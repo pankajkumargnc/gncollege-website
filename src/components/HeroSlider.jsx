@@ -2,27 +2,27 @@ import React, { useState, useEffect } from 'react';
 
 const sliderData = [
   {
-    image: '/images/slider_baisakhi.jpg', 
+    image: 'images/slider_baisakhi.jpg', 
     title: 'BAISAKHI DI SHAAM Celebration',
     subtitle: 'Celebrating culture and traditions',
   },
   {
-    image: '/images/slider_cricket.jpg', 
+    image: 'images/slider_cricket.jpg', 
     title: 'Inter College BBMKU Cricket Winners',
     subtitle: 'Celebrating sportsmanship and victory',
   },
   {
-    image: '/images/slider_ncc.jpg', 
+    image: 'images/slider_ncc.jpg', 
     title: 'NCC "At Home Function" Participants',
     subtitle: 'Dedicated NCC Cadets & Commanders',
   },
   {
-    image: '/images/slider_youth_winners.jpg', 
+    image: 'images/slider_youth_winners.jpg', 
     title: 'BBMKU Youth Festival Champions',
     subtitle: 'Winners of BBMKU Inter College Youth Festival - अंतर्नाद',
   },
   {
-    image: '/images/slider_seminar.jpg', 
+    image: 'images/slider_seminar.jpg', 
     title: 'ICSSR Multidisciplinary National Seminar',
     subtitle: 'G20: A Global Platform for Economic Development',
   },
