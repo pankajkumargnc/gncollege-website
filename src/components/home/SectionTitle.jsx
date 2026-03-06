@@ -1,0 +1,11 @@
+import { COLORS } from '../../styles/colors';
+
+const SectionTitle = ({ title, subtitle }) => (
+    <div style={{ textAlign: 'center', marginBottom: 40 }}>
+      <h2 style={{ fontSize: 28, fontWeight: 800, color: COLORS.navy, marginBottom: 8 }}>{title}</h2>
+      <div style={{ width: 60, height: 4, background: COLORS.gold, margin: '0 auto 12px', borderRadius: 2 }} />
+      {subtitle && <p style={{ color: '#666', fontSize: 15 }}>{subtitle}</p>}
+    </div>
+  );
+  
+export default SectionTitle;
