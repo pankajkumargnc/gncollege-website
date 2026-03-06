@@ -51,7 +51,7 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
               `}
             </style>
             <div className="image-stack">
-              <img src="/images/college_photo.jpg" alt="Guru Nanak College Campus" className="main-img" />
+              <img src="images/college_photo.jpg" alt="Guru Nanak College Campus" className="main-img" />
               <div className="accent-box">
                 <h4 style={{ fontSize: '32px', margin: 0, fontWeight: 900, color: COLORS.gold }}>56+</h4>
                 <p style={{ fontSize: '12px', margin: 0, opacity: 0.8, letterSpacing: '1px' }}>YEARS OF EXCELLENCE</p>

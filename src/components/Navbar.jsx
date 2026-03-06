@@ -39,8 +39,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
 
         {/* LOGO AREA: marginLeft '-40px' kar diya (extreme left) aur marginRight '60px' (double gap) */}
         <div style={{ display: 'flex', alignItems: 'center', padding: '8px 0', marginRight: isMobile ? '0' : '60px', marginLeft: isMobile ? '0' : '-100px' }}>
-          <img 
-            src="/logo1.png" 
+          <img src={`${import.meta.env.BASE_URL}images/logo1.png`} 
             alt="Guru Nanak College Dhanbad" 
             style={{ 
               height: 80,            

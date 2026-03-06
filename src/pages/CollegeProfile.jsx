@@ -43,7 +43,7 @@ const CollegeProfile = () => {
             </p>
             <p style={{ marginTop: 20, fontWeight: 700, color: COLORS.navy }}>- Dr. Sanjay Prasad, Principal</p>
           </div>
-          <img src="/images/pf1.jpeg" alt="Principal" style={{ width: 200, height: 200, borderRadius: '50%', objectFit: 'cover', border: `5px solid ${COLORS.navy}` }} />
+          <img src="images/pf1.jpeg" alt="Principal" style={{ width: 200, height: 200, borderRadius: '50%', objectFit: 'cover', border: `5px solid ${COLORS.navy}` }} />
         </section>
 
         {/* 5. COLLEGE HISTORY */}

@@ -22,8 +22,7 @@ const Footer = () => {
                 padding: '5px',
                 boxShadow: `0 0 15px ${COLORS.gold}40`
               }}>
-                <img
-                  src="/logo.png"  // Ensure karein ki aapka logo 'public' folder mein 'logo.png' naam se hai
+                <img src={`${import.meta.env.BASE_URL}images/logo.png`}  // Ensure karein ki aapka logo 'public' folder mein 'logo.png' naam se hai
                   alt="GNC Logo"
                   style={{ width: '100%', height: '100%', objectFormat: 'contain' }}
                   onError={(e) => { e.target.src = "https://via.placeholder.com/70?text=GNC"; }} // Agar image na mile toh placeholder dikhega
