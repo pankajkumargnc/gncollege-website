@@ -78,7 +78,7 @@ const HeroSlider = () => {
           >
             {index === currentSlide && (
               <>
-                <img src={slide.image} alt={slide.title} className="image" />
+                <img src={`${import.meta.env.BASE_URL}${slide.image}`} alt={slide.title} className="image" />
                 <div className="content">
                   <h2>{slide.title}</h2>
                   <p>{slide.subtitle}</p>
