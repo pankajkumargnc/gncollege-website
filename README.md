@@ -1,25 +1,27 @@
-# 🎓 Guru Nanak College, Dhanbad - Official Website Under Development
+# 🎓 Guru Nanak College, Dhanbad - Digital Portal
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-039BE5?style=for-the-badge&logo=Firebase&logoColor=white)
+![GitHub Pages](https://img.shields.io/badge/github%20pages-121013?style=for-the-badge&logo=github&logoColor=white)
 
-Welcome to the official digital portal of Guru Nanak College, Dhanbad. This platform is designed to provide real-time academic updates, admission details, and notices to students and faculty.
+An advanced, high-performance web portal for **Guru Nanak College, Dhanbad**. Built with a focus on speed, responsiveness, and real-time updates for students and administration.
 
-🔗 **Live Website:** [Visit the Portal here](https://pankajkumargnc.github.io/gncollege-website/)
+🔗 **Live Demo:** [https://pankajkumargnc.github.io/gncollege-website/](https://pankajkumargnc.github.io/gncollege-website/)
 
-## 🚀 Tech Stack Used
+## 🚀 Key Features
+- ⚡ **Lightning Fast:** Built using **Vite** for optimized build performance.
+- 📱 **Fully Responsive:** Professional UI that fits every screen from mobile to 4K.
+- 🔔 **Real-time Updates:** Integrated with **Firebase Firestore** for instant notice delivery.
+- 🔒 **Admin Suite:** Dedicated administrative panel for managing campus news and notices.
+- ✨ **Smooth Animations:** Powered by **AOS** and hardware-accelerated CSS transitions.
 
-This modern, single-page application (SPA) is built using the following technologies:
-
-* **Frontend:** React.js (v18)
-* **Build Tool:** Vite.js for lightning-fast bundling
-* **Routing:** React Router DOM (HashRouter for GitHub Pages compatibility)
-* **Database & Backend:** Google Firebase (Firestore) for real-time notices and admin updates
-* **Styling:** Custom CSS with fully responsive mobile-first design
-* **Hosting:** GitHub Pages
-
-## ✨ Key Features
-* 📱 **Fully Responsive:** Seamless experience across desktop and mobile devices.
-* ⚡ **Fast Loading:** Optimized assets using Vite.
-* 🔔 **Dynamic Notices:** Real-time updates directly fetched from the Firebase database.
-* 🔐 **Admin Panel Ready:** Integrated structure for secure content management.
+## 🛠️ Tech Stack
+- **Frontend:** React.js (v18)
+- **Styling:** Custom Advanced CSS Architecture
+- **Routing:** React Router (HashRouter)
+- **Backend:** Google Firebase (Firestore)
+- **Build Tool:** Vite
 
 ## 👨‍💻 Developed By
-**Pankaj Kumar Prasad**
+**Pankaj Kumar**
+Guru Nanak College, Dhanbad
