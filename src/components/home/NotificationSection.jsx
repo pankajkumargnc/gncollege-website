@@ -15,7 +15,6 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
   const combinedNews = useMemo(() => {
     const upcoming = (upcomingEvents || []).map(e => ({ ...e, text: e.title, date: e.createdAt?.toDate(), type: e.type || 'Event' }));
     const news = (announcements || []).map(a => ({ ...a, date: a.createdAt?.toDate(), type: a.type || 'News' }));
-    // Sort by date, newest first. Handle cases where date might be null.
     return [...upcoming, ...news].sort((a, b) => (b.date || 0) - (a.date || 0));
   }, [upcomingEvents, announcements]);
 
@@ -26,122 +25,40 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
     return [...reports, ...reports];
   }, [pdfReports]);
 
-
   useEffect(() => {
     const el = noticesRef.current;
     if (!el) return;
-
     let pos = 0;
-    const animate = () => {
-      pos -= 0.5;
-      if (pos < -el.scrollHeight / 2) {
-        pos = 0;
-      }
-      el.style.transform = `translateY(${pos}px)`;
-      noticesRafRef.current = requestAnimationFrame(animate);
-    };
-
-    const startAnimation = () => {
-      noticesRafRef.current = requestAnimationFrame(animate);
-    };
-
-    const stopAnimation = () => {
-      if (noticesRafRef.current) {
-        cancelAnimationFrame(noticesRafRef.current);
-      }
-    };
-
-    const handleMouseEnter = () => stopAnimation();
-    const handleMouseLeave = () => startAnimation();
-
-    el.addEventListener('mouseenter', handleMouseEnter);
-    el.addEventListener('mouseleave', handleMouseLeave);
-
+    const animate = () => { pos -= 0.5; if (pos < -el.scrollHeight / 2) { pos = 0; } el.style.transform = `translateY(${pos}px)`; noticesRafRef.current = requestAnimationFrame(animate); };
+    const startAnimation = () => { noticesRafRef.current = requestAnimationFrame(animate); };
+    const stopAnimation = () => { if (noticesRafRef.current) cancelAnimationFrame(noticesRafRef.current); };
+    el.addEventListener('mouseenter', stopAnimation); el.addEventListener('mouseleave', startAnimation);
     startAnimation();
-
-    return () => {
-      stopAnimation();
-      if (el) {
-        el.removeEventListener('mouseenter', handleMouseEnter);
-        el.removeEventListener('mouseleave',handleMouseLeave);
-      }
-    };
+    return () => { stopAnimation(); if (el) { el.removeEventListener('mouseenter', stopAnimation); el.removeEventListener('mouseleave', startAnimation); } };
   }, [doubledNotices]);
 
   useEffect(() => {
     const el = newsRef.current;
     if (!el) return;
-
     let pos = 0;
-    const animate = () => {
-      pos -= 0.5; // Adjust scroll speed if needed
-      if (pos < -el.scrollHeight / 2) {
-        pos = 0;
-      }
-      el.style.transform = `translateY(${pos}px)`;
-      newsRafRef.current = requestAnimationFrame(animate);
-    };
-
-    const startAnimation = () => {
-      newsRafRef.current = requestAnimationFrame(animate);
-    };
-
-    const stopAnimation = () => {
-      if (newsRafRef.current) {
-        cancelAnimationFrame(newsRafRef.current);
-      }
-    };
-
-    el.addEventListener('mouseenter', stopAnimation);
-    el.addEventListener('mouseleave', startAnimation);
-
+    const animate = () => { pos -= 0.5; if (pos < -el.scrollHeight / 2) { pos = 0; } el.style.transform = `translateY(${pos}px)`; newsRafRef.current = requestAnimationFrame(animate); };
+    const startAnimation = () => { newsRafRef.current = requestAnimationFrame(animate); };
+    const stopAnimation = () => { if (newsRafRef.current) cancelAnimationFrame(newsRafRef.current); };
+    el.addEventListener('mouseenter', stopAnimation); el.addEventListener('mouseleave', startAnimation);
     startAnimation();
-
-    return () => {
-      stopAnimation();
-      if (el) {
-        el.removeEventListener('mouseenter', stopAnimation);
-        el.removeEventListener('mouseleave', startAnimation);
-      }
-    };
+    return () => { stopAnimation(); if (el) { el.removeEventListener('mouseenter', stopAnimation); el.removeEventListener('mouseleave', startAnimation); } };
   }, [doubledNews]);
 
   useEffect(() => {
     const el = pdfRef.current;
     if (!el) return;
-
     let pos = 0;
-    const animate = () => {
-      pos -= 0.5;
-      if (pos < -el.scrollHeight / 2) {
-        pos = 0;
-      }
-      el.style.transform = `translateY(${pos}px)`;
-      pdfRafRef.current = requestAnimationFrame(animate);
-    };
-
-    const startAnimation = () => {
-      pdfRafRef.current = requestAnimationFrame(animate);
-    };
-
-    const stopAnimation = () => {
-      if (pdfRafRef.current) {
-        cancelAnimationFrame(pdfRafRef.current);
-      }
-    };
-
-    el.addEventListener('mouseenter', stopAnimation);
-    el.addEventListener('mouseleave', startAnimation);
-
+    const animate = () => { pos -= 0.5; if (pos < -el.scrollHeight / 2) { pos = 0; } el.style.transform = `translateY(${pos}px)`; pdfRafRef.current = requestAnimationFrame(animate); };
+    const startAnimation = () => { pdfRafRef.current = requestAnimationFrame(animate); };
+    const stopAnimation = () => { if (pdfRafRef.current) cancelAnimationFrame(pdfRafRef.current); };
+    el.addEventListener('mouseenter', stopAnimation); el.addEventListener('mouseleave', startAnimation);
     startAnimation();
-
-    return () => {
-      stopAnimation();
-      if (el) {
-        el.removeEventListener('mouseenter', stopAnimation);
-        el.removeEventListener('mouseleave', startAnimation);
-      }
-    };
+    return () => { stopAnimation(); if (el) { el.removeEventListener('mouseenter', stopAnimation); el.removeEventListener('mouseleave', startAnimation); } };
   }, [doubledPdfReports]);
 
   return (
@@ -167,7 +84,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
           transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
           display: flex;
           flex-direction: column;
-          height: 500px; /* Thoda adjust kiya list ke liye */
+          height: 500px;
         }
         .notif-card:hover {
           transform: translateY(-12px);
@@ -187,7 +104,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
         .notif-body {
           padding: 20px;
           flex: 1;
-          overflow-y: hidden; /* Changed from auto */
+          overflow-y: hidden;
           display: flex;
           flex-direction: column;
         }
@@ -210,17 +127,41 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
           color: #fff;
           border-color: ${COLORS.navy};
         }
+        
+        /* 🌟 FIX 1: Pura Notification Item Left Align hoga */
         .notif-item {
           padding: 15px 0;
           border-bottom: 1px solid #eee;
+          text-align: left; 
         }  
+        
+        /* 🌟 FIX 2: Rich Text (HTML) Titles Left Align honge */
+        .rich-text-title {
+          margin: 0 0 5px;
+          font-size: 14px;
+          color: ${COLORS.navy};
+          font-weight: 600;
+          text-align: left; 
+        }
+        .rich-text-title * {
+          margin: 0 !important; 
+        }
+        
+        /* 🌟 FIX 3: Rich Text (HTML) Descriptions Left Align honge */
+        .rich-text-desc {
+          margin: 0 0 5px;
+          font-size: 13px;
+          color: #555;
+          line-height: 1.4;
+          text-align: left; 
+        }
           
         @media (max-width: 1100px) { .notif-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 700px) { .notif-grid { grid-template-columns: 1fr; } .notif-card { height: 450px; } }
       `}</style>
   
       <div className="notif-grid">
-          {/* OFFICIAL NOTICES WITH DATE AND NEW BADGE LOGIC */}
+          {/* OFFICIAL NOTICES */}
           <div className="notif-card">
             <div className="notif-header" style={{ background: COLORS.navy }}>
               <span style={{ fontSize: '24px' }}>🔔</span> Official Notices
@@ -228,23 +169,18 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
             <div className="notif-body">
               <div ref={noticesRef}>
                 {doubledNotices.map((n, i) => {
-                  // Logic for 3-day old "NEW" badge
                   const isNew = n.isNew && (new Date() - new Date(n.date)) / (1000 * 60 * 60 * 24) < 3;
                   return (
                     <div key={i} className="notif-item">
-                      {/* Top line: Date, Category, New Badge */}
-                      <div style={{ display: 'flex', alignItems: 'center', fontSize: '11px', color: '#888', fontWeight: 700, marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '11px', color: '#888', fontWeight: 700, marginBottom: '8px' }}>
                         <span>📅 {n.date ? new Date(n.date).toLocaleDateString('en-GB') : 'Recently'}</span>
                         <span style={{ margin: '0 8px' }}>|</span>
                         <span style={{ color: COLORS.gold }}>{n.type || 'Notice'}</span>
                         {isNew && <span style={{ marginLeft: '16px', background: 'red', color: '#fff', fontSize: '9px', padding: '2px 6px', borderRadius: '4px', animation: 'blink 1s infinite' }}>NEW</span>}
                       </div>
-                      {/* Title */}
-                      <p style={{ margin: '0 0 5px', fontSize: '14px', color: COLORS.navy, fontWeight: 600 }}>
-                        {n.text}
-                      </p>
-                      {/* Link/Description */}
-                      {n.link && <a href={n.link} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#007bff', fontWeight: 700, display: 'inline-block' }}>🔗 View Document</a>}
+                      <div className="rich-text-title" dangerouslySetInnerHTML={{ __html: n.text }} />
+                      
+                      {n.link && <a href={n.link} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#007bff', fontWeight: 700, display: 'inline-block', marginTop: '5px' }}>🔗 View Document</a>}
                     </div>
                   )
                 })}
@@ -264,21 +200,17 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
                   const isNew = n.date && (new Date() - new Date(n.date)) / (1000 * 60 * 60 * 24) < 3;
                   return (
                     <div key={i} className="notif-item">
-                      {/* Top line: Date, Category, New Badge */}
-                      <div style={{ display: 'flex', alignItems: 'center', fontSize: '11px', color: '#888', fontWeight: 700, marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '11px', color: '#888', fontWeight: 700, marginBottom: '8px' }}>
                         <span>📅 {n.date ? new Date(n.date).toLocaleDateString('en-GB') : 'Recently'}</span>
                         <span style={{ margin: '0 8px' }}>|</span>
                         <span style={{ color: COLORS.red }}>{n.type || 'Update'}</span>
                         {isNew && <span style={{ marginLeft: '16px', background: 'red', color: '#fff', fontSize: '9px', padding: '2px 6px', borderRadius: '4px', animation: 'blink 1s infinite' }}>NEW</span>}
                       </div>
-                      {/* Title */}
-                      <p style={{ margin: '0 0 5px', fontSize: '14px', color: COLORS.navy, fontWeight: 600 }}>
-                        {n.text || n.title}
-                      </p>
-                      {/* Description if it exists */}
-                      {n.desc && <p style={{ margin: '0 0 5px', fontSize: '13px', color: '#555', lineHeight: 1.4 }}>{n.desc}</p>}
-                      {/* Link if it exists */}
-                      {n.link && <a href={n.link} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#007bff', fontWeight: 700, display: 'inline-block' }}>🔗 View Document</a>}
+                      
+                      <div className="rich-text-title" dangerouslySetInnerHTML={{ __html: n.text || n.title }} />
+                      {n.desc && <div className="rich-text-desc" dangerouslySetInnerHTML={{ __html: n.desc }} />}
+                      
+                      {n.link && <a href={n.link} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#007bff', fontWeight: 700, display: 'inline-block', marginTop: '5px' }}>🔗 View Document</a>}
                     </div>
                   )
                 })}
@@ -296,18 +228,14 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
               <div ref={pdfRef}>
                 {doubledPdfReports.map((n, i) => (
                   <div key={i} className="notif-item">
-                    {/* Top line: Date, Category */}
-                    <div style={{ display: 'flex', alignItems: 'center', fontSize: '11px', color: '#888', fontWeight: 700, marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '11px', color: '#888', fontWeight: 700, marginBottom: '8px' }}>
                       <span>📅 {n.date ? new Date(n.date).toLocaleDateString('en-GB') : 'Recently'}</span>
                       <span style={{ margin: '0 8px' }}>|</span>
                       <span style={{ color: '#10b981' }}>{n.type || 'Document'}</span>
                     </div>
-                    {/* Title */}
-                    <p style={{ margin: '0 0 5px', fontSize: '14px', color: COLORS.navy, fontWeight: 600 }}>
-                      {n.text || n.title}
-                    </p>
-                    {/* Link */}
-                    {n.link && <a href={n.link} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#007bff', fontWeight: 700, display: 'inline-block' }}>🔗 View Document</a>}
+                    <div className="rich-text-title" dangerouslySetInnerHTML={{ __html: n.text || n.title }} />
+                    
+                    {n.link && <a href={n.link} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#007bff', fontWeight: 700, display: 'inline-block', marginTop: '5px' }}>🔗 View Document</a>}
                   </div>
                 ))}
               </div>

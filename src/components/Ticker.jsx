@@ -13,7 +13,9 @@ export default function Ticker({ items }) {
       alignItems: 'center', 
       overflow: 'hidden',
       borderBottom: '1px solid rgba(0,0,0,0.1)',
-      zIndex: 10
+      zIndex: 10,
+      width: '100%', /* 🌟 NAYA: Screen limit lock */
+      boxSizing: 'border-box'
     }}>
       <style>
         {`
@@ -33,12 +35,14 @@ export default function Ticker({ items }) {
             border-radius: 4px;
             animation: blinker 1s linear infinite;
             white-space: nowrap;
+            flex-shrink: 0; /* 🌟 NAYA: Badge ko dabne se roke */
             z-index: 20;
           }
           .ticker-track {
             display: flex;
             width: max-content;
             animation: tickerScroll 30s linear infinite;
+            transform: translateZ(0); /* Zero Lag Scroll */
           }
           .ticker-track:hover { animation-play-state: paused; }
           .ticker-item {
@@ -53,9 +57,9 @@ export default function Ticker({ items }) {
 
       <div className="ticker-badge">🚨 LATEST</div>
 
-      <div style={{ flex: 1, overflow: 'hidden' }}>
+      {/* 🌟 NAYA: minWidth: 0 hi wo jaadu hai jo website ko right khisakne se rokega */}
+      <div style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
         <div className="ticker-track">
-          {/* Loop ke liye items ko do baar repeat kiya gaya hai */}
           {[...items, ...items].map((item, index) => (
             <div key={index} className="ticker-item">
               <span style={{ color: '#d32f2f', marginRight: '8px' }}>•</span>

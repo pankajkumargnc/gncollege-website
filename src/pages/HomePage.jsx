@@ -10,12 +10,10 @@ import NotificationSection from '../components/home/NotificationSection';
 
 const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, gallery }) => {
   
-  // 🌟 GALLERY LOGIC
   const [activeTab, setActiveTab] = useState('All Moments');
   const combinedGalleryImages = gallery || [];
   const filteredImages = activeTab === 'All Moments' ? combinedGalleryImages : combinedGalleryImages.filter(img => img.cat === activeTab);
 
-  // 🌟 EVENTS LOGIC: Sirf recent aur upcoming filter kar rahe hain
   const upcomingEvents = (events || []).filter(e => e.status === 'upcoming');
   const recentEvents = (events || []).filter(e => e.status === 'recent');
 
@@ -30,19 +28,19 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
   };
 
   return (
-    <div style={{ fontFamily: "'Segoe UI',sans-serif", background: '#f8f9fa', minHeight: '100vh' }}>
+    <div style={{ fontFamily: "'Segoe UI',sans-serif", background: '#f4f7f9', minHeight: '100vh', overflowX: 'hidden' }}>
 
       <HeroSlider slides={sliderSlides} />
       <QuickRibbon />
       <NotificationSection notices={notices} announcements={announcements} pdfReports={pdfReports} upcomingEvents={upcomingEvents} />
 
-      {/* WELCOME SECTION */}
+      {/* WELCOME SECTION with AOS */}
       <section id="about" style={{ background: '#fff', padding: '100px 20px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ maxWidth: 1250, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '60px', alignItems: 'center' }}>
-          <div style={{ position: 'relative', animation: 'fadeInLeft 1s ease' }}>
+          
+          <div data-aos="fade-right" style={{ position: 'relative' }}>
             <style>
               {`
-                @keyframes fadeInLeft { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
                 @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
                 .image-stack { position: relative; width: 100%; height: 450px; }
                 .main-img { width: 90%; height: 100%; object-fit: cover; border-radius: 20px; box-shadow: 20px 20px 0px ${COLORS.gold}; position: relative; z-index: 2; transition: transform 0.5s ease; }
@@ -59,8 +57,7 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
             </div>
           </div>
 
-          <div style={{ animation: 'fadeInRight 1s ease' }}>
-            <style>{` @keyframes fadeInRight { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } } `}</style>
+          <div data-aos="fade-left">
             <h2 style={{ fontSize: '38px', fontWeight: 900, color: COLORS.navy, lineHeight: 1.2, marginBottom: '10px' }}>
               About the <span style={{ color: COLORS.gold }}>College</span>
             </h2>
@@ -93,15 +90,8 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
                   font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(15,35,71,0.3);
                   text-decoration: none; display: inline-block;
                 }
-                .discover-btn:hover {
-                  transform: translateY(-3px) scale(1.05);
-                  background: ${COLORS.gold}; color: ${COLORS.navy};
-                  box-shadow: 0 8px 25px rgba(244,160,35,0.4);
-                }
-                .social-icon-btn {
-                  width: 40px; height: 40px; border-radius: 50%; background: #f0f2f5; display: flex; align-items: center; 
-                  justify-content: center; color: ${COLORS.navy}; font-size: 18px; text-decoration: none; transition: all 0.3s ease;
-                }
+                .discover-btn:hover { background: ${COLORS.gold}; color: ${COLORS.navy}; box-shadow: 0 8px 25px rgba(244,160,35,0.4); }
+                .social-icon-btn { width: 40px; height: 40px; border-radius: 50%; background: #f0f2f5; display: flex; align-items: center; justify-content: center; color: ${COLORS.navy}; font-size: 18px; text-decoration: none; transition: all 0.3s ease; }
                 .social-icon-btn:hover { background: ${COLORS.navy}; color: ${COLORS.gold}; transform: rotate(360deg); }
               `}</style>
               <Link to="/about-us/college-profile" className="discover-btn">DISCOVER MORE →</Link>
@@ -121,59 +111,20 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
 
       <HomeFeatures />
 
-      {/* --- PROFESSIONAL INFINITE SCROLL EVENTS SECTION --- */}
-      <section id="events" style={{ padding: '80px 20px', background: '#f8f9fa' }}>
+      {/* EVENTS SECTION with AOS */}
+      <section id="events" style={{ padding: '80px 20px', background: 'transparent' }} data-aos="fade-up">
         <div style={{ maxWidth: 1400, margin: '0 auto' }}>
           <SectionTitle title="Recent Events & Happenings" subtitle="Insights into our seminars, workshops, and vibrant campus activities" />
-
           <style>{`
-            /* Smooth Infinite Scrolling Animation */
-            @keyframes scrollLeft { 
-              0% { transform: translateX(0); } 
-              100% { transform: translateX(-50%); } 
-            }
-            .events-scroller { 
-              overflow: hidden; 
-              padding: 20px 0;
-              margin-top: 30px;
-              /* Fades edges nicely so cards don't just cut off sharply */
-              -webkit-mask: linear-gradient(90deg, transparent, white 5%, white 95%, transparent); 
-              mask: linear-gradient(90deg, transparent, white 5%, white 95%, transparent); 
-            }
-            .events-track { 
-              display: flex; 
-              width: max-content; 
-              gap: 30px; /* Space between cards */
-              /* Time controls speed: 30s is smooth. */
-              animation: scrollLeft 35s linear infinite; 
-            }
-            .events-track:hover { 
-              animation-play-state: paused; /* Pause on hover */
-            }
-            
-            /* Card Design for Single Row */
-            .event-loop-card { 
-              width: 320px; 
-              background: #fff; 
-              border-radius: 16px; 
-              overflow: hidden; 
-              box-shadow: 0 10px 25px rgba(0,0,0,0.04); 
-              border: 1px solid #edf2f7; 
-              flex-shrink: 0; 
-              transition: all 0.4s ease;
-              display: flex;
-              flex-direction: column;
-            }
-            .event-loop-card:hover { 
-              transform: translateY(-8px); 
-              box-shadow: 0 15px 35px rgba(15, 35, 71, 0.12); 
-              border-color: ${COLORS.gold};
-            }
-            
+            @keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+            .events-scroller { overflow: hidden; padding: 20px 0; margin-top: 30px; mask: linear-gradient(90deg, transparent, white 5%, white 95%, transparent); -webkit-mask: linear-gradient(90deg, transparent, white 5%, white 95%, transparent); }
+            .events-track { display: flex; width: max-content; gap: 30px; animation: scrollLeft 35s linear infinite; transform: translateZ(0); }
+            .events-track:hover { animation-play-state: paused; }
+            .event-loop-card { width: 320px; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.5); flex-shrink: 0; transition: all 0.4s ease; display: flex; flex-direction: column; }
+            .event-loop-card:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(15, 35, 71, 0.12); border-color: ${COLORS.gold}; }
             .el-img-box { position: relative; height: 200px; overflow: hidden; }
             .el-img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s ease; }
             .event-loop-card:hover .el-img { transform: scale(1.08); }
-            
             .el-badge { position: absolute; top: 15px; right: 15px; background: ${COLORS.gold}; color: #000; padding: 5px 12px; font-size: 10px; font-weight: 800; border-radius: 50px; text-transform: uppercase; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
             .el-date { position: absolute; bottom: 0; left: 0; background: ${COLORS.navy}; color: #fff; padding: 8px 15px; border-top-right-radius: 12px; text-align: center; z-index: 2; }
             .el-info { padding: 22px; flex: 1; display: flex; flex-direction: column; }
@@ -185,7 +136,6 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
           {recentEvents.length > 0 ? (
             <div className="events-scroller">
               <div className="events-track">
-                {/* 🌟 MAGIC: Array ko 2 baar print kiya hai taki scroll seamless (infinite) lage */}
                 {[...recentEvents, ...recentEvents, ...recentEvents].map((ev, i) => (
                   <div key={i} className="event-loop-card">
                     <div className="el-img-box">
@@ -196,15 +146,11 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
                       </div>
                       <img src={ev.imageUrl || getEventImage(ev.type)} alt={ev.title} className="el-img" />
                     </div>
-                    
                     <div className="el-info">
                       <h3 className="el-title">{ev.title}</h3>
-                      {/* Description Rich Text ko safely render karne ke liye */}
                       <div className="el-desc" dangerouslySetInnerHTML={{ __html: ev.desc }} />
-                      
                       <div className="el-footer">
                         <span style={{ fontSize: '11px', color: '#888', fontWeight: 700 }}>📍 {ev.location || 'Campus'}</span>
-                        {/* Fake link for UI aesthetics */}
                         <span style={{ fontSize: '11px', color: COLORS.gold, fontWeight: 800 }}>READ MORE →</span>
                       </div>
                     </div>
@@ -213,19 +159,19 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
               </div>
             </div>
           ) : (
-            <div style={{textAlign: 'center', background: '#fff', padding: '40px', borderRadius: '12px', border: '1px dashed #e2e8f0', marginTop: '30px'}}>
+            <div style={{textAlign: 'center', background: 'rgba(255,255,255,0.7)', padding: '40px', borderRadius: '12px', border: '1px dashed #e2e8f0', marginTop: '30px'}}>
               <div style={{fontSize: '40px', marginBottom: '10px'}}>📅</div>
               <h3 style={{color: COLORS.navy, margin: '0 0 10px'}}>No Recent Events</h3>
-              <p style={{color: '#64748b', margin: 0, fontSize: '14px'}}>There are no events to display at the moment. Please check back later.</p>
+              <p style={{color: '#64748b', margin: 0, fontSize: '14px'}}>There are no events to display at the moment.</p>
             </div>
           )}
         </div>
       </section>
 
-      {/* COUNTER SECTION */}
+      {/* COUNTER SECTION with AOS */}
       <section style={{ background: `linear-gradient(135deg, ${COLORS.navyDark} 0%, ${COLORS.navy} 100%)`, padding: '80px 20px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0.05, pointerEvents: 'none', backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
-        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '40px', textAlign: 'center', position: 'relative', zIndex: 2 }}>
+        <div data-aos="zoom-in" style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '40px', textAlign: 'center', position: 'relative', zIndex: 2 }}>
           <style>{`
             .counter-box { padding: 20px; transition: transform 0.3s ease; }
             .counter-box:hover { transform: translateY(-10px); }
@@ -241,14 +187,14 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
         </div>
       </section>
 
-      {/* IMPORTANT LINKS SECTION */}
-      <section style={{ padding: '80px 20px', background: '#f8f9fa' }}>
+      {/* IMPORTANT LINKS SECTION with AOS */}
+      <section style={{ padding: '80px 20px', background: 'transparent' }} data-aos="fade-up">
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <SectionTitle title="Important External Links" subtitle="Quick access to official education and government portals" />
           <style>{`
             .links-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-top: 40px; }
-            .link-tile { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px 15px; text-align: center; text-decoration: none; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-            .link-tile:hover { transform: translateY(-8px); border-color: ${COLORS.gold}; box-shadow: 0 12px 20px rgba(15, 35, 71, 0.08); }
+            .link-tile { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.6); border-radius: 12px; padding: 25px 15px; text-align: center; text-decoration: none; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); transform: translateZ(0); }
+            .link-tile:hover { transform: translateY(-8px); border-color: ${COLORS.gold}; box-shadow: 0 12px 20px rgba(15, 35, 71, 0.08); background: #fff; }
             .link-icon-circle { width: 60px; height: 60px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; transition: 0.3s; }
             .link-tile:hover .link-icon-circle { background: ${COLORS.navy}; color: #fff; }
             .link-name { font-size: 13px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: 0.5px; }
@@ -261,8 +207,8 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
         </div>
       </section>
 
-      {/* PHOTO GALLERY */}
-      <section id="gallery" style={{ padding: '100px 20px', background: '#fff' }}>
+      {/* PHOTO GALLERY with AOS */}
+      <section id="gallery" style={{ padding: '100px 20px', background: '#fff' }} data-aos="fade-up">
         <div style={{ maxWidth: 1300, margin: '0 auto' }}>
           <SectionTitle title="📸 Photo Gallery" subtitle="Memorable glimpses of academic excellence and cultural heritage" />
           <style>{`

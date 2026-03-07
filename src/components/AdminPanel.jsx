@@ -1,7 +1,22 @@
+import toast from 'react-hot-toast';
 import React, { useState, useRef, useEffect } from 'react';
 import { COLORS } from '../styles/colors';
 import { db } from '../firebase'; 
 import { collection, addDoc, serverTimestamp, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+
+const handleSaveData = async () => {
+  try {
+    // Aapka Firebase save karne ka code yahan hoga
+    await addDoc(collection(db, "notices"), data);
+    
+    // Success Toast
+    toast.success('Data saved successfully! 🎉');
+    
+  } catch (err) {
+    // 🌟 ERROR TOAST YAHAN AAYEGA 🌟
+    toast.error('Error: ' + err.message);
+  }
+};
 
 // ==========================================
 // 🌟 ADVANCED RICH TEXT EDITOR (In-built)
@@ -141,10 +156,10 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
     if (!noticeData.text.trim()) return alert("Notice text is required");
     setLoading(true);
     try {
-      if (editingNotice) { await updateDoc(doc(db, 'notices', editingNotice.id), { ...noticeData, updatedAt: serverTimestamp() }); alert('Notice updated!'); } 
-      else { await addDoc(collection(db, 'notices'), { ...noticeData, date: new Date().toISOString(), isNew: true, createdAt: serverTimestamp() }); alert('Notice published!'); }
+      if (editingNotice) { await updateDoc(doc(db, 'notices', editingNotice.id), { ...noticeData, updatedAt: serverTimestamp() }); toast.success('Notice Updated successfully! 🎉'); } 
+      else { await addDoc(collection(db, 'notices'), { ...noticeData, date: new Date().toISOString(), isNew: true, createdAt: serverTimestamp() }); toast.success('Notice published successfully! 🎉'); }
       handleCancelEditNotice();
-    } catch (err) { alert('Error: ' + err.message); }
+    } catch (err) { toast.error('Error: ' + err.message); }
     setLoading(false);
   };
 
@@ -153,10 +168,10 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
     if (!announcementData.text.trim()) return alert("Announcement text is required");
     setLoading(true);
     try {
-      if (editingAnnouncement) { await updateDoc(doc(db, 'announcements', editingAnnouncement.id), { ...announcementData, updatedAt: serverTimestamp() }); alert('News updated!'); } 
-      else { await addDoc(collection(db, 'announcements'), { ...announcementData, date: new Date().toISOString(), createdAt: serverTimestamp() }); alert('News published!'); }
+      if (editingAnnouncement) { await updateDoc(doc(db, 'announcements', editingAnnouncement.id), { ...announcementData, updatedAt: serverTimestamp() }); toast.success('News updated successfully! 🎉'); } 
+      else { await addDoc(collection(db, 'announcements'), { ...announcementData, date: new Date().toISOString(), createdAt: serverTimestamp() }); toast.success('News published successfully! 🎉'); }
       handleCancelEditAnnouncement();
-    } catch (err) { alert('Error: ' + err.message); }
+    } catch (err) { toast.error('Error: ' + err.message); }
     setLoading(false);
   };
 
@@ -165,10 +180,10 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
     if (!pdfReportData.title.trim() || !pdfReportData.link.trim()) return alert("Title and Link are required");
     setLoading(true);
     try {
-      if (editingPdfReport) { await updateDoc(doc(db, 'pdfReports', editingPdfReport.id), { ...pdfReportData, updatedAt: serverTimestamp() }); alert('Document updated!'); } 
-      else { await addDoc(collection(db, 'pdfReports'), { ...pdfReportData, date: new Date().toISOString(), createdAt: serverTimestamp() }); alert('Document published!'); }
+      if (editingPdfReport) { await updateDoc(doc(db, 'pdfReports', editingPdfReport.id), { ...pdfReportData, updatedAt: serverTimestamp() }); toast.success('Document updated successfully! 🎉'); } 
+      else { await addDoc(collection(db, 'pdfReports'), { ...pdfReportData, date: new Date().toISOString(), createdAt: serverTimestamp() }); toast.success('Document published successfully! 🎉'); }
       handleCancelEditPdfReport();
-    } catch (err) { alert('Error: ' + err.message); }
+    } catch (err) { toast.error('Error: ' + err.message); }
     setLoading(false);
   };
 
@@ -273,9 +288,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
             </div>
           ))}
         </div>
-        <div style={{ padding: '25px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-          <button className="btn btn-danger" style={{ width: '100%', justifyContent: 'center' }} onClick={onClose}>🚪 Logout Dashboard</button>
-        </div>
+        <div style={{marginTop:'auto', padding:'20px'}}><button onClick={onClose} className="btn btn-primary" style={{width:'100%', background:'red'}}>Logout</button></div>
       </div>
 
       {/* MAIN CONTENT AREA */}
