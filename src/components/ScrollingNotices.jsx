@@ -6,11 +6,6 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
   const noticesRef = useRef(null);
   const newsRef = useRef(null);
   const pdfRef = useRef(null);
-  const noticesRafRef = useRef(null);
-  const newsRafRef = useRef(null);
-  const pdfRafRef = useRef(null);
-
-  const doubledNotices = useMemo(() => [...notices, ...notices], [notices]);
 
   const combinedNews = useMemo(() => {
     const upcoming = (upcomingEvents || []).map(e => ({ ...e, text: e.title, date: e.createdAt?.toDate(), type: e.type || 'Event' }));
@@ -19,130 +14,10 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
     return [...upcoming, ...news].sort((a, b) => (b.date || 0) - (a.date || 0));
   }, [upcomingEvents, announcements]);
 
-  const doubledNews = useMemo(() => [...combinedNews, ...combinedNews], [combinedNews]);
-
-  const doubledPdfReports = useMemo(() => {
+  const pdfReportsMapped = useMemo(() => {
     const reports = (pdfReports || []).map(p => ({ ...p, text: p.title, date: p.createdAt?.toDate(), type: 'Document' }));
-    return [...reports, ...reports];
+    return reports;
   }, [pdfReports]);
-
-
-  useEffect(() => {
-    const el = noticesRef.current;
-    if (!el) return;
-
-    let pos = 0;
-    const animate = () => {
-      pos -= 0.5;
-      if (pos < -el.scrollHeight / 2) {
-        pos = 0;
-      }
-      el.style.transform = `translateY(${pos}px)`;
-      noticesRafRef.current = requestAnimationFrame(animate);
-    };
-
-    const startAnimation = () => {
-      noticesRafRef.current = requestAnimationFrame(animate);
-    };
-
-    const stopAnimation = () => {
-      if (noticesRafRef.current) {
-        cancelAnimationFrame(noticesRafRef.current);
-      }
-    };
-
-    const handleMouseEnter = () => stopAnimation();
-    const handleMouseLeave = () => startAnimation();
-
-    el.addEventListener('mouseenter', handleMouseEnter);
-    el.addEventListener('mouseleave', handleMouseLeave);
-
-    startAnimation();
-
-    return () => {
-      stopAnimation();
-      if (el) {
-        el.removeEventListener('mouseenter', handleMouseEnter);
-        el.removeEventListener('mouseleave',handleMouseLeave);
-      }
-    };
-  }, [doubledNotices]);
-
-  useEffect(() => {
-    const el = newsRef.current;
-    if (!el) return;
-
-    let pos = 0;
-    const animate = () => {
-      pos -= 0.5; // Adjust scroll speed if needed
-      if (pos < -el.scrollHeight / 2) {
-        pos = 0;
-      }
-      el.style.transform = `translateY(${pos}px)`;
-      newsRafRef.current = requestAnimationFrame(animate);
-    };
-
-    const startAnimation = () => {
-      newsRafRef.current = requestAnimationFrame(animate);
-    };
-
-    const stopAnimation = () => {
-      if (newsRafRef.current) {
-        cancelAnimationFrame(newsRafRef.current);
-      }
-    };
-
-    el.addEventListener('mouseenter', stopAnimation);
-    el.addEventListener('mouseleave', startAnimation);
-
-    startAnimation();
-
-    return () => {
-      stopAnimation();
-      if (el) {
-        el.removeEventListener('mouseenter', stopAnimation);
-        el.removeEventListener('mouseleave', startAnimation);
-      }
-    };
-  }, [doubledNews]);
-
-  useEffect(() => {
-    const el = pdfRef.current;
-    if (!el) return;
-
-    let pos = 0;
-    const animate = () => {
-      pos -= 0.5;
-      if (pos < -el.scrollHeight / 2) {
-        pos = 0;
-      }
-      el.style.transform = `translateY(${pos}px)`;
-      pdfRafRef.current = requestAnimationFrame(animate);
-    };
-
-    const startAnimation = () => {
-      pdfRafRef.current = requestAnimationFrame(animate);
-    };
-
-    const stopAnimation = () => {
-      if (pdfRafRef.current) {
-        cancelAnimationFrame(pdfRafRef.current);
-      }
-    };
-
-    el.addEventListener('mouseenter', stopAnimation);
-    el.addEventListener('mouseleave', startAnimation);
-
-    startAnimation();
-
-    return () => {
-      stopAnimation();
-      if (el) {
-        el.removeEventListener('mouseenter', stopAnimation);
-        el.removeEventListener('mouseleave', startAnimation);
-      }
-    };
-  }, [doubledPdfReports]);
 
   return (
     <section style={{ padding: '80px 20px', background: '#f4f7fa' }}>
@@ -187,7 +62,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
         .notif-body {
           padding: 20px;
           flex: 1;
-          overflow-y: hidden; /* Changed from auto */
+          overflow-y: auto; /* Changed from hidden to auto */
           display: flex;
           flex-direction: column;
         }
@@ -213,7 +88,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
         .notif-item {
           padding: 15px 0;
           border-bottom: 1px solid #eee;
-        }  
+        }
           
         @media (max-width: 1100px) { .notif-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 700px) { .notif-grid { grid-template-columns: 1fr; } .notif-card { height: 450px; } }
@@ -226,10 +101,10 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
               <span style={{ fontSize: '24px' }}>🔔</span> Official Notices
             </div>
             <div className="notif-body">
-              <div ref={noticesRef}>
-                {doubledNotices.map((n, i) => {
+              <div>
+                {notices.map((n, i) => {
                   // Logic for 3-day old "NEW" badge
-                  const isNew = n.isNew && (new Date() - new Date(n.date)) / (1000 * 60 * 60 * 24) < 3;
+                  const isNew = n.isNew;
                   return (
                     <div key={i} className="notif-item">
                       {/* Top line: Date, Category, New Badge */}
@@ -240,9 +115,11 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
                         {isNew && <span style={{ marginLeft: '16px', background: 'red', color: '#fff', fontSize: '9px', padding: '2px 6px', borderRadius: '4px', animation: 'blink 1s infinite' }}>NEW</span>}
                       </div>
                       {/* Title */}
-                      <p style={{ margin: '0 0 5px', fontSize: '14px', color: COLORS.navy, fontWeight: 600 }}>
-                        {n.text}
-                      </p>
+                      <div 
+                        className="rich-text-title"
+                        style={{ margin: '0 0 5px', fontSize: '14px', color: COLORS.navy, fontWeight: 600 }}
+                        dangerouslySetInnerHTML={{ __html: n.text }}
+                      />
                       {/* Link/Description */}
                       {n.link && <a href={n.link} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#007bff', fontWeight: 700, display: 'inline-block' }}>🔗 View Document</a>}
                     </div>
@@ -259,9 +136,9 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
               <span style={{ fontSize: '24px' }}>📣</span> Academic News / Upcoming Event
             </div>
             <div className="notif-body">
-              <div ref={newsRef}>
-                {doubledNews.map((n, i) => {
-                  const isNew = n.date && (new Date() - new Date(n.date)) / (1000 * 60 * 60 * 24) < 3;
+              <div>
+                {combinedNews.map((n, i) => {
+                  const isNew = n.isNew;
                   return (
                     <div key={i} className="notif-item">
                       {/* Top line: Date, Category, New Badge */}
@@ -272,11 +149,17 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
                         {isNew && <span style={{ marginLeft: '16px', background: 'red', color: '#fff', fontSize: '9px', padding: '2px 6px', borderRadius: '4px', animation: 'blink 1s infinite' }}>NEW</span>}
                       </div>
                       {/* Title */}
-                      <p style={{ margin: '0 0 5px', fontSize: '14px', color: COLORS.navy, fontWeight: 600 }}>
-                        {n.text || n.title}
-                      </p>
+                      <div 
+                        className="rich-text-title"
+                        style={{ margin: '0 0 5px', fontSize: '14px', color: COLORS.navy, fontWeight: 600 }}
+                        dangerouslySetInnerHTML={{ __html: n.text || n.title }}
+                      />
                       {/* Description if it exists */}
-                      {n.desc && <p style={{ margin: '0 0 5px', fontSize: '13px', color: '#555', lineHeight: 1.4 }}>{n.desc}</p>}
+                      {n.desc && <div 
+                        className="rich-text-desc"
+                        style={{ margin: '0 0 5px', fontSize: '13px', color: '#555', lineHeight: 1.4 }}
+                        dangerouslySetInnerHTML={{ __html: n.desc }}
+                      />}
                       {/* Link if it exists */}
                       {n.link && <a href={n.link} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#007bff', fontWeight: 700, display: 'inline-block' }}>🔗 View Document</a>}
                     </div>
@@ -293,8 +176,8 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
               <span style={{ fontSize: '24px' }}>📄</span> E-Documents
             </div>
             <div className="notif-body">
-              <div ref={pdfRef}>
-                {doubledPdfReports.map((n, i) => (
+              <div>
+                {pdfReportsMapped.map((n, i) => (
                   <div key={i} className="notif-item">
                     {/* Top line: Date, Category */}
                     <div style={{ display: 'flex', alignItems: 'center', fontSize: '11px', color: '#888', fontWeight: 700, marginBottom: '8px' }}>
@@ -303,7 +186,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
                       <span style={{ color: '#10b981' }}>{n.type || 'Document'}</span>
                     </div>
                     {/* Title */}
-                    <p style={{ margin: '0 0 5px', fontSize: '14px', color: COLORS.navy, fontWeight: 600 }}>
+                    <p className="rich-text-title" style={{ margin: '0 0 5px', fontSize: '14px', color: COLORS.navy, fontWeight: 600 }}>
                       {n.text || n.title}
                     </p>
                     {/* Link */}

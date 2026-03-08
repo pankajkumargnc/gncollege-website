@@ -1,158 +1,154 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { collection, query, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
 import { COLORS } from '../styles/colors';
+import DOMPurify from 'dompurify';
+import parse from 'html-react-parser';
 
-export default function PageViewer({ slug, page: propPage, onClose }) {
-  const [page, setPage] = useState(propPage || null);
-  // 🌟 BUG FIX 1: Loading ko hamesha pehle 'true' rakhein
-  const [loading, setLoading] = useState(true); 
+export default function PageViewer({ page }) {
+  const [relatedDocs, setRelatedDocs] = useState([]);
 
+  // 🌟 FIREBASE DATA FETCHING
   useEffect(() => {
-    // 1. Agar App.jsx ne database se page laakar de diya hai
-    if (propPage) {
-      setPage(propPage);
-      setLoading(false); // Data mil gaya, loading band!
-      return;
-    }
+    if (!page) return;
+    window.scrollTo(0, 0); 
     
-    // 2. Agar koi custom Link (slug) click hua hai, toh Firebase se fetch karein
-    if (slug) {
-      const fetchPage = async () => {
-        setLoading(true);
-        const q = query(collection(db, 'pages'), where('slug', '==', slug));
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-          setPage(querySnapshot.docs[0].data());
-        } else {
-          setPage(null);
-        }
-        setLoading(false);
-      };
-      fetchPage();
-      return;
-    }
-
-    // 🌟 BUG FIX 2: "Grace Period" Timer 
-    // Agar turant data nahi mila (refresh hone par), toh 1.5 sec wait karein.
-    setPage(null);
-    const timer = setTimeout(() => {
-      setLoading(false); // 1.5 sec baad agar sach me data nahi hai, toh 404 dikhega
-    }, 1500);
+    const targetPath = page.path || `/p/${page.slug}`;
+    const q = query(collection(db, 'pdfReports'));
     
-    return () => clearTimeout(timer); // Cleanup function
-  }, [slug, propPage]);
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const allDocs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const pageDocs = allDocs.filter(d => d.targetPage === targetPath);
+      pageDocs.sort((a, b) => new Date(b.date) - new Date(a.date));
+      setRelatedDocs(pageDocs);
+    });
 
-  // --- LOADING & 404 STATES ---
-  if (loading) {
-    return (
-      <div style={{ padding: '100px 20px', textAlign: 'center', minHeight: '60vh', background: '#f4f7fa', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ fontSize: '40px', marginBottom: '15px', animation: 'spin 2s linear infinite' }}>⏳</div>
-        <h3 style={{ color: COLORS.navy, fontWeight: 700 }}>Loading Page Content...</h3>
-        <p style={{ color: '#666', fontSize: '14px' }}>Please wait while we fetch the latest data from the server.</p>
-      </div>
-    );
-  }
+    return () => unsubscribe();
+  }, [page]);
 
+  // 🚧 PAGE NOT FOUND / LOADING
   if (!page) {
     return (
-      <div style={{ padding: '100px 20px', textAlign: 'center', minHeight: '60vh', background: '#f4f7fa', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <h2 style={{ color: COLORS.navy, fontSize: '32px', fontWeight: 800 }}>404 - Page Not Found</h2>
-        <p style={{ color: '#666', fontSize: '16px', marginTop: '10px' }}>The page you are looking for is currently being updated or does not exist.</p>
-        <p style={{ fontSize: '14px', background: '#e2e8f0', display: 'inline-block', padding: '10px 20px', borderRadius: '8px', marginTop: '20px' }}>
-          <strong>Admin Note:</strong> Please create this page from the Admin Dashboard.
-        </p>
+      <div style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f4f7fa' }}>
+        <div style={{ textAlign: 'center', padding: '50px', background: '#fff', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+          <div style={{ fontSize: '50px', marginBottom: '15px' }}>🚧</div>
+          <h2 style={{ color: COLORS.navy, fontSize: '28px', margin: '0 0 10px' }}>Content Updating...</h2>
+          <p style={{ color: '#64748b', margin: 0 }}>This section is currently being updated by the administration.</p>
+        </div>
       </div>
     );
   }
 
-  // --- PREMIUM TWO-COLUMN UI RENDER ---
+  // 🛡️ SECURITY: Sanitize HTML to prevent attacks
+  const cleanHTML = DOMPurify.sanitize(page.content, { ADD_TAGS: ['iframe'], ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling'] });
+
   return (
-    <div className="page-wrapper">
-      <style>{`
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        .page-wrapper { background: #f4f7fa; padding: 60px 20px; min-height: 70vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .page-container { max-width: 1300px; margin: 0 auto; display: flex; gap: 40px; align-items: flex-start; }
-        
-        .content-col { flex: 1 1 68%; background: #fff; padding: 50px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); min-width: 300px; border: 1px solid #edf2f7; }
-        .page-title { color: ${COLORS.navy}; font-size: 36px; font-weight: 800; margin: 0 0 12px; letter-spacing: -0.5px; }
-        .title-underline { width: 80px; height: 5px; background: ${COLORS.gold}; margin-bottom: 35px; border-radius: 3px; }
-        .rich-content { font-size: 16px; line-height: 1.8; color: #333; text-align: justify; }
-        .rich-content h1, .rich-content h2, .rich-content h3 { color: ${COLORS.navy}; margin-top: 30px; margin-bottom: 15px; }
-        .rich-content a { color: ${COLORS.gold}; text-decoration: none; font-weight: 600; }
-        .rich-content a:hover { text-decoration: underline; }
-        .rich-content img { max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .rich-content ul, .rich-content ol { margin-left: 20px; margin-bottom: 20px; }
-        .rich-content li { margin-bottom: 8px; }
-
-        .sidebar-col { flex: 1 1 28%; min-width: 300px; position: sticky; top: 110px; }
-        .widget { background: #fff; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid #edf2f7; }
-        .widget-title { color: ${COLORS.navy}; font-size: 20px; font-weight: 800; margin: 0 0 20px; display: flex; align-items: center; gap: 12px; border-bottom: 2px solid #f4f7fa; padding-bottom: 15px; }
-        
-        .quick-links { list-style: none; padding: 0; margin: 0; }
-        .quick-link-item { border-bottom: 1px solid #f4f7fa; }
-        .quick-link-item:last-child { border-bottom: none; }
-        .quick-link { display: flex; align-items: center; gap: 12px; padding: 14px 0; color: #4a5568; text-decoration: none; font-weight: 600; font-size: 14.5px; transition: all 0.3s ease; }
-        .quick-link:hover { color: ${COLORS.gold}; padding-left: 8px; }
-        .link-arrow { color: ${COLORS.gold}; font-size: 18px; font-weight: bold; transition: transform 0.3s; }
-        .quick-link:hover .link-arrow { transform: translateX(3px); }
-        
-        .helpdesk-widget { background: linear-gradient(145deg, ${COLORS.navy} 0%, #0a1832 100%); color: #fff; padding: 35px 30px; border-radius: 16px; text-align: center; box-shadow: 0 15px 35px rgba(15,35,71,0.25); position: relative; overflow: hidden; }
-        .helpdesk-widget::before { content: '☎'; position: absolute; top: -20px; right: -20px; font-size: 120px; color: rgba(255,255,255,0.05); transform: rotate(15deg); pointer-events: none; }
-        .helpdesk-btn { display: inline-block; background: ${COLORS.gold}; color: ${COLORS.navyDark}; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 14px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(244,160,35,0.3); margin-top: 20px; position: relative; z-index: 2; }
-        .helpdesk-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(244,160,35,0.5); background: #e08e1a; }
-
-        @media (max-width: 1024px) { .page-container { flex-direction: column; } .sidebar-col { position: static; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; } }
-        @media (max-width: 768px) { .page-wrapper { padding: 30px 15px; } .content-col { padding: 30px 20px; } .page-title { font-size: 28px; } .sidebar-col { grid-template-columns: 1fr; gap: 20px; } }
-      `}</style>
-
-      <div className="page-container">
-        <div className="content-col">
-          {onClose && <button onClick={onClose} style={{ float: 'right', padding: '8px 16px', background: COLORS.red, color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>✕ Close</button>}
-          <h1 className="page-title">{page.title}</h1>
-          <div className="title-underline"></div>
-          <div className="rich-content">
-            {page.contentType === 'html' ? (
-              <div dangerouslySetInnerHTML={{ __html: page.content }} />
-            ) : (
-              <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>{page.content}</pre>
-            )}
-          </div>
+    <div className="profile-page-wrapper">
+      
+      {/* 1. PREMIUM HERO BANNER */}
+      <header className="profile-hero" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop')` }}>
+        <div className="hero-overlay"></div>
+        <div className="hero-content anim-fade-in">
+          <h1 className="hero-title">{page.title}</h1>
+          <p className="hero-subtitle">Guru Nanak College, Dhanbad</p>
         </div>
+      </header>
 
-        <div className="sidebar-col">
-          <div className="widget">
-            <h3 className="widget-title"><span style={{ color: COLORS.gold, fontSize: '24px' }}>📑</span> Quick Links</h3>
-            <ul className="quick-links">
-              {[
-                { label: 'College Profile', path: '/about-us/college-profile' },
-                { label: 'Admission Rules', path: '/admission/rule' },
-                { label: 'Fee Structure', path: '/admission/fee-structure' },
-                { label: 'Syllabus', path: '/syllabus' },
-                { label: 'Academic Calendar', path: '/academics/academic-calendar' },
-                { label: 'Photo Gallery', path: '/gallery' },
-                { label: 'Contact Helpdesk', path: '/contact' }
-              ].map((link, i) => (
-                <li key={i} className="quick-link-item">
-                  <Link to={link.path} className="quick-link" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                    <span className="link-arrow">›</span> {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+      <div className="profile-container">
+        
+        <div className="profile-layout">
+          <main className="profile-main">
+            <section className="glass-panel profile-section anim-slide-up" style={{ animationDelay: '0.2s' }}>
+              <h2 className="section-heading">{page.title}</h2>
+              <div className="heading-underline"></div>
+              <div className="dynamic-rich-content">
+                {parse(cleanHTML)}
+              </div>
+            </section>
 
-          <div className="helpdesk-widget">
-            <div style={{ fontSize: '45px', marginBottom: '15px', position: 'relative', zIndex: 2 }}>📞</div>
-            <h4 style={{ margin: '0 0 12px', fontSize: '19px', color: COLORS.gold, position: 'relative', zIndex: 2 }}>Need Assistance?</h4>
-            <p style={{ fontSize: '14px', margin: '0', color: '#e2e8f0', lineHeight: '1.6', position: 'relative', zIndex: 2 }}>
-              Contact our administration office for any queries related to admission, examinations, or syllabus.
-            </p>
-            <a href="tel:+917903340991" className="helpdesk-btn">Call Helpdesk Now</a>
-          </div>
+            {relatedDocs.length > 0 && (
+              <section className="glass-panel profile-section anim-slide-up" style={{ animationDelay: '0.3s' }}>
+                <h2 className="section-heading">📚 Official Documents</h2>
+                <div className="heading-underline"></div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                  {relatedDocs.map((doc) => (
+                    <div key={doc.id}
+                         style={{ display: 'flex', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', overflow: 'hidden', transition: 'all 0.3s ease', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}
+                         onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = COLORS.gold; }} 
+                         onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = '#e2e8f0'; }}>
+                      <div style={{ width: '80px', background: '#f1f5f9', borderRight: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {doc.coverImage ? <img src={doc.coverImage} alt="cover" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ fontSize: '30px', opacity: 0.3 }}>📄</div>}
+                      </div>
+                      <div style={{ padding: '15px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        {doc.isNew && <span className="new-badge">NEW</span>}
+                        <h4 style={{ margin: '0 0 5px 0', fontSize: '14px', color: COLORS.navy, lineHeight: '1.4' }}>{doc.title}</h4>
+                        <p style={{ margin: '0 0 10px 0', fontSize: '11px', color: '#64748b', fontWeight: 600 }}>📅 {doc.date}</p>
+                        <a href={doc.pdfLink || doc.link} target="_blank" rel="noreferrer" className="download-btn">⬇️ View Document</a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </main>
+
+          <aside className="profile-sidebar anim-slide-up" style={{animationDelay: '0.5s'}}>
+            <div className="widget">
+              <h3 className="widget-title"><span>📑</span> Quick Links</h3>
+              <ul className="quick-links">
+                {[
+                  { label: 'Principal Message', path: '/about-us/principal-message' },
+                  { label: 'Admission Rules', path: '/admission/rule' },
+                  { label: 'Fee Structure', path: '/admission/fee-structure' },
+                  { label: 'Departments', path: '/academics/course-offered' },
+                  { label: 'NSS', path: '/activity/nss' },
+                  { label: 'NCC', path: '/activity/ncc' },
+                  { label: 'Sports', path: '/activity/games-sports' },
+                  { label: 'Workshop', path: '/activity/workshop' },
+                  { label: 'Syllabus', path: '/syllabus' },
+                  { label: 'Academic Calendar', path: '/academics/academic-calendar' },
+                  { label: 'Photo Gallery', path: '/gallery' },
+                  { label: 'Contact Us', path: '/contact' }
+                ].map((link, i) => (
+                  <li key={i} className="quick-link-item">
+                    <Link to={link.path} className="quick-link" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                      <span className="link-arrow">›</span> {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="helpdesk-widget">
+              <div style={{ fontSize: '45px', marginBottom: '15px', position: 'relative', zIndex: 2 }}>📞</div>
+              <h4 style={{ margin: '0 0 12px', fontSize: '19px', color: '#f4a023', position: 'relative', zIndex: 2 }}>Need Assistance?</h4>
+              <p style={{ fontSize: '14px', margin: '0 0 20px', color: '#e2e8f0', lineHeight: '1.6', position: 'relative', zIndex: 2 }}>
+                Contact our administration office for any queries related to admission or academics.
+              </p>
+              <a href="tel:+917903340991" className="helpdesk-btn">Call Helpdesk Now</a>
+            </div>
+          </aside>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 768px) { .dynamic-rich-content { padding: 25px !important; } }
+        .dynamic-rich-content table { width: 100% !important; border-collapse: collapse; margin: 20px 0; display: block; overflow-x: auto; white-space: nowrap; font-size: 14px; }
+        .dynamic-rich-content th { background: ${COLORS.navy}; color: white; padding: 12px 15px; text-align: left; }
+        .dynamic-rich-content td { padding: 12px 15px; border: 1px solid #e2e8f0; }
+        .dynamic-rich-content tr:nth-child(even) { background-color: #f8fafc; }
+        .dynamic-rich-content iframe { width: 100%; aspect-ratio: 16 / 9; height: auto; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin: 20px 0; }
+        .dynamic-rich-content img { max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin: 20px 0; display: block; }
+        .dynamic-rich-content h1, .dynamic-rich-content h2, .dynamic-rich-content h3 { color: ${COLORS.navy}; margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 800; line-height: 1.3; }
+        .dynamic-rich-content p { margin-bottom: 1.5em; line-height: 1.8; color: #334155; font-size: 16px; }
+        .dynamic-rich-content ul, .dynamic-rich-content ol { margin-bottom: 1.5em; padding-left: 20px; color: #334155; line-height: 1.8; font-size: 16px;}
+        .dynamic-rich-content li { margin-bottom: 8px; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .new-badge { display: inline-block; background: #ef4444; color: #fff; fontSize: 9px; font-weight: 800; padding: 3px 6px; border-radius: 4px; margin-bottom: 8px; width: fit-content; animation: blink 1.5s infinite; letter-spacing: 0.5px;}
+        .download-btn { display: inline-block; background: #f8fafc; color: ${COLORS.navy}; padding: 8px 15px; border-radius: 6px; font-size: 12px; font-weight: 700; text-decoration: none; border: 1px solid #cbd5e1; text-align: center; transition: 0.2s; }
+        .download-btn:hover { background: ${COLORS.navy}; color: #fff; border-color: ${COLORS.navy}; }
+      `}</style>
     </div>
   );
 }

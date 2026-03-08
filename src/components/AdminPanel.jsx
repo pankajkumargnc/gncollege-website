@@ -1,95 +1,11 @@
 import toast from 'react-hot-toast';
 import React, { useState, useRef, useEffect } from 'react';
+import JoditEditor from 'jodit-react';
 import { COLORS } from '../styles/colors';
 import { db } from '../firebase'; 
+import DOMPurify from 'dompurify';
+import parse from 'html-react-parser';
 import { collection, addDoc, serverTimestamp, doc, deleteDoc, updateDoc } from 'firebase/firestore';
-
-const handleSaveData = async () => {
-  try {
-    // Aapka Firebase save karne ka code yahan hoga
-    await addDoc(collection(db, "notices"), data);
-    
-    // Success Toast
-    toast.success('Data saved successfully! 🎉');
-    
-  } catch (err) {
-    // 🌟 ERROR TOAST YAHAN AAYEGA 🌟
-    toast.error('Error: ' + err.message);
-  }
-};
-
-// ==========================================
-// 🌟 ADVANCED RICH TEXT EDITOR (In-built)
-// ==========================================
-const RichTextEditor = ({ value, onChange, placeholder }) => {
-  const editorRef = useRef(null);
-
-  useEffect(() => {
-    if (editorRef.current && value !== editorRef.current.innerHTML) {
-      editorRef.current.innerHTML = value || '';
-    }
-  }, [value]);
-
-  const format = (command, val = null) => {
-    document.execCommand(command, false, val);
-    if (editorRef.current) {
-      editorRef.current.focus();
-      onChange(editorRef.current.innerHTML);
-    }
-  };
-
-  const handleInput = () => {
-    if (editorRef.current) onChange(editorRef.current.innerHTML);
-  };
-
-  const addLink = () => {
-    const url = prompt('Enter the link URL (e.g., https://google.com): ', 'https://');
-    if (url) format('createLink', url);
-  };
-
-  const addImage = () => {
-    const url = prompt('Enter the Image URL: ', 'https://');
-    if (url) format('insertImage', url);
-  };
-
-  const btnStyle = { padding: '6px 10px', background: '#fff', border: '1px solid #cbd5e0', borderRadius: '6px', cursor: 'pointer', fontSize: '15px', color: COLORS.navy, fontWeight: 'bold' };
-  const selectStyle = { padding: '6px', background: '#fff', border: '1px solid #cbd5e0', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', color: COLORS.navy, fontWeight: 'bold' };
-
-  return (
-    <div style={{ border: '2px solid #e2e8f0', borderRadius: '10px', overflow: 'hidden', background: '#fff' }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '12px', background: '#f8fafc', borderBottom: '2px solid #e2e8f0', alignItems: 'center' }}>
-        <button type="button" onClick={() => format('bold')} style={btnStyle} title="Bold">B</button>
-        <button type="button" onClick={() => format('italic')} style={{...btnStyle, fontStyle: 'italic'}} title="Italic">I</button>
-        <button type="button" onClick={() => format('underline')} style={{...btnStyle, textDecoration: 'underline'}} title="Underline">U</button>
-        <span style={{ width: '1px', background: '#cbd5e0', margin: '0 5px' }}></span>
-        <select onChange={(e) => format('formatBlock', e.target.value)} style={selectStyle}>
-          <option value="P">Paragraph</option><option value="H1">Heading 1</option><option value="H2">Heading 2</option><option value="H3">Heading 3</option>
-        </select>
-        <select onChange={(e) => format('fontSize', e.target.value)} style={selectStyle}>
-          <option value="">Font Size</option><option value="1">Small</option><option value="3">Normal</option><option value="5">Large</option>
-        </select>
-        <span style={{ width: '1px', background: '#cbd5e0', margin: '0 5px' }}></span>
-        <input type="color" onChange={(e) => format('foreColor', e.target.value)} title="Text Color" style={{ width: '32px', height: '32px', padding: '0', border: 'none', cursor: 'pointer', borderRadius: '6px' }} />
-        <span style={{ width: '1px', background: '#cbd5e0', margin: '0 5px' }}></span>
-        <button type="button" onClick={() => format('justifyLeft')} style={btnStyle}>⫷</button>
-        <button type="button" onClick={() => format('justifyCenter')} style={btnStyle}>≡</button>
-        <button type="button" onClick={() => format('justifyRight')} style={btnStyle}>⫸</button>
-        <span style={{ width: '1px', background: '#cbd5e0', margin: '0 5px' }}></span>
-        <button type="button" onClick={() => format('insertOrderedList')} style={btnStyle}>1.</button>
-        <button type="button" onClick={() => format('insertUnorderedList')} style={btnStyle}>•</button>
-        <span style={{ width: '1px', background: '#cbd5e0', margin: '0 5px' }}></span>
-        <button type="button" onClick={addLink} style={btnStyle}>🔗</button>
-        <button type="button" onClick={addImage} style={btnStyle}>🖼️</button>
-      </div>
-      <div 
-        ref={editorRef} contentEditable="true" onInput={handleInput} onBlur={handleInput}
-        style={{ minHeight: '200px', maxHeight: '500px', overflowY: 'auto', padding: '20px', outline: 'none', fontSize: '15px', lineHeight: '1.6' }}
-        data-placeholder={placeholder}
-      />
-    </div>
-  );
-};
-
 
 // ==========================================
 // 🌟 MAIN ADMIN PANEL COMPONENT
@@ -98,6 +14,33 @@ const formatPathToLabel = (path) => path.replace(/^\//, '').replace(/-/g, ' ').s
 
 export default function AdminPanel({ onClose, notices, pages, events, gallery, placeholderPaths, announcements, pdfReports }) {
   const [activeTab, setActiveTab] = useState('pages');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('all');
+
+  const editor = useRef(null);
+	const config = { 
+    readonly: false, 
+    placeholder: 'Start typings...',
+    height: 400,
+    // Paste issue fix
+    processPasteHTML: true,
+    processPasteFromWord: true,
+    askBeforePasteHTML: false,
+    askBeforePasteFromWord: false,
+    buttons: [
+      'source', '|', 'bold', 'italic', 'underline', '|', 'ul', 'ol', '|', 'font', 'fontsize', 'brush', 'paragraph', '|',
+      'image', 'table', 'link', '|', 'align', 'undo', 'redo', '|', 'hr', 'eraser', 'fullsize'
+    ],
+  };
+
+  // State for Preview Modal
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewContent, setPreviewContent] = useState('');
+  const handlePreview = (content) => {
+    setPreviewContent(content);
+    setShowPreview(true);
+  };
+
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false); 
 
@@ -109,7 +52,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
   const [editingPdfReport, setEditingPdfReport] = useState(null);
 
   const [eventData, setEventData] = useState({ title: '', desc: '', type: 'WORKSHOP', day: '', month: '', location: '', status: 'upcoming', imageUrl: '' });
-  const [noticeData, setNoticeData] = useState({ text: '', link: '', type: 'General' });
+  const [noticeData, setNoticeData] = useState({ text: '', link: '', type: 'General', isNew: true });
   const [pageData, setPageData] = useState({ title: '', content: '', path: '', slug: '', contentType: 'html' });
   const [announcementData, setAnnouncementData] = useState({ text: '', link: '', type: 'News' });
   const [pdfReportData, setPdfReportData] = useState({ title: '', link: '', type: 'Document' });
@@ -123,12 +66,12 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
     setLoading(true);
     try {
       await addDoc(collection(db, 'gallery'), { 
-        title: galleryData.title, 
-        cat: galleryData.cat, 
-        src: galleryData.src, // Seedha manual path jayega
+        title: galleryData.title.trim(), 
+        cat: galleryData.cat.trim(), 
+        src: galleryData.src.trim(), // Seedha manual path jayega
         createdAt: serverTimestamp() 
       });
-      alert('Photo published to Gallery successfully!');
+      toast.success('Photo published to Gallery!');
       setGalleryData({ title: '', cat: 'Seminars', src: '' }); // Form Reset
     } catch (err) { alert('Upload Error: ' + err.message); }
     setLoading(false);
@@ -136,7 +79,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
 
   const handleDeleteGalleryPhoto = async (id) => {
     if (window.confirm('Are you sure you want to remove this photo?')) {
-      try { await deleteDoc(doc(db, 'gallery', id)); alert('Photo removed successfully!'); } catch (err) { alert('Error: ' + err.message); }
+      try { await deleteDoc(doc(db, 'gallery', id)); toast.success('Photo removed successfully!'); } catch (err) { toast.error('Error: ' + err.message); }
     }
   };
 
@@ -144,10 +87,10 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
     e.preventDefault();
     setLoading(true);
     try {
-      if (editingEvent) { await updateDoc(doc(db, 'events', editingEvent.id), { ...eventData, updatedAt: serverTimestamp() }); alert('Event updated!'); } 
-      else { await addDoc(collection(db, 'events'), { ...eventData, createdAt: serverTimestamp() }); alert('Event added!'); }
+      if (editingEvent) { await updateDoc(doc(db, 'events', editingEvent.id), { ...eventData, updatedAt: serverTimestamp() }); toast.success('Event updated!'); } 
+      else { await addDoc(collection(db, 'events'), { ...eventData, createdAt: serverTimestamp() }); toast.success('Event added!'); }
       handleCancelEditEvent();
-    } catch (err) { alert('Error: ' + err.message); }
+    } catch (err) { toast.error('Error: ' + err.message); }
     setLoading(false);
   };
 
@@ -157,7 +100,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
     setLoading(true);
     try {
       if (editingNotice) { await updateDoc(doc(db, 'notices', editingNotice.id), { ...noticeData, updatedAt: serverTimestamp() }); toast.success('Notice Updated successfully! 🎉'); } 
-      else { await addDoc(collection(db, 'notices'), { ...noticeData, date: new Date().toISOString(), isNew: true, createdAt: serverTimestamp() }); toast.success('Notice published successfully! 🎉'); }
+      else { await addDoc(collection(db, 'notices'), { ...noticeData, date: new Date().toISOString(), createdAt: serverTimestamp() }); toast.success('Notice published successfully! 🎉'); }
       handleCancelEditNotice();
     } catch (err) { toast.error('Error: ' + err.message); }
     setLoading(false);
@@ -193,32 +136,50 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
     if (pageCreationMode === 'create' && (!pageData.title || !pageData.slug)) return alert("Title and Slug required");
     setLoading(true);
     try {
-      const dataToSave = { title: pageData.title.trim(), content: pageData.content, contentType: pageData.contentType, path: pageCreationMode === 'update' ? pageData.path : '', slug: pageCreationMode === 'create' ? pageData.slug.trim() : '' };
-      if (editingPage) { await updateDoc(doc(db, 'pages', editingPage.id), { ...dataToSave, updatedAt: serverTimestamp() }); alert('Page updated!'); } 
-      else { await addDoc(collection(db, 'pages'), { ...dataToSave, createdAt: serverTimestamp() }); alert('Page created!'); }
+      const slug = pageData.title.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+      const dataToSave = { 
+        title: pageData.title.trim(), content: pageData.content, contentType: pageData.contentType, 
+        path: pageCreationMode === 'update' ? pageData.path : '', slug: pageCreationMode === 'create' ? slug : '' 
+      };
+      if (editingPage) { await updateDoc(doc(db, 'pages', editingPage.id), { ...dataToSave, updatedAt: serverTimestamp() }); toast.success('Page updated!'); } 
+      else { await addDoc(collection(db, 'pages'), { ...dataToSave, createdAt: serverTimestamp() }); toast.success('Page created!'); }
       handleCancelEdit(); 
-    } catch (err) { alert('Error: ' + err.message); }
+    } catch (err) { toast.error('Error: ' + err.message); }
     setLoading(false);
   };
 
   const handleEditEvent = (event) => { setEditingEvent(event); setEventData({ title: event.title || '', desc: event.desc || '', type: event.type || 'WORKSHOP', day: event.day || '', month: event.month || '', location: event.location || '', status: event.status || 'upcoming', imageUrl: event.imageUrl || '' }); };
-  const handleEditNotice = (notice) => { setEditingNotice(notice); setNoticeData({ text: notice.text || '', link: notice.link || '', type: notice.type || 'General' }); };
+  const handleEditNotice = (notice) => { setEditingNotice(notice); setNoticeData({ text: notice.text || '', link: notice.link || '', type: notice.type || 'General', isNew: notice.isNew !== false }); };
   const handleEditAnnouncement = (announcement) => { setEditingAnnouncement(announcement); setAnnouncementData({ text: announcement.text || '', link: announcement.link || '', type: announcement.type || 'News' }); };
   const handleEditPdfReport = (report) => { setEditingPdfReport(report); setPdfReportData({ title: report.title || '', link: report.link || '', type: report.type || 'Document' }); };
   const handleEdit = (page) => { setEditingPage(page); setPageData({ title: page.title, content: page.content, path: page.path || '', slug: page.slug || '', contentType: page.contentType || 'html' }); setPageCreationMode(page.path ? 'update' : 'create'); };
 
   const handleCancelEditEvent = () => { setEditingEvent(null); setEventData({ title: '', desc: '', type: 'WORKSHOP', day: '', month: '', location: '', status: 'upcoming', imageUrl: '' }); };
-  const handleCancelEditNotice = () => { setEditingNotice(null); setNoticeData({ text: '', link: '', type: 'General' }); };
+  const handleCancelEditNotice = () => { setEditingNotice(null); setNoticeData({ text: '', link: '', type: 'General', isNew: true }); };
   const handleCancelEditAnnouncement = () => { setEditingAnnouncement(null); setAnnouncementData({ text: '', link: '', type: 'News' }); };
   const handleCancelEditPdfReport = () => { setEditingPdfReport(null); setPdfReportData({ title: '', link: '', type: 'Document' }); };
   const handleCancelEdit = () => { setEditingPage(null); setPageData({ title: '', content: '', path: '', slug: '', contentType: 'html' }); };
 
-  const handleDeleteEvent = async (id) => { if (window.confirm('Delete this event?')) { try { await deleteDoc(doc(db, 'events', id)); alert('Deleted!'); if (editingEvent?.id === id) handleCancelEditEvent(); } catch (err) { alert(err.message); } } };
-  const handleDeleteNotice = async (id) => { if (window.confirm('Delete this notice?')) { try { await deleteDoc(doc(db, 'notices', id)); alert('Deleted!'); if (editingNotice?.id === id) handleCancelEditNotice(); } catch (err) { alert(err.message); } } };
-  const handleDeleteAnnouncement = async (id) => { if (window.confirm('Delete this news?')) { try { await deleteDoc(doc(db, 'announcements', id)); alert('Deleted!'); if (editingAnnouncement?.id === id) handleCancelEditAnnouncement(); } catch (err) { alert(err.message); } } };
-  const handleDeletePdfReport = async (id) => { if (window.confirm('Delete this Document?')) { try { await deleteDoc(doc(db, 'pdfReports', id)); alert('Deleted!'); if (editingPdfReport?.id === id) handleCancelEditPdfReport(); } catch (err) { alert(err.message); } } };
-  const handleDelete = async (id) => { if (window.confirm('Delete this page?')) { try { await deleteDoc(doc(db, 'pages', id)); alert('Deleted!'); if (editingPage?.id === id) handleCancelEdit(); } catch (err) { alert(err.message); } } };
+  const handleDeleteEvent = async (id) => { if (window.confirm('Delete this event?')) { try { await deleteDoc(doc(db, 'events', id)); toast.success('Event Deleted!'); if (editingEvent?.id === id) handleCancelEditEvent(); } catch (err) { toast.error(err.message); } } };
+  const handleDeleteNotice = async (id) => { if (window.confirm('Delete this notice?')) { try { await deleteDoc(doc(db, 'notices', id)); toast.success('Notice Deleted!'); if (editingNotice?.id === id) handleCancelEditNotice(); } catch (err) { toast.error(err.message); } } };
+  const handleDeleteAnnouncement = async (id) => { if (window.confirm('Delete this news?')) { try { await deleteDoc(doc(db, 'announcements', id)); toast.success('News Deleted!'); if (editingAnnouncement?.id === id) handleCancelEditAnnouncement(); } catch (err) { toast.error(err.message); } } };
+  const handleDeletePdfReport = async (id) => { if (window.confirm('Delete this Document?')) { try { await deleteDoc(doc(db, 'pdfReports', id)); toast.success('Document Deleted!'); if (editingPdfReport?.id === id) handleCancelEditPdfReport(); } catch (err) { toast.error(err.message); } } };
+  const handleDelete = async (id) => { if (window.confirm('Delete this page?')) { try { await deleteDoc(doc(db, 'pages', id)); toast.success('Page Deleted!'); if (editingPage?.id === id) handleCancelEdit(); } catch (err) { toast.error(err.message); } } };
 
+  const allContent = [
+    ...pages.map(p => ({ ...p, contentType: 'Page' })),
+    ...notices.map(n => ({ ...n, title: n.text.substring(0, 50) + '...', contentType: 'Notice' })),
+    ...announcements.map(a => ({ ...a, title: a.text.substring(0, 50) + '...', contentType: 'News' })),
+    ...events.map(e => ({ ...e, contentType: 'Event' })),
+    ...pdfReports.map(r => ({ ...r, contentType: 'Document' })),
+    ...gallery.map(g => ({ ...g, contentType: 'Gallery' })),
+  ].sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+
+  const filteredContent = allContent.filter(item => {
+    const titleMatch = item.title?.toLowerCase().includes(searchTerm.toLowerCase());
+    const typeMatch = filterType === 'all' || item.contentType.toLowerCase() === filterType;
+    return titleMatch && typeMatch;
+  });
   return (
     <div className="admin-wrapper">
       <style>{`
@@ -246,7 +207,22 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
         .btn-gold { background: ${COLORS.gold}; color: ${COLORS.navyDark}; }
         .btn-danger { background: #fee2e2; color: #e53e3e; }
         .btn-secondary { background: #edf2f7; color: #4a5568; }
-        .data-list { display: flex; flex-direction: column; gap: 15px; }
+        .preview-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 10002; backdrop-filter: blur(5px); }
+        .preview-modal-content { background: #f4f7fa; width: 90%; max-width: 900px; height: 85vh; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; }
+        .preview-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; background: #fff; border-bottom: 1px solid #e2e8f0; }
+        .preview-modal-header h3 { margin: 0; color: ${COLORS.navy}; font-size: 18px; }
+        .preview-modal-header button { background: transparent; border: none; font-size: 24px; cursor: pointer; color: #666; }
+        .preview-modal-body { padding: 30px 40px; overflow-y: auto; flex: 1; }
+        .dynamic-rich-content table { width: 100% !important; border-collapse: collapse; margin: 20px 0; display: block; overflow-x: auto; white-space: nowrap; font-size: 14px; }
+        .dynamic-rich-content th { background: ${COLORS.navy}; color: white; padding: 12px 15px; text-align: left; }
+        .dynamic-rich-content td { padding: 12px 15px; border: 1px solid #e2e8f0; }
+        .dynamic-rich-content tr:nth-child(even) { background-color: #f8fafc; }
+        .dynamic-rich-content iframe { width: 100%; aspect-ratio: 16 / 9; height: auto; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin: 20px 0; }
+        .dynamic-rich-content img { max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin: 20px 0; display: block; }
+        .dynamic-rich-content h1, .dynamic-rich-content h2, .dynamic-rich-content h3 { color: ${COLORS.navy}; margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 800; line-height: 1.3; }
+        .dynamic-rich-content p { margin-bottom: 1.5em; line-height: 1.8; color: #334155; font-size: 16px; }
+        .dynamic-rich-content ul, .dynamic-rich-content ol { margin-bottom: 1.5em; padding-left: 20px; color: #334155; line-height: 1.8; font-size: 16px;}
+        .data-list { display: flex; flex-direction: column; gap: 15px; word-wrap: break-word; overflow-wrap: break-word; }
         .data-item { display: flex; justify-content: space-between; align-items: center; padding: 20px 25px; border: 1px solid #edf2f7; border-radius: 12px; background: #fff; }
         .data-content h4 { margin: 0 0 6px; color: ${COLORS.navy}; font-size: 16px; font-weight: 700; }
         .badge { font-size: 11px; padding: 4px 10px; border-radius: 6px; font-weight: 700; display: inline-block; margin-bottom: 8px; }
@@ -279,7 +255,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
         </div>
         <div className="nav-menu">
           {[
-            { id: 'pages', label: 'Dynamic Pages', icon: '📄' }, { id: 'gallery', label: 'Photo Gallery', icon: '📸' },
+            { id: 'dashboard', label: 'Dashboard', icon: '📊' }, { id: 'pages', label: 'Dynamic Pages', icon: '📄' }, { id: 'gallery', label: 'Photo Gallery', icon: '📸' },
             { id: 'notices', label: 'Notice Board', icon: '📢' }, { id: 'announcements', label: 'Academic News', icon: '📣' },
             { id: 'pdfReports', label: 'E-Documents', icon: '📁' }, { id: 'events', label: 'Campus Events', icon: '🏆' }
           ].map(tab => (
@@ -293,6 +269,41 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
 
       {/* MAIN CONTENT AREA */}
       <div className="admin-main">
+
+        {activeTab === 'dashboard' && (
+          <div className="card">
+            <div className="card-title">📊 Content Dashboard</div>
+            <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+              <input 
+                type="text" 
+                placeholder="Search all content..." 
+                className="input"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+              />
+              <select className="input" value={filterType} onChange={e => setFilterType(e.target.value)}>
+                <option value="all">All Types</option>
+                <option value="page">Page</option>
+                <option value="notice">Notice</option>
+                <option value="news">News</option>
+                <option value="event">Event</option>
+                <option value="document">Document</option>
+                <option value="gallery">Gallery</option>
+              </select>
+            </div>
+            <div className="data-list">
+              {filteredContent.map(item => (
+                <div key={item.id} className="data-item">
+                  <div className="data-content">
+                    <span className="badge" style={{ background: '#eee', color: '#333' }}>{item.contentType}</span>
+                    <h4 style={{ whiteSpace: 'normal', wordBreak: 'break-all' }}>{item.title}</h4>
+                  </div>
+                  <button className="btn btn-secondary" style={{padding:'8px 16px'}} onClick={() => { setActiveTab(item.contentType.toLowerCase() + 's'); }}>Go to Edit</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         
         {/* ==========================================
             0. PHOTO GALLERY (Ab Image Path ke zariye)
@@ -376,13 +387,14 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
                   ) : (
                     <input className="input" placeholder="e.g. computer-science" value={pageData.slug} onChange={e => setPageData({...pageData, slug: e.target.value.toLowerCase().trim().replace(/\s+/g, '-'), path: '' })} required />
                   )}
-                </div>
+                </div>              
               </div>
               <div className="form-group">
                 <label className="label">Page Content</label>
-                <RichTextEditor value={pageData.content} onChange={(content) => setPageData({...pageData, content})} />
+                <JoditEditor ref={editor} value={pageData.content} config={config} tabIndex={1} onBlur={newContent => setPageData({...pageData, content: newContent})} />
               </div>
               <div className="btn-group">
+                <button type="button" className="btn btn-secondary" onClick={() => handlePreview(pageData.content)}>👁️ Preview</button>
                 <button className="btn btn-gold" onClick={handleAddPage} disabled={loading}>{loading ? 'Processing...' : (editingPage ? '💾 Save Changes' : '🚀 Publish Page')}</button>
                 {editingPage && <button className="btn btn-secondary" onClick={handleCancelEdit}>Cancel</button>}
               </div>
@@ -392,7 +404,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
               <div className="data-list">
                 {(pages || []).map((p) => (
                   <div key={p.id} className="data-item" style={{ borderLeft: `4px solid ${COLORS.navy}` }}>
-                    <div className="data-content">
+                    <div className="data-content" style={{ wordBreak: 'break-all' }}>
                       <h4>{p.title}</h4>
                       <a href={p.path ? `/#${p.path}` : `/#/p/${p.slug}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '13px', color: COLORS.gold, textDecoration: 'none', fontWeight: 700 }}>🔗 View Live Page</a>
                     </div>
@@ -416,10 +428,14 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
                 <div className="form-grid">
                   <div className="form-group"><label className="label">Category</label><select className="input" value={noticeData.type} onChange={e => setNoticeData({...noticeData, type: e.target.value})}><option>General</option><option>Examination</option><option>Admission</option><option>Holiday</option></select></div>
                   <div className="form-group"><label className="label">Attachment URL (Drive/PDF)</label><input className="input" placeholder="Optional Link" value={noticeData.link} onChange={e => setNoticeData({...noticeData, link: e.target.value})} /></div>
+                  <div className="form-group" style={{alignSelf: 'center'}}>
+                    <label className="label" style={{display: 'flex', alignItems: 'center', gap: '10px'}}><input type="checkbox" checked={noticeData.isNew} onChange={e => setNoticeData({...noticeData, isNew: e.target.checked})} /> Show "NEW" Badge</label>
+                  </div>
                 </div>
                 <div className="form-group">
                   <label className="label">Notice Message (Rich Text)</label>
-                  <RichTextEditor value={noticeData.text} onChange={(text) => setNoticeData({...noticeData, text})} />
+                  <JoditEditor ref={editor} value={noticeData.text} config={config} onBlur={newContent => setNoticeData({...noticeData, text: newContent})} />
+
                 </div>
                 <div className="btn-group">
                   <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? 'Processing...' : (editingNotice ? '💾 Update Notice' : '🚀 Broadcast Notice')}</button>
@@ -433,7 +449,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
                 {(notices || []).map((n) => (
                   <div key={n.id} className="data-item" style={{ borderLeft: `5px solid ${COLORS.gold}` }}>
                     <div className="data-content" style={{ flex: 1 }}>
-                      <span className="badge" style={{ background: '#fff3cd', color: '#856404' }}>{n.type}</span>
+                      <span className="badge" style={{ background: '#fff3cd', color: '#856404' }}>{n.type} {n.isNew && <span style={{color: 'red', marginLeft: '5px'}}> (NEW)</span>}</span>
                       <span style={{ fontSize: '12px', marginLeft: '12px', color: '#718096', fontWeight: 600 }}>📅 {n.date ? new Date(n.date).toLocaleDateString('en-GB') : 'N/A'}</span>
                       <div dangerouslySetInnerHTML={{ __html: n.text }} style={{ margin: '8px 0', fontSize: '15px', color: '#1a202c', fontWeight: 600 }} />
                       {n.link && <a href={n.link} target="_blank" rel="noreferrer" style={{ fontSize: '12.5px', color: COLORS.navy, fontWeight: 700, textDecoration: 'none' }}>📎 Open Attachment</a>}
@@ -461,7 +477,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
                 </div>
                 <div className="form-group">
                   <label className="label">News Content (Rich Text)</label>
-                  <RichTextEditor value={announcementData.text} onChange={(text) => setAnnouncementData({...announcementData, text})} />
+                  <JoditEditor ref={editor} value={announcementData.text} config={config} onBlur={newContent => setAnnouncementData({...announcementData, text: newContent})} />
                 </div>
                 <div className="btn-group">
                   <button type="submit" className="btn btn-primary" disabled={loading}>{editingAnnouncement ? '💾 Update News' : '🚀 Publish News'}</button>
@@ -547,7 +563,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
                 <div className="form-group"><label className="label">Image Path (from public folder)</label><input className="input" placeholder="e.g. /images/sports-day.jpg" value={eventData.imageUrl} onChange={e => setEventData({...eventData, imageUrl: e.target.value})} /></div>
                 <div className="form-group">
                   <label className="label">Event Description (Rich Text)</label>
-                  <RichTextEditor value={eventData.desc} onChange={(desc) => setEventData({...eventData, desc})} />
+                  <JoditEditor ref={editor} value={eventData.desc} config={config} onBlur={newContent => setEventData({...eventData, desc: newContent})} />
                 </div>
                 <div className="btn-group">
                   <button type="submit" className="btn btn-primary" disabled={loading}>{editingEvent ? '💾 Update Event' : '🚀 Publish Event'}</button>
@@ -577,6 +593,20 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
           </>
         )}
 
+        {/* PREVIEW MODAL */}
+        {showPreview && (
+          <div className="preview-modal-overlay">
+              <div className="preview-modal-content">
+                  <div className="preview-modal-header">
+                      <h3>Live Content Preview</h3>
+                      <button onClick={() => setShowPreview(false)}>✕</button>
+                  </div>
+                  <div className="preview-modal-body dynamic-rich-content">
+                      {parse(DOMPurify.sanitize(previewContent, { ADD_TAGS: ['iframe'], ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling'] }))}
+                  </div>
+              </div>
+          </div>
+        )}
       </div>
     </div>
   );

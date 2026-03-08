@@ -64,9 +64,9 @@ export default function Navbar({ onAdminClick, navLinks }) {
           maxHeight: isMobile ? '80vh' : 'auto',
           overflowY: isMobile ? 'auto' : 'visible',
           flex: 1, 
-          justifyContent: 'flex-end',
+          justifyContent: isMobile ? 'flex-start' : 'flex-end', // 🌟 FIX 1: Mobile par menu ko upar se start karein
           borderTop: isMobile && menuOpen ? '1px solid #eee' : 'none',
-          zIndex: 150
+          zIndex: 250 // 🌟 FIX 2: z-index ko badhaya gaya hai taaki ye logo ke upar aaye
         }}>
           {navLinks.map(l0 => (
             <div key={l0.label} style={{ position: 'relative', width: isMobile ? '100%' : 'auto' }}

@@ -1,65 +1,52 @@
 import React, { useState } from 'react';
 import { COLORS } from '../styles/colors';
 
-const QuickActionNav = () => {
+export default function QuickActionNav() {
   const actions = [
-    { label: "Admission 2024", icon: "🎓", href: "#" },
-    { label: "Student Portal", icon: "💻", href: "#" },
-    { label: "Exam Results", icon: "📋", href: "#" },
-    { label: "Pay Fee Online", icon: "💳", href: "#" },
-    { label: "Syllabus", icon: "📚", href: "#" },
+    { label: "Principal Message", icon: "👨‍🏫", href: "#/about-us/principal-message" },
+    { label: "Admission Rules", icon: "🎓", href: "#/admission/rule" },
+    { label: "Departments", icon: "🏛️", href: "#/academics/course-offered" },
+    { label: "NSS / NCC", icon: "🎖️", href: "#/activity/nss" },
+    { label: "Syllabus", icon: "📚", href: "#/syllabus" },
+    { label: "Photo Gallery", icon: "📸", href: "#/gallery" },
+    { label: "Contact Us", icon: "📞", href: "#/contact" },
   ];
 
   return (
-    <div style={{
-      position: 'fixed',
-      right: 0,
-      top: '40%',
-      transform: 'translateY(-50%)',
-      zIndex: 999,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '2px'
-    }}>
+    <div style={{ position: 'fixed', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 990, display: 'flex', flexDirection: 'column', gap: '4px' }}>
       {actions.map((action, index) => (
-        <QuickActionItem key={index} action={action} />
+        <QuickActionItem key={index} action={action} index={index} />
       ))}
     </div>
   );
-};
+}
 
-const QuickActionItem = ({ action }) => {
+const QuickActionItem = ({ action, index }) => {
   const [hover, setHover] = useState(false);
 
   return (
-    <a
-      href={action.href}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
+    <a href={action.href} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        padding: '12px',
+        display: 'flex', alignItems: 'center', justifyContent: 'flex-start', padding: '12px 15px',
         backgroundColor: hover ? COLORS.gold : COLORS.navy,
         color: hover ? COLORS.navy : '#fff',
         textDecoration: 'none',
-        width: hover ? '190px' : '50px',
-        height: '50px',
-        borderTopLeftRadius: '8px',
-        borderBottomLeftRadius: '8px',
-        transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
-        overflow: 'hidden',
-        whiteSpace: 'nowrap',
-        boxShadow: '-2px 2px 8px rgba(0,0,0,0.15)',
-        position: 'relative',
-        right: hover ? '0' : '-5px'
+        width: hover ? '200px' : '55px',
+        height: '55px',
+        borderTopLeftRadius: '12px', borderBottomLeftRadius: '12px',
+        transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+        overflow: 'hidden', whiteSpace: 'nowrap',
+        boxShadow: hover ? '-5px 5px 15px rgba(0,0,0,0.2)' : '-2px 2px 8px rgba(0,0,0,0.1)',
+        position: 'relative', right: hover ? '0' : '-5px',
+        animation: `slideInRight 0.5s ease forwards ${index * 0.1}s`,
+        opacity: 0
       }}
     >
-      <span style={{ fontSize: '22px', minWidth: '30px', textAlign: 'center', marginLeft: '-2px' }}>{action.icon}</span>
-      <span style={{ fontWeight: '700', fontSize: '14px', marginLeft: '15px', opacity: hover ? 1 : 0, transition: 'opacity 0.2s' }}>{action.label}</span>
+      <span style={{ fontSize: '22px', minWidth: '30px', textAlign: 'center', display: 'block' }}>{action.icon}</span>
+      <span style={{ fontWeight: '800', fontSize: '14px', marginLeft: '12px', opacity: hover ? 1 : 0, transition: 'opacity 0.3s ease 0.1s' }}>
+        {action.label}
+      </span>
+      <style>{`@keyframes slideInRight { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }`}</style>
     </a>
   );
 };
-
-export default QuickActionNav;

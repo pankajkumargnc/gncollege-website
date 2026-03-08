@@ -7,6 +7,7 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 
 import { sliderSlides, navLinks as staticNavLinks } from './data/db';
+import { Toaster } from 'react-hot-toast';
 import HomePage from './pages/HomePage';
 import Ticker from './components/Ticker';
 import Navbar from './components/Navbar';
@@ -19,13 +20,14 @@ import Breadcrumbs from './components/Breadcrumbs';
 import QuickActionNav from './components/QuickActionNav';
 import PageViewer from './components/PageViewer'; 
 import Contact from './pages/Contact'; 
+import CollegeProfile from './pages/CollegeProfile';
 
 // FIREBASE IMPORTS
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from './firebase';
 
 const placeholderPaths = [
-  '/about-us/college-profile', '/syllabus', '/about-us', '/about-us/vision-mission', 
+  '/syllabus', '/about-us', '/about-us/vision-mission', 
   '/about-us/principal-message', '/about-us/college-management/organogram', 
   '/about-us/college-management/presidents', '/about-us/college-management/secretaries', 
   '/about-us/college-management/principal', '/about-us/various-committees/womens-cell', 
@@ -157,6 +159,36 @@ export default function App() {
 
   return (
     <>
+      {/* ==================================================
+          🌟 PREMIUM DARK GLASSMORPHISM TOASTER NOTIFICATIONS 🌟
+      =================================================== */}
+      <Toaster 
+        position="top-right"
+        reverseOrder={false}
+        gutter={12}
+        containerStyle={{
+          top: 20,
+          right: 20,
+          zIndex: 999999, // Admin Panel se upar dikhane ke liye
+        }}
+        toastOptions={{
+          // Default Style
+          style: {
+            background: 'rgba(15, 35, 71, 0.85)', // --primary-navy with transparency
+            backdropFilter: 'blur(12px)',
+            color: '#fff',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
+            padding: '16px',
+            borderRadius: '14px',
+            fontSize: '15px',
+            fontWeight: '600',
+          },
+          // Success & Error Specific Styles
+          success: { icon: '✅', duration: 3000 },
+          error: { icon: '❌', duration: 4000 },
+        }}
+      />
       <div className={`splash-screen ${!showSplash ? 'hide' : ''}`}>
         <img src={`${import.meta.env.BASE_URL}images/logo.png`} alt="Guru Nanak College" className="splash-logo" />
         <div className="splash-text">Loading Portal...</div>
@@ -178,6 +210,7 @@ export default function App() {
         <Routes location={location}>
           <Route path="/" element={<HomePage notices={notices} announcements={announcements} pdfReports={pdfReports} sliderSlides={sliderSlides} events={events} gallery={gallery} />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/about-us/college-profile" element={<CollegeProfile />} />
           <Route path="/admin" element={ <AdminRouteWrapper notices={notices} announcements={announcements} events={events} gallery={gallery} pdfReports={pdfReports} pages={pages} placeholderPaths={placeholderPaths} /> } />
           <Route path="/p/:slug" element={<DynamicPageRoute pages={pages} />} />
           {placeholderPaths.map(path => {
