@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { COLORS } from '../styles/colors'
+import { doc, onSnapshot } from 'firebase/firestore'
+import { db } from '../firebase'
 
 export default function Navbar({ onAdminClick, navLinks }) {
   const [openL1, setOpenL1] = useState(null)
@@ -10,6 +12,8 @@ export default function Navbar({ onAdminClick, navLinks }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1250)
   const [menuOpen, setMenuOpen] = useState(false)
 
+  const [firebaseNav, setFirebaseNav] = useState(null)
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1250)
@@ -18,6 +22,18 @@ export default function Navbar({ onAdminClick, navLinks }) {
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, 'settings', 'navbar'), (docSnap) => {
+      if (docSnap.exists() && docSnap.data().links) {
+        setFirebaseNav(docSnap.data().links)
+      }
+    })
+    return () => unsub()
+  }, [])
+
+  // 🌟 FIX: Yahan check hai ki agar Firebase menu khali hai, toh App.jsx ka original menu load karo
+  const activeLinks = (firebaseNav && firebaseNav.length > 0) ? firebaseNav : navLinks
 
   const toggleL1 = (label) => {
     if (openL1 === label) { setOpenL1(null); setOpenL2(null); setOpenL3(null); }
@@ -34,10 +50,8 @@ export default function Navbar({ onAdminClick, navLinks }) {
 
   return (
     <nav className="glass-navbar" style={{ position: 'sticky', top: 0, zIndex: 100, transform: 'translateZ(0)', willChange: 'transform' }}>
-      {/* 🌟 FIX 1: gap: '20px' add kiya taaki Logo aur Menu aapas me takraye nahi */}
       <div style={{ maxWidth: 1400, width: '100%', margin: '0 auto', padding: '0 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px' }}>
 
-        {/* 🌟 FIX 2: flexShrink: 0 kiya aur negative margin hata diya taaki ye apni jagah fixed rahe */}
         <div style={{ display: 'flex', alignItems: 'center', padding: '8px 0', flexShrink: 0 }}>
           <img src={`${import.meta.env.BASE_URL}images/logo1.png`} 
             alt="Guru Nanak College Dhanbad" 
@@ -64,11 +78,11 @@ export default function Navbar({ onAdminClick, navLinks }) {
           maxHeight: isMobile ? '80vh' : 'auto',
           overflowY: isMobile ? 'auto' : 'visible',
           flex: 1, 
-          justifyContent: isMobile ? 'flex-start' : 'flex-end', // 🌟 FIX 1: Mobile par menu ko upar se start karein
+          justifyContent: isMobile ? 'flex-start' : 'flex-end',
           borderTop: isMobile && menuOpen ? '1px solid #eee' : 'none',
-          zIndex: 250 // 🌟 FIX 2: z-index ko badhaya gaya hai taaki ye logo ke upar aaye
+          zIndex: 250
         }}>
-          {navLinks.map(l0 => (
+          {activeLinks.map(l0 => (
             <div key={l0.label} style={{ position: 'relative', width: isMobile ? '100%' : 'auto' }}
               onMouseEnter={() => !isMobile && setOpenL1(l0.label)}
               onMouseLeave={() => { if (!isMobile) { setOpenL1(null); setOpenL2(null); setOpenL3(null); } }}>

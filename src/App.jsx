@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useParams, useLocation } from 'react-router-dom';
 
@@ -72,17 +71,18 @@ const DynamicPageRoute = ({ pages }) => {
   return <PageViewer page={page} />;
 };
 
-const AdminRouteWrapper = ({ notices, announcements, events, gallery, pdfReports, pages, placeholderPaths }) => {
+// 🌟 FIX: navLinks prop yahan pass kiya gaya hai
+const AdminRouteWrapper = ({ notices, announcements, events, gallery, pdfReports, pages, placeholderPaths, navLinks }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isGncAdmin') === 'true');
 
   if (!isLoggedIn) {
     return <AdminLogin onSuccess={() => { setIsLoggedIn(true); localStorage.setItem('isGncAdmin', 'true'); }} onClose={() => window.close()} />;
   }
 
-  return <AdminPanel notices={notices} announcements={announcements} events={events} gallery={gallery} pdfReports={pdfReports} pages={pages} placeholderPaths={placeholderPaths} onClose={() => { setIsLoggedIn(false); localStorage.removeItem('isGncAdmin'); window.close(); }} />;
+  // 🌟 FIX: AdminPanel ko navLinks diya gaya hai
+  return <AdminPanel notices={notices} announcements={announcements} events={events} gallery={gallery} pdfReports={pdfReports} pages={pages} placeholderPaths={placeholderPaths} navLinks={navLinks} onClose={() => { setIsLoggedIn(false); localStorage.removeItem('isGncAdmin'); window.close(); }} />;
 };
 
-// 🌟 FIX: Ticker se HTML tags hatane ka smart function
 const stripHtml = (html) => {
   if (!html) return "";
   const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -101,7 +101,6 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  // 🌟 FIX 1: Check karna ki kya user Admin Panel par hai
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   useEffect(() => {
@@ -151,7 +150,6 @@ export default function App() {
   
   const handleOpenAdminTab = () => { window.open('#/admin', '_blank'); };
 
-  // 🌟 FIX: Ticker ke liye saaf text banana
   const tickerItems = [...notices.slice(0, 3), ...announcements.slice(0, 2)].map(item => ({
     ...item,
     text: stripHtml(item.text || item.title)
@@ -159,32 +157,13 @@ export default function App() {
 
   return (
     <>
-      {/* ==================================================
-          🌟 PREMIUM DARK GLASSMORPHISM TOASTER NOTIFICATIONS 🌟
-      =================================================== */}
       <Toaster 
         position="top-right"
         reverseOrder={false}
         gutter={12}
-        containerStyle={{
-          top: 20,
-          right: 20,
-          zIndex: 999999, // Admin Panel se upar dikhane ke liye
-        }}
+        containerStyle={{ top: 20, right: 20, zIndex: 999999 }}
         toastOptions={{
-          // Default Style
-          style: {
-            background: 'rgba(15, 35, 71, 0.85)', // --primary-navy with transparency
-            backdropFilter: 'blur(12px)',
-            color: '#fff',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
-            padding: '16px',
-            borderRadius: '14px',
-            fontSize: '15px',
-            fontWeight: '600',
-          },
-          // Success & Error Specific Styles
+          style: { background: 'rgba(15, 35, 71, 0.85)', backdropFilter: 'blur(12px)', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.15)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)', padding: '16px', borderRadius: '14px', fontSize: '15px', fontWeight: '600' },
           success: { icon: '✅', duration: 3000 },
           error: { icon: '❌', duration: 4000 },
         }}
@@ -194,7 +173,6 @@ export default function App() {
         <div className="splash-text">Loading Portal...</div>
       </div>
 
-      {/* 🌟 FIX: Admin page par in sabko hide karna taaki Admin Panel full screen aaye */}
       {!isAdminRoute && (
         <>
           <TopBar />
@@ -205,13 +183,13 @@ export default function App() {
         </>
       )}
       
-      {/* 🌟 FIX: Admin route par udne wala transition na aaye */}
       <div key={location.pathname} className={isAdminRoute ? "" : "page-transition"}>
         <Routes location={location}>
           <Route path="/" element={<HomePage notices={notices} announcements={announcements} pdfReports={pdfReports} sliderSlides={sliderSlides} events={events} gallery={gallery} />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about-us/college-profile" element={<CollegeProfile />} />
-          <Route path="/admin" element={ <AdminRouteWrapper notices={notices} announcements={announcements} events={events} gallery={gallery} pdfReports={pdfReports} pages={pages} placeholderPaths={placeholderPaths} /> } />
+          {/* 🌟 FIX: navLinks yahan pass kiya gaya hai */}
+          <Route path="/admin" element={ <AdminRouteWrapper notices={notices} announcements={announcements} events={events} gallery={gallery} pdfReports={pdfReports} pages={pages} placeholderPaths={placeholderPaths} navLinks={dynamicNavLinks} /> } />
           <Route path="/p/:slug" element={<DynamicPageRoute pages={pages} />} />
           {placeholderPaths.map(path => {
             const page = pageContentByPath.get(path);
