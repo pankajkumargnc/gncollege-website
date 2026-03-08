@@ -9,7 +9,6 @@ import { collection, addDoc, serverTimestamp, doc, deleteDoc, updateDoc, setDoc,
 
 const formatPathToLabel = (path) => path.replace(/^\//, '').replace(/-/g, ' ').split('/').map(segment => segment.charAt(0).toUpperCase() + segment.slice(1)).join(' > ');
 
-// 🌟 FIX: navLinks yahan receive ho raha hai
 export default function AdminPanel({ onClose, notices, pages, events, gallery, placeholderPaths, announcements, pdfReports, navLinks }) {
   const [activeTab, setActiveTab] = useState('pages');
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,7 +17,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
   const editor = useRef(null);
   const config = useMemo(() => ({ 
     readonly: false, 
-    placeholder: 'Start typings...',
+    placeholder: 'Start typing your content here...',
     height: 400,
     processPasteHTML: true,
     processPasteFromWord: true,
@@ -47,9 +46,6 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
 
   const [adminLogs, setAdminLogs] = useState([]);
 
-  // ==========================================
-  // 🌟 ADVANCED MENU BUILDER STATES
-  // ==========================================
   const [navData, setNavData] = useState([]);
   const [editMenuSelection, setEditMenuSelection] = useState('');
   const [editMenuForm, setEditMenuForm] = useState({ label: '', href: '' });
@@ -61,25 +57,21 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // 🌟 FIX: Database se check karega, nahi mila toh seedha aapka App.jsx wala menu uthayega
   useEffect(() => {
     const fetchNav = async () => {
       const docSnap = await getDoc(doc(db, 'settings', 'navbar'));
       if (docSnap.exists() && docSnap.data().links && docSnap.data().links.length > 0) {
         setNavData(docSnap.data().links);
       } else if (navLinks && navLinks.length > 0) {
-        setNavData(navLinks); // Original menus se load karega!
+        setNavData(navLinks); 
       }
     };
     fetchNav();
   }, [navLinks]);
 
-  // 🌟 NAYA BUTTON: ORIGINAL MENU WAPAS LAANE KE LIYE
   const handleRestoreOriginalMenu = async () => {
     if (!window.confirm("Kya aap apna original lamba menu wapas laana chahte hain? Yeh live menu ko replace kar dega.")) return;
-    if (!navLinks || navLinks.length === 0) {
-      return toast.error("Original menu nahi mila!");
-    }
+    if (!navLinks || navLinks.length === 0) return toast.error("Original menu nahi mila!");
     
     setLoading(true);
     const toastId = toast.loading('Restoring Original Menu...');
@@ -180,20 +172,60 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
   const [pdfReportData, setPdfReportData] = useState({ title: '', link: '', type: 'Document' });
   const [galleryData, setGalleryData] = useState({ title: '', cat: 'Seminars', src: '' });
 
+  // 🌟🌟🌟 THE FIX: SAFE DYNAMIC PAGES 🌟🌟🌟
+  const handleAddPage = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (editingPage) {
+        if (!pageData.title) { toast.error("Title cannot be empty."); setLoading(false); return; }
+        const dataToUpdate = { title: pageData.title.trim(), content: pageData.content, contentType: pageData.contentType, updatedAt: serverTimestamp() };
+        await updateDoc(doc(db, 'pages', editingPage.id), dataToUpdate);
+        toast.success('Page updated successfully!');
+      } else {
+        if (pageCreationMode === 'update') {
+          if (!pageData.title || !pageData.path) { toast.error("Title and Menu Link are required."); setLoading(false); return; }
+          // SAFELY STRIP /#
+          let safePath = pageData.path.startsWith('/#') ? pageData.path.replace('/#', '') : pageData.path;
+          const dataToSave = { title: pageData.title.trim(), content: pageData.content, contentType: pageData.contentType, path: safePath, slug: '', createdAt: serverTimestamp() };
+          await addDoc(collection(db, 'pages'), dataToSave);
+          toast.success(`Page linked to menu successfully!`);
+        } else {
+          if (!pageData.title || !pageData.slug) { toast.error("Title and Custom URL Slug are required."); setLoading(false); return; }
+          const safeSlug = pageData.slug.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+          // SAFELY EMPTY PATH - So App.jsx automatically puts it in 'More'
+          const dataToSave = { title: pageData.title.trim(), content: pageData.content, contentType: pageData.contentType, path: '', slug: safeSlug, createdAt: serverTimestamp() };
+          await addDoc(collection(db, 'pages'), dataToSave);
+          toast.success(`Page created! It is automatically added to the "More" menu.`);
+        }
+      }
+      handleCancelEdit();
+    } catch (err) { toast.error('Error: ' + err.message); }
+    setLoading(false);
+  };
+
+  const handleEdit = (page) => { 
+    setEditingPage(page); 
+    const dropdownPath = page.path ? (page.path.startsWith('/#') ? page.path : `/#${page.path}`) : '';
+    const isLinkedToMenu = flattenedMenus.some(m => m.href === dropdownPath);
+    setPageData({ title: page.title || '', content: page.content || '', path: isLinkedToMenu ? dropdownPath : '', slug: page.slug || '', contentType: page.contentType || 'html' }); 
+    setPageCreationMode(isLinkedToMenu ? 'update' : 'create'); 
+    if (!isMobile) document.querySelector('.admin-main').scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  // 🌟🌟🌟 FIX ENDS HERE 🌟🌟🌟
+
   const handleAddGalleryPhoto = async (e) => { e.preventDefault(); if (!galleryData.src.trim()) return alert("Image path is required."); setLoading(true); try { await addDoc(collection(db, 'gallery'), { title: galleryData.title.trim(), cat: galleryData.cat.trim(), src: galleryData.src.trim(), createdAt: serverTimestamp() }); toast.success('Photo published to Gallery!'); setGalleryData({ title: '', cat: 'Seminars', src: '' }); } catch (err) { alert('Upload Error: ' + err.message); } setLoading(false); };
   const handleDeleteGalleryPhoto = async (id) => { if (window.confirm('Are you sure you want to remove this photo?')) { try { await deleteDoc(doc(db, 'gallery', id)); toast.success('Photo removed successfully!'); } catch (err) { toast.error('Error: ' + err.message); } } };
   const handleAddEvent = async (e) => { e.preventDefault(); setLoading(true); try { if (editingEvent) { await updateDoc(doc(db, 'events', editingEvent.id), { ...eventData, updatedAt: serverTimestamp() }); toast.success('Event updated!'); } else { await addDoc(collection(db, 'events'), { ...eventData, createdAt: serverTimestamp() }); toast.success('Event added!'); } handleCancelEditEvent(); } catch (err) { toast.error('Error: ' + err.message); } setLoading(false); };
-  const handleAddNotice = async (e) => { e.preventDefault(); if (!noticeData.text.trim()) return alert("Notice text is required"); setLoading(true); try { if (editingNotice) { await updateDoc(doc(db, 'notices', editingNotice.id), { ...noticeData, updatedAt: serverTimestamp() }); toast.success('Notice Updated successfully! 🎉'); } else { await addDoc(collection(db, 'notices'), { ...noticeData, date: new Date().toISOString(), createdAt: serverTimestamp() }); toast.success('Notice published successfully! 🎉'); } handleCancelEditNotice(); } catch (err) { toast.error('Error: ' + err.message); } setLoading(false); };
-  const handleAddAnnouncement = async (e) => { e.preventDefault(); if (!announcementData.text.trim()) return alert("Announcement text is required"); setLoading(true); try { if (editingAnnouncement) { await updateDoc(doc(db, 'announcements', editingAnnouncement.id), { ...announcementData, updatedAt: serverTimestamp() }); toast.success('News updated successfully! 🎉'); } else { await addDoc(collection(db, 'announcements'), { ...announcementData, date: new Date().toISOString(), createdAt: serverTimestamp() }); toast.success('News published successfully! 🎉'); } handleCancelEditAnnouncement(); } catch (err) { toast.error('Error: ' + err.message); } setLoading(false); };
-  const handleAddPdfReport = async (e) => { e.preventDefault(); if (!pdfReportData.title.trim() || !pdfReportData.link.trim()) return alert("Title and Link are required"); setLoading(true); try { if (editingPdfReport) { await updateDoc(doc(db, 'pdfReports', editingPdfReport.id), { ...pdfReportData, updatedAt: serverTimestamp() }); toast.success('Document updated successfully! 🎉'); } else { await addDoc(collection(db, 'pdfReports'), { ...pdfReportData, date: new Date().toISOString(), createdAt: serverTimestamp() }); toast.success('Document published successfully! 🎉'); } handleCancelEditPdfReport(); } catch (err) { toast.error('Error: ' + err.message); } setLoading(false); };
-  const handleAddPage = async (e) => { e.preventDefault(); if (pageCreationMode === 'update' && (!pageData.title || !pageData.path)) return alert("Title and Menu Link required"); if (pageCreationMode === 'create' && (!pageData.title || !pageData.slug)) return alert("Title and Slug required"); setLoading(true); try { const slug = pageData.title.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, ''); const dataToSave = { title: pageData.title.trim(), content: pageData.content, contentType: pageData.contentType, path: pageCreationMode === 'update' ? pageData.path : '', slug: pageCreationMode === 'create' ? slug : '' }; if (editingPage) { await updateDoc(doc(db, 'pages', editingPage.id), { ...dataToSave, updatedAt: serverTimestamp() }); toast.success('Page updated!'); } else { await addDoc(collection(db, 'pages'), { ...dataToSave, createdAt: serverTimestamp() }); toast.success('Page created!'); } handleCancelEdit(); } catch (err) { toast.error('Error: ' + err.message); } setLoading(false); };
-
+  const handleAddNotice = async (e) => { e.preventDefault(); if (!noticeData.text.trim()) return toast.error("Notice text is required"); setLoading(true); try { if (editingNotice) { await updateDoc(doc(db, 'notices', editingNotice.id), { ...noticeData, updatedAt: serverTimestamp() }); toast.success('Notice Updated successfully! 🎉'); } else { await addDoc(collection(db, 'notices'), { ...noticeData, date: new Date().toISOString(), createdAt: serverTimestamp() }); toast.success('Notice published successfully! 🎉'); } handleCancelEditNotice(); } catch (err) { toast.error('Error: ' + err.message); } setLoading(false); };
+  const handleAddAnnouncement = async (e) => { e.preventDefault(); if (!announcementData.text.trim()) return toast.error("Announcement text is required"); setLoading(true); try { if (editingAnnouncement) { await updateDoc(doc(db, 'announcements', editingAnnouncement.id), { ...announcementData, updatedAt: serverTimestamp() }); toast.success('News updated successfully! 🎉'); } else { await addDoc(collection(db, 'announcements'), { ...announcementData, date: new Date().toISOString(), createdAt: serverTimestamp() }); toast.success('News published successfully! 🎉'); } handleCancelEditAnnouncement(); } catch (err) { toast.error('Error: ' + err.message); } setLoading(false); };
+  const handleAddPdfReport = async (e) => { e.preventDefault(); if (!pdfReportData.title.trim() || !pdfReportData.link.trim()) return toast.error("Title and Link are required"); setLoading(true); try { if (editingPdfReport) { await updateDoc(doc(db, 'pdfReports', editingPdfReport.id), { ...pdfReportData, updatedAt: serverTimestamp() }); toast.success('Document updated successfully! 🎉'); } else { await addDoc(collection(db, 'pdfReports'), { ...pdfReportData, date: new Date().toISOString(), createdAt: serverTimestamp() }); toast.success('Document published successfully! 🎉'); } handleCancelEditPdfReport(); } catch (err) { toast.error('Error: ' + err.message); } setLoading(false); };
+  
   const handleEditEvent = (event) => { setEditingEvent(event); setEventData({ title: event.title || '', desc: event.desc || '', type: event.type || 'WORKSHOP', day: event.day || '', month: event.month || '', location: event.location || '', status: event.status || 'upcoming', imageUrl: event.imageUrl || '' }); };
   const handleEditNotice = (notice) => { setEditingNotice(notice); setNoticeData({ text: notice.text || '', link: notice.link || '', type: notice.type || 'General', isNew: notice.isNew !== false }); };
   const handleEditAnnouncement = (announcement) => { setEditingAnnouncement(announcement); setAnnouncementData({ text: announcement.text || '', link: announcement.link || '', type: announcement.type || 'News' }); };
   const handleEditPdfReport = (report) => { setEditingPdfReport(report); setPdfReportData({ title: report.title || '', link: report.link || '', type: report.type || 'Document' }); };
-  const handleEdit = (page) => { setEditingPage(page); setPageData({ title: page.title, content: page.content, path: page.path || '', slug: page.slug || '', contentType: page.contentType || 'html' }); setPageCreationMode(page.path ? 'update' : 'create'); };
-
+  
   const handleCancelEditEvent = () => { setEditingEvent(null); setEventData({ title: '', desc: '', type: 'WORKSHOP', day: '', month: '', location: '', status: 'upcoming', imageUrl: '' }); };
   const handleCancelEditNotice = () => { setEditingNotice(null); setNoticeData({ text: '', link: '', type: 'General', isNew: true }); };
   const handleCancelEditAnnouncement = () => { setEditingAnnouncement(null); setAnnouncementData({ text: '', link: '', type: 'News' }); };
@@ -336,9 +368,9 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
 
       <div className="admin-main">
 
+        {/* 🌟 MENU BUILDER TAB */}
         {activeTab === 'menu_builder' && (
           <>
-            {/* 🌟 NAYA RESTORE BUTTON */}
             <div style={{ background: '#fff3cd', padding: '20px', borderRadius: '12px', borderLeft: '5px solid #856404', marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h4 style={{ margin: '0 0 5px 0', color: '#856404', fontSize: '18px' }}>Missing your original Menu?</h4>
@@ -407,7 +439,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
           </>
         )}
 
-        {/* REST OF THE TABS */}
+        {/* DASHBOARD */}
         {activeTab === 'dashboard' && (
           <div className="card">
             <div className="card-title">📊 Content Dashboard</div>
@@ -439,6 +471,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
           </div>
         )}
         
+        {/* GALLERY */}
         {activeTab === 'gallery' && (
           <>
             <div className="card">
@@ -466,6 +499,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
           </>
         )}
 
+        {/* 🌟 DYNAMIC PAGES TAB */}
         {activeTab === 'pages' && (
           <>
             <div className="card">
@@ -475,17 +509,44 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
                 <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: 600, color: COLORS.navy }}><input type="radio" value="create" checked={pageCreationMode === 'create'} onChange={() => setPageCreationMode('create')} /> Create Custom URL Page</label>
               </div>
               <div className="form-grid">
-                <div className="form-group"><label className="label">Page Title</label><input className="input" placeholder="e.g. Computer Science" value={pageData.title} onChange={e => setPageData({...pageData, title: e.target.value})} required /></div>
+                <div className="form-group">
+                  <label className="label">Page Title</label>
+                  <input 
+                    className="input" 
+                    placeholder="e.g. Computer Science" 
+                    value={pageData.title} 
+                    onChange={e => {
+                      const newTitle = e.target.value;
+                      setPageData({
+                        ...pageData, 
+                        title: newTitle,
+                        slug: pageCreationMode === 'create' ? newTitle.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, '') : pageData.slug
+                      });
+                    }} 
+                    required 
+                  />
+                </div>
                 <div className="form-group"><label className="label">{pageCreationMode === 'update' ? 'Target Menu Link' : 'Custom URL Slug'}</label>
                   {pageCreationMode === 'update' ? (
                     <select className="input" value={pageData.path} onChange={e => setPageData({...pageData, path: e.target.value, slug: '' })} required>
                       <option value="">-- Select Menu --</option>
-                      {flattenedMenus.map(m => <option key={m.id} value={m.href}>{m.pathStr} {m.href ? `(${m.href})` : ''}</option>)}
+                      {flattenedMenus.filter(m => m.href).map(m => <option key={m.id} value={m.href}>{m.pathStr} {m.href ? `(${m.href})` : ''}</option>)}
                     </select>
-                  ) : (<input className="input" placeholder="e.g. computer-science" value={pageData.slug} onChange={e => setPageData({...pageData, slug: e.target.value.toLowerCase().trim().replace(/\s+/g, '-'), path: '' })} required />)}
+                  ) : (
+                    <input 
+                      className="input" 
+                      placeholder="e.g. computer-science" 
+                      value={pageData.slug} 
+                      onChange={e => setPageData({...pageData, slug: e.target.value.toLowerCase().trim().replace(/\s+/g, '-'), path: '' })} 
+                      required 
+                    />
+                  )}
                 </div>              
               </div>
-              <div className="form-group"><label className="label">Page Content</label><JoditEditor ref={editor} value={pageData.content} config={config} tabIndex={1} onBlur={newContent => setPageData({...pageData, content: newContent})} /></div>
+              <div className="form-group">
+                <label className="label">Page Content</label>
+                <JoditEditor ref={editor} value={pageData.content} config={config} tabIndex={1} onBlur={newContent => setPageData({...pageData, content: newContent})} />
+              </div>
               <div className="btn-group">
                 <button type="button" className="btn btn-secondary" onClick={() => handlePreview(pageData.content)}>👁️ Preview</button>
                 <button className="btn btn-gold" onClick={handleAddPage} disabled={loading}>{loading ? 'Processing...' : (editingPage ? '💾 Save Changes' : '🚀 Publish Page')}</button>
@@ -495,17 +556,23 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
             <div className="card">
               <div className="card-title">📂 Live Pages Database</div>
               <div className="data-list">
-                {(pages || []).map((p) => (
+                {(pages || []).map((p) => {
+                  const viewLink = p.path ? (p.path.startsWith('/#') ? p.path : `/#${p.path}`) : `/#/p/${p.slug}`;
+                  return (
                   <div key={p.id} className="data-item" style={{ borderLeft: `4px solid ${COLORS.navy}` }}>
-                    <div className="data-content" style={{ wordBreak: 'break-all' }}><h4>{p.title}</h4><a href={p.path ? `/#${p.path}` : `/#/p/${p.slug}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '13px', color: COLORS.gold, textDecoration: 'none', fontWeight: 700 }}>🔗 View Live Page</a></div>
+                    <div className="data-content" style={{ wordBreak: 'break-all' }}>
+                      <h4>{p.title}</h4>
+                      <a href={viewLink} target="_blank" rel="noopener noreferrer" style={{ fontSize: '13px', color: COLORS.gold, textDecoration: 'none', fontWeight: 700 }}>🔗 View Live Page</a>
+                    </div>
                     <div className="btn-group action-btns"><button className="btn btn-secondary" style={{padding:'8px 16px'}} onClick={() => handleEdit(p)}>✏️ Edit</button><button className="btn btn-danger" style={{padding:'8px 16px'}} onClick={() => handleDelete(p.id)}>🗑️</button></div>
                   </div>
-                ))}
+                )})}
               </div>
             </div>
           </>
         )}
 
+        {/* NOTICES */}
         {activeTab === 'notices' && (
           <>
             <div className="card">
@@ -534,6 +601,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
           </>
         )}
 
+        {/* ANNOUNCEMENTS */}
         {activeTab === 'announcements' && (
           <>
             <div className="card">
@@ -558,6 +626,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
           </>
         )}
 
+        {/* PDF REPORTS */}
         {activeTab === 'pdfReports' && (
           <>
             <div className="card">
@@ -582,6 +651,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
           </>
         )}
 
+        {/* EVENTS */}
         {activeTab === 'events' && (
           <>
             <div className="card">
@@ -609,6 +679,7 @@ export default function AdminPanel({ onClose, notices, pages, events, gallery, p
           </>
         )}
 
+        {/* PREVIEW MODAL */}
         {showPreview && (
           <div className="preview-modal-overlay">
               <div className="preview-modal-content">

@@ -1,10 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useParams, useLocation } from 'react-router-dom';
-
-// 🌟 AOS ANIMATION IMPORTS
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-
 import { sliderSlides, navLinks as staticNavLinks } from './data/db';
 import { Toaster } from 'react-hot-toast';
 import HomePage from './pages/HomePage';
@@ -20,74 +17,30 @@ import QuickActionNav from './components/QuickActionNav';
 import PageViewer from './components/PageViewer'; 
 import Contact from './pages/Contact'; 
 import CollegeProfile from './pages/CollegeProfile';
-
-// FIREBASE IMPORTS
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, getDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
 const placeholderPaths = [
-  '/syllabus', '/about-us', '/about-us/vision-mission', 
-  '/about-us/principal-message', '/about-us/college-management/organogram', 
-  '/about-us/college-management/presidents', '/about-us/college-management/secretaries', 
-  '/about-us/college-management/principal', '/about-us/various-committees/womens-cell', 
-  '/about-us/various-committees/anti-ragging', '/about-us/various-committees/sc-st', 
-  '/about-us/various-committees/obc', '/about-us/various-committees/grievance', 
-  '/about-us/various-committees/icc', '/about-us/various-committees/minority', 
-  '/about-us/various-committees/placement', '/about-us/various-committees/rusa', 
-  '/about-us/college-staff/teaching-staff', '/about-us/college-staff/non-teaching-staff', 
-  '/about-us/regulations/bbmku/special-ug-regulation', '/about-us/regulations/bbmku/ug-regulation-fyugp', 
-  '/about-us/regulations/bbmku/ug-regulation-cbcs', '/about-us/regulations/college-affiliation', 
-  '/about-us/regulations/ugc-section', '/about-us/regulations/vbu/ug-regulation-2015', 
-  '/about-us/regulations/vbu/bca-regulation', '/about-us/regulations/byelaws', 
-  '/about-us/regulations/exemption', '/about-us/audit-report', '/campus/visuals/bhuda', 
-  '/campus/visuals/bank-more', '/campus/visuals/vocational-building', '/campus/infrastructure', 
-  '/campus/classroom', '/campus/ict-rooms', '/campus/green-campus', '/academics/iqac', 
-  '/academics/course-offered', '/academics/departments/humanities', '/academics/departments/social-science', 
-  '/academics/departments/commerce', '/academics/departments/bca', '/academics/departments/bba', 
-  '/academics/academic-calendar', '/admission/rule', '/admission/document-required', 
-  '/admission/fee-structure', '/admission/notification/latest', '/admission/notification/upcoming', 
-  '/admission/intake-capacity', '/activity/nss', '/activity/ncc', '/activity/workshop', 
-  '/activity/games-sports', '/activity/collaboration/rotaract-club', '/activity/collaboration/sadbhavana-diwas', 
-  '/naac/ssr-1st-cycle/cycle-1-documents', '/naac/ssr-1st-cycle/peer-team-report', 
-  '/naac/ssr-2nd-cycle/cycle-2-documents', '/naac/ssr-2nd-cycle/executive-summary', 
-  '/naac/aqar', '/naac/nirf', '/naac/perspective-plan', '/publication/college-library', 
-  '/publication/e-magazine', '/publication/examination-results/2024', 
-  '/publication/examination-results/2023', '/publication/sss-report/2023-24', 
-  '/publication/sss-report/2022-23', '/gallery'
+  '/syllabus', '/about-us', '/about-us/vision-mission', '/about-us/principal-message', '/about-us/college-management/organogram', '/about-us/college-management/presidents', '/about-us/college-management/secretaries', '/about-us/college-management/principal', '/about-us/various-committees/womens-cell', '/about-us/various-committees/anti-ragging', '/about-us/various-committees/sc-st', '/about-us/various-committees/obc', '/about-us/various-committees/grievance', '/about-us/various-committees/icc', '/about-us/various-committees/minority', '/about-us/various-committees/placement', '/about-us/various-committees/rusa', '/about-us/college-staff/teaching-staff', '/about-us/college-staff/non-teaching-staff', '/about-us/regulations/bbmku/special-ug-regulation', '/about-us/regulations/bbmku/ug-regulation-fyugp', '/about-us/regulations/bbmku/ug-regulation-cbcs', '/about-us/regulations/college-affiliation', '/about-us/regulations/ugc-section', '/about-us/regulations/vbu/ug-regulation-2015', '/about-us/regulations/vbu/bca-regulation', '/about-us/regulations/byelaws', '/about-us/regulations/exemption', '/about-us/audit-report', '/campus/visuals/bhuda', '/campus/visuals/bank-more', '/campus/visuals/vocational-building', '/campus/infrastructure', '/campus/classroom', '/campus/ict-rooms', '/campus/green-campus', '/academics/iqac', '/academics/course-offered', '/academics/departments/humanities', '/academics/departments/social-science', '/academics/departments/commerce', '/academics/departments/bca', '/academics/departments/bba', '/academics/academic-calendar', '/admission/rule', '/admission/document-required', '/admission/fee-structure', '/admission/notification/latest', '/admission/notification/upcoming', '/admission/intake-capacity', '/activity/nss', '/activity/ncc', '/activity/workshop', '/activity/games-sports', '/activity/collaboration/rotaract-club', '/activity/collaboration/sadbhavana-diwas', '/naac/ssr-1st-cycle/cycle-1-documents', '/naac/ssr-1st-cycle/peer-team-report', '/naac/ssr-2nd-cycle/cycle-2-documents', '/naac/ssr-2nd-cycle/executive-summary', '/naac/aqar', '/naac/nirf', '/naac/perspective-plan', '/publication/college-library', '/publication/e-magazine', '/publication/examination-results/2024', '/publication/examination-results/2023', '/publication/sss-report/2023-24', '/publication/sss-report/2022-23', '/gallery'
 ];
 
 const DynamicPageRoute = ({ pages }) => {
   const { slug } = useParams();
   const [page, setPage] = useState(null);
-
   useEffect(() => {
-    if (pages && slug) {
-      const foundPage = pages.find(p => p.slug === slug);
-      setPage(foundPage);
-    }
+    if (pages && slug) { const foundPage = pages.find(p => p.slug === slug); setPage(foundPage); }
   }, [slug, pages]);
-
   if (!pages || pages.length === 0) return <div style={{ padding: '40px 20px', textAlign: 'center' }}>Loading pages...</div>;
   return <PageViewer page={page} />;
 };
 
-// 🌟 FIX: navLinks prop yahan pass kiya gaya hai
 const AdminRouteWrapper = ({ notices, announcements, events, gallery, pdfReports, pages, placeholderPaths, navLinks }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isGncAdmin') === 'true');
-
-  if (!isLoggedIn) {
-    return <AdminLogin onSuccess={() => { setIsLoggedIn(true); localStorage.setItem('isGncAdmin', 'true'); }} onClose={() => window.close()} />;
-  }
-
-  // 🌟 FIX: AdminPanel ko navLinks diya gaya hai
+  if (!isLoggedIn) return <AdminLogin onSuccess={() => { setIsLoggedIn(true); localStorage.setItem('isGncAdmin', 'true'); }} onClose={() => window.close()} />;
   return <AdminPanel notices={notices} announcements={announcements} events={events} gallery={gallery} pdfReports={pdfReports} pages={pages} placeholderPaths={placeholderPaths} navLinks={navLinks} onClose={() => { setIsLoggedIn(false); localStorage.removeItem('isGncAdmin'); window.close(); }} />;
 };
 
-const stripHtml = (html) => {
-  if (!html) return "";
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  return doc.body.textContent || "";
-};
+const stripHtml = (html) => { if (!html) return ""; const doc = new DOMParser().parseFromString(html, 'text/html'); return doc.body.textContent || ""; };
 
 export default function App() {
   const [notices, setNotices]             = useState([]);
@@ -96,11 +49,13 @@ export default function App() {
   const [gallery, setGallery]             = useState([]);
   const [pdfReports, setPdfReports]       = useState([]);
   const [pages, setPages]                 = useState([]);
+  
+  // 🌟 NAYA: Firebase Menu State
+  const [firebaseNav, setFirebaseNav]     = useState(null);
 
   const location = useLocation();
   const [showSplash, setShowSplash] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   useEffect(() => {
@@ -118,16 +73,43 @@ export default function App() {
     AOS.init({ duration: 800, easing: 'ease-in-out', once: false, mirror: true, offset: 50 });
   }, []);
 
+  // 🌟 FIX: Fetch Navbar from Firebase
+  useEffect(() => {
+    const unsubNav = onSnapshot(doc(db, 'settings', 'navbar'), (docSnap) => {
+      if (docSnap.exists() && docSnap.data().links && docSnap.data().links.length > 0) {
+        setFirebaseNav(docSnap.data().links);
+      } else {
+        setFirebaseNav(staticNavLinks);
+      }
+    });
+    return () => unsubNav();
+  }, []);
+
+  // 🌟 NAYA: Dynamic Auto-Append Logic for 'More' Menu
+  const baseNavLinks = firebaseNav || staticNavLinks;
   const dynamicNavLinks = useMemo(() => {
-    const newPages = pages.filter(p => p.slug && !p.path).sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0)).map(p => ({ label: p.title, href: `/p/${p.slug}` }));
-    const linksCopy = JSON.parse(JSON.stringify(staticNavLinks));
+    // Sirf wo pages lo jinka path khali hai (Custom URLs)
+    const newPages = pages.filter(p => p.slug && (!p.path || p.path === '')).sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0)).map(p => ({ label: p.title, href: `/p/${p.slug}` }));
+    
+    const linksCopy = JSON.parse(JSON.stringify(baseNavLinks));
+    
     if (newPages.length > 0) {
-      const moreMenu = { label: "More", href: "#", sub: newPages };
-      const galleryIndex = linksCopy.findIndex(link => link.label === 'Gallery');
-      linksCopy.splice(galleryIndex > -1 ? galleryIndex : linksCopy.length - 1, 0, moreMenu);
+      let moreMenu = linksCopy.find(link => link.label.toLowerCase() === 'more');
+      if (!moreMenu) {
+          moreMenu = { label: "More", href: "#", sub: [] };
+          linksCopy.push(moreMenu);
+      }
+      if (!moreMenu.sub) moreMenu.sub = [];
+      
+      // Prevent duplicates
+      newPages.forEach(np => {
+         if (!moreMenu.sub.some(sub => sub.href === np.href)) {
+             moreMenu.sub.push(np);
+         }
+      });
     }
     return linksCopy;
-  }, [pages]);
+  }, [pages, baseNavLinks]);
 
   const pageContentByPath = useMemo(() => {
     const map = new Map();
@@ -149,34 +131,18 @@ export default function App() {
   }, []);
   
   const handleOpenAdminTab = () => { window.open('#/admin', '_blank'); };
-
-  const tickerItems = [...notices.slice(0, 3), ...announcements.slice(0, 2)].map(item => ({
-    ...item,
-    text: stripHtml(item.text || item.title)
-  }));
+  const tickerItems = [...notices.slice(0, 3), ...announcements.slice(0, 2)].map(item => ({ ...item, text: stripHtml(item.text || item.title) }));
 
   return (
     <>
-      <Toaster 
-        position="top-right"
-        reverseOrder={false}
-        gutter={12}
-        containerStyle={{ top: 20, right: 20, zIndex: 999999 }}
-        toastOptions={{
-          style: { background: 'rgba(15, 35, 71, 0.85)', backdropFilter: 'blur(12px)', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.15)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)', padding: '16px', borderRadius: '14px', fontSize: '15px', fontWeight: '600' },
-          success: { icon: '✅', duration: 3000 },
-          error: { icon: '❌', duration: 4000 },
-        }}
-      />
-      <div className={`splash-screen ${!showSplash ? 'hide' : ''}`}>
-        <img src={`${import.meta.env.BASE_URL}images/logo.png`} alt="Guru Nanak College" className="splash-logo" />
-        <div className="splash-text">Loading Portal...</div>
-      </div>
+      <Toaster position="top-right" gutter={12} containerStyle={{ top: 20, right: 20, zIndex: 999999 }} toastOptions={{ style: { background: 'rgba(15, 35, 71, 0.85)', backdropFilter: 'blur(12px)', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.15)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)', padding: '16px', borderRadius: '14px', fontSize: '15px', fontWeight: '600' }, success: { icon: '✅', duration: 3000 }, error: { icon: '❌', duration: 4000 } }} />
+      <div className={`splash-screen ${!showSplash ? 'hide' : ''}`}><img src={`${import.meta.env.BASE_URL}images/logo.png`} alt="Guru Nanak College" className="splash-logo" /><div className="splash-text">Loading Portal...</div></div>
 
       {!isAdminRoute && (
         <>
           <TopBar />
           <Ticker items={tickerItems} />
+          {/* 🌟 Pass dynamicNavLinks to Navbar */}
           <Navbar onAdminClick={handleOpenAdminTab} navLinks={dynamicNavLinks} />
           <Breadcrumbs />
           {!isMobile && <QuickActionNav />}
@@ -188,8 +154,8 @@ export default function App() {
           <Route path="/" element={<HomePage notices={notices} announcements={announcements} pdfReports={pdfReports} sliderSlides={sliderSlides} events={events} gallery={gallery} />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about-us/college-profile" element={<CollegeProfile />} />
-          {/* 🌟 FIX: navLinks yahan pass kiya gaya hai */}
-          <Route path="/admin" element={ <AdminRouteWrapper notices={notices} announcements={announcements} events={events} gallery={gallery} pdfReports={pdfReports} pages={pages} placeholderPaths={placeholderPaths} navLinks={dynamicNavLinks} /> } />
+          {/* 🌟 Pass baseNavLinks to Admin so it edits the clean menu */}
+          <Route path="/admin" element={ <AdminRouteWrapper notices={notices} announcements={announcements} events={events} gallery={gallery} pdfReports={pdfReports} pages={pages} placeholderPaths={placeholderPaths} navLinks={baseNavLinks} /> } />
           <Route path="/p/:slug" element={<DynamicPageRoute pages={pages} />} />
           {placeholderPaths.map(path => {
             const page = pageContentByPath.get(path);
@@ -201,9 +167,7 @@ export default function App() {
       {!isAdminRoute && (
         <>
           <Footer />
-          <button onClick={handleOpenAdminTab} style={{ position: 'fixed', bottom: 25, right: 25, background: COLORS.navy, color: '#fff', border: `3px solid ${COLORS.gold}`, borderRadius: '50%', width: 60, height: 60, cursor: 'pointer', zIndex: 500 }}>
-            <span style={{ fontSize: 18 }}>⚙️</span>
-          </button>
+          <button onClick={handleOpenAdminTab} style={{ position: 'fixed', bottom: 25, right: 25, background: COLORS.navy, color: '#fff', border: `3px solid ${COLORS.gold}`, borderRadius: '50%', width: 60, height: 60, cursor: 'pointer', zIndex: 500 }}><span style={{ fontSize: 18 }}>⚙️</span></button>
         </>
       )}
     </>

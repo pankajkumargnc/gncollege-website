@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { COLORS } from '../styles/colors'
-import { doc, onSnapshot } from 'firebase/firestore'
-import { db } from '../firebase'
 
 export default function Navbar({ onAdminClick, navLinks }) {
   const [openL1, setOpenL1] = useState(null)
@@ -12,8 +10,6 @@ export default function Navbar({ onAdminClick, navLinks }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1250)
   const [menuOpen, setMenuOpen] = useState(false)
 
-  const [firebaseNav, setFirebaseNav] = useState(null)
-
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1250)
@@ -22,18 +18,6 @@ export default function Navbar({ onAdminClick, navLinks }) {
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
-
-  useEffect(() => {
-    const unsub = onSnapshot(doc(db, 'settings', 'navbar'), (docSnap) => {
-      if (docSnap.exists() && docSnap.data().links) {
-        setFirebaseNav(docSnap.data().links)
-      }
-    })
-    return () => unsub()
-  }, [])
-
-  // 🌟 FIX: Yahan check hai ki agar Firebase menu khali hai, toh App.jsx ka original menu load karo
-  const activeLinks = (firebaseNav && firebaseNav.length > 0) ? firebaseNav : navLinks
 
   const toggleL1 = (label) => {
     if (openL1 === label) { setOpenL1(null); setOpenL2(null); setOpenL3(null); }
@@ -47,6 +31,13 @@ export default function Navbar({ onAdminClick, navLinks }) {
     if (openL3 === label) { setOpenL3(null); }
     else { setOpenL3(label); }
   }
+
+  // 🌟 FIX: Home Page clone rokne ke liye Smart Route Cleaner
+  const getRoute = (href) => {
+    if (!href) return '#';
+    if (href.startsWith('/#')) return href.substring(2); // removes '/#'
+    return href;
+  };
 
   return (
     <nav className="glass-navbar" style={{ position: 'sticky', top: 0, zIndex: 100, transform: 'translateZ(0)', willChange: 'transform' }}>
@@ -80,16 +71,16 @@ export default function Navbar({ onAdminClick, navLinks }) {
           flex: 1, 
           justifyContent: isMobile ? 'flex-start' : 'flex-end',
           borderTop: isMobile && menuOpen ? '1px solid #eee' : 'none',
-          zIndex: 250
+          zIndex: 250 
         }}>
-          {activeLinks.map(l0 => (
+          {navLinks.map(l0 => (
             <div key={l0.label} style={{ position: 'relative', width: isMobile ? '100%' : 'auto' }}
               onMouseEnter={() => !isMobile && setOpenL1(l0.label)}
               onMouseLeave={() => { if (!isMobile) { setOpenL1(null); setOpenL2(null); setOpenL3(null); } }}>
 
               <div onClick={() => isMobile && l0.sub && toggleL1(l0.label)}
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: isMobile && l0.sub ? 'pointer' : 'default' }}>
-                <Link to={l0.href || '#'}
+                <Link to={getRoute(l0.href)}
                   onClick={() => { if (l0.label === 'Home') window.scrollTo(0, 0); }}
                   style={{ color: COLORS.navy, padding: isMobile ? '12px 0' : '24px 8px', display: 'block', fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap', textDecoration: 'none', transition: 'all .2s', width: '100%' }}>
                   {l0.label === 'Home' ? '🏠 ' : ''}{l0.label}
@@ -103,7 +94,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                   {l0.sub.map(l1 => (
                     <div key={l1.label} style={{ position: 'relative' }} onMouseEnter={() => !isMobile && setOpenL2(l1.label)} onMouseLeave={() => !isMobile && setOpenL2(null)}>
                       <div onClick={(e) => { if (isMobile && l1.sub) { e.stopPropagation(); toggleL2(l1.label); } }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: isMobile ? '10px 16px' : '10px 18px', borderBottom: isMobile ? 'none' : '1px solid #f8f9fa', cursor: isMobile && l1.sub ? 'pointer' : 'default' }} onMouseEnter={e => { if(!isMobile) e.currentTarget.style.background = '#f4f6f9' }} onMouseLeave={e => { if(!isMobile) e.currentTarget.style.background = 'transparent' }}>
-                        <Link to={l1.href || '#'} style={{ fontSize: 13, fontWeight: 600, color: COLORS.navy, display: 'block', width: '100%', textDecoration: 'none' }}>{l1.label}</Link>
+                        <Link to={getRoute(l1.href)} style={{ fontSize: 13, fontWeight: 600, color: COLORS.navy, display: 'block', width: '100%', textDecoration: 'none' }}>{l1.label}</Link>
                         {l1.sub && <span style={{ fontSize: 12, color: COLORS.gold, marginLeft: 8 }}>{isMobile ? (openL2 === l1.label ? '▴' : '▾') : '▶'}</span>}
                       </div>
                       {l1.sub && openL2 === l1.label && (
@@ -111,13 +102,13 @@ export default function Navbar({ onAdminClick, navLinks }) {
                           {l1.sub.map(l2 => (
                              <div key={l2.label} style={{ position: 'relative' }} onMouseEnter={() => !isMobile && setOpenL3(l2.label)} onMouseLeave={() => !isMobile && setOpenL3(null)}>
                               <div onClick={(e) => { if (isMobile && l2.sub) { e.stopPropagation(); toggleL3(l2.label); } }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', borderBottom: isMobile ? 'none' : '1px solid #f8f9fa', cursor: isMobile && l2.sub ? 'pointer' : 'default' }} onMouseEnter={e => { if(!isMobile) e.currentTarget.style.background = '#f4f6f9' }} onMouseLeave={e => { if(!isMobile) e.currentTarget.style.background = 'transparent' }}>
-                                <Link to={l2.href || '#'} style={{ fontSize: 12.5, fontWeight: 600, color: '#444', display: 'block', width: '100%', textDecoration: 'none' }}>{l2.label}</Link>
+                                <Link to={getRoute(l2.href)} style={{ fontSize: 12.5, fontWeight: 600, color: '#444', display: 'block', width: '100%', textDecoration: 'none' }}>{l2.label}</Link>
                                 {l2.sub && <span style={{ fontSize: 11, color: COLORS.gold, marginLeft: 8 }}>{isMobile ? (openL3 === l2.label ? '▴' : '▾') : '▶'}</span>}
                               </div>
                               {l2.sub && openL3 === l2.label && (
                                 <div style={{ position: isMobile ? 'static' : 'absolute', top: 0, left: '100%', background: '#fff', minWidth: 260, boxShadow: isMobile ? 'none' : '4px 4px 20px rgba(0,0,0,.15)', borderTop: isMobile ? 'none' : '3px solid ' + COLORS.navy, borderRadius: isMobile ? 4 : '0 8px 8px 8px', margin: isMobile ? '0 16px 10px' : 0, borderLeft: isMobile ? '2px solid ' + COLORS.navy : 'none' }}>
                                   {l2.sub.map(l3 => (
-                                    <Link key={l3.label} to={l3.href || '#'} style={{ display: 'block', padding: '10px 16px', fontSize: 12, color: '#555', borderBottom: isMobile ? 'none' : '1px solid #f8f9fa', textDecoration: 'none' }} onMouseEnter={e => { if(!isMobile) e.currentTarget.style.background = '#f4f6f9' }} onMouseLeave={e => { if(!isMobile) e.currentTarget.style.background = 'transparent' }}>
+                                    <Link key={l3.label} to={getRoute(l3.href)} style={{ display: 'block', padding: '10px 16px', fontSize: 12, color: '#555', borderBottom: isMobile ? 'none' : '1px solid #f8f9fa', textDecoration: 'none' }} onMouseEnter={e => { if(!isMobile) e.currentTarget.style.background = '#f4f6f9' }} onMouseLeave={e => { if(!isMobile) e.currentTarget.style.background = 'transparent' }}>
                                       {l3.label}
                                     </Link>
                                   ))}
@@ -135,30 +126,9 @@ export default function Navbar({ onAdminClick, navLinks }) {
           ))}
 
           <button onClick={onAdminClick}
-            style={{
-              flexShrink: 0,
-              background: COLORS.gold,
-              color: '#000',
-              border: 'none',
-              padding: '8px 24px',
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontSize: 13,
-              fontWeight: 800,
-              marginLeft: isMobile ? 0 : 20,
-              marginTop: isMobile ? 12 : 0,
-              width: isMobile ? '100%' : 'auto',
-              boxShadow: '0 4px 15px rgba(244,160,35,0.3)',
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              transition: 'all 0.3s ease'
-            }}
+            style={{ flexShrink: 0, background: COLORS.gold, color: '#000', border: 'none', padding: '8px 24px', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 800, marginLeft: isMobile ? 0 : 20, marginTop: isMobile ? 12 : 0, width: isMobile ? '100%' : 'auto', boxShadow: '0 4px 15px rgba(244,160,35,0.3)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.3s ease' }}
             onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-            >
+            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
             <span style={{ fontSize: 18 }}>⚙️</span> Admin Login
           </button>
         </div>

@@ -144,7 +144,7 @@ const HeroSlider = () => {
             margin-bottom: 8px;
             font-weight: 800;
             letter-spacing: 0.5px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.6); /* Text ko aur clear padhne ke liye shadow */
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.8); /* Shadow badhaya gaya hai */
           }
 
           .content p {
@@ -152,7 +152,7 @@ const HeroSlider = () => {
             margin-bottom: 18px;
             font-weight: 500;
             color: #e2e8f0;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+            text-shadow: 1px 1px 5px rgba(0,0,0,0.7); /* Shadow badhaya gaya hai */
           }
 
           .content hr {

@@ -117,7 +117,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
                       {/* Title */}
                       <div 
                         className="rich-text-title"
-                        style={{ margin: '0 0 5px', fontSize: '14px', color: COLORS.navy, fontWeight: 600 }}
+                        style={{ margin: '0 0 5px', fontSize: '14px', color: COLORS.navy, fontWeight: 600, textAlign: 'left !important' }}
                         dangerouslySetInnerHTML={{ __html: n.text }}
                       />
                       {/* Link/Description */}
@@ -151,13 +151,13 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
                       {/* Title */}
                       <div 
                         className="rich-text-title"
-                        style={{ margin: '0 0 5px', fontSize: '14px', color: COLORS.navy, fontWeight: 600 }}
+                        style={{ margin: '0 0 5px', fontSize: '14px', color: COLORS.navy, fontWeight: 600, textAlign: 'left !important' }}
                         dangerouslySetInnerHTML={{ __html: n.text || n.title }}
                       />
                       {/* Description if it exists */}
                       {n.desc && <div 
                         className="rich-text-desc"
-                        style={{ margin: '0 0 5px', fontSize: '13px', color: '#555', lineHeight: 1.4 }}
+                        style={{ margin: '0 0 5px', fontSize: '13px', color: '#555', lineHeight: 1.4, textAlign: 'left !important' }}
                         dangerouslySetInnerHTML={{ __html: n.desc }}
                       />}
                       {/* Link if it exists */}
