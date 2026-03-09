@@ -134,7 +134,7 @@ h1, h2, h3, h4, h5, h6,
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  z-index: 99999; /* Sabse upar rahega */
+  z-index: 999999 !important; /* Sabse upar rahega, !important to override any other style */
   display: flex;
   flex-direction: column;
   justify-content: center;

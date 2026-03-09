@@ -40,12 +40,10 @@ const CollegeProfile = () => {
       </header>
 
       {/* 2. MAIN CONTENT CONTAINER (Overlapping Hero) */}
-      <div className="profile-container">
-        
+      <div style={{ maxWidth: '1200px', margin: '3rem auto 0', padding: '0 20px', position: 'relative', zIndex: 20 }}>
         <div className="profile-layout">
         <main className="profile-main">
-        {/* Introduction Section (Glass Panel) */}
-        <section className="glass-panel profile-section anim-slide-up" style={{animationDelay: '0.2s'}}>
+        <section className="profile-section anim-slide-up" style={{animationDelay: '0.2s', background: '#fff', borderRadius: '24px'}}>
           <div className="section-grid" style={{ marginBottom: '3rem' }}>
             <div className="text-content">
               <h2 className="section-heading">College Profile</h2>
@@ -103,15 +101,15 @@ const CollegeProfile = () => {
           </div>
         </section>
 
-        {/* Key Statistics (Icons Grid) */}
-        <section className="stats-grid stats-grid-override mb-16 anim-slide-up" style={{animationDelay: '0.7s'}}>
+        {/* Key Statistics (Plain Grid) */}
+        <section className="stats-grid stats-grid-override mb-16 anim-slide-up" style={{animationDelay: '0.4s'}}>
           {[
-            { label: "Years of Legacy", value: "50+", icon: "🏛️" },
+            { label: "Years of Legacy", value: "56+", icon: "🏛️" },
             { label: "Expert Faculty", value: "120+", icon: "👨‍🏫" },
             { label: "Students", value: "5000+", icon: "🎓" },
             { label: "Courses", value: "30+", icon: "📚" }
           ].map((stat, idx) => (
-            <div key={idx} className="glass-card stat-card stat-card-small">
+            <div key={idx} className="stat-card stat-card-small" style={{background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0'}}>
               <div className="stat-icon">{stat.icon}</div>
               <div className="stat-value stat-value-small">{stat.value}</div>
               <div className="stat-label">{stat.label}</div>
@@ -177,6 +175,7 @@ const CollegeProfile = () => {
           </aside>
         </div>
       </div>
+
     </div>
   );
 };

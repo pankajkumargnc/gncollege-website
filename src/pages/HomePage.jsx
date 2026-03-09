@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { COLORS } from '../styles/colors';
 import { SOCIAL_LINKS } from '../data/db';
 import HeroSlider from '../components/HeroSlider';
-import QuickRibbon from '../components/QuickRibbon';
+import PremiumTicker from '../components/PremiumTicker'; // QuickRibbon ko PremiumTicker se badlein
 import HomeFeatures from '../components/HomeFeatures';
 import SectionTitle from '../components/home/SectionTitle';
 import NotificationSection from '../components/home/NotificationSection';
@@ -27,6 +27,13 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
     }
   };
 
+  // Ticker ke liye dummy data (aap ise database se la sakte hain)
+  const tickerItems = [
+    { text: "B.A./B.Com. Semester 1 Admissions are now open for 2024-25 session.", link: "/admission/info" },
+    { text: "Results for the Semester 6 internal examinations have been published.", link: "/results" },
+    { text: "The college will remain closed on account of Holi from 24th to 26th March.", link: "#" },
+  ];
+
   return (
     <div style={{ fontFamily: "'Segoe UI',sans-serif", background: 'transparent', minHeight: '100vh', overflowX: 'hidden' }}>
 
@@ -46,7 +53,7 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
       }} />
 
       <HeroSlider slides={sliderSlides} />
-      <QuickRibbon />
+      <PremiumTicker items={tickerItems} />
       <NotificationSection notices={notices} announcements={announcements} pdfReports={pdfReports} upcomingEvents={upcomingEvents} />
 
       {/* WELCOME SECTION with AOS */}
