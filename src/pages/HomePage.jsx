@@ -28,7 +28,22 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
   };
 
   return (
-    <div style={{ fontFamily: "'Segoe UI',sans-serif", background: '#f4f7f9', minHeight: '100vh', overflowX: 'hidden' }}>
+    <div style={{ fontFamily: "'Segoe UI',sans-serif", background: 'transparent', minHeight: '100vh', overflowX: 'hidden' }}>
+
+      {/* Watermark Background */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundImage: `url(${import.meta.env.BASE_URL}images/logo.png)`,
+        backgroundRepeat: 'repeat',
+        backgroundSize: '350px',
+        opacity: 0.03,
+        zIndex: -1,
+        backgroundColor: '#f4f7f9'
+      }} />
 
       <HeroSlider slides={sliderSlides} />
       <QuickRibbon />
@@ -109,6 +124,35 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
         </div>
       </section>
 
+      {/* PRINCIPAL'S MESSAGE SECTION */}
+      <section style={{ padding: '80px 20px', background: '#f4f7fa' }} data-aos="fade-up">
+        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '50px', alignItems: 'center' }}>
+          <div style={{ textAlign: 'center' }}>
+            <img 
+              src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1888&auto=format&fit=crop" 
+              alt="Principal" 
+              style={{
+                width: '220px',
+                height: '220px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: `6px solid ${COLORS.gold}`,
+                boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+                marginBottom: '20px'
+              }}
+            />
+            <h4 style={{ color: COLORS.navy, margin: '0 0 5px', fontSize: '20px', fontWeight: 800 }}>Dr. [Principal's Name]</h4>
+            <p style={{ color: '#666', margin: 0, fontSize: '14px', fontWeight: 600 }}>Principal, Guru Nanak College</p>
+          </div>
+          <div style={{ borderLeft: '4px solid #f4a023', paddingLeft: '30px' }}>
+            <h3 style={{ fontSize: '28px', fontWeight: 800, color: COLORS.navy, marginBottom: '15px', textAlign: 'left' }}>A Message from the Principal</h3>
+            <p style={{ fontStyle: 'italic', color: '#555', lineHeight: 1.7, fontSize: '16px', borderLeft: '3px solid #ddd', paddingLeft: '20px', margin: 0 }}>
+              "We are committed to providing an environment where students can discover their potential and achieve their dreams. Our focus is on building character, fostering innovation, and nurturing the leaders of tomorrow."
+            </p>
+          </div>
+        </div>
+      </section>
+
       <HomeFeatures />
 
       {/* EVENTS SECTION with AOS */}
@@ -121,16 +165,20 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
             .events-track { display: flex; width: max-content; gap: 30px; animation: scrollLeft 35s linear infinite; transform: translateZ(0); }
             .events-track:hover { animation-play-state: paused; }
             .event-loop-card { width: 320px; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.5); flex-shrink: 0; transition: all 0.4s ease; display: flex; flex-direction: column; }
-            .event-loop-card:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(15, 35, 71, 0.12); border-color: ${COLORS.gold}; }
+            .event-loop-card:hover { transform: translateY(-10px) scale(1.02); box-shadow: 0 18px 40px rgba(15, 35, 71, 0.15); border-color: ${COLORS.gold}; }
             .el-img-box { position: relative; height: 200px; overflow: hidden; }
             .el-img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s ease; }
             .event-loop-card:hover .el-img { transform: scale(1.08); }
-            .el-badge { position: absolute; top: 15px; right: 15px; background: ${COLORS.gold}; color: #000; padding: 5px 12px; font-size: 10px; font-weight: 800; border-radius: 50px; text-transform: uppercase; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-            .el-date { position: absolute; bottom: 0; left: 0; background: ${COLORS.navy}; color: #fff; padding: 8px 15px; border-top-right-radius: 12px; text-align: center; z-index: 2; }
+            .el-badge { position: absolute; top: 15px; right: 15px; background: ${COLORS.gold}; color: #000; padding: 5px 12px; font-size: 10px; font-weight: 800; border-radius: 50px; text-transform: uppercase; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.3s ease; }
+            .event-loop-card:hover .el-badge { transform: scale(1.1); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
+            .el-date { position: absolute; bottom: 0; left: 0; background: ${COLORS.navy}; color: #fff; padding: 8px 15px; border-top-right-radius: 12px; text-align: center; z-index: 2; transition: all 0.3s ease; }
+            .event-loop-card:hover .el-date { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
             .el-info { padding: 22px; flex: 1; display: flex; flex-direction: column; }
             .el-title { font-size: 16px; font-weight: 800; color: ${COLORS.navy}; margin: 0 0 10px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
             .el-desc { font-size: 13px; color: #64748b; line-height: 1.6; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; flex: 1;}
             .el-footer { display: flex; justifyContent: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 12px; margin-top: auto;}
+            .read-more-link { font-size: 11px; color: ${COLORS.gold}; font-weight: 800; text-decoration: none; transition: all 0.3s ease; }
+            .event-loop-card:hover .read-more-link { color: ${COLORS.navy}; letter-spacing: 0.5px; }
           `}</style>
 
           {recentEvents.length > 0 ? (
@@ -151,7 +199,7 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
                       <div className="el-desc" dangerouslySetInnerHTML={{ __html: ev.desc }} />
                       <div className="el-footer">
                         <span style={{ fontSize: '11px', color: '#888', fontWeight: 700 }}>📍 {ev.location || 'Campus'}</span>
-                        <span style={{ fontSize: '11px', color: COLORS.gold, fontWeight: 800 }}>READ MORE →</span>
+                        <a href="#" className="read-more-link">READ MORE →</a>
                       </div>
                     </div>
                   </div>
@@ -173,9 +221,15 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0.05, pointerEvents: 'none', backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
         <div data-aos="zoom-in" style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '40px', textAlign: 'center', position: 'relative', zIndex: 2 }}>
           <style>{`
-            .counter-box { padding: 20px; transition: transform 0.3s ease; }
-            .counter-box:hover { transform: translateY(-10px); }
-            .counter-icon { font-size: 50px; margin-bottom: 15px; display: inline-block; filter: drop-shadow(0 0 10px rgba(244,160,35,0.3)); }
+            .counter-box { padding: 20px; transition: all 0.4s ease; }
+            .counter-box:hover { 
+              transform: translateY(-10px); 
+              background: rgba(255, 255, 255, 0.05);
+              border-radius: 15px;
+              box-shadow: 0 0 25px rgba(244,160,35,0.1);
+            }
+            .counter-icon { font-size: 50px; margin-bottom: 15px; display: inline-block; filter: drop-shadow(0 0 10px rgba(244,160,35,0.3)); transition: all 0.4s ease; }
+            .counter-box:hover .counter-icon { transform: scale(1.2) rotate(10deg); filter: drop-shadow(0 0 20px rgba(244,160,35,0.6)); }
             .counter-number { font-size: 45px; font-weight: 900; color: ${COLORS.gold}; line-height: 1; margin-bottom: 10px; font-family: 'Arial Black', sans-serif; }
             .counter-label { font-size: 14px; color: #e2e8f0; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
           `}</style>
@@ -194,14 +248,14 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
           <style>{`
             .links-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-top: 40px; }
             .link-tile { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.6); border-radius: 12px; padding: 25px 15px; text-align: center; text-decoration: none; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); transform: translateZ(0); }
-            .link-tile:hover { transform: translateY(-8px); border-color: ${COLORS.gold}; box-shadow: 0 12px 20px rgba(15, 35, 71, 0.08); background: #fff; }
+            .link-tile:hover { transform: translateY(-8px) scale(1.03); border-color: ${COLORS.gold}; box-shadow: 0 12px 25px rgba(15, 35, 71, 0.1); background: #fff; }
             .link-icon-circle { width: 60px; height: 60px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; transition: 0.3s; }
-            .link-tile:hover .link-icon-circle { background: ${COLORS.navy}; color: #fff; }
+            .link-tile:hover .link-icon-circle { background: ${COLORS.navy}; color: #fff; transform: rotate(15deg); }
             .link-name { font-size: 13px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: 0.5px; }
           `}</style>
           <div className="links-grid">
             {[ { name: 'NAAC', url: 'https://naac.gov.in', icon: '🏅' }, { name: 'UGC', url: 'https://ugc.ac.in', icon: '📜' }, { name: 'INFLIBNET', url: 'https://inflibnet.ac.in', icon: '📚' }, { name: 'NDL INDIA', url: 'https://ndl.gov.in', icon: '🔬' }, { name: 'SWAYAM', url: 'https://swayam.gov.in', icon: '🌐' }, { name: 'BBMK UNIVERSITY', url: 'https://bbmku.ac.in', icon: '🏛️' } ].map((link, i) => (
-              <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="link-tile"><div className="link-icon-circle">{link.icon}</div><div className="link-name">{link.name}</div></a>
+              <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="link-tile" data-aos="fade-up" data-aos-delay={i * 50}><div className="link-icon-circle">{link.icon}</div><div className="link-name">{link.name}</div></a>
             ))}
           </div>
         </div>
@@ -214,14 +268,17 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
           <style>{`
             .gallery-filters { display: flex; justify-content: center; gap: 12px; margin-bottom: 50px; flex-wrap: wrap; }
             .filter-btn { padding: 10px 24px; border-radius: 50px; border: 2px solid #edf2f7; background: #fff; color: #0f2347; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.3s ease; }
-            .filter-btn:hover, .filter-btn.active { background: #0f2347; color: #fff; border-color: #0f2347; box-shadow: 0 5px 15px rgba(15,35,71,0.2); }
-            .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; animation: fadeIn 0.5s ease-in; }
-            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-            .gallery-item { position: relative; border-radius: 15px; overflow: hidden; aspect-ratio: 4/3; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+            .filter-btn:hover { background: #0f2347; color: #fff; border-color: #0f2347; transform: translateY(-2px); }
+            .filter-btn.active { background: #0f2347; color: #fff; border-color: #0f2347; box-shadow: 0 5px 15px rgba(15,35,71,0.2); transform: translateY(-2px); }
+            .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+            .gallery-item { position: relative; border-radius: 15px; overflow: hidden; aspect-ratio: 4/3; box-shadow: 0 5px 15px rgba(0,0,0,0.05); cursor: pointer; }
             .gallery-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
             .gallery-item:hover .gallery-img { transform: scale(1.1); }
             .gallery-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,35,71,0.9), transparent); opacity: 0; transition: 0.4s; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; }
             .gallery-item:hover .gallery-overlay { opacity: 1; }
+            .gallery-overlay span, .gallery-overlay h4 { transform: translateY(10px); opacity: 0; transition: all 0.4s ease; }
+            .gallery-item:hover .gallery-overlay span { transform: translateY(0); opacity: 1; transition-delay: 0.1s; }
+            .gallery-item:hover .gallery-overlay h4 { transform: translateY(0); opacity: 1; transition-delay: 0.2s; }
           `}</style>
           
           <div className="gallery-filters">
@@ -234,7 +291,7 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
 
           <div className="gallery-grid" key={activeTab}> 
             {filteredImages.length > 0 ? filteredImages.map((img, i) => (
-              <div key={i} className="gallery-item">
+              <div key={i} className="gallery-item" data-aos="zoom-in" data-aos-delay={i * 50}>
                 <img src={img.src} alt={img.title} className="gallery-img" />
                 <div className="gallery-overlay">
                   <span style={{ color: '#f4a023', fontSize: '10px', fontWeight: '800' }}>{img.cat}</span>

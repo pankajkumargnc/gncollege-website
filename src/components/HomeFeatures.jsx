@@ -88,6 +88,10 @@ export default function HomeFeatures() {
       opacity: 0.2;
       transition: 0.5s;
     }
+    .modern-dept-card:hover .explore-arrow {
+      transform: translateX(5px);
+      transition: transform 0.3s ease;
+    }
 
     /* Mobile Responsive */
     @media (max-width: 1024px) {
@@ -105,7 +109,7 @@ export default function HomeFeatures() {
       { name: 'COMMERCE', icon: '💰', symbol: '📒', desc: 'Expertise in Finance, Accounts, and Trade.' },
       { name: 'ARTS', icon: '🎨', symbol: '🎭', desc: 'Exploring Humanity, Culture, and Social Science.' }
     ].map((dept, index) => (
-      <div key={index} className="modern-dept-card">
+      <div key={index} className="modern-dept-card" data-aos="fade-up" data-aos-delay={index * 100}>
         {/* Background Symbol Layer */}
         <div className="dept-bg-symbol">{dept.symbol}</div>
         
@@ -117,8 +121,8 @@ export default function HomeFeatures() {
           <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12.5px', lineHeight: '1.5', margin: 0 }}>
             {dept.desc}
           </p>
-          <div style={{ marginTop: '15px', color: COLORS.gold, fontSize: '12px', fontWeight: 'bold' }}>
-            EXPLORE PROGRAM →
+          <div style={{ marginTop: '15px', color: COLORS.gold, fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+            EXPLORE PROGRAM <span className="explore-arrow" style={{ marginLeft: '5px', display: 'inline-block' }}>→</span>
           </div>
         </div>
       </div>
@@ -127,7 +131,7 @@ export default function HomeFeatures() {
 </section>
 
       {/* --- MODERN & ANIMATED COLLEGE FACILITIES SECTION --- */}
-<section style={{ padding: '80px 20px', background: '#ffffff' }}>
+<section style={{ padding: '80px 20px', background: '#ffffff' }} data-aos="fade-up">
   <div style={{ maxWidth: 1250, margin: '0 auto' }}>
     <SectionTitle 
       title="College Facilities" 
@@ -207,7 +211,7 @@ export default function HomeFeatures() {
 
     <div className="facility-container">
       {facilities.map((ft, index) => (
-        <div key={index} className="facility-card">
+        <div key={index} className="facility-card" data-aos="zoom-in" data-aos-delay={index * 50}>
           <div className="facility-icon-wrap">{ft.emoji}</div>
           <div className="facility-text">{ft.name}</div>
         </div>

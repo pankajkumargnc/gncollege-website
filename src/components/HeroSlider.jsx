@@ -69,6 +69,12 @@ const HeroSlider = () => {
         &#10095;
       </div>
 
+      <div className="slider-dots">
+        {sliderData.map((_, index) => (
+          <div key={index} className={`dot ${currentSlide === index ? 'current' : ''}`} onClick={() => setCurrentSlide(index)} />
+        ))}
+      </div>
+
       {/* Slides */}
       {sliderData.map((slide, index) => {
         return (
@@ -93,6 +99,30 @@ const HeroSlider = () => {
       {/* Internal CSS for HeroSlider */}
       <style>
         {`
+          /* --- 🌟 NEW: Performance & Smoothness Animations 🌟 --- */
+          @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+          /* Animations */
+          @keyframes kenburns {
+            0% {
+              transform: scale(1.05) translate(0, 0);
+              filter: brightness(0.9);
+            }
+            100% {
+              transform: scale(1.15) translate(-1%, -1%);
+              filter: brightness(1);
+            }
+          }
+          @keyframes contentFadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes grow-width {
+            from { width: 0; }
+            to { width: 80px; }
+          }
+
+          /* --- 🌟 REFINED: Main Slider Styles 🌟 --- */
           .slider {
             width: 100%;
             height: 60vh; /* Professional height */
@@ -111,13 +141,23 @@ const HeroSlider = () => {
             width: 100%;
             height: 100%;
             opacity: 0;
-            transform: scale(1.05); /* Halka sa zoom out effect fade hone par */
-            transition: all 0.8s ease-in-out;
+            transform: scale(1.15); /* Start slightly more zoomed in */
+            transition: opacity 1.5s cubic-bezier(0.33, 1, 0.68, 1); /* Smoother fade */
+            will-change: opacity, transform; /* Performance Boost */
+          }
+
+          .slide::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to top, rgba(15, 35, 71, 0.6), transparent 60%); /* Darker at bottom */
+            z-index: 1;
           }
 
           .slide.current {
             opacity: 1;
-            transform: scale(1); /* Wapas normal size par */
+            transform: scale(1);
+            transition-delay: 0.2s;
           }
 
           .image {
@@ -125,6 +165,12 @@ const HeroSlider = () => {
             height: 100%;
             object-fit: cover; 
             object-position: center 20%; /* Image ka focus thoda upar rakha hai taaki chehre clear dikhein */
+            transition: transform 12s cubic-bezier(0.2, 0.8, 0.2, 1); /* Slower transition for smoothness */
+            will-change: transform; /* Performance Boost */
+          }
+
+          .slide.current .image {
+            animation: kenburns 12s ease-out forwards;
           }
 
           /* NAYA TEXT DESIGN: Bottom Center with Gradient */
@@ -135,8 +181,9 @@ const HeroSlider = () => {
             width: 100%;
             text-align: center; /* Text Center me */
             color: #fff;
-            background: linear-gradient(to top, rgba(15, 35, 71, 0.9) 0%, rgba(15, 35, 71, 0) 100%); /* Niche se dark, upar se transparent */
+            /* Gradient is now on the ::after pseudo-element */
             padding: 80px 20px 30px; /* Text ko upar push karne ke liye padding */
+            z-index: 2;
           }
 
           .content h2 {
@@ -144,7 +191,8 @@ const HeroSlider = () => {
             margin-bottom: 8px;
             font-weight: 800;
             letter-spacing: 0.5px;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.8); /* Shadow badhaya gaya hai */
+            text-shadow: 0px 2px 15px rgba(0,0,0,0.5);
+            opacity: 0;
           }
 
           .content p {
@@ -152,15 +200,21 @@ const HeroSlider = () => {
             margin-bottom: 18px;
             font-weight: 500;
             color: #e2e8f0;
-            text-shadow: 1px 1px 5px rgba(0,0,0,0.7); /* Shadow badhaya gaya hai */
+            text-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+            opacity: 0;
           }
 
           .content hr {
             border: 2px solid #f4a023; 
-            width: 60px;
+            width: 80px;
             margin: 0 auto; /* Gold line ko center me lane ke liye */
             border-radius: 4px;
+            opacity: 0;
           }
+
+          .slide.current .content h2 { animation: contentFadeInUp 0.8s 0.4s both cubic-bezier(0.2, 0.6, 0.2, 1); }
+          .slide.current .content p { animation: contentFadeInUp 0.8s 0.6s both cubic-bezier(0.2, 0.6, 0.2, 1); }
+          .slide.current .content hr { animation: grow-width 0.8s 0.8s both cubic-bezier(0.2, 0.6, 0.2, 1); opacity: 1; }
 
           /* Controls Style */
           .arrow {
@@ -169,7 +223,7 @@ const HeroSlider = () => {
             transform: translateY(-50%);
             width: 45px;
             height: 45px;
-            background-color: rgba(255, 255, 255, 0.15);
+            background-color: rgba(15, 35, 71, 0.3); /* Darker, more subtle */
             color: #fff;
             font-size: 1.5rem;
             display: flex;
@@ -177,15 +231,41 @@ const HeroSlider = () => {
             align-items: center;
             cursor: pointer;
             border-radius: 50%;
-            z-index: 10;
+            z-index: 11; /* Above the overlay */
             transition: all 0.3s;
             backdrop-filter: blur(4px); /* Glassmorphism effect */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0; /* 🌟 Hide by default */
+            transform: translateY(-50%) scale(0.8);
+          }
+
+          .slider:hover .arrow {
+            opacity: 1;
+            transform: translateY(-50%) scale(1);
           }
 
           .arrow:hover {
             background-color: #f4a023; /* Hover par gold */
             color: #000;
-            transform: translateY(-50%) scale(1.1);
+            transform: translateY(-50%) scale(1.1); /* Keep the hover effect */
+            box-shadow: 0 0 15px rgba(244, 160, 35, 0.4);
+          }
+
+          /* --- 🌟 NEW: Slide Indicator Dots 🌟 --- */
+          .slider-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 11;
+          }
+          .dot {
+            width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; transition: all 0.4s ease;
+          }
+          .dot.current {
+            background: #f4a023; transform: scale(1.3); box-shadow: 0 0 10px rgba(244, 160, 35, 0.5);
           }
 
           .prev { left: 30px; }
