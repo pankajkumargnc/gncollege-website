@@ -51,8 +51,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
 
   return (
     <nav className="glass-navbar" style={{ 
-      position: '-webkit-sticky', // Safari ke liye
-      position: 'sticky',         // Chrome/Edge/Firefox ke liye
+      position: 'sticky',
       top: 0, 
       zIndex: 99999,              // Sabse upar rakhne ke liye
       background: isScrolled ? 'rgba(255, 255, 255, 0.98)' : '#ffffff',

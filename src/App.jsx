@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useParams, useLocation } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import { sliderSlides, navLinks as staticNavLinks } from './data/db';
+import { navLinks as staticNavLinks } from './data/db'; // ✅ sliderSlides import HATA DIYA
 import { Toaster } from 'react-hot-toast';
 import HomePage from './pages/HomePage';
 import Ticker from './components/Ticker';
@@ -14,10 +14,10 @@ import AdminLogin from './components/AdminLogin';
 import { COLORS } from './styles/colors';
 import Breadcrumbs from './components/Breadcrumbs';
 import QuickActionNav from './components/QuickActionNav';
-import PageViewer from './components/PageViewer'; 
-import Contact from './pages/Contact'; 
+import PageViewer from './components/PageViewer';
+import Contact from './pages/Contact';
 import CollegeProfile from './pages/CollegeProfile';
-import { collection, onSnapshot, query, orderBy, doc, getDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
 import { db } from './firebase';
 
 const placeholderPaths = [
@@ -34,10 +34,22 @@ const DynamicPageRoute = ({ pages }) => {
   return <PageViewer page={page} />;
 };
 
-const AdminRouteWrapper = ({ notices, announcements, events, gallery, pdfReports, pages, placeholderPaths, navLinks }) => {
+// ✅ sliderSlides prop NAYA add kiya
+const AdminRouteWrapper = ({ notices, announcements, events, gallery, pdfReports, pages, sliderSlides, placeholderPaths, navLinks }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isGncAdmin') === 'true');
   if (!isLoggedIn) return <AdminLogin onSuccess={() => { setIsLoggedIn(true); localStorage.setItem('isGncAdmin', 'true'); }} onClose={() => window.close()} />;
-  return <AdminPanel notices={notices} announcements={announcements} events={events} gallery={gallery} pdfReports={pdfReports} pages={pages} placeholderPaths={placeholderPaths} navLinks={navLinks} onClose={() => { setIsLoggedIn(false); localStorage.removeItem('isGncAdmin'); window.close(); }} />;
+  return <AdminPanel
+    notices={notices}
+    announcements={announcements}
+    events={events}
+    gallery={gallery}
+    pdfReports={pdfReports}
+    pages={pages}
+    sliderSlides={sliderSlides}
+    placeholderPaths={placeholderPaths}
+    navLinks={navLinks}
+    onClose={() => { setIsLoggedIn(false); localStorage.removeItem('isGncAdmin'); window.close(); }}
+  />;
 };
 
 const stripHtml = (html) => { if (!html) return ""; const doc = new DOMParser().parseFromString(html, 'text/html'); return doc.body.textContent || ""; };
@@ -49,13 +61,12 @@ export default function App() {
   const [gallery, setGallery]             = useState([]);
   const [pdfReports, setPdfReports]       = useState([]);
   const [pages, setPages]                 = useState([]);
-  
-  // 🌟 NAYA: Firebase Menu State
+  const [sliderSlides, setSliderSlides]   = useState([]); // ✅ NAYA: Dynamic slider state
   const [firebaseNav, setFirebaseNav]     = useState(null);
 
-  const location = useLocation();
+  const location   = useLocation();
   const [showSplash, setShowSplash] = useState(true);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile]     = useState(window.innerWidth < 768);
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   useEffect(() => {
@@ -73,10 +84,10 @@ export default function App() {
     AOS.init({ duration: 800, easing: 'ease-in-out', once: false, mirror: true, offset: 50 });
   }, []);
 
-  // 🌟 FIX: Fetch Navbar from Firebase
+  // Navbar from Firebase
   useEffect(() => {
     const unsubNav = onSnapshot(doc(db, 'settings', 'navbar'), (docSnap) => {
-      if (docSnap.exists() && docSnap.data().links && docSnap.data().links.length > 0) {
+      if (docSnap.exists() && docSnap.data().links?.length > 0) {
         setFirebaseNav(docSnap.data().links);
       } else {
         setFirebaseNav(staticNavLinks);
@@ -85,77 +96,114 @@ export default function App() {
     return () => unsubNav();
   }, []);
 
-  // 🌟 NAYA: Dynamic Auto-Append Logic for 'More' Menu
   const baseNavLinks = firebaseNav || staticNavLinks;
+
   const dynamicNavLinks = useMemo(() => {
-    // Sirf wo pages lo jinka path khali hai (Custom URLs)
-    const newPages = pages.filter(p => p.slug && (!p.path || p.path === '')).sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0)).map(p => ({ label: p.title, href: `/p/${p.slug}` }));
-    
+    const newPages = pages
+      .filter(p => p.slug && (!p.path || p.path === ''))
+      .sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0))
+      .map(p => ({ label: p.title, href: `/p/${p.slug}` }));
     const linksCopy = JSON.parse(JSON.stringify(baseNavLinks));
-    
     if (newPages.length > 0) {
-      let moreMenu = linksCopy.find(link => link.label.toLowerCase() === 'more');
-      if (!moreMenu) {
-          moreMenu = { label: "More", href: "#", sub: [] };
-          linksCopy.push(moreMenu);
-      }
+      let moreMenu = linksCopy.find(l => l.label.toLowerCase() === 'more');
+      if (!moreMenu) { moreMenu = { label: 'More', href: '#', sub: [] }; linksCopy.push(moreMenu); }
       if (!moreMenu.sub) moreMenu.sub = [];
-      
-      // Prevent duplicates
-      newPages.forEach(np => {
-         if (!moreMenu.sub.some(sub => sub.href === np.href)) {
-             moreMenu.sub.push(np);
-         }
-      });
+      newPages.forEach(np => { if (!moreMenu.sub.some(s => s.href === np.href)) moreMenu.sub.push(np); });
     }
     return linksCopy;
   }, [pages, baseNavLinks]);
 
   const pageContentByPath = useMemo(() => {
     const map = new Map();
-    const sortedPages = [...pages].sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-    sortedPages.forEach(p => { if (p.path && !map.has(p.path)) { map.set(p.path, p); } });
+    [...pages].sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0))
+      .forEach(p => { if (p.path && !map.has(p.path)) map.set(p.path, p); });
     return map;
   }, [pages]);
 
+  // ✅ Firestore collections - regular ones (createdAt desc)
   useEffect(() => {
-    const collections = [['notices', setNotices], ['announcements', setAnnouncements], ['events', setEvents], ['gallery', setGallery], ['pdfReports', setPdfReports], ['pages', setPages]];
-    const unsubscribers = collections.map(([colName, setter]) => {
-      const q = query(collection(db, colName), orderBy('createdAt', 'desc'));
-      return onSnapshot(q, (snapshot) => {
-        const dataArr = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setter(dataArr);
-      });
+    const regularCols = [
+      ['notices',       setNotices],
+      ['announcements', setAnnouncements],
+      ['events',        setEvents],
+      ['gallery',       setGallery],
+      ['pdfReports',    setPdfReports],
+      ['pages',         setPages],
+    ];
+    const unsubs = regularCols.map(([col, setter]) => {
+      const q = query(collection(db, col), orderBy('createdAt', 'desc'));
+      return onSnapshot(q, snap => setter(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
     });
-    return () => unsubscribers.forEach(unsub => unsub());
+
+    // ✅ sliderSlides - order field se ascending
+    let unsubSlider;
+    try {
+      const sliderQ = query(collection(db, 'sliderSlides'), orderBy('order', 'asc'));
+      unsubSlider = onSnapshot(sliderQ,
+        snap => setSliderSlides(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+        () => {
+          // fallback: createdAt se
+          const fbQ = query(collection(db, 'sliderSlides'), orderBy('createdAt', 'asc'));
+          unsubSlider = onSnapshot(fbQ, snap => setSliderSlides(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+        }
+      );
+    } catch {
+      const fbQ = query(collection(db, 'sliderSlides'), orderBy('createdAt', 'asc'));
+      unsubSlider = onSnapshot(fbQ, snap => setSliderSlides(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+    }
+
+    return () => { unsubs.forEach(u => u()); if (unsubSlider) unsubSlider(); };
   }, []);
-  
-  const handleOpenAdminTab = () => { window.open('#/admin', '_blank'); };
-  const tickerItems = [...notices.slice(0, 3), ...announcements.slice(0, 2)].map(item => ({ ...item, text: stripHtml(item.text || item.title) }));
+
+  const handleOpenAdminTab = () => window.open('#/admin', '_blank');
+  const tickerItems = [...notices.slice(0, 3), ...announcements.slice(0, 2)]
+    .map(item => ({ ...item, text: stripHtml(item.text || item.title) }));
 
   return (
     <>
-      <Toaster position="top-right" gutter={12} containerStyle={{ top: 20, right: 20, zIndex: 999999 }} toastOptions={{ style: { background: 'rgba(15, 35, 71, 0.85)', backdropFilter: 'blur(12px)', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.15)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)', padding: '16px', borderRadius: '14px', fontSize: '15px', fontWeight: '600' }, success: { icon: '✅', duration: 3000 }, error: { icon: '❌', duration: 4000 } }} />
-      <div className={`splash-screen ${!showSplash ? 'hide' : ''}`}><img src={`${import.meta.env.BASE_URL}images/logo.png`} alt="Guru Nanak College" className="splash-logo" /><div className="splash-text">Loading Portal...</div></div>
+      <Toaster position="top-right" gutter={12} containerStyle={{ top: 20, right: 20, zIndex: 999999 }} toastOptions={{ style: { background: 'rgba(15,35,71,0.85)', backdropFilter: 'blur(12px)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)', padding: '16px', borderRadius: '14px', fontSize: '15px', fontWeight: '600' }, success: { icon: '✅', duration: 3000 }, error: { icon: '❌', duration: 4000 } }} />
+      <div className={`splash-screen ${!showSplash ? 'hide' : ''}`}>
+        <img src={`${import.meta.env.BASE_URL}images/logo.png`} alt="Guru Nanak College" className="splash-logo" />
+        <div className="splash-text">Loading Portal...</div>
+      </div>
 
       {!isAdminRoute && (
         <>
           <TopBar />
           <Ticker items={tickerItems} />
-          {/* 🌟 Pass dynamicNavLinks to Navbar */}
           <Navbar onAdminClick={handleOpenAdminTab} navLinks={dynamicNavLinks} />
           <Breadcrumbs />
           {!isMobile && <QuickActionNav />}
         </>
       )}
-      
-      <div key={location.pathname} className={isAdminRoute ? "" : "page-transition"}>
+
+      <div key={location.pathname} className={isAdminRoute ? '' : 'page-transition'}>
         <Routes location={location}>
-          <Route path="/" element={<HomePage notices={notices} announcements={announcements} pdfReports={pdfReports} sliderSlides={sliderSlides} events={events} gallery={gallery} />} />
+          <Route path="/" element={
+            <HomePage
+              notices={notices}
+              announcements={announcements}
+              pdfReports={pdfReports}
+              sliderSlides={sliderSlides}
+              events={events}
+              gallery={gallery}
+            />
+          } />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about-us/college-profile" element={<CollegeProfile />} />
-          {/* 🌟 Pass baseNavLinks to Admin so it edits the clean menu */}
-          <Route path="/admin" element={ <AdminRouteWrapper notices={notices} announcements={announcements} events={events} gallery={gallery} pdfReports={pdfReports} pages={pages} placeholderPaths={placeholderPaths} navLinks={baseNavLinks} /> } />
+          <Route path="/admin" element={
+            <AdminRouteWrapper
+              notices={notices}
+              announcements={announcements}
+              events={events}
+              gallery={gallery}
+              pdfReports={pdfReports}
+              pages={pages}
+              sliderSlides={sliderSlides}
+              placeholderPaths={placeholderPaths}
+              navLinks={baseNavLinks}
+            />
+          } />
           <Route path="/p/:slug" element={<DynamicPageRoute pages={pages} />} />
           {placeholderPaths.map(path => {
             const page = pageContentByPath.get(path);
@@ -167,9 +215,14 @@ export default function App() {
       {!isAdminRoute && (
         <>
           <Footer />
-          <button onClick={handleOpenAdminTab} style={{ position: 'fixed', bottom: 25, right: 25, background: COLORS.navy, color: '#fff', border: `3px solid ${COLORS.gold}`, borderRadius: '50%', width: 60, height: 60, cursor: 'pointer', zIndex: 500 }}><span style={{ fontSize: 18 }}>⚙️</span></button>
+          <button
+            onClick={handleOpenAdminTab}
+            style={{ position: 'fixed', bottom: 25, right: 25, background: COLORS.navy, color: '#fff', border: `3px solid ${COLORS.gold}`, borderRadius: '50%', width: 60, height: 60, cursor: 'pointer', zIndex: 500 }}
+          >
+            <span style={{ fontSize: 18 }}>⚙️</span>
+          </button>
         </>
       )}
     </>
-  )
+  );
 }
