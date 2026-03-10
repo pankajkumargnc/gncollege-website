@@ -79,6 +79,8 @@ const HeroSlider = ({ slides = [] }) => {
               <img
                 src={resolveImage(slide.image)}
                 alt={slide.title}
+                loading="lazy"
+                decoding="async"
                 className="image"
                 onError={e => { e.target.style.opacity = '0.2'; }}
               />

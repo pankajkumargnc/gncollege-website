@@ -103,7 +103,7 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
               `}
             </style>
             <div className="image-stack">
-              <img src={`${import.meta.env.BASE_URL}images/college_photo.jpg`} alt="Guru Nanak College Campus" className="main-img" />
+              <img src={`${import.meta.env.BASE_URL}images/college_photo.jpg`} alt="Guru Nanak College Campus" className="main-img" loading="lazy" decoding="async" />
               <div className="accent-box">
                 <h4 style={{ fontSize: '32px', margin: 0, fontWeight: 900, color: COLORS.gold }}>56+</h4>
                 <p style={{ fontSize: '12px', margin: 0, opacity: 0.8, letterSpacing: '1px' }}>YEARS OF EXCELLENCE</p>
@@ -205,7 +205,7 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
                         <div style={{ fontSize: '18px', fontWeight: 900, lineHeight: 1 }}>{ev.day || '--'}</div>
                         <div style={{ fontSize: '10px', fontWeight: 700 }}>{ev.month || '---'}</div>
                       </div>
-                      <img src={ev.imageUrl || getEventImage(ev.type)} alt={ev.title} className="el-img" />
+                      <img src={ev.imageUrl || getEventImage(ev.type)} alt={ev.title} className="el-img" loading="lazy" decoding="async" />
                     </div>
                     <div className="el-info">
                       <h3 className="el-title">{ev.title}</h3>
@@ -326,7 +326,7 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
           <div className="gallery-grid" key={activeTab}> 
             {filteredImages.length > 0 ? filteredImages.map((img, i) => (
               <div key={i} className="gallery-item" data-aos="zoom-in" data-aos-delay={i * 50}>
-                <img src={img.src} alt={img.title} className="gallery-img" />
+                <img src={img.src} alt={img.title} className="gallery-img" loading="lazy" decoding="async" />
                 <div className="gallery-overlay">
                   <span style={{ color: '#f4a023', fontSize: '10px', fontWeight: '800' }}>{img.cat}</span>
                   <h4 style={{ color: '#fff', fontSize: '14px', fontWeight: '700', marginTop: '5px' }}>{img.title}</h4>

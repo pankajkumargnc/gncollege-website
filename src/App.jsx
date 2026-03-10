@@ -1,15 +1,14 @@
-import { useState, useEffect, useMemo } from 'react';
+import NewsPage from './pages/NewsPage';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Routes, Route, useParams, useLocation } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { navLinks as staticNavLinks } from './data/db'; // ✅ sliderSlides import HATA DIYA
 import { Toaster } from 'react-hot-toast';
 import HomePage from './pages/HomePage';
-import Ticker from './components/Ticker';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import TopBar from './components/home/TopBar';
-import AdminPanel from './components/AdminPanel';
 import AdminLogin from './components/AdminLogin';
 import { COLORS } from './styles/colors';
 import Breadcrumbs from './components/Breadcrumbs';
@@ -22,6 +21,10 @@ import DocumentsPage from './pages/DocumentsPage';
 import EventsPage from './pages/EventsPage';
 import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
 import { db } from './firebase';
+
+// 1. LAZY LOADING: AdminPanel ab sirf zaroorat padne par download hoga
+const AdminPanel = lazy(() => import('./components/AdminPanel'));
+const Ticker = lazy(() => import('./components/Ticker'));
 
 const placeholderPaths = [
   '/syllabus', '/about-us', '/about-us/vision-mission', '/about-us/principal-message', '/about-us/college-management/organogram', '/about-us/college-management/presidents', '/about-us/college-management/secretaries', '/about-us/college-management/principal', '/about-us/various-committees/womens-cell', '/about-us/various-committees/anti-ragging', '/about-us/various-committees/sc-st', '/about-us/various-committees/obc', '/about-us/various-committees/grievance', '/about-us/various-committees/icc', '/about-us/various-committees/minority', '/about-us/various-committees/placement', '/about-us/various-committees/rusa', '/about-us/college-staff/teaching-staff', '/about-us/college-staff/non-teaching-staff', '/about-us/regulations/bbmku/special-ug-regulation', '/about-us/regulations/bbmku/ug-regulation-fyugp', '/about-us/regulations/bbmku/ug-regulation-cbcs', '/about-us/regulations/college-affiliation', '/about-us/regulations/ugc-section', '/about-us/regulations/vbu/ug-regulation-2015', '/about-us/regulations/vbu/bca-regulation', '/about-us/regulations/byelaws', '/about-us/regulations/exemption', '/about-us/audit-report', '/campus/visuals/bhuda', '/campus/visuals/bank-more', '/campus/visuals/vocational-building', '/campus/infrastructure', '/campus/classroom', '/campus/ict-rooms', '/campus/green-campus', '/academics/iqac', '/academics/course-offered', '/academics/departments/humanities', '/academics/departments/social-science', '/academics/departments/commerce', '/academics/departments/bca', '/academics/departments/bba', '/academics/academic-calendar', '/admission/rule', '/admission/document-required', '/admission/fee-structure', '/admission/notification/latest', '/admission/notification/upcoming', '/admission/intake-capacity', '/activity/nss', '/activity/ncc', '/activity/workshop', '/activity/games-sports', '/activity/collaboration/rotaract-club', '/activity/collaboration/sadbhavana-diwas', '/naac/ssr-1st-cycle/cycle-1-documents', '/naac/ssr-1st-cycle/peer-team-report', '/naac/ssr-2nd-cycle/cycle-2-documents', '/naac/ssr-2nd-cycle/executive-summary', '/naac/aqar', '/naac/nirf', '/naac/perspective-plan', '/publication/college-library', '/publication/e-magazine', '/publication/examination-results/2024', '/publication/examination-results/2023', '/publication/sss-report/2023-24', '/publication/sss-report/2022-23', '/gallery'
@@ -37,22 +40,35 @@ const DynamicPageRoute = ({ pages }) => {
   return <PageViewer page={page} />;
 };
 
+// Simple loader for Suspense fallback
+const AdminLoader = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#0f2347', color: '#fff', fontFamily: 'monospace' }}>
+    Initializing Secure Admin Panel...
+  </div>
+);
+
 // ✅ sliderSlides prop NAYA add kiya
 const AdminRouteWrapper = ({ notices, announcements, events, gallery, pdfReports, pages, sliderSlides, placeholderPaths, navLinks }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isGncAdmin') === 'true');
   if (!isLoggedIn) return <AdminLogin onSuccess={() => { setIsLoggedIn(true); localStorage.setItem('isGncAdmin', 'true'); }} onClose={() => window.close()} />;
-  return <AdminPanel
-    notices={notices}
-    announcements={announcements}
-    events={events}
-    gallery={gallery}
-    pdfReports={pdfReports}
-    pages={pages}
-    sliderSlides={sliderSlides}
-    placeholderPaths={placeholderPaths}
-    navLinks={navLinks}
-    onClose={() => { setIsLoggedIn(false); localStorage.removeItem('isGncAdmin'); window.close(); }}
-  />;
+  
+  // 2. SUSPENSE: AdminPanel load hone tak loader dikhayega
+  return (
+    <Suspense fallback={<AdminLoader />}>
+      <AdminPanel
+        notices={notices}
+        announcements={announcements}
+        events={events}
+        gallery={gallery}
+        pdfReports={pdfReports}
+        pages={pages}
+        sliderSlides={sliderSlides}
+        placeholderPaths={placeholderPaths}
+        navLinks={navLinks}
+        onClose={() => { setIsLoggedIn(false); localStorage.removeItem('isGncAdmin'); window.close(); }}
+      />
+    </Suspense>
+  );
 };
 
 const stripHtml = (html) => { if (!html) return ""; const doc = new DOMParser().parseFromString(html, 'text/html'); return doc.body.textContent || ""; };
@@ -173,7 +189,9 @@ export default function App() {
       {!isAdminRoute && (
         <>
           <TopBar />
-          <Ticker items={tickerItems} />
+          <Suspense fallback={<div style={{height: '37px'}} />}>
+            <Ticker items={tickerItems} />
+          </Suspense>
           <Navbar onAdminClick={handleOpenAdminTab} navLinks={dynamicNavLinks} />
           <Breadcrumbs />
           {!isMobile && <QuickActionNav />}
@@ -197,6 +215,7 @@ export default function App() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/documents"     element={<DocumentsPage />} />
           <Route path="/events"        element={<EventsPage />} />
+          <Route path="/news" element={<NewsPage />} />
           <Route path="/admin" element={
             <AdminRouteWrapper
               notices={notices}

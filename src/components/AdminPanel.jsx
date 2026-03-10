@@ -1,8 +1,7 @@
 // GNC COLLEGE - PREMIUM ADMIN PANEL v5.1 (Diagnostic Guard Fixed)
 // Replace: src/components/AdminPanel.jsx
 
-import toast from 'react-hot-toast';
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import JoditEditor from 'jodit-react';
 import { COLORS } from '../styles/colors';
 import { db, storage } from '../firebase';
@@ -14,6 +13,20 @@ import {
   updateDoc, setDoc, getDoc, onSnapshot, query, orderBy,
   getDocs, writeBatch, limit
 } from 'firebase/firestore';
+import toast from 'react-hot-toast';
+
+// 1. LAZY LOADING: Heavy components ab zaroorat par hi download honge
+const ImageCropper = lazy(() => import('./ImageCropper')); // Assuming ImageCropper is in its own file
+
+// Debounce Hook for search optimization
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => { setDebouncedValue(value); }, delay);
+    return () => { clearTimeout(handler); };
+  }, [value, delay]);
+  return debouncedValue;
+}
 
 const T = {
   bg0: '#f0f4f8', bg1: '#ffffff', bg2: 'linear-gradient(135deg, #f0f4f8 0%, #e1e8f0 100%)',
@@ -134,21 +147,7 @@ function useCountUp(target, dur=1200) {
   },[target]); return v;
 }
 
-const StatCard=({icon,label,count,color})=>{
-  const a=useCountUp(count);
-  return(
-    <div className="glass count-anim" style={{padding:'24px',borderBottom:`3px solid ${color}`,transition:'transform .3s'}}
-      onMouseEnter={e=>e.currentTarget.style.transform='translateY(-6px)'} onMouseLeave={e=>e.currentTarget.style.transform='translateY(0)'}>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
-        <div style={{fontSize:32}}>{icon}</div><div style={{width:10,height:10,borderRadius:'50%',background:color,boxShadow:`0 0 10px ${color}`}}/>
-      </div>
-      <div style={{fontSize:36,fontWeight:900,color:T.navy,lineHeight:1,fontFamily:"'JetBrains Mono',monospace"}}>{a}</div>
-      <div style={{fontSize:12,fontWeight:800,color:T.t3,marginTop:8,textTransform:'uppercase',letterSpacing:'.5px'}}>{label}</div>
-    </div>
-  );
-};
-
-const LogItem=({log})=>{
+const LogItem = React.memo(({ log }) => {
   const icons={add:'➕',update:'✏️',delete:'🗑️',publish:'🚀',login:'🔐',restore:'🔄'};
   const colors={add:T.green,update:T.gold,delete:T.red,publish:T.cyan,login:T.purple,restore:T.navy};
   const ic=icons[log.action]||'📝', co=colors[log.action]||T.t2;
@@ -162,7 +161,21 @@ const LogItem=({log})=>{
       <div className="abadge" style={{background:`${co}15`,color:co,fontSize:11,flexShrink:0}}>{log.action}</div>
     </div>
   );
-};
+});
+
+const StatCard = React.memo(({ icon, label, count, color }) => {
+  const animatedCount = useCountUp(count);
+  return (
+    <div className="glass count-anim" style={{ padding: '24px', borderBottom: `3px solid ${color}`, transition: 'transform .3s' }}
+      onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-6px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div style={{ fontSize: 32 }}>{icon}</div><div style={{ width: 10, height: 10, borderRadius: '50%', background: color, boxShadow: `0 0 10px ${color}` }} />
+      </div>
+      <div style={{ fontSize: 36, fontWeight: 900, color: T.navy, lineHeight: 1, fontFamily: "'JetBrains Mono',monospace" }}>{animatedCount}</div>
+      <div style={{ fontSize: 12, fontWeight: 800, color: T.t3, marginTop: 8, textTransform: 'uppercase', letterSpacing: '.5px' }}>{label}</div>
+    </div>
+  );
+});
 
 const getSeoScore=(seo,title)=>{
   let s=0;
@@ -177,34 +190,6 @@ const getSeoScore=(seo,title)=>{
 const SeoRing=({score})=>{
   const c=score>=80?T.green:score>=50?T.gold:T.red;
   return <div className="seo-ring" style={{background:`${c}15`,color:c,border:`3px solid ${c}`}}>{score}</div>;
-};
-
-const ImageCropper=({src,onCrop,onCancel})=>{
-  const [crop,setCrop]=useState({x:0,y:0,w:100,h:100}); const imgRef=useRef(null);
-  const handleCrop=useCallback(()=>{
-    const img=imgRef.current;if(!img)return;
-    const canvas=document.createElement('canvas'); const scaleX=img.naturalWidth/img.width, scaleY=img.naturalHeight/img.height;
-    const ow=(crop.w/100)*img.width, oh=(crop.h/100)*img.height; canvas.width=ow*scaleX; canvas.height=oh*scaleY;
-    const ctx=canvas.getContext('2d'); ctx.drawImage(img,(crop.x/100)*img.naturalWidth,(crop.y/100)*img.naturalHeight,ow*scaleX,oh*scaleY,0,0,canvas.width,canvas.height);
-    canvas.toBlob(b=>onCrop(b),'image/jpeg',.92);
-  },[crop,onCrop]);
-  return(
-    <div style={{position:'fixed',inset:0,background:'rgba(15,35,71,.95)',zIndex:100010,display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(5px)'}}>
-      <div style={{background:'#fff',borderRadius:20,padding:32,width:'90%',maxWidth:720,boxShadow:'0 25px 50px rgba(0,0,0,.2)'}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}><div style={{fontSize:20,fontWeight:800,color:T.navy}}>✂️ Crop Image</div><button onClick={onCancel} className="abtn abtn-dark abtn-sm">✕ Cancel</button></div>
-        <div style={{position:'relative',width:'100%',borderRadius:12,overflow:'hidden',marginBottom:24,background:'#f1f5f9'}}>
-          <img ref={imgRef} src={src} alt="crop" style={{width:'100%',display:'block',borderRadius:12}}/>
-          <div style={{position:'absolute',left:`${crop.x}%`,top:`${crop.y}%`,width:`${crop.w}%`,height:`${crop.h}%`,border:`3px solid ${T.gold}`,background:'rgba(244,160,35,.15)',boxShadow:'0 0 0 9999px rgba(15,35,71,.6)',pointerEvents:'none'}}></div>
-        </div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:24}}>
-          {[['X Offset (%)','x',0,50],['Y Offset (%)','y',0,50],['Width (%)','w',30,100],['Height (%)','h',30,100]].map(([lbl,key,min,max])=>(
-            <div key={key}><label className="alabel">{lbl}</label><input type="range" min={min} max={max} value={crop[key]} onChange={e=>setCrop(c=>({...c,[key]:+e.target.value}))} style={{width:'100%',accentColor:T.navy}}/></div>
-          ))}
-        </div>
-        <div style={{display:'flex',gap:12}}><button className="abtn abtn-gold" onClick={handleCrop} style={{flex:1,justifyContent:'center'}}>✂️ Apply Crop & Use</button><button className="abtn abtn-dark" onClick={onCancel}>Use Original</button></div>
-      </div>
-    </div>
-  );
 };
 
 const joditCfg={readonly:false,placeholder:'Start writing…',height:420,processPasteHTML:true,processPasteFromWord:true,theme:'default',buttons:['source','|','bold','italic','underline','strikethrough','|','ul','ol','|','font','fontsize','brush','paragraph','|','image','table','link','|','align','undo','redo','|','hr','eraser','fullsize']};
@@ -419,7 +404,9 @@ export default function AdminPanel({onClose,notices,pages,events,gallery,placeho
     ...(gallery||[]).map(g=>({...g,contentType:'Gallery'})),
   ].sort((a,b)=>(b.createdAt?.toMillis?.()??0)-(a.createdAt?.toMillis?.()??0)),[localSlides,pages,notices,announcements,events,pdfReports,gallery]);
 
-  const filtered=allContent.filter(i=>i.title?.toLowerCase().includes(searchTerm.toLowerCase())&&(filterType==='all'||i.contentType.toLowerCase()===filterType));
+  // 2. DEBOUNCING: Search term ko debounce kiya
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const filtered = useMemo(() => allContent.filter(i => i.title?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) && (filterType === 'all' || i.contentType.toLowerCase() === filterType)), [allContent, debouncedSearchTerm, filterType]);
   const bc=(type)=>({Slide:{bg:'rgba(244,160,35,.15)',c:T.gold},Page:{bg:'rgba(139,92,246,.15)',c:T.purple},Notice:{bg:'rgba(245,158,11,.15)',c:'#f59e0b'},News:{bg:'rgba(239,68,68,.15)',c:T.red},Event:{bg:'rgba(139,92,246,.15)',c:T.purple},Document:{bg:'rgba(16,185,129,.15)',c:T.green},Gallery:{bg:'rgba(236,72,153,.15)',c:T.pink}}[type]||{bg:'#f1f5f9',c:T.t2});
 
   const seoScore=getSeoScore(seoData, pageData?.title || '');
@@ -442,7 +429,9 @@ export default function AdminPanel({onClose,notices,pages,events,gallery,placeho
   return (
     <div className="adm" style={{display:'flex',height:'100vh',width:'100vw',position:'fixed',top:0,left:0,zIndex:99999,background:T.bg2,overflow:'hidden'}}>
       <style>{GCSS}</style>
-      {cropSrc&&<ImageCropper src={cropSrc} onCrop={handleCropDone} onCancel={()=>{setCropSrc(null);setCropCb(null);}}/>}
+      {cropSrc && (
+        <Suspense fallback={<div>Loading Cropper...</div>}><ImageCropper src={cropSrc} onCrop={handleCropDone} onCancel={() => { setCropSrc(null); setCropCb(null); }} /></Suspense>
+      )}
 
       <div style={{width:260,background:T.bg1,display:'flex',flexDirection:'column',borderRight:`1px solid ${T.b1}`,zIndex:10001,flexShrink:0,
         position:isMobile?'fixed':'relative',height:'100%',boxShadow:'4px 0 20px rgba(0,0,0,.02)',
@@ -544,7 +533,7 @@ export default function AdminPanel({onClose,notices,pages,events,gallery,placeho
                         {sliderUploading&&<div className="prog-outer"><div className="prog-inner" style={{width:`${sliderProgress}%`}}/></div>}
                       </label>
                       <div>
-                        <label className="alabel">Or Paste URL</label>
+                        <label className="alabel">Or Paste Image URL</label>
                         <textarea className="ainp" rows={4} placeholder="https://…" value={sliderForm.image} onChange={e=>setSliderForm(f=>({...f,image:e.target.value}))} style={{resize:'vertical'}}/>
                       </div>
                     </div>
@@ -567,7 +556,7 @@ export default function AdminPanel({onClose,notices,pages,events,gallery,placeho
                         <div className="abadge" style={{background:'#fef3c7',color:'#047857'}}>#{slide.order??idx}</div>
                       </div>
                       <div style={{height:160,margin:'14px 18px 0',borderRadius:12,overflow:'hidden',background:T.bg4,position:'relative'}}>
-                        <img src={slide.image} alt={slide.title} style={{width:'100%',height:'100%',objectFit:'cover'}} onError={e=>e.target.style.opacity='.2'}/>
+                        <img src={slide.image} alt={slide.title} loading="lazy" decoding="async" style={{width:'100%',height:'100%',objectFit:'cover'}} onError={e=>e.target.style.opacity='.2'}/>
                         <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(15,35,71,.7),transparent)'}}/>
                       </div>
                       <div style={{padding:'16px 18px 20px'}}>
@@ -624,7 +613,11 @@ export default function AdminPanel({onClose,notices,pages,events,gallery,placeho
                     <div style={{marginBottom:20}}><label className="alabel">Image URL (Optional)</label><input className="ainp" value={evtData.imageUrl} onChange={e=>setEvtData(d=>({...d,imageUrl:e.target.value}))} placeholder="/images/event.jpg"/></div>
                   )}
 
-                  <div style={{marginBottom:24}}><label className="alabel">Description</label><JoditEditor ref={editor} value={evtData.desc} config={joditCfg} onBlur={c=>setEvtData(d=>({...d,desc:c}))}/></div>
+                  <div style={{marginBottom:24}}>
+                    <label className="alabel">Description</label>
+                    {/* 3. SUSPENSE: Editor load hone tak loader dikhayega */}
+                    <Suspense fallback={<div>Loading Editor...</div>}><JoditEditor ref={editor} value={evtData.desc} config={joditCfg} onBlur={c=>setEvtData(d=>({...d,desc:c}))}/></Suspense>
+                  </div>
                   <div style={{display:'flex',gap:14}}><button type="submit" className="abtn abtn-gold" disabled={loading||eventUploading}>{loading?'⏳':editEvent?'💾 Update Event':'🚀 Publish Event'}</button>{editEvent&&<button type="button" className="abtn abtn-dark" onClick={()=>{setEditEvent(null);setEvtData({title:'',desc:'',type:'WORKSHOP',day:'',month:'',location:'',status:'upcoming',imageUrl:'',reportLink:''});}}>Cancel</button>}</div>
                 </form>
               </div>
@@ -726,7 +719,10 @@ export default function AdminPanel({onClose,notices,pages,events,gallery,placeho
                      </select>:<input className="ainp" placeholder="department-commerce" value={pageData?.slug || ''} onChange={e=>setPageData(d=>({...d,slug:e.target.value.toLowerCase().replace(/\s+/g,'-'),path:''}))}/>}
                    </div>
                  </div>
-                 <div style={{marginBottom:24}}><label className="alabel">Content</label><JoditEditor ref={editor} value={pageData?.content || ''} config={joditCfg} tabIndex={1} onBlur={c=>setPageData(d=>({...d,content:c}))}/></div>
+                 <div style={{marginBottom:24}}>
+                   <label className="alabel">Content</label>
+                   <Suspense fallback={<div>Loading Editor...</div>}><JoditEditor ref={editor} value={pageData?.content || ''} config={joditCfg} tabIndex={1} onBlur={c=>setPageData(d=>({...d,content:c}))}/></Suspense>
+                 </div>
                  <div style={{background:'#f8fafc',border:`1px solid ${T.b1}`,borderRadius:14,padding:'24px 26px',marginBottom:24}}>
                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20}}>
                      <div style={{fontWeight:900,color:T.navy,fontSize:16}}>🔍 SEO Settings</div>
@@ -790,7 +786,7 @@ export default function AdminPanel({onClose,notices,pages,events,gallery,placeho
                      </select></div>
                    </div>
                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:20}}>
-                     <label className="upload-zone"><div style={{fontSize:32,marginBottom:8}}>📷</div><div style={{fontSize:14,fontWeight:800,color:T.navy}}>{galleryUploading?`${galleryProgress}%…`:'Upload Image'}</div><input ref={galleryFileRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>e.target.files[0]&&handleGalleryFile(e.target.files[0])}/>{galleryUploading&&<div className="prog-outer"><div className="prog-inner" style={{width:`${galleryProgress}%`}}/></div>}</label>
+                     <label className="upload-zone"><div style={{fontSize:32,marginBottom:8}}>📷</div><div style={{fontSize:14,fontWeight:800,color:T.navy}}>{galleryUploading?`${galleryProgress}%…`:'Upload Image'}</div><input ref={galleryFileRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>e.target.files[0]&&handleGalleryFile(e.target.files[0])}/></label>
                      <div><label className="alabel">Or Paste URL</label><textarea className="ainp" rows={5} placeholder="https://…" value={galleryData.src} onChange={e=>setGalleryData(d=>({...d,src:e.target.value}))} style={{resize:'vertical'}}/></div>
                    </div>
                    {galleryData.src&&<img src={galleryData.src} alt="prev" style={{width:'100%',maxHeight:200,objectFit:'cover',borderRadius:12,marginBottom:20}} onError={e=>e.target.style.display='none'}/>}
@@ -826,7 +822,9 @@ export default function AdminPanel({onClose,notices,pages,events,gallery,placeho
                      <div><label className="alabel">Attachment URL</label><input className="ainp" placeholder="Drive/PDF Link" value={noticeData.link} onChange={e=>setNoticeData(d=>({...d,link:e.target.value}))}/></div>
                      <div style={{display:'flex',alignItems:'center',gap:12,paddingTop:24}}><input type="checkbox" checked={noticeData.isNew} onChange={e=>setNoticeData(d=>({...d,isNew:e.target.checked}))} style={{width:18,height:18,accentColor:T.navy}}/><label style={{fontSize:14,fontWeight:800,color:T.navy,cursor:'pointer'}}>Show "NEW" badge</label></div>
                    </div>
-                   <div style={{marginBottom:24}}><label className="alabel">Content *</label><JoditEditor ref={editor} value={noticeData.text} config={joditCfg} onBlur={c=>setNoticeData(d=>({...d,text:c}))}/></div>
+                   <div style={{marginBottom:24}}>
+                     <label className="alabel">Content *</label><Suspense fallback={<div>Loading Editor...</div>}><JoditEditor ref={editor} value={noticeData.text} config={joditCfg} onBlur={c=>setNoticeData(d=>({...d,text:c}))}/></Suspense>
+                   </div>
                    <div style={{display:'flex',gap:12}}><button type="submit" className="abtn abtn-gold" disabled={loading}>{loading?'⏳':editNotice?'💾 Update':'🚀 Broadcast'}</button>{editNotice&&<button type="button" className="abtn abtn-dark" onClick={()=>{setEditNotice(null);setNoticeData({text:'',link:'',type:'General',isNew:true});}}>Cancel</button>}</div>
                  </form>
                </div>
@@ -854,7 +852,9 @@ export default function AdminPanel({onClose,notices,pages,events,gallery,placeho
                      <div><label className="alabel">Category</label><select className="ainp" value={annData.type} onChange={e=>setAnnData(d=>({...d,type:e.target.value}))}>{['News','Achievement','Update','Result','Scholarship'].map(t=><option key={t}>{t}</option>)}</select></div>
                      <div><label className="alabel">Link</label><input className="ainp" placeholder="Optional URL" value={annData.link} onChange={e=>setAnnData(d=>({...d,link:e.target.value}))}/></div>
                    </div>
-                   <div style={{marginBottom:24}}><label className="alabel">Content *</label><JoditEditor ref={editor} value={annData.text} config={joditCfg} onBlur={c=>setAnnData(d=>({...d,text:c}))}/></div>
+                   <div style={{marginBottom:24}}>
+                     <label className="alabel">Content *</label><Suspense fallback={<div>Loading Editor...</div>}><JoditEditor ref={editor} value={annData.text} config={joditCfg} onBlur={c=>setAnnData(d=>({...d,text:c}))}/></Suspense>
+                   </div>
                    <div style={{display:'flex',gap:12}}><button type="submit" className="abtn abtn-gold" disabled={loading}>{loading?'⏳':editAnn?'💾 Update':'🚀 Publish'}</button>{editAnn&&<button type="button" className="abtn abtn-dark" onClick={()=>{setEditAnn(null);setAnnData({text:'',link:'',type:'News'});}}>Cancel</button>}</div>
                  </form>
                </div>

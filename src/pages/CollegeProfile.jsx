@@ -59,6 +59,8 @@ const CollegeProfile = () => {
               <img 
                 src="https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1986&auto=format&fit=crop" 
                 alt="College Campus" 
+                loading="lazy"
+                decoding="async"
                 className="profile-img hover-scale"
               />
             </div>
