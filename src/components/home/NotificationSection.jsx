@@ -256,7 +256,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
               </div>
               {/* 🌟 FIX: Updated to Link Tag pointing to /notifications */}
               <div className="view-all-wrapper">
-                <Link to="/newspage" className="view-all-btn">Explore News</Link>
+                <Link to="/news" className="view-all-btn">Explore News</Link>
               </div>
             </div>
     

@@ -342,7 +342,21 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
           </div>
         </div>
       </section>
-
+{/* 📺 YOUTUBE AUTO-VIDEO GALLERY */}
+      <section style={{ padding: '80px 20px', background: '#fff', textAlign: 'center' }}>
+        <h2 style={{ fontSize: '36px', fontWeight: 900, color: COLORS.navy, margin: '0 0 10px' }}>🎬 Campus <span style={{ color: COLORS.gold }}>Video Highlights</span></h2>
+        <p style={{ color: '#64748b', marginBottom: '40px' }}>Automatically fetched from our official YouTube Channel</p>
+        
+        {/* NOTE FOR PANKAJ JI: 
+            Replace 'YOUR_YOUTUBE_API_KEY' with actual key.
+            Replace 'YOUR_CHANNEL_ID' with actual GNC College channel ID. */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px', maxWidth: 1200, margin: '0 auto' }}>
+           {/* Temporary Iframe examples for layout, API fetch logic goes here in production */}
+           <iframe width="100%" height="250" src="https://www.youtube.com/embed/YOUR_VIDEO_ID_1" style={{borderRadius:'16px', border:'none', boxShadow:'0 10px 30px rgba(0,0,0,0.1)'}} allowFullScreen></iframe>
+           <iframe width="100%" height="250" src="https://www.youtube.com/embed/YOUR_VIDEO_ID_2" style={{borderRadius:'16px', border:'none', boxShadow:'0 10px 30px rgba(0,0,0,0.1)'}} allowFullScreen></iframe>
+           <iframe width="100%" height="250" src="https://www.youtube.com/embed/YOUR_VIDEO_ID_3" style={{borderRadius:'16px', border:'none', boxShadow:'0 10px 30px rgba(0,0,0,0.1)'}} allowFullScreen></iframe>
+        </div>
+      </section>
       {/* 🌟 FIX: React Portal Modal - Ye kabhi parent se affect nahi hoga aur screen par chipka rahega */}
       {selectedPdf && createPortal(
         <div style={{

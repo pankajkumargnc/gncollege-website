@@ -1,9 +1,13 @@
+// src/App.jsx — Updated with VideoGallery route + AlertBanner
+// All existing routes preserved + new: /video-gallery
+
+import StaffPage from './pages/StaffPage';
 import NewsPage from './pages/NewsPage';
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Routes, Route, useParams, useLocation } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import { navLinks as staticNavLinks } from './data/db'; // ✅ sliderSlides import HATA DIYA
+import { navLinks as staticNavLinks } from './data/db';
 import { Toaster } from 'react-hot-toast';
 import HomePage from './pages/HomePage';
 import Navbar from './components/Navbar';
@@ -19,10 +23,11 @@ import CollegeProfile from './pages/CollegeProfile';
 import NotificationsPage from './pages/NotificationsPage';
 import DocumentsPage from './pages/DocumentsPage';
 import EventsPage from './pages/EventsPage';
+import VideoGallery from './pages/VideoGallery';
+import AlertBanner from './components/AlertBanner';
 import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
 import { db } from './firebase';
 
-// 1. LAZY LOADING: AdminPanel ab sirf zaroorat padne par download hoga
 const AdminPanel = lazy(() => import('./components/AdminPanel'));
 const Ticker = lazy(() => import('./components/Ticker'));
 
@@ -33,45 +38,34 @@ const placeholderPaths = [
 const DynamicPageRoute = ({ pages }) => {
   const { slug } = useParams();
   const [page, setPage] = useState(null);
-  useEffect(() => {
-    if (pages && slug) { const foundPage = pages.find(p => p.slug === slug); setPage(foundPage); }
-  }, [slug, pages]);
+  useEffect(() => { if (pages && slug) { const found = pages.find(p => p.slug === slug); setPage(found); } }, [slug, pages]);
   if (!pages || pages.length === 0) return <div style={{ padding: '40px 20px', textAlign: 'center' }}>Loading pages...</div>;
   return <PageViewer page={page} />;
 };
 
-// Simple loader for Suspense fallback
 const AdminLoader = () => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#0f2347', color: '#fff', fontFamily: 'monospace' }}>
-    Initializing Secure Admin Panel...
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#030b1a', color: '#10b981', fontFamily: 'monospace', fontSize: 16 }}>
+    ⚡ Initializing Secure Admin Panel...
   </div>
 );
 
-// ✅ sliderSlides prop NAYA add kiya
-const AdminRouteWrapper = ({ notices, announcements, events, gallery, pdfReports, pages, sliderSlides, placeholderPaths, navLinks }) => {
+const AdminRouteWrapper = ({ notices, announcements, events, gallery, pdfReports, pages, sliderSlides, placeholderPaths, navLinks, faculties, placements, alerts }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isGncAdmin') === 'true');
   if (!isLoggedIn) return <AdminLogin onSuccess={() => { setIsLoggedIn(true); localStorage.setItem('isGncAdmin', 'true'); }} onClose={() => window.close()} />;
-  
-  // 2. SUSPENSE: AdminPanel load hone tak loader dikhayega
   return (
     <Suspense fallback={<AdminLoader />}>
       <AdminPanel
-        notices={notices}
-        announcements={announcements}
-        events={events}
-        gallery={gallery}
-        pdfReports={pdfReports}
-        pages={pages}
-        sliderSlides={sliderSlides}
-        placeholderPaths={placeholderPaths}
-        navLinks={navLinks}
+        notices={notices} announcements={announcements} events={events} gallery={gallery}
+        pdfReports={pdfReports} pages={pages} sliderSlides={sliderSlides}
+        placeholderPaths={placeholderPaths} navLinks={navLinks}
+        faculties={faculties} placements={placements} alerts={alerts}
         onClose={() => { setIsLoggedIn(false); localStorage.removeItem('isGncAdmin'); window.close(); }}
       />
     </Suspense>
   );
 };
 
-const stripHtml = (html) => { if (!html) return ""; const doc = new DOMParser().parseFromString(html, 'text/html'); return doc.body.textContent || ""; };
+const stripHtml = (html) => { if (!html) return ''; const d = new DOMParser().parseFromString(html, 'text/html'); return d.body.textContent || ''; };
 
 export default function App() {
   const [notices, setNotices]             = useState([]);
@@ -80,107 +74,88 @@ export default function App() {
   const [gallery, setGallery]             = useState([]);
   const [pdfReports, setPdfReports]       = useState([]);
   const [pages, setPages]                 = useState([]);
-  const [sliderSlides, setSliderSlides]   = useState([]); // ✅ NAYA: Dynamic slider state
+  const [sliderSlides, setSliderSlides]   = useState([]);
+  const [faculties, setFaculties]         = useState([]);
+  const [placements, setPlacements]       = useState([]);
+  const [alerts, setAlerts]               = useState([]);
   const [firebaseNav, setFirebaseNav]     = useState(null);
 
-  const location   = useLocation();
+  const location    = useLocation();
   const [showSplash, setShowSplash] = useState(true);
   const [isMobile, setIsMobile]     = useState(window.innerWidth < 768);
   const isAdminRoute = location.pathname.startsWith('/admin');
 
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    AOS.init({ duration: 800, easing: 'ease-in-out', once: false, mirror: true, offset: 50 });
-  }, []);
+  useEffect(() => { const fn = () => setIsMobile(window.innerWidth < 768); window.addEventListener('resize', fn); return () => window.removeEventListener('resize', fn); }, []);
+  useEffect(() => { const t = setTimeout(() => setShowSplash(false), 2000); return () => clearTimeout(t); }, []);
+  useEffect(() => { AOS.init({ duration: 800, easing: 'ease-in-out', once: false, mirror: true, offset: 50 }); }, []);
 
   // Navbar from Firebase
   useEffect(() => {
-    const unsubNav = onSnapshot(doc(db, 'settings', 'navbar'), (docSnap) => {
-      if (docSnap.exists() && docSnap.data().links?.length > 0) {
-        setFirebaseNav(docSnap.data().links);
-      } else {
-        setFirebaseNav(staticNavLinks);
-      }
+    return onSnapshot(doc(db, 'settings', 'navbar'), snap => {
+      setFirebaseNav(snap.exists() && snap.data().links?.length > 0 ? snap.data().links : staticNavLinks);
     });
-    return () => unsubNav();
   }, []);
 
   const baseNavLinks = firebaseNav || staticNavLinks;
 
   const dynamicNavLinks = useMemo(() => {
-    const newPages = pages
-      .filter(p => p.slug && (!p.path || p.path === ''))
-      .sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0))
-      .map(p => ({ label: p.title, href: `/p/${p.slug}` }));
+    const newPages = pages.filter(p => p.slug && (!p.path || p.path === '')).sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0)).map(p => ({ label: p.title, href: `/p/${p.slug}` }));
     const linksCopy = JSON.parse(JSON.stringify(baseNavLinks));
     if (newPages.length > 0) {
-      let moreMenu = linksCopy.find(l => l.label.toLowerCase() === 'more');
-      if (!moreMenu) { moreMenu = { label: 'More', href: '#', sub: [] }; linksCopy.push(moreMenu); }
-      if (!moreMenu.sub) moreMenu.sub = [];
-      newPages.forEach(np => { if (!moreMenu.sub.some(s => s.href === np.href)) moreMenu.sub.push(np); });
+      let more = linksCopy.find(l => l.label.toLowerCase() === 'more');
+      if (!more) { more = { label: 'More', href: '#', sub: [] }; linksCopy.push(more); }
+      if (!more.sub) more.sub = [];
+      newPages.forEach(np => { if (!more.sub.some(s => s.href === np.href)) more.sub.push(np); });
     }
     return linksCopy;
   }, [pages, baseNavLinks]);
 
   const pageContentByPath = useMemo(() => {
     const map = new Map();
-    [...pages].sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0))
-      .forEach(p => { if (p.path && !map.has(p.path)) map.set(p.path, p); });
+    [...pages].sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0)).forEach(p => { if (p.path && !map.has(p.path)) map.set(p.path, p); });
     return map;
   }, [pages]);
 
-  // ✅ Firestore collections - regular ones (createdAt desc)
+  // Firestore listeners
   useEffect(() => {
-    const regularCols = [
-      ['notices',       setNotices],
-      ['announcements', setAnnouncements],
-      ['events',        setEvents],
-      ['gallery',       setGallery],
-      ['pdfReports',    setPdfReports],
-      ['pages',         setPages],
+    const cols = [
+      ['notices', setNotices], ['announcements', setAnnouncements], ['events', setEvents],
+      ['gallery', setGallery], ['pdfReports', setPdfReports], ['pages', setPages],
+      ['faculties', setFaculties], ['placements', setPlacements], ['alerts', setAlerts],
     ];
-    const unsubs = regularCols.map(([col, setter]) => {
-      const q = query(collection(db, col), orderBy('createdAt', 'desc'));
-      return onSnapshot(q, snap => setter(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+    const unsubs = cols.map(([col, setter]) => {
+      try {
+        return onSnapshot(query(collection(db, col), orderBy('createdAt', 'desc')), snap => setter(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+      } catch {
+        return onSnapshot(query(collection(db, col)), snap => setter(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+      }
     });
 
-    // ✅ sliderSlides - order field se ascending
     let unsubSlider;
     try {
       const sliderQ = query(collection(db, 'sliderSlides'), orderBy('order', 'asc'));
-      unsubSlider = onSnapshot(sliderQ,
-        snap => setSliderSlides(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
-        () => {
-          // fallback: createdAt se
-          const fbQ = query(collection(db, 'sliderSlides'), orderBy('createdAt', 'asc'));
-          unsubSlider = onSnapshot(fbQ, snap => setSliderSlides(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
-        }
-      );
+      unsubSlider = onSnapshot(sliderQ, snap => setSliderSlides(snap.docs.map(d => ({ id: d.id, ...d.data() }))), () => {
+        unsubSlider = onSnapshot(query(collection(db, 'sliderSlides'), orderBy('createdAt', 'asc')), snap => setSliderSlides(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+      });
     } catch {
-      const fbQ = query(collection(db, 'sliderSlides'), orderBy('createdAt', 'asc'));
-      unsubSlider = onSnapshot(fbQ, snap => setSliderSlides(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+      unsubSlider = onSnapshot(query(collection(db, 'sliderSlides'), orderBy('createdAt', 'asc')), snap => setSliderSlides(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
     }
 
     return () => { unsubs.forEach(u => u()); if (unsubSlider) unsubSlider(); };
   }, []);
 
   const handleOpenAdminTab = () => window.open('#/admin', '_blank');
-  const tickerItems = [...notices.slice(0, 3), ...announcements.slice(0, 2)]
-    .map(item => ({ ...item, text: stripHtml(item.text || item.title) }));
+  const tickerItems = [...notices.slice(0, 3), ...announcements.slice(0, 2)].map(item => ({ ...item, text: stripHtml(item.text || item.title) }));
+
+  // Active alerts filter
+  const activeAlerts = alerts.filter(a => a.isActive);
 
   return (
     <>
-      <Toaster position="top-right" gutter={12} containerStyle={{ top: 20, right: 20, zIndex: 999999 }} toastOptions={{ style: { background: 'rgba(15,35,71,0.85)', backdropFilter: 'blur(12px)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)', padding: '16px', borderRadius: '14px', fontSize: '15px', fontWeight: '600' }, success: { icon: '✅', duration: 3000 }, error: { icon: '❌', duration: 4000 } }} />
+      <Toaster position="top-right" gutter={12} containerStyle={{ top: 20, right: 20, zIndex: 999999 }}
+        toastOptions={{ style: { background: 'rgba(15,35,71,0.85)', backdropFilter: 'blur(12px)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)', padding: '16px', borderRadius: '14px', fontSize: '15px', fontWeight: '600' }, success: { icon: '✅', duration: 3000 }, error: { icon: '❌', duration: 4000 } }}
+      />
+
       <div className={`splash-screen ${!showSplash ? 'hide' : ''}`}>
         <img src={`${import.meta.env.BASE_URL}images/logo.png`} alt="Guru Nanak College" className="splash-logo" />
         <div className="splash-text">Loading Portal...</div>
@@ -189,9 +164,11 @@ export default function App() {
       {!isAdminRoute && (
         <>
           <TopBar />
-          <Suspense fallback={<div style={{height: '37px'}} />}>
+          <Suspense fallback={<div style={{ height: '37px' }} />}>
             <Ticker items={tickerItems} />
           </Suspense>
+          {/* 🚨 Flash Alert Banner — shows only if active alerts exist */}
+          {activeAlerts.length > 0 && <AlertBanner />}
           <Navbar onAdminClick={handleOpenAdminTab} navLinks={dynamicNavLinks} />
           <Breadcrumbs />
           {!isMobile && <QuickActionNav />}
@@ -201,32 +178,23 @@ export default function App() {
       <div key={location.pathname} className={isAdminRoute ? '' : 'page-transition'}>
         <Routes location={location}>
           <Route path="/" element={
-            <HomePage
-              notices={notices}
-              announcements={announcements}
-              pdfReports={pdfReports}
-              sliderSlides={sliderSlides}
-              events={events}
-              gallery={gallery}
-            />
+            <HomePage notices={notices} announcements={announcements} pdfReports={pdfReports} sliderSlides={sliderSlides} events={events} gallery={gallery} placements={placements} />
           } />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about-us/college-profile" element={<CollegeProfile />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/documents"     element={<DocumentsPage />} />
           <Route path="/events"        element={<EventsPage />} />
-          <Route path="/news" element={<NewsPage />} />
+          <Route path="/news"          element={<NewsPage />} />
+          <Route path="/video-gallery" element={<VideoGallery />} />
+          <Route path="/about-us/college-staff/teaching-staff"     element={<StaffPage faculties={faculties} staffType="Teaching" />} />
+          <Route path="/about-us/college-staff/non-teaching-staff" element={<StaffPage faculties={faculties} staffType="Non-Teaching" />} />
           <Route path="/admin" element={
             <AdminRouteWrapper
-              notices={notices}
-              announcements={announcements}
-              events={events}
-              gallery={gallery}
-              pdfReports={pdfReports}
-              pages={pages}
-              sliderSlides={sliderSlides}
-              placeholderPaths={placeholderPaths}
-              navLinks={baseNavLinks}
+              notices={notices} announcements={announcements} events={events} gallery={gallery}
+              pdfReports={pdfReports} pages={pages} sliderSlides={sliderSlides}
+              placeholderPaths={placeholderPaths} navLinks={baseNavLinks}
+              faculties={faculties} placements={placements} alerts={alerts}
             />
           } />
           <Route path="/p/:slug" element={<DynamicPageRoute pages={pages} />} />
@@ -240,10 +208,8 @@ export default function App() {
       {!isAdminRoute && (
         <>
           <Footer />
-          <button
-            onClick={handleOpenAdminTab}
-            style={{ position: 'fixed', bottom: 25, right: 25, background: COLORS.navy, color: '#fff', border: `3px solid ${COLORS.gold}`, borderRadius: '50%', width: 60, height: 60, cursor: 'pointer', zIndex: 500 }}
-          >
+          <button onClick={handleOpenAdminTab}
+            style={{ position: 'fixed', bottom: 25, right: 25, background: COLORS.navy, color: '#fff', border: `3px solid ${COLORS.gold}`, borderRadius: '50%', width: 60, height: 60, cursor: 'pointer', zIndex: 500, boxShadow: '0 6px 20px rgba(0,0,0,.25)' }}>
             <span style={{ fontSize: 18 }}>⚙️</span>
           </button>
         </>

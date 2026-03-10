@@ -5,7 +5,7 @@ import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const EVENT_TYPES  = ['All','WORKSHOP','SEMINAR','CULTURAL','SPORTS','NSS','NCC'];
+const EVENT_TYPES  = ['All','WORKSHOP','SEMINAR','CULTURAL','SPORTS','NSS','NCC', 'ACADEMIC'];
 
 const TYPE_META = {
   WORKSHOP: { icon:'🛠️', grad:'linear-gradient(135deg,#667eea,#764ba2)', light:'#FAF5FF', text:'#44337a', border:'#E9D8FD', color:'#805ad5' },
@@ -14,65 +14,10 @@ const TYPE_META = {
   SPORTS:   { icon:'🏆', grad:'linear-gradient(135deg,#43e97b,#38f9d7)', light:'#F0FFF4', text:'#1c4532', border:'#9AE6B4', color:'#38a169' },
   NSS:      { icon:'🤝', grad:'linear-gradient(135deg,#fa709a,#fee140)', light:'#FFFBEB', text:'#744210', border:'#FAF089', color:'#d69e2e' },
   NCC:      { icon:'🎖️', grad:'linear-gradient(135deg,#a18cd1,#fbc2eb)', light:'#FAF5FF', text:'#44337a', border:'#E9D8FD', color:'#805ad5' },
+  ACADEMIC: { icon:'📚', grad:'linear-gradient(135deg,#a18cd1,#fbc2eb)', light:'#FAF5FF', text:'#44337a', border:'#E9D8FD', color:'#805ad5' },
 };
 
 const getTS = ts => ts?.toDate ? ts.toDate() : new Date(ts || Date.now());
-
-const Sidebar = ({ navy, gold, upcoming, past }) => (
-  <aside className="profile-sidebar anim-slide-up" style={{ animationDelay:'0.4s' }}>
-    {/* Upcoming mini list */}
-    <div className="widget">
-      <h3 className="widget-title"><span>🔜</span> Next Events</h3>
-      {upcoming.slice(0, 4).length === 0 ? (
-        <p style={{ color:'#a0aec0', fontSize:13, padding:'10px 0' }}>Koi upcoming event nahi</p>
-      ) : upcoming.slice(0, 4).map((ev, i) => {
-        const m = TYPE_META[ev.type]||{icon:'📅',color:'#718096'};
-        return (
-          <div key={ev.id||i} style={{ display:'flex', gap:10, padding:'10px 0', borderBottom:'1px solid #f0f4f8', alignItems:'flex-start' }}>
-            <div style={{ width:38, height:38, borderRadius:9, background:`${m.color}15`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, flexShrink:0 }}>
-              {m.icon}
-            </div>
-            <div style={{ flex:1, overflow:'hidden' }}>
-              <div style={{ fontSize:13, fontWeight:700, color:'#1a202c', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{ev.title}</div>
-              <div style={{ fontSize:11, color:'#a0aec0', marginTop:2 }}>📅 {ev.day||'?'} {ev.month||'—'} · 📍 {ev.location||'Campus'}</div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-
-    <div className="widget" style={{ marginTop:20 }}>
-      <h3 className="widget-title"><span>📑</span> Quick Links</h3>
-      <ul className="quick-links">
-        {[
-          { label:'📢 Notice Board',    path:'/notifications' },
-          { label:'📁 Document Archive', path:'/documents' },
-          { label:'NSS',                path:'/activity/nss' },
-          { label:'NCC',                path:'/activity/ncc' },
-          { label:'Sports',             path:'/activity/games-sports' },
-          { label:'Workshop',           path:'/activity/workshop' },
-          { label:'Admission Rules',    path:'/admission/rule' },
-          { label:'Photo Gallery',      path:'/gallery' },
-          { label:'Contact Us',         path:'/contact' },
-        ].map((link, i) => (
-          <li key={i} className="quick-link-item">
-            <Link to={link.path} className="quick-link" onClick={() => window.scrollTo({ top:0, behavior:'smooth' })}>
-              <span className="link-arrow">›</span> {link.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-    <div className="helpdesk-widget">
-      <div style={{ fontSize:'45px', marginBottom:'15px', position:'relative', zIndex:2 }}>📞</div>
-      <h4 style={{ margin:'0 0 12px', fontSize:'19px', color:'#f4a023', position:'relative', zIndex:2 }}>Need Assistance?</h4>
-      <p style={{ fontSize:'14px', margin:'0 0 20px', color:'#e2e8f0', lineHeight:'1.6', position:'relative', zIndex:2 }}>
-        Contact our administration office for any queries related to admission or academics.
-      </p>
-      <a href="tel:+917903340991" className="helpdesk-btn">Call Helpdesk Now</a>
-    </div>
-  </aside>
-);
 
 export default function EventsPage() {
   const [events,   setEvents]   = useState([]);
@@ -139,37 +84,34 @@ export default function EventsPage() {
       `}</style>
 
       {/* ── HERO ── */}
-      <header className="profile-hero"
-        style={{ backgroundImage:`url('https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=2070&auto=format&fit=crop')` }}>
+      <header className="profile-hero" style={{ backgroundImage:`url('https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=2070&auto=format&fit=crop')` }}>
         <div className="hero-overlay" />
         <div className="hero-content anim-fade-in">
-          <nav style={{ display:'flex', alignItems:'center', gap:8, marginBottom:14, fontSize:13, fontWeight:600 }}>
-            <Link to="/" style={{ color:'rgba(255,255,255,.55)', textDecoration:'none' }}>🏠 Home</Link>
-            <span style={{ color:'rgba(255,255,255,.3)' }}>›</span>
-            <span style={{ color:gold }}>Campus Events</span>
-          </nav>
           <h1 className="hero-title">🏛️ Campus Events</h1>
           <p className="hero-subtitle">Workshops, seminars, cultural fests aur khel-kud — saari activities ek jagah</p>
-          <div style={{ display:'flex', gap:14, flexWrap:'wrap', marginTop:22 }}>
-            {[
-              { val:events.length,   label:'Total Events', icon:'📆' },
-              { val:upcoming.length, label:'Upcoming',     icon:'🔜', hi:true },
-              { val:past.length,     label:'Past Events',  icon:'📜' },
-              { val:[...new Set(events.map(e=>e.type))].filter(Boolean).length, label:'Types', icon:'🏷️' },
-            ].map((s,i) => (
-              <div key={i} style={{ background:s.hi?`rgba(201,162,39,.22)`:'rgba(255,255,255,.1)', border:`1px solid ${s.hi?gold+'66':'rgba(255,255,255,.18)'}`, borderRadius:11, padding:'10px 20px', textAlign:'center', backdropFilter:'blur(8px)' }}>
-                <span style={{ display:'block', fontSize:17 }}>{s.icon}</span>
-                <div style={{ fontSize:24, fontWeight:900, color:s.hi?gold:'#fff', lineHeight:1, marginTop:2 }}>{s.val}</div>
-                <div style={{ fontSize:11, color:'rgba(255,255,255,.55)', marginTop:2 }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
         </div>
       </header>
 
-      <div className="profile-container">
-        <div className="profile-layout">
-          <main className="profile-main">
+      {/* Counters Section */}
+      <div style={{ maxWidth: '1000px', margin: '-80px auto 40px', padding: '20px', position: 'relative', zIndex: 10, background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(10px)', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
+        <div style={{ display:'flex', gap:14, flexWrap:'wrap', justifyContent: 'center' }}>
+          {[
+            { val:events.length,   label:'Total Events', icon:'📆' },
+            { val:upcoming.length, label:'Upcoming',     icon:'🔜', hi:true },
+            { val:past.length,     label:'Past Events',  icon:'📜' },
+            { val:[...new Set(events.map(e=>e.type))].filter(Boolean).length, label:'Types', icon:'🏷️' },
+          ].map((s,i) => (
+            <div key={i} style={{ background:s.hi?'#fffbeb':'#fff', border:`1px solid ${s.hi?gold:'#e2e8f0'}`, borderRadius:11, padding:'10px 20px', textAlign:'center', transition: 'all .2s', flex: 1, minWidth: '150px' }}>
+              <span style={{ display:'block', fontSize:17 }}>{s.icon}</span>
+              <div style={{ fontSize:24, fontWeight:900, color:s.hi?gold:navy, lineHeight:1, marginTop:2 }}>{s.val}</div>
+              <div style={{ fontSize:11, color:'#64748b', marginTop:2, fontWeight: 600 }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+        <main>
 
             {/* ── Featured upcoming banner ── */}
             {featured && (
@@ -197,7 +139,7 @@ export default function EventsPage() {
             )}
 
             {/* ── Filters ── */}
-            <section className="glass-panel profile-section anim-slide-up" style={{ padding:'20px 24px', animationDelay:'.1s' }}>
+            <section style={{ background: '#fff', padding: '30px 40px', borderRadius: '16px', boxShadow: '0 8px 25px rgba(0,0,0,0.07)', marginTop: '30px', animationDelay:'.1s' }}>
               {/* Tab buttons */}
               <div style={{ display:'flex', gap:3, marginBottom:16, background:'#f4f7fa', borderRadius:11, padding:3, width:'fit-content' }}>
                 {[
@@ -269,7 +211,7 @@ export default function EventsPage() {
             </section>
 
             {/* ── Events ── */}
-            <section className="glass-panel profile-section anim-slide-up" style={{ animationDelay:'.2s' }}>
+            <section style={{ background: '#fff', padding: '30px 40px', borderRadius: '16px', boxShadow: '0 8px 25px rgba(0,0,0,0.07)', marginTop: '30px', animationDelay:'.2s' }}>
               <h2 className="section-heading">📅 Events ({filtered.length})</h2>
               <div className="heading-underline" />
 
@@ -379,10 +321,7 @@ export default function EventsPage() {
             </section>
 
           </main>
-          <Sidebar navy={navy} gold={gold} upcoming={upcoming} past={past} />
-        </div>
       </div>
-
       <style>{`
         .download-btn { display:inline-block; background:#f8fafc; color:${navy}; padding:8px 15px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none; border:1px solid #cbd5e1; transition:.2s; }
         .download-btn:hover { background:${navy}; color:#fff; border-color:${navy}; }

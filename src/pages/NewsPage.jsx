@@ -21,46 +21,6 @@ const TYPE_COLORS = {
 const getTS   = ts => ts?.toDate ? ts.toDate() : new Date(ts || Date.now());
 const fmtFull = ts => { const d = getTS(ts); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`; };
 
-/* ─── sidebar ─── */
-const Sidebar = ({ navy, gold }) => (
-  <aside className="profile-sidebar anim-slide-up" style={{ animationDelay: '0.4s' }}>
-    <div className="widget">
-      <h3 className="widget-title"><span>📑</span> Quick Links</h3>
-      <ul className="quick-links">
-        {[
-          { label: '📢 Official Notices',        path: '/notifications' },
-          { label: '📁 Document Archive',        path: '/documents' },
-          { label: '🏆 Campus Events',           path: '/events' },
-          { label: 'Principal Message',          path: '/about-us/principal-message' },
-          { label: 'Admission Rules',            path: '/admission/rule' },
-          { label: 'Photo Gallery',              path: '/gallery' },
-          { label: 'Contact Us',                 path: '/contact' },
-        ].map((link, i) => (
-          <li key={i} className="quick-link-item">
-            <Link to={link.path} className="quick-link" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <span className="link-arrow">›</span> {link.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-    
-    <div className="widget" style={{ marginTop: 20 }}>
-      <h3 className="widget-title"><span>📊</span> Categories</h3>
-      <ul className="quick-links">
-        {Object.entries(TYPE_COLORS).map(([cat, col]) => (
-          <li key={cat} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid #f0f4f8' }}>
-            <span style={{ fontSize: 13, color: col.text, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 7 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: col.dot, display: 'inline-block' }} />
-              {cat}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </aside>
-);
-
 /* ══════════════════════════════════════════════
    NEWS PAGE COMPONENT
 ══════════════════════════════════════════════ */
@@ -124,40 +84,36 @@ export default function NewsPage() {
       `}</style>
 
       {/* ── HERO ── */}
-      <header className="profile-hero"
-        style={{ backgroundImage: `url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop')` }}>
+      <header className="profile-hero" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop')` }}>
         <div className="hero-overlay" />
         <div className="hero-content anim-fade-in">
-          <nav style={{ display:'flex', alignItems:'center', gap:8, marginBottom:14, fontSize:13, fontWeight:600 }}>
-            <Link to="/" style={{ color:'rgba(255,255,255,.55)', textDecoration:'none' }}>🏠 Home</Link>
-            <span style={{ color:'rgba(255,255,255,.3)' }}>›</span>
-            <span style={{ color:gold }}>Academic News</span>
-          </nav>
           <h1 className="hero-title">📣 News & Updates</h1>
           <p className="hero-subtitle">College ke latest achievements, academic news aur recent updates yahan dekhein</p>
-          
-          <div style={{ display:'flex', gap:14, flexWrap:'wrap', marginTop:22 }}>
-            {[
-              { val:newsList.length,                                      label:'Total News' },
-              { val:newsList.filter(n=>n.type==='Achievement').length,    label:'Achievements' },
-              { val:newsList.filter(n=>n.type==='Result').length,         label:'Results' },
-              { val:years.length - 1,                                     label:'Active Years' },
-            ].map((s, i) => (
-              <div key={i} style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.18)', borderRadius:11, padding:'10px 20px', textAlign:'center', backdropFilter:'blur(8px)' }}>
-                <div style={{ fontSize:24, fontWeight:900, color:gold, lineHeight:1 }}>{s.val}</div>
-                <div style={{ fontSize:11, color:'rgba(255,255,255,.55)', marginTop:3 }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
         </div>
       </header>
 
-      <div className="profile-container">
-        <div className="profile-layout">
-          <main className="profile-main">
+      {/* Counters Section */}
+      <div style={{ maxWidth: '1000px', margin: '-80px auto 40px', padding: '20px', position: 'relative', zIndex: 10, background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(10px)', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
+        <div style={{ display:'flex', gap:14, flexWrap:'wrap', justifyContent: 'center' }}>
+          {[
+            { val:newsList.length,                                      label:'Total News' },
+            { val:newsList.filter(n=>n.type==='Achievement').length,    label:'Achievements' },
+            { val:newsList.filter(n=>n.type==='Result').length,         label:'Results' },
+            { val:years.length - 1,                                     label:'Active Years' },
+          ].map((s, i) => (
+            <div key={i} style={{ background:'#fff', border:'1px solid #e2e8f0', borderRadius:11, padding:'10px 20px', textAlign:'center', flex: 1, minWidth: '150px' }}>
+              <div style={{ fontSize:24, fontWeight:900, color:gold, lineHeight:1 }}>{s.val}</div>
+              <div style={{ fontSize:11, color:'#64748b', marginTop:3, fontWeight: 600 }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+        <main>
 
             {/* ── Filter panel ── */}
-            <section className="glass-panel profile-section anim-slide-up" style={{ padding:'20px 24px', animationDelay:'.1s' }}>
+            <section style={{ background: '#fff', padding: '30px 40px', borderRadius: '16px', boxShadow: '0 8px 25px rgba(0,0,0,0.07)', animationDelay:'.1s' }}>
               <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'center', marginBottom:16 }}>
                 <div style={{ flex:1, minWidth:200, position:'relative' }}>
                   <span style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', opacity:.4, fontSize:16, pointerEvents:'none' }}>🔍</span>
@@ -223,7 +179,7 @@ export default function NewsPage() {
             </section>
 
             {/* ── Results ── */}
-            <section className="glass-panel profile-section anim-slide-up" style={{ animationDelay:'.2s' }}>
+            <section style={{ background: '#fff', padding: '30px 40px', borderRadius: '16px', boxShadow: '0 8px 25px rgba(0,0,0,0.07)', marginTop: '30px', animationDelay:'.2s' }}>
               <h2 className="section-heading">📰 Latest News ({filtered.length})</h2>
               <div className="heading-underline" />
 
@@ -310,10 +266,7 @@ export default function NewsPage() {
             </section>
 
           </main>
-          <Sidebar navy={navy} gold={gold} />
         </div>
-      </div>
-
       <style>{`
         .download-btn { display:inline-block; background:#f8fafc; color:${navy}; padding:8px 15px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none; border:1px solid #cbd5e1; transition:.2s; }
         .download-btn:hover { background:${navy}; color:#fff; border-color:${navy}; }

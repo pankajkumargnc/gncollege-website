@@ -17,58 +17,6 @@ const DOC_META = {
 const getTS  = ts => ts?.toDate ? ts.toDate() : new Date(ts || Date.now());
 const fmtDt  = ts => { const d=getTS(ts); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`; };
 
-const Sidebar = ({ navy, gold, typeCounts }) => (
-  <aside className="profile-sidebar anim-slide-up" style={{ animationDelay:'0.4s' }}>
-    <div className="widget">
-      <h3 className="widget-title"><span>📊</span> Document Types</h3>
-      <ul className="quick-links">
-        {Object.entries(typeCounts).map(([type, count]) => {
-          const m = DOC_META[type] || { icon:'📄', color:'#718096' };
-          return (
-            <li key={type} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid #f0f4f8' }}>
-              <span style={{ fontSize:13.5, color:'#334155', fontWeight:600, display:'flex', alignItems:'center', gap:7 }}>
-                {m.icon} {type}
-              </span>
-              <span style={{ background:`${m.color}18`, color:m.color, padding:'2px 9px', borderRadius:20, fontSize:12, fontWeight:800 }}>{count}</span>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-    <div className="widget" style={{ marginTop:20 }}>
-      <h3 className="widget-title"><span>📑</span> Quick Links</h3>
-      <ul className="quick-links">
-        {[
-          { label:'📢 Notice Board',    path:'/notifications' },
-          { label:'🏆 Campus Events',   path:'/events' },
-          { label:'Syllabus',           path:'/syllabus' },
-          { label:'Admission Rules',    path:'/admission/rule' },
-          { label:'Fee Structure',      path:'/admission/fee-structure' },
-          { label:'Academic Calendar',  path:'/academics/academic-calendar' },
-          { label:'NAAC',               path:'/naac/nirf' },
-          { label:'IQAC',               path:'/academics/iqac' },
-          { label:'Photo Gallery',      path:'/gallery' },
-          { label:'Contact Us',         path:'/contact' },
-        ].map((link, i) => (
-          <li key={i} className="quick-link-item">
-            <Link to={link.path} className="quick-link" onClick={() => window.scrollTo({ top:0, behavior:'smooth' })}>
-              <span className="link-arrow">›</span> {link.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-    <div className="helpdesk-widget">
-      <div style={{ fontSize:'45px', marginBottom:'15px', position:'relative', zIndex:2 }}>📞</div>
-      <h4 style={{ margin:'0 0 12px', fontSize:'19px', color:'#f4a023', position:'relative', zIndex:2 }}>Need Assistance?</h4>
-      <p style={{ fontSize:'14px', margin:'0 0 20px', color:'#e2e8f0', lineHeight:'1.6', position:'relative', zIndex:2 }}>
-        Contact our administration office for any queries related to admission or academics.
-      </p>
-      <a href="tel:+917903340991" className="helpdesk-btn">Call Helpdesk Now</a>
-    </div>
-  </aside>
-);
-
 export default function DocumentsPage() {
   const [docs,     setDocs]     = useState([]);
   const [loading,  setLoading]  = useState(true);
@@ -134,45 +82,41 @@ export default function DocumentsPage() {
       `}</style>
 
       {/* ── HERO ── */}
-      <header className="profile-hero"
-        style={{ backgroundImage:`url('https://images.unsplash.com/photo-1568667256549-094345857637?q=80&w=2070&auto=format&fit=crop')` }}>
+      <header className="profile-hero" style={{ backgroundImage:`url('https://images.unsplash.com/photo-1568667256549-094345857637?q=80&w=2070&auto=format&fit=crop')` }}>
         <div className="hero-overlay" />
         <div className="hero-content anim-fade-in">
-          <nav style={{ display:'flex', alignItems:'center', gap:8, marginBottom:14, fontSize:13, fontWeight:600 }}>
-            <Link to="/" style={{ color:'rgba(255,255,255,.55)', textDecoration:'none' }}>🏠 Home</Link>
-            <span style={{ color:'rgba(255,255,255,.3)' }}>›</span>
-            <span style={{ color:gold }}>Document Archive</span>
-          </nav>
           <h1 className="hero-title">📁 Document Archive</h1>
           <p className="hero-subtitle">Syllabus, circulars, reports aur important documents — year aur type wise filter karo</p>
-          {/* type count pills */}
-          <div style={{ display:'flex', gap:12, flexWrap:'wrap', marginTop:22 }}>
-            {Object.entries(typeCounts).map(([type,count]) => {
-              const m = DOC_META[type]||{icon:'📄'};
-              return (
-                <button key={type} onClick={() => setSelType(selType===type?'All':type)}
-                  style={{ background:selType===type?`rgba(201,162,39,.25)`:'rgba(255,255,255,.1)', border:`1px solid ${selType===type?gold:'rgba(255,255,255,.18)'}`, borderRadius:11, padding:'10px 18px', color:'#fff', cursor:'pointer', textAlign:'center', transition:'all .2s', backdropFilter:'blur(6px)' }}>
-                  <span style={{ display:'block', fontSize:19 }}>{m.icon}</span>
-                  <span style={{ display:'block', fontSize:22, fontWeight:900, color:gold, lineHeight:1 }}>{count}</span>
-                  <span style={{ display:'block', fontSize:11, color:'rgba(255,255,255,.55)', marginTop:2 }}>{type}</span>
-                </button>
-              );
-            })}
-            <div style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.18)', borderRadius:11, padding:'10px 18px', textAlign:'center', backdropFilter:'blur(6px)' }}>
-              <span style={{ display:'block', fontSize:19 }}>📂</span>
-              <span style={{ display:'block', fontSize:22, fontWeight:900, color:gold, lineHeight:1 }}>{docs.length}</span>
-              <span style={{ display:'block', fontSize:11, color:'rgba(255,255,255,.55)', marginTop:2 }}>Total</span>
-            </div>
-          </div>
         </div>
       </header>
 
-      <div className="profile-container">
-        <div className="profile-layout">
-          <main className="profile-main">
+      {/* Counters Section */}
+      <div style={{ maxWidth: '1000px', margin: '-80px auto 40px', padding: '20px', position: 'relative', zIndex: 10, background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(10px)', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
+        <div style={{ display:'flex', gap:12, flexWrap:'wrap', justifyContent: 'center' }}>
+          {Object.entries(typeCounts).map(([type,count]) => {
+            const m = DOC_META[type]||{icon:'📄'};
+            return (
+              <button key={type} onClick={() => setSelType(selType===type?'All':type)}
+                style={{ background:selType===type ? '#fffbeb' : '#fff', border:`1px solid ${selType===type ? gold : '#e2e8f0'}`, borderRadius:11, padding:'10px 18px', color:navy, cursor:'pointer', textAlign:'center', transition:'all .2s' }}>
+                <span style={{ display:'block', fontSize:19 }}>{m.icon}</span>
+                <span style={{ display:'block', fontSize:22, fontWeight:900, color:gold, lineHeight:1 }}>{count}</span>
+                <span style={{ display:'block', fontSize:11, color:'#64748b', marginTop:2, fontWeight: 600 }}>{type}</span>
+              </button>
+            );
+          })}
+          <div style={{ background:'#fff', border:'1px solid #e2e8f0', borderRadius:11, padding:'10px 18px', textAlign:'center' }}>
+            <span style={{ display:'block', fontSize:19 }}>📂</span>
+            <span style={{ display:'block', fontSize:22, fontWeight:900, color:gold, lineHeight:1 }}>{docs.length}</span>
+            <span style={{ display:'block', fontSize:11, color:'#64748b', marginTop:2, fontWeight: 600 }}>Total</span>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+        <main>
 
             {/* ── Filter Panel ── */}
-            <section className="glass-panel profile-section anim-slide-up" style={{ padding:'20px 24px', animationDelay:'.1s' }}>
+            <section style={{ background: '#fff', padding: '30px 40px', borderRadius: '16px', boxShadow: '0 8px 25px rgba(0,0,0,0.07)', animationDelay:'.1s' }}>
               {/* search + toggle */}
               <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'center', marginBottom:16 }}>
                 <div style={{ flex:1, minWidth:200, position:'relative' }}>
@@ -236,7 +180,7 @@ export default function DocumentsPage() {
             </section>
 
             {/* ── Documents List ── */}
-            <section className="glass-panel profile-section anim-slide-up" style={{ animationDelay:'.2s' }}>
+            <section style={{ background: '#fff', padding: '30px 40px', borderRadius: '16px', boxShadow: '0 8px 25px rgba(0,0,0,0.07)', marginTop: '30px', animationDelay:'.2s' }}>
               <h2 className="section-heading">📚 Official Documents ({filtered.length})</h2>
               <div className="heading-underline" />
 
@@ -321,10 +265,7 @@ export default function DocumentsPage() {
             </section>
 
           </main>
-          <Sidebar navy={navy} gold={gold} typeCounts={typeCounts} />
         </div>
-      </div>
-
       <style>{`
         .download-btn { display:inline-block; background:#f8fafc; color:${navy}; padding:8px 15px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none; border:1px solid #cbd5e1; transition:.2s; }
         .download-btn:hover { background:${navy}; color:#fff; border-color:${navy}; }

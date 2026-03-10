@@ -6,7 +6,7 @@ import { COLORS } from '../styles/colors';
 
 /* ─── constants ─── */
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const CATEGORIES   = ['All','General','Examination','Admission','Holiday','Sports','Cultural'];
+const CATEGORIES   = ['All','General','Examination','Admission','Holiday','Sports','Cultural','Academic'];
 
 const TYPE_COLORS = {
   General:     { bg:'#EBF0FF', text:'#1a365d', border:'#BED0FF', dot:'#4a7fd4' },
@@ -15,68 +15,13 @@ const TYPE_COLORS = {
   Holiday:     { bg:'#FFFBEB', text:'#744210', border:'#FAF089', dot:'#d69e2e' },
   Sports:      { bg:'#FAF5FF', text:'#44337a', border:'#E9D8FD', dot:'#805ad5' },
   Cultural:    { bg:'#E6FFFA', text:'#1d4044', border:'#81E6D9', dot:'#319795' },
+  Academic:    { bg:'#fef3c7', text:'#92400e', border:'#fde68a', dot:'#f59e0b' },
 };
 
 const getTS   = ts => ts?.toDate ? ts.toDate() : new Date(ts || Date.now());
 const fmtFull = ts => { const d = getTS(ts); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`; };
 
-/* ─── sidebar (copied from PageViewer) ─── */
-const Sidebar = ({ navy, gold }) => (
-  <aside className="profile-sidebar anim-slide-up" style={{ animationDelay: '0.4s' }}>
-    <div className="widget">
-      <h3 className="widget-title"><span>📑</span> Quick Links</h3>
-      <ul className="quick-links">
-        {[
-          { label: '📁 Document Archive',         path: '/documents' },
-          { label: '🏆 Campus Events',             path: '/events' },
-          { label: 'Principal Message',            path: '/about-us/principal-message' },
-          { label: 'Admission Rules',              path: '/admission/rule' },
-          { label: 'Fee Structure',                path: '/admission/fee-structure' },
-          { label: 'Departments',                  path: '/academics/course-offered' },
-          { label: 'NSS',                          path: '/activity/nss' },
-          { label: 'NCC',                          path: '/activity/ncc' },
-          { label: 'Sports',                       path: '/activity/games-sports' },
-          { label: 'Syllabus',                     path: '/syllabus' },
-          { label: 'Academic Calendar',            path: '/academics/academic-calendar' },
-          { label: 'Photo Gallery',                path: '/gallery' },
-          { label: 'Contact Us',                   path: '/contact' },
-        ].map((link, i) => (
-          <li key={i} className="quick-link-item">
-            <Link to={link.path} className="quick-link" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <span className="link-arrow">›</span> {link.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-    {/* Stats widget */}
-    <div className="widget" style={{ marginTop: 20 }}>
-      <h3 className="widget-title"><span>📊</span> Category Stats</h3>
-      <ul className="quick-links">
-        {Object.entries(TYPE_COLORS).map(([cat, col]) => (
-          <li key={cat} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid #f0f4f8' }}>
-            <span style={{ fontSize: 13, color: col.text, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 7 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: col.dot, display: 'inline-block' }} />
-              {cat}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-    <div className="helpdesk-widget">
-      <div style={{ fontSize: '45px', marginBottom: '15px', position: 'relative', zIndex: 2 }}>📞</div>
-      <h4 style={{ margin: '0 0 12px', fontSize: '19px', color: '#f4a023', position: 'relative', zIndex: 2 }}>Need Assistance?</h4>
-      <p style={{ fontSize: '14px', margin: '0 0 20px', color: '#e2e8f0', lineHeight: '1.6', position: 'relative', zIndex: 2 }}>
-        Contact our administration office for any queries related to admission or academics.
-      </p>
-      <a href="tel:+917903340991" className="helpdesk-btn">Call Helpdesk Now</a>
-    </div>
-  </aside>
-);
 
-/* ══════════════════════════════════════════════
-   PAGE COMPONENT
-══════════════════════════════════════════════ */
 export default function NotificationsPage() {
   const [notices,  setNotices]  = useState([]);
   const [loading,  setLoading]  = useState(true);
@@ -92,10 +37,11 @@ export default function NotificationsPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
     const q = query(collection(db, 'notices'), orderBy('createdAt', 'desc'));
-    return onSnapshot(q, snap => {
+    const unsubscribe = onSnapshot(q, snap => {
       setNotices(snap.docs.map(d => ({ id: d.id, ...d.data() })));
       setLoading(false);
     });
+    return () => unsubscribe();
   }, []);
 
   const years = useMemo(() => {
@@ -135,25 +81,17 @@ export default function NotificationsPage() {
         .ntf-card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(11,31,78,.12) !important; }
       `}</style>
 
-      {/* ── HERO (PageViewer style) ── */}
-      <header className="profile-hero"
-        style={{ backgroundImage: `url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop')` }}>
+      <header className="profile-hero" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop')` }}>
         <div className="hero-overlay" />
         <div className="hero-content anim-fade-in">
-          <nav style={{ display:'flex', alignItems:'center', gap:8, marginBottom:14, fontSize:13, fontWeight:600 }}>
-            <Link to="/" style={{ color:'rgba(255,255,255,.55)', textDecoration:'none' }}>🏠 Home</Link>
-            <span style={{ color:'rgba(255,255,255,.3)' }}>›</span>
-            <span style={{ color:gold }}>Notice Board</span>
-          </nav>
           <h1 className="hero-title">📢 Notice Board</h1>
           <p className="hero-subtitle">Saare notices, circulars aur official announcements — year, month aur category wise</p>
-          {/* stats */}
           <div style={{ display:'flex', gap:14, flexWrap:'wrap', marginTop:22 }}>
             {[
-              { val:notices.length,                                    label:'Total Notices' },
-              { val:notices.filter(n=>n.isNew).length,                 label:'New'          },
-              { val:notices.filter(n=>n.type==='Examination').length,  label:'Examination'  },
-              { val:years.length - 1,                                  label:'Years'        },
+              { val:notices.length, label:'Total Notices' },
+              { val:notices.filter(n=>n.isNew).length, label:'New' },
+              { val:notices.filter(n=>n.type==='Examination').length, label:'Examination' },
+              { val:years.length - 1, label:'Years' },
             ].map((s, i) => (
               <div key={i} style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.18)', borderRadius:11, padding:'10px 20px', textAlign:'center', backdropFilter:'blur(8px)' }}>
                 <div style={{ fontSize:24, fontWeight:900, color:gold, lineHeight:1 }}>{s.val}</div>
@@ -164,13 +102,9 @@ export default function NotificationsPage() {
         </div>
       </header>
 
-      <div className="profile-container">
-        <div className="profile-layout">
-          <main className="profile-main">
-
-            {/* ── Filter panel (glass-panel style) ── */}
-            <section className="glass-panel profile-section anim-slide-up" style={{ padding:'20px 24px', animationDelay:'.1s' }}>
-              {/* search + toggle */}
+      <div style={{ maxWidth: '1200px', margin: '40px auto', padding: '0 20px' }}>
+        <main>
+            <section style={{ background: '#fff', padding: '30px 40px', borderRadius: '16px', boxShadow: '0 8px 25px rgba(0,0,0,0.07)', animationDelay:'.1s' }}>
               <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'center', marginBottom:16 }}>
                 <div style={{ flex:1, minWidth:200, position:'relative' }}>
                   <span style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', opacity:.4, fontSize:16, pointerEvents:'none' }}>🔍</span>
@@ -192,7 +126,6 @@ export default function NotificationsPage() {
                 </div>
               </div>
 
-              {/* Year */}
               <div style={{ display:'flex', gap:7, flexWrap:'wrap', alignItems:'center', marginBottom:10 }}>
                 <span style={{ fontSize:10.5, fontWeight:700, color:'#a0aec0', textTransform:'uppercase', letterSpacing:.8, flexShrink:0 }}>YEAR:</span>
                 {years.map(y => (
@@ -203,7 +136,6 @@ export default function NotificationsPage() {
                 ))}
               </div>
 
-              {/* Month */}
               <div style={{ display:'flex', gap:5, flexWrap:'wrap', alignItems:'center', marginBottom:10 }}>
                 <span style={{ fontSize:10.5, fontWeight:700, color:'#a0aec0', textTransform:'uppercase', letterSpacing:.8, flexShrink:0 }}>MONTH:</span>
                 {['All', ...MONTHS_SHORT].map(m => (
@@ -214,7 +146,6 @@ export default function NotificationsPage() {
                 ))}
               </div>
 
-              {/* Category */}
               <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
                 <span style={{ fontSize:10.5, fontWeight:700, color:'#a0aec0', textTransform:'uppercase', letterSpacing:.8, flexShrink:0 }}>CATEGORY:</span>
                 {CATEGORIES.map(c => {
@@ -235,8 +166,7 @@ export default function NotificationsPage() {
               </div>
             </section>
 
-            {/* ── Results ── */}
-            <section className="glass-panel profile-section anim-slide-up" style={{ animationDelay:'.2s' }}>
+            <section style={{ background: '#fff', padding: '30px 40px', borderRadius: '16px', boxShadow: '0 8px 25px rgba(0,0,0,0.07)', marginTop: '30px', animationDelay:'.2s' }}>
               <h2 className="section-heading">📋 Notices ({filtered.length})</h2>
               <div className="heading-underline" />
 
@@ -252,8 +182,6 @@ export default function NotificationsPage() {
                   <p style={{ color:'#718096', fontSize:13.5 }}>Filter ya search change karo</p>
                 </div>
               ) : view === 'list' ? (
-
-                /* ── LIST VIEW ── */
                 Object.entries(grouped).map(([monthYear, items]) => (
                   <div key={monthYear} style={{ marginBottom:28 }}>
                     <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:14 }}>
@@ -269,8 +197,7 @@ export default function NotificationsPage() {
                         const tc = TYPE_COLORS[n.type] || TYPE_COLORS.General;
                         return (
                           <div key={n.id} className="ntf-row-hover"
-                            style={{ background:'#fff', borderRadius:11, padding:'14px 18px', display:'flex', alignItems:'flex-start', gap:14, borderLeft:`4px solid ${gold}`, border:`1px solid #edf2f7`, borderLeft:`4px solid ${gold}`, boxShadow:'0 2px 10px rgba(11,31,78,.04)' }}>
-                            {/* date box */}
+                            style={{ background:'#fff', borderRadius:11, padding:'14px 18px', display:'flex', alignItems:'flex-start', gap:14, borderLeft:`4px solid ${gold}`, border:`1px solid #edf2f7`, boxShadow:'0 2px 10px rgba(11,31,78,.04)' }}>
                             <div style={{ textAlign:'center', minWidth:44, flexShrink:0 }}>
                               <div style={{ fontSize:9.5, fontWeight:700, color:'#a0aec0', textTransform:'uppercase' }}>{MONTHS_SHORT[d.getMonth()]}</div>
                               <div style={{ fontSize:22, fontWeight:900, color:navy, lineHeight:1 }}>{d.getDate()}</div>
@@ -296,9 +223,7 @@ export default function NotificationsPage() {
                     </div>
                   </div>
                 ))
-
               ) : (
-                /* ── CARD VIEW ── */
                 <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:16, marginTop:4 }}>
                   {filtered.map(n => {
                     const d  = getTS(n.createdAt);
@@ -310,7 +235,7 @@ export default function NotificationsPage() {
                           <span style={{ background:tc.bg, color:tc.text, border:`1px solid ${tc.border}`, padding:'3px 10px', borderRadius:20, fontSize:11.5, fontWeight:700 }}>{n.type||'General'}</span>
                           <span style={{ color:gold, fontSize:11.5, fontWeight:700 }}>📅 {fmtFull(n.createdAt)}</span>
                         </div>
-                        {n.isNew && <div style={{ position:'absolute', top:10, right:10, background:'#e53e3e', color:'#fff', fontSize:9, fontWeight:900, padding:'2px 7px', borderRadius:4, letterSpacing:1 }}>NEW</div>}
+                        {n.isNew && <div style={{ position:'absolute', top:10, right:10, background:'#e53e3e', color:'#fff', padding:'2px 7px', borderRadius:20, fontSize:9.5, fontWeight:900, animation:'blink 1.5s infinite' }}>● NEW</div>}
                         <div style={{ padding:'15px 16px' }}>
                           <div dangerouslySetInnerHTML={{ __html: n.text }}
                             style={{ fontSize:13.5, color:'#334155', lineHeight:1.7, marginBottom:12 }} />
@@ -324,10 +249,7 @@ export default function NotificationsPage() {
                 </div>
               )}
             </section>
-
-          </main>
-          <Sidebar navy={navy} gold={gold} />
-        </div>
+        </main>
       </div>
 
       <style>{`

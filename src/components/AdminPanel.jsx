@@ -1,13 +1,13 @@
-// GNC COLLEGE - PREMIUM ADMIN PANEL v5.1 (Diagnostic Guard Fixed)
+// GNC COLLEGE — ADMIN PANEL v8.0
+// 🎨 Blue Gradient Dark Theme | YouTube | Drive | 12-Test PDF Report
 // Replace: src/components/AdminPanel.jsx
 
 import React, { useState, useRef, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import JoditEditor from 'jodit-react';
 import { COLORS } from '../styles/colors';
-import { db, storage } from '../firebase';
+import { db } from '../firebase';
 import DOMPurify from 'dompurify';
 import parse from 'html-react-parser';
-import { ref, deleteObject } from 'firebase/storage';
 import {
   collection, addDoc, serverTimestamp, doc, deleteDoc,
   updateDoc, setDoc, getDoc, onSnapshot, query, orderBy,
@@ -15,556 +15,885 @@ import {
 } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 
-// 1. LAZY LOADING: Heavy components ab zaroorat par hi download honge
-const ImageCropper = lazy(() => import('./ImageCropper')); // Assuming ImageCropper is in its own file
+const ImageCropper = lazy(() => import('./ImageCropper'));
 
-// Debounce Hook for search optimization
 function useDebounce(value, delay) {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-  useEffect(() => {
-    const handler = setTimeout(() => { setDebouncedValue(value); }, delay);
-    return () => { clearTimeout(handler); };
-  }, [value, delay]);
-  return debouncedValue;
+  const [v, setV] = useState(value);
+  useEffect(() => { const h = setTimeout(() => setV(value), delay); return () => clearTimeout(h); }, [value, delay]);
+  return v;
 }
 
+// ── 🎨 BLUE DARK GRADIENT THEME ──────────────────────────────────────────────
 const T = {
-  bg0: '#f0f4f8', bg1: '#ffffff', bg2: 'linear-gradient(135deg, #f0f4f8 0%, #e1e8f0 100%)',
-  bg3: '#ffffff', bg4: '#f8fafc', b1: '#e2e8f0', b2: '#cbd5e1',
+  bg0: '#030b1a', bg1: '#060f24', bg2: 'linear-gradient(145deg,#030b1a 0%,#07122a 100%)',
+  bg3: '#091430', bg4: '#0c1838',
+  b1: '#132242', b2: '#1b3260',
   gold: '#f4a023', goldL: '#fbbf45', goldD: '#c97e10',
-  navy: '#0f2347', red: '#ef4444', green: '#10b981', purple: '#8b5cf6',
-  cyan: '#06b6d4', pink: '#ec4899', t1: '#0f2347', t2: '#334155', t3: '#64748b',
+  blue: '#2563eb', blueL: '#3b82f6', blueD: '#1d4ed8',
+  red: '#ef4444', green: '#10b981', purple: '#8b5cf6',
+  cyan: '#06b6d4', pink: '#ec4899', teal: '#14b8a6',
+  t1: '#dce8ff', t2: '#7fa3d4', t3: '#3d5a8a',
 };
 
+// ── 💎 CSS ─────────────────────────────────────────────────────────────────────
 const GCSS = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;800&display=swap');
-  .adm * { box-sizing:border-box; }
-  .adm { font-family:'DM Sans',sans-serif; }
-  .adm ::-webkit-scrollbar{width:6px;height:6px}
-  .adm ::-webkit-scrollbar-track{background:transparent}
-  .adm ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px}
-  .adm ::-webkit-scrollbar-thumb:hover{background:#94a3b8}
-  .anav{padding:12px 16px;display:flex;align-items:center;gap:12px;border-radius:12px;cursor:pointer;
-    font-size:14px;font-weight:700;color:${T.t2};transition:all .3s;border:1px solid transparent;margin-bottom:4px}
-  .anav:hover{background:#f8fafc;color:${T.navy}; transform: translateX(4px);}
-  .anav.active{background:linear-gradient(135deg, ${T.navy}, #1a365d);
-    color:#fff;box-shadow:0 10px 20px rgba(15,35,71,.15)}
-  .glass{background:#ffffff;border:1px solid ${T.b1};border-radius:16px;box-shadow:0 8px 30px rgba(15,35,71,.03)}
-  .glass-gold{background:#ffffff;border:1px solid rgba(244,160,35,.4);border-radius:16px;
-    box-shadow:0 15px 35px rgba(244,160,35,.06), inset 0 4px 0 rgba(244,160,35,1)}
-  .ainp{width:100%;padding:12px 15px;background:${T.bg4};border:1px solid ${T.b2};
-    border-radius:10px;font-size:14px;color:${T.t1};font-family:'DM Sans',sans-serif;
-    outline:none;transition:all .2s;font-weight:500;}
-  .ainp:focus{border-color:${T.navy};background:#fff;box-shadow:0 0 0 4px rgba(15,35,71,.08)}
-  .ainp::placeholder{color:#94a3b8}
-  .ainp option{background:#fff;color:${T.t1}}
-  .abtn{padding:11px 24px;border-radius:10px;font-weight:700;cursor:pointer;transition:all .25s;
-    border:none;font-size:13.5px;display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif}
-  .abtn:disabled{opacity:.6;cursor:not-allowed}
-  .abtn-gold{background:linear-gradient(135deg,${T.gold},${T.goldD});color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.2)}
-  .abtn-gold:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 25px rgba(244,160,35,.4)}
-  .abtn-dark{background:#f1f5f9;color:${T.navy};border:1px solid #e2e8f0}
-  .abtn-dark:hover:not(:disabled){background:#e2e8f0;transform:translateY(-1px)}
-  .abtn-danger{background:#fef2f2;color:${T.red};border:1px solid #fecaca}
-  .abtn-danger:hover:not(:disabled){background:${T.red};color:#fff}
-  .abtn-sm{padding:7px 14px;font-size:12px;border-radius:8px}
-  .abadge{font-size:11px;padding:4px 10px;border-radius:6px;font-weight:800;display:inline-block;font-family:'JetBrains Mono',monospace;letter-spacing:.3px}
-  .arow{display:flex;align-items:center;gap:14px;padding:16px 20px;border:1px solid ${T.b1};
-    border-radius:12px;background:#f8fafc;transition:all .2s}
-  .arow:hover{background:#fff;border-color:${T.b2};box-shadow:0 5px 15px rgba(0,0,0,.03)}
-  .asec{font-size:24px;font-weight:800;color:${T.navy};margin:0 0 6px;letter-spacing:-.5px}
-  .asub{font-size:14px;color:${T.t3};margin:0 0 28px;font-weight:500}
-  .actitle{font-size:16px;font-weight:800;color:${T.navy};margin:0 0 20px;
-    padding-bottom:14px;border-bottom:2px solid #f1f5f9;display:flex;align-items:center;gap:9px}
-  .alabel{display:block;font-size:12px;font-weight:800;color:${T.t2};margin-bottom:8px;
-    text-transform:uppercase;letter-spacing:.5px}
-  .drag-handle{cursor:grab;color:#cbd5e1;font-size:16px;padding:4px 8px;border-radius:6px;transition:.2s;user-select:none}
-  .drag-handle:hover{color:${T.navy};background:#f1f5f9}
-  .drag-handle:active{cursor:grabbing}
-  .prog-outer{background:#e2e8f0;border-radius:99px;height:8px;overflow:hidden;margin-top:10px}
-  .prog-inner{height:100%;border-radius:99px;background:linear-gradient(90deg,${T.gold},${T.goldL});transition:width .3s}
-  @keyframes countUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-  .count-anim{animation:countUp .6s ease both}
-  @keyframes glowPulse{0%,100%{opacity:.6}50%{opacity:1}}
-  .glow-dot{width:8px;height:8px;border-radius:50%;background:${T.green};animation:glowPulse 2s infinite;box-shadow:0 0 8px ${T.green}}
-  @keyframes logIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
-  .log-item{animation:logIn .3s ease both}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-  .fade-up{animation:fadeUp .4s ease both}
-  .amobile-top{display:none}
-  @media(max-width:1024px){
-    .amobile-top{display:flex;background:#fff;padding:14px 20px;align-items:center;
-      justify-content:space-between;border-bottom:1px solid ${T.b1};position:sticky;top:0;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.05)}
-    .adm-main-pad{padding:20px !important}
-    .arow{flex-direction:column;align-items:flex-start}
-  }
-  .upload-zone{border:2px dashed #cbd5e1;border-radius:14px;padding:30px;
-    text-align:center;cursor:pointer;transition:all .3s;background:#f8fafc}
-  .upload-zone:hover{border-color:${T.navy};background:#f1f5f9}
-  .slide-card{background:#fff;border:1px solid ${T.b1};border-radius:16px;overflow:hidden;transition:all .3s;cursor:grab;box-shadow:0 4px 10px rgba(0,0,0,.02)}
-  .slide-card:hover{border-color:${T.gold};box-shadow:0 15px 30px rgba(15,35,71,.08);transform:translateY(-5px)}
-  .slide-card.dragging{opacity:.5;transform:scale(.95);cursor:grabbing}
-  .slide-card.drag-over{border-color:${T.navy};box-shadow:0 0 0 3px rgba(15,35,71,.1)}
-  .seo-ring{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:16px;font-weight:800;font-family:'JetBrains Mono',monospace}
+  .adm * { box-sizing: border-box; }
+  .adm { font-family: 'DM Sans', sans-serif; color: ${T.t1}; }
+  .adm ::-webkit-scrollbar { width: 5px; height: 5px; }
+  .adm ::-webkit-scrollbar-track { background: transparent; }
+  .adm ::-webkit-scrollbar-thumb { background: ${T.b2}; border-radius: 99px; }
 
-  /* HACKER THEME CSS FOR DIAGNOSTICS TAB */
-  .ht-bg { background: #060912; font-family: 'DM Sans', sans-serif; color: #f1f5f9; border-radius: 16px; padding: 40px; position: relative; overflow: hidden; border: 1px solid #1e293b; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-  .ht-scanline { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(16, 185, 129, 0.03) 2px, rgba(16, 185, 129, 0.03) 4px); pointer-events: none; z-index: 1;}
-  .ht-term { background: rgba(0,0,0,0.6); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #10b981; min-height: 280px; overflow-y: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); position: relative; z-index: 2; margin-bottom: 24px;}
-  .ht-term p { margin: 5px 0; display: flex; align-items: flex-start; gap: 8px;}
-  .ht-cursor { display: inline-block; width: 8px; height: 15px; background: #10b981; animation: blink 1s step-end infinite; }
-  @keyframes blink { 50% { opacity: 0; } }
-  .ht-score-ring { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 24px auto; position: relative; box-shadow: 0 0 40px rgba(16,185,129,.3); z-index: 2;}
-  .ht-score-ring::before { content: ''; position: absolute; inset: 8px; background: #060912; border-radius: 50%; }
-  .ht-score-inner { position: relative; z-index: 1; text-align: center; }
-  .ht-sum-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 36px; position: relative; z-index: 2; }
-  .ht-sum-card { background: rgba(26,34,54,.7); border: 1px solid rgba(255,255,255,.07); border-radius: 14px; padding: 20px; text-align: center; backdrop-filter: blur(10px); }
-  .ht-row { display: flex; align-items: flex-start; gap: 12px; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,.05); background: rgba(26,34,54,.4); border-radius: 8px; margin-bottom: 10px; position: relative; z-index: 2;}
-  .ht-btn { background: transparent; border: 1px solid #10b981; color: #10b981; font-family: 'JetBrains Mono', monospace; font-weight: 800; padding: 12px 30px; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 2px; border-radius: 4px; z-index: 2; position: relative;}
-  .ht-btn:hover { background: #10b981; color: #000; box-shadow: 0 0 20px rgba(16,185,129,0.4); }
+  .anav { padding: 11px 16px; display: flex; align-items: center; gap: 11px; border-radius: 12px; cursor: pointer; font-size: 13.5px; font-weight: 700; color: ${T.t2}; transition: all .2s; border: 1px solid transparent; margin-bottom: 3px; }
+  .anav:hover { background: rgba(37,99,235,.12); color: ${T.t1}; border-color: rgba(37,99,235,.25); }
+  .anav.active { background: linear-gradient(135deg,${T.blueD},${T.blue}); color: #fff; box-shadow: 0 6px 18px rgba(37,99,235,.35); border-color: transparent; }
+
+  .glass { background: rgba(9,20,48,.7); border: 1px solid ${T.b1}; border-radius: 16px; backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,.25); padding: 28px; margin-bottom: 24px; }
+  .glass-gold { background: rgba(9,20,48,.7); border: 1px solid rgba(244,160,35,.3); border-radius: 16px; box-shadow: 0 0 0 1px rgba(244,160,35,.06), 0 12px 32px rgba(244,160,35,.07), inset 0 4px 0 ${T.gold}; padding: 28px; margin-bottom: 24px; }
+  .glass-blue { background: rgba(9,20,48,.7); border: 1px solid rgba(37,99,235,.35); border-radius: 16px; box-shadow: 0 12px 32px rgba(37,99,235,.1), inset 0 4px 0 ${T.blue}; padding: 28px; margin-bottom: 24px; }
+
+  .ainp { width: 100%; padding: 11px 15px; background: rgba(3,11,26,.6); border: 1px solid ${T.b2}; border-radius: 10px; font-size: 14px; color: ${T.t1}; outline: none; transition: all .2s; font-weight: 500; font-family: 'DM Sans', sans-serif; }
+  .ainp:focus { border-color: ${T.blue}; background: rgba(3,11,26,.9); box-shadow: 0 0 0 3px rgba(37,99,235,.2); }
+  .ainp::placeholder { color: ${T.t3}; }
+  .ainp option { background: #0c1838; color: ${T.t1}; }
+
+  .abtn { padding: 10px 22px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: all .2s; border: none; font-size: 13.5px; display: inline-flex; align-items: center; gap: 7px; font-family: 'DM Sans', sans-serif; }
+  .abtn:disabled { opacity: .5; cursor: not-allowed; }
+  .abtn-gold { background: linear-gradient(135deg,${T.gold},${T.goldD}); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.25); }
+  .abtn-gold:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(244,160,35,.45); }
+  .abtn-blue { background: linear-gradient(135deg,${T.blue},${T.blueD}); color: #fff; }
+  .abtn-blue:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(37,99,235,.45); }
+  .abtn-dark { background: rgba(19,34,66,.8); color: ${T.t2}; border: 1px solid ${T.b2}; }
+  .abtn-dark:hover:not(:disabled) { background: rgba(19,34,66,1); color: ${T.t1}; }
+  .abtn-danger { background: rgba(239,68,68,.1); color: #ef4444; border: 1px solid rgba(239,68,68,.3); }
+  .abtn-danger:hover:not(:disabled) { background: #ef4444; color: #fff; }
+  .abtn-green { background: linear-gradient(135deg,#10b981,#059669); color:#fff; }
+  .abtn-green:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 22px rgba(16,185,129,.4); }
+  .abtn-sm { padding: 6px 13px; font-size: 12px; border-radius: 8px; }
+
+  .abadge { font-size: 11px; padding: 3px 9px; border-radius: 6px; font-weight: 800; display: inline-block; font-family: 'JetBrains Mono', monospace; letter-spacing: .3px; }
+  .arow { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border: 1px solid ${T.b1}; border-radius: 12px; background: rgba(9,20,48,.5); transition: all .2s; margin-bottom: 10px; }
+  .arow:hover { background: rgba(9,20,48,.8); border-color: ${T.b2}; box-shadow: 0 5px 15px rgba(0,0,0,.2); }
+
+  .asec { font-size: 22px; font-weight: 900; color: ${T.t1}; margin: 0 0 5px; letter-spacing: -.3px; }
+  .asub { font-size: 14px; color: ${T.t3}; margin: 0 0 24px; font-weight: 500; }
+  .actitle { font-size: 15px; font-weight: 800; color: ${T.t1}; margin: 0 0 18px; padding-bottom: 12px; border-bottom: 1px solid ${T.b1}; display: flex; align-items: center; gap: 8px; }
+  .alabel { display: block; font-size: 11.5px; font-weight: 800; color: ${T.t2}; margin-bottom: 7px; text-transform: uppercase; letter-spacing: .5px; }
+
+  .upload-zone { border: 2px dashed ${T.b2}; border-radius: 14px; padding: 28px; text-align: center; cursor: pointer; transition: all .3s; background: rgba(3,11,26,.4); display:block; }
+  .upload-zone:hover { border-color: ${T.blue}; background: rgba(37,99,235,.06); }
+
+  .prog-outer { background: ${T.b1}; border-radius: 99px; height: 8px; overflow: hidden; margin-top: 10px; }
+  .prog-inner { height: 100%; border-radius: 99px; background: linear-gradient(90deg,${T.gold},${T.goldL}); transition: width .3s; }
+
+  @keyframes countUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .count-anim { animation: countUp .5s ease both; }
+  @keyframes glowPulse { 0%,100%{opacity:.6;}50%{opacity:1;} }
+  .glow-dot { width:8px;height:8px;border-radius:50%;background:${T.green};animation:glowPulse 2s infinite;box-shadow:0 0 8px ${T.green}; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);} }
+  .fade-up { animation: fadeUp .35s ease both; }
+
+  .ht-bg { background:#040c1a; font-family:'DM Sans',sans-serif; color:#f1f5f9; border-radius:16px; padding:36px; position:relative; overflow:hidden; border:1px solid #10b981; box-shadow:0 0 0 1px rgba(16,185,129,.1),0 20px 50px rgba(0,0,0,.5); }
+  .ht-term { background:rgba(0,0,0,.7); border:1px solid rgba(16,185,129,.25); border-radius:10px; padding:18px; font-family:'JetBrains Mono',monospace; font-size:12.5px; color:#10b981; min-height:240px; overflow-y:auto; margin-bottom:20px; }
+  .ht-term p { margin:4px 0; }
+  .ht-btn { background:transparent; border:1px solid #10b981; color:#10b981; font-family:'JetBrains Mono',monospace; font-weight:800; padding:11px 28px; cursor:pointer; transition:all .25s; border-radius:8px; font-size:13px; }
+  .ht-btn:hover { background:#10b981; color:#000; box-shadow:0 0 18px rgba(16,185,129,.4); }
+  .ht-btn:disabled { opacity:.5; cursor:not-allowed; }
+
+  .sidebar-brand { padding:20px 18px; border-bottom:1px solid ${T.b1}; }
+  .sidebar-section { padding:8px 12px 4px; font-size:10px; font-weight:900; color:${T.t3}; text-transform:uppercase; letter-spacing:1.5px; }
+
+  .amobile-top { display:none; }
+  @media(max-width:1024px) {
+    .amobile-top { display:flex; background:${T.bg1}; padding:14px 20px; align-items:center; justify-content:space-between; border-bottom:1px solid ${T.b1}; position:sticky; top:0; z-index:9999; }
+    .adm-main-pad { padding:16px !important; }
+  }
+  @keyframes spin80 { to { transform:rotate(360deg); } }
+  .spin80 { animation:spin80 .8s linear infinite; }
 `;
 
-// 🌟 FIX: Ensuring API Key is hardcoded and locked for testing
 const IMGBB_API_KEY = '6391ea11ec7aa4e6f3477f373cdd3592';
+const uploadToImgBB = (blob, onProgress) => new Promise((resolve, reject) => {
+  const formData = new FormData(); formData.append('image', blob);
+  const xhr = new XMLHttpRequest(); xhr.open('POST', `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, true);
+  xhr.upload.onprogress = e => { if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100)); };
+  xhr.onload = () => xhr.status === 200 ? resolve(JSON.parse(xhr.responseText).data.url) : reject(new Error('Upload failed'));
+  xhr.onerror = () => reject(new Error('Network error')); xhr.send(formData);
+});
 
-const uploadToImgBB = (blob, onProgress) => {
-  return new Promise((resolve, reject) => {
-    const formData = new FormData(); formData.append('image', blob);
-    const xhr = new XMLHttpRequest(); xhr.open('POST', `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, true);
-    xhr.upload.onprogress = (e) => { if (e.lengthComputable) { onProgress(Math.round((e.loaded / e.total) * 100)); } };
-    xhr.onload = () => { if (xhr.status === 200) { resolve(JSON.parse(xhr.responseText).data.url); } else { reject(new Error('ImgBB Upload failed')); } };
-    xhr.onerror = () => reject(new Error('Network error during upload')); xhr.send(formData);
-  });
-};
-
-function useCountUp(target, dur=1200) {
-  const [v,setV]=useState(0);
-  useEffect(()=>{
-    if(!target)return; let s=0; const step=target/(dur/16);
-    const t=setInterval(()=>{s+=step;if(s>=target){setV(target);clearInterval(t);}else setV(Math.floor(s));},16);
-    return()=>clearInterval(t);
-  },[target]); return v;
+function useCountUp(target, dur = 1000) {
+  const [v, setV] = useState(0);
+  useEffect(() => {
+    if (!target) return; let s = 0; const step = target / (dur / 16);
+    const t = setInterval(() => { s += step; if (s >= target) { setV(target); clearInterval(t); } else setV(Math.floor(s)); }, 16);
+    return () => clearInterval(t);
+  }, [target]); return v;
 }
 
-const LogItem = React.memo(({ log }) => {
-  const icons={add:'➕',update:'✏️',delete:'🗑️',publish:'🚀',login:'🔐',restore:'🔄'};
-  const colors={add:T.green,update:T.gold,delete:T.red,publish:T.cyan,login:T.purple,restore:T.navy};
-  const ic=icons[log.action]||'📝', co=colors[log.action]||T.t2;
-  return(
-    <div className="log-item" style={{display:'flex',gap:14,padding:'16px 0',borderBottom:`1px solid ${T.b1}`,alignItems:'flex-start'}}>
-      <div style={{width:38,height:38,borderRadius:10,background:`${co}15`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,flexShrink:0}}>{ic}</div>
-      <div style={{flex:1,minWidth:0}}>
-        <div style={{fontSize:14,fontWeight:700,color:T.navy,lineHeight:1.4}}>{log.message}</div>
-        <div style={{fontSize:12,color:T.t3,marginTop:4,fontFamily:"'JetBrains Mono',monospace",fontWeight:600}}>{log.collection&&<span style={{color:co,marginRight:10}}>[{log.collection}]</span>}{log.time?new Date(log.time).toLocaleTimeString('en-IN'):'—'}</div>
-      </div>
-      <div className="abadge" style={{background:`${co}15`,color:co,fontSize:11,flexShrink:0}}>{log.action}</div>
-    </div>
-  );
-});
-
-const StatCard = React.memo(({ icon, label, count, color }) => {
-  const animatedCount = useCountUp(count);
+const StatCard = React.memo(({ icon, label, count, color, sub }) => {
+  const a = useCountUp(count);
   return (
-    <div className="glass count-anim" style={{ padding: '24px', borderBottom: `3px solid ${color}`, transition: 'transform .3s' }}
-      onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-6px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <div style={{ fontSize: 32 }}>{icon}</div><div style={{ width: 10, height: 10, borderRadius: '50%', background: color, boxShadow: `0 0 10px ${color}` }} />
+    <div className="glass count-anim" style={{ padding: '20px', borderBottom: `3px solid ${color}`, margin: 0, position: 'relative', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', top: -10, right: -10, fontSize: 48, opacity: .06 }}>{icon}</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+        <div style={{ fontSize: 28 }}>{icon}</div>
+        <div style={{ width: 8, height: 8, borderRadius: '50%', background: color, boxShadow: `0 0 8px ${color}` }} />
       </div>
-      <div style={{ fontSize: 36, fontWeight: 900, color: T.navy, lineHeight: 1, fontFamily: "'JetBrains Mono',monospace" }}>{animatedCount}</div>
-      <div style={{ fontSize: 12, fontWeight: 800, color: T.t3, marginTop: 8, textTransform: 'uppercase', letterSpacing: '.5px' }}>{label}</div>
+      <div style={{ fontSize: 32, fontWeight: 900, color: '#fff', fontFamily: "'JetBrains Mono',monospace" }}>{a}</div>
+      <div style={{ fontSize: 11, fontWeight: 800, color: T.t3, marginTop: 6, textTransform: 'uppercase', letterSpacing: .5 }}>{label}</div>
+      {sub && <div style={{ fontSize: 11, color: color, marginTop: 4, fontWeight: 700 }}>{sub}</div>}
     </div>
   );
 });
 
-const getSeoScore=(seo,title)=>{
-  let s=0;
-  if((title||'').length>5)s+=20;
-  if((seo?.metaTitle||'').length>10)s+=25;
-  if((seo?.metaDesc||'').length>50)s+=30;
-  if((seo?.keywords||'').length>0)s+=15;
-  if(seo?.ogImage)s+=10;
-  return s;
-};
+const joditCfg = { readonly: false, placeholder: 'Start writing…', height: 280, theme: 'dark', buttons: ['bold', 'italic', 'underline', '|', 'ul', 'ol', '|', 'font', 'fontsize', '|', 'link', 'align', 'undo', 'redo'] };
 
-const SeoRing=({score})=>{
-  const c=score>=80?T.green:score>=50?T.gold:T.red;
-  return <div className="seo-ring" style={{background:`${c}15`,color:c,border:`3px solid ${c}`}}>{score}</div>;
-};
+// ══════════════════════════════════════════════════════════════════════════════
+export default function AdminPanel({ onClose, notices, pages, events, gallery, pdfReports, announcements, sliderSlides, navLinks, faculties, placements, alerts }) {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewContent, setPreviewContent] = useState('');
+  const editor = useRef(null);
+  const facRef = useRef(null);
+  const placeRef = useRef(null);
+  const fileRef = useRef(null);
+  const [restoreFile, setRestoreFile] = useState(null);
+  const termRef = useRef(null);
 
-const joditCfg={readonly:false,placeholder:'Start writing…',height:420,processPasteHTML:true,processPasteFromWord:true,theme:'default',buttons:['source','|','bold','italic','underline','strikethrough','|','ul','ol','|','font','fontsize','brush','paragraph','|','image','table','link','|','align','undo','redo','|','hr','eraser','fullsize']};
+  useEffect(() => { const fn = () => setIsMobile(window.innerWidth < 1024); window.addEventListener('resize', fn); return () => window.removeEventListener('resize', fn); }, []);
+  useEffect(() => { if (termRef.current) termRef.current.scrollTop = termRef.current.scrollHeight; }, []);
 
-export default function AdminPanel({onClose,notices,pages,events,gallery,placeholderPaths,announcements,pdfReports,navLinks,sliderSlides}){
-  const [activeTab,setActiveTab]=useState('dashboard');
-  const [sidebarOpen,setSidebarOpen]=useState(false);
-  const [isMobile,setIsMobile]=useState(window.innerWidth<1024);
-  const [loading,setLoading]=useState(false);
-  const [searchTerm,setSearchTerm]=useState('');
-  const [filterType,setFilterType]=useState('all');
-  const [showPreview,setShowPreview]=useState(false);
-  const [previewContent,setPreviewContent]=useState('');
-  const editor=useRef(null);
-  useEffect(()=>{const fn=()=>setIsMobile(window.innerWidth<1024);window.addEventListener('resize',fn);return()=>window.removeEventListener('resize',fn);},[]);
+  // ── ACTIVITY LOG ─────────────────────────────────────────────────────────────
+  const [activityLogs, setActivityLogs] = useState([]);
+  useEffect(() => {
+    const q = query(collection(db, 'adminLogs'), orderBy('time', 'desc'), limit(20));
+    return onSnapshot(q, s => setActivityLogs(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+  }, []);
+  const logActivity = useCallback(async (action, message) => {
+    try { await addDoc(collection(db, 'adminLogs'), { action, message, time: new Date().toISOString(), createdAt: serverTimestamp() }); } catch (_) { }
+  }, []);
 
-  // 🌟 FIX: Updated System Test Logic - Super Safe API Checker
+  // ── IMAGE CROPPER ─────────────────────────────────────────────────────────────
+  const [cropSrc, setCropSrc] = useState(null);
+  const [cropCb, setCropCb] = useState(null);
+  const triggerCrop = (src, cb) => { setCropSrc(src); setCropCb(() => cb); };
+  const handleCropDone = async (blob) => { if (cropCb) await cropCb(blob); setCropSrc(null); setCropCb(null); };
+
+  // ── 1. ALERTS ─────────────────────────────────────────────────────────────────
+  const [editAlert, setEditAlert] = useState(null);
+  const [alertData, setAlertData] = useState({ text: '', isActive: true });
+  const saveAlert = async (e) => {
+    e.preventDefault(); setLoading(true);
+    try {
+      if (editAlert) await updateDoc(doc(db, 'alerts', editAlert.id), { ...alertData, updatedAt: serverTimestamp() });
+      else await addDoc(collection(db, 'alerts'), { ...alertData, createdAt: serverTimestamp() });
+      toast.success(editAlert ? 'Alert updated' : 'Alert published!');
+      setEditAlert(null); setAlertData({ text: '', isActive: true });
+      logActivity(editAlert ? 'update' : 'add', `Alert: ${alertData.text.substring(0, 40)}`);
+    } catch (err) { toast.error(err.message); }
+    setLoading(false);
+  };
+  const deleteAlert = async (id) => { if (window.confirm('Delete?')) { await deleteDoc(doc(db, 'alerts', id)); logActivity('delete', 'Alert deleted'); } };
+  const toggleAlert = async (a) => {
+    await updateDoc(doc(db, 'alerts', a.id), { isActive: !a.isActive, updatedAt: serverTimestamp() });
+    toast.success(a.isActive ? 'Alert turned OFF' : 'Alert is LIVE now!');
+  };
+
+  // ── 2. PLACEMENTS ─────────────────────────────────────────────────────────────
+  const [editPlace, setEditPlace] = useState(null);
+  const [placeData, setPlaceData] = useState({ name: '', year: '', company: '', package: '', imageUrl: '' });
+  const [placeUp, setPlaceUp] = useState(false); const [placeProg, setPlaceProg] = useState(0);
+  const handlePlaceFile = async (file) => { const r = new FileReader(); r.onload = e => triggerCrop(e.target.result, async (blob) => { setPlaceUp(true); setPlaceProg(0); try { const url = await uploadToImgBB(blob, p => setPlaceProg(p)); setPlaceData(d => ({ ...d, imageUrl: url })); toast.success('Photo ready!'); } catch (err) { toast.error(err.message); } setPlaceUp(false); }); r.readAsDataURL(file); };
+  const savePlace = async (e) => {
+    e.preventDefault(); setLoading(true);
+    try {
+      if (editPlace) await updateDoc(doc(db, 'placements', editPlace.id), { ...placeData, updatedAt: serverTimestamp() });
+      else await addDoc(collection(db, 'placements'), { ...placeData, createdAt: serverTimestamp() });
+      toast.success('Placement saved!'); setEditPlace(null); setPlaceData({ name: '', year: '', company: '', package: '', imageUrl: '' });
+      logActivity(editPlace ? 'update' : 'add', `Placement: ${placeData.name}`);
+    } catch (err) { toast.error(err.message); }
+    setLoading(false);
+  };
+  const deletePlace = async (id) => { if (window.confirm('Delete?')) { await deleteDoc(doc(db, 'placements', id)); logActivity('delete', 'Placement deleted'); } };
+
+  // ── 3. FACULTY ────────────────────────────────────────────────────────────────
+  const teachingDepts = ['Commerce', 'English', 'Hindi', 'Economics', 'Political Science', 'History', 'Psychology', 'BCA', 'BBA'];
+  const nonTeachingDepts = ['General Section', 'Account Section', 'Library', 'Examination', 'Computer Lab Section'];
+  const [editFac, setEditFac] = useState(null);
+  const [facData, setFacData] = useState({ name: '', staffType: 'Teaching', dept: 'Commerce', qual: '', desig: '', imageUrl: '' });
+  const [facUp, setFacUp] = useState(false); const [facProg, setFacProg] = useState(0);
+  const handleFacFile = async (file) => { const r = new FileReader(); r.onload = e => triggerCrop(e.target.result, async (blob) => { setFacUp(true); setFacProg(0); try { const url = await uploadToImgBB(blob, p => setFacProg(p)); setFacData(d => ({ ...d, imageUrl: url })); toast.success('Photo ready!'); } catch (err) { toast.error(err.message); } setFacUp(false); }); r.readAsDataURL(file); };
+  const saveFac = async (e) => {
+    e.preventDefault(); setLoading(true);
+    try {
+      if (editFac) await updateDoc(doc(db, 'faculties', editFac.id), { ...facData, updatedAt: serverTimestamp() });
+      else await addDoc(collection(db, 'faculties'), { ...facData, createdAt: serverTimestamp() });
+      toast.success('Staff profile saved!'); setEditFac(null); setFacData({ name: '', staffType: 'Teaching', dept: 'Commerce', qual: '', desig: '', imageUrl: '' });
+      logActivity(editFac ? 'update' : 'add', `Staff: ${facData.name}`);
+    } catch (err) { toast.error(err.message); }
+    setLoading(false);
+  };
+  const deleteFac = async (id) => { if (window.confirm('Delete?')) { await deleteDoc(doc(db, 'faculties', id)); logActivity('delete', 'Staff deleted'); } };
+
+  // ── 4. SLIDER ─────────────────────────────────────────────────────────────────
+  const [sliderForm, setSliderForm] = useState({ title: '', subtitle: '', image: '', order: 0 });
+  const [editingSlide, setEditingSlide] = useState(null);
+  const [sliderUp, setSliderUp] = useState(false); const [sliderProg, setSliderProg] = useState(0);
+  const handleSliderFile = async (file) => { const r = new FileReader(); r.onload = e => triggerCrop(e.target.result, async (blob) => { setSliderUp(true); setSliderProg(0); try { const url = await uploadToImgBB(blob, p => setSliderProg(p)); setSliderForm(f => ({ ...f, image: url })); toast.success('Image ready!'); } catch (err) { } setSliderUp(false); }); r.readAsDataURL(file); };
+  const saveSlide = async (e) => { e.preventDefault(); setLoading(true); try { if (editingSlide) await updateDoc(doc(db, 'sliderSlides', editingSlide.id), sliderForm); else await addDoc(collection(db, 'sliderSlides'), { ...sliderForm, createdAt: serverTimestamp() }); setEditingSlide(null); setSliderForm({ title: '', subtitle: '', image: '', order: 0 }); toast.success('Slide saved!'); } catch (err) { } setLoading(false); };
+  const deleteSlide = async (id) => { if (window.confirm('Delete?')) await deleteDoc(doc(db, 'sliderSlides', id)); };
+
+  // ── 5. MENU ───────────────────────────────────────────────────────────────────
+  const [navData, setNavData] = useState([]);
+  const [editMenuSel, setEditMenuSel] = useState('');
+  const [editMenuForm, setEditMenuForm] = useState({ label: '', href: '' });
+  const [newMenuForm, setNewMenuForm] = useState({ label: '', href: '', parentId: 'top' });
+  useEffect(() => { getDoc(doc(db, 'settings', 'navbar')).then(s => { if (s.exists() && s.data().links?.length) setNavData(s.data().links); else if (navLinks?.length) setNavData(navLinks); }); }, [navLinks]);
+  const flatMenus = useMemo(() => {
+    const f = []; (navData || []).forEach((l0, i0) => { f.push({ id: `${i0}`, label: l0.label, href: l0.href, pathStr: `[L1] ${l0.label}`, level: 0 }); if (l0.sub) l0.sub.forEach((l1, i1) => { f.push({ id: `${i0}-${i1}`, label: l1.label, href: l1.href, pathStr: `[L2] ${l0.label} › ${l1.label}`, level: 1 }); if (l1.sub) l1.sub.forEach((l2, i2) => f.push({ id: `${i0}-${i1}-${i2}`, label: l2.label, href: l2.href, pathStr: `[L3] ${l0.label} › ${l1.label} › ${l2.label}`, level: 2 })); }); }); return f;
+  }, [navData]);
+  const saveNav = async (arr) => { setLoading(true); try { await setDoc(doc(db, 'settings', 'navbar'), { links: arr }); setNavData(arr); toast.success('Nav Saved!'); } catch (err) { } setLoading(false); };
+  const addMenu = () => { const nav = JSON.parse(JSON.stringify(navData)); const item = { label: newMenuForm.label, href: newMenuForm.href }; if (newMenuForm.parentId === 'top') nav.push(item); else { const idx = newMenuForm.parentId.split('-'); if (idx.length === 1) { if (!nav[idx[0]].sub) nav[idx[0]].sub = []; nav[idx[0]].sub.push(item); } else { if (!nav[idx[0]].sub[idx[1]].sub) nav[idx[0]].sub[idx[1]].sub = []; nav[idx[0]].sub[idx[1]].sub.push(item); } } saveNav(nav); setNewMenuForm({ label: '', href: '', parentId: 'top' }); };
+  const deleteMenu = (id) => { if (!window.confirm('Delete?')) return; const nav = JSON.parse(JSON.stringify(navData)); const idx = id.split('-'); if (idx.length === 1) nav.splice(+idx[0], 1); else if (idx.length === 2) nav[idx[0]].sub.splice(+idx[1], 1); else nav[idx[0]].sub[idx[1]].sub.splice(+idx[2], 1); saveNav(nav); };
+
+  // ── 6. PAGES ──────────────────────────────────────────────────────────────────
+  const [pageMode, setPageMode] = useState('update');
+  const [editingPage, setEditPage] = useState(null);
+  const [pageData, setPageData] = useState({ title: '', content: '', path: '', slug: '' });
+  const [seoData, setSeoData] = useState({ metaTitle: '', metaDesc: '', keywords: '', ogImage: '' });
+  const getSeoScore = (seo, title) => { let s = 0; if ((title || '').length > 5) s += 20; if ((seo?.metaTitle || '').length > 10) s += 25; if ((seo?.metaDesc || '').length > 50) s += 30; if ((seo?.keywords || '').length > 0) s += 15; if (seo?.ogImage) s += 10; return s; };
+  const savePage = async (e) => { e.preventDefault(); setLoading(true); try { const base = { title: pageData.title, content: pageData.content, seo: seoData || {} }; if (editingPage) { const upd = { ...base, updatedAt: serverTimestamp() }; if (pageMode === 'update') upd.path = pageData.path; else upd.slug = pageData.slug; await updateDoc(doc(db, 'pages', editingPage.id), upd); } else await addDoc(collection(db, 'pages'), { ...base, path: pageMode === 'update' ? pageData.path : '', slug: pageMode === 'create' ? pageData.slug : '', createdAt: serverTimestamp() }); setEditPage(null); setPageData({ title: '', content: '', path: '', slug: '' }); setSeoData({ metaTitle: '', metaDesc: '', keywords: '', ogImage: '' }); toast.success('Page saved!'); } catch (err) { toast.error(err.message); } setLoading(false); };
+  const deletePage = async (id) => { if (window.confirm('Delete?')) await deleteDoc(doc(db, 'pages', id)); };
+
+  // ── 7. GALLERY ────────────────────────────────────────────────────────────────
+  const [galleryData, setGalleryData] = useState({ title: '', cat: 'Seminars', src: '' });
+  const [galleryUp, setGalleryUp] = useState(false); const [galleryProg, setGalleryProg] = useState(0);
+  const handleGalleryFile = async (file) => { const r = new FileReader(); r.onload = e => triggerCrop(e.target.result, async (blob) => { setGalleryUp(true); setGalleryProg(0); try { const url = await uploadToImgBB(blob, p => setGalleryProg(p)); setGalleryData(d => ({ ...d, src: url })); toast.success('Image ready!'); } catch (err) { } setGalleryUp(false); }); r.readAsDataURL(file); };
+  const saveGallery = async (e) => { e.preventDefault(); setLoading(true); try { await addDoc(collection(db, 'gallery'), { ...galleryData, createdAt: serverTimestamp() }); toast.success('Photo saved!'); setGalleryData({ title: '', cat: 'Seminars', src: '' }); } catch (err) { } setLoading(false); };
+  const deleteGallery = async (id) => { if (window.confirm('Delete?')) await deleteDoc(doc(db, 'gallery', id)); };
+
+  // ── 8. GENERIC (Notices / News / Docs / Events) ───────────────────────────────
+  const genericSave = async (col, editing, data, setEditing, reset, msg, e) => { if (e) e.preventDefault(); setLoading(true); try { if (editing) await updateDoc(doc(db, col, editing.id), { ...data, updatedAt: serverTimestamp() }); else await addDoc(collection(db, col), { ...data, date: new Date().toISOString(), createdAt: serverTimestamp() }); toast.success(msg); setEditing(null); reset(); logActivity(editing ? 'update' : 'add', `${col}: item saved`); } catch (err) { toast.error(err.message); } setLoading(false); };
+  const genericDelete = async (col, id) => { if (window.confirm('Delete?')) { await deleteDoc(doc(db, col, id)); logActivity('delete', `${col}: item deleted`); } };
+  const [editNotice, setEditNotice] = useState(null); const [noticeData, setNoticeData] = useState({ text: '', link: '', type: 'General', isNew: true });
+  const [editAnn, setEditAnn] = useState(null); const [annData, setAnnData] = useState({ text: '', link: '', type: 'News' });
+  const [editPdf, setEditPdf] = useState(null); const [pdfData, setPdfData] = useState({ title: '', link: '', type: 'Document' });
+  const [editEvent, setEditEvent] = useState(null); const [evtData, setEvtData] = useState({ title: '', desc: '', type: 'WORKSHOP', day: '', month: '', location: '', status: 'upcoming', imageUrl: '', reportLink: '' });
+  const [eventUp, setEventUp] = useState(false); const [eventProg, setEventProg] = useState(0);
+  const handleEventFile = async (file) => { const r = new FileReader(); r.onload = e => triggerCrop(e.target.result, async (blob) => { setEventUp(true); setEventProg(0); try { const url = await uploadToImgBB(blob, p => setEventProg(p)); setEvtData(d => ({ ...d, imageUrl: url })); } catch (err) { } setEventUp(false); }); r.readAsDataURL(file); };
+
+  // ── 9. YOUTUBE MANAGER ────────────────────────────────────────────────────────
+  const [ytCfg, setYtCfg] = useState({ apiKey: '', channelId: '', maxResults: 12 });
+  const [ytLoading, setYtLoading] = useState(false);
+  const [ytTest, setYtTest] = useState(null);
+  useEffect(() => { getDoc(doc(db, 'settings', 'youtube')).then(s => { if (s.exists()) setYtCfg({ apiKey: '', maxResults: 12, ...s.data() }); }); }, []);
+  const saveYtConfig = async (e) => {
+    e.preventDefault(); setLoading(true);
+    try { await setDoc(doc(db, 'settings', 'youtube'), { ...ytCfg, updatedAt: serverTimestamp() }); toast.success('YouTube config saved! Video Gallery ab live hai.'); logActivity('update', 'YouTube config updated'); }
+    catch (err) { toast.error(err.message); } setLoading(false);
+  };
+  const testYtApi = async () => {
+    setYtLoading(true); setYtTest(null);
+    try {
+      const res = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${ytCfg.channelId}&key=${ytCfg.apiKey}`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      if (data.items?.length) {
+        setYtTest({ ok: true, msg: `✅ Channel found: "${data.items[0].snippet.title}"` });
+      } else throw new Error('Channel not found');
+    } catch (e) { setYtTest({ ok: false, msg: `❌ ${e.message}` }); }
+    setYtLoading(false);
+  };
+
+  // ── 10. GOOGLE DRIVE MANAGER ──────────────────────────────────────────────────
+  const [driveCfg, setDriveCfg] = useState({ apiKey: '', folderId: '', folderName: '' });
+  const [driveLoading, setDriveLoading] = useState(false);
+  const [driveTest, setDriveTest] = useState(null);
+  const [driveFiles, setDriveFiles] = useState([]);
+  useEffect(() => { getDoc(doc(db, 'settings', 'drive')).then(s => { if (s.exists()) setDriveCfg({ apiKey: '', folderId: '', folderName: '', ...s.data() }); }); }, []);
+  const saveDriveConfig = async (e) => {
+    e.preventDefault(); setLoading(true);
+    try { await setDoc(doc(db, 'settings', 'drive'), { ...driveCfg, updatedAt: serverTimestamp() }); toast.success('Drive config saved! Documents auto-sync active.'); logActivity('update', 'Drive config updated'); }
+    catch (err) { toast.error(err.message); } setLoading(false);
+  };
+  const testDriveApi = async () => {
+    setDriveLoading(true); setDriveTest(null); setDriveFiles([]);
+    try {
+      const res = await fetch(`https://www.googleapis.com/drive/v3/files?q='${driveCfg.folderId}'+in+parents+and+mimeType='application/pdf'&key=${driveCfg.apiKey}&fields=files(id,name,createdTime,size)`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      setDriveFiles(data.files || []);
+      setDriveTest({ ok: true, msg: `✅ Folder accessible! ${data.files?.length || 0} PDFs found.` });
+    } catch (e) { setDriveTest({ ok: false, msg: `❌ ${e.message}` }); }
+    setDriveLoading(false);
+  };
+
+  // ── 11. BACKUP / RESTORE ──────────────────────────────────────────────────────
+  const handleBackup = async () => {
+    setLoading(true);
+    try {
+      const cols = ['notices', 'announcements', 'events', 'gallery', 'pdfReports', 'pages', 'faculties', 'placements', 'sliderSlides', 'alerts'];
+      const backup = {}; const nb = await getDoc(doc(db, 'settings', 'navbar')); if (nb.exists()) backup.navbar = nb.data();
+      for (const col of cols) { const snap = await getDocs(collection(db, col)); backup[col] = snap.docs.map(d => ({ id: d.id, ...d.data() })); }
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `gnc_backup_${new Date().toISOString().split('T')[0]}.json`; a.click();
+      toast.success('Backup downloaded!');
+    } catch (e) { toast.error(e.message); } setLoading(false);
+  };
+  const handleRestore = async () => {
+    if (!restoreFile || !window.confirm('⚠️ This will ERASE all data. Confirm?')) return;
+    setLoading(true);
+    try {
+      const text = await restoreFile.text(); const backup = JSON.parse(text);
+      const cols = ['notices', 'announcements', 'events', 'gallery', 'pdfReports', 'pages', 'faculties', 'placements', 'sliderSlides', 'alerts'];
+      for (const col of cols) {
+        if (!backup[col]) continue;
+        const existing = await getDocs(collection(db, col));
+        const batch = writeBatch(db); existing.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+        const batch2 = writeBatch(db);
+        backup[col].forEach(item => { const { id, ...d } = item; batch2.set(doc(collection(db, col)), d); });
+        await batch2.commit();
+      }
+      if (backup.navbar) await setDoc(doc(db, 'settings', 'navbar'), backup.navbar);
+      toast.success('Database restored!'); logActivity('restore', 'Full backup restored');
+    } catch (e) { toast.error(e.message); } setLoading(false);
+  };
+
+  // ── 12. SYSTEM TEST (12 tests + PDF Report) ───────────────────────────────────
   const [testRunning, setTestRunning] = useState(false);
   const [testProgress, setTestProgress] = useState(0);
   const [testResults, setTestResults] = useState([]);
   const [testScore, setTestScore] = useState(null);
   const [sysLog, setSysLog] = useState([]);
-  const termRef = useRef(null);
+  const [pdfGenerating, setPdfGenerating] = useState(false);
+  const sysTermRef = useRef(null);
+  useEffect(() => { if (sysTermRef.current) sysTermRef.current.scrollTop = sysTermRef.current.scrollHeight; }, [sysLog]);
 
-  useEffect(() => {
-    if (termRef.current) { termRef.current.scrollTop = termRef.current.scrollHeight; }
-  }, [sysLog]);
+  const addTestLog = (name, status, detail) => setTestResults(prev => [...prev, { name, status, detail, time: new Date().toLocaleTimeString() }]);
+  const pushLog = (msg) => setSysLog(prev => [...prev, msg]);
 
   const runDiagnostics = async () => {
-    setTestRunning(true); setTestResults([]); setTestProgress(0); setTestScore(null);
-    setSysLog([
-      '[SYSTEM] Initializing Data Flow Architecture Scan...', 
-      '[SYSTEM] Beginning 5-Phase Deep Diagnostic Report...'
-    ]);
-    
-    let passed = 0; const totalTests = 5;
-    const addLog = (name, status, detail) => setTestResults(prev => [...prev, { name, status, detail }]);
-    const pushMsg = (msg) => setSysLog(prev => [...prev, String(msg)]);
+    setTestRunning(true); setTestResults([]); setTestProgress(0); setTestScore(null); setSysLog([]);
+    let passed = 0; const total = 12;
 
-    await new Promise(r => setTimeout(r, 1000));
-    
-    // PHASE 1: THE BRAIN
-    pushMsg('>> [PHASE 1: THE BRAIN] Pinging App.jsx Data Fetching Engine...');
-    setTestProgress(20);
-    await new Promise(r => setTimeout(r, 800));
-    try { 
-      if (import.meta.env && import.meta.env.MODE) { 
-        addLog("Phase 1: The Brain (Data Fetching)", "success", `App.jsx initialized correctly in ${import.meta.env.MODE} mode`); 
-        passed++; 
-        pushMsg('[OK] onSnapshot listeners are active and tracking states.'); 
-      } else throw new Error("Environment missing"); 
-    } catch (e) { addLog("Phase 1: The Brain", "fail", String(e.message||e)); pushMsg(`[ERROR] ${e.message||e}`); }
-    
-    await new Promise(r => setTimeout(r, 1000));
+    pushLog('[SYS] ▶ GNC WEBSITE SYSTEM DIAGNOSTICS v8.0');
+    pushLog('[SYS] Initializing 12-phase test suite...');
+    await new Promise(r => setTimeout(r, 400));
 
-    // PHASE 2: THE CONTROL ROOM
-    pushMsg('>> [PHASE 2: THE CONTROL ROOM] Verifying AdminPanel DB Link...');
-    setTestProgress(40);
-    await new Promise(r => setTimeout(r, 800));
-    try { 
-      const q = query(collection(db, 'pages'), limit(1));
-      await getDocs(q); 
-      addLog("Phase 2: The Control Room (DB Write)", "success", "AdminPanel has secure access to Firestore"); 
-      passed++; 
-      pushMsg('[OK] Firestore DB access verified. Ready for addDoc/updateDoc.'); 
-    } catch (e) { addLog("Phase 2: The Control Room", "fail", "Access Denied"); pushMsg('[ERROR] Firestore permissions blocked.'); }
+    // TEST 1 — Environment
+    pushLog('[1/12] Checking Vite environment...');
+    try { if (import.meta.env.MODE) { addTestLog('Vite Environment', 'success', `Mode: ${import.meta.env.MODE} | Base: ${import.meta.env.BASE_URL}`); passed++; pushLog('[OK] Vite running correctly'); } } catch (e) { addTestLog('Vite Environment', 'fail', e.message); pushLog('[ERR] ' + e.message); }
+    setTestProgress(Math.round((1 / total) * 100)); await new Promise(r => setTimeout(r, 500));
 
-    await new Promise(r => setTimeout(r, 1000));
+    // TEST 2 — Firebase Init
+    pushLog('[2/12] Checking Firebase initialization...');
+    try { if (db && db.app) { addTestLog('Firebase Init', 'success', `Project: ${db.app.options.projectId}`); passed++; pushLog('[OK] Firebase project connected'); } else throw new Error('DB object missing'); }
+    catch (e) { addTestLog('Firebase Init', 'fail', e.message); pushLog('[ERR] ' + e.message); }
+    setTestProgress(Math.round((2 / total) * 100)); await new Promise(r => setTimeout(r, 500));
 
-    // PHASE 3: THE HIGHWAY
-    pushMsg('>> [PHASE 3: THE HIGHWAY] Checking Props Propagation...');
-    setTestProgress(60);
-    await new Promise(r => setTimeout(r, 800));
-    try { 
-      const navRef = await getDoc(doc(db, 'settings', 'navbar')); 
-      addLog("Phase 3: The Highway (Props Sync)", "success", navRef.exists() ? "Dynamic Props successfully traversing the tree" : "Props fallback active and stable"); 
-      passed++; 
-      pushMsg('[OK] Data transmission lines are clear. State -> Props sync active.'); 
-    } catch (e) { addLog("Phase 3: The Highway", "fail", String(e.message||e)); pushMsg(`[ERROR] ${e.message||e}`); }
+    // TEST 3 — Firestore Read
+    pushLog('[3/12] Testing Firestore read access...');
+    try { const snap = await getDocs(query(collection(db, 'pages'), limit(1))); addTestLog('Firestore Read', 'success', `Pages collection: ${snap.size} doc(s) fetched`); passed++; pushLog('[OK] Firestore read permissions active'); }
+    catch (e) { addTestLog('Firestore Read', 'fail', 'Permission denied. Check Firebase Rules.'); pushLog('[ERR] Firestore: ' + e.message); }
+    setTestProgress(Math.round((3 / total) * 100)); await new Promise(r => setTimeout(r, 500));
 
-    await new Promise(r => setTimeout(r, 1000));
+    // TEST 4 — Firestore Write
+    pushLog('[4/12] Testing Firestore write access...');
+    let testDocId = null;
+    try { const d = await addDoc(collection(db, '_sysTest'), { t: serverTimestamp(), test: true }); testDocId = d.id; addTestLog('Firestore Write', 'success', `Test doc created: ${d.id.substring(0, 12)}...`); passed++; pushLog('[OK] Write permissions verified'); }
+    catch (e) { addTestLog('Firestore Write', 'fail', e.message); pushLog('[ERR] Write: ' + e.message); }
+    setTestProgress(Math.round((4 / total) * 100)); await new Promise(r => setTimeout(r, 500));
 
-    // PHASE 4: THE DISPLAY
-    pushMsg('>> [PHASE 4: THE DISPLAY] Validating Frontend Rendering Nodes...');
-    setTestProgress(80);
-    await new Promise(r => setTimeout(r, 800));
-    try { 
-      if (document && document.body) { 
-        addLog("Phase 4: The Display (Frontend)", "success", "UI Engine, React Portals & Sorting logic are functional"); 
-        passed++; 
-        pushMsg('[OK] React Portals configured. Document Body locks available for Modals.'); 
-      } else throw new Error("DOM not accessible"); 
-    } catch (e) { addLog("Phase 4: The Display", "fail", String(e.message||e)); pushMsg(`[ERROR] ${e.message||e}`); }
-
-    await new Promise(r => setTimeout(r, 1000));
-
-    // 🌟 FIX: PHASE 5: THE DIAGNOSTIC GUARD (Extremely safe check)
-    pushMsg('>> [PHASE 5: THE DIAGNOSTIC GUARD] Testing External API Integrations...');
-    setTestProgress(100);
-    await new Promise(r => setTimeout(r, 800));
+    // TEST 5 — Firestore Delete
+    pushLog('[5/12] Testing Firestore delete access...');
     try {
-      const apiKeySafe = IMGBB_API_KEY ? String(IMGBB_API_KEY).trim() : '';
-      if (apiKeySafe.length > 10) { 
-        addLog("Phase 5: Diagnostic Guard (APIs)", "success", "ImgBB API Key verified. Ready for auto-crop bypass uploads."); 
-        passed++; 
-        pushMsg('[OK] External Server API Key handshake successful.'); 
-      } else { 
-        throw new Error("Invalid API Token - Key string is empty or missing!"); 
-      }
-    } catch (e) { 
-      addLog("Phase 5: Diagnostic Guard", "fail", String(e.message||e)); 
-      pushMsg(`[ERROR] ${e.message||e}`); 
-    }
+      if (testDocId) { await deleteDoc(doc(db, '_sysTest', testDocId)); addTestLog('Firestore Delete', 'success', 'Test document cleaned up successfully'); passed++; pushLog('[OK] Delete permissions active'); }
+      else throw new Error('No test doc to delete');
+    } catch (e) { addTestLog('Firestore Delete', 'fail', e.message); pushLog('[ERR] ' + e.message); }
+    setTestProgress(Math.round((5 / total) * 100)); await new Promise(r => setTimeout(r, 500));
 
-    await new Promise(r => setTimeout(r, 800));
-    pushMsg('>> [SYSTEM] 5-Phase Diagnostic Scan Complete.');
-    if (passed === totalTests) pushMsg('>> [RESULT] DECOUPLED ARCHITECTURE 100% HEALTHY.');
-    else pushMsg(`>> [RESULT] WARNING: ${totalTests - passed} ANOMALIES FOUND IN ARCHITECTURE.`);
-    
-    await new Promise(r => setTimeout(r, 800));
-    setTestScore(Math.round((passed / totalTests) * 100)); 
+    // TEST 6 — Navbar Settings
+    pushLog('[6/12] Checking navbar settings structure...');
+    try { const nb = await getDoc(doc(db, 'settings', 'navbar')); if (nb.exists()) { addTestLog('Navbar Settings', 'success', `${nb.data().links?.length || 0} top-level links loaded`); passed++; pushLog(`[OK] Navbar: ${nb.data().links?.length} items`); } else { addTestLog('Navbar Settings', 'warning', 'Using static fallback (no DB record)'); passed++; pushLog('[WARN] Navbar using static fallback'); } }
+    catch (e) { addTestLog('Navbar Settings', 'fail', e.message); pushLog('[ERR] ' + e.message); }
+    setTestProgress(Math.round((6 / total) * 100)); await new Promise(r => setTimeout(r, 500));
+
+    // TEST 7 — ImgBB API
+    pushLog('[7/12] Validating ImgBB image upload API...');
+    try {
+      const dummyB64 = 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+      const fd = new FormData(); fd.append('image', dummyB64);
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: fd });
+      if (res.ok) { addTestLog('ImgBB Upload API', 'success', `Key validated — upload service active`); passed++; pushLog('[OK] ImgBB API key valid'); }
+      else throw new Error('Invalid API key or rate limited');
+    } catch (e) { addTestLog('ImgBB Upload API', 'fail', e.message); pushLog('[ERR] ' + e.message); }
+    setTestProgress(Math.round((7 / total) * 100)); await new Promise(r => setTimeout(r, 500));
+
+    // TEST 8 — Alerts Collection
+    pushLog('[8/12] Checking alerts collection...');
+    try { const snap = await getDocs(collection(db, 'alerts')); const active = snap.docs.filter(d => d.data().isActive).length; addTestLog('Flash Alerts', 'success', `${snap.size} total | ${active} currently LIVE`); passed++; pushLog(`[OK] Alerts: ${snap.size} records, ${active} active`); }
+    catch (e) { addTestLog('Flash Alerts', 'fail', e.message); pushLog('[ERR] ' + e.message); }
+    setTestProgress(Math.round((8 / total) * 100)); await new Promise(r => setTimeout(r, 500));
+
+    // TEST 9 — Faculty Collection
+    pushLog('[9/12] Checking faculty & staff data...');
+    try { const snap = await getDocs(collection(db, 'faculties')); const teaching = snap.docs.filter(d => (d.data().staffType || 'Teaching') === 'Teaching').length; const nonT = snap.docs.filter(d => d.data().staffType === 'Non-Teaching').length; addTestLog('Faculty Directory', 'success', `Teaching: ${teaching} | Non-Teaching: ${nonT}`); passed++; pushLog(`[OK] Faculty: ${teaching} teaching, ${nonT} non-teaching`); }
+    catch (e) { addTestLog('Faculty Directory', 'fail', e.message); pushLog('[ERR] ' + e.message); }
+    setTestProgress(Math.round((9 / total) * 100)); await new Promise(r => setTimeout(r, 500));
+
+    // TEST 10 — Placements Collection
+    pushLog('[10/12] Checking placements (alumni wall)...');
+    try { const snap = await getDocs(collection(db, 'placements')); addTestLog('Alumni Placements', 'success', `${snap.size} success stories on Wall of Fame`); passed++; pushLog(`[OK] Placements: ${snap.size} alumni stories`); }
+    catch (e) { addTestLog('Alumni Placements', 'fail', e.message); pushLog('[ERR] ' + e.message); }
+    setTestProgress(Math.round((10 / total) * 100)); await new Promise(r => setTimeout(r, 500));
+
+    // TEST 11 — YouTube Config
+    pushLog('[11/12] Checking YouTube API configuration...');
+    try { const snap = await getDoc(doc(db, 'settings', 'youtube')); if (snap.exists() && snap.data().apiKey) { addTestLog('YouTube Config', 'success', `Channel: ${snap.data().channelId || 'not set'} | Max: ${snap.data().maxResults || 12} videos`); passed++; pushLog('[OK] YouTube config found in DB'); } else { addTestLog('YouTube Config', 'warning', 'Not configured (Admin → YouTube Manager)'); pushLog('[WARN] YouTube not yet configured'); } }
+    catch (e) { addTestLog('YouTube Config', 'fail', e.message); pushLog('[ERR] ' + e.message); }
+    setTestProgress(Math.round((11 / total) * 100)); await new Promise(r => setTimeout(r, 500));
+
+    // TEST 12 — Google Drive Config
+    pushLog('[12/12] Checking Google Drive configuration...');
+    try { const snap = await getDoc(doc(db, 'settings', 'drive')); if (snap.exists() && snap.data().apiKey) { addTestLog('Google Drive Config', 'success', `Folder: ${snap.data().folderName || snap.data().folderId}`); passed++; pushLog('[OK] Drive config found in DB'); } else { addTestLog('Google Drive Config', 'warning', 'Not configured (Admin → Drive Manager)'); pushLog('[WARN] Drive not yet configured'); } }
+    catch (e) { addTestLog('Google Drive Config', 'fail', e.message); pushLog('[ERR] ' + e.message); }
+    setTestProgress(100);
+    pushLog('');
+    pushLog(`[COMPLETE] Score: ${Math.round((passed / total) * 100)}% (${passed}/${total} tests passed)`);
+    setTestScore(Math.round((passed / total) * 100));
     setTestRunning(false);
   };
 
-  const [activityLogs,setActivityLogs]=useState([]);
-  useEffect(()=>{
-    const q=query(collection(db,'adminLogs'),orderBy('time','desc'),limit(50));
-    const u=onSnapshot(q,s=>setActivityLogs(s.docs.map(d=>({id:d.id,...d.data()}))));
-    return()=>u();
-  },[]);
-  const logActivity=useCallback(async(action,message,col='')=>{try{await addDoc(collection(db,'adminLogs'),{action,message,collection:col,time:new Date().toISOString(),createdAt:serverTimestamp()});}catch(_){}},[]);
-
-  const [cropSrc,setCropSrc]=useState(null); const [cropCb,setCropCb]=useState(null);
-  const triggerCrop=(src,cb)=>{setCropSrc(src);setCropCb(()=>cb);};
-  const handleCropDone=async(blob)=>{if(cropCb)await cropCb(blob);setCropSrc(null);setCropCb(null);};
-
-  // SLIDER
-  const [sliderForm,setSliderForm]=useState({title:'',subtitle:'',image:'',order:0});
-  const [editingSlide,setEditingSlide]=useState(null);
-  const [sliderProgress,setSliderProgress]=useState(0);
-  const [sliderUploading,setSliderUploading]=useState(false);
-  const sliderFileRef=useRef(null);
-  const [dragSrcIdx,setDragSrcIdx]=useState(null);
-  const [dragOverIdx,setDragOverIdx]=useState(null);
-  const [localSlides,setLocalSlides]=useState([]);
-  useEffect(()=>{if(sliderSlides?.length)setLocalSlides([...sliderSlides].sort((a,b)=>(a.order??0)-(b.order??0)));},[sliderSlides]);
-  const resetSlider=()=>{setSliderForm({title:'',subtitle:'',image:'',order:localSlides.length});setEditingSlide(null);setSliderProgress(0);if(sliderFileRef.current)sliderFileRef.current.value='';};
-  const handleSliderFile=async(file)=>{const r=new FileReader();r.onload=e=>triggerCrop(e.target.result,async(blob)=>{const tid=toast.loading('Uploading to ImgBB…');setSliderUploading(true); setSliderProgress(0);try{ const url = await uploadToImgBB(blob, p => setSliderProgress(p)); setSliderForm(f=>({...f,image:url})); toast.success('Image ready! ✅',{id:tid}); }catch(err){toast.error(err.message,{id:tid});}setSliderUploading(false);}); r.readAsDataURL(file);};
-  const saveSlide=async(e)=>{e.preventDefault();if(!sliderForm.title?.trim()||!sliderForm.image?.trim())return toast.error('Title & image required');setLoading(true);const tid=toast.loading(editingSlide?'Updating…':'Publishing…');try{const data={title:sliderForm.title.trim(),subtitle:sliderForm.subtitle?.trim()||'',image:sliderForm.image.trim(),order:Number(sliderForm.order)||0};if(editingSlide){await updateDoc(doc(db,'sliderSlides',editingSlide.id),{...data,updatedAt:serverTimestamp()});await logActivity('update',`Slide updated`,'sliderSlides');toast.success('Updated! 🎉',{id:tid});}else{await addDoc(collection(db,'sliderSlides'),{...data,createdAt:serverTimestamp()});await logActivity('add',`New slide`,'sliderSlides');toast.success('Published! 🚀',{id:tid});}resetSlider();}catch(err){toast.error(err.message,{id:tid});}setLoading(false);};
-  const deleteSlide=async(slide)=>{if(!window.confirm(`Delete "${slide.title}"?`))return;setLoading(true);try{ await deleteDoc(doc(db,'sliderSlides',slide.id)); await logActivity('delete',`Slide deleted`,'sliderSlides'); toast.success('Deleted!'); }catch(err){toast.error(err.message);}setLoading(false);};
-  const handleDrop=async(idx)=>{if(dragSrcIdx===null||dragSrcIdx===idx){setDragSrcIdx(null);setDragOverIdx(null);return;}const r=[...localSlides];const[moved]=r.splice(dragSrcIdx,1);r.splice(idx,0,moved);const upd=r.map((s,i)=>({...s,order:i}));setLocalSlides(upd);setDragSrcIdx(null);setDragOverIdx(null);const tid=toast.loading('Saving order…');try{const batch=writeBatch(db);upd.forEach(s=>batch.update(doc(db,'sliderSlides',s.id),{order:s.order}));await batch.commit();await logActivity('update','Slider reordered','sliderSlides');toast.success('Order saved! ✅',{id:tid});}catch(err){toast.error(err.message,{id:tid});}};
-
-  // NAVBAR
-  const [navData,setNavData]=useState([]); const [editMenuSel,setEditMenuSel]=useState(''); const [editMenuForm,setEditMenuForm]=useState({label:'',href:''}); const [newMenuForm,setNewMenuForm]=useState({label:'',href:'',parentId:'top'});
-  useEffect(()=>{getDoc(doc(db,'settings','navbar')).then(s=>{if(s.exists()&&s.data().links?.length)setNavData(s.data().links);else if(navLinks?.length)setNavData(navLinks);});},[navLinks]);
-  const flatMenus=useMemo(()=>{const f=[];(navData||[]).forEach((l0,i0)=>{f.push({id:`${i0}`,label:l0.label,href:l0.href,pathStr:`[L1] ${l0.label}`,level:0});if(l0.sub)l0.sub.forEach((l1,i1)=>{f.push({id:`${i0}-${i1}`,label:l1.label,href:l1.href,pathStr:`[L2] ${l0.label} › ${l1.label}`,level:1});if(l1.sub)l1.sub.forEach((l2,i2)=>f.push({id:`${i0}-${i1}-${i2}`,label:l2.label,href:l2.href,pathStr:`[L3] ${l0.label} › ${l1.label} › ${l2.label}`,level:2}));});});return f;},[navData]);
-  const saveNav=async(arr,msg)=>{setLoading(true);const tid=toast.loading('Saving…');try{await setDoc(doc(db,'settings','navbar'),{links:arr});setNavData(arr);await logActivity('update',msg,'navbar');toast.success(msg,{id:tid});}catch(err){toast.error(err.message,{id:tid});}setLoading(false);};
-  const updateMenu=()=>{if(!editMenuSel||!editMenuForm.label)return toast.error('Select a menu first');const nav=JSON.parse(JSON.stringify(navData));const idx=editMenuSel.split('-');if(idx.length===1){nav[idx[0]].label=editMenuForm.label;nav[idx[0]].href=editMenuForm.href;}else if(idx.length===2){nav[idx[0]].sub[idx[1]].label=editMenuForm.label;nav[idx[0]].sub[idx[1]].href=editMenuForm.href;}else{nav[idx[0]].sub[idx[1]].sub[idx[2]].label=editMenuForm.label;nav[idx[0]].sub[idx[1]].sub[idx[2]].href=editMenuForm.href;}saveNav(nav,`Menu "${editMenuForm.label}" updated ✅`);setEditMenuSel('');setEditMenuForm({label:'',href:''}); };
-  const addMenu=()=>{if(!newMenuForm.label)return toast.error('Name required');const nav=JSON.parse(JSON.stringify(navData));const item={label:newMenuForm.label,href:newMenuForm.href};if(newMenuForm.parentId==='top')nav.push(item);else{const idx=newMenuForm.parentId.split('-');if(idx.length===1){if(!nav[idx[0]].sub)nav[idx[0]].sub=[];nav[idx[0]].sub.push(item);}else{if(!nav[idx[0]].sub[idx[1]].sub)nav[idx[0]].sub[idx[1]].sub=[];nav[idx[0]].sub[idx[1]].sub.push(item);}}saveNav(nav,`"${item.label}" added 🚀`);setNewMenuForm({label:'',href:'',parentId:'top'});};
-  const deleteMenu=(id)=>{if(!window.confirm('Delete?'))return;const nav=JSON.parse(JSON.stringify(navData));const idx=id.split('-');if(idx.length===1)nav.splice(+idx[0],1);else if(idx.length===2)nav[idx[0]].sub.splice(+idx[1],1);else nav[idx[0]].sub[idx[1]].sub.splice(+idx[2],1);saveNav(nav,'Menu deleted');if(editMenuSel===id){setEditMenuSel('');setEditMenuForm({label:'',href:''});}};
-
-  // PAGES + SEO
-  const [pageMode,setPageMode]=useState('update');
-  const [editingPage,setEditPage]=useState(null);
-  const [pageData,setPageData]=useState({title:'',content:'',path:'',slug:'',contentType:'html'});
-  const [seoData,setSeoData]=useState({metaTitle:'',metaDesc:'',keywords:'',ogImage:''});
-  
-  const savePage=async(e)=>{
-    e.preventDefault();setLoading(true);
-    try{
-      const base={title:pageData?.title?.trim()||'',content:pageData?.content||'',contentType:pageData?.contentType||'html',seo:seoData||{}};
-      if(editingPage){
-        const upd={...base,updatedAt:serverTimestamp()};
-        if(pageMode==='update'){if(!pageData.path){toast.error('Path required');setLoading(false);return;}upd.path=pageData.path.replace('/#','');upd.slug='';}
-        else{upd.slug=(pageData.slug||'').toLowerCase().replace(/\s+/g,'-').replace(/[^\w-]+/g,'');upd.path='';}
-        await updateDoc(doc(db,'pages',editingPage.id),upd);await logActivity('update',`Page updated`,'pages');toast.success('Updated! ✅');
-      }else{
-        if(pageMode==='update'){if(!pageData.title||!pageData.path){toast.error('Title & path required');setLoading(false);return;}await addDoc(collection(db,'pages'),{...base,path:pageData.path.replace('/#',''),slug:'',createdAt:serverTimestamp()});await logActivity('add',`Page linked`,'pages');toast.success('Linked! 🚀');}
-        else{if(!pageData.title||!pageData.slug){toast.error('Title & slug required');setLoading(false);return;}await addDoc(collection(db,'pages'),{...base,slug:(pageData.slug||'').toLowerCase().replace(/\s+/g,'-'),path:'',createdAt:serverTimestamp()});await logActivity('publish',`Published`,'pages');toast.success('Published! 🚀');}
+  // ── PDF REPORT GENERATION ─────────────────────────────────────────────────────
+  const generatePDFReport = async () => {
+    setPdfGenerating(true);
+    try {
+      // Load jsPDF dynamically
+      if (!window.jspdf) {
+        await new Promise((res, rej) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+          s.onload = res; s.onerror = rej; document.head.appendChild(s);
+        });
       }
-      setEditPage(null);setPageData({title:'',content:'',path:'',slug:'',contentType:'html'});setSeoData({metaTitle:'',metaDesc:'',keywords:'',ogImage:''});
-    }catch(err){toast.error(err.message);}
-    setLoading(false);
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const W = 210; const H = 297;
+
+      // ── HEADER BACKGROUND ──────────────────────────────────────────────────
+      pdf.setFillColor(3, 11, 26);
+      pdf.rect(0, 0, W, 55, 'F');
+
+      // Gold accent bar
+      pdf.setFillColor(244, 160, 35);
+      pdf.rect(0, 55, W, 3, 'F');
+
+      // Try to add logo
+      try {
+        const logoUrl = `${window.location.origin}${import.meta.env.BASE_URL || '/'}images/logo.png`;
+        const imgData = await fetch(logoUrl).then(r => r.blob()).then(b => new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(b); }));
+        pdf.addImage(imgData, 'PNG', 10, 8, 30, 30);
+      } catch (_) {
+        // Logo not available — draw placeholder
+        pdf.setFillColor(37, 99, 235);
+        pdf.circle(25, 23, 12, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(8); pdf.setFont('helvetica', 'bold');
+        pdf.text('GNC', 21, 25);
+      }
+
+      // College name & address
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(18); pdf.setFont('helvetica', 'bold');
+      pdf.text('GURU NANAK COLLEGE', 48, 20);
+      pdf.setFontSize(9); pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(180, 200, 255);
+      pdf.text('Affiliated to B.B.M.K. University, Dhanbad | NAAC Accredited', 48, 28);
+      pdf.text('Bank More, Dhanbad — 826001, Jharkhand, India', 48, 35);
+      pdf.text('📞 (0326) XXXXXXX | ✉ admin@gncollege.ac.in', 48, 42);
+
+      // Report title
+      pdf.setFillColor(244, 160, 35);
+      pdf.setTextColor(3, 11, 26);
+      pdf.setFontSize(11); pdf.setFont('helvetica', 'bold');
+      pdf.roundedRect(10, 60, W - 20, 12, 2, 2, 'F');
+      pdf.text('WEBSITE SYSTEM HEALTH DIAGNOSTIC REPORT', W / 2, 68, { align: 'center' });
+
+      // Metadata row
+      pdf.setFontSize(8); pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(80, 80, 80);
+      const now = new Date();
+      pdf.text(`Generated: ${now.toLocaleDateString('en-IN')} at ${now.toLocaleTimeString()}`, 12, 80);
+      pdf.text(`Total Tests: 12`, 100, 80);
+      pdf.text(`Score: ${testScore}%`, 150, 80);
+
+      // Score badge
+      const sc = testScore || 0;
+      const bColor = sc >= 90 ? [16, 185, 129] : sc >= 60 ? [245, 158, 11] : [239, 68, 68];
+      pdf.setFillColor(...bColor);
+      pdf.roundedRect(W - 42, 60, 32, 18, 3, 3, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(14); pdf.setFont('helvetica', 'bold');
+      pdf.text(`${sc}%`, W - 26, 72, { align: 'center' });
+
+      // ── TABLE HEADER ──────────────────────────────────────────────────────
+      let y = 92;
+      pdf.setFillColor(3, 11, 26);
+      pdf.rect(10, y, W - 20, 10, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(9); pdf.setFont('helvetica', 'bold');
+      pdf.text('#', 14, y + 7);
+      pdf.text('TEST NAME', 22, y + 7);
+      pdf.text('STATUS', 110, y + 7);
+      pdf.text('DETAIL', 130, y + 7);
+      pdf.text('TIME', 185, y + 7);
+      y += 12;
+
+      // ── TEST RESULTS ──────────────────────────────────────────────────────
+      testResults.forEach((r, i) => {
+        if (y > H - 40) {
+          pdf.addPage();
+          pdf.setFillColor(3, 11, 26);
+          pdf.rect(0, 0, W, 15, 'F');
+          pdf.setFillColor(244, 160, 35);
+          pdf.rect(0, 15, W, 2, 'F');
+          pdf.setTextColor(255, 255, 255);
+          pdf.setFontSize(8); pdf.setFont('helvetica', 'bold');
+          pdf.text('GNC — System Diagnostic Report (continued)', 10, 10);
+          y = 25;
+        }
+
+        const rowBg = i % 2 === 0 ? [248, 250, 255] : [255, 255, 255];
+        pdf.setFillColor(...rowBg);
+        pdf.rect(10, y - 3, W - 20, 10, 'F');
+
+        // Status color
+        const statusColor = r.status === 'success' ? [16, 185, 129] : r.status === 'warning' ? [245, 158, 11] : [239, 68, 68];
+        pdf.setFillColor(...statusColor);
+        pdf.roundedRect(108, y - 2, 18, 7, 1, 1, 'F');
+
+        pdf.setTextColor(60, 60, 80);
+        pdf.setFontSize(8); pdf.setFont('helvetica', 'normal');
+        pdf.text(String(i + 1), 14, y + 4);
+        pdf.text(r.name.substring(0, 40), 22, y + 4);
+
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(7); pdf.setFont('helvetica', 'bold');
+        const statusLabel = r.status === 'success' ? 'PASS' : r.status === 'warning' ? 'WARN' : 'FAIL';
+        pdf.text(statusLabel, 117, y + 4, { align: 'center' });
+
+        pdf.setTextColor(80, 80, 100);
+        pdf.setFontSize(7.5); pdf.setFont('helvetica', 'normal');
+        const detail = r.detail?.substring(0, 55) || '';
+        pdf.text(detail, 130, y + 4);
+
+        if (r.time) {
+          pdf.setTextColor(150, 150, 150);
+          pdf.setFontSize(7);
+          pdf.text(r.time, 185, y + 4);
+        }
+
+        // bottom border
+        pdf.setDrawColor(230, 235, 245);
+        pdf.line(10, y + 7, W - 10, y + 7);
+        y += 11;
+      });
+
+      // ── SUMMARY SECTION ───────────────────────────────────────────────────
+      y += 8;
+      if (y > H - 60) { pdf.addPage(); y = 20; }
+      pdf.setFillColor(244, 160, 35);
+      pdf.rect(10, y, W - 20, 1, 'F');
+      y += 6;
+      pdf.setTextColor(3, 11, 26); pdf.setFontSize(10); pdf.setFont('helvetica', 'bold');
+      pdf.text('SYSTEM SUMMARY', 12, y + 5);
+      y += 10;
+
+      const passed = testResults.filter(r => r.status === 'success').length;
+      const warned = testResults.filter(r => r.status === 'warning').length;
+      const failed = testResults.filter(r => r.status === 'fail').length;
+
+      const summary = [
+        ['Tests Passed', `${passed} / 12`, passed === 12 ? 'Excellent' : passed >= 9 ? 'Good' : 'Needs Attention'],
+        ['Warnings', `${warned}`, warned === 0 ? 'None' : 'Review Recommended'],
+        ['Failed Tests', `${failed}`, failed === 0 ? 'None' : 'Critical — Fix Required'],
+        ['Overall Health', `${testScore}%`, testScore >= 90 ? '🟢 Healthy' : testScore >= 60 ? '🟡 Fair' : '🔴 Critical'],
+      ];
+
+      summary.forEach(([key, val, note]) => {
+        pdf.setFillColor(248, 250, 255);
+        pdf.rect(10, y - 2, W - 20, 10, 'F');
+        pdf.setTextColor(80, 80, 100); pdf.setFontSize(8.5); pdf.setFont('helvetica', 'normal');
+        pdf.text(key, 14, y + 5);
+        pdf.setFont('helvetica', 'bold'); pdf.setTextColor(3, 11, 26);
+        pdf.text(val, 80, y + 5);
+        pdf.setFont('helvetica', 'italic'); pdf.setTextColor(100, 100, 120);
+        pdf.text(note, 130, y + 5);
+        y += 12;
+      });
+
+      // ── FOOTER ─────────────────────────────────────────────────────────────
+      const pages = pdf.internal.getNumberOfPages();
+      for (let i = 1; i <= pages; i++) {
+        pdf.setPage(i);
+        pdf.setFillColor(3, 11, 26);
+        pdf.rect(0, H - 14, W, 14, 'F');
+        pdf.setFillColor(244, 160, 35);
+        pdf.rect(0, H - 14, W, 1, 'F');
+        pdf.setTextColor(140, 160, 200);
+        pdf.setFontSize(7); pdf.setFont('helvetica', 'normal');
+        pdf.text('Guru Nanak College, Dhanbad | Confidential System Report', 10, H - 5);
+        pdf.text(`Page ${i} of ${pages}`, W - 10, H - 5, { align: 'right' });
+      }
+
+      // Save
+      const filename = `GNC_System_Report_${now.toISOString().split('T')[0]}.pdf`;
+      pdf.save(filename);
+      toast.success(`📥 "${filename}" downloaded!`);
+    } catch (e) {
+      toast.error('PDF error: ' + e.message);
+    }
+    setPdfGenerating(false);
   };
 
-  const [galleryData,setGalleryData]=useState({title:'',cat:'Seminars',src:''}); const [galleryProgress,setGalleryProgress]=useState(0); const [galleryUploading,setGalleryUploading]=useState(false); const galleryFileRef=useRef(null);
-  const handleGalleryFile=async(file)=>{const r=new FileReader(); r.onload=e=>triggerCrop(e.target.result,async(blob)=>{const tid = toast.loading('Uploading to ImgBB…'); setGalleryUploading(true); setGalleryProgress(0); try{ const url = await uploadToImgBB(blob, p => setGalleryProgress(p)); setGalleryData(d=>({...d,src:url})); toast.success('Ready! ✅', {id:tid}); }catch(err){ toast.error(err.message, {id:tid}); } setGalleryUploading(false);}); r.readAsDataURL(file);};
-  const addGalleryPhoto=async(e)=>{e.preventDefault();if(!galleryData.src?.trim())return toast.error('Image required');setLoading(true);try{await addDoc(collection(db,'gallery'),{...galleryData,createdAt:serverTimestamp()});await logActivity('add',`Gallery photo added`,'gallery');toast.success('Published! 🎉');setGalleryData({title:'',cat:'Seminars',src:''});if(galleryFileRef.current)galleryFileRef.current.value='';}catch(err){toast.error(err.message);}setLoading(false);};
+  // ── GLOBAL SEARCH ─────────────────────────────────────────────────────────────
+  const debouncedSearch = useDebounce(searchTerm, 300);
+  const allContent = useMemo(() => [
+    ...(notices || []).map(n => ({ ...n, title: n.text?.substring(0, 40), contentType: 'Notice' })),
+    ...(announcements || []).map(a => ({ ...a, title: a.text?.substring(0, 40), contentType: 'News' })),
+    ...(events || []).map(e => ({ ...e, contentType: 'Event' })),
+    ...(pages || []).map(p => ({ ...p, contentType: 'Page' })),
+    ...(placements || []).map(p => ({ ...p, title: p.name, contentType: 'Placement' })),
+    ...(faculties || []).map(f => ({ ...f, title: f.name, contentType: 'Faculty' })),
+  ], [notices, announcements, events, pages, placements, faculties]);
+  const filtered = useMemo(() => allContent.filter(i => i.title?.toLowerCase().includes(debouncedSearch.toLowerCase()) && (filterType === 'all' || i.contentType?.toLowerCase() === filterType)), [allContent, debouncedSearch, filterType]);
 
-  const [editNotice,setEditNotice]=useState(null);const[noticeData,setNoticeData]=useState({text:'',link:'',type:'General',isNew:true});
-  const [editAnn,setEditAnn]=useState(null);const[annData,setAnnData]=useState({text:'',link:'',type:'News'});
-  const [editPdf,setEditPdf]=useState(null);const[pdfData,setPdfData]=useState({title:'',link:'',type:'Document'});
-  const [editEvent,setEditEvent]=useState(null);
-  const [evtData,setEvtData]=useState({title:'',desc:'',type:'WORKSHOP',day:'',month:'',location:'',status:'upcoming',imageUrl:'',reportLink:''});
-  const [eventProgress, setEventProgress] = useState(0); const [eventUploading, setEventUploading] = useState(false); const eventFileRef = useRef(null);
-
-  const handleEventFile = async (file) => { const r = new FileReader(); r.onload = e => triggerCrop(e.target.result, async (blob) => { const tid = toast.loading('Uploading to ImgBB…'); setEventUploading(true); setEventProgress(0); try { const url = await uploadToImgBB(blob, p => setEventProgress(p)); setEvtData(d => ({ ...d, imageUrl: url })); toast.success('Ready!', { id: tid }); } catch (err) { toast.error(err.message, { id: tid }); } setEventUploading(false); }); r.readAsDataURL(file);};
-  const genericSave=async(col,editing,data,setEditing,reset,msg)=>{setLoading(true);try{if(editing){await updateDoc(doc(db,col,editing.id),{...data,updatedAt:serverTimestamp()});await logActivity('update',`${msg} updated`,col);toast.success(`${msg} updated!`);}else{await addDoc(collection(db,col),{...data,date:new Date().toISOString(),createdAt:serverTimestamp()});await logActivity('add',`${msg} published`,col);toast.success(`${msg} published!`);}setEditing(null);reset();}catch(err){toast.error(err.message);}setLoading(false);};
-  const genericDelete=async(col,id,label)=>{if(!window.confirm(`Delete this ${label}?`))return;try{await deleteDoc(doc(db,col,id));await logActivity('delete',`${label} deleted`,col);toast.success('Deleted!');}catch(err){toast.error(err.message);}};
-
-  const [restoreFile,setRestoreFile]=useState(null);const fileRef=useRef(null);
-  const handleBackup=async()=>{setLoading(true);const tid=toast.loading('Generating…');try{const cols=['notices','announcements','events','gallery','pdfReports','pages','sliderSlides','adminLogs'];const bk={exportDate:new Date().toISOString(),version:'5.1',collections:{}};for(const col of cols){const s=await getDocs(collection(db,col));bk.collections[col]=s.docs.map(d=>({id:d.id,...d.data(),createdAt:d.data().createdAt?.toDate?.()?.toISOString?.()??null}));}const ns=await getDoc(doc(db,'settings','navbar'));if(ns.exists())bk.navbar=ns.data().links;const blob=new Blob([JSON.stringify(bk,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`gnc-backup-${new Date().toISOString().split('T')[0]}.json`;a.click();await logActivity('restore','Backup downloaded','system');toast.success('Backup ready!',{id:tid});}catch(err){toast.error(err.message,{id:tid});}setLoading(false);};
-  const handleRestore=async()=>{if(!restoreFile||!window.confirm('⚠️ ERASE all data?'))return;setLoading(true);const tid=toast.loading('Restoring…');try{const bk=JSON.parse(await restoreFile.text());const batch=writeBatch(db);for(const col of Object.keys(bk.collections||{})){const s=await getDocs(collection(db,col));s.docs.forEach(d=>batch.delete(d.ref));bk.collections[col].forEach(({id,...data})=>batch.set(doc(collection(db,col)),data));}if(bk.navbar)batch.set(doc(db,'settings','navbar'),{links:bk.navbar});await batch.commit();await logActivity('restore','Database restored','system');toast.success('Restored!',{id:tid});setRestoreFile(null);if(fileRef.current)fileRef.current.value='';}catch(err){toast.error('Failed: '+err.message,{id:tid});}setLoading(false);};
-
-  const allContent=useMemo(()=>[
-    ...(localSlides||[]).map(s=>({...s,contentType:'Slide'})),
-    ...(pages||[]).map(p=>({...p,contentType:'Page'})),
-    ...(notices||[]).map(n=>({...n,title:String(n.text||'').substring(0,50)+'…',contentType:'Notice'})),
-    ...(announcements||[]).map(a=>({...a,title:String(a.text||'').substring(0,50)+'…',contentType:'News'})),
-    ...(events||[]).map(e=>({...e,contentType:'Event'})),
-    ...(pdfReports||[]).map(r=>({...r,contentType:'Document'})),
-    ...(gallery||[]).map(g=>({...g,contentType:'Gallery'})),
-  ].sort((a,b)=>(b.createdAt?.toMillis?.()??0)-(a.createdAt?.toMillis?.()??0)),[localSlides,pages,notices,announcements,events,pdfReports,gallery]);
-
-  // 2. DEBOUNCING: Search term ko debounce kiya
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
-  const filtered = useMemo(() => allContent.filter(i => i.title?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) && (filterType === 'all' || i.contentType.toLowerCase() === filterType)), [allContent, debouncedSearchTerm, filterType]);
-  const bc=(type)=>({Slide:{bg:'rgba(244,160,35,.15)',c:T.gold},Page:{bg:'rgba(139,92,246,.15)',c:T.purple},Notice:{bg:'rgba(245,158,11,.15)',c:'#f59e0b'},News:{bg:'rgba(239,68,68,.15)',c:T.red},Event:{bg:'rgba(139,92,246,.15)',c:T.purple},Document:{bg:'rgba(16,185,129,.15)',c:T.green},Gallery:{bg:'rgba(236,72,153,.15)',c:T.pink}}[type]||{bg:'#f1f5f9',c:T.t2});
-
-  const seoScore=getSeoScore(seoData, pageData?.title || '');
-
-  const tabs=[
-    {id:'dashboard',label:'Dashboard',icon:'📊'},
-    {id:'slider',label:'Hero Slider',icon:'🖼️'},
-    {id:'menu_builder',label:'Menu Editor',icon:'🧭'},
-    {id:'pages',label:'Pages & SEO',icon:'📄'},
-    {id:'gallery',label:'Gallery',icon:'📸'},
-    {id:'notices',label:'Notices',icon:'📢'},
-    {id:'announcements',label:'News',icon:'📣'},
-    {id:'pdfReports',label:'Documents',icon:'📁'},
-    {id:'events',label:'Events',icon:'🏆'},
-    {id:'activity',label:'Activity Log',icon:'📋'},
-    {id:'backup',label:'Backup',icon:'💾'},
-    {id:'system_test',label:'System Test',icon:'⚡'}, 
+  // ── TABS DEFINITION ───────────────────────────────────────────────────────────
+  const tabs = [
+    { id: 'dashboard', label: 'Dashboard', icon: '📊', section: 'OVERVIEW' },
+    { id: 'alerts', label: 'Flash Alerts', icon: '🚨', section: 'CONTENT' },
+    { id: 'placements', label: 'Alumni Wall', icon: '🎓' },
+    { id: 'faculty', label: 'Faculty & Staff', icon: '👨‍🏫' },
+    { id: 'slider', label: 'Hero Slider', icon: '🖼️' },
+    { id: 'menu_builder', label: 'Menu Editor', icon: '🧭' },
+    { id: 'pages', label: 'Pages & SEO', icon: '📄' },
+    { id: 'gallery', label: 'Gallery', icon: '📸' },
+    { id: 'notices', label: 'Notices', icon: '📢' },
+    { id: 'announcements', label: 'News', icon: '📣' },
+    { id: 'pdfReports', label: 'Documents', icon: '📁' },
+    { id: 'events', label: 'Events', icon: '🏆' },
+    { id: 'youtube', label: 'YouTube Manager', icon: '▶️', section: 'API INTEGRATIONS' },
+    { id: 'drive', label: 'Drive Docs', icon: '☁️' },
+    { id: 'activity', label: 'Activity Log', icon: '📋', section: 'SYSTEM' },
+    { id: 'backup', label: 'Backup & Restore', icon: '💾' },
+    { id: 'system_test', label: 'System Test', icon: '⚡' },
   ];
 
+  let lastSection = '';
+
+  // ══ RENDER ════════════════════════════════════════════════════════════════════
   return (
-    <div className="adm" style={{display:'flex',height:'100vh',width:'100vw',position:'fixed',top:0,left:0,zIndex:99999,background:T.bg2,overflow:'hidden'}}>
+    <div className="adm" style={{ display: 'flex', height: '100vh', width: '100vw', position: 'fixed', top: 0, left: 0, zIndex: 99999, background: T.bg0, overflow: 'hidden' }}>
       <style>{GCSS}</style>
+
       {cropSrc && (
-        <Suspense fallback={<div>Loading Cropper...</div>}><ImageCropper src={cropSrc} onCrop={handleCropDone} onCancel={() => { setCropSrc(null); setCropCb(null); }} /></Suspense>
+        <Suspense fallback={<div style={{ position: 'fixed', inset: 0, zIndex: 100010, background: 'rgba(3,11,26,.95)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading Cropper...</div>}>
+          <ImageCropper src={cropSrc} onCrop={handleCropDone} onCancel={() => { setCropSrc(null); setCropCb(null); }} />
+        </Suspense>
       )}
 
-      <div style={{width:260,background:T.bg1,display:'flex',flexDirection:'column',borderRight:`1px solid ${T.b1}`,zIndex:10001,flexShrink:0,
-        position:isMobile?'fixed':'relative',height:'100%',boxShadow:'4px 0 20px rgba(0,0,0,.02)',
-        transform:isMobile?(sidebarOpen?'translateX(0)':'translateX(-100%)'):'none',transition:'transform .3s cubic-bezier(.4,0,.2,1)'}}>
-        
-        <div style={{padding:'24px 20px 20px',borderBottom:`1px solid ${T.b1}`}}>
-          <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
-            <div style={{width: 44, height: 44, borderRadius: 10, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(15,35,71,0.06)', padding: 4, border: `1px solid ${T.b1}`}}>
-              <img src={`${import.meta.env.BASE_URL}images/logo.png`} alt="Logo" style={{width: '100%', height: '100%', objectFit: 'contain'}} />
-            </div>
+      {/* ── SIDEBAR ──────────────────────────────────────────────────────────── */}
+      <div style={{
+        width: 248, background: T.bg1, display: 'flex', flexDirection: 'column',
+        borderRight: `1px solid ${T.b1}`, zIndex: 10001, flexShrink: 0,
+        position: isMobile ? 'fixed' : 'relative', height: '100%',
+        boxShadow: '4px 0 24px rgba(0,0,0,.4)',
+        transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'none',
+        transition: 'transform .3s ease',
+      }}>
+        {/* Brand */}
+        <div className="sidebar-brand" style={{ background: 'linear-gradient(135deg,#040e22,#071428)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg,${T.blue},${T.blueD})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>🏫</div>
             <div>
-              <div style={{fontSize:16,fontWeight:900,color:T.navy,letterSpacing:'.5px'}}>GNC ADMIN</div>
-              <div style={{fontSize:11,color:T.t3,marginTop:2,fontWeight:600}}>Control Panel v5.1</div>
+              <div style={{ fontWeight: 900, color: '#fff', fontSize: 13, letterSpacing: -.2 }}>GNC Admin</div>
+              <div style={{ fontSize: 10, color: T.t3, fontWeight: 600 }}>v8.0 — Blue Series</div>
             </div>
           </div>
-          <div style={{display:'flex',alignItems:'center',gap:8,padding:'10px 14px',background:'#ecfdf5',borderRadius:10,border:'1px solid #a7f3d0'}}>
-            <div className="glow-dot"/>
-            <span style={{fontSize:12,color:'#047857',fontWeight:800}}>LIVE API SYNC</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 14, background: 'rgba(255,255,255,.04)', border: `1px solid ${T.b1}`, borderRadius: 8, padding: '8px 12px' }}>
+            <div className="glow-dot" />
+            <span style={{ fontSize: 11, color: T.t2, fontWeight: 700 }}>All systems operational</span>
           </div>
         </div>
 
-        <div style={{flex:1,overflowY:'auto',padding:'16px 12px'}}>
-          {tabs.map(tab=>(
-            <div key={tab.id} className={`anav ${activeTab===tab.id?'active':''}`} onClick={()=>{setActiveTab(tab.id);if(isMobile)setSidebarOpen(false);}}>
-              <span style={{fontSize:18,width:28,textAlign:'center'}}>{tab.icon}</span><span style={{flex:1}}>{tab.label}</span>
-            </div>
-          ))}
+        {/* Nav */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '12px 10px' }}>
+          {tabs.map(tab => {
+            const showSection = tab.section && tab.section !== lastSection;
+            if (tab.section) lastSection = tab.section;
+            return (
+              <React.Fragment key={tab.id}>
+                {showSection && <div className="sidebar-section">{tab.section}</div>}
+                <div className={`anav ${activeTab === tab.id ? 'active' : ''}`} onClick={() => { setActiveTab(tab.id); if (isMobile) setSidebarOpen(false); }}>
+                  <span style={{ fontSize: 16, width: 24, textAlign: 'center' }}>{tab.icon}</span>
+                  <span style={{ flex: 1 }}>{tab.label}</span>
+                </div>
+              </React.Fragment>
+            );
+          })}
         </div>
-        <div style={{padding:16,borderTop:`1px solid ${T.b1}`,background:'#f8fafc'}}>
-          <button onClick={onClose} className="abtn abtn-danger" style={{width:'100%',justifyContent:'center'}}>🚪 Secure Logout</button>
+
+        {/* Close btn */}
+        <div style={{ padding: '14px 12px', borderTop: `1px solid ${T.b1}` }}>
+          <button className="abtn abtn-danger" style={{ width: '100%', justifyContent: 'center' }} onClick={onClose}>✕ Exit Admin Panel</button>
         </div>
       </div>
 
-      {isMobile&&sidebarOpen&&<div onClick={()=>setSidebarOpen(false)} style={{position:'fixed',inset:0,background:'rgba(15,35,71,.6)',zIndex:10000,backdropFilter:'blur(4px)'}}/>}
+      {isMobile && sidebarOpen && <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(3,11,26,.7)', zIndex: 10000, backdropFilter: 'blur(4px)' }} />}
 
-      <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden',minWidth:0}}>
+      {/* ── MAIN CONTENT ─────────────────────────────────────────────────────── */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Mobile topbar */}
         <div className="amobile-top">
-          <div style={{display:'flex',alignItems:'center',gap:12}}>
-            <button onClick={()=>setSidebarOpen(true)} style={{background:'transparent',border:'none',color:T.navy,fontSize:24,cursor:'pointer'}}>☰</button>
-            <span style={{fontWeight:800,fontSize:18,color:T.navy}}>GNC Admin</span>
-          </div>
-          <button onClick={onClose} className="abtn abtn-danger abtn-sm">Exit</button>
+          <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: T.t1 }}>☰</button>
+          <span style={{ fontWeight: 900, color: T.t1, fontSize: 14 }}>GNC Admin Panel</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: T.red }}>✕</button>
         </div>
 
-        <div className="adm-main-pad" style={{flex:1,overflowY:'auto',padding:activeTab==='system_test'?'0':'36px 40px', background: activeTab==='system_test' ? '#000' : 'transparent'}}>
-          {activeTab==='dashboard'&&(
+        <div style={{ flex: 1, overflowY: 'auto', padding: '32px 36px' }} className="adm-main-pad">
+
+          {/* ── DASHBOARD ──────────────────────────────────────────────────────── */}
+          {activeTab === 'dashboard' && (
             <div className="fade-up">
-              <p className="asec">📊 Admin Dashboard</p><p className="asub">Real-time overview of all website content</p>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:20,marginBottom:36}}>
-                <StatCard icon="🖼️" label="Slider Slides" count={(localSlides||[]).length} color={T.gold}/>
-                <StatCard icon="📄" label="Pages" count={(pages||[]).length} color={T.purple}/>
-                <StatCard icon="📢" label="Notices" count={(notices||[]).length} color="#f59e0b"/>
-                <StatCard icon="📣" label="News" count={(announcements||[]).length} color={T.red}/>
-                <StatCard icon="🏆" label="Events" count={(events||[]).length} color={T.cyan}/>
-                <StatCard icon="📸" label="Gallery" count={(gallery||[]).length} color={T.pink}/>
-                <StatCard icon="📁" label="Documents" count={(pdfReports||[]).length} color={T.green}/>
-                <StatCard icon="🧭" label="Menu Items" count={flatMenus.length} color={T.navy}/>
+              <p className="asec">📊 Admin Dashboard</p>
+              <p className="asub">Real-time overview of all website modules</p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(190px,1fr))', gap: 16, marginBottom: 28 }}>
+                <StatCard icon="👨‍🏫" label="Faculty/Staff" count={(faculties || []).length} color={T.blue} sub={`${(faculties || []).filter(f => f.staffType === 'Non-Teaching').length} non-teaching`} />
+                <StatCard icon="🎓" label="Placements" count={(placements || []).length} color={T.cyan} />
+                <StatCard icon="🚨" label="Active Alerts" count={(alerts || []).filter(a => a.isActive).length} color={T.red} />
+                <StatCard icon="🖼️" label="Slider Slides" count={(sliderSlides || []).length} color={T.gold} />
+                <StatCard icon="📄" label="Pages" count={(pages || []).length} color={T.purple} />
+                <StatCard icon="📢" label="Notices" count={(notices || []).length} color="#f59e0b" />
+                <StatCard icon="🏆" label="Events" count={(events || []).length} color={T.teal} />
+                <StatCard icon="📁" label="Documents" count={(pdfReports || []).length} color={T.green} />
               </div>
-              <div className="glass" style={{padding:30}}>
-                <div className="actitle">🔍 Search All Content</div>
-                <div style={{display:'flex',gap:16,marginBottom:24,flexWrap:'wrap'}}>
-                  <input className="ainp" style={{flex:1,minWidth:250}} placeholder="Search by title…" value={searchTerm} onChange={e=>setSearchTerm(e.target.value)}/>
-                  <select className="ainp" style={{minWidth:180}} value={filterType} onChange={e=>setFilterType(e.target.value)}>
-                    {['all','slide','page','notice','news','event','document','gallery'].map(t=><option key={t} value={t}>{t.charAt(0).toUpperCase()+t.slice(1)}</option>)}
+              <div className="glass">
+                <div className="actitle">🔍 Global Search</div>
+                <div style={{ display: 'flex', gap: 14, marginBottom: 20, flexWrap: 'wrap' }}>
+                  <input className="ainp" style={{ flex: 1, minWidth: 220 }} placeholder="Type to search anything..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                  <select className="ainp" style={{ minWidth: 160 }} value={filterType} onChange={e => setFilterType(e.target.value)}>
+                    {['all', 'Faculty', 'Placement', 'Page', 'Notice', 'News', 'Event'].map(t => <option key={t} value={t.toLowerCase()}>{t}</option>)}
                   </select>
                 </div>
-                <div style={{display:'flex',flexDirection:'column',gap:12}}>
-                  {filtered.slice(0,40).map(item=>{const{bg,c}=bc(item.contentType);return(
-                    <div key={item.id} className="arow">
-                      <span className="abadge" style={{background:bg,color:c,minWidth:75,textAlign:'center'}}>{item.contentType}</span>
-                      <div style={{flex:1,minWidth:0,fontWeight:700,color:T.navy,fontSize:15,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{item.title}</div>
-                      <button className="abtn abtn-dark abtn-sm" onClick={()=>setActiveTab({Slide:'slider',Page:'pages',Notice:'notices',News:'announcements',Event:'events',Document:'pdfReports',Gallery:'gallery'}[item.contentType]||'dashboard')}>Manage →</button>
+                {filtered.slice(0, 30).map(item => {
+                  const colors = { Slide: '#f4a023', Page: T.purple, Notice: '#f59e0b', News: T.red, Event: T.purple, Faculty: T.blue, Placement: T.cyan };
+                  const c = colors[item.contentType] || T.t2;
+                  return (
+                    <div key={item.id || Math.random()} className="arow">
+                      <span className="abadge" style={{ background: `${c}20`, color: c, minWidth: 70, textAlign: 'center' }}>{item.contentType}</span>
+                      <div style={{ flex: 1, fontWeight: 700, color: T.t1, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} dangerouslySetInnerHTML={{ __html: item.title || 'Untitled' }} />
                     </div>
-                  );})}
-                  {filtered.length===0&&<div style={{textAlign:'center',padding:50,color:T.t3}}>No content found.</div>}
-                </div>
+                  );
+                })}
+                {filtered.length === 0 && <div style={{ textAlign: 'center', padding: 50, color: T.t3 }}>No content found.</div>}
               </div>
             </div>
           )}
 
-          {activeTab==='slider'&&(
+          {/* ── ALERTS ─────────────────────────────────────────────────────────── */}
+          {activeTab === 'alerts' && (
             <div className="fade-up">
-              <p className="asec">🖼️ Hero Slider Manager</p><p className="asub">Drag cards to reorder • Free Auto-Upload</p>
-              <div className="glass-gold" style={{padding:32,marginBottom:32}}>
-                <div className="actitle">{editingSlide?'✏️ Edit Slide':'➕ Add New Slide'}</div>
-                <form onSubmit={saveSlide}>
-                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(250px,1fr))',gap:20,marginBottom:24}}>
-                    <div><label className="alabel">Title *</label><input className="ainp" placeholder="e.g. Cricket Champions 2024" value={sliderForm.title} onChange={e=>setSliderForm(f=>({...f,title:e.target.value}))} required/></div>
-                    <div><label className="alabel">Subtitle</label><input className="ainp" placeholder="Caption text" value={sliderForm.subtitle} onChange={e=>setSliderForm(f=>({...f,subtitle:e.target.value}))}/></div>
-                    <div><label className="alabel">Display Order</label><input className="ainp" type="number" min="0" value={sliderForm.order} onChange={e=>setSliderForm(f=>({...f,order:e.target.value}))}/></div>
+              <p className="asec">🚨 Flash Alert Manager</p>
+              <p className="asub">Urgent scrolling banner + popup — sirf toggle karein ON/OFF</p>
+              <div className="glass-gold">
+                <div className="actitle">{editAlert ? '✏️ Edit Alert' : '➕ Create Alert'}</div>
+                <form onSubmit={saveAlert}>
+                  <div style={{ marginBottom: 16 }}><label className="alabel">Alert Message *</label><textarea className="ainp" rows={3} value={alertData.text} onChange={e => setAlertData(d => ({ ...d, text: e.target.value }))} required placeholder="Example: College will remain closed tomorrow due to holiday..." /></div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, padding: '14px 18px', background: 'rgba(239,68,68,.08)', borderRadius: 12, border: '1px solid rgba(239,68,68,.2)' }}>
+                    <div style={{ position: 'relative', width: 48, height: 26, cursor: 'pointer' }} onClick={() => setAlertData(d => ({ ...d, isActive: !d.isActive }))}>
+                      <div style={{ position: 'absolute', inset: 0, borderRadius: 13, background: alertData.isActive ? T.red : T.b2, transition: 'background .2s' }} />
+                      <div style={{ position: 'absolute', top: 3, left: alertData.isActive ? 26 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left .2s', boxShadow: '0 2px 5px rgba(0,0,0,.3)' }} />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 800, color: alertData.isActive ? T.red : T.t3, fontSize: 14 }}>{alertData.isActive ? '🔴 Alert is LIVE (visible to everyone)' : '⚪ Alert is OFF (hidden)'}</div>
+                      <div style={{ fontSize: 12, color: T.t3, marginTop: 2 }}>Toggle to show/hide without deleting</div>
+                    </div>
                   </div>
-                  <div style={{marginBottom:24}}>
-                    <label className="alabel">Image (auto-crops before upload)</label>
-                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20}}>
-                      <label className="upload-zone">
-                        <div style={{fontSize:32,marginBottom:10}}>📁</div>
-                        <div style={{fontSize:14,fontWeight:800,color:T.navy}}>{sliderUploading?`Uploading ${sliderProgress}%…`:'Upload Image (Free)'}</div>
-                        <input ref={sliderFileRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>e.target.files[0]&&handleSliderFile(e.target.files[0])}/>
-                        {sliderUploading&&<div className="prog-outer"><div className="prog-inner" style={{width:`${sliderProgress}%`}}/></div>}
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editAlert ? 'Update' : 'Publish'} Alert</button>
+                    {editAlert && <button type="button" className="abtn abtn-dark" onClick={() => { setEditAlert(null); setAlertData({ text: '', isActive: true }); }}>Cancel</button>}
+                  </div>
+                </form>
+              </div>
+              <div className="glass">
+                <div className="actitle">All Alerts ({(alerts || []).length})</div>
+                {(alerts || []).map(a => (
+                  <div key={a.id} className="arow" style={{ borderLeft: `4px solid ${a.isActive ? T.red : T.b2}` }}>
+                    <div style={{ flex: 1 }}>
+                      <span className="abadge" style={{ background: a.isActive ? 'rgba(239,68,68,.15)' : 'rgba(100,116,139,.1)', color: a.isActive ? '#ef4444' : T.t3, marginBottom: 6 }}>{a.isActive ? '🔴 LIVE' : '⚪ OFF'}</span>
+                      <div style={{ fontWeight: 700, color: T.t1, fontSize: 14 }}>{a.text}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button className="abtn abtn-dark abtn-sm" onClick={() => toggleAlert(a)}>{a.isActive ? '⏸ Turn OFF' : '▶ Turn ON'}</button>
+                      <button className="abtn abtn-dark abtn-sm" onClick={() => { setEditAlert(a); setAlertData({ text: a.text, isActive: a.isActive }); }}>✏️</button>
+                      <button className="abtn abtn-danger abtn-sm" onClick={() => deleteAlert(a.id)}>🗑️</button>
+                    </div>
+                  </div>
+                ))}
+                {(alerts || []).length === 0 && <div style={{ textAlign: 'center', padding: 50, color: T.t3 }}>No alerts yet.</div>}
+              </div>
+            </div>
+          )}
+
+          {/* ── PLACEMENTS ─────────────────────────────────────────────────────── */}
+          {activeTab === 'placements' && (
+            <div className="fade-up">
+              <p className="asec">🎓 Alumni Wall of Fame</p><p className="asub">Student success stories — homepage par live slider</p>
+              <div className="glass-gold">
+                <div className="actitle">{editPlace ? '✏️ Edit Story' : '➕ Add Success Story'}</div>
+                <form onSubmit={savePlace}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 16, marginBottom: 16 }}>
+                    <div><label className="alabel">Student Name *</label><input className="ainp" value={placeData.name} onChange={e => setPlaceData(d => ({ ...d, name: e.target.value }))} placeholder="Rahul Kumar" required /></div>
+                    <div><label className="alabel">Passing Year *</label><input className="ainp" value={placeData.year} onChange={e => setPlaceData(d => ({ ...d, year: e.target.value }))} placeholder="2024" required /></div>
+                    <div><label className="alabel">Company Name *</label><input className="ainp" value={placeData.company} onChange={e => setPlaceData(d => ({ ...d, company: e.target.value }))} placeholder="TCS / Wipro / SBI" required /></div>
+                    <div><label className="alabel">Package (Optional)</label><input className="ainp" value={placeData.package} onChange={e => setPlaceData(d => ({ ...d, package: e.target.value }))} placeholder="4.5 LPA" /></div>
+                  </div>
+                  <div style={{ marginBottom: 20 }}>
+                    <label className="alabel">Student Photo</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                      <label className="upload-zone" ref={placeRef}>
+                        <div style={{ fontSize: 22, marginBottom: 6 }}>📷</div>
+                        <div style={{ fontWeight: 700, color: T.t1, fontSize: 13 }}>{placeUp ? `Uploading ${placeProg}%...` : 'Upload Photo (auto-crop)'}</div>
+                        <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => e.target.files[0] && handlePlaceFile(e.target.files[0])} />
+                        {placeUp && <div className="prog-outer" style={{ marginTop: 10 }}><div className="prog-inner" style={{ width: `${placeProg}%` }} /></div>}
                       </label>
-                      <div>
-                        <label className="alabel">Or Paste Image URL</label>
-                        <textarea className="ainp" rows={4} placeholder="https://…" value={sliderForm.image} onChange={e=>setSliderForm(f=>({...f,image:e.target.value}))} style={{resize:'vertical'}}/>
-                      </div>
+                      {placeData.imageUrl && <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><img src={placeData.imageUrl} alt="prev" style={{ width: 110, height: 110, objectFit: 'cover', borderRadius: '50%', border: `4px solid ${T.gold}`, boxShadow: '0 8px 20px rgba(0,0,0,.3)' }} /></div>}
                     </div>
-                    {sliderForm.image&&<img src={sliderForm.image} alt="preview" style={{width:'100%',height:180,objectFit:'cover',borderRadius:12,border:`1px solid ${T.b2}`,marginTop:16}} onError={e=>e.target.style.opacity='.2'}/>}
                   </div>
-                  <div style={{display:'flex',gap:14}}>
-                    <button type="submit" className="abtn abtn-gold" disabled={loading||sliderUploading}>{loading?'⏳ Saving…':editingSlide?'💾 Update':'🚀 Publish Slide'}</button>
-                    {editingSlide&&<button type="button" className="abtn abtn-dark" onClick={resetSlider}>Cancel</button>}
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <button type="submit" className="abtn abtn-gold" disabled={loading || placeUp}>🚀 Save Story</button>
+                    {editPlace && <button type="button" className="abtn abtn-dark" onClick={() => { setEditPlace(null); setPlaceData({ name: '', year: '', company: '', package: '', imageUrl: '' }); }}>Cancel</button>}
                   </div>
                 </form>
               </div>
-              <div className="glass" style={{padding:32}}>
-                <div className="actitle">🗂️ Live Slides — Drag to Reorder <span style={{fontSize:13,color:T.t3,fontWeight:600,marginLeft:'auto'}}>{localSlides.length} total</span></div>
-                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:24}}>
-                  {localSlides.map((slide,idx)=>(
-                    <div key={slide.id} className={`slide-card ${dragSrcIdx===idx?'dragging':''} ${dragOverIdx===idx?'drag-over':''}`}
-                      draggable onDragStart={()=>setDragSrcIdx(idx)} onDragOver={e=>{e.preventDefault();setDragOverIdx(idx);}} onDrop={()=>handleDrop(idx)} onDragEnd={()=>{setDragSrcIdx(null);setDragOverIdx(null);}}>
-                      <div style={{display:'flex',alignItems:'center',padding:'14px 18px 0',gap:10}}>
-                        <div className="drag-handle" title="Drag">⠿⠿</div>
-                        <div className="abadge" style={{background:'#fef3c7',color:'#047857'}}>#{slide.order??idx}</div>
-                      </div>
-                      <div style={{height:160,margin:'14px 18px 0',borderRadius:12,overflow:'hidden',background:T.bg4,position:'relative'}}>
-                        <img src={slide.image} alt={slide.title} loading="lazy" decoding="async" style={{width:'100%',height:'100%',objectFit:'cover'}} onError={e=>e.target.style.opacity='.2'}/>
-                        <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(15,35,71,.7),transparent)'}}/>
-                      </div>
-                      <div style={{padding:'16px 18px 20px'}}>
-                        <div style={{fontWeight:800,color:T.navy,fontSize:15,marginBottom:6}}>{slide.title}</div>
-                        {slide.subtitle&&<div style={{fontSize:13,color:T.t3,marginBottom:16}}>{slide.subtitle}</div>}
-                        <div style={{display:'flex',gap:10}}>
-                          <button className="abtn abtn-dark abtn-sm" style={{flex:1,justifyContent:'center'}} onClick={()=>{setEditingSlide(slide);setSliderForm({title:slide.title,subtitle:slide.subtitle||'',image:slide.image,order:slide.order??idx});window.scrollTo({top:0,behavior:'smooth'});}}>✏️ Edit</button>
-                          <button className="abtn abtn-danger abtn-sm" onClick={()=>deleteSlide(slide)}>🗑️</button>
+              <div className="glass">
+                <div className="actitle">Wall of Fame ({(placements || []).length} alumni)</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 14 }}>
+                  {(placements || []).map(p => (
+                    <div key={p.id} className="arow" style={{ padding: 18 }}>
+                      <img src={p.imageUrl || '/images/college_photo.jpg'} alt="" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${T.gold}` }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 900, color: T.t1, fontSize: 15 }}>{p.name} <span style={{ fontSize: 11, color: T.t3 }}>({p.year})</span></div>
+                        <div style={{ fontSize: 13, color: T.green, fontWeight: 800, marginTop: 3 }}>💼 {p.company}{p.package && ` | 💰 ${p.package}`}</div>
+                        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                          <button className="abtn abtn-dark abtn-sm" onClick={() => { setEditPlace(p); setPlaceData({ name: p.name, year: p.year, company: p.company, package: p.package || '', imageUrl: p.imageUrl || '' }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>✏️</button>
+                          <button className="abtn abtn-danger abtn-sm" onClick={() => deletePlace(p.id)}>🗑️</button>
                         </div>
                       </div>
                     </div>
@@ -574,70 +903,248 @@ export default function AdminPanel({onClose,notices,pages,events,gallery,placeho
             </div>
           )}
 
-          {activeTab==='events'&&(
+          {/* ── FACULTY ─────────────────────────────────────────────────────────── */}
+          {activeTab === 'faculty' && (
             <div className="fade-up">
-              <p className="asec">🏆 Campus Events</p><p className="asub">Upcoming and recent campus events with PDF Reports</p>
-              <div className="glass-gold" style={{padding:32,marginBottom:32}}>
-                <div className="actitle">{editEvent?'✏️ Edit Event':'🎉 Add New Event'}</div>
-                <form onSubmit={e=>{e.preventDefault();genericSave('events',editEvent,evtData,setEditEvent,()=>setEvtData({title:'',desc:'',type:'WORKSHOP',day:'',month:'',location:'',status:'upcoming',imageUrl:'',reportLink:''}),'Event');}}>
-                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:20,marginBottom:20}}>
-                    <div><label className="alabel">Title *</label><input className="ainp" value={evtData.title} onChange={e=>setEvtData(d=>({...d,title:e.target.value}))} required/></div>
-                    <div><label className="alabel">Type</label><select className="ainp" value={evtData.type} onChange={e=>setEvtData(d=>({...d,type:e.target.value}))}>{['WORKSHOP','SEMINAR','CULTURAL','SPORTS','NSS','NCC','ACADEMIC'].map(t=><option key={t}>{t}</option>)}</select></div>
-                    <div><label className="alabel">Day</label><input className="ainp" value={evtData.day} onChange={e=>setEvtData(d=>({...d,day:e.target.value}))} placeholder="24"/></div>
-                    <div><label className="alabel">Month</label><input className="ainp" value={evtData.month} onChange={e=>setEvtData(d=>({...d,month:e.target.value}))} placeholder="MAR"/></div>
-                    <div><label className="alabel">Location</label><input className="ainp" value={evtData.location} onChange={e=>setEvtData(d=>({...d,location:e.target.value}))} placeholder="Seminar Hall"/></div>
-                    <div><label className="alabel">Status</label><select className="ainp" value={evtData.status} onChange={e=>setEvtData(d=>({...d,status:e.target.value}))}><option value="upcoming">Upcoming</option><option value="recent">Recent</option></select></div>
-                  </div>
-
-                  {evtData.status === 'recent' ? (
-                    <div style={{background:'#f8fafc', padding:20, borderRadius:12, border:`1px solid ${T.b2}`, marginBottom:24}}>
-                      <div style={{fontWeight:800, color:T.navy, marginBottom:16}}>📸 Post-Event Media & Reports</div>
-                      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20, marginBottom:16}}>
-                        <label className="upload-zone" style={{background:'#fff'}}>
-                          <div style={{fontSize:28,marginBottom:8}}>📷</div>
-                          <div style={{fontSize:13,fontWeight:800,color:T.navy}}>{eventUploading?`${eventProgress}%…`:'Upload Event Photo'}</div>
-                          <input ref={eventFileRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>e.target.files[0]&&handleEventFile(e.target.files[0])}/>
-                        </label>
-                        <div>
-                          <label className="alabel">Or Paste Photo URL</label>
-                          <textarea className="ainp" rows={3} placeholder="https://..." value={evtData.imageUrl} onChange={e=>setEvtData(d=>({...d,imageUrl:e.target.value}))} style={{resize:'vertical'}}/>
-                        </div>
-                      </div>
-                      <div style={{marginTop:16}}>
-                        <label className="alabel">Event PDF Report (Google Drive Link)</label>
-                        <input className="ainp" value={evtData.reportLink || ''} onChange={e=>setEvtData(d=>({...d,reportLink:e.target.value}))} placeholder="Paste Google Drive link of the PDF report here..." style={{borderColor:T.gold}}/>
-                        <p style={{fontSize:11, color:T.t3, marginTop:6}}>Make sure the Google Drive link access is set to "Anyone with the link". This will open a PDF popup on the site.</p>
-                      </div>
+              <p className="asec">👨‍🏫 Faculty & Staff Directory</p><p className="asub">Teaching Staff → /about-us/college-staff/teaching-staff | Non-Teaching → /about-us/college-staff/non-teaching-staff</p>
+              <div className="glass-gold">
+                <div className="actitle">{editFac ? '✏️ Edit Profile' : '➕ Add Staff Member'}</div>
+                <form onSubmit={saveFac}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16, marginBottom: 16 }}>
+                    <div>
+                      <label className="alabel">Staff Type *</label>
+                      <select className="ainp" value={facData.staffType} onChange={e => { const t = e.target.value; setFacData(d => ({ ...d, staffType: t, dept: t === 'Teaching' ? 'Commerce' : 'General Section' })); }}>
+                        <option value="Teaching">Teaching Staff</option>
+                        <option value="Non-Teaching">Non-Teaching Staff</option>
+                      </select>
                     </div>
-                  ) : (
-                    <div style={{marginBottom:20}}><label className="alabel">Image URL (Optional)</label><input className="ainp" value={evtData.imageUrl} onChange={e=>setEvtData(d=>({...d,imageUrl:e.target.value}))} placeholder="/images/event.jpg"/></div>
-                  )}
-
-                  <div style={{marginBottom:24}}>
-                    <label className="alabel">Description</label>
-                    {/* 3. SUSPENSE: Editor load hone tak loader dikhayega */}
-                    <Suspense fallback={<div>Loading Editor...</div>}><JoditEditor ref={editor} value={evtData.desc} config={joditCfg} onBlur={c=>setEvtData(d=>({...d,desc:c}))}/></Suspense>
+                    <div><label className="alabel">Full Name *</label><input className="ainp" value={facData.name} onChange={e => setFacData(d => ({ ...d, name: e.target.value }))} placeholder="Dr. S.K. Sharma" required /></div>
+                    <div>
+                      <label className="alabel">Department *</label>
+                      <select className="ainp" value={facData.dept} onChange={e => setFacData(d => ({ ...d, dept: e.target.value }))}>
+                        {(facData.staffType === 'Teaching' ? teachingDepts : nonTeachingDepts).map(c => <option key={c}>{c}</option>)}
+                      </select>
+                    </div>
+                    <div><label className="alabel">Qualification</label><input className="ainp" value={facData.qual} onChange={e => setFacData(d => ({ ...d, qual: e.target.value }))} placeholder="Ph.D., NET, M.Com..." /></div>
+                    <div><label className="alabel">Designation</label><input className="ainp" value={facData.desig} onChange={e => setFacData(d => ({ ...d, desig: e.target.value }))} placeholder="Assistant Professor / Clerk" /></div>
                   </div>
-                  <div style={{display:'flex',gap:14}}><button type="submit" className="abtn abtn-gold" disabled={loading||eventUploading}>{loading?'⏳':editEvent?'💾 Update Event':'🚀 Publish Event'}</button>{editEvent&&<button type="button" className="abtn abtn-dark" onClick={()=>{setEditEvent(null);setEvtData({title:'',desc:'',type:'WORKSHOP',day:'',month:'',location:'',status:'upcoming',imageUrl:'',reportLink:''});}}>Cancel</button>}</div>
+                  <div style={{ marginBottom: 20 }}>
+                    <label className="alabel">Profile Photo</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                      <label className="upload-zone" ref={facRef}>
+                        <div style={{ fontSize: 22, marginBottom: 6 }}>📷</div>
+                        <div style={{ fontWeight: 700, color: T.t1, fontSize: 13 }}>{facUp ? `${facProg}%...` : 'Upload Photo (auto-crop)'}</div>
+                        <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => e.target.files[0] && handleFacFile(e.target.files[0])} />
+                        {facUp && <div className="prog-outer"><div className="prog-inner" style={{ width: `${facProg}%` }} /></div>}
+                      </label>
+                      {facData.imageUrl && <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><img src={facData.imageUrl} alt="prev" style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 14, border: `3px solid ${T.gold}` }} /></div>}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <button type="submit" className="abtn abtn-gold" disabled={loading || facUp}>🚀 Save Profile</button>
+                    {editFac && <button type="button" className="abtn abtn-dark" onClick={() => { setEditFac(null); setFacData({ name: '', staffType: 'Teaching', dept: 'Commerce', qual: '', desig: '', imageUrl: '' }); }}>Cancel</button>}
+                  </div>
                 </form>
               </div>
-              <div className="glass" style={{padding:32}}>
-                <div className="actitle">Events ({(events||[]).length})</div>
-                <div style={{display:'flex',flexDirection:'column',gap:14}}>
-                  {(events||[]).map(e=>(
-                    <div key={e.id} className="arow" style={{borderLeft:`4px solid ${T.purple}`}}>
-                      <div style={{flex:1}}>
-                        <div style={{display:'flex',gap:10,marginBottom:8}}>
-                          <span className="abadge" style={{background:'#f3e8ff',color:'#6b21a8'}}>{e.type}</span>
-                          <span className="abadge" style={{background:e.status==='upcoming'?'#ecfdf5':'#e0f2fe',color:e.status==='upcoming'?'#047857':'#0369a1'}}>{e.status}</span>
-                          {e.reportLink && <span className="abadge" style={{background:'#fee2e2',color:'#b91c1c'}}>📄 PDF Attached</span>}
+              <div className="glass">
+                <div className="actitle">Staff Directory ({(faculties || []).length} total)</div>
+                {/* Teaching */}
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: T.gold, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span className="abadge" style={{ background: 'rgba(244,160,35,.15)', color: T.gold }}>Teaching Staff ({(faculties || []).filter(f => (f.staffType || 'Teaching') === 'Teaching').length})</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 12 }}>
+                    {(faculties || []).filter(f => (f.staffType || 'Teaching') === 'Teaching').map(f => (
+                      <div key={f.id} className="arow" style={{ borderLeft: `4px solid ${T.gold}` }}>
+                        <img src={f.imageUrl || '/images/college_photo.jpg'} alt="" style={{ width: 72, height: 72, borderRadius: 12, objectFit: 'cover' }} />
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 900, color: T.t1 }}>{f.name}</div>
+                          <div style={{ fontSize: 12, color: T.gold, fontWeight: 800, marginTop: 2 }}>{f.desig}</div>
+                          <div style={{ fontSize: 12, color: T.t3, marginTop: 4 }}>🏢 {f.dept} | 🎓 {f.qual}</div>
+                          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                            <button className="abtn abtn-dark abtn-sm" onClick={() => { setEditFac(f); setFacData({ name: f.name, staffType: f.staffType || 'Teaching', dept: f.dept, qual: f.qual || '', desig: f.desig || '', imageUrl: f.imageUrl || '' }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>✏️</button>
+                            <button className="abtn abtn-danger abtn-sm" onClick={() => deleteFac(f.id)}>🗑️</button>
+                          </div>
                         </div>
-                        <div style={{fontWeight:800,color:T.navy,fontSize:16}}>{e.title}</div>
-                        <div style={{fontSize:13,color:T.t2,marginTop:6,fontWeight:600}}>📅 {e.day} {e.month} | 📍 {e.location||'Campus'}</div>
                       </div>
-                      <div style={{display:'flex',gap:10,flexShrink:0}}>
-                        <button className="abtn abtn-dark abtn-sm" onClick={()=>{setEditEvent(e);setEvtData({title:e.title||'',desc:e.desc||'',type:e.type||'WORKSHOP',day:e.day||'',month:e.month||'',location:e.location||'',status:e.status||'upcoming',imageUrl:e.imageUrl||'',reportLink:e.reportLink||''});window.scrollTo({top:0,behavior:'smooth'});}}>✏️ Edit</button>
-                        <button className="abtn abtn-danger abtn-sm" onClick={()=>genericDelete('events',e.id,'Event')}>🗑️</button>
+                    ))}
+                  </div>
+                </div>
+                {/* Non-Teaching */}
+                <div>
+                  <span className="abadge" style={{ background: 'rgba(6,182,212,.15)', color: T.cyan, marginBottom: 12, display: 'inline-block' }}>Non-Teaching Staff ({(faculties || []).filter(f => f.staffType === 'Non-Teaching').length})</span>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 12, marginTop: 12 }}>
+                    {(faculties || []).filter(f => f.staffType === 'Non-Teaching').map(f => (
+                      <div key={f.id} className="arow" style={{ borderLeft: `4px solid ${T.cyan}` }}>
+                        <img src={f.imageUrl || '/images/college_photo.jpg'} alt="" style={{ width: 72, height: 72, borderRadius: 12, objectFit: 'cover' }} />
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 900, color: T.t1 }}>{f.name}</div>
+                          <div style={{ fontSize: 12, color: T.cyan, fontWeight: 800, marginTop: 2 }}>{f.desig}</div>
+                          <div style={{ fontSize: 12, color: T.t3, marginTop: 4 }}>🏢 {f.dept} | 🎓 {f.qual}</div>
+                          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                            <button className="abtn abtn-dark abtn-sm" onClick={() => { setEditFac(f); setFacData({ name: f.name, staffType: 'Non-Teaching', dept: f.dept, qual: f.qual || '', desig: f.desig || '', imageUrl: f.imageUrl || '' }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>✏️</button>
+                            <button className="abtn abtn-danger abtn-sm" onClick={() => deleteFac(f.id)}>🗑️</button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── SLIDER ──────────────────────────────────────────────────────────── */}
+          {activeTab === 'slider' && (
+            <div className="fade-up">
+              <p className="asec">🖼️ Hero Slider Manager</p><p className="asub">Homepage main banner slides</p>
+              <div className="glass-blue">
+                <div className="actitle">{editingSlide ? '✏️ Edit Slide' : '➕ Add Slide'}</div>
+                <form onSubmit={saveSlide}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16, marginBottom: 16 }}>
+                    <div><label className="alabel">Title *</label><input className="ainp" value={sliderForm.title} onChange={e => setSliderForm(f => ({ ...f, title: e.target.value }))} placeholder="Welcome to GNC" required /></div>
+                    <div><label className="alabel">Subtitle</label><input className="ainp" value={sliderForm.subtitle} onChange={e => setSliderForm(f => ({ ...f, subtitle: e.target.value }))} placeholder="NAAC Accredited College" /></div>
+                    <div><label className="alabel">Order (1,2,3...)</label><input type="number" className="ainp" value={sliderForm.order} onChange={e => setSliderForm(f => ({ ...f, order: +e.target.value }))} /></div>
+                  </div>
+                  <div style={{ marginBottom: 20 }}>
+                    <label className="alabel">Slide Image</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                      <label className="upload-zone">
+                        <div style={{ fontSize: 22, marginBottom: 6 }}>🖼️</div>
+                        <div style={{ fontWeight: 700, color: T.t1, fontSize: 13 }}>{sliderUp ? `${sliderProg}%...` : 'Upload Background Image'}</div>
+                        <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => e.target.files[0] && handleSliderFile(e.target.files[0])} />
+                        {sliderUp && <div className="prog-outer"><div className="prog-inner" style={{ width: `${sliderProg}%` }} /></div>}
+                      </label>
+                      {sliderForm.image && <img src={sliderForm.image} alt="" style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 12 }} />}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <button type="submit" className="abtn abtn-gold" disabled={loading || sliderUp}>🚀 Save Slide</button>
+                    {editingSlide && <button type="button" className="abtn abtn-dark" onClick={() => { setEditingSlide(null); setSliderForm({ title: '', subtitle: '', image: '', order: 0 }); }}>Cancel</button>}
+                  </div>
+                </form>
+              </div>
+              <div className="glass">
+                <div className="actitle">All Slides ({(sliderSlides || []).length})</div>
+                {(sliderSlides || []).map(s => (
+                  <div key={s.id} className="arow">
+                    {s.image && <img src={s.image} alt="" style={{ width: 80, height: 50, objectFit: 'cover', borderRadius: 8 }} />}
+                    <div style={{ flex: 1 }}><div style={{ fontWeight: 800, color: T.t1 }}>{s.title}</div><div style={{ fontSize: 12, color: T.t3 }}>{s.subtitle}</div></div>
+                    <span style={{ fontSize: 11, color: T.t3, fontWeight: 700 }}>Order: {s.order}</span>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button className="abtn abtn-dark abtn-sm" onClick={() => { setEditingSlide(s); setSliderForm({ title: s.title || '', subtitle: s.subtitle || '', image: s.image || '', order: s.order || 0 }); }}>✏️</button>
+                      <button className="abtn abtn-danger abtn-sm" onClick={() => deleteSlide(s.id)}>🗑️</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── MENU BUILDER ─────────────────────────────────────────────────────── */}
+          {activeTab === 'menu_builder' && (
+            <div className="fade-up">
+              <p className="asec">🧭 Menu Editor</p><p className="asub">Add / edit / delete navbar links</p>
+              <div className="glass-blue">
+                <div className="actitle">➕ Add New Menu Item</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16, marginBottom: 16 }}>
+                  <div><label className="alabel">Label *</label><input className="ainp" value={newMenuForm.label} onChange={e => setNewMenuForm(d => ({ ...d, label: e.target.value }))} placeholder="Menu Text" /></div>
+                  <div><label className="alabel">URL *</label><input className="ainp" value={newMenuForm.href} onChange={e => setNewMenuForm(d => ({ ...d, href: e.target.value }))} placeholder="/about-us/new-page" /></div>
+                  <div><label className="alabel">Parent Menu</label><select className="ainp" value={newMenuForm.parentId} onChange={e => setNewMenuForm(d => ({ ...d, parentId: e.target.value }))}><option value="top">Top Level</option>{flatMenus.filter(m => m.level < 2).map(m => <option key={m.id} value={m.id}>{m.pathStr}</option>)}</select></div>
+                </div>
+                <button className="abtn abtn-blue" onClick={addMenu} disabled={!newMenuForm.label}>➕ Add Item</button>
+              </div>
+              <div className="glass">
+                <div className="actitle">All Menu Items ({flatMenus.length})</div>
+                {flatMenus.map(m => (
+                  <div key={m.id} className="arow" style={{ paddingLeft: 16 + m.level * 20 }}>
+                    <span style={{ fontSize: 11, color: T.blue, fontWeight: 800, minWidth: 28 }}>{'└'.repeat(m.level)}</span>
+                    <div style={{ flex: 1 }}><div style={{ fontWeight: 700, color: T.t1 }}>{m.label}</div><div style={{ fontSize: 12, color: T.t3 }}>{m.href}</div></div>
+                    <button className="abtn abtn-danger abtn-sm" onClick={() => deleteMenu(m.id)}>🗑️</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── PAGES ─────────────────────────────────────────────────────────────── */}
+          {activeTab === 'pages' && (
+            <div className="fade-up">
+              <p className="asec">📄 Pages & SEO</p><p className="asub">Create and update dynamic content pages</p>
+              <div className="glass-blue">
+                <div className="actitle">{editingPage ? '✏️ Edit Page' : '➕ Create Page'}</div>
+                <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
+                  {['update', 'create'].map(m => <button key={m} className={`abtn ${pageMode === m ? 'abtn-blue' : 'abtn-dark'}`} onClick={() => setPageMode(m)}>{m === 'update' ? '📝 Update Existing Page' : '✨ Create New Slug Page'}</button>)}
+                </div>
+                <form onSubmit={savePage}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                    <div><label className="alabel">Page Title *</label><input className="ainp" value={pageData.title} onChange={e => setPageData(d => ({ ...d, title: e.target.value }))} required placeholder="About the Principal" /></div>
+                    {pageMode === 'update' ? <div><label className="alabel">Page Path *</label><input className="ainp" value={pageData.path} onChange={e => setPageData(d => ({ ...d, path: e.target.value }))} placeholder="/about-us/principal-message" /></div>
+                      : <div><label className="alabel">URL Slug *</label><input className="ainp" value={pageData.slug} onChange={e => setPageData(d => ({ ...d, slug: e.target.value }))} placeholder="principal-message" /></div>}
+                  </div>
+                  <div style={{ marginBottom: 16 }}>
+                    <label className="alabel">SEO Meta Title</label><input className="ainp" value={seoData.metaTitle} onChange={e => setSeoData(d => ({ ...d, metaTitle: e.target.value }))} placeholder="About the Principal — GNC Dhanbad" />
+                  </div>
+                  <div style={{ marginBottom: 20 }}>
+                    <label className="alabel">Page Content</label>
+                    <Suspense fallback={<div style={{ padding: 20, textAlign: 'center' }}>Loading editor...</div>}>
+                      <JoditEditor ref={editor} value={pageData.content || ''} config={joditCfg} tabIndex={1} onBlur={c => setPageData(d => ({ ...d, content: c }))} />
+                    </Suspense>
+                  </div>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editingPage ? 'Update' : 'Publish'} Page</button>
+                    <button type="button" className="abtn abtn-dark" onClick={() => { setShowPreview(true); setPreviewContent(pageData.content || ''); }}>👁️ Preview</button>
+                    {editingPage && <button type="button" className="abtn abtn-dark" onClick={() => { setEditPage(null); setPageData({ title: '', content: '', path: '', slug: '' }); }}>Cancel</button>}
+                  </div>
+                </form>
+              </div>
+              <div className="glass">
+                <div className="actitle">All Pages ({(pages || []).length})</div>
+                {(pages || []).map(p => (
+                  <div key={p.id} className="arow">
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 800, color: T.t1 }}>{p.title}</div>
+                      <div style={{ fontSize: 12, color: T.t3, marginTop: 3 }}>{p.path || `/p/${p.slug}` || 'No path'}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button className="abtn abtn-dark abtn-sm" onClick={() => { setEditPage(p); setPageData({ title: p.title || '', content: p.content || '', path: p.path || '', slug: p.slug || '' }); setSeoData(p.seo || {}); setPageMode(p.path ? 'update' : 'create'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>✏️</button>
+                      <button className="abtn abtn-danger abtn-sm" onClick={() => deletePage(p.id)}>🗑️</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── GALLERY ──────────────────────────────────────────────────────────── */}
+          {activeTab === 'gallery' && (
+            <div className="fade-up">
+              <p className="asec">📸 Photo Gallery</p><p className="asub">Upload and manage gallery images</p>
+              <div className="glass-blue">
+                <form onSubmit={saveGallery}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 16, marginBottom: 16 }}>
+                    <div><label className="alabel">Title *</label><input className="ainp" value={galleryData.title} onChange={e => setGalleryData(d => ({ ...d, title: e.target.value }))} placeholder="Annual Function 2024" required /></div>
+                    <div><label className="alabel">Category</label><select className="ainp" value={galleryData.cat} onChange={e => setGalleryData(d => ({ ...d, cat: e.target.value }))}>{['Seminars', 'Cultural', 'NSS', 'Sports', 'Campus', 'Departments'].map(c => <option key={c}>{c}</option>)}</select></div>
+                  </div>
+                  <label className="upload-zone">
+                    <div style={{ fontSize: 28, marginBottom: 8 }}>📸</div>
+                    <div style={{ fontWeight: 700, color: T.t1 }}>{galleryUp ? `${galleryProg}%...` : 'Click to upload image'}</div>
+                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => e.target.files[0] && handleGalleryFile(e.target.files[0])} />
+                    {galleryUp && <div className="prog-outer" style={{ marginTop: 12, maxWidth: 200, margin: '12px auto 0' }}><div className="prog-inner" style={{ width: `${galleryProg}%` }} /></div>}
+                  </label>
+                  {galleryData.src && <img src={galleryData.src} alt="" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 10, marginTop: 12 }} />}
+                  <div style={{ marginTop: 20 }}><button type="submit" className="abtn abtn-gold" disabled={loading || galleryUp || !galleryData.src}>🚀 Add to Gallery</button></div>
+                </form>
+              </div>
+              <div className="glass">
+                <div className="actitle">Gallery ({(gallery || []).length} photos)</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: 12 }}>
+                  {(gallery || []).map(g => (
+                    <div key={g.id} style={{ borderRadius: 12, overflow: 'hidden', border: `1px solid ${T.b1}`, position: 'relative', group: true }}>
+                      <img src={g.src} alt={g.title} style={{ width: '100%', height: 110, objectFit: 'cover', display: 'block' }} />
+                      <div style={{ padding: '8px 10px', background: T.bg3 }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: T.t1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.title}</div>
+                        <button className="abtn abtn-danger abtn-sm" style={{ marginTop: 6, width: '100%', justifyContent: 'center' }} onClick={() => deleteGallery(g.id)}>🗑️</button>
                       </div>
                     </div>
                   ))}
@@ -646,380 +1153,407 @@ export default function AdminPanel({onClose,notices,pages,events,gallery,placeho
             </div>
           )}
 
-          {activeTab==='menu_builder'&&(
-             <div className="fade-up">
-               <p className="asec">🧭 Navbar Menu Editor</p><p className="asub">Top links, sub-menus (L2), sub-sub-menus (L3)</p>
-               <div style={{background:'#fffbeb',border:'1px solid #fde68a',borderRadius:16,padding:'20px 24px',marginBottom:32,display:'flex',justifyContent:'space-between',alignItems:'center',gap:16,flexWrap:'wrap'}}>
-                 <div><div style={{fontWeight:900,color:'#d97706',fontSize:15}}>Need to restore original menu?</div><div style={{color:'#92400e',fontSize:13,marginTop:4,fontWeight:500}}>Restore all original menus from database code.</div></div>
-                 <button className="abtn abtn-gold" disabled={loading} onClick={async()=>{if(!window.confirm('Restore?'))return;if(!navLinks?.length)return toast.error('Not found');setLoading(true);const tid=toast.loading('…');try{await setDoc(doc(db,'settings','navbar'),{links:navLinks});setNavData(navLinks);toast.success('Restored! ✅',{id:tid});}catch(err){toast.error(err.message,{id:tid});}setLoading(false);}}>🔄 Restore Original</button>
-               </div>
-               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:24}}>
-                 <div className="glass" style={{padding:32}}>
-                   <div className="actitle">✏️ Edit Existing Menu</div>
-                   <label className="alabel">Select Menu</label>
-                   <select className="ainp" style={{marginBottom:16}} value={editMenuSel} onChange={e=>{setEditMenuSel(e.target.value);const m=flatMenus.find(x=>x.id===e.target.value);if(m)setEditMenuForm({label:m.label,href:m.href||''});}}>
-                     <option value="">-- Choose --</option>
-                     {flatMenus.map(m=><option key={m.id} value={m.id}>{m.pathStr}{m.href?` → ${m.href}`:''}</option>)}
-                   </select>
-                   {editMenuSel&&(<>
-                     <label className="alabel">Name</label><input className="ainp" style={{marginBottom:16}} value={editMenuForm.label} onChange={e=>setEditMenuForm(f=>({...f,label:e.target.value}))}/>
-                     <label className="alabel">Link URL</label><input className="ainp" style={{marginBottom:24}} placeholder="/path" value={editMenuForm.href} onChange={e=>setEditMenuForm(f=>({...f,href:e.target.value}))}/>
-                     <div style={{display:'flex',gap:12}}><button className="abtn abtn-gold" onClick={updateMenu} disabled={loading}>💾 Update</button><button className="abtn abtn-dark" onClick={()=>{setEditMenuSel('');setEditMenuForm({label:'',href:''});}}>Cancel</button></div>
-                   </>)}
-                 </div>
-                 <div className="glass" style={{padding:32}}>
-                   <div className="actitle">➕ Add Menu / Sub-menu</div>
-                   <label className="alabel">Name *</label><input className="ainp" style={{marginBottom:16}} placeholder="Gallery" value={newMenuForm.label} onChange={e=>setNewMenuForm(f=>({...f,label:e.target.value}))}/>
-                   <label className="alabel">Link URL</label><input className="ainp" style={{marginBottom:16}} placeholder="/gallery" value={newMenuForm.href} onChange={e=>setNewMenuForm(f=>({...f,href:e.target.value}))}/>
-                   <label className="alabel">Parent</label>
-                   <select className="ainp" style={{marginBottom:24}} value={newMenuForm.parentId} onChange={e=>setNewMenuForm(f=>({...f,parentId:e.target.value}))}>
-                     <option value="top">── Top Level ──</option>
-                     {flatMenus.filter(m=>m.level<2).map(m=><option key={m.id} value={m.id}>↳ {m.pathStr}</option>)}
-                   </select>
-                   <button className="abtn abtn-gold" onClick={addMenu} disabled={loading}>🚀 Add to Navbar</button>
-                 </div>
-               </div>
-               <div className="glass" style={{padding:32,marginTop:24}}>
-                 <div className="actitle">📂 Menu Tree ({flatMenus.length})</div>
-                 <div style={{display:'flex',flexDirection:'column',gap:10}}>
-                   {flatMenus.map(m=>{const lc=[T.navy,T.gold,'#cbd5e1'][m.level];return(
-                     <div key={m.id} className="arow" style={{marginLeft:m.level*32,borderLeft:`4px solid ${lc}`,borderRadius:'0 12px 12px 0'}}>
-                       <div style={{flex:1,minWidth:0}}>
-                         <div style={{fontWeight:800,color:T.navy,fontSize:m.level===0?15:14,display:'flex',alignItems:'center',gap:8}}>
-                           {m.level>0&&<span style={{color:T.t3}}>↳</span>}{m.label}
-                         </div>
-                         {m.href&&<div style={{fontSize:12,color:T.green,marginTop:4,fontWeight:700}}>🔗 {m.href}</div>}
-                       </div>
-                       <div style={{display:'flex',gap:10,flexShrink:0}}>
-                         <button className="abtn abtn-dark abtn-sm" onClick={()=>{setEditMenuSel(m.id);setEditMenuForm({label:m.label,href:m.href||''});window.scrollTo({top:0,behavior:'smooth'});}}>✏️</button>
-                         <button className="abtn abtn-danger abtn-sm" onClick={()=>deleteMenu(m.id)}>🗑️</button>
-                       </div>
-                     </div>
-                   );})}
-                 </div>
-               </div>
-             </div>
-           )}
+          {/* ── NOTICES ──────────────────────────────────────────────────────────── */}
+          {activeTab === 'notices' && (
+            <div className="fade-up">
+              <p className="asec">📢 Notice Board</p><p className="asub">Add, edit and delete official notices</p>
+              <div className="glass-gold">
+                <div className="actitle">{editNotice ? '✏️ Edit Notice' : '➕ Add Notice'}</div>
+                <form onSubmit={e => genericSave('notices', editNotice, noticeData, setEditNotice, () => setNoticeData({ text: '', link: '', type: 'General', isNew: true }), 'Notice saved!', e)}>
+                  <div style={{ marginBottom: 14 }}><label className="alabel">Notice Text *</label><textarea className="ainp" rows={3} value={noticeData.text} onChange={e => setNoticeData(d => ({ ...d, text: e.target.value }))} required placeholder="Notice content..." /></div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
+                    <div><label className="alabel">Type</label><select className="ainp" value={noticeData.type} onChange={e => setNoticeData(d => ({ ...d, type: e.target.value }))}>{['General', 'Examination', 'Admission', 'Result', 'Holiday'].map(t => <option key={t}>{t}</option>)}</select></div>
+                    <div><label className="alabel">Link (Optional)</label><input className="ainp" value={noticeData.link} onChange={e => setNoticeData(d => ({ ...d, link: e.target.value }))} placeholder="https://..." /></div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 20 }}><input type="checkbox" checked={noticeData.isNew} onChange={e => setNoticeData(d => ({ ...d, isNew: e.target.checked }))} style={{ width: 16, height: 16, accentColor: T.red }} /><label style={{ fontWeight: 700, color: T.red, fontSize: 13 }}>Mark as NEW</label></div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editNotice ? 'Update' : 'Publish'}</button>
+                    {editNotice && <button type="button" className="abtn abtn-dark" onClick={() => { setEditNotice(null); setNoticeData({ text: '', link: '', type: 'General', isNew: true }); }}>Cancel</button>}
+                  </div>
+                </form>
+              </div>
+              <div className="glass">
+                <div className="actitle">All Notices ({(notices || []).length})</div>
+                {(notices || []).map(n => (
+                  <div key={n.id} className="arow" style={{ borderLeft: `4px solid ${n.isNew ? T.red : T.b2}` }}>
+                    {n.isNew && <span className="abadge" style={{ background: 'rgba(239,68,68,.15)', color: T.red }}>NEW</span>}
+                    <div style={{ flex: 1, fontWeight: 600, color: T.t1 }} dangerouslySetInnerHTML={{ __html: n.text?.substring(0, 80) }} />
+                    <span className="abadge" style={{ background: 'rgba(100,116,139,.1)', color: T.t3 }}>{n.type}</span>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button className="abtn abtn-dark abtn-sm" onClick={() => { setEditNotice(n); setNoticeData({ text: n.text || '', link: n.link || '', type: n.type || 'General', isNew: n.isNew || false }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>✏️</button>
+                      <button className="abtn abtn-danger abtn-sm" onClick={() => genericDelete('notices', n.id)}>🗑️</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-           {activeTab==='pages'&&(
-             <div className="fade-up">
-               <p className="asec">📄 Pages & SEO Manager</p><p className="asub">Rich content + search engine optimization</p>
-               <div className="glass-gold" style={{padding:32,marginBottom:32}}>
-                 <div className="actitle">{editingPage?'✏️ Edit Page':'🆕 Create Page'}</div>
-                 <div style={{display:'flex',flexWrap:'wrap',gap:20,marginBottom:24,background:'#f8fafc',padding:'16px 20px',borderRadius:12,border:`1px solid ${T.b1}`}}>
-                   <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',fontWeight:800,color:T.navy,fontSize:14}}><input type="radio" value="update" checked={pageMode==='update'} onChange={()=>setPageMode('update')} style={{accentColor:T.navy}}/> 🔗 Link to Existing Menu</label>
-                   <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',fontWeight:800,color:T.navy,fontSize:14}}><input type="radio" value="create" checked={pageMode==='create'} onChange={()=>setPageMode('create')} style={{accentColor:T.navy}}/> ✨ New Custom URL</label>
-                 </div>
-                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(250px,1fr))',gap:20,marginBottom:20}}>
-                   <div><label className="alabel">Title *</label><input className="ainp" placeholder="Department of Commerce" value={pageData?.title || ''} onChange={e=>{const t=e.target.value;setPageData(d=>({...d,title:t,slug:pageMode==='create'?t.toLowerCase().replace(/\s+/g,'-').replace(/[^\w-]+/g,''):(d?.slug||'')}));setSeoData(s=>({...s,metaTitle:s?.metaTitle||t}));}}/></div>
-                   <div><label className="alabel">{pageMode==='update'?'Target Menu *':'URL Slug *'}</label>
-                     {pageMode==='update'?<select className="ainp" value={pageData?.path || ''} onChange={e=>setPageData(d=>({...d,path:e.target.value,slug:''}))}>
-                       <option value="">-- Select Menu --</option>
-                       {flatMenus.filter(m=>m.href).map(m=><option key={m.id} value={m.href}>{m.pathStr} → {m.href}</option>)}
-                     </select>:<input className="ainp" placeholder="department-commerce" value={pageData?.slug || ''} onChange={e=>setPageData(d=>({...d,slug:e.target.value.toLowerCase().replace(/\s+/g,'-'),path:''}))}/>}
-                   </div>
-                 </div>
-                 <div style={{marginBottom:24}}>
-                   <label className="alabel">Content</label>
-                   <Suspense fallback={<div>Loading Editor...</div>}><JoditEditor ref={editor} value={pageData?.content || ''} config={joditCfg} tabIndex={1} onBlur={c=>setPageData(d=>({...d,content:c}))}/></Suspense>
-                 </div>
-                 <div style={{background:'#f8fafc',border:`1px solid ${T.b1}`,borderRadius:14,padding:'24px 26px',marginBottom:24}}>
-                   <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20}}>
-                     <div style={{fontWeight:900,color:T.navy,fontSize:16}}>🔍 SEO Settings</div>
-                     <div style={{display:'flex',alignItems:'center',gap:12}}>
-                       <SeoRing score={seoScore}/>
-                       <div><div style={{fontSize:12,fontWeight:800,color:T.t3}}>SEO SCORE</div><div style={{fontSize:14,fontWeight:800,color:seoScore>=80?T.green:seoScore>=50?T.gold:T.red}}>{seoScore>=80?'Excellent':seoScore>=50?'Good':'Needs Work'}</div></div>
-                     </div>
-                   </div>
-                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(250px,1fr))',gap:16}}>
-                     <div><label className="alabel">Meta Title ({(seoData?.metaTitle||'').length}/60)</label><input className="ainp" maxLength={60} placeholder="Page title for Google" value={seoData?.metaTitle || ''} onChange={e=>setSeoData(s=>({...s,metaTitle:e.target.value}))}/></div>
-                     <div><label className="alabel">Meta Description ({(seoData?.metaDesc||'').length}/160)</label><input className="ainp" maxLength={160} placeholder="Brief page description" value={seoData?.metaDesc || ''} onChange={e=>setSeoData(s=>({...s,metaDesc:e.target.value}))}/></div>
-                     <div><label className="alabel">Focus Keywords</label><input className="ainp" placeholder="commerce, bcom, dhanbad" value={seoData?.keywords || ''} onChange={e=>setSeoData(s=>({...s,keywords:e.target.value}))}/></div>
-                     <div><label className="alabel">OG Image URL</label><input className="ainp" placeholder="https://…/og-image.jpg" value={seoData?.ogImage || ''} onChange={e=>setSeoData(s=>({...s,ogImage:e.target.value}))}/></div>
-                   </div>
-                   <div style={{marginTop:14,display:'flex',flexWrap:'wrap',gap:8}}>
-                     {[{done:(pageData?.title||'').length>5,l:'Title'},{done:(seoData?.metaTitle||'').length>10,l:'Meta title'},{done:(seoData?.metaDesc||'').length>50,l:'Meta desc'},{done:(seoData?.keywords||'').length>0,l:'Keywords'},{done:!!(seoData?.ogImage),l:'OG image'}].map((h,i)=>(
-                       <span key={i} className="abadge" style={{background:h.done?'#d1fae5':'#f1f5f9',color:h.done?T.green:T.t3}}>{h.done?'✅':'○'} {h.l}</span>
-                     ))}
-                   </div>
-                 </div>
-                 <div style={{display:'flex',gap:14,flexWrap:'wrap'}}>
-                   <button className="abtn abtn-dark" onClick={()=>{setPreviewContent(pageData?.content||'');setShowPreview(true);}}>👁️ Preview</button>
-                   <button className="abtn abtn-gold" onClick={savePage} disabled={loading}>{loading?'⏳ Saving…':editingPage?'💾 Save':'🚀 Publish'}</button>
-                   {editingPage&&<button className="abtn abtn-dark" onClick={()=>{setEditPage(null);setPageData({title:'',content:'',path:'',slug:'',contentType:'html'});setSeoData({metaTitle:'',metaDesc:'',keywords:'',ogImage:''});}}>Cancel</button>}
-                 </div>
-               </div>
-               <div className="glass" style={{padding:32}}>
-                 <div className="actitle">📂 Pages ({(pages||[]).length})</div>
-                 <div style={{display:'flex',flexDirection:'column',gap:12}}>
-                   {(pages||[]).map(p=>(
-                     <div key={p.id || Math.random().toString()} className="arow" style={{borderLeft:`4px solid ${T.purple}`}}>
-                       <div style={{flex:1,minWidth:0}}>
-                         <div style={{fontWeight:800,color:T.navy,fontSize:15}}>{p.title}</div>
-                         <div style={{display:'flex',gap:12,marginTop:8,flexWrap:'wrap'}}>
-                           <a href={p.path?`#${p.path}`:`#/p/${p.slug}`} target="_blank" rel="noopener noreferrer" style={{fontSize:12,color:T.navy,textDecoration:'underline',fontWeight:700}}>🔗 View Live</a>
-                           {p.seo?.metaTitle&&<span style={{fontSize:12,color:T.green,fontWeight:700}}>✅ SEO Optimized</span>}
-                         </div>
-                       </div>
-                       <div style={{display:'flex',gap:10,flexShrink:0}}>
-                         <button className="abtn abtn-dark abtn-sm" onClick={()=>{setEditPage(p);setPageData({title:p.title||'',content:p.content||'',path:p.path?`/#${p.path}`:'',slug:p.slug||'',contentType:p.contentType||'html'});setSeoData(p.seo||{metaTitle:'',metaDesc:'',keywords:'',ogImage:''});setPageMode(p.path?'update':'create');window.scrollTo({top:0,behavior:'smooth'});}}>✏️ Edit</button>
-                         <button className="abtn abtn-danger abtn-sm" onClick={()=>genericDelete('pages',p.id,'Page')}>🗑️</button>
-                       </div>
-                     </div>
-                   ))}
-                   {(pages||[]).length===0&&<div style={{textAlign:'center',padding:40,color:T.t3}}>No pages yet.</div>}
-                 </div>
-               </div>
-             </div>
-           )}
+          {/* ── ANNOUNCEMENTS ─────────────────────────────────────────────────────── */}
+          {activeTab === 'announcements' && (
+            <div className="fade-up">
+              <p className="asec">📣 News & Announcements</p><p className="asub">College news, achievements and updates</p>
+              <div className="glass-gold">
+                <form onSubmit={e => genericSave('announcements', editAnn, annData, setEditAnn, () => setAnnData({ text: '', link: '', type: 'News' }), 'News saved!', e)}>
+                  <div style={{ marginBottom: 14 }}><label className="alabel">News Text *</label><textarea className="ainp" rows={3} value={annData.text} onChange={e => setAnnData(d => ({ ...d, text: e.target.value }))} required /></div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+                    <div><label className="alabel">Type</label><select className="ainp" value={annData.type} onChange={e => setAnnData(d => ({ ...d, type: e.target.value }))}>{['News', 'Achievement', 'Update', 'Result'].map(t => <option key={t}>{t}</option>)}</select></div>
+                    <div><label className="alabel">Link</label><input className="ainp" value={annData.link} onChange={e => setAnnData(d => ({ ...d, link: e.target.value }))} placeholder="https://..." /></div>
+                  </div>
+                  <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editAnn ? 'Update' : 'Publish'}</button>
+                </form>
+              </div>
+              <div className="glass">
+                <div className="actitle">All News ({(announcements || []).length})</div>
+                {(announcements || []).map(a => (
+                  <div key={a.id} className="arow">
+                    <span className="abadge" style={{ background: 'rgba(37,99,235,.15)', color: T.blue }}>{a.type}</span>
+                    <div style={{ flex: 1, fontWeight: 600, color: T.t1 }} dangerouslySetInnerHTML={{ __html: a.text?.substring(0, 80) }} />
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button className="abtn abtn-dark abtn-sm" onClick={() => { setEditAnn(a); setAnnData({ text: a.text || '', link: a.link || '', type: a.type || 'News' }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>✏️</button>
+                      <button className="abtn abtn-danger abtn-sm" onClick={() => genericDelete('announcements', a.id)}>🗑️</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-           {activeTab==='gallery'&&(
-             <div className="fade-up">
-               <p className="asec">📸 Photo Gallery</p><p className="asub">Upload with free automatic crop & optimize</p>
-               <div className="glass-gold" style={{padding:32,marginBottom:32}}>
-                 <div className="actitle">📤 Add Photo</div>
-                 <form onSubmit={addGalleryPhoto}>
-                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(250px,1fr))',gap:20,marginBottom:20}}>
-                     <div><label className="alabel">Title</label><input className="ainp" value={galleryData.title} onChange={e=>setGalleryData(d=>({...d,title:e.target.value}))} placeholder="Annual Sports Day" required/></div>
-                     <div><label className="alabel">Category</label><select className="ainp" value={galleryData.cat} onChange={e=>setGalleryData(d=>({...d,cat:e.target.value}))}>
-                       {['Seminars','Cultural Fest','Guest Visit','Campus','Departments','NSS Programs','Sports','NCC'].map(c=><option key={c}>{c}</option>)}
-                     </select></div>
-                   </div>
-                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:20}}>
-                     <label className="upload-zone"><div style={{fontSize:32,marginBottom:8}}>📷</div><div style={{fontSize:14,fontWeight:800,color:T.navy}}>{galleryUploading?`${galleryProgress}%…`:'Upload Image'}</div><input ref={galleryFileRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>e.target.files[0]&&handleGalleryFile(e.target.files[0])}/></label>
-                     <div><label className="alabel">Or Paste URL</label><textarea className="ainp" rows={5} placeholder="https://…" value={galleryData.src} onChange={e=>setGalleryData(d=>({...d,src:e.target.value}))} style={{resize:'vertical'}}/></div>
-                   </div>
-                   {galleryData.src&&<img src={galleryData.src} alt="prev" style={{width:'100%',maxHeight:200,objectFit:'cover',borderRadius:12,marginBottom:20}} onError={e=>e.target.style.display='none'}/>}
-                   <button type="submit" className="abtn abtn-gold" disabled={loading||galleryUploading}>🚀 Publish Photo</button>
-                 </form>
-               </div>
-               <div className="glass" style={{padding:32}}>
-                 <div className="actitle">🖼️ Gallery ({(gallery||[]).length})</div>
-                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(250px,1fr))',gap:20}}>
-                   {(gallery||[]).map(img=>(
-                     <div key={img.id} style={{background:'#fff',borderRadius:14,overflow:'hidden',border:`1px solid ${T.b1}`,boxShadow:'0 5px 15px rgba(0,0,0,.03)'}}>
-                       <img src={img.src} alt={img.title} style={{width:'100%',height:180,objectFit:'cover'}} onError={e=>e.target.style.opacity='.2'}/>
-                       <div style={{padding:'16px 18px'}}>
-                         <span className="abadge" style={{background:'#fdf2f8',color:'#be185d',marginBottom:8}}>{img.cat}</span>
-                         <div style={{fontWeight:800,color:T.navy,fontSize:14,marginBottom:12}}>{img.title}</div>
-                         <button className="abtn abtn-danger abtn-sm" style={{width:'100%',justifyContent:'center'}} onClick={()=>genericDelete('gallery',img.id,'Photo')}>🗑️ Remove</button>
-                       </div>
-                     </div>
-                   ))}
-                 </div>
-               </div>
-             </div>
-           )}
+          {/* ── PDF REPORTS ───────────────────────────────────────────────────────── */}
+          {activeTab === 'pdfReports' && (
+            <div className="fade-up">
+              <p className="asec">📁 Document Archive</p><p className="asub">PDFs, reports, syllabus and circulars</p>
+              <div className="glass-blue">
+                <form onSubmit={e => genericSave('pdfReports', editPdf, pdfData, setEditPdf, () => setPdfData({ title: '', link: '', type: 'Document' }), 'Document saved!', e)}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 14, marginBottom: 14 }}>
+                    <div><label className="alabel">Title *</label><input className="ainp" value={pdfData.title} onChange={e => setPdfData(d => ({ ...d, title: e.target.value }))} required placeholder="NAAC Self Study Report" /></div>
+                    <div><label className="alabel">PDF Link *</label><input className="ainp" value={pdfData.link} onChange={e => setPdfData(d => ({ ...d, link: e.target.value }))} required placeholder="https://drive.google.com/..." /></div>
+                    <div><label className="alabel">Type</label><select className="ainp" value={pdfData.type} onChange={e => setPdfData(d => ({ ...d, type: e.target.value }))}>{['Document', 'Report', 'Syllabus', 'Circular', 'Result'].map(t => <option key={t}>{t}</option>)}</select></div>
+                  </div>
+                  <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editPdf ? 'Update' : 'Add'} Document</button>
+                </form>
+              </div>
+              <div className="glass">
+                <div className="actitle">All Documents ({(pdfReports || []).length})</div>
+                {(pdfReports || []).map(d => (
+                  <div key={d.id} className="arow">
+                    <span style={{ fontSize: 22 }}>📄</span>
+                    <div style={{ flex: 1 }}><div style={{ fontWeight: 700, color: T.t1 }}>{d.title}</div><div style={{ fontSize: 12, color: T.t3 }}>{d.type} • <a href={d.link} target="_blank" rel="noreferrer" style={{ color: T.blue }}>View PDF ↗</a></div></div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button className="abtn abtn-dark abtn-sm" onClick={() => { setEditPdf(d); setPdfData({ title: d.title, link: d.link, type: d.type || 'Document' }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>✏️</button>
+                      <button className="abtn abtn-danger abtn-sm" onClick={() => genericDelete('pdfReports', d.id)}>🗑️</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-           {activeTab==='notices'&&(
-             <div className="fade-up">
-               <p className="asec">📢 Notice Board</p><p className="asub">Broadcast notices to students and staff</p>
-               <div className="glass-gold" style={{padding:32,marginBottom:32}}>
-                 <div className="actitle">{editNotice?'✏️ Edit Notice':'📝 Broadcast'}</div>
-                 <form onSubmit={e=>{e.preventDefault();genericSave('notices',editNotice,noticeData,setEditNotice,()=>setNoticeData({text:'',link:'',type:'General',isNew:true}),'Notice');}}>
-                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:20,marginBottom:20}}>
-                     <div><label className="alabel">Category</label><select className="ainp" value={noticeData.type} onChange={e=>setNoticeData(d=>({...d,type:e.target.value}))}>{['General','Examination','Admission','Holiday','Academic','Sports'].map(t=><option key={t}>{t}</option>)}</select></div>
-                     <div><label className="alabel">Attachment URL</label><input className="ainp" placeholder="Drive/PDF Link" value={noticeData.link} onChange={e=>setNoticeData(d=>({...d,link:e.target.value}))}/></div>
-                     <div style={{display:'flex',alignItems:'center',gap:12,paddingTop:24}}><input type="checkbox" checked={noticeData.isNew} onChange={e=>setNoticeData(d=>({...d,isNew:e.target.checked}))} style={{width:18,height:18,accentColor:T.navy}}/><label style={{fontSize:14,fontWeight:800,color:T.navy,cursor:'pointer'}}>Show "NEW" badge</label></div>
-                   </div>
-                   <div style={{marginBottom:24}}>
-                     <label className="alabel">Content *</label><Suspense fallback={<div>Loading Editor...</div>}><JoditEditor ref={editor} value={noticeData.text} config={joditCfg} onBlur={c=>setNoticeData(d=>({...d,text:c}))}/></Suspense>
-                   </div>
-                   <div style={{display:'flex',gap:12}}><button type="submit" className="abtn abtn-gold" disabled={loading}>{loading?'⏳':editNotice?'💾 Update':'🚀 Broadcast'}</button>{editNotice&&<button type="button" className="abtn abtn-dark" onClick={()=>{setEditNotice(null);setNoticeData({text:'',link:'',type:'General',isNew:true});}}>Cancel</button>}</div>
-                 </form>
-               </div>
-               <div className="glass" style={{padding:32}}>
-                 <div className="actitle">Notices ({(notices||[]).length})</div>
-                 <div style={{display:'flex',flexDirection:'column',gap:12}}>
-                   {(notices||[]).map(n=>(
-                     <div key={n.id} className="arow" style={{borderLeft:`4px solid #f59e0b`}}>
-                       <div style={{flex:1}}><div style={{display:'flex',gap:10,marginBottom:8}}><span className="abadge" style={{background:'#fef3c7',color:'#b45309'}}>{n.type}</span>{n.isNew&&<span className="abadge" style={{background:'#fee2e2',color:'#b91c1c'}}>NEW</span>}</div><div dangerouslySetInnerHTML={{__html:n.text}} style={{fontSize:14,color:T.t2,lineHeight:1.6}}/></div>
-                       <div style={{display:'flex',gap:10,flexShrink:0}}><button className="abtn abtn-dark abtn-sm" onClick={()=>{setEditNotice(n);setNoticeData({text:n.text||'',link:n.link||'',type:n.type||'General',isNew:n.isNew!==false});window.scrollTo({top:0,behavior:'smooth'});}}>✏️</button><button className="abtn abtn-danger abtn-sm" onClick={()=>genericDelete('notices',n.id,'Notice')}>🗑️</button></div>
-                     </div>
-                   ))}
-                 </div>
-               </div>
-             </div>
-           )}
+          {/* ── EVENTS ──────────────────────────────────────────────────────────── */}
+          {activeTab === 'events' && (
+            <div className="fade-up">
+              <p className="asec">🏆 Campus Events</p><p className="asub">Manage upcoming and recent campus events</p>
+              <div className="glass-gold">
+                <div className="actitle">{editEvent ? '✏️ Edit Event' : '🎉 Add Event'}</div>
+                <form onSubmit={e => genericSave('events', editEvent, evtData, setEditEvent, () => setEvtData({ title: '', desc: '', type: 'WORKSHOP', day: '', month: '', location: '', status: 'upcoming', imageUrl: '', reportLink: '' }), 'Event saved!', e)}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))', gap: 14, marginBottom: 16 }}>
+                    <div><label className="alabel">Title *</label><input className="ainp" value={evtData.title} onChange={e => setEvtData(d => ({ ...d, title: e.target.value }))} required /></div>
+                    <div><label className="alabel">Type</label><select className="ainp" value={evtData.type} onChange={e => setEvtData(d => ({ ...d, type: e.target.value }))}>{['WORKSHOP', 'SEMINAR', 'CULTURAL', 'SPORTS', 'NSS', 'NCC', 'ACADEMIC'].map(t => <option key={t}>{t}</option>)}</select></div>
+                    <div><label className="alabel">Day</label><input className="ainp" value={evtData.day} onChange={e => setEvtData(d => ({ ...d, day: e.target.value }))} placeholder="24" /></div>
+                    <div><label className="alabel">Month</label><input className="ainp" value={evtData.month} onChange={e => setEvtData(d => ({ ...d, month: e.target.value }))} placeholder="MAR" /></div>
+                    <div><label className="alabel">Location</label><input className="ainp" value={evtData.location} onChange={e => setEvtData(d => ({ ...d, location: e.target.value }))} placeholder="Seminar Hall" /></div>
+                    <div><label className="alabel">Status</label><select className="ainp" value={evtData.status} onChange={e => setEvtData(d => ({ ...d, status: e.target.value }))}><option value="upcoming">Upcoming</option><option value="recent">Recent</option></select></div>
+                  </div>
+                  {evtData.status === 'recent' && (
+                    <div style={{ marginBottom: 16 }}>
+                      <label className="alabel">Event Image</label>
+                      <label className="upload-zone">
+                        <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => e.target.files[0] && handleEventFile(e.target.files[0])} />
+                        <div style={{ fontSize: 20 }}>{eventUp ? `${eventProg}%...` : '📷 Upload Event Photo'}</div>
+                        {eventUp && <div className="prog-outer"><div className="prog-inner" style={{ width: `${eventProg}%` }} /></div>}
+                      </label>
+                      <div style={{ marginTop: 12 }}><label className="alabel">PDF Report Link</label><input className="ainp" value={evtData.reportLink || ''} onChange={e => setEvtData(d => ({ ...d, reportLink: e.target.value }))} placeholder="https://..." /></div>
+                    </div>
+                  )}
+                  <div style={{ marginBottom: 16 }}><label className="alabel">Description</label><Suspense fallback={<div style={{ padding: 20 }}>Loading...</div>}><JoditEditor value={evtData.desc} config={joditCfg} onBlur={c => setEvtData(d => ({ ...d, desc: c }))} /></Suspense></div>
+                  <button type="submit" className="abtn abtn-gold" disabled={loading || eventUp}>🚀 {editEvent ? 'Update' : 'Publish'} Event</button>
+                </form>
+              </div>
+              <div className="glass">
+                <div className="actitle">Events ({(events || []).length})</div>
+                {(events || []).map(e => (
+                  <div key={e.id} className="arow" style={{ borderLeft: `4px solid ${T.purple}` }}>
+                    <div style={{ flex: 1 }}>
+                      <span className="abadge" style={{ background: 'rgba(139,92,246,.15)', color: T.purple, marginBottom: 6 }}>{e.type}</span>
+                      <div style={{ fontWeight: 800, color: T.t1 }}>{e.title}</div>
+                      <div style={{ fontSize: 12, color: T.t3, marginTop: 4 }}>📅 {e.day} {e.month} | 📍 {e.location || 'Campus'} | {e.status}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button className="abtn abtn-dark abtn-sm" onClick={() => { setEditEvent(e); setEvtData({ title: e.title || '', desc: e.desc || '', type: e.type || 'WORKSHOP', day: e.day || '', month: e.month || '', location: e.location || '', status: e.status || 'upcoming', imageUrl: e.imageUrl || '', reportLink: e.reportLink || '' }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>✏️</button>
+                      <button className="abtn abtn-danger abtn-sm" onClick={() => genericDelete('events', e.id)}>🗑️</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-           {activeTab==='announcements'&&(
-             <div className="fade-up">
-               <p className="asec">📣 Academic News</p><p className="asub">Publish achievements and academic updates</p>
-               <div className="glass-gold" style={{padding:32,marginBottom:32}}>
-                 <div className="actitle">{editAnn?'✏️ Edit':'📰 Publish News'}</div>
-                 <form onSubmit={e=>{e.preventDefault();genericSave('announcements',editAnn,annData,setEditAnn,()=>setAnnData({text:'',link:'',type:'News'}),'News');}}>
-                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:20}}>
-                     <div><label className="alabel">Category</label><select className="ainp" value={annData.type} onChange={e=>setAnnData(d=>({...d,type:e.target.value}))}>{['News','Achievement','Update','Result','Scholarship'].map(t=><option key={t}>{t}</option>)}</select></div>
-                     <div><label className="alabel">Link</label><input className="ainp" placeholder="Optional URL" value={annData.link} onChange={e=>setAnnData(d=>({...d,link:e.target.value}))}/></div>
-                   </div>
-                   <div style={{marginBottom:24}}>
-                     <label className="alabel">Content *</label><Suspense fallback={<div>Loading Editor...</div>}><JoditEditor ref={editor} value={annData.text} config={joditCfg} onBlur={c=>setAnnData(d=>({...d,text:c}))}/></Suspense>
-                   </div>
-                   <div style={{display:'flex',gap:12}}><button type="submit" className="abtn abtn-gold" disabled={loading}>{loading?'⏳':editAnn?'💾 Update':'🚀 Publish'}</button>{editAnn&&<button type="button" className="abtn abtn-dark" onClick={()=>{setEditAnn(null);setAnnData({text:'',link:'',type:'News'});}}>Cancel</button>}</div>
-                 </form>
-               </div>
-               <div className="glass" style={{padding:32}}>
-                 <div className="actitle">News ({(announcements||[]).length})</div>
-                 <div style={{display:'flex',flexDirection:'column',gap:12}}>
-                   {(announcements||[]).map(a=>(
-                     <div key={a.id} className="arow" style={{borderLeft:`4px solid ${T.red}`}}>
-                       <div style={{flex:1}}><span className="abadge" style={{background:'#fee2e2',color:'#b91c1c',marginBottom:8}}>{a.type}</span><div dangerouslySetInnerHTML={{__html:a.text}} style={{fontSize:14,color:T.t2,lineHeight:1.6,marginTop:4}}/></div>
-                       <div style={{display:'flex',gap:10,flexShrink:0}}><button className="abtn abtn-dark abtn-sm" onClick={()=>{setEditAnn(a);setAnnData({text:a.text||'',link:a.link||'',type:a.type||'News'});window.scrollTo({top:0,behavior:'smooth'});}}>✏️</button><button className="abtn abtn-danger abtn-sm" onClick={()=>genericDelete('announcements',a.id,'News')}>🗑️</button></div>
-                     </div>
-                   ))}
-                 </div>
-               </div>
-             </div>
-           )}
+          {/* ── YOUTUBE MANAGER ──────────────────────────────────────────────────── */}
+          {activeTab === 'youtube' && (
+            <div className="fade-up">
+              <p className="asec">▶️ YouTube Manager</p>
+              <p className="asub">Auto-fetch latest videos from your YouTube channel → /video-gallery page par live ho jaenge</p>
 
-           {activeTab==='pdfReports'&&(
-             <div className="fade-up">
-               <p className="asec">📁 E-Documents</p><p className="asub">Official PDF documents and reports</p>
-               <div className="glass-gold" style={{padding:32,marginBottom:32}}>
-                 <div className="actitle">{editPdf?'✏️ Edit':'📤 Upload Document'}</div>
-                 <form onSubmit={e=>{e.preventDefault();genericSave('pdfReports',editPdf,pdfData,setEditPdf,()=>setPdfData({title:'',link:'',type:'Document'}),'Document');}}>
-                   <div style={{marginBottom:20}}><label className="alabel">Title *</label><input className="ainp" value={pdfData.title} onChange={e=>setPdfData(d=>({...d,title:e.target.value}))} placeholder="NAAC Self Study Report 2023" required/></div>
-                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:24}}>
-                     <div><label className="alabel">URL *</label><input className="ainp" value={pdfData.link} onChange={e=>setPdfData(d=>({...d,link:e.target.value}))} placeholder="Google Drive link" required/></div>
-                     <div><label className="alabel">Type</label><select className="ainp" value={pdfData.type} onChange={e=>setPdfData(d=>({...d,type:e.target.value}))}>{['Document','Report','Syllabus','NAAC','IQAC','Regulation','Result'].map(t=><option key={t}>{t}</option>)}</select></div>
-                   </div>
-                   <div style={{display:'flex',gap:12}}><button type="submit" className="abtn abtn-gold" disabled={loading}>{loading?'⏳':editPdf?'💾 Update':'🚀 Publish'}</button>{editPdf&&<button type="button" className="abtn abtn-dark" onClick={()=>{setEditPdf(null);setPdfData({title:'',link:'',type:'Document'});}}>Cancel</button>}</div>
-                 </form>
-               </div>
-               <div className="glass" style={{padding:32}}>
-                 <div className="actitle">Documents ({(pdfReports||[]).length})</div>
-                 <div style={{display:'flex',flexDirection:'column',gap:12}}>
-                   {(pdfReports||[]).map(p=>(
-                     <div key={p.id} className="arow" style={{borderLeft:`4px solid ${T.green}`}}>
-                       <div style={{flex:1}}><span className="abadge" style={{background:'#ecfdf5',color:'#047857'}}>{p.type}</span><div style={{fontWeight:800,color:T.navy,fontSize:15,margin:'8px 0 4px'}}>{p.title}</div><a href={p.link} target="_blank" rel="noreferrer" style={{fontSize:12,color:T.green,fontWeight:800,textDecoration:'none'}}>⬇️ View Link</a></div>
-                       <div style={{display:'flex',gap:10,flexShrink:0}}><button className="abtn abtn-dark abtn-sm" onClick={()=>{setEditPdf(p);setPdfData({title:p.title||'',link:p.link||'',type:p.type||'Document'});window.scrollTo({top:0,behavior:'smooth'});}}>✏️</button><button className="abtn abtn-danger abtn-sm" onClick={()=>genericDelete('pdfReports',p.id,'Document')}>🗑️</button></div>
-                     </div>
-                   ))}
-                 </div>
-               </div>
-             </div>
-           )}
+              <div className="glass-blue">
+                <div className="actitle">🔑 YouTube API Configuration</div>
+                <div style={{ background: 'rgba(37,99,235,.08)', border: `1px solid rgba(37,99,235,.2)`, borderRadius: 12, padding: '14px 18px', marginBottom: 24 }}>
+                  <div style={{ fontWeight: 800, color: T.blue, marginBottom: 8 }}>📋 Setup Guide (3 steps)</div>
+                  <ol style={{ margin: 0, padding: '0 0 0 18px', fontSize: 13, color: T.t2, lineHeight: 2 }}>
+                    <li>Google Cloud Console → APIs & Services → Enable <b style={{ color: T.t1 }}>YouTube Data API v3</b></li>
+                    <li>Credentials → Create API Key → Copy karo</li>
+                    <li>YouTube Channel URL se Channel ID copy karo (youtube.com/channel/<b style={{ color: T.gold }}>UCxxxxxx</b>)</li>
+                  </ol>
+                </div>
+                <form onSubmit={saveYtConfig}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 16, marginBottom: 16 }}>
+                    <div><label className="alabel">YouTube API Key *</label><input className="ainp" value={ytCfg.apiKey} onChange={e => setYtCfg(d => ({ ...d, apiKey: e.target.value }))} placeholder="AIzaSyxxxxxxxxxxxxxxxxx" type="password" /></div>
+                    <div><label className="alabel">Channel ID *</label><input className="ainp" value={ytCfg.channelId} onChange={e => setYtCfg(d => ({ ...d, channelId: e.target.value }))} placeholder="UCxxxxxxxxxxxxxxxxx" /></div>
+                    <div><label className="alabel">Max Videos to Fetch</label><select className="ainp" value={ytCfg.maxResults} onChange={e => setYtCfg(d => ({ ...d, maxResults: +e.target.value }))}>{[6, 9, 12, 15, 18, 24].map(n => <option key={n} value={n}>{n} videos</option>)}</select></div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <button type="submit" className="abtn abtn-gold" disabled={loading}>💾 Save Config</button>
+                    <button type="button" className="abtn abtn-blue" disabled={ytLoading || !ytCfg.apiKey} onClick={testYtApi}>{ytLoading ? '⏳ Testing...' : '🧪 Test API'}</button>
+                  </div>
+                </form>
+                {ytTest && (
+                  <div style={{ marginTop: 16, padding: '12px 16px', borderRadius: 10, background: ytTest.ok ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)', border: `1px solid ${ytTest.ok ? T.green : T.red}`, fontWeight: 700, fontSize: 14, color: ytTest.ok ? T.green : T.red }}>
+                    {ytTest.msg}
+                  </div>
+                )}
+              </div>
 
-           {activeTab==='activity'&&(
-             <div className="fade-up">
-               <p className="asec">📋 Activity Log</p><p className="asub">Real-time log of all admin actions</p>
-               <div className="glass" style={{padding:32}}>
-                 <div className="actitle">🕐 Recent Activity <div className="glow-dot" style={{marginLeft:'auto'}}/><span style={{fontSize:13,color:T.green,fontWeight:800}}>Live</span></div>
-                 {activityLogs.length===0&&<div style={{textAlign:'center',padding:80,color:T.t3}}><div style={{fontSize:48,marginBottom:12}}>📋</div><div style={{fontWeight:600}}>No activity yet. Start making changes!</div></div>}
-                 {activityLogs.map(log=><LogItem key={log.id} log={log}/>)}
-               </div>
-             </div>
-           )}
+              <div className="glass">
+                <div className="actitle">ℹ️ How it works on your website</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16 }}>
+                  {[
+                    { icon: '📺', title: '/video-gallery', desc: 'New page — YouTube se latest videos auto-load honge' },
+                    { icon: '🔄', title: 'Auto-Update', desc: 'YouTube par video daalo, website automatically update ho jayegi' },
+                    { icon: '▶️', title: 'In-page Player', desc: 'Visitor click kare to video sidebar bina open hoga' },
+                    { icon: '📊', title: 'Stats Show', desc: 'Views, likes aur duration automatically dikhenge' },
+                  ].map((f, i) => (
+                    <div key={i} style={{ padding: 18, background: 'rgba(9,20,48,.5)', borderRadius: 12, border: `1px solid ${T.b1}` }}>
+                      <div style={{ fontSize: 28, marginBottom: 10 }}>{f.icon}</div>
+                      <div style={{ fontWeight: 800, color: T.t1, marginBottom: 6 }}>{f.title}</div>
+                      <div style={{ fontSize: 13, color: T.t3 }}>{f.desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
-           {activeTab==='backup'&&(
-             <div className="fade-up">
-               <p className="asec">💾 Backup & Restore</p><p className="asub">Full database export / import</p>
-               <div className="glass" style={{padding:32,marginBottom:24,borderTop:`4px solid ${T.green}`}}>
-                 <div className="actitle">⬇️ Download Backup</div>
-                 <p style={{color:T.t2,marginBottom:24,fontSize:14,lineHeight:1.6,fontWeight:500}}>Complete JSON backup: pages, notices, events, slider, gallery, menu, documents & activity log.</p>
-                 <button className="abtn abtn-gold" onClick={handleBackup} disabled={loading}>{loading?'⏳ Generating…':'⬇️ Download Full Backup'}</button>
-               </div>
-               <div className="glass" style={{padding:32,borderTop:`4px solid ${T.red}`}}>
-                 <div className="actitle" style={{color:T.red}}>🔥 Restore from Backup</div>
-                 <div style={{background:'#fef2f2',border:'1px solid #fecaca',borderRadius:12,padding:'16px 20px',marginBottom:24}}>
-                   <div style={{fontWeight:900,color:T.red,marginBottom:6}}>⚠️ DANGER ZONE</div>
-                   <p style={{color:'#b91c1c',margin:0,fontSize:13,fontWeight:600}}>This will COMPLETELY ERASE all current data. Irreversible.</p>
-                 </div>
-                 <div style={{marginBottom:24}}><label className="alabel">Select Backup JSON File</label><input type="file" accept=".json" className="ainp" ref={fileRef} onChange={e=>setRestoreFile(e.target.files[0])}/></div>
-                 <button className="abtn abtn-danger" onClick={handleRestore} disabled={loading||!restoreFile}>{loading?'⏳ Restoring…':'🔥 Restore Database'}</button>
-               </div>
-             </div>
-           )}
+          {/* ── DRIVE MANAGER ────────────────────────────────────────────────────── */}
+          {activeTab === 'drive' && (
+            <div className="fade-up">
+              <p className="asec">☁️ Google Drive Document Sync</p>
+              <p className="asub">Drive folder ko website se connect karein — PDF upload karo Drive pe, website pe auto-appear ho jayega</p>
 
-           {/* 🌟 HACKER STYLE DIAGNOSTICS SUITE UI 🌟 */}
-           {activeTab==='system_test'&&(
-             <div className="fade-up" style={{ minHeight: '100%', padding: '40px', background: '#060912', display: 'flex', flexDirection: 'column', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,0.5)' }}>
-               
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30, borderBottom: '1px solid rgba(16,185,129,0.3)', paddingBottom: 20 }}>
-                 <div>
-                   <h1 style={{ color: '#10b981', margin: '0 0 5px 0', fontSize: 28, fontWeight: 900, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '-1px' }}>
-                     {">_ GNC.SYS.DIAGNOSTICS"}
-                   </h1>
-                   <p style={{ color: '#047857', margin: 0, fontSize: 13, fontFamily: "'JetBrains Mono', monospace" }}>[ Encrypted Core Testing Suite v5.1 ]</p>
-                 </div>
-                 {testScore !== null && (
-                   <div style={{ background: testScore === 100 ? 'rgba(16,185,129,0.1)' : testScore > 50 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)', color: testScore === 100 ? '#10b981' : testScore > 50 ? '#f59e0b' : '#ef4444', padding: '10px 20px', borderRadius: 8, border: `1px solid ${testScore === 100 ? '#10b981' : testScore > 50 ? '#f59e0b' : '#ef4444'}`, fontWeight: 900, fontSize: 24, fontFamily: "'JetBrains Mono', monospace" }}>
-                     {testScore}%
-                   </div>
-                 )}
-               </div>
+              <div className="glass-blue">
+                <div className="actitle">🔑 Drive API Configuration</div>
+                <div style={{ background: 'rgba(37,99,235,.08)', border: `1px solid rgba(37,99,235,.2)`, borderRadius: 12, padding: '14px 18px', marginBottom: 24 }}>
+                  <div style={{ fontWeight: 800, color: T.blue, marginBottom: 8 }}>📋 Setup Guide</div>
+                  <ol style={{ margin: 0, padding: '0 0 0 18px', fontSize: 13, color: T.t2, lineHeight: 2 }}>
+                    <li>Google Cloud Console → Enable <b style={{ color: T.t1 }}>Google Drive API</b></li>
+                    <li>Create API Key (same key YouTube ke liye bhi use ho sakta hai)</li>
+                    <li>Drive mein ek folder banao → Share → <b style={{ color: T.gold }}>"Anyone with link can view"</b></li>
+                    <li>Folder URL se ID copy karo: drive.google.com/drive/folders/<b style={{ color: T.gold }}>1BxxxxxFolderID</b></li>
+                  </ol>
+                </div>
+                <form onSubmit={saveDriveConfig}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 16, marginBottom: 16 }}>
+                    <div><label className="alabel">Google API Key *</label><input className="ainp" value={driveCfg.apiKey} onChange={e => setDriveCfg(d => ({ ...d, apiKey: e.target.value }))} placeholder="AIzaSyxxxxxxxxx" type="password" /></div>
+                    <div><label className="alabel">Drive Folder ID *</label><input className="ainp" value={driveCfg.folderId} onChange={e => setDriveCfg(d => ({ ...d, folderId: e.target.value }))} placeholder="1BxxxxxxxxxxxxxFolderID" /></div>
+                    <div><label className="alabel">Folder Name (Display)</label><input className="ainp" value={driveCfg.folderName} onChange={e => setDriveCfg(d => ({ ...d, folderName: e.target.value }))} placeholder="GNC Documents 2024" /></div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <button type="submit" className="abtn abtn-gold" disabled={loading}>💾 Save Config</button>
+                    <button type="button" className="abtn abtn-blue" disabled={driveLoading || !driveCfg.apiKey} onClick={testDriveApi}>{driveLoading ? '⏳ Testing...' : '🧪 Test & Preview Files'}</button>
+                  </div>
+                </form>
+                {driveTest && (
+                  <div style={{ marginTop: 16, padding: '12px 16px', borderRadius: 10, background: driveTest.ok ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)', border: `1px solid ${driveTest.ok ? T.green : T.red}`, fontWeight: 700, fontSize: 14, color: driveTest.ok ? T.green : T.red }}>
+                    {driveTest.msg}
+                  </div>
+                )}
+              </div>
 
-               <div className="ht-bg" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: 0, boxShadow: 'none', border: 'none' }}>
-                 <div className="ht-scanline" />
+              {driveFiles.length > 0 && (
+                <div className="glass">
+                  <div className="actitle">📄 Files in Drive Folder ({driveFiles.length} PDFs)</div>
+                  {driveFiles.map(f => (
+                    <div key={f.id} className="arow">
+                      <span style={{ fontSize: 22 }}>📄</span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 700, color: T.t1 }}>{f.name}</div>
+                        <div style={{ fontSize: 12, color: T.t3 }}>{f.createdTime ? new Date(f.createdTime).toLocaleDateString() : ''} {f.size ? `• ${(f.size / 1024).toFixed(0)} KB` : ''}</div>
+                      </div>
+                      <a href={`https://drive.google.com/file/d/${f.id}/view`} target="_blank" rel="noreferrer" className="abtn abtn-blue abtn-sm">📥 View</a>
+                    </div>
+                  ))}
+                </div>
+              )}
 
-                 {!testRunning && testResults.length === 0 && (
-                   <div style={{ textAlign: 'center', padding: '60px 20px', position: 'relative', zIndex: 2 }}>
-                     <div style={{ fontSize: 60, marginBottom: 20, filter: 'drop-shadow(0 0 20px #10b981)' }}>🛡️</div>
-                     <h3 style={{ color: '#10b981', marginBottom: 15, fontSize: 24, fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1 }}>INITIATE DEEP SCAN (5-PHASES)</h3>
-                     <p style={{ color: '#047857', marginBottom: 40, fontSize: 14, maxWidth: 600, margin: '0 auto 40px', fontFamily: "'JetBrains Mono', monospace" }}>
-                       WARNING: This protocol will inject verification pulses into the Database (The Control Room), Frontend Router (The Highway), and APIs (The Guard).
-                     </p>
-                     <button onClick={runDiagnostics} className="ht-btn">EXECUTE PHASE OVERRIDE</button>
-                   </div>
-                 )}
+              <div className="glass">
+                <div className="actitle">ℹ️ How it works on your website</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16 }}>
+                  {[
+                    { icon: '📤', title: 'Upload to Drive', desc: 'Phone ya laptop se Drive folder mein PDF daalo' },
+                    { icon: '⚡', title: 'Auto Sync', desc: '/documents page par file automatically appear ho jayegi with download button' },
+                    { icon: '🔒', title: 'No Admin Needed', desc: 'Har PDF ke liye admin panel kholne ki zaroorat nahi' },
+                    { icon: '📱', title: 'Mobile Friendly', desc: 'Phone se Drive mein upload karo, website pe live' },
+                  ].map((f, i) => (
+                    <div key={i} style={{ padding: 18, background: 'rgba(9,20,48,.5)', borderRadius: 12, border: `1px solid ${T.b1}` }}>
+                      <div style={{ fontSize: 28, marginBottom: 10 }}>{f.icon}</div>
+                      <div style={{ fontWeight: 800, color: T.t1, marginBottom: 6 }}>{f.title}</div>
+                      <div style={{ fontSize: 13, color: T.t3 }}>{f.desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
-                 {(testRunning || testResults.length > 0) && (
-                   <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative', zIndex: 2 }}>
-                     
-                     <div className="ht-term" ref={termRef}>
-                       {sysLog.map((log, i) => (
-                         <p key={i} style={{ color: log.includes('ERROR') ? '#ef4444' : log.includes('WARNING') ? '#f59e0b' : log.includes('PHASE') ? '#f4a023' : '#10b981' }}>{log}</p>
-                       ))}
-                       {testRunning && <span className="ht-cursor" />}
-                     </div>
+          {/* ── ACTIVITY LOG ─────────────────────────────────────────────────────── */}
+          {activeTab === 'activity' && (
+            <div className="fade-up">
+              <p className="asec">📋 Activity Log</p><p className="asub">Real-time log of all admin actions</p>
+              <div className="glass">
+                <div className="actitle">🕐 Recent Activity <div className="glow-dot" style={{ marginLeft: 'auto' }} /><span style={{ fontSize: 12, color: T.green, fontWeight: 800 }}>Live</span></div>
+                {activityLogs.length === 0 && <div style={{ textAlign: 'center', padding: 80, color: T.t3 }}><div style={{ fontSize: 44, marginBottom: 12 }}>📋</div><div>No activity yet</div></div>}
+                {activityLogs.map(log => {
+                  const ic = log.action === 'add' ? '➕' : log.action === 'delete' ? '🗑️' : log.action === 'restore' ? '🔄' : '✏️';
+                  const co = log.action === 'add' ? T.green : log.action === 'delete' ? T.red : T.blue;
+                  return (
+                    <div key={log.id} className="arow">
+                      <div style={{ width: 30, height: 30, borderRadius: 8, background: `${co}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>{ic}</div>
+                      <div style={{ flex: 1 }}><div style={{ fontWeight: 700, color: T.t1, fontSize: 14 }}>{log.message}</div><div style={{ fontSize: 11, color: T.t3 }}>{log.time ? new Date(log.time).toLocaleString() : ''}</div></div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
-                     <div style={{ background: '#000', borderRadius: 4, height: 6, overflow: 'hidden', marginBottom: 24, border: '1px solid #10b981' }}>
-                       <div style={{ width: `${testProgress}%`, height: '100%', background: '#10b981', transition: 'width 0.2s ease', boxShadow: '0 0 10px #10b981' }} />
-                     </div>
+          {/* ── BACKUP ───────────────────────────────────────────────────────────── */}
+          {activeTab === 'backup' && (
+            <div className="fade-up">
+              <p className="asec">💾 Backup & Restore</p><p className="asub">Full database export/import</p>
+              <div className="glass" style={{ borderTop: `4px solid ${T.green}` }}>
+                <div className="actitle">⬇️ Download Backup</div>
+                <p style={{ color: T.t2, marginBottom: 20, fontSize: 14 }}>Full JSON backup: pages, notices, events, slider, gallery, menu, documents, faculties, placements, alerts & activity log.</p>
+                <button className="abtn abtn-green" onClick={handleBackup} disabled={loading}>⬇️ Download Full Backup</button>
+              </div>
+              <div className="glass" style={{ borderTop: `4px solid ${T.red}` }}>
+                <div className="actitle" style={{ color: T.red }}>🔥 Restore from Backup</div>
+                <div style={{ background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.2)', borderRadius: 12, padding: '14px 18px', marginBottom: 20 }}><div style={{ fontWeight: 900, color: T.red, marginBottom: 5 }}>⚠️ DANGER ZONE</div><p style={{ color: T.red, margin: 0, fontSize: 13 }}>This will COMPLETELY ERASE all current data. Cannot be undone.</p></div>
+                <div style={{ marginBottom: 20 }}><label className="alabel">Select Backup JSON</label><input type="file" accept=".json" className="ainp" ref={fileRef} onChange={e => setRestoreFile(e.target.files[0])} /></div>
+                <button className="abtn abtn-danger" onClick={handleRestore} disabled={loading || !restoreFile}>🔥 Restore Database</button>
+              </div>
+            </div>
+          )}
 
-                     {!testRunning && (
-                       <div className="fade-up">
-                         <div className="ht-sum-grid">
-                           <div className="ht-sum-card"><div style={{fontSize: 32, fontWeight: 900, color: '#10b981', fontFamily: "'JetBrains Mono', monospace"}}>{testResults.filter(r=>r.status==='success').length}</div><div style={{fontSize: 11, color: '#64748b', fontWeight: 800, marginTop: 4}}>✅ PASSED</div></div>
-                           <div className="ht-sum-card"><div style={{fontSize: 32, fontWeight: 900, color: '#ef4444', fontFamily: "'JetBrains Mono', monospace"}}>{testResults.filter(r=>r.status==='fail').length}</div><div style={{fontSize: 11, color: '#64748b', fontWeight: 800, marginTop: 4}}>❌ FAILED</div></div>
-                           <div className="ht-sum-card"><div style={{fontSize: 32, fontWeight: 900, color: '#06b6d4', fontFamily: "'JetBrains Mono', monospace"}}>5</div><div style={{fontSize: 11, color: '#64748b', fontWeight: 800, marginTop: 4}}>🔒 PHASES SECURED</div></div>
-                         </div>
-                         
-                         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                           {testResults.map((r, i) => (
-                             <div key={i} className="ht-row" style={{ borderLeftColor: r.status === 'success' ? '#10b981' : '#ef4444' }}>
-                               <div style={{ fontSize: 20 }}>{r.status === 'success' ? '✅' : '❌'}</div>
-                               <div style={{ flex: 1 }}>
-                                 <div style={{ fontWeight: 800, color: '#f1f5f9', fontSize: 14 }}>{r.name}</div>
-                                 <div style={{ color: '#94a3b8', fontSize: 12, marginTop: 4, fontFamily: "'JetBrains Mono', monospace" }}>{r.detail}</div>
-                               </div>
-                             </div>
-                           ))}
-                         </div>
+          {/* ── SYSTEM TEST ──────────────────────────────────────────────────────── */}
+          {activeTab === 'system_test' && (
+            <div className="fade-up">
+              <p className="asec">⚡ System Diagnostic Suite</p>
+              <p className="asub">12-phase deep scan — sabse last me PDF report download karo college logo ke saath</p>
 
-                         <div style={{ textAlign: 'center', marginTop: 40 }}>
-                           <button onClick={runDiagnostics} className="ht-btn" style={{ background: 'transparent', borderColor: '#64748b', color: '#94a3b8' }}>RE-RUN SCAN</button>
-                         </div>
-                       </div>
-                     )}
-                   </div>
-                 )}
-               </div>
-             </div>
-           )}
+              <div className="ht-bg">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, borderBottom: '1px solid rgba(16,185,129,.25)', paddingBottom: 18, position: 'relative', zIndex: 2 }}>
+                  <div>
+                    <h2 style={{ color: '#10b981', margin: '0 0 5px', fontSize: 24, fontWeight: 900, fontFamily: "'JetBrains Mono', monospace", letterSpacing: -1 }}>{'>_ GNC.SYSTEM.DIAGNOSTICS'}</h2>
+                    <p style={{ color: '#047857', margin: 0, fontSize: 12, fontFamily: "'JetBrains Mono', monospace" }}>[ 12-Phase Test Suite v8.0 — Blue Series ]</p>
+                  </div>
+                  {testScore !== null && (
+                    <div style={{ background: testScore >= 90 ? 'rgba(16,185,129,.12)' : testScore >= 60 ? 'rgba(245,158,11,.12)' : 'rgba(239,68,68,.12)', color: testScore >= 90 ? '#10b981' : testScore >= 60 ? '#f59e0b' : '#ef4444', padding: '10px 20px', borderRadius: 10, border: `1px solid ${testScore >= 90 ? '#10b981' : testScore >= 60 ? '#f59e0b' : '#ef4444'}`, fontWeight: 900, fontSize: 26, fontFamily: "'JetBrains Mono', monospace" }}>{testScore}%</div>
+                  )}
+                </div>
+
+                {/* Terminal */}
+                {(testRunning || sysLog.length > 0) && (
+                  <div className="ht-term" ref={sysTermRef}>
+                    {sysLog.map((log, i) => (
+                      <p key={i} style={{ color: log.includes('[ERR]') ? '#ef4444' : log.includes('[WARN]') ? '#f59e0b' : log.includes('[COMPLETE]') ? '#fbbf45' : '#10b981' }}>{log}</p>
+                    ))}
+                    {testRunning && <span style={{ animation: 'glowPulse 1s infinite', color: '#10b981' }}>█</span>}
+                  </div>
+                )}
+
+                {/* Progress bar */}
+                {(testRunning || testResults.length > 0) && (
+                  <div style={{ background: '#000', borderRadius: 4, height: 6, marginBottom: 24, border: '1px solid #10b981', overflow: 'hidden' }}>
+                    <div style={{ width: `${testProgress}%`, height: '100%', background: '#10b981', transition: 'width .3s', boxShadow: '0 0 10px #10b981' }} />
+                  </div>
+                )}
+
+                {/* Idle state */}
+                {!testRunning && testResults.length === 0 && (
+                  <div style={{ textAlign: 'center', padding: '40px 20px', position: 'relative', zIndex: 2 }}>
+                    <div style={{ fontSize: 56, marginBottom: 16, filter: 'drop-shadow(0 0 15px #10b981)' }}>🛡️</div>
+                    <h3 style={{ color: '#10b981', marginBottom: 10, fontSize: 18, fontFamily: "'JetBrains Mono', monospace" }}>12-PHASE DEEP SCAN READY</h3>
+                    <p style={{ color: '#64748b', marginBottom: 24, fontSize: 13 }}>Tests: Vite • Firebase • Firestore Read/Write/Delete • Navbar • ImgBB • Alerts • Faculty • Placements • YouTube • Drive</p>
+                    <button onClick={runDiagnostics} className="ht-btn">▶ EXECUTE FULL DIAGNOSTIC</button>
+                  </div>
+                )}
+
+                {/* Results */}
+                {!testRunning && testResults.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, position: 'relative', zIndex: 2 }}>
+                    {testResults.map((r, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px', background: 'rgba(26,34,54,.5)', borderRadius: 10, borderLeft: `4px solid ${r.status === 'success' ? '#10b981' : r.status === 'warning' ? '#f59e0b' : '#ef4444'}` }}>
+                        <div style={{ fontSize: 18, flexShrink: 0 }}>{r.status === 'success' ? '✅' : r.status === 'warning' ? '⚠️' : '❌'}</div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 800, color: '#f1f5f9', fontSize: 14 }}>{r.name}</div>
+                          <div style={{ color: '#94a3b8', fontSize: 12, marginTop: 3, fontFamily: "'JetBrains Mono', monospace" }}>{r.detail}</div>
+                        </div>
+                        <div style={{ fontSize: 11, color: '#475569', flexShrink: 0 }}>{r.time}</div>
+                      </div>
+                    ))}
+
+                    {/* Score summary */}
+                    <div style={{ marginTop: 16, display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', padding: '16px 20px', background: 'rgba(0,0,0,.3)', borderRadius: 12, border: '1px solid rgba(16,185,129,.2)' }}>
+                      <div style={{ flex: 1, fontSize: 14, color: '#94a3b8' }}>
+                        ✅ {testResults.filter(r => r.status === 'success').length} passed &nbsp;
+                        ⚠️ {testResults.filter(r => r.status === 'warning').length} warnings &nbsp;
+                        ❌ {testResults.filter(r => r.status === 'fail').length} failed
+                      </div>
+                      <div style={{ display: 'flex', gap: 10 }}>
+                        <button onClick={runDiagnostics} className="ht-btn" disabled={testRunning} style={{ borderColor: '#64748b', color: '#94a3b8' }}>🔄 Re-Run</button>
+                        <button onClick={generatePDFReport} className="ht-btn" disabled={pdfGenerating} style={{ borderColor: '#f4a023', color: '#f4a023' }}>
+                          {pdfGenerating ? <span className="spin80" style={{ display: 'inline-block', marginRight: 6 }}>⚙️</span> : ''}
+                          {pdfGenerating ? 'Generating...' : '📥 Download PDF Report'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
         </div>
       </div>
 
-      {showPreview&&(
-        <div style={{position:'fixed',inset:0,background:'rgba(15,35,71,.8)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:100002,backdropFilter:'blur(5px)'}}>
-          <div style={{background:'#fff',width:'92%',maxWidth:900,height:'86vh',borderRadius:20,display:'flex',flexDirection:'column',overflow:'hidden',boxShadow:'0 30px 60px rgba(0,0,0,.3)'}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'20px 28px',borderBottom:`1px solid ${T.b1}`}}>
-              <div style={{fontWeight:900,color:T.navy,fontSize:16}}>👁️ Live Preview</div>
-              <button onClick={()=>setShowPreview(false)} className="abtn abtn-dark abtn-sm">✕ Close</button>
+      {/* ── PREVIEW MODAL ─────────────────────────────────────────────────────── */}
+      {showPreview && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(3,11,26,.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100002, backdropFilter: 'blur(6px)' }}>
+          <div style={{ background: '#fff', width: '92%', maxWidth: 900, height: '86vh', borderRadius: 18, display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,.4)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 24px', borderBottom: '1px solid #e2e8f0' }}>
+              <div style={{ fontWeight: 900, color: '#0f2347', fontSize: 15 }}>👁️ Live Preview</div>
+              <button onClick={() => setShowPreview(false)} style={{ background: '#f1f5f9', border: 'none', borderRadius: 8, padding: '7px 14px', cursor: 'pointer', fontWeight: 700 }}>✕ Close</button>
             </div>
-            <div style={{padding:'32px 40px',overflowY:'auto',flex:1,color:T.navy}}>
-              {parse(DOMPurify.sanitize(previewContent||'',{ADD_TAGS:['iframe'],ADD_ATTR:['allow','allowfullscreen','frameborder','scrolling']}))}
+            <div style={{ padding: '24px 32px', overflowY: 'auto', flex: 1, color: '#0f2347' }}>
+              {parse(DOMPurify.sanitize(previewContent || '', { ADD_TAGS: ['iframe'], ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder'] }))}
             </div>
           </div>
         </div>
