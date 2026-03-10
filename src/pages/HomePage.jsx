@@ -59,6 +59,36 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
       <PremiumTicker items={tickerItems} />
       <NotificationSection notices={notices} announcements={announcements} pdfReports={pdfReports} upcomingEvents={upcomingEvents} />
 
+      {/* ── 3 Quick Pill Buttons ── */}
+      <div style={{ background: '#fff', borderTop: '1px solid #edf2f7', borderBottom: '1px solid #edf2f7', padding: '18px 20px' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {[
+            { to: '/notifications', icon: '📢', label: 'All Notices & News', bg: COLORS.navy, color: '#fff',    shadow: `${COLORS.navy}33` },
+            { to: '/documents',     icon: '📁', label: 'All Documents',      bg: '#16213e',   color: '#fff',    shadow: '#16213e33'        },
+          ].map(btn => (
+            <Link
+              key={btn.to}
+              to={btn.to}
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                background: btn.bg, color: btn.color,
+                padding: '11px 26px', borderRadius: 50,
+                fontSize: 14, fontWeight: 800, textDecoration: 'none',
+                boxShadow: `0 4px 14px ${btn.shadow}`,
+                transition: 'all .2s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = `0 8px 22px ${btn.shadow}`; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = `0 4px 14px ${btn.shadow}`; }}
+            >
+              <span style={{ fontSize: 17 }}>{btn.icon}</span>
+              {btn.label}
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       {/* ABOUT SECTION */}
       <section id="about" style={{ background: '#fff', padding: '100px 20px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ maxWidth: 1250, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '60px', alignItems: 'center' }}>
@@ -205,6 +235,27 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
               <p style={{color: '#64748b', margin: 0, fontSize: '14px'}}>There are no events to display at the moment.</p>
             </div>
           )}
+
+          {/* ── View All Events — right aligned below cards ── */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 28 }}>
+            <Link
+              to="/events"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 9,
+                background: `linear-gradient(135deg, ${COLORS.gold}, #a07010)`,
+                color: COLORS.navy, padding: '13px 30px', borderRadius: 50,
+                fontSize: 14.5, fontWeight: 900, textDecoration: 'none',
+                boxShadow: `0 4px 18px ${COLORS.gold}55`,
+                transition: 'all .2s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = `0 8px 26px ${COLORS.gold}66`; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = `0 4px 18px ${COLORS.gold}55`; }}
+            >
+              🏆 View All Events
+              <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </Link>
+          </div>
+
         </div>
       </section>
 

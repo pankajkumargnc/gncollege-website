@@ -17,6 +17,9 @@ import QuickActionNav from './components/QuickActionNav';
 import PageViewer from './components/PageViewer';
 import Contact from './pages/Contact';
 import CollegeProfile from './pages/CollegeProfile';
+import NotificationsPage from './pages/NotificationsPage';
+import DocumentsPage from './pages/DocumentsPage';
+import EventsPage from './pages/EventsPage';
 import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -191,6 +194,9 @@ export default function App() {
           } />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about-us/college-profile" element={<CollegeProfile />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/documents"     element={<DocumentsPage />} />
+          <Route path="/events"        element={<EventsPage />} />
           <Route path="/admin" element={
             <AdminRouteWrapper
               notices={notices}

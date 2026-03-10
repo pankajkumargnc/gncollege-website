@@ -1,4 +1,5 @@
 import { useRef, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom'; // 🌟 FIX: React Router DOM se Link import kiya
 import { COLORS } from '../../styles/colors';
 import SectionTitle from './SectionTitle';
 
@@ -185,6 +186,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
             background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px;
             color: #334155; font-weight: 800; font-size: 0.85rem;
             cursor: pointer; transition: all 0.3s ease; text-align: center; text-transform: uppercase; letter-spacing: 1px;
+            text-decoration: none; /* 🌟 FIX: Removed blue underline from anchor tag */
           }
           .notif-card:hover .view-all-btn {
             background: ${COLORS.navy}; color: #fff; border-color: ${COLORS.navy}; box-shadow: 0 8px 20px rgba(15,23,42,0.2);
@@ -222,7 +224,10 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
                   })}
                 </div>
               </div>
-              <div className="view-all-wrapper"><div className="view-all-btn">View All Notices</div></div>
+              {/* 🌟 FIX: Updated to Link Tag pointing to /notifications */}
+              <div className="view-all-wrapper">
+                <Link to="/notifications" className="view-all-btn">View All Notices</Link>
+              </div>
             </div>
     
             {/* 2. ACADEMIC NEWS */}
@@ -249,7 +254,10 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
                   })}
                 </div>
               </div>
-              <div className="view-all-wrapper"><div className="view-all-btn">Explore News</div></div>
+              {/* 🌟 FIX: Updated to Link Tag pointing to /notifications */}
+              <div className="view-all-wrapper">
+                <Link to="/notifications" className="view-all-btn">Explore News</Link>
+              </div>
             </div>
     
             {/* 3. E-DOCUMENTS */}
@@ -271,7 +279,10 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
                   ))}
                 </div>
               </div>
-              <div className="view-all-wrapper"><div className="view-all-btn">Document Archive</div></div>
+              {/* 🌟 FIX: Updated to Link Tag pointing to /documents */}
+              <div className="view-all-wrapper">
+                <Link to="/documents" className="view-all-btn">Document Archive</Link>
+              </div>
             </div>
 
         </div>

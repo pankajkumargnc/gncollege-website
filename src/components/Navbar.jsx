@@ -63,12 +63,6 @@ export default function Navbar({ onAdminClick, navLinks }) {
     }}>
       
       <style>{`
-        /* 🚨 MASTER OVERRIDE: Ye sticky behavior ko fail hone se rokega 🚨 */
-        html, body, #root {
-          overflow-x: clip !important;
-          overflow-y: visible !important;
-        }
-
         /* 3D Spin for Logo */
         @keyframes coinSpin {
           0% { transform: rotateY(0deg); }
