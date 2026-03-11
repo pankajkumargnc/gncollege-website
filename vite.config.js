@@ -1,21 +1,54 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+// vite.config.js
+// ✅ console.log production build mein automatically remove ho jaayenge
+// ✅ Bundle chunks split — faster loading
+// ✅ Source maps disabled in production — security
 
-// https://vitejs.dev/config/
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
 export default defineConfig({
   plugins: [react()],
-  // GitHub Pages ke liye base path
-  base: '/gncollege-website/', 
+
   build: {
-    chunkSizeWarningLimit: 1600, // Warning ki limit badha di taaki ye baar-baar na aaye
+    // ✅ FIX 1: Production mein console.log + console.warn automatically delete
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,   // console.log, console.info — sab gone
+        drop_debugger: true,  // debugger; statements bhi gone
+      },
+    },
+
+    // ✅ FIX 2: Manual chunks — vendor libraries alag file mein
+    // Fayda: Browser cache karta hai — repeat visitors ko faster load
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            return id.toString().split('node_modules/')[1].split('/')[0].toString();
-          }
-        }
-      }
-    }
-  }
-})
+        manualChunks: {
+          // React core — rarely changes, aggressively cached
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+
+          // Firebase — bada hai, alag chunk better
+          'vendor-firebase': [
+            'firebase/app',
+            'firebase/firestore',
+            'firebase/storage',
+            'firebase/auth',
+          ],
+
+          // UI utilities
+          'vendor-ui': ['dompurify', 'html-react-parser', 'react-hot-toast'],
+        },
+      },
+    },
+
+    // ✅ FIX 3: Source maps production mein band
+    // Source maps se attackers aapka original code dekh sakte hain
+    sourcemap: false,
+
+    // Chunk size warning — 500KB se bada hua toh warning aayega
+    chunkSizeWarningLimit: 500,
+  },
+
+  // Development mein sab normal rahega — console.log kaam karega
+  // Sirf `npm run build` pe ye rules apply honge
+});
