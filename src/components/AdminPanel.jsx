@@ -345,6 +345,8 @@ const TABS = [
   { id: 'activity',      icon: '📋', label: 'Activity Log',      section: '' },
   { id: 'backup',        icon: '💾', label: 'Backup & Restore',  section: '' },
   { id: 'system_test',   icon: '🛡️', label: 'System Test',       section: '' },
+  { id: 'events', icon: '🏆', label: 'Events', section: '' },
+  { id: 'contact', icon: '📞', label: 'Contact Settings', section: '' },
 ];
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -752,11 +754,51 @@ function AdminPanelInner({
     } catch { }
     setLoading(false);
   };
-
   // 12. YOUTUBE CONFIG
   const [ytCfg, setYtCfg] = useState({ apiKey: '', channelId: '', maxResults: 12 });
   const [ytTest, setYtTest] = useState(null);
   const [ytLoading, setYtLoading] = useState(false);
+  // 14. CONTACT SETTINGS
+const [contactData, setContactData] = useState({
+  bhuda:    { phone: '', email: '', address: 'Guru Nanak College, Bhuda\nDhanbad, Jharkhand - 826001' },
+  bankMore: { phone: '', email: '', address: 'Guru Nanak College, Bank More\nDhanbad, Jharkhand - 826001' },
+});
+const [directoryList, setDirectoryList] = useState([]);
+const [newDirEntry,   setNewDirEntry]   = useState({ title:'', name:'', phone:'', icon:'👤', order:0 });
+useEffect(() => {
+  getDoc(doc(db, 'settings', 'contact'))
+    .then(s => s.exists() && setContactData(prev => ({
+      bhuda:    { ...prev.bhuda,    ...(s.data().bhuda    || {}) },
+      bankMore: { ...prev.bankMore, ...(s.data().bankMore || {}) },
+    }))).catch(() => {});
+  return onSnapshot(
+    query(collection(db, 'contactDirectory'), orderBy('order', 'asc')),
+    snap => setDirectoryList(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+    () => {}
+  );
+}, []);
+const saveContact = async () => {
+  setLoading(true);
+  try {
+    await setDoc(doc(db, 'settings', 'contact'), { ...contactData, updatedAt: serverTimestamp() });
+    toast.success('Contact info saved!');
+    logAct('update', 'Contact info updated', 'settings');
+  } catch (err) { toast.error(err.message); }
+  setLoading(false);
+};
+const addDirEntry = async () => {
+  if (!newDirEntry.title || !newDirEntry.name) return toast.error('Title aur Name required hai');
+  try {
+    await addDoc(collection(db, 'contactDirectory'), { ...newDirEntry, createdAt: serverTimestamp() });
+    setNewDirEntry({ title:'', name:'', phone:'', icon:'👤', order:0 });
+    toast.success('Entry added!');
+  } catch (err) { toast.error(err.message); }
+};
+const deleteDirEntry = async (id) => {
+  if (!window.confirm('Delete this entry?')) return;
+  await deleteDoc(doc(db, 'contactDirectory', id));
+  toast.success('Deleted!');
+};
   useEffect(() => {
     getDoc(doc(db, 'settings', 'youtube'))
       .then(s => s.exists() && setYtCfg(prev => ({ ...prev, ...s.data() })))
@@ -1974,7 +2016,72 @@ try {
               <MiniLog logs={getSectionLog('events')} />
             </div>
           )}
+          {/* ── CONTACT ──────────────────────────────── */}
+          {tab === 'contact' && (
+            <div className="fade-up">
+              <p className="asec">📞 Contact Settings</p>
+              <p className="asub">Campus info aur Administration Directory manage karo</p>
 
+              {/* Campus Info */}
+              {['bhuda', 'bankMore'].map(campus => (
+                <div key={campus} style={{ background:'#fff', border:'1px solid #e2e8f0', borderRadius:14, padding:'22px 24px', marginBottom:20 }}>
+                  <h3 style={{ fontWeight:800, marginBottom:16, color:'#0f2347' }}>
+                    {campus === 'bhuda' ? '🏛️ Bhuda Campus (Boys Wing)' : '🏢 Bank More Campus (Girls Wing)'}
+                  </h3>
+                  <div className="agrid2">
+                    <div>
+                      <label className="alabel">Phone Number</label>
+                      <input className="ainp" value={contactData[campus].phone}
+                        onChange={e => setContactData(d => ({ ...d, [campus]: { ...d[campus], phone: e.target.value } }))}
+                        placeholder="+91 XXXXX XXXXX" />
+                    </div>
+                    <div>
+                      <label className="alabel">Email</label>
+                      <input className="ainp" value={contactData[campus].email}
+                        onChange={e => setContactData(d => ({ ...d, [campus]: { ...d[campus], email: e.target.value } }))}
+                        placeholder="info@gncollege.org" />
+                    </div>
+                  </div>
+                  <div style={{ marginTop:12 }}>
+                    <label className="alabel">Address (newline se alag karo)</label>
+                    <textarea className="ainp" rows={2} value={contactData[campus].address}
+                      onChange={e => setContactData(d => ({ ...d, [campus]: { ...d[campus], address: e.target.value } }))}
+                      placeholder="College address..." />
+                  </div>
+                </div>
+              ))}
+              <button className="abtn abtn-navy" onClick={saveContact} disabled={loading}>💾 Save Campus Info</button>
+
+              {/* Directory */}
+              <p className="asec" style={{ marginTop:32 }}>👥 Administration Directory</p>
+              <div style={{ background:'#fff', border:'1px solid #e2e8f0', borderRadius:14, padding:'22px 24px', marginBottom:16 }}>
+                <div className="agrid2">
+                  <div><label className="alabel">Title / Role *</label><input className="ainp" value={newDirEntry.title} onChange={e => setNewDirEntry(d=>({...d,title:e.target.value}))} placeholder="BCA Coordinator" /></div>
+                  <div><label className="alabel">Name *</label><input className="ainp" value={newDirEntry.name} onChange={e => setNewDirEntry(d=>({...d,name:e.target.value}))} placeholder="Prof. XYZ" /></div>
+                  <div><label className="alabel">Phone</label><input className="ainp" value={newDirEntry.phone} onChange={e => setNewDirEntry(d=>({...d,phone:e.target.value}))} placeholder="+91 XXXXX XXXXX" /></div>
+                  <div><label className="alabel">Icon (emoji)</label><input className="ainp" value={newDirEntry.icon} onChange={e => setNewDirEntry(d=>({...d,icon:e.target.value}))} placeholder="👤" style={{fontSize:20}} /></div>
+                  <div><label className="alabel">Display Order</label><input className="ainp" type="number" value={newDirEntry.order} onChange={e => setNewDirEntry(d=>({...d,order:+e.target.value}))} placeholder="1" /></div>
+                </div>
+                <button className="abtn abtn-gold" style={{marginTop:12}} onClick={addDirEntry}>➕ Add Entry</button>
+              </div>
+
+              {/* List */}
+              {directoryList.map(p => (
+                <div key={p.id} style={{ background:'#f8fafc', border:'1px solid #e2e8f0', borderRadius:10, padding:'14px 18px', marginBottom:8, display:'flex', justifyContent:'space-between', alignItems:'center', gap:12 }}>
+                  <div style={{ display:'flex', gap:12, alignItems:'center' }}>
+                    <span style={{ fontSize:24 }}>{p.icon}</span>
+                    <div>
+                      <div style={{ fontWeight:800, fontSize:13.5, color:'#0f2347' }}>{p.name}</div>
+                      <div style={{ fontSize:12, color:'#64748b' }}>{p.title} • {p.phone || 'No phone'}</div>
+                    </div>
+                  </div>
+                  <button className="abtn" style={{ background:'#fef2f2', color:'#dc2626', border:'1px solid #fecaca', padding:'6px 14px' }}
+                    onClick={() => deleteDirEntry(p.id)}>🗑️ Delete</button>
+                </div>
+              ))}
+              {directoryList.length === 0 && <p style={{ color:'#94a3b8', fontSize:13 }}>Koi entry nahi — upar se add karo</p>}
+            </div>
+          )}
           {/* ── YOUTUBE ──────────────────────────────────────────── */}
           {tab === 'youtube' && (
             <div className="fade-up">

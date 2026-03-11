@@ -84,7 +84,7 @@ export default function PageViewer({ page }) {
                       {doc.isNew && <span className="new-badge">NEW</span>}
                       <h4 style={{ margin: '0 0 5px 0', fontSize: '14px', color: COLORS.navy, lineHeight: '1.4' }}>{doc.title}</h4>
                       <p style={{ margin: '0 0 10px 0', fontSize: '11px', color: '#64748b', fontWeight: 600 }}>📅 {doc.date}</p>
-                      <a href={doc.pdfLink || doc.link} target="_blank" rel="noreferrer" className="download-btn">⬇️ View Document</a>
+                      <a href={doc.link}>⬇️ View Document</a>
                     </div>
                   </div>
                 ))}
