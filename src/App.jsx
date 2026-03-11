@@ -1,7 +1,4 @@
 // src/App.jsx
-// ✅ UPDATED: ErrorBoundary added on all pages
-// ✅ FIXED: window.open('#/admin') → window.open('/admin') (Batch 1 critical bug)
-
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Routes, Route, useParams, useLocation } from 'react-router-dom';
 import AOS from 'aos';
@@ -26,7 +23,7 @@ import VideoGallery from './pages/VideoGallery';
 import AlertBanner from './components/AlertBanner';
 import StaffPage from './pages/StaffPage';
 import NewsPage from './pages/NewsPage';
-// ✅ NEW: ErrorBoundary import
+import DepartmentPage from './pages/DepartmentPage';
 import ErrorBoundary from './components/ErrorBoundary';
 import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
 import { db } from './firebase';
@@ -34,11 +31,35 @@ import { db } from './firebase';
 const AdminPanel = lazy(() => import('./components/AdminPanel'));
 const Ticker     = lazy(() => import('./components/Ticker'));
 
+// 🌟 FIX: Removed conflicting department and staff URLs from this list
 const placeholderPaths = [
-  '/syllabus', '/about-us', '/about-us/vision-mission', '/about-us/principal-message', '/about-us/college-management/organogram', '/about-us/college-management/presidents', '/about-us/college-management/secretaries', '/about-us/college-management/principal', '/about-us/various-committees/womens-cell', '/about-us/various-committees/anti-ragging', '/about-us/various-committees/sc-st', '/about-us/various-committees/obc', '/about-us/various-committees/grievance', '/about-us/various-committees/icc', '/about-us/various-committees/minority', '/about-us/various-committees/placement', '/about-us/various-committees/rusa', '/about-us/college-staff/teaching-staff', '/about-us/college-staff/non-teaching-staff', '/about-us/regulations/bbmku/special-ug-regulation', '/about-us/regulations/bbmku/ug-regulation-fyugp', '/about-us/regulations/bbmku/ug-regulation-cbcs', '/about-us/regulations/college-affiliation', '/about-us/regulations/ugc-section', '/about-us/regulations/vbu/ug-regulation-2015', '/about-us/regulations/vbu/bca-regulation', '/about-us/regulations/byelaws', '/about-us/regulations/exemption', '/about-us/audit-report', '/campus/visuals/bhuda', '/campus/visuals/bank-more', '/campus/visuals/vocational-building', '/campus/infrastructure', '/campus/classroom', '/campus/ict-rooms', '/campus/green-campus', '/academics/iqac', '/academics/course-offered', '/academics/departments/humanities', '/academics/departments/social-science', '/academics/departments/commerce', '/academics/departments/bca', '/academics/departments/bba', '/academics/academic-calendar', '/admission/rule', '/admission/document-required', '/admission/fee-structure', '/admission/notification/latest', '/admission/notification/upcoming', '/admission/intake-capacity', '/activity/nss', '/activity/ncc', '/activity/workshop', '/activity/games-sports', '/activity/collaboration/rotaract-club', '/activity/collaboration/sadbhavana-diwas', '/naac/ssr-1st-cycle/cycle-1-documents', '/naac/ssr-1st-cycle/peer-team-report', '/naac/ssr-2nd-cycle/cycle-2-documents', '/naac/ssr-2nd-cycle/executive-summary', '/naac/aqar', '/naac/nirf', '/naac/perspective-plan', '/publication/college-library', '/publication/e-magazine', '/publication/examination-results/2024', '/publication/examination-results/2023', '/publication/sss-report/2023-24', '/publication/sss-report/2022-23', '/gallery'
+  '/syllabus', '/about-us', '/about-us/vision-mission', '/about-us/principal-message', 
+  '/about-us/college-management/organogram', '/about-us/college-management/presidents', 
+  '/about-us/college-management/secretaries', '/about-us/college-management/principal', 
+  '/about-us/various-committees/womens-cell', '/about-us/various-committees/anti-ragging', 
+  '/about-us/various-committees/sc-st', '/about-us/various-committees/obc', 
+  '/about-us/various-committees/grievance', '/about-us/various-committees/icc', 
+  '/about-us/various-committees/minority', '/about-us/various-committees/placement', 
+  '/about-us/various-committees/rusa', '/about-us/regulations/bbmku/special-ug-regulation', 
+  '/about-us/regulations/bbmku/ug-regulation-fyugp', '/about-us/regulations/bbmku/ug-regulation-cbcs', 
+  '/about-us/regulations/college-affiliation', '/about-us/regulations/ugc-section', 
+  '/about-us/regulations/vbu/ug-regulation-2015', '/about-us/regulations/vbu/bca-regulation', 
+  '/about-us/regulations/byelaws', '/about-us/regulations/exemption', '/about-us/audit-report', 
+  '/campus/visuals/bhuda', '/campus/visuals/bank-more', '/campus/visuals/vocational-building', 
+  '/campus/infrastructure', '/campus/classroom', '/campus/ict-rooms', '/campus/green-campus', 
+  '/academics/iqac', '/academics/course-offered', '/academics/academic-calendar', 
+  '/admission/rule', '/admission/document-required', '/admission/fee-structure', 
+  '/admission/notification/latest', '/admission/notification/upcoming', '/admission/intake-capacity', 
+  '/activity/nss', '/activity/ncc', '/activity/workshop', '/activity/games-sports', 
+  '/activity/collaboration/rotaract-club', '/activity/collaboration/sadbhavana-diwas', 
+  '/naac/ssr-1st-cycle/cycle-1-documents', '/naac/ssr-1st-cycle/peer-team-report', 
+  '/naac/ssr-2nd-cycle/cycle-2-documents', '/naac/ssr-2nd-cycle/executive-summary', 
+  '/naac/aqar', '/naac/nirf', '/naac/perspective-plan', '/publication/college-library', 
+  '/publication/e-magazine', '/publication/examination-results/2024', 
+  '/publication/examination-results/2023', '/publication/sss-report/2023-24', 
+  '/publication/sss-report/2022-23'
 ];
 
-// ── Dynamic page route ────────────────────────────────────────────────────────
 const DynamicPageRoute = ({ pages }) => {
   const { slug } = useParams();
   const [page, setPage] = useState(null);
@@ -54,14 +75,12 @@ const DynamicPageRoute = ({ pages }) => {
   return <PageViewer page={page} />;
 };
 
-// ── Admin loading screen ──────────────────────────────────────────────────────
 const AdminLoader = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#030b1a', color: '#10b981', fontFamily: 'monospace', fontSize: 16 }}>
     ⚡ Initializing Secure Admin Panel...
   </div>
 );
 
-// ── Admin route wrapper ───────────────────────────────────────────────────────
 const AdminRouteWrapper = ({
   notices, announcements, events, gallery, pdfReports,
   pages, sliderSlides, placeholderPaths, navLinks,
@@ -96,14 +115,12 @@ const AdminRouteWrapper = ({
   );
 };
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
 const stripHtml = html => {
   if (!html) return '';
   const d = new DOMParser().parseFromString(html, 'text/html');
   return d.body.textContent || '';
 };
 
-// ── Main App ──────────────────────────────────────────────────────────────────
 export default function App() {
   const [notices,       setNotices]       = useState([]);
   const [announcements, setAnnouncements] = useState([]);
@@ -122,25 +139,21 @@ export default function App() {
   const [isMobile,   setIsMobile]   = useState(window.innerWidth < 768);
   const isAdminRoute = location.pathname.startsWith('/admin');
 
-  // Resize listener
   useEffect(() => {
     const fn = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', fn);
     return () => window.removeEventListener('resize', fn);
   }, []);
 
-  // Splash screen
   useEffect(() => {
     const t = setTimeout(() => setShowSplash(false), 2000);
     return () => clearTimeout(t);
   }, []);
 
-  // AOS animations
   useEffect(() => {
     AOS.init({ duration: 800, easing: 'ease-in-out', once: false, mirror: true, offset: 50 });
   }, []);
 
-  // Navbar from Firebase
   useEffect(() => {
     return onSnapshot(doc(db, 'settings', 'navbar'), snap => {
       setFirebaseNav(
@@ -153,7 +166,6 @@ export default function App() {
 
   const baseNavLinks = firebaseNav || staticNavLinks;
 
-  // Dynamic nav links (pages se)
   const dynamicNavLinks = useMemo(() => {
     const newPages = pages
       .filter(p => p.slug && (!p.path || p.path === ''))
@@ -170,7 +182,6 @@ export default function App() {
     return linksCopy;
   }, [pages, baseNavLinks]);
 
-  // Page content map (path → page)
   const pageContentByPath = useMemo(() => {
     const map = new Map();
     [...pages]
@@ -179,7 +190,6 @@ export default function App() {
     return map;
   }, [pages]);
 
-  // All Firestore listeners
   useEffect(() => {
     const cols = [
       ['notices',       setNotices],
@@ -207,7 +217,6 @@ export default function App() {
       }
     });
 
-    // Slider — order field se, fallback createdAt
     let unsubSlider;
     try {
       unsubSlider = onSnapshot(
@@ -230,10 +239,9 @@ export default function App() {
     return () => { unsubs.forEach(u => u()); if (unsubSlider) unsubSlider(); };
   }, []);
 
-  // ✅ FIXED: window.open('/admin') — Batch 1 critical bug fix
-  // Pehle '#/admin' tha jo React Router ke saath kaam nahi karta tha
   const handleOpenAdminTab = () => {
-    window.open('#/admin', '_blank');
+    const currentUrl = window.location.href.split('#')[0];
+    window.open(`${currentUrl}#/admin`, '_blank');
   };
 
   const tickerItems = [
@@ -261,13 +269,11 @@ export default function App() {
         }}
       />
 
-      {/* Splash screen */}
       <div className={`splash-screen ${!showSplash ? 'hide' : ''}`}>
         <img src={`${import.meta.env.BASE_URL}images/logo.png`} alt="Guru Nanak College" className="splash-logo" />
         <div className="splash-text">Loading Portal...</div>
       </div>
 
-      {/* Top bar, ticker, alert banner, navbar */}
       {!isAdminRoute && (
         <>
           <TopBar />
@@ -275,7 +281,6 @@ export default function App() {
             <Ticker items={tickerItems} />
           </Suspense>
 
-          {/* ✅ AlertBanner — minimal mode: agar crash ho toh banner silently hide hoga */}
           {activeAlerts.length > 0 && (
             <ErrorBoundary page="AlertBanner" minimal={true}>
               <AlertBanner />
@@ -288,11 +293,9 @@ export default function App() {
         </>
       )}
 
-      {/* ── Routes ── */}
       <div key={location.pathname} className={isAdminRoute ? '' : 'page-transition'}>
         <Routes location={location}>
 
-          {/* Home */}
           <Route path="/" element={
             <ErrorBoundary page="HomePage">
               <HomePage
@@ -307,77 +310,30 @@ export default function App() {
             </ErrorBoundary>
           } />
 
-          {/* Contact */}
-          <Route path="/contact" element={
-            <ErrorBoundary page="Contact">
-              <Contact />
+          <Route path="/contact" element={<ErrorBoundary page="Contact"><Contact /></ErrorBoundary>} />
+          <Route path="/about-us/college-profile" element={<ErrorBoundary page="CollegeProfile"><CollegeProfile /></ErrorBoundary>} />
+          <Route path="/notifications" element={<ErrorBoundary page="NotificationsPage"><NotificationsPage /></ErrorBoundary>} />
+          <Route path="/documents" element={<ErrorBoundary page="DocumentsPage"><DocumentsPage /></ErrorBoundary>} />
+          <Route path="/events" element={<ErrorBoundary page="EventsPage"><EventsPage /></ErrorBoundary>} />
+          <Route path="/news" element={<ErrorBoundary page="NewsPage"><NewsPage /></ErrorBoundary>} />
+          <Route path="/video-gallery" element={<ErrorBoundary page="VideoGallery"><VideoGallery /></ErrorBoundary>} />
+          
+          <Route path="/about-us/college-staff/teaching-staff" element={<ErrorBoundary page="StaffPage"><StaffPage faculties={faculties} staffType="Teaching" /></ErrorBoundary>} />
+          <Route path="/about-us/college-staff/non-teaching-staff" element={<ErrorBoundary page="StaffPage"><StaffPage faculties={faculties} staffType="Non-Teaching" /></ErrorBoundary>} />
+          <Route path="/gallery" element={<ErrorBoundary page="HomePage"><HomePage /></ErrorBoundary>} />
+
+          {/* 🌟 FIX: Clean and working Department Routes */}
+          <Route path="/academics/departments" element={ 
+            <ErrorBoundary page="DepartmentsDirectory">
+              <DepartmentPage />
+            </ErrorBoundary>
+          } />
+          <Route path="/academics/departments/:deptSlug" element={ 
+            <ErrorBoundary page="SpecificDepartment">
+              <DepartmentPage />
             </ErrorBoundary>
           } />
 
-          {/* College Profile */}
-          <Route path="/about-us/college-profile" element={
-            <ErrorBoundary page="CollegeProfile">
-              <CollegeProfile />
-            </ErrorBoundary>
-          } />
-
-          {/* Notifications */}
-          <Route path="/notifications" element={
-            <ErrorBoundary page="NotificationsPage">
-              <NotificationsPage />
-            </ErrorBoundary>
-          } />
-
-          {/* Documents */}
-          <Route path="/documents" element={
-            <ErrorBoundary page="DocumentsPage">
-              <DocumentsPage />
-            </ErrorBoundary>
-          } />
-
-          {/* Events */}
-          <Route path="/events" element={
-            <ErrorBoundary page="EventsPage">
-              <EventsPage />
-            </ErrorBoundary>
-          } />
-
-          {/* News */}
-          <Route path="/news" element={
-            <ErrorBoundary page="NewsPage">
-              <NewsPage />
-            </ErrorBoundary>
-          } />
-
-          {/* Video Gallery */}
-          <Route path="/video-gallery" element={
-            <ErrorBoundary page="VideoGallery">
-              <VideoGallery />
-            </ErrorBoundary>
-          } />
-
-          {/* Teaching Staff */}
-          <Route path="/about-us/college-staff/teaching-staff" element={
-            <ErrorBoundary page="StaffPage">
-              <StaffPage faculties={faculties} staffType="Teaching" />
-            </ErrorBoundary>
-          } />
-
-          {/* Non-Teaching Staff */}
-          <Route path="/about-us/college-staff/non-teaching-staff" element={
-            <ErrorBoundary page="StaffPage">
-              <StaffPage faculties={faculties} staffType="Non-Teaching" />
-            </ErrorBoundary>
-          } />
-
-          {/* Gallery — scrolls to gallery section on HomePage */}
-          <Route path="/gallery" element={
-            <ErrorBoundary page="HomePage">
-              <HomePage />
-            </ErrorBoundary>
-          } />
-
-          {/* Admin — ErrorBoundary nahi — AdminPanel ka apna ErrorBoundary hai */}
           <Route path="/admin" element={
             <AdminRouteWrapper
               notices={notices} announcements={announcements} events={events}
@@ -388,14 +344,12 @@ export default function App() {
             />
           } />
 
-          {/* Dynamic slug pages (/p/:slug) */}
           <Route path="/p/:slug" element={
             <ErrorBoundary page="PageViewer">
               <DynamicPageRoute pages={pages} />
             </ErrorBoundary>
           } />
 
-          {/* Placeholder paths — Firebase se content aata hai */}
           {placeholderPaths.map(path => {
             const page = pageContentByPath.get(path);
             return (
@@ -410,7 +364,6 @@ export default function App() {
         </Routes>
       </div>
 
-      {/* Footer + Admin button */}
       {!isAdminRoute && (
         <>
           <Footer />

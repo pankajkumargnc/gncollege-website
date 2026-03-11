@@ -40,13 +40,7 @@ export default function StaffPage({ faculties, staffType }) {
       }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '30px 30px', opacity: 0.05 }}></div>
         <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative', zIndex: 2 }}>
-          <nav style={{ display: 'flex', justifyContent: 'center', gap: '10px', fontSize: '13px', color: '#cbd5e1', fontWeight: 600, marginBottom: '20px' }}>
-            <Link to="/" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Home</Link>
-            <span>›</span>
-            <span>About Us</span>
-            <span>›</span>
-            <span style={{ color: COLORS.gold }}>{staffType} Staff</span>
-          </nav>
+          
           <h1 style={{ color: '#fff', fontSize: '42px', fontWeight: 900, margin: '0 0 15px' }}>{staffType} Staff Directory</h1>
           <p style={{ color: '#94a3b8', fontSize: '16px', maxWidth: '600px', margin: '0 auto' }}>
             Meet our dedicated and highly qualified {staffType.toLowerCase()} members who shape the future of Guru Nanak College.

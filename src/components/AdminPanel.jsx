@@ -18,6 +18,7 @@ import {
   getDocs, writeBatch, limit
 } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import AdminDepartmentTab from './AdminDepartmentTab';
 
 const ImageCropper = lazy(() => import('./ImageCropper'));
 
@@ -347,6 +348,7 @@ const TABS = [
   { id: 'system_test',   icon: '🛡️', label: 'System Test',       section: '' },
   { id: 'events', icon: '🏆', label: 'Events', section: '' },
   { id: 'contact', icon: '📞', label: 'Contact Settings', section: '' },
+  { id: 'departments', icon: '🏛️', label: 'Departments', section: '' },
 ];
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -2357,6 +2359,7 @@ try {
               </div>
             </div>
           )}
+          {tab === 'departments' && <AdminDepartmentTab />}
 
           {/* ── PREVIEW MODAL ─────────────────────────────────────── */}
           {showPreview && (
