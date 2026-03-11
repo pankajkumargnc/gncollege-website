@@ -313,16 +313,9 @@ const Footer = () => {
         </div>
 
         {/* WIDGET 4: Newsletter */}
-        <div className="footer-widget">
-          <h3 className="footer-heading">Stay Updated</h3>
-          <p className="footer-desc" style={{ marginBottom: '15px' }}>
-            Subscribe to our digital newsletter to receive the latest academic notices and campus announcements directly in your inbox.
-          </p>
-          <div className="newsletter-box">
-            <input type="email" placeholder="Enter email address..." className="newsletter-input" />
-            <button className="newsletter-btn">Subscribe</button>
-          </div>
-        </div>
+        <button className="newsletter-btn" onClick={() => alert('Newsletter coming soon!')}>
+  Subscribe
+</button>
 
       </div>
 

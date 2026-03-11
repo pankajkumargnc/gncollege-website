@@ -1,17 +1,18 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const DOC_TYPES    = ['All','Document','Report','Syllabus','Circular','Result'];
+const DOC_TYPES = ['All','Document','Report','Syllabus','Circular','Result','Regulation','Affiliation'];
 const DOC_META = {
   Document: { icon:'📄', bg:'#EBF0FF', text:'#1a365d', border:'#BED0FF', color:'#4a7fd4' },
   Report:   { icon:'📊', bg:'#F0FFF4', text:'#1c4532', border:'#9AE6B4', color:'#38a169' },
   Syllabus: { icon:'📚', bg:'#FFFBEB', text:'#744210', border:'#FAF089', color:'#d69e2e' },
   Circular: { icon:'📋', bg:'#FFF5F5', text:'#742a2a', border:'#FEB2B2', color:'#e53e3e' },
   Result:   { icon:'🏆', bg:'#E6FFFA', text:'#1d4044', border:'#81E6D9', color:'#319795' },
+  Regulation: { icon:'⚖️', bg:'#F5F3FF', text:'#4C1D95', border:'#DDD6FE', color:'#7C3AED' },
+Affiliation:{ icon:'🏛️', bg:'#F0F9FF', text:'#0C4A6E', border:'#BAE6FD', color:'#0284C7' },
 };
 
 const getTS  = ts => ts?.toDate ? ts.toDate() : new Date(ts || Date.now());

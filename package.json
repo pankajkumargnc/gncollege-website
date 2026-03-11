@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "aos": "^2.3.4",
-    "dompurify": "^3.3.2",
+    "dompurify": "^3.3.3",
     "firebase": "^12.10.0",
     "framer-motion": "^12.35.1",
     "html-react-parser": "^5.2.17",

@@ -5,6 +5,7 @@ import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import DOMPurify from 'dompurify';
 import parse from 'html-react-parser';
+import { orderBy } from 'firebase/firestore'; 
 
 export default function PageViewer({ page }) {
   const [relatedDocs, setRelatedDocs] = useState([]);
@@ -15,7 +16,7 @@ export default function PageViewer({ page }) {
     window.scrollTo(0, 0); 
     
     const targetPath = page.path || `/p/${page.slug}`;
-    const q = query(collection(db, 'pdfReports'));
+    const q = query(collection(db, 'pdfReports'), orderBy('createdAt', 'desc'));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const allDocs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));

@@ -1,8 +1,6 @@
 // src/App.jsx — Updated with VideoGallery route + AlertBanner
 // All existing routes preserved + new: /video-gallery
 
-import StaffPage from './pages/StaffPage';
-import NewsPage from './pages/NewsPage';
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Routes, Route, useParams, useLocation } from 'react-router-dom';
 import AOS from 'aos';
@@ -27,6 +25,8 @@ import VideoGallery from './pages/VideoGallery';
 import AlertBanner from './components/AlertBanner';
 import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
 import { db } from './firebase';
+import StaffPage from './pages/StaffPage';
+import NewsPage from './pages/NewsPage';
 
 const AdminPanel = lazy(() => import('./components/AdminPanel'));
 const Ticker = lazy(() => import('./components/Ticker'));
@@ -144,7 +144,10 @@ export default function App() {
     return () => { unsubs.forEach(u => u()); if (unsubSlider) unsubSlider(); };
   }, []);
 
-  const handleOpenAdminTab = () => window.open('#/admin', '_blank');
+  const handleOpenAdminTab = () => {
+  const currentUrl = window.location.href.split('#')[0];
+  window.open(`${currentUrl}#/admin`, '_blank');
+};
   const tickerItems = [...notices.slice(0, 3), ...announcements.slice(0, 2)].map(item => ({ ...item, text: stripHtml(item.text || item.title) }));
 
   // Active alerts filter
@@ -189,6 +192,7 @@ export default function App() {
           <Route path="/video-gallery" element={<VideoGallery />} />
           <Route path="/about-us/college-staff/teaching-staff"     element={<StaffPage faculties={faculties} staffType="Teaching" />} />
           <Route path="/about-us/college-staff/non-teaching-staff" element={<StaffPage faculties={faculties} staffType="Non-Teaching" />} />
+          <Route path="/gallery" element={<HomePage />} />
           <Route path="/admin" element={
             <AdminRouteWrapper
               notices={notices} announcements={announcements} events={events} gallery={gallery}

@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
+import DOMPurify from 'dompurify';
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const CATEGORIES   = ['All','General','Examination','Admission','Holiday','Sports','Cultural','Academic'];
@@ -113,11 +114,15 @@ export default function NotificationsPage() {
           </div>
 
           <div className="filter-row">
-            <div className="filter-label">Category</div>
-            <div className="pill-group">
-              {CATEGORIES.map(c => <button key={c} className={`premium-pill ${selCat===c?'active':''}`} onClick={() => setSelCat(c)}>{c}</button>)}
-            </div>
-          </div>
+  <div className="filter-label">Month</div>
+  <div className="pill-group">
+    {['All',...MONTHS_SHORT].map(m => (
+      <button key={m} className={`premium-pill ${selMonth===m?'active':''}`} 
+        onClick={() => setSelMonth(m)}>{m}
+      </button>
+    ))}
+  </div>
+</div>
 
           <div className="filter-row">
             <div className="filter-label">Timeline</div>
@@ -146,7 +151,7 @@ export default function NotificationsPage() {
                         <span style={{ fontSize: '11px', fontWeight: 800, padding: '4px 12px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '50px', color: navy, textTransform: 'uppercase' }}>{n.type || 'General'}</span>
                         {n.isNew && <span style={{ fontSize: '10px', fontWeight: 900, color: '#fff', background: '#ef4444', padding: '3px 8px', borderRadius: '50px' }}>NEW</span>}
                       </div>
-                      <div dangerouslySetInnerHTML={{ __html: n.text }} style={{ fontSize: '15px', color: '#334155', lineHeight: 1.6, fontWeight: 500 }} />
+                      <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(n.text) }} />
                       {n.link && <a href={n.link} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '16px', fontSize: '13px', fontWeight: 800, color: navy, textDecoration: 'none', background: '#f1f5f9', padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', transition: 'all .2s' }} onMouseOver={e=>{e.target.style.background=navy; e.target.style.color='#fff';}} onMouseOut={e=>{e.target.style.background='#f1f5f9'; e.target.style.color=navy;}}>📎 View Attachment Document</a>}
                     </div>
                   </div>

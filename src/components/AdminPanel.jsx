@@ -1745,7 +1745,7 @@ try {
                 <form onSubmit={saveGallery}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
                     <div><label className="alabel">Title *</label><input className="ainp" value={galData.title} onChange={e=>setGalData(d=>({...d,title:e.target.value}))} placeholder="Annual Function 2024" required /></div>
-                    <div><label className="alabel">Category</label><select className="ainp" value={galData.cat} onChange={e=>setGalData(d=>({...d,cat:e.target.value}))}>{['Seminars','Cultural','NSS','Sports','Campus','Departments','Achievements'].map(c=><option key={c}>{c}</option>)}</select></div>
+                    <div><label className="alabel">Category</label><select className="ainp" value={galData.cat} onChange={e=>setGalData(d=>({...d,cat:e.target.value}))}>{['Seminars','Cultural Fest','Guest Visit','NSS Programs','Sports','Campus','Departments'].map(c=><option key={c}>{c}</option>)}</select></div>
                   </div>
                   <label className="upload-zone">
                     <div style={{ fontSize: 32, marginBottom: 8 }}>📸</div>
@@ -1857,7 +1857,7 @@ try {
                     <div style={{ flex: 1, fontWeight: 600, color: NAVY, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} dangerouslySetInnerHTML={{__html: DOMPurify.sanitize((a.text||'').substring(0,80))}} />
                     <div style={{ display: 'flex', gap: 8 }}>
                       <button className="abtn abtn-outline abtn-sm" onClick={()=>{setEditAnn(a);setAnnData({text:a.text||'',link:a.link||'',type:a.type||'News'});window.scrollTo({top:0,behavior:'smooth'});}}>✏️</button>
-                      <button className="abtn abtn-red abtn-sm" onClick={()=>softDelete('announcements',a.id,a,(a.text||'').substring(0,30))}>🗑️</button>
+                      <button className="abtn abtn-red abtn-sm" onClick={()=>softDelete('announcements', a.id, a, (a.text||'').replace(/<[^>]*>/g,'').substring(0,30))}>🗑️</button>
                     </div>
                   </div>
                 ))}

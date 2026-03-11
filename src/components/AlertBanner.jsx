@@ -31,8 +31,23 @@ export default function AlertBanner() {
         setTimeout(() => setShowPopup(true), 1200);
       }
     });
-  }, []);
-
+  }, [dismissed]); // ← add karo
+// Lekin ye infinite loop karega — better approach:
+return onSnapshot(q, snap => {
+  const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  setAlerts(data);
+  setShowPopup(prev => prev); // popup logic ko alag useEffect mein le jao
+});
+// Alag useEffect:
+useEffect(() => {
+  if (alerts.length === 0) return;
+  const undismissed = alerts.filter(a => !dismissed.includes(a.id));
+  if (undismissed.length > 0) {
+    setCurrentIdx(0);
+    const t = setTimeout(() => setShowPopup(true), 1200);
+    return () => clearTimeout(t);
+  }
+}, [alerts]); // dismissed intentionally omit — only on alerts change
   // Cycle banner ticker every 4s
   useEffect(() => {
     if (alerts.length <= 1) return;

@@ -4,6 +4,9 @@ import { COLORS } from '../styles/colors';
 export default function Ticker({ items }) {
   if (!items || items.length === 0) return null;
 
+  // Dynamic duration: more items = more time, min 20s
+  const duration = Math.max(20, items.length * 6);
+
   return (
     <div style={{ 
       background: COLORS.gold, 
@@ -13,9 +16,7 @@ export default function Ticker({ items }) {
       alignItems: 'center', 
       overflow: 'hidden',
       borderBottom: '1px solid rgba(0,0,0,0.1)',
-      zIndex: 10,
-      width: '100%', /* 🌟 NAYA: Screen limit lock */
-      boxSizing: 'border-box'
+      zIndex: 10
     }}>
       <style>
         {`
@@ -35,14 +36,13 @@ export default function Ticker({ items }) {
             border-radius: 4px;
             animation: blinker 1s linear infinite;
             white-space: nowrap;
-            flex-shrink: 0; /* 🌟 NAYA: Badge ko dabne se roke */
             z-index: 20;
+            flex-shrink: 0;
           }
           .ticker-track {
             display: flex;
             width: max-content;
-            animation: tickerScroll 30s linear infinite;
-            transform: translateZ(0); /* Zero Lag Scroll */
+            animation: tickerScroll ${duration}s linear infinite;
           }
           .ticker-track:hover { animation-play-state: paused; }
           .ticker-item {
@@ -57,8 +57,7 @@ export default function Ticker({ items }) {
 
       <div className="ticker-badge">🚨 LATEST</div>
 
-      {/* 🌟 NAYA: minWidth: 0 hi wo jaadu hai jo website ko right khisakne se rokega */}
-      <div style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
+      <div style={{ flex: 1, overflow: 'hidden' }}>
         <div className="ticker-track">
           {[...items, ...items].map((item, index) => (
             <div key={index} className="ticker-item">

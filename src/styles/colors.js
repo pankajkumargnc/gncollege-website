@@ -1,6 +1,6 @@
 export const COLORS = {
-  navy:      '#1a3a6b',
-  navyDark:  '#0f2347',
+  navy:      '#0f2347',
+  navyDark:  '#060e1c',
   gold:      '#f4a023',
   goldDark:  '#d4870e',
   red:       '#c0392b',

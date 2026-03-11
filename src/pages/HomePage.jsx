@@ -1,410 +1,571 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-// 🌟 FIX: React Portal import kiya taaki Popup screen par properly freeze ho sake
-import { createPortal } from 'react-dom'; 
-import { COLORS } from '../styles/colors';
-import { SOCIAL_LINKS } from '../data/db';
-import HeroSlider from '../components/HeroSlider';
-import PremiumTicker from '../components/PremiumTicker';
-import HomeFeatures from '../components/HomeFeatures';
-import SectionTitle from '../components/home/SectionTitle';
-import NotificationSection from '../components/home/NotificationSection';
+// src/pages/HomePage.jsx
+// GNC College — Premium Homepage with Scroll Animations
+// Animations: IntersectionObserver only — zero scroll listeners, GPU transforms
 
-const getEmbedUrl = (url) => {
-  if (!url) return '';
-  if (url.includes('drive.google.com/file/d/')) {
-    const fileId = url.split('/d/')[1].split('/')[0];
-    return `https://drive.google.com/file/d/${fileId}/preview`;
-  }
+import { useState, useEffect, useCallback, useRef, memo } from 'react';
+import { Link }         from 'react-router-dom';
+import { createPortal } from 'react-dom';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db }           from '../firebase';
+import { COLORS }       from '../styles/colors';
+import { SOCIAL_LINKS } from '../data/db';
+
+import HeroSlider          from '../components/HeroSlider';
+import PremiumTicker       from '../components/PremiumTicker';
+import HomeFeatures        from '../components/HomeFeatures';
+import SectionTitle        from '../components/home/SectionTitle';
+import NotificationSection from '../components/home/NotificationSection';
+import PlacementsSection   from '../components/home/PlacementsSection';
+
+// ── Theme ──────────────────────────────────────────────────────────────────────
+const N  = COLORS.navy     || '#0f2347';
+const G  = COLORS.gold     || '#f4a023';
+const ND = COLORS.navyDark || '#060e1c';
+
+const getEmbedUrl = (url = '') => {
+  if (url.includes('drive.google.com/file/d/'))
+    return `https://drive.google.com/file/d/${url.split('/d/')[1].split('/')[0]}/preview`;
   return url;
 };
+const getEventImg = t => ({ SEMINAR:'/images/slider_seminar.jpg', WORKSHOP:'/images/slider_ncc.jpg', SPORTS:'/images/slider_cricket.jpg', CULTURAL:'/images/slider_baisakhi.jpg' }[t] || '/images/college_photo.jpg');
 
-const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, gallery }) => {
-  const [activeTab, setActiveTab] = useState('All Moments');
-  const [selectedPdf, setSelectedPdf] = useState(null);
+const TICKER_ITEMS = [
+  { text:'B.A./B.Com. Semester 1 Admissions are now open for 2024-25 session.', link:'/admission/info' },
+  { text:'Results for the Semester 6 internal examinations have been published.', link:'/results' },
+  { text:'The college will remain closed on account of Holi from 24th to 26th March.', link:'#' },
+];
+const GALLERY_TABS  = ['All Moments','Seminars','Cultural Fest','Guest Visit','Campus','Departments','NSS Programs'];
+const LINKS_DATA    = [
+  { name:'NAAC',       url:'https://naac.gov.in',     icon:'🏅' },
+  { name:'UGC',        url:'https://ugc.ac.in',       icon:'📜' },
+  { name:'INFLIBNET',  url:'https://inflibnet.ac.in', icon:'📚' },
+  { name:'NDL INDIA',  url:'https://ndl.gov.in',      icon:'🔬' },
+  { name:'SWAYAM',     url:'https://swayam.gov.in',   icon:'🌐' },
+  { name:'BBMK UNIV.', url:'https://bbmku.ac.in',     icon:'🏛️' },
+];
+const COUNTERS = [
+  { label:'Students Enrolled', value:'4,000+', icon:'👨‍🎓' },
+  { label:'Successful Alumni',  value:'45,000+',icon:'🎓'  },
+  { label:'Expert Faculty',     value:'50+',    icon:'👨‍🏫' },
+  { label:'Years of Legacy',    value:'56',     icon:'🏛️'  },
+];
+const ABOUT_FEATS = [
+  { icon:'🛡️', title:'NAAC Accredited', desc:'Grade B Institution'   },
+  { icon:'👨‍🏫', title:'Expert Faculty',  desc:'Highly Experienced'    },
+  { icon:'🔬', title:'Modern Labs',      desc:'Tech-enabled Learning' },
+  { icon:'🏅', title:'NSS & NCC',        desc:'Character Building'    },
+];
 
-  const combinedGalleryImages = gallery || [];
-  const filteredImages = activeTab === 'All Moments' ? combinedGalleryImages : combinedGalleryImages.filter(img => img.cat === activeTab);
+// ── SCROLL ANIMATION HOOK ──────────────────────────────────────────────────────
+// Uses IntersectionObserver — no scroll listeners, no layout thrashing
+// Only animates opacity + transform (GPU composited, zero repaint)
+function useScrollAnim(options = {}) {
+  const { threshold = 0.12, rootMargin = '0px 0px -60px 0px' } = options;
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
 
-  const upcomingEvents = (events || []).filter(e => e.status === 'upcoming');
-  const recentEvents = (events || []).filter(e => e.status === 'recent');
-
-  const getEventImage = (type) => {
-    switch (type) {
-      case 'SEMINAR': return '/images/slider_seminar.jpg';
-      case 'WORKSHOP': return '/images/slider_ncc.jpg';
-      case 'SPORTS': return '/images/slider_cricket.jpg';
-      case 'CULTURAL': return '/images/slider_baisakhi.jpg';
-      default: return '/images/college_photo.jpg';
+  useEffect(() => {
+    // Respect user's motion preference
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setVisible(true);
+      return;
     }
-  };
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setVisible(true);
+        obs.unobserve(el); // fire once, then stop watching
+      }
+    }, { threshold, rootMargin });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold, rootMargin]);
 
-  const tickerItems = [
-    { text: "B.A./B.Com. Semester 1 Admissions are now open for 2024-25 session.", link: "/admission/info" },
-    { text: "Results for the Semester 6 internal examinations have been published.", link: "/results" },
-    { text: "The college will remain closed on account of Holi from 24th to 26th March.", link: "#" },
-  ];
+  return [ref, visible];
+}
 
+// ── ANIMATION CSS ──────────────────────────────────────────────────────────────
+// All transitions use only opacity + transform — never width/height/top/margin
+// This ensures the browser uses the compositor thread (zero main-thread jank)
+const ANIM_CSS = `
+  /* Base hidden state — rendered but invisible */
+  .sa { opacity: 0; will-change: opacity, transform; }
+  .sa.visible { will-change: auto; } /* release after animation */
+
+  /* Transition curves */
+  .sa { transition: opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1); }
+
+  /* Variants — initial state */
+  .sa-up    { transform: translateY(38px); }
+  .sa-down  { transform: translateY(-28px); }
+  .sa-left  { transform: translateX(-40px); }
+  .sa-right { transform: translateX(40px); }
+  .sa-scale { transform: scale(.93); }
+  .sa-fade  { transform: none; }
+  .sa-rise  { transform: translateY(22px) scale(.97); }
+
+  /* Visible state — all variants reset to natural */
+  .sa.visible { opacity: 1; transform: none; }
+
+  /* Delay helpers (stagger children) */
+  .sa-d1 { transition-delay: .08s; }
+  .sa-d2 { transition-delay: .16s; }
+  .sa-d3 { transition-delay: .24s; }
+  .sa-d4 { transition-delay: .32s; }
+  .sa-d5 { transition-delay: .40s; }
+  .sa-d6 { transition-delay: .48s; }
+
+  /* Slower for big hero-like elements */
+  .sa-slow { transition-duration: .9s; }
+
+  /* @media: reduce delays on mobile to feel snappier */
+  @media (max-width: 600px) {
+    .sa { transition-duration: .45s; }
+    .sa-d1,.sa-d2,.sa-d3,.sa-d4,.sa-d5,.sa-d6 { transition-delay: 0s; }
+    .sa-up,.sa-down { transform: translateY(22px); }
+    .sa-left,.sa-right { transform: translateX(22px); }
+  }
+`;
+
+// ── Animated wrapper component ─────────────────────────────────────────────────
+// Lightweight — just a div with IntersectionObserver ref
+const SA = ({ children, variant = 'up', delay = '', slow = false, className = '', style = {}, tag: Tag = 'div' }) => {
+  const [ref, vis] = useScrollAnim();
   return (
-    <div style={{ fontFamily: "'Segoe UI',sans-serif", background: 'transparent', minHeight: '100vh', overflowX: 'hidden' }}>
+    <Tag
+      ref={ref}
+      className={`sa sa-${variant}${slow ? ' sa-slow' : ''}${delay ? ` sa-${delay}` : ''}${vis ? ' visible' : ''}${className ? ' ' + className : ''}`}
+      style={style}
+    >
+      {children}
+    </Tag>
+  );
+};
 
-      <div style={{
-        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-        backgroundImage: `url(${import.meta.env.BASE_URL}images/logo.png)`,
-        backgroundRepeat: 'repeat', backgroundSize: '350px', opacity: 0.03,
-        zIndex: -1, backgroundColor: '#f4f7f9'
-      }} />
+// ── Global page CSS ────────────────────────────────────────────────────────────
+const CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+  *,*::before,*::after{box-sizing:border-box;}
 
-      <HeroSlider slides={sliderSlides} />
-      <PremiumTicker items={tickerItems} />
-      <NotificationSection notices={notices} announcements={announcements} pdfReports={pdfReports} upcomingEvents={upcomingEvents} />
+  .hp-watermark{position:fixed;inset:0;background-image:url(${import.meta.env.BASE_URL}images/logo.png);background-repeat:repeat;background-size:320px;opacity:.025;z-index:-1;background-color:#f4f7f9;pointer-events:none;}
 
-      {/* ── 3 Quick Pill Buttons ── */}
-      <div style={{ background: '#fff', borderTop: '1px solid #edf2f7', borderBottom: '1px solid #edf2f7', padding: '18px 20px' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-          {[
-            { to: '/notifications', icon: '📢', label: 'All Notices & News', bg: COLORS.navy, color: '#fff',    shadow: `${COLORS.navy}33` },
-            { to: '/documents',     icon: '📁', label: 'All Documents',      bg: '#16213e',   color: '#fff',    shadow: '#16213e33'        },
-          ].map(btn => (
-            <Link
-              key={btn.to}
-              to={btn.to}
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                background: btn.bg, color: btn.color,
-                padding: '11px 26px', borderRadius: 50,
-                fontSize: 14, fontWeight: 800, textDecoration: 'none',
-                boxShadow: `0 4px 14px ${btn.shadow}`,
-                transition: 'all .2s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = `0 8px 22px ${btn.shadow}`; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = `0 4px 14px ${btn.shadow}`; }}
-            >
-              <span style={{ fontSize: 17 }}>{btn.icon}</span>
-              {btn.label}
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </Link>
-          ))}
+  /* quick pills */
+  .hp-quick{background:#fff;border-top:1px solid #edf2f7;border-bottom:1px solid #edf2f7;padding:16px 20px;}
+  .hp-quick-inner{max-width:1280px;margin:0 auto;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+  .hp-pill{display:inline-flex;align-items:center;gap:8px;padding:11px 26px;border-radius:50px;font-size:14px;font-weight:700;text-decoration:none;transition:transform .22s,box-shadow .22s;font-family:'DM Sans',sans-serif;}
+  .hp-pill:hover{transform:translateY(-3px);}
+
+  /* about */
+  .hp-about{background:#fff;padding:clamp(60px,8vw,100px) 20px;overflow:hidden;}
+  .hp-about-inner{max-width:1250px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:56px;align-items:center;}
+  @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+  .hp-imgstack{position:relative;width:100%;height:420px;}
+  .hp-img-main{width:90%;height:100%;object-fit:cover;border-radius:20px;box-shadow:20px 20px 0 ${G};position:relative;z-index:2;transition:transform .5s;}
+  .hp-imgstack:hover .hp-img-main{transform:scale(1.02);}
+  .hp-img-accent{position:absolute;bottom:-28px;right:0;background:${N};color:#fff;padding:22px 26px;border-radius:14px;z-index:3;box-shadow:0 10px 30px rgba(0,0,0,.2);animation:float 3s ease-in-out infinite;}
+  .hp-at{font-family:'Syne',sans-serif;font-size:clamp(28px,4vw,38px);font-weight:800;color:${N};line-height:1.2;margin-bottom:8px;}
+  .hp-at span{color:${G};}
+  .hp-asub{color:${G};font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:22px;font-size:13px;}
+  .hp-adesc{color:#555;line-height:1.8;font-size:15.5px;margin-bottom:28px;font-family:'DM Sans',sans-serif;}
+  .hp-afeat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:32px;}
+  .hp-afeat{display:flex;gap:11px;align-items:flex-start;}
+  .hp-afeat-t{font-weight:800;font-size:13.5px;color:${N};}
+  .hp-afeat-d{font-size:12px;color:#888;}
+  .hp-disc{background:${N};color:#fff;padding:14px 32px;border:none;border-radius:50px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;font-size:14px;transition:background .3s,box-shadow .3s,transform .2s;box-shadow:0 5px 18px rgba(15,35,71,.25);}
+  .hp-disc:hover{background:${G};color:${N};transform:translateY(-2px);box-shadow:0 8px 24px rgba(244,160,35,.35);}
+  .hp-soc{width:38px;height:38px;border-radius:50%;background:#f0f2f5;display:flex;align-items:center;justify-content:center;color:${N};font-size:17px;text-decoration:none;transition:background .3s,transform .3s;}
+  .hp-soc:hover{background:${N};color:${G};transform:rotate(360deg);}
+
+  /* section divider */
+  .hp-sec-divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(15,35,71,.08),transparent);margin:0;}
+
+  /* events */
+  .hp-events{padding:clamp(60px,8vw,80px) 20px;background:transparent;}
+  .hp-ev-inner{max-width:1400px;margin:0 auto;}
+  @keyframes hp-ev-scroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+  .hp-ev-scroller{overflow:hidden;padding:20px 0;margin-top:28px;mask:linear-gradient(90deg,transparent,#fff 5%,#fff 95%,transparent);-webkit-mask:linear-gradient(90deg,transparent,#fff 5%,#fff 95%,transparent);}
+  .hp-ev-track{display:flex;width:max-content;gap:28px;animation:hp-ev-scroll 36s linear infinite;will-change:transform;}
+  .hp-ev-track:hover{animation-play-state:paused;}
+  .hp-ev-card{width:310px;flex-shrink:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.05);border:1px solid rgba(255,255,255,.5);transition:transform .35s,box-shadow .35s,border-color .35s;display:flex;flex-direction:column;}
+  .hp-ev-card:hover{transform:translateY(-10px) scale(1.02);box-shadow:0 20px 40px rgba(15,35,71,.14);border-color:${G};}
+  .hp-ev-imgbox{position:relative;height:190px;overflow:hidden;}
+  .hp-ev-img{width:100%;height:100%;object-fit:cover;transition:transform .55s;}
+  .hp-ev-card:hover .hp-ev-img{transform:scale(1.08);}
+  .hp-ev-bdg{position:absolute;top:14px;right:14px;background:${G};color:#000;padding:4px 11px;font-size:9.5px;font-weight:800;border-radius:50px;text-transform:uppercase;z-index:2;letter-spacing:.5px;}
+  .hp-ev-dt{position:absolute;bottom:0;left:0;background:${N};color:#fff;padding:8px 14px;border-top-right-radius:12px;z-index:2;}
+  .hp-ev-info{padding:20px;flex:1;display:flex;flex-direction:column;}
+  .hp-ev-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:${N};margin:0 0 9px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .hp-ev-desc{font-size:13px;color:#64748b;line-height:1.6;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+  .hp-ev-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:12px;margin-top:14px;}
+  .hp-ev-loc{font-size:11px;color:#94a3b8;font-weight:600;}
+  .hp-ev-more{background:none;border:none;font-size:11px;color:${G};font-weight:800;cursor:pointer;transition:color .2s;padding:0;display:flex;align-items:center;gap:5px;}
+  .hp-ev-more:hover{color:${N};}
+  .hp-pdf-bdg{background:#fee2e2;color:#b91c1c;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:800;}
+  .hp-ev-empty{text-align:center;background:rgba(255,255,255,.7);padding:40px;border-radius:12px;border:1px dashed #e2e8f0;margin-top:28px;}
+
+  /* counters */
+  .hp-cnt{background:linear-gradient(135deg,${ND} 0%,${N} 100%);padding:clamp(60px,8vw,80px) 20px;position:relative;overflow:hidden;}
+  .hp-cnt-bg{position:absolute;inset:0;opacity:.05;pointer-events:none;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:30px 30px;}
+  .hp-cnt-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:36px;text-align:center;position:relative;z-index:2;}
+  .hp-cnt-box{padding:18px;transition:transform .35s,background .35s,box-shadow .35s;border-radius:14px;cursor:default;}
+  .hp-cnt-box:hover{transform:translateY(-8px);background:rgba(255,255,255,.05);box-shadow:0 0 24px rgba(244,160,35,.12);}
+  .hp-cnt-icon{font-size:46px;margin-bottom:14px;display:inline-block;filter:drop-shadow(0 0 10px rgba(244,160,35,.3));transition:transform .35s,filter .35s;}
+  .hp-cnt-box:hover .hp-cnt-icon{transform:scale(1.2) rotate(10deg);filter:drop-shadow(0 0 20px rgba(244,160,35,.6));}
+  .hp-cnt-num{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;color:${G};line-height:1;margin-bottom:8px;}
+  .hp-cnt-lbl{font-size:12.5px;color:#e2e8f0;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;}
+
+  /* links */
+  .hp-links{padding:clamp(60px,8vw,80px) 20px;background:transparent;}
+  .hp-links-inner{max-width:1200px;margin:0 auto;}
+  .hp-links-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:18px;margin-top:38px;}
+  .hp-link-tile{background:rgba(255,255,255,.75);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.6);border-radius:12px;padding:24px 14px;text-align:center;text-decoration:none;transition:transform .3s,border-color .3s,box-shadow .3s,background .3s;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 4px 10px rgba(0,0,0,.03);}
+  .hp-link-tile:hover{transform:translateY(-7px) scale(1.03);border-color:${G};box-shadow:0 12px 28px rgba(15,35,71,.1);background:#fff;}
+  .hp-link-icon{width:56px;height:56px;background:#f1f5f9;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;transition:background .3s,transform .3s;}
+  .hp-link-tile:hover .hp-link-icon{background:${N};transform:rotate(15deg);}
+  .hp-link-name{font-size:12.5px;font-weight:800;color:${N};letter-spacing:.4px;}
+
+  /* gallery */
+  .hp-gal{padding:clamp(70px,9vw,100px) 20px;background:#fff;}
+  .hp-gal-inner{max-width:1300px;margin:0 auto;}
+  .hp-gal-filters{display:flex;justify-content:center;gap:10px;margin-bottom:44px;flex-wrap:wrap;}
+  .hp-filter{padding:9px 22px;border-radius:50px;border:2px solid #edf2f7;background:#fff;color:${N};font-weight:700;font-size:13px;cursor:pointer;transition:background .25s,color .25s,border-color .25s,transform .25s,box-shadow .25s;}
+  .hp-filter:hover,.hp-filter.active{background:${N};color:#fff;border-color:${N};transform:translateY(-2px);box-shadow:0 5px 14px rgba(15,35,71,.2);}
+  .hp-gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+  .hp-gal-item{position:relative;border-radius:14px;overflow:hidden;aspect-ratio:4/3;box-shadow:0 4px 14px rgba(0,0,0,.06);cursor:pointer;}
+  .hp-gal-img{width:100%;height:100%;object-fit:cover;transition:transform .55s;}
+  .hp-gal-item:hover .hp-gal-img{transform:scale(1.1);}
+  .hp-gal-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(15,35,71,.88),transparent);opacity:0;transition:opacity .35s;display:flex;flex-direction:column;justify-content:flex-end;padding:18px;}
+  .hp-gal-item:hover .hp-gal-ov{opacity:1;}
+  .hp-gal-cat{color:${G};font-size:10px;font-weight:800;letter-spacing:.5px;transform:translateY(8px);opacity:0;transition:all .35s .05s;}
+  .hp-gal-ttl{color:#fff;font-size:13.5px;font-weight:700;margin-top:4px;transform:translateY(8px);opacity:0;transition:all .35s .12s;}
+  .hp-gal-item:hover .hp-gal-cat,.hp-gal-item:hover .hp-gal-ttl{transform:translateY(0);opacity:1;}
+  .hp-gal-empty{grid-column:1/-1;text-align:center;background:#f8fafc;padding:48px 20px;border-radius:16px;border:1px dashed #cbd5e1;}
+
+  /* youtube */
+  .hp-yt{padding:clamp(60px,8vw,80px) 20px;background:#f8fafc;text-align:center;}
+  .hp-yt-inner{max-width:1200px;margin:0 auto;}
+  .hp-yt-h{font-family:'Syne',sans-serif;font-size:clamp(24px,3.5vw,36px);font-weight:800;color:${N};margin-bottom:10px;}
+  .hp-yt-h span{color:${G};}
+  .hp-yt-sub{color:#64748b;font-size:14px;margin-bottom:38px;}
+  .hp-yt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;}
+  .hp-yt-frame{border-radius:16px;border:none;box-shadow:0 10px 32px rgba(0,0,0,.1);width:100%;height:220px;}
+  .hp-yt-ph{background:rgba(255,255,255,.8);border:1px dashed #cbd5e1;border-radius:16px;height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
+  .hp-yt-ph-icon{font-size:34px;opacity:.35;}
+  .hp-yt-ph-txt{color:#94a3b8;font-size:13px;}
+
+  /* modal */
+  .hp-modal-ov{position:fixed;inset:0;z-index:9999999;background:rgba(15,35,71,.95);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;}
+  .hp-modal-box{background:#fff;width:90%;max-width:1000px;height:85vh;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 60px rgba(0,0,0,.5);}
+  .hp-modal-head{padding:14px 22px;background:${N};color:#fff;display:flex;justify-content:space-between;align-items:center;font-family:'DM Sans',sans-serif;font-weight:800;}
+  .hp-modal-close{background:rgba(255,255,255,.15);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+  .hp-modal-close:hover{background:#e53e3e;}
+
+  /* responsive */
+  @media(max-width:768px){
+    .hp-imgstack{height:300px;} .hp-img-accent{display:none;} .hp-afeat-grid{grid-template-columns:1fr;}
+    .hp-cnt-grid{grid-template-columns:1fr 1fr;} .hp-links-grid{grid-template-columns:repeat(3,1fr);}
+  }
+  @media(max-width:480px){
+    .hp-about-inner{grid-template-columns:1fr;} .hp-imgstack{height:240px;}
+    .hp-cnt-grid{grid-template-columns:1fr 1fr;gap:18px;} .hp-cnt-num{font-size:30px;}
+    .hp-links-grid{grid-template-columns:repeat(2,1fr);} .hp-gal-grid{grid-template-columns:1fr;}
+    .hp-yt-grid{grid-template-columns:1fr;}
+  }
+`;
+
+// ── Sub-components ─────────────────────────────────────────────────────────────
+const EventCard = memo(({ ev, onPdf }) => (
+  <div className="hp-ev-card">
+    <div className="hp-ev-imgbox">
+      <div className="hp-ev-bdg">{ev.type}</div>
+      <div className="hp-ev-dt">
+        <div style={{ fontSize:18, fontWeight:900, lineHeight:1 }}>{ev.day||'--'}</div>
+        <div style={{ fontSize:10, fontWeight:700 }}>{ev.month||'---'}</div>
+      </div>
+      <img src={ev.imageUrl||getEventImg(ev.type)} alt={ev.title} className="hp-ev-img" loading="lazy" decoding="async" />
+    </div>
+    <div className="hp-ev-info">
+      <h3 className="hp-ev-title">{ev.title}</h3>
+      <div className="hp-ev-desc" dangerouslySetInnerHTML={{ __html: ev.desc }} />
+      <div className="hp-ev-foot">
+        <span className="hp-ev-loc">📍 {ev.location||'Campus'}</span>
+        <button className="hp-ev-more" onClick={() => onPdf(ev)}>
+          {ev.reportLink ? <><span className="hp-pdf-bdg">PDF</span> READ REPORT →</> : 'READ MORE →'}
+        </button>
+      </div>
+    </div>
+  </div>
+));
+
+const GalItem = memo(({ img, index }) => {
+  const [ref, vis] = useScrollAnim({ threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  const delay = (index % 6) * 0.07;
+  return (
+    <div
+      ref={ref}
+      className={`hp-gal-item sa sa-scale${vis ? ' visible' : ''}`}
+      style={{ transitionDelay: `${delay}s` }}
+    >
+      <img src={img.src} alt={img.title} className="hp-gal-img" loading="lazy" decoding="async" />
+      <div className="hp-gal-ov">
+        <div className="hp-gal-cat">{img.cat}</div>
+        <div className="hp-gal-ttl">{img.title}</div>
+      </div>
+    </div>
+  );
+});
+
+// ── YouTube Section ────────────────────────────────────────────────────────────
+function YouTubeSection() {
+  const [ytData, setYt] = useState(null);
+  const [ready, setR]   = useState(false);
+  useEffect(() => {
+    return onSnapshot(doc(db, 'settings', 'youtube'), s => {
+      setYt(s.exists() ? s.data() : null); setR(true);
+    }, () => setR(true));
+  }, []);
+  if (!ready) return null;
+  const videos  = ytData?.videoIds ? ytData.videoIds.split(/[\n,]/).map(s=>s.trim()).filter(Boolean).slice(0,3) : [];
+  const channel = ytData?.channelName || 'GNC College Official';
+  return (
+    <section className="hp-yt">
+      <div className="hp-yt-inner">
+        <SA variant="up"><h2 className="hp-yt-h">🎬 Campus <span>Video Highlights</span></h2></SA>
+        <SA variant="fade" delay="d1"><p className="hp-yt-sub">Official {channel} channel se latest videos</p></SA>
+        <div className="hp-yt-grid">
+          {videos.length > 0
+            ? videos.map((vid, i) => (
+                <SA key={vid} variant="up" delay={`d${i+1}`}>
+                  <iframe className="hp-yt-frame" src={`https://www.youtube.com/embed/${vid}`} allowFullScreen title={vid} loading="lazy" />
+                </SA>
+              ))
+            : [1,2,3].map(i => (
+                <SA key={i} variant="up" delay={`d${i}`}>
+                  <div className="hp-yt-ph">
+                    <div className="hp-yt-ph-icon">▶️</div>
+                    <div className="hp-yt-ph-txt">Admin Panel → Settings → YouTube<br/>mein Video IDs add karein</div>
+                  </div>
+                </SA>
+              ))
+          }
         </div>
       </div>
+    </section>
+  );
+}
 
-      {/* ABOUT SECTION */}
-      <section id="about" style={{ background: '#fff', padding: '100px 20px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ maxWidth: 1250, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '60px', alignItems: 'center' }}>
-          <div data-aos="fade-right" style={{ position: 'relative' }}>
-            <style>
-              {`
-                @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
-                .image-stack { position: relative; width: 100%; height: 450px; }
-                .main-img { width: 90%; height: 100%; object-fit: cover; border-radius: 20px; box-shadow: 20px 20px 0px ${COLORS.gold}; position: relative; z-index: 2; transition: transform 0.5s ease; }
-                .image-stack:hover .main-img { transform: scale(1.02); }
-                .accent-box { position: absolute; bottom: -30px; right: 0; background: ${COLORS.navy}; color: #fff; padding: 25px; border-radius: 15px; z-index: 3; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: float 3s ease-in-out infinite; }
-              `}
-            </style>
-            <div className="image-stack">
-              <img src={`${import.meta.env.BASE_URL}images/college_photo.jpg`} alt="Guru Nanak College Campus" className="main-img" loading="lazy" decoding="async" />
-              <div className="accent-box">
-                <h4 style={{ fontSize: '32px', margin: 0, fontWeight: 900, color: COLORS.gold }}>56+</h4>
-                <p style={{ fontSize: '12px', margin: 0, opacity: 0.8, letterSpacing: '1px' }}>YEARS OF EXCELLENCE</p>
+// ── Main Component ─────────────────────────────────────────────────────────────
+const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, gallery }) => {
+  const [tab, setTab] = useState('All Moments');
+  const [pdf, setPdf] = useState(null);
+
+  const allGal   = gallery || [];
+  const filtered = tab === 'All Moments' ? allGal : allGal.filter(i => i.cat === tab);
+  const recentEv = (events || []).filter(e => e.status === 'recent');
+  const upcomEv  = (events || []).filter(e => e.status === 'upcoming');
+  const evTriple = [...recentEv, ...recentEv, ...recentEv];
+
+  const handlePdf = useCallback(ev => {
+    if (ev.reportLink) setPdf(getEmbedUrl(ev.reportLink));
+    else alert('Full details coming soon!');
+  }, []);
+
+  return (
+    <div style={{ fontFamily:"'DM Sans',sans-serif", background:'transparent', minHeight:'100vh', overflowX:'hidden' }}>
+      <style>{ANIM_CSS + CSS}</style>
+      <div className="hp-watermark" />
+
+      {/* ── HERO (no animation — above the fold) ── */}
+      <HeroSlider slides={sliderSlides} />
+      <PremiumTicker items={TICKER_ITEMS} />
+      <NotificationSection notices={notices} announcements={announcements} pdfReports={pdfReports} upcomingEvents={upcomEv} />
+
+      {/* ── QUICK PILLS ── animate as a row sliding up */}
+      <div className="hp-quick">
+        <SA variant="up" className="hp-quick-inner" tag="div">
+          {[
+            { to:'/notifications', icon:'📢', label:'All Notices & News', bg:N,        shadow:`${N}33`    },
+            { to:'/documents',     icon:'📁', label:'All Documents',      bg:'#16213e', shadow:'#16213e33' },
+          ].map((b, i) => (
+            <Link key={b.to} to={b.to} className={`hp-pill sa sa-up sa-d${i+1} visible`}
+              style={{ background:b.bg, color:'#fff', boxShadow:`0 4px 14px ${b.shadow}` }}
+              onClick={() => window.scrollTo({ top:0, behavior:'smooth' })}
+            >
+              <span style={{ fontSize:17 }}>{b.icon}</span>{b.label}
+              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </Link>
+          ))}
+        </SA>
+      </div>
+
+      {/* ── ABOUT ── */}
+      <section id="about" className="hp-about">
+        <div className="hp-about-inner">
+          {/* Image — slides from left */}
+          <SA variant="left" slow>
+            <div className="hp-imgstack">
+              <img src={`${import.meta.env.BASE_URL}images/college_photo.jpg`} alt="Guru Nanak College" className="hp-img-main" loading="lazy" decoding="async" />
+              <div className="hp-img-accent">
+                <div style={{ fontSize:30, fontWeight:900, color:G, lineHeight:1 }}>56+</div>
+                <div style={{ fontSize:11, opacity:.8, letterSpacing:1 }}>YEARS OF EXCELLENCE</div>
               </div>
             </div>
-          </div>
+          </SA>
 
-          <div data-aos="fade-left">
-            <h2 style={{ fontSize: '38px', fontWeight: 900, color: COLORS.navy, lineHeight: 1.2, marginBottom: '10px' }}>
-              About the <span style={{ color: COLORS.gold }}>College</span>
-            </h2>
-            <h4 style={{ color: COLORS.gold, fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '25px', fontSize: '14px' }}>Established 1970</h4>
-            <p style={{ color: '#555', lineHeight: 1.8, fontSize: '16px', marginBottom: '30px' }}>
-              Guru Nanak College, Dhanbad (A Sikh Minority Degree College) was established by the Gurudwara Prabandhak Committee in 1970 to mark the fifth Birth Centenary of the great Guru. We draw inspiration from the teachings of Guru Nanak Devji, fostering an environment of academic progress and individual development.
+          {/* Text — slides from right, staggered children */}
+          <SA variant="right" slow>
+            <h2 className="hp-at">About the <span>College</span></h2>
+            <div className="hp-asub">Established 1970</div>
+            <p className="hp-adesc">
+              Guru Nanak College, Dhanbad (A Sikh Minority Degree College) was established by the
+              Gurudwara Prabandhak Committee in 1970 to mark the fifth Birth Centenary of the great
+              Guru. We draw inspiration from the teachings of Guru Nanak Devji, fostering an
+              environment of academic progress and individual development.
             </p>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '35px' }}>
-              {[
-                { icon: '🛡️', title: 'NAAC Accredited', desc: 'Grade B Institution' },
-                { icon: '👨‍🏫', title: 'Expert Faculty', desc: 'Highly Experienced' },
-                { icon: '🔬', title: 'Modern Labs', desc: 'Tech-enabled Learning' },
-                { icon: '🏅', title: 'NSS & NCC', desc: 'Character Building' }
-              ].map((f, i) => (
-                <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'start' }}>
-                  <span style={{ fontSize: '20px' }}>{f.icon}</span>
-                  <div>
-                    <div style={{ fontWeight: 800, fontSize: '14px', color: COLORS.navy }}>{f.title}</div>
-                    <div style={{ fontSize: '12px', color: '#888' }}>{f.desc}</div>
-                  </div>
+            <div className="hp-afeat-grid">
+              {ABOUT_FEATS.map(f => (
+                <div key={f.title} className="hp-afeat">
+                  <span style={{ fontSize:19, marginTop:2 }}>{f.icon}</span>
+                  <div><div className="hp-afeat-t">{f.title}</div><div className="hp-afeat-d">{f.desc}</div></div>
                 </div>
               ))}
             </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '25px', flexWrap: 'wrap' }}>
-              <style>{`
-                .discover-btn {
-                  background: ${COLORS.navy}; color: #fff; padding: 15px 35px; border: none; border-radius: 50px; 
-                  font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(15,35,71,0.3);
-                  text-decoration: none; display: inline-block;
-                }
-                .discover-btn:hover { background: ${COLORS.gold}; color: ${COLORS.navy}; box-shadow: 0 8px 25px rgba(244,160,35,0.4); }
-                .social-icon-btn { width: 40px; height: 40px; border-radius: 50%; background: #f0f2f5; display: flex; align-items: center; justify-content: center; color: ${COLORS.navy}; font-size: 18px; text-decoration: none; transition: all 0.3s ease; }
-                .social-icon-btn:hover { background: ${COLORS.navy}; color: ${COLORS.gold}; transform: rotate(360deg); }
-              `}</style>
-              <Link to="/about-us/college-profile" className="discover-btn">DISCOVER MORE →</Link>
-
-              <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                <span style={{ fontSize: '13px', fontWeight: 700, color: '#666' }}>FOLLOW US:</span>
+            <div style={{ display:'flex', alignItems:'center', gap:22, flexWrap:'wrap' }}>
+              <Link to="/about-us/college-profile" className="hp-disc">DISCOVER MORE →</Link>
+              <div style={{ display:'flex', gap:12, alignItems:'center' }}>
+                <span style={{ fontSize:12, fontWeight:700, color:'#888' }}>FOLLOW US:</span>
                 {SOCIAL_LINKS.map(s => (
-                  <a key={s.id} href={s.href} target="_blank" rel="noopener noreferrer" className="social-icon-btn">
-                    {s.id === 'twitter' ? '𝕏' : s.id === 'youtube' ? '▶' : s.label.charAt(0)}
+                  <a key={s.id} href={s.href} target="_blank" rel="noopener noreferrer" className="hp-soc">
+                    {s.id==='twitter'?'𝕏':s.id==='youtube'?'▶':s.label.charAt(0)}
                   </a>
                 ))}
               </div>
             </div>
-          </div>
+          </SA>
         </div>
       </section>
 
+      <div className="hp-sec-divider" />
       <HomeFeatures />
+      <div className="hp-sec-divider" />
 
-      {/* EVENTS SECTION */}
-      <section id="events" style={{ padding: '80px 20px', background: 'transparent' }} data-aos="fade-up">
-        <div style={{ maxWidth: 1400, margin: '0 auto' }}>
-          <SectionTitle title="Recent Events & Happenings" subtitle="Insights into our seminars, workshops, and vibrant campus activities" />
-          <style>{`
-            @keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-            .events-scroller { overflow: hidden; padding: 20px 0; margin-top: 30px; mask: linear-gradient(90deg, transparent, white 5%, white 95%, transparent); -webkit-mask: linear-gradient(90deg, transparent, white 5%, white 95%, transparent); }
-            .events-track { display: flex; width: max-content; gap: 30px; animation: scrollLeft 35s linear infinite; transform: translateZ(0); }
-            .events-track:hover { animation-play-state: paused; }
-            .event-loop-card { width: 320px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.5); flex-shrink: 0; transition: all 0.4s ease; display: flex; flex-direction: column; }
-            .event-loop-card:hover { transform: translateY(-10px) scale(1.02); box-shadow: 0 18px 40px rgba(15, 35, 71, 0.15); border-color: ${COLORS.gold}; }
-            .el-img-box { position: relative; height: 200px; overflow: hidden; }
-            .el-img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s ease; }
-            .event-loop-card:hover .el-img { transform: scale(1.08); }
-            .el-badge { position: absolute; top: 15px; right: 15px; background: ${COLORS.gold}; color: #000; padding: 5px 12px; font-size: 10px; font-weight: 800; border-radius: 50px; text-transform: uppercase; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.3s ease; }
-            .event-loop-card:hover .el-badge { transform: scale(1.1); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
-            .el-date { position: absolute; bottom: 0; left: 0; background: ${COLORS.navy}; color: #fff; padding: 8px 15px; border-top-right-radius: 12px; text-align: center; z-index: 2; transition: all 0.3s ease; }
-            .event-loop-card:hover .el-date { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-            .el-info { padding: 22px; flex: 1; display: flex; flex-direction: column; }
-            .el-title { font-size: 16px; font-weight: 800; color: ${COLORS.navy}; margin: 0 0 10px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-            .el-desc { font-size: 13px; color: #64748b; line-height: 1.6; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; flex: 1;}
-            
-            .el-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 12px; margin-top: auto;}
-            
-            .read-more-btn { background: none; border: none; font-size: 11px; color: ${COLORS.gold}; font-weight: 800; text-decoration: none; transition: all 0.3s ease; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 5px; }
-            .read-more-btn:hover { color: ${COLORS.navy}; letter-spacing: 0.5px; }
-            .report-badge { background: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-size: 9px; font-weight: 800; }
-          `}</style>
+      {/* ── EVENTS ── */}
+      <section id="events" className="hp-events">
+        <div className="hp-ev-inner">
+          <SA variant="up"><SectionTitle title="Recent Events & Happenings" subtitle="Seminars, workshops aur campus activities ki ek jhalak" /></SA>
 
-          {recentEvents.length > 0 ? (
-            <div className="events-scroller">
-              <div className="events-track">
-                {[...recentEvents, ...recentEvents, ...recentEvents].map((ev, i) => (
-                  <div key={i} className="event-loop-card">
-                    <div className="el-img-box">
-                      <div className="el-badge">{ev.type}</div>
-                      <div className="el-date">
-                        <div style={{ fontSize: '18px', fontWeight: 900, lineHeight: 1 }}>{ev.day || '--'}</div>
-                        <div style={{ fontSize: '10px', fontWeight: 700 }}>{ev.month || '---'}</div>
-                      </div>
-                      <img src={ev.imageUrl || getEventImage(ev.type)} alt={ev.title} className="el-img" loading="lazy" decoding="async" />
-                    </div>
-                    <div className="el-info">
-                      <h3 className="el-title">{ev.title}</h3>
-                      <div className="el-desc" dangerouslySetInnerHTML={{ __html: ev.desc }} />
-                      <div className="el-footer">
-                        <span style={{ fontSize: '11px', color: '#888', fontWeight: 700 }}>📍 {ev.location || 'Campus'}</span>
-                        <button 
-                          className="read-more-btn"
-                          onClick={(e) => { 
-                            e.preventDefault(); 
-                            if(ev.reportLink) setSelectedPdf(getEmbedUrl(ev.reportLink)); 
-                            else alert("Full details coming soon!"); 
-                          }}
-                        >
-                          {ev.reportLink ? <><span className="report-badge">PDF</span> READ REPORT →</> : 'READ MORE →'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+          {recentEv.length > 0 ? (
+            <SA variant="fade" delay="d1">
+              <div className="hp-ev-scroller">
+                <div className="hp-ev-track">
+                  {evTriple.map((ev, i) => <EventCard key={`${ev.id||i}-${i}`} ev={ev} onPdf={handlePdf} />)}
+                </div>
               </div>
-            </div>
+            </SA>
           ) : (
-            <div style={{textAlign: 'center', background: 'rgba(255,255,255,0.7)', padding: '40px', borderRadius: '12px', border: '1px dashed #e2e8f0', marginTop: '30px'}}>
-              <div style={{fontSize: '40px', marginBottom: '10px'}}>📅</div>
-              <h3 style={{color: COLORS.navy, margin: '0 0 10px'}}>No Recent Events</h3>
-              <p style={{color: '#64748b', margin: 0, fontSize: '14px'}}>There are no events to display at the moment.</p>
-            </div>
+            <SA variant="scale">
+              <div className="hp-ev-empty">
+                <div style={{ fontSize:38, marginBottom:10 }}>📅</div>
+                <h3 style={{ color:N, margin:'0 0 8px' }}>No Recent Events</h3>
+                <p style={{ color:'#64748b', fontSize:13 }}>Admin Panel → Events se data add karein</p>
+              </div>
+            </SA>
           )}
 
-          {/* ── View All Events — right aligned below cards ── */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 28 }}>
-            <Link
-              to="/events"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 9,
-                background: `linear-gradient(135deg, ${COLORS.gold}, #a07010)`,
-                color: COLORS.navy, padding: '13px 30px', borderRadius: 50,
-                fontSize: 14.5, fontWeight: 900, textDecoration: 'none',
-                boxShadow: `0 4px 18px ${COLORS.gold}55`,
-                transition: 'all .2s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = `0 8px 26px ${COLORS.gold}66`; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = `0 4px 18px ${COLORS.gold}55`; }}
-            >
+          <SA variant="right" delay="d2" style={{ display:'flex', justifyContent:'flex-end', marginTop:24 }}>
+            <Link to="/events" style={{ display:'inline-flex', alignItems:'center', gap:8, background:`linear-gradient(135deg,${G},#a07010)`, color:N, padding:'12px 28px', borderRadius:50, fontSize:14, fontWeight:900, textDecoration:'none', boxShadow:`0 4px 18px ${G}55` }}>
               🏆 View All Events
-              <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </Link>
-          </div>
-
+          </SA>
         </div>
       </section>
 
-      {/* OTHER SECTIONS (Counters, Links, Gallery) */}
-      <section style={{ background: `linear-gradient(135deg, ${COLORS.navyDark} 0%, ${COLORS.navy} 100%)`, padding: '80px 20px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0.05, pointerEvents: 'none', backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
-        <div data-aos="zoom-in" style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '40px', textAlign: 'center', position: 'relative', zIndex: 2 }}>
-          <style>{`
-            .counter-box { padding: 20px; transition: all 0.4s ease; }
-            .counter-box:hover { transform: translateY(-10px); background: rgba(255, 255, 255, 0.05); borderRadius: 15px; boxShadow: 0 0 25px rgba(244,160,35,0.1); }
-            .counter-icon { font-size: 50px; margin-bottom: 15px; display: inline-block; filter: drop-shadow(0 0 10px rgba(244,160,35,0.3)); transition: all 0.4s ease; }
-            .counter-box:hover .counter-icon { transform: scale(1.2) rotate(10deg); filter: drop-shadow(0 0 20px rgba(244,160,35,0.6)); }
-            .counter-number { font-size: 45px; font-weight: 900; color: ${COLORS.gold}; line-height: 1; margin-bottom: 10px; font-family: 'Arial Black', sans-serif; }
-            .counter-label { font-size: 14px; color: #e2e8f0; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
-          `}</style>
-          {[ { label: 'STUDENTS ENROLLED', value: '4,000+', icon: '👨‍🎓' }, { label: 'SUCCESSFUL ALUMNI', value: '45,000+', icon: '🎓' }, { label: 'EXPERT FACULTY', value: '50+', icon: '👨‍🏫' }, { label: 'YEARS OF LEGACY', value: '56', icon: '🏛️' } ].map((item, i) => (
-            <div key={i} className="counter-box"><div className="counter-icon">{item.icon}</div><div className="counter-number">{item.value}</div><div className="counter-label">{item.label}</div></div>
+      {/* ── ALUMNI WALL — PlacementsSection has its own animation system internally ── */}
+      <PlacementsSection />
+
+      {/* ── COUNTERS — each box rises up with stagger ── */}
+      <section className="hp-cnt">
+        <div className="hp-cnt-bg" />
+        <div className="hp-cnt-grid">
+          {COUNTERS.map((c, i) => (
+            <SA key={c.label} variant="rise" delay={`d${i+1}`}>
+              <div className="hp-cnt-box">
+                <div className="hp-cnt-icon">{c.icon}</div>
+                <div className="hp-cnt-num">{c.value}</div>
+                <div className="hp-cnt-lbl">{c.label}</div>
+              </div>
+            </SA>
           ))}
         </div>
       </section>
 
-      <section style={{ padding: '80px 20px', background: 'transparent' }} data-aos="fade-up">
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <SectionTitle title="Important External Links" subtitle="Quick access to official education and government portals" />
-          <style>{`
-            .links-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-top: 40px; }
-            .link-tile { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.6); border-radius: 12px; padding: 25px 15px; text-align: center; text-decoration: none; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); transform: translateZ(0); }
-            .link-tile:hover { transform: translateY(-8px) scale(1.03); border-color: ${COLORS.gold}; box-shadow: 0 12px 25px rgba(15, 35, 71, 0.1); background: #fff; }
-            .link-icon-circle { width: 60px; height: 60px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; transition: 0.3s; }
-            .link-tile:hover .link-icon-circle { background: ${COLORS.navy}; color: #fff; transform: rotate(15deg); }
-            .link-name { font-size: 13px; font-weight: 800; color: ${COLORS.navy}; letter-spacing: 0.5px; }
-          `}</style>
-          <div className="links-grid">
-            {[ { name: 'NAAC', url: 'https://naac.gov.in', icon: '🏅' }, { name: 'UGC', url: 'https://ugc.ac.in', icon: '📜' }, { name: 'INFLIBNET', url: 'https://inflibnet.ac.in', icon: '📚' }, { name: 'NDL INDIA', url: 'https://ndl.gov.in', icon: '🔬' }, { name: 'SWAYAM', url: 'https://swayam.gov.in', icon: '🌐' }, { name: 'BBMK UNIVERSITY', url: 'https://bbmku.ac.in', icon: '🏛️' } ].map((link, i) => (
-              <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="link-tile" data-aos="fade-up" data-aos-delay={i * 50}><div className="link-icon-circle">{link.icon}</div><div className="link-name">{link.name}</div></a>
+      {/* ── LINKS — alternating left/right per row ── */}
+      <section className="hp-links">
+        <div className="hp-links-inner">
+          <SA variant="up"><SectionTitle title="Important External Links" subtitle="Official education and government portals ka quick access" /></SA>
+          <div className="hp-links-grid">
+            {LINKS_DATA.map((l, i) => (
+              <SA key={l.name} variant="scale" delay={`d${(i % 4) + 1}`}>
+                <a href={l.url} target="_blank" rel="noopener noreferrer" className="hp-link-tile">
+                  <div className="hp-link-icon">{l.icon}</div>
+                  <div className="hp-link-name">{l.name}</div>
+                </a>
+              </SA>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="gallery" style={{ padding: '100px 20px', background: '#fff' }} data-aos="fade-up">
-        <div style={{ maxWidth: 1300, margin: '0 auto' }}>
-          <SectionTitle title="📸 Photo Gallery" subtitle="Memorable glimpses of academic excellence and cultural heritage" />
-          <style>{`
-            .gallery-filters { display: flex; justify-content: center; gap: 12px; margin-bottom: 50px; flex-wrap: wrap; }
-            .filter-btn { padding: 10px 24px; border-radius: 50px; border: 2px solid #edf2f7; background: #fff; color: #0f2347; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.3s ease; }
-            .filter-btn:hover { background: #0f2347; color: #fff; border-color: #0f2347; transform: translateY(-2px); }
-            .filter-btn.active { background: #0f2347; color: #fff; border-color: #0f2347; box-shadow: 0 5px 15px rgba(15,35,71,0.2); transform: translateY(-2px); }
-            .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-            .gallery-item { position: relative; border-radius: 15px; overflow: hidden; aspect-ratio: 4/3; box-shadow: 0 5px 15px rgba(0,0,0,0.05); cursor: pointer; }
-            .gallery-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
-            .gallery-item:hover .gallery-img { transform: scale(1.1); }
-            .gallery-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,35,71,0.9), transparent); opacity: 0; transition: 0.4s; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; }
-            .gallery-item:hover .gallery-overlay { opacity: 1; }
-            .gallery-overlay span, .gallery-overlay h4 { transform: translateY(10px); opacity: 0; transition: all 0.4s ease; }
-            .gallery-item:hover .gallery-overlay span { transform: translateY(0); opacity: 1; transition-delay: 0.1s; }
-            .gallery-item:hover .gallery-overlay h4 { transform: translateY(0); opacity: 1; transition-delay: 0.2s; }
-          `}</style>
-          
-          <div className="gallery-filters">
-            {['All Moments', 'Seminars', 'Cultural Fest', 'Guest Visit', 'Campus', 'Departments', 'NSS Programs'].map((tab) => (
-              <button key={tab} className={`filter-btn ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
-                {tab}
-              </button>
-            ))}
-          </div>
-
-          <div className="gallery-grid" key={activeTab}> 
-            {filteredImages.length > 0 ? filteredImages.map((img, i) => (
-              <div key={i} className="gallery-item" data-aos="zoom-in" data-aos-delay={i * 50}>
-                <img src={img.src} alt={img.title} className="gallery-img" loading="lazy" decoding="async" />
-                <div className="gallery-overlay">
-                  <span style={{ color: '#f4a023', fontSize: '10px', fontWeight: '800' }}>{img.cat}</span>
-                  <h4 style={{ color: '#fff', fontSize: '14px', fontWeight: '700', marginTop: '5px' }}>{img.title}</h4>
-                </div>
-              </div>
-            )) : (
-               <div style={{gridColumn: '1 / -1', textAlign: 'center', background: '#f8fafc', padding: '50px 20px', borderRadius: '16px', border: '1px dashed #cbd5e1'}}>
-                  <div style={{fontSize: '32px', marginBottom: '10px'}}>📸</div>
-                  <h3 style={{color: COLORS.navy, margin: '0 0 5px'}}>Gallery is Empty</h3>
-                  <p style={{color: '#64748b', margin: 0, fontSize: '14px'}}>Upload photos from the Admin Panel to see them here.</p>
-               </div>
-            )}
-          </div>
-        </div>
-      </section>
-{/* 📺 YOUTUBE AUTO-VIDEO GALLERY */}
-      <section style={{ padding: '80px 20px', background: '#fff', textAlign: 'center' }}>
-        <h2 style={{ fontSize: '36px', fontWeight: 900, color: COLORS.navy, margin: '0 0 10px' }}>🎬 Campus <span style={{ color: COLORS.gold }}>Video Highlights</span></h2>
-        <p style={{ color: '#64748b', marginBottom: '40px' }}>Automatically fetched from our official YouTube Channel</p>
-        
-        {/* NOTE FOR PANKAJ JI: 
-            Replace 'YOUR_YOUTUBE_API_KEY' with actual key.
-            Replace 'YOUR_CHANNEL_ID' with actual GNC College channel ID. */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px', maxWidth: 1200, margin: '0 auto' }}>
-           {/* Temporary Iframe examples for layout, API fetch logic goes here in production */}
-           <iframe width="100%" height="250" src="https://www.youtube.com/embed/YOUR_VIDEO_ID_1" style={{borderRadius:'16px', border:'none', boxShadow:'0 10px 30px rgba(0,0,0,0.1)'}} allowFullScreen></iframe>
-           <iframe width="100%" height="250" src="https://www.youtube.com/embed/YOUR_VIDEO_ID_2" style={{borderRadius:'16px', border:'none', boxShadow:'0 10px 30px rgba(0,0,0,0.1)'}} allowFullScreen></iframe>
-           <iframe width="100%" height="250" src="https://www.youtube.com/embed/YOUR_VIDEO_ID_3" style={{borderRadius:'16px', border:'none', boxShadow:'0 10px 30px rgba(0,0,0,0.1)'}} allowFullScreen></iframe>
-        </div>
-      </section>
-      {/* 🌟 FIX: React Portal Modal - Ye kabhi parent se affect nahi hoga aur screen par chipka rahega */}
-      {selectedPdf && createPortal(
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9999999, 
-          background: 'rgba(15,35,71,0.95)', backdropFilter: 'blur(8px)', 
-          display: 'flex', alignItems: 'center', justifyContent: 'center'
-        }}>
-          <div style={{
-            background: '#fff', width: '90%', maxWidth: '1000px', height: '85vh', 
-            borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
-          }}>
-            <div style={{
-              padding: '16px 24px', background: COLORS.navy, color: '#fff', 
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-            }}>
-              <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-                <span style={{fontSize: '20px'}}>📄</span>
-                <span style={{fontWeight: 800, letterSpacing: '0.5px'}}>Official Event Report</span>
-              </div>
-              <button 
-                onClick={() => setSelectedPdf(null)} 
-                style={{
-                  background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', 
-                  width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', 
-                  fontSize: '14px', transition: '0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}
-                onMouseOver={e => e.currentTarget.style.background = COLORS.red}
-                onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
-              >✕</button>
+      {/* ── GALLERY ── */}
+      <section id="gallery" className="hp-gal">
+        <div className="hp-gal-inner">
+          <SA variant="up"><SectionTitle title="📸 Photo Gallery" subtitle="Academic excellence aur cultural heritage ki yadgar jhalak" /></SA>
+          <SA variant="fade" delay="d1">
+            <div className="hp-gal-filters">
+              {GALLERY_TABS.map(t => (
+                <button key={t} className={`hp-filter ${tab===t?'active':''}`} onClick={() => setTab(t)}>{t}</button>
+              ))}
             </div>
-            <div style={{flex: 1, background: '#f1f5f9'}}>
-              <iframe 
-                src={selectedPdf} 
-                title="Event PDF Report"
-                width="100%" 
-                height="100%" 
-                style={{ border: 'none' }}
-                allow="autoplay"
-              />
+          </SA>
+          <div className="hp-gal-grid">
+            {filtered.length > 0
+              ? filtered.map((img, i) => <GalItem key={i} img={img} index={i} />)
+              : (
+                <SA variant="scale" className="hp-gal-empty">
+                  <div style={{ fontSize:32, marginBottom:10 }}>📸</div>
+                  <h3 style={{ color:N, margin:'0 0 6px' }}>Gallery Empty</h3>
+                  <p style={{ color:'#64748b', fontSize:13 }}>Admin Panel → Gallery se photos upload karein</p>
+                </SA>
+              )
+            }
+          </div>
+        </div>
+      </section>
+
+      {/* ── YOUTUBE ── */}
+      <YouTubeSection />
+
+      {/* ── PDF MODAL ── */}
+      {pdf && createPortal(
+        <div className="hp-modal-ov" onClick={() => setPdf(null)}>
+          <div className="hp-modal-box" onClick={e => e.stopPropagation()}>
+            <div className="hp-modal-head">
+              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <span style={{ fontSize:20 }}>📄</span> Official Event Report
+              </div>
+              <button className="hp-modal-close" onClick={() => setPdf(null)}>✕</button>
+            </div>
+            <div style={{ flex:1, background:'#f1f5f9' }}>
+              <iframe src={pdf} title="Event PDF" width="100%" height="100%" style={{ border:'none' }} allow="autoplay" />
             </div>
           </div>
         </div>,
         document.body
       )}
-
     </div>
-  )
-}
+  );
+};
 
 export default HomePage;
