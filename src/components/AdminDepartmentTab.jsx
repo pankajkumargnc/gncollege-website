@@ -1,42 +1,38 @@
 // ═══════════════════════════════════════════════════════════════════════
-//  AdminDepartmentTab.jsx
-//  AdminPanel.jsx ke andar DEPARTMENTS tab ka complete code
+//  AdminDepartmentTab.jsx  v2 — 100% FREE (No Firebase Storage)
+//  Images  → ImgBB (free lifetime hosting)
+//  PDFs    → Google Drive public link / local public/ folder
+//  Photos  → PC se upload (ImgBB) ya public/images/ ya paste URL
+//
+//  INTEGRATION: (same as before)
+//  1. src/components/AdminDepartmentTab.jsx
+//  2. AdminPanel.jsx mein: import AdminDepartmentTab from './AdminDepartmentTab'
+//  3. TABS array:  { id: 'departments', icon: '🏛️', label: 'Departments', section: '' }
+//  4. Render:      {tab === 'departments' && <Suspense ...><AdminDepartmentTab /></Suspense>}
 // ═══════════════════════════════════════════════════════════════════════
 
 import { useState, useEffect, useRef } from 'react';
 import { doc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
-import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../firebase';
+import { db } from '../firebase';           // ✅ No storage needed
+import MediaPicker from './MediaPicker';    // ✅ Free upload — ImgBB + local + URL
 
-/* ─── colour constants ─────────────────────────────────────────────────── */
+/* ─── colours ──────────────────────────────────────────────────────────── */
 const NAVY = '#0f2347';
 const C    = '#0ea5e9';
-const IMGBB_API_KEY = '6391ea11ec7aa4e6f3477f373cdd3592'; // Auto-upload API
+const GOLD = '#f4a023';
 
-/* ─── all departments ──────────────────────────────────────────────────── */
+/* ─── departments ──────────────────────────────────────────────────────── */
 const DEPTS = [
-  { slug: 'bca',          label: 'BCA',          icon: '💻', color: '#0ea5e9' },
-  { slug: 'bba',          label: 'BBA',          icon: '📊', color: '#f59e0b' },
-  { slug: 'commerce',     label: 'Commerce',     icon: '🏦', color: '#10b981' },
-  { slug: 'humanities',   label: 'Humanities',   icon: '📚', color: '#8b5cf6' },
-  { slug: 'social-science', label: 'Social Science', icon: '🌍', color: '#ef4444' },
+  { slug: 'bca',           label: 'BCA',           icon: '💻', color: '#0ea5e9' },
+  { slug: 'bba',           label: 'BBA',           icon: '📊', color: '#f59e0b' },
+  { slug: 'commerce',      label: 'Commerce',      icon: '🏦', color: '#10b981' },
+  { slug: 'humanities',    label: 'Humanities',    icon: '📚', color: '#8b5cf6' },
+  { slug: 'social-science',label: 'Social Science',icon: '🌍', color: '#ef4444' },
 ];
 
 /* ─── helpers ───────────────────────────────────────────────────────────── */
 const uuid = () => Math.random().toString(36).slice(2, 10);
-const btn  = (label, onClick, col = NAVY, outline = false) => (
-  <button onClick={onClick} style={{
-    padding: '9px 20px', border: outline ? `1.5px solid ${col}` : 'none',
-    background: outline ? 'transparent' : col, color: outline ? col : '#fff',
-    borderRadius: 9, cursor: 'pointer', fontWeight: 700, fontSize: 13,
-    fontFamily: 'inherit', transition: 'opacity .15s',
-  }}
-    onMouseEnter={e => e.currentTarget.style.opacity = '.82'}
-    onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-  >{label}</button>
-);
 
-/* ─── input styles ─────────────────────────────────────────────────────── */
 const INP = {
   width: '100%', padding: '10px 14px', border: '1.5px solid #e2e8f0',
   borderRadius: 9, fontSize: 13.5, fontFamily: 'inherit', color: '#334155',
@@ -44,7 +40,7 @@ const INP = {
 };
 const TEA = { ...INP, resize: 'vertical', minHeight: 80 };
 
-const Input  = ({ label, ...p }) => (
+const Input = ({ label, ...p }) => (
   <div style={{ marginBottom: 16 }}>
     {label && <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 6, letterSpacing: '.3px' }}>{label}</div>}
     <input style={INP} {...p} />
@@ -68,76 +64,102 @@ const Card = ({ children, style = {} }) => (
 );
 
 /* ═══════════════════════════════════════════════════════════════════════
-   PDF UPLOAD component
+   INLINE DIALOG — window.prompt ka safe replacement
 ═══════════════════════════════════════════════════════════════════════ */
-const PdfUploader = ({ slug, reports = [], onUpdate }) => {
-  const [title,    setTitle]   = useState('');
-  const [year,     setYear]    = useState(new Date().getFullYear().toString());
-  const [file,     setFile]    = useState(null);
-  const [prog,     setProg]    = useState(0);
-  const [uploading, setUpl]    = useState(false);
-  const fileRef = useRef();
+function InlinePrompt({ prompt, placeholder = '', onConfirm, onCancel }) {
+  const [val, setVal] = useState('');
+  const ref = useRef();
+  useEffect(() => { ref.current?.focus(); }, []);
+  return (
+    <div style={{ background: '#fffbeb', border: `1.5px solid ${GOLD}`, borderRadius: 12, padding: '14px 16px', marginBottom: 12 }}>
+      <div style={{ fontSize: 12.5, fontWeight: 700, color: NAVY, marginBottom: 8 }}>{prompt}</div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <input
+          ref={ref}
+          style={{ ...INP, flex: 1, padding: '8px 12px', fontSize: 13 }}
+          placeholder={placeholder}
+          value={val}
+          onChange={e => setVal(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && val.trim()) onConfirm(val.trim()); if (e.key === 'Escape') onCancel(); }}
+        />
+        <button onClick={() => val.trim() && onConfirm(val.trim())}
+          style={{ background: NAVY, color: '#fff', border: 'none', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontWeight: 700, fontSize: 12, fontFamily: 'inherit' }}>
+          ✓ Add
+        </button>
+        <button onClick={onCancel}
+          style={{ background: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: 8, padding: '8px 12px', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>
+          ✕
+        </button>
+      </div>
+    </div>
+  );
+}
 
-  const upload = async () => {
-    if (!file && !title) return;
-    setUpl(true);
-    try {
-      if (file) {
-        const path = `departments/${slug}/reports/${Date.now()}_${file.name}`;
-        const sRef = storageRef(storage, path);
-        const task = uploadBytesResumable(sRef, file);
-        task.on('state_changed', s => setProg(Math.round(s.bytesTransferred / s.totalBytes * 100)));
-        await task;
-        const url = await getDownloadURL(sRef);
-        onUpdate([...reports, { id: uuid(), title, year, pdfUrl: url }]);
-      }
-      setTitle(''); setYear(new Date().getFullYear().toString()); setFile(null); setProg(0);
-      if (fileRef.current) fileRef.current.value = '';
-    } catch (e) { alert('Upload failed: ' + e.message); }
-    setUpl(false);
-  };
+/* ═══════════════════════════════════════════════════════════════════════
+   PDF REPORT MANAGER — 100% Free (No Firebase Storage)
+   Uses MediaPicker — paste Google Drive link ya public/ folder path
+═══════════════════════════════════════════════════════════════════════ */
+const PdfManager = ({ reports = [], onUpdate, color = C }) => {
+  const [adding,   setAdding]   = useState(false);
+  const [title,    setTitle]    = useState('');
+  const [year,     setYear]     = useState(new Date().getFullYear().toString());
+  const [pdfUrl,   setPdfUrl]   = useState('');
 
-  const addUrl = (url) => {
-    if (!title || !url) return;
-    onUpdate([...reports, { id: uuid(), title, year, pdfUrl: url }]);
-    setTitle(''); setYear(new Date().getFullYear().toString());
+  const addReport = () => {
+    if (!title.trim() || !pdfUrl.trim()) return;
+    onUpdate([...reports, { id: uuid(), title: title.trim(), year, pdfUrl: pdfUrl.trim() }]);
+    setTitle(''); setYear(new Date().getFullYear().toString()); setPdfUrl(''); setAdding(false);
   };
 
   return (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-        <input style={INP} placeholder="Report title (e.g. Annual Activity Report 2024)" value={title} onChange={e => setTitle(e.target.value)} />
-        <input style={{ ...INP, width: 90 }} placeholder="Year" value={year} onChange={e => setYear(e.target.value)} />
-        <input style={INP} type="file" accept=".pdf" ref={fileRef} onChange={e => setFile(e.target.files[0])} />
-      </div>
-      {uploading && (
-        <div style={{ background: '#f0f9ff', borderRadius: 8, padding: '8px 12px', marginBottom: 10, fontSize: 13 }}>
-          Uploading... {prog}%
-          <div style={{ height: 4, borderRadius: 4, background: '#e0f2fe', marginTop: 6 }}>
-            <div style={{ height: '100%', borderRadius: 4, background: C, width: `${prog}%`, transition: 'width .3s' }} />
-          </div>
-        </div>
-      )}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-        {btn('📤 Upload PDF', upload, C)}
-        {btn('+ Add via URL', () => {
-          const url = window.prompt('PDF URL paste karo (Google Drive / ImgBB link):');
-          if (url) addUrl(url.trim());
-        }, '#64748b', true)}
-      </div>
-
+      {/* Existing reports */}
       {reports.map((rep, i) => (
         <div key={rep.id || i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 16px', background: '#f8fafc', borderRadius: 10, marginBottom: 8, border: '1px solid #f1f5f9' }}>
           <span style={{ fontSize: 20 }}>📄</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700, fontSize: 13, color: NAVY }}>{rep.title}</div>
-            <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>{rep.year}</div>
+            <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>{rep.year} — <a href={rep.pdfUrl} target="_blank" rel="noreferrer" style={{ color, textDecoration: 'none' }}>Preview ↗</a></div>
           </div>
-          <a href={rep.pdfUrl} target="_blank" rel="noreferrer" style={{ color: C, fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>Preview</a>
           <button onClick={() => onUpdate(reports.filter((_, j) => j !== i))}
-            style={{ background: '#fee2e2', border: 'none', color: '#ef4444', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', fontSize: 12, fontWeight: 800 }}>✕</button>
+            style={{ background: '#fee2e2', border: 'none', color: '#ef4444', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', fontSize: 12, fontWeight: 800 }}>✕
+          </button>
         </div>
       ))}
+
+      {/* Add form */}
+      {adding ? (
+        <div style={{ background: '#f8fafc', border: `1.5px solid ${color}33`, borderRadius: 12, padding: '16px 16px 12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 90px', gap: 10, marginBottom: 12 }}>
+            <Input label="Report Title" value={title} onChange={e => setTitle(e.target.value)} placeholder="Annual Activity Report 2024" />
+            <Input label="Year" value={year} onChange={e => setYear(e.target.value)} placeholder="2024" />
+          </div>
+          <MediaPicker
+            label="PDF File (Google Drive link ya public/pdfs/ path)"
+            value={pdfUrl}
+            onChange={setPdfUrl}
+            type="pdf"
+            compact={true}
+          />
+          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+            <button onClick={addReport} disabled={!title.trim() || !pdfUrl.trim()}
+              style={{ background: !title.trim() || !pdfUrl.trim() ? '#94a3b8' : color, color: '#fff', border: 'none', borderRadius: 9, padding: '9px 20px', cursor: !title.trim() || !pdfUrl.trim() ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit' }}>
+              ✓ Add Report
+            </button>
+            <button onClick={() => { setAdding(false); setTitle(''); setPdfUrl(''); }}
+              style={{ background: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: 9, padding: '9px 16px', cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit' }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button onClick={() => setAdding(true)}
+          style={{ width: '100%', padding: '9px 16px', border: '1.5px dashed #cbd5e1', background: 'transparent', color: '#64748b', borderRadius: 9, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 600, transition: 'all .16s' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = color; e.currentTarget.style.color = color; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.color = '#64748b'; }}>
+          + Add Report / PDF
+        </button>
+      )}
     </div>
   );
 };
@@ -151,12 +173,12 @@ export default function AdminDepartmentTab() {
   const [saving,     setSaving]     = useState(false);
   const [saved,      setSaved]      = useState(false);
   const [loading,    setLoading]    = useState(true);
+  const savedTimerRef               = useRef(null);
 
-  // Auto-upload states for HOD Photo
-  const [hodUp, setHodUp] = useState(false);
-  const [hodProg, setHodProg] = useState(0);
+  // cleanup
+  useEffect(() => () => { if (savedTimerRef.current) clearTimeout(savedTimerRef.current); }, []);
 
-  /* Load from Firestore */
+  // Load from Firestore
   useEffect(() => {
     setLoading(true);
     const unsub = onSnapshot(doc(db, 'departments', activeDept), snap => {
@@ -166,36 +188,37 @@ export default function AdminDepartmentTab() {
     return () => unsub();
   }, [activeDept]);
 
-  const set = (key, val) => setData(p => ({ ...p, [key]: val }));
-  const setHod = (k, v) => setData(p => ({ ...p, hod: { ...(p.hod || {}), [k]: v } }));
+  const set    = (key, val) => setData(p => ({ ...p, [key]: val }));
+  const setHod = (k, v)    => setData(p => ({ ...p, hod: { ...(p.hod || {}), [k]: v } }));
 
   const save = async () => {
     setSaving(true);
     try {
       await setDoc(doc(db, 'departments', activeDept), { ...data, updatedAt: serverTimestamp() }, { merge: true });
       setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+      savedTimerRef.current = setTimeout(() => setSaved(false), 2500);
     } catch (e) { alert('Save failed: ' + e.message); }
     setSaving(false);
   };
 
-  const addAch  = () => set('achievements',  [...(data.achievements  || []), '']);
-  const addFee  = () => set('feeStructure',  [...(data.feeStructure  || []), { category: '', amount: '', note: '' }]);
-  const addHl   = () => set('highlights',    [...(data.highlights    || []), { icon: '⭐', title: '', desc: '' }]);
-  const addFac  = () => set('facilities',    [...(data.facilities    || []), { icon: '🔬', name: '', desc: '' }]);
-  const addStat = () => set('stats',         [...(data.stats         || []), { icon: '', value: '', label: '', sub: '' }]);
+  // List helpers
+  const addAch  = () => set('achievements', [...(data.achievements || []), '']);
+  const addFee  = () => set('feeStructure', [...(data.feeStructure || []), { category: '', amount: '', note: '' }]);
+  const addHl   = () => set('highlights',   [...(data.highlights   || []), { icon: '⭐', title: '', desc: '' }]);
+  const addFac  = () => set('facilities',   [...(data.facilities   || []), { icon: '🔬', name: '', desc: '' }]);
+  const addStat = () => set('stats',        [...(data.stats        || []), { icon: '', value: '', label: '', sub: '' }]);
 
-  const addSem  = () => {
-    const key = window.prompt('Semester name (e.g. Semester I):');
-    if (!key) return;
-    set('curriculum', { ...(data.curriculum || {}), [key]: [] });
-  };
-  const addSubj = (sem) => {
-    const subj = window.prompt(`Subject name for ${sem}:`);
-    if (!subj) return;
+  // Inline dialog state for Sem + Subject
+  const [semPrompt,  setSemPrompt]  = useState(false);
+  const [subjPrompt, setSubjPrompt] = useState(null); // sem key or null
+
+  const addSem  = (name) => { set('curriculum', { ...(data.curriculum || {}), [name]: [] }); setSemPrompt(false); };
+  const addSubj = (sem, subj) => {
     const cur = { ...(data.curriculum || {}) };
     cur[sem] = [...(cur[sem] || []), subj];
     set('curriculum', cur);
+    setSubjPrompt(null);
   };
   const delSubj = (sem, i) => {
     const cur = { ...(data.curriculum || {}) };
@@ -208,39 +231,8 @@ export default function AdminDepartmentTab() {
     set('curriculum', cur);
   };
 
-  // 🔥 FINAL FIX: User ki original API key ke sath auto-upload
-  const handleHodPhotoUpload = async (file) => {
-    setHodUp(true); 
-    setHodProg(30); // Uploading shuru
-    
-    // 👇 Aapki di hui original API Key yahan set ho gayi hai
-    const MY_IMGBB_KEY = 'ddf5f47dac2ed473aab5b70d08ae5a7a'; 
-
-    const formData = new FormData(); 
-    formData.append('image', file);
-    
-    try {
-      setHodProg(60);
-      const response = await fetch(`https://api.imgbb.com/1/upload?key=${MY_IMGBB_KEY}`, {
-        method: 'POST',
-        body: formData
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setHodProg(100);
-        setHod('imageUrl', data.data.url); // Photo URL form mein set ho jayega
-      } else {
-        alert('Upload Failed Reason: ' + data.error.message);
-      }
-    } catch (error) {
-      alert('Network Error! Kripya apna internet connection check karein.');
-    } finally {
-      setTimeout(() => setHodUp(false), 1000);
-    }
-  };
   const deptInfo = DEPTS.find(d => d.slug === activeDept);
+  const C_dept   = deptInfo?.color || C;
 
   return (
     <div style={{ fontFamily: "'DM Sans','Plus Jakarta Sans',sans-serif", maxWidth: 1100 }}>
@@ -258,10 +250,15 @@ export default function AdminDepartmentTab() {
       {/* Page header */}
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontWeight: 900, fontSize: 22, color: NAVY, margin: '0 0 4px' }}>🏛️ Department Management</h2>
-        <p style={{ color: '#94a3b8', fontSize: 13, margin: 0 }}>Department ka sara data yahan se manage karo — website pe automatically update hoga</p>
+        <p style={{ color: '#94a3b8', fontSize: 13, margin: 0 }}>
+          Saara department data yahan se manage karo — website pe automatically update hoga
+          <span style={{ marginLeft: 10, background: '#d1fae5', color: '#065f46', padding: '2px 9px', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
+            100% Free — No Storage Cost
+          </span>
+        </p>
       </div>
 
-      {/* Dept selector tabs */}
+      {/* Dept selector */}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 28 }}>
         {DEPTS.map(d => (
           <button key={d.slug} className={`adt-dtab${activeDept === d.slug ? ' on' : ''}`}
@@ -277,7 +274,7 @@ export default function AdminDepartmentTab() {
         <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>Loading {deptInfo?.label} data...</div>
       ) : (
         <>
-          {/* ─── BASIC INFO ─────────────────────────────────────────── */}
+          {/* ─── BASIC INFO ────────────────────────────────────────────── */}
           <Card>
             <SubHead txt={`${deptInfo?.icon} Basic Information — ${deptInfo?.label}`} />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 20px' }}>
@@ -292,7 +289,7 @@ export default function AdminDepartmentTab() {
             </div>
           </Card>
 
-          {/* ─── HOD INFORMATION ─────────────────────────────────────── */}
+          {/* ─── HOD INFORMATION ────────────────────────────────────────── */}
           <Card>
             <SubHead txt="👨‍🏫 Head of Department (HOD) Info" />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 20px' }}>
@@ -303,42 +300,19 @@ export default function AdminDepartmentTab() {
               <Input label="Phone" value={data.hod?.phone || ''} onChange={e => setHod('phone', e.target.value)} placeholder="+91 XXXXX XXXXX" />
             </div>
 
-            {/* 🔥 NEW: Smart HOD Photo Input + Auto Upload */}
-            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 16 }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 6, letterSpacing: '.3px' }}>
-                  HOD Photo URL (Google Drive links auto-convert)
-                </div>
-                <input style={INP} value={data.hod?.imageUrl || ''} onChange={e => {
-                  let val = e.target.value;
-                  // Magic Regex: Automatically converts Google Drive share link to image link
-                  const match = val.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
-                  if (match && match[1]) {
-                    val = `https://drive.google.com/uc?export=view&id=${match[1]}`;
-                  }
-                  setHod('imageUrl', val);
-                }} placeholder="Paste Drive link or upload from PC 👉" />
-              </div>
-              
-              <div style={{ flexShrink: 0 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#fff', marginBottom: 6 }}>.</div>
-                <label className="adt-dtab" style={{ display: 'inline-flex', padding: '10px 16px', background: '#f8fafc', margin: 0, textAlign: 'center', height: '40px', alignItems: 'center' }}>
-                  {hodUp ? `⏳ ${hodProg}%` : '📁 Upload Photo'}
-                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => e.target.files[0] && handleHodPhotoUpload(e.target.files[0])} />
-                </label>
-              </div>
-            </div>
-            
-            {data.hod?.imageUrl && (
-              <div style={{ marginBottom: 16 }}>
-                <img src={data.hod.imageUrl} alt="HOD Preview" style={{ width: 80, height: 80, borderRadius: 12, objectFit: 'cover', border: '2px solid #e2e8f0' }} />
-              </div>
-            )}
+            {/* ✅ HOD Photo — MediaPicker (ImgBB upload / public/ / URL) */}
+            <MediaPicker
+              label="HOD Photo"
+              value={data.hod?.imageUrl || ''}
+              onChange={url => setHod('imageUrl', url)}
+              type="image"
+              compact={true}
+            />
 
             <Textarea label="HOD Message (shown on page as quote)" rows={4} value={data.hod?.message || ''} onChange={e => setHod('message', e.target.value)} placeholder="Welcome message from HOD..." />
           </Card>
 
-          {/* ─── STATS / KEY NUMBERS ──────────────────────────────────── */}
+          {/* ─── STATS ──────────────────────────────────────────────────── */}
           <Card>
             <SubHead txt="📊 Key Stats (Hero card pe dikhte hain)" />
             {(data.stats || []).map((s, i) => (
@@ -353,7 +327,7 @@ export default function AdminDepartmentTab() {
             <button className="adt-add" onClick={addStat}>+ Add Stat</button>
           </Card>
 
-          {/* ─── HIGHLIGHTS ───────────────────────────────────────────── */}
+          {/* ─── HIGHLIGHTS ─────────────────────────────────────────────── */}
           <Card>
             <SubHead txt="⭐ Programme Highlights (Why Choose Us)" />
             {(data.highlights || []).map((h, i) => (
@@ -367,7 +341,7 @@ export default function AdminDepartmentTab() {
             <button className="adt-add" onClick={addHl}>+ Add Highlight</button>
           </Card>
 
-          {/* ─── FACILITIES ───────────────────────────────────────────── */}
+          {/* ─── FACILITIES ─────────────────────────────────────────────── */}
           <Card>
             <SubHead txt="🔬 Labs & Facilities" />
             {(data.facilities || []).map((f, i) => (
@@ -381,18 +355,42 @@ export default function AdminDepartmentTab() {
             <button className="adt-add" onClick={addFac}>+ Add Facility</button>
           </Card>
 
-          {/* ─── CURRICULUM ───────────────────────────────────────────── */}
+          {/* ─── CURRICULUM ─────────────────────────────────────────────── */}
           <Card>
             <SubHead txt="📖 Curriculum (Semester-wise)" />
+            {semPrompt && (
+              <InlinePrompt
+                prompt="Semester ka naam likhein:"
+                placeholder="Semester I"
+                onConfirm={addSem}
+                onCancel={() => setSemPrompt(false)}
+              />
+            )}
             {Object.entries(data.curriculum || {}).map(([sem, subjects]) => (
               <div key={sem} style={{ marginBottom: 20, background: '#f8fafc', borderRadius: 12, padding: '14px 16px', border: '1px solid #f1f5f9' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                   <div style={{ fontWeight: 800, color: NAVY, fontSize: 13.5 }}>{sem}</div>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => addSubj(sem)} style={{ background: C, border: 'none', color: '#fff', padding: '4px 12px', borderRadius: 7, cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>+ Subject</button>
-                    <button onClick={() => delSem(sem)} style={{ background: '#fee2e2', border: 'none', color: '#ef4444', padding: '4px 10px', borderRadius: 7, cursor: 'pointer', fontSize: 12 }}>Delete Sem</button>
+                    <button onClick={() => setSubjPrompt(sem)}
+                      style={{ background: C_dept, border: 'none', color: '#fff', padding: '4px 12px', borderRadius: 7, cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>
+                      + Subject
+                    </button>
+                    <button onClick={() => delSem(sem)}
+                      style={{ background: '#fee2e2', border: 'none', color: '#ef4444', padding: '4px 10px', borderRadius: 7, cursor: 'pointer', fontSize: 12 }}>
+                      Delete Sem
+                    </button>
                   </div>
                 </div>
+                {subjPrompt === sem && (
+                  <div style={{ marginBottom: 10 }}>
+                    <InlinePrompt
+                      prompt={`${sem} mein subject add karein:`}
+                      placeholder="e.g. Data Structures"
+                      onConfirm={subj => addSubj(sem, subj)}
+                      onCancel={() => setSubjPrompt(null)}
+                    />
+                  </div>
+                )}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 8 }}>
                   {(subjects || []).map((s, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -408,10 +406,10 @@ export default function AdminDepartmentTab() {
                 </div>
               </div>
             ))}
-            <button className="adt-add" onClick={addSem}>+ Add Semester</button>
+            <button className="adt-add" onClick={() => setSemPrompt(true)}>+ Add Semester</button>
           </Card>
 
-          {/* ─── FEE STRUCTURE ────────────────────────────────────────── */}
+          {/* ─── FEE STRUCTURE ──────────────────────────────────────────── */}
           <Card>
             <SubHead txt="💰 Fee Structure" />
             {(data.feeStructure || []).map((f, i) => (
@@ -425,20 +423,20 @@ export default function AdminDepartmentTab() {
             <button className="adt-add" onClick={addFee}>+ Add Fee Row</button>
           </Card>
 
-          {/* ─── PROGRAMME / ACTIVITY REPORTS ─────────────────────────── */}
+          {/* ─── PROGRAMME / ACTIVITY REPORTS (PDF) ────────────────────── */}
           <Card>
             <SubHead txt="📋 Programme & Activity Reports (PDF)" />
-            <p style={{ fontSize: 12.5, color: '#94a3b8', margin: '0 0 16px' }}>
-              PDF file upload karo (Firebase Storage) ya Google Drive link paste karo
-            </p>
-            <PdfUploader
-              slug={activeDept}
+            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 9, padding: '10px 14px', marginBottom: 16, fontSize: 12.5, color: '#166534' }}>
+              ✅ <strong>100% FREE</strong> — Google Drive ka public link paste karo ya <code style={{ background: '#dcfce7', padding: '1px 5px', borderRadius: 3 }}>public/pdfs/</code> mein PDF rakh ke path use karo. Firebase Storage ki zaroorat nahi!
+            </div>
+            <PdfManager
               reports={data.programReports || []}
               onUpdate={v => set('programReports', v)}
+              color={C_dept}
             />
           </Card>
 
-          {/* ─── ACHIEVEMENTS ─────────────────────────────────────────── */}
+          {/* ─── ACHIEVEMENTS ───────────────────────────────────────────── */}
           <Card>
             <SubHead txt="🏆 Achievements & Milestones" />
             {(data.achievements || []).map((a, i) => (
@@ -453,24 +451,21 @@ export default function AdminDepartmentTab() {
             <button className="adt-add" onClick={addAch}>+ Add Achievement</button>
           </Card>
 
-          {/* ─── SAVE BUTTON ──────────────────────────────────────────── */}
-          <div style={{ position: 'sticky', bottom: 0, background: '#f8fafc', padding: '16px 0', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 16 }}>
-            <button
-              onClick={save}
-              disabled={saving}
+          {/* ─── SAVE BUTTON ────────────────────────────────────────────── */}
+          <div style={{ position: 'sticky', bottom: 0, background: '#f8fafc', padding: '16px 0', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 16, zIndex: 10 }}>
+            <button onClick={save} disabled={saving}
               style={{
                 background: saving ? '#94a3b8' : `linear-gradient(135deg,${NAVY},#1a3a7c)`,
                 color: '#fff', border: 'none', padding: '12px 32px',
                 borderRadius: 11, cursor: saving ? 'not-allowed' : 'pointer',
                 fontWeight: 800, fontSize: 14, fontFamily: 'inherit',
                 boxShadow: saving ? 'none' : '0 4px 16px rgba(15,35,71,.25)',
-              }}
-            >
+              }}>
               {saving ? '⏳ Saving...' : `💾 Save ${deptInfo?.label} Data`}
             </button>
             {saved && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#d1fae5', color: '#065f46', padding: '9px 18px', borderRadius: 10, fontSize: 13, fontWeight: 700 }}>
-                ✅ Saved successfully! Page ab update ho gaya hoga.
+                ✅ Saved! Website pe live ho gaya.
               </div>
             )}
           </div>

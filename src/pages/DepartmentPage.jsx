@@ -1,13 +1,23 @@
 // src/pages/DepartmentPage.jsx
+// ══════════════════════════════════════════════════════════════════
+//  UNIVERSAL DEPARTMENT TEMPLATE  —  100 % Firebase-driven
+//  Ek hi file → sab 5 departments handle karti hai
+//  Admin Panel se data change karo → page auto-update hoga
+//
+//  Firebase path:  departments/{slug}
+//  Faculty path:   faculties  (where dept == slug-label)
+// ══════════════════════════════════════════════════════════════════
+
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { doc, collection, query, where, onSnapshot } from 'firebase/firestore';
+import {
+  doc, collection, query, where, onSnapshot
+} from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 
 /* ── brand colours ─────────────────────────────────────────────── */
 const NAVY = COLORS?.navy || '#0f2347';
-const GOLD = COLORS?.gold || '#f4a023';
 const FALLBACK_IMG = '/images/college_photo.jpg';
 
 /* ── per-department static config (icon / palette / faculty keys) ─ */
@@ -123,6 +133,7 @@ const EmptyBox = ({ icon, msg, sub, color }) => (
   </div>
 );
 
+/* ── Spinner ─────────────────────────────────────────────────────── */
 const Spin = ({ color = NAVY }) => (
   <>
     <style>{`@keyframes dp-spin{to{transform:rotate(360deg)}}`}</style>
@@ -150,6 +161,7 @@ const FacCard = ({ fac, color }) => {
       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = `0 14px 32px ${color}20`; }}
       onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = isHod ? `0 4px 20px ${color}1a` : '0 2px 12px rgba(15,35,71,.06)'; }}
     >
+      {/* Photo */}
       <div style={{ position: 'relative', paddingTop: '110%', background: `linear-gradient(160deg,${color}10,${color}05)`, overflow: 'hidden' }}>
         <img
           src={err || !fac.imageUrl ? FALLBACK_IMG : fac.imageUrl}
@@ -167,6 +179,7 @@ const FacCard = ({ fac, color }) => {
           }}>HOD</div>
         )}
       </div>
+      {/* Info */}
       <div style={{ padding: '14px 16px 18px' }}>
         <div style={{ fontWeight: 800, fontSize: 14, color: NAVY, marginBottom: 3, lineHeight: 1.3 }}>
           {fac.name || '—'}
@@ -177,10 +190,23 @@ const FacCard = ({ fac, color }) => {
             🎓 {fac.qual}
           </div>
         )}
+        {fac.specialization && (
+          <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4, marginBottom: 4 }}>
+            ✦ {fac.specialization}
+          </div>
+        )}
+        {fac.email && (
+          <a href={`mailto:${fac.email}`}
+            style={{ display: 'block', fontSize: 10.5, color: '#94a3b8', marginTop: 7, textDecoration: 'none', wordBreak: 'break-all', transition: 'color .15s' }}
+            onMouseEnter={e => e.currentTarget.style.color = color}
+            onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}
+          >✉ {fac.email}</a>
+        )}
       </div>
     </div>
   );
 };
+
 
 /* ══════════════════════════════════════════════════════════════════
    FACULTY SECTION  (live Firestore, tabs for multi-dept)
@@ -190,16 +216,24 @@ const FacultySection = ({ keys = [], tabs, color }) => {
   const [counts, setCounts] = useState({});
   const [active, setActive] = useState(tabs?.[0]?.key || keys[0] || '');
   const [loading, setLoading] = useState(true);
+  // ✅ B5 FIX: Set tracks which keys resolved — spinner only hides when ALL done
+  const resolvedRef = useRef(new Set());
 
   useEffect(() => {
     if (!keys.length) { setLoading(false); return; }
     setLoading(true);
+    resolvedRef.current = new Set();
     const localMap = {};
     const unsubs = [];
 
+    const markResolved = (k) => {
+      resolvedRef.current.add(k);
+      if (resolvedRef.current.size >= keys.length) setLoading(false);
+    };
+
     keys.forEach(k => {
       const sort = arr =>
-        arr.sort((a, b) => {
+        [...arr].sort((a, b) => {
           if (a.desig?.toLowerCase().includes('head')) return -1;
           if (b.desig?.toLowerCase().includes('head')) return 1;
           return (a.name || '').localeCompare(b.name || '');
@@ -214,8 +248,9 @@ const FacultySection = ({ keys = [], tabs, color }) => {
         localMap[k] = sort(snap.docs.map(d => ({ id: d.id, ...d.data() })));
         setMap({ ...localMap });
         setCounts(p => ({ ...p, [k]: localMap[k].length }));
-        setLoading(false);
+        markResolved(k);
       }, () => {
+        // Fallback: no compound index, filter client-side
         const q2 = query(collection(db, 'faculties'), where('dept', '==', k));
         const u2 = onSnapshot(q2, snap => {
           localMap[k] = sort(
@@ -224,21 +259,23 @@ const FacultySection = ({ keys = [], tabs, color }) => {
           );
           setMap({ ...localMap });
           setCounts(p => ({ ...p, [k]: localMap[k].length }));
-          setLoading(false);
-        });
+          markResolved(k);
+        }, () => markResolved(k)); // Even total failure → unblock spinner
         unsubs.push(u2);
       });
       unsubs.push(u);
     });
 
     return () => unsubs.forEach(u => u());
-  }, [keys.join(',')]);
+  }, [keys.join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
+
 
   const total = Object.values(counts).reduce((s, v) => s + v, 0);
   const list  = map[active] || [];
 
   return (
     <div>
+      {/* Header */}
       <Fade>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 8 }}>
           <div>
@@ -256,8 +293,10 @@ const FacultySection = ({ keys = [], tabs, color }) => {
         </div>
       </Fade>
 
+      {/* Accent bar */}
       <div style={{ height: 3, borderRadius: 99, background: `linear-gradient(90deg,${color},transparent)`, margin: '16px 0 28px' }} />
 
+      {/* Tabs (Humanities / Social Science) */}
       {tabs && tabs.length > 1 && (
         <Fade delay={0.06}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 0, marginBottom: 32, borderBottom: '2px solid #f1f5f9' }}>
@@ -294,6 +333,7 @@ const FacultySection = ({ keys = [], tabs, color }) => {
         </Fade>
       )}
 
+      {/* Cards */}
       {loading ? <Spin color={color} /> : list.length === 0 ? (
         <EmptyBox icon="👨‍🏫" msg="Faculty data abhi available nahi"
           sub={`Admin Panel → Faculty Directory → Dept: ${active} mein add karein`}
@@ -314,7 +354,15 @@ const FacultySection = ({ keys = [], tabs, color }) => {
 /* ══════════════════════════════════════════════════════════════════
    PDF VIEWER MODAL
 ══════════════════════════════════════════════════════════════════ */
-const PdfModal = ({ pdf, onClose }) => (
+const PdfModal = ({ pdf, onClose }) => {
+  // ✅ B12 FIX: Escape key se modal band ho
+  useEffect(() => {
+    const handler = e => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  return (
   <div
     onClick={onClose}
     style={{
@@ -352,10 +400,11 @@ const PdfModal = ({ pdf, onClose }) => (
       <iframe src={pdf.pdfUrl} title={pdf.title} style={{ flex: 1, border: 'none', width: '100%' }} />
     </div>
   </div>
-);
+  );
+};
 
 /* ══════════════════════════════════════════════════════════════════
-   SINGLE DEPARTMENT PAGE
+   SINGLE DEPARTMENT PAGE  (universal template)
 ══════════════════════════════════════════════════════════════════ */
 function SingleDeptPage({ slug }) {
   const meta            = DEPT_META[slug] || { short: slug.toUpperCase(), icon: '🏛️', color: NAVY, heroBg: 'linear-gradient(145deg,#f8fafc,#f1f5f9)', facultyKeys: [slug] };
@@ -365,7 +414,9 @@ function SingleDeptPage({ slug }) {
   const [semTab, setSem] = useState(null);
   const [pdfOpen, setPdf] = useState(null);
 
+  /* Firestore listener */
   useEffect(() => {
+    setSem(null); // ✅ B10 FIX: Reset semester tab when switching departments
     const unsub = onSnapshot(doc(db, 'departments', slug), snap => {
       const d = snap.exists() ? snap.data() : {};
       setData(d);
@@ -375,15 +426,6 @@ function SingleDeptPage({ slug }) {
     }, () => setL(false));
     return () => unsub();
   }, [slug]);
-
-  // 🔥 FIX: Smooth Scroll handler function
-  const scrollToSection = (e, id) => {
-    e.preventDefault();
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
 
   if (loading) return <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif" }}><Spin color={C} /></div>;
 
@@ -408,6 +450,10 @@ function SingleDeptPage({ slug }) {
 
         .dp-hl{background:#fff;border:1.5px solid #f1f5f9;border-radius:16px;padding:22px 20px;height:100%;transition:all .22s;}
         .dp-hl:hover{border-color:${C}3a;box-shadow:0 10px 28px ${C}12;transform:translateY(-3px);}
+
+        .dp-fac-card{background:#fff;border:1.5px solid #f1f5f9;border-radius:14px;padding:20px;
+          display:flex;gap:14px;align-items:flex-start;transition:all .2s;}
+        .dp-fac-card:hover{border-color:${C}38;box-shadow:0 6px 20px ${C}0e;}
 
         .dp-rep{display:flex;align-items:center;gap:16px;background:#fff;border:1.5px solid #f1f5f9;
           border-radius:14px;padding:18px 20px;cursor:pointer;transition:all .2s;}
@@ -434,7 +480,6 @@ function SingleDeptPage({ slug }) {
 
         @media(max-width:900px){
           .dp-g3{grid-template-columns:1fr 1fr !important;}
-          .dp-g4{grid-template-columns:1fr 1fr !important;}
         }
         @media(max-width:640px){
           .dp-g3{grid-template-columns:1fr !important;}
@@ -450,6 +495,19 @@ function SingleDeptPage({ slug }) {
         <div style={{ position: 'absolute', bottom: -50, left: '8%', width: 260, height: 260, borderRadius: '50%', background: 'radial-gradient(circle,rgba(244,160,35,.07) 0%,transparent 70%)', pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          {/* Breadcrumb */}
+          <div style={{ fontSize: 12.5, color: '#94a3b8', marginBottom: 28, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+            {[['Home', '/'], ['Academics', '/academics'], ['Departments', '/academics/departments']].map(([l, h]) => (
+              <span key={h} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Link to={h} style={{ color: 'inherit', textDecoration: 'none', transition: 'color .15s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = C}
+                  onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}>{l}</Link>
+                <span style={{ opacity: .4 }}>›</span>
+              </span>
+            ))}
+            <span style={{ color: NAVY, fontWeight: 600 }}>{meta.short}</span>
+          </div>
+
           {/* Two-col layout */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 40, alignItems: 'center' }}>
 
@@ -460,7 +518,7 @@ function SingleDeptPage({ slug }) {
               </div>
 
               <h1 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 'clamp(28px,4.5vw,52px)', fontWeight: 800, color: NAVY, lineHeight: 1.06, letterSpacing: '-1.5px', margin: '0 0 14px' }}>
-                {d.fullName || d.name || meta.short}
+                {d.fullName || meta.fullName || d.name || meta.short}
               </h1>
 
               {d.tagline && (
@@ -476,13 +534,17 @@ function SingleDeptPage({ slug }) {
                 </div>
               )}
 
-              {/* 🔥 FIX: Changed anchor tags to buttons with smooth scrolling */}
+              {/* CTA buttons — ✅ FIX: onClick+scrollIntoView, href="#" React Router mein blank page deta hai */}
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                <button onClick={(e) => scrollToSection(e, 'faculty')} style={{ background: `linear-gradient(135deg,${NAVY},#1a3a7c)`, color: '#fff', border: 'none', cursor: 'pointer', padding: '11px 24px', borderRadius: 10, fontFamily: 'inherit', fontWeight: 700, fontSize: 13.5, boxShadow: `0 4px 16px ${NAVY}28`, display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                <button
+                  onClick={() => document.getElementById('faculty')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                  style={{ background: `linear-gradient(135deg,${NAVY},#1a3a7c)`, color: '#fff', padding: '11px 24px', borderRadius: 10, border: 'none', fontWeight: 700, fontSize: 13.5, boxShadow: `0 4px 16px ${NAVY}28`, display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer', fontFamily: 'inherit' }}>
                   👨‍🏫 Faculty Roster
                 </button>
                 {feeRows.length > 0 && (
-                  <button onClick={(e) => scrollToSection(e, 'fees')} style={{ background: '#fff', border: `1.5px solid ${C}`, color: C, cursor: 'pointer', padding: '11px 24px', borderRadius: 10, fontFamily: 'inherit', fontWeight: 700, fontSize: 13.5, display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                  <button
+                    onClick={() => document.getElementById('fees')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                    style={{ background: '#fff', border: `1.5px solid ${C}`, color: C, padding: '11px 24px', borderRadius: 10, fontWeight: 700, fontSize: 13.5, display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer', fontFamily: 'inherit' }}>
                     💰 Fee Structure
                   </button>
                 )}
@@ -501,7 +563,7 @@ function SingleDeptPage({ slug }) {
                 </div>
                 <div>
                   <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 700, letterSpacing: '.6px', textTransform: 'uppercase', marginBottom: 3 }}>Head of Department</div>
-                  <div style={{ fontWeight: 800, color: NAVY, fontSize: 15 }}>{d.hod?.name || 'Admin Panel se update karein'}</div>
+                  <div style={{ fontWeight: 800, color: NAVY, fontSize: 15 }}>{d.hod?.name || 'Add from Admin Panel'}</div>
                   {d.hod?.qual && <div style={{ fontSize: 12, color: C, fontWeight: 600, marginTop: 2 }}>{d.hod.qual}</div>}
                 </div>
               </div>
@@ -629,7 +691,7 @@ function SingleDeptPage({ slug }) {
             </Fade>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(250px,1fr))', gap: 10 }}>
               {(curriculum[activeSem] || []).map((subj, i) => (
-                <Fade key={subj + i} delay={i * .04} y={14}>
+                <Fade key={i} delay={i * .04} y={14}>
                   <div className="dp-subj">
                     <div style={{ width: 27, height: 27, borderRadius: 7, background: `linear-gradient(135deg,${NAVY},#1a3a7c)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 11, fontWeight: 700, color: '#fff' }}>
                       {String(i + 1).padStart(2, '0')}
@@ -643,24 +705,25 @@ function SingleDeptPage({ slug }) {
         )}
 
         {/* ── FACULTY ───────────────────────────────────────────── */}
-        {/* 🔥 FIX: Added scrollMarginTop to ensure it scrolls perfectly below header */}
-        <div id="faculty" style={{ padding: '64px 0 0', scrollMarginTop: '60px' }}>
+        <div id="faculty" style={{ padding: '64px 0 0' }}>
           <FacultySection keys={facultyKeys} tabs={meta.tabs} color={C} />
         </div>
 
         {/* ── FEE STRUCTURE ─────────────────────────────────────── */}
-        <div id="fees" style={{ padding: '64px 0 0', scrollMarginTop: '60px' }}>
+        <div id="fees" style={{ padding: '64px 0 0' }}>
           <SectionHead label="Academic Fees" title="Fee Structure" color={C} />
           {feeRows.length === 0 ? (
             <Fade><EmptyBox icon="💰" msg="Fee structure abhi add nahi ki gayi" sub="Admin Panel → Departments → [Dept] → Fee Structure mein add karein" color={C} /></Fade>
           ) : (
             <Fade delay={0.06}>
               <div style={{ background: '#fff', border: '1.5px solid #f1f5f9', borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 20px rgba(15,35,71,.06)' }}>
+                {/* Header */}
                 <div className="dp-fee-hd">
                   {['Fee Category', 'Amount (₹)', 'Notes'].map(h => (
                     <div key={h} className={h === 'Notes' ? 'dp-fee-note' : ''} style={{ fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,.75)', letterSpacing: '.5px', textTransform: 'uppercase' }}>{h}</div>
                   ))}
                 </div>
+                {/* Rows */}
                 {feeRows.map((row, i) => (
                   <div key={i} className="dp-fee-row">
                     <div style={{ fontSize: 14, fontWeight: 600, color: NAVY }}>{row.category}</div>
@@ -668,6 +731,7 @@ function SingleDeptPage({ slug }) {
                     <div className="dp-fee-note" style={{ fontSize: 13, color: '#64748b' }}>{row.note || '—'}</div>
                   </div>
                 ))}
+                {/* Total row */}
                 {feeRows.length > 1 && (
                   <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr', padding: '14px 20px', background: `${C}0a`, borderTop: `2px solid ${C}1e` }}>
                     <div style={{ fontSize: 14, fontWeight: 800, color: NAVY }}>Total Annual Fee</div>
@@ -731,6 +795,7 @@ function SingleDeptPage({ slug }) {
           <SectionHead label="From the Head of Department" title="HOD's Message" color={C} />
           <Fade delay={0.08}>
             <div className="dp-g2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 24 }}>
+              {/* HOD card */}
               <div style={{ background: `linear-gradient(145deg,${C}0a,${C}04)`, border: `1.5px solid ${C}1e`, borderRadius: 20, padding: '28px 26px' }}>
                 <div style={{ width: 68, height: 68, borderRadius: 16, overflow: 'hidden', background: `${C}14`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30, marginBottom: 16, border: `2px solid ${C}28` }}>
                   {d.hod?.imageUrl
@@ -740,7 +805,12 @@ function SingleDeptPage({ slug }) {
                 <div style={{ fontWeight: 800, color: NAVY, fontSize: 17, marginBottom: 3 }}>{d.hod?.name || 'Prof. [Name]'}</div>
                 <div style={{ color: C, fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{d.hod?.desig || `HOD, ${meta.short}`}</div>
                 {d.hod?.qual && <div style={{ color: '#94a3b8', fontSize: 12.5, marginBottom: 16 }}>{d.hod.qual}</div>}
+                <div style={{ borderTop: `1px solid ${C}1e`, paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 9 }}>
+                  {d.hod?.email && <a href={`mailto:${d.hod.email}`} style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#475569', fontSize: 13, textDecoration: 'none' }}><span style={{ color: C }}>✉</span>{d.hod.email}</a>}
+                  {d.hod?.phone && <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#475569', fontSize: 13 }}><span style={{ color: C }}>📞</span>{d.hod.phone}</div>}
+                </div>
               </div>
+              {/* Message */}
               <div style={{ background: '#fff', border: '1.5px solid #f1f5f9', borderRadius: 20, padding: '28px 26px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <div style={{ fontSize: 48, color: `${C}35`, fontFamily: 'Georgia,serif', lineHeight: 1, marginBottom: 12 }}>"</div>
                 <p style={{ color: '#475569', lineHeight: 1.9, fontSize: 15, margin: '0 0 14px', fontStyle: 'italic' }}>
@@ -752,7 +822,18 @@ function SingleDeptPage({ slug }) {
           </Fade>
         </div>
 
+      </div>{/* /body */}
+
+      {/* Back link */}
+      <div style={{ borderTop: '1px solid #f1f5f9', padding: '22px 20px', textAlign: 'center' }}>
+        <Link to="/academics/departments"
+          style={{ color: '#94a3b8', fontSize: 13, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 7, transition: 'color .15s' }}
+          onMouseEnter={e => e.currentTarget.style.color = C}
+          onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}
+        >← Back to All Departments</Link>
       </div>
+
+      {/* PDF modal */}
       {pdfOpen && <PdfModal pdf={pdfOpen} onClose={() => setPdf(null)} />}
     </div>
   );
@@ -768,13 +849,28 @@ function HubPage() {
   useEffect(() => {
     const slugs = Object.keys(DEPT_META);
     const map = {};
-    let done = 0;
+    // ✅ B9 FIX: Use Set so multiple Firestore re-fires don't break the counter
+    const loaded = new Set();
+    const maybeSetCards = () => {
+      if (loaded.size >= slugs.length) {
+        setCards(slugs.map(s => map[s]));
+        setL(false);
+      }
+    };
     const unsubs = slugs.map(slug => {
       return onSnapshot(doc(db, 'departments', slug), snap => {
         map[slug] = { slug, ...DEPT_META[slug], ...(snap.exists() ? snap.data() : {}) };
-        done++;
-        if (done === slugs.length) { setCards(slugs.map(s => map[s])); setL(false); }
-      }, () => { map[slug] = { slug, ...DEPT_META[slug] }; done++; if (done === slugs.length) { setCards(slugs.map(s => map[s])); setL(false); } });
+        loaded.add(slug);
+        // Always update cards after initial load (real-time updates)
+        if (loaded.size >= slugs.length) {
+          setCards(slugs.map(s => map[s]));
+          setL(false);
+        }
+      }, () => {
+        map[slug] = { slug, ...DEPT_META[slug] };
+        loaded.add(slug);
+        maybeSetCards();
+      });
     });
     return () => unsubs.forEach(u => u());
   }, []);
@@ -789,9 +885,15 @@ function HubPage() {
         .dp-hcard:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(15,35,71,.12);}
       `}</style>
 
+      {/* Hero banner */}
       <div style={{ background: 'linear-gradient(145deg,#f0f9ff,#e0f2fe 40%,#fef9ec 100%)', borderBottom: '1px solid #e0f2fe', padding: '60px 20px 52px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: -80, right: -60, width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle,rgba(14,165,233,.1) 0%,transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative', zIndex: 1, textAlign: 'center' }}>
+          <div style={{ fontSize: 12.5, color: '#94a3b8', marginBottom: 22, display: 'flex', gap: 6, justifyContent: 'center' }}>
+            <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>Home</Link>
+            <span>›</span>
+            <span style={{ color: NAVY, fontWeight: 600 }}>Academic Departments</span>
+          </div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#e0f2fe', color: '#0ea5e9', fontSize: 12, fontWeight: 700, padding: '5px 14px', borderRadius: 20, marginBottom: 16 }}>
             🏛️ Academics
           </div>
@@ -804,6 +906,7 @@ function HubPage() {
         </div>
       </div>
 
+      {/* Cards */}
       <div style={{ maxWidth: 1240, margin: '0 auto', padding: '48px 20px 72px' }}>
         {loading ? <Spin /> : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 18 }}>

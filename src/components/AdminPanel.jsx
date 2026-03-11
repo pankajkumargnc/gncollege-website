@@ -18,9 +18,10 @@ import {
   getDocs, writeBatch, limit
 } from 'firebase/firestore';
 import toast from 'react-hot-toast';
-import AdminDepartmentTab from './AdminDepartmentTab';
 
 const ImageCropper = lazy(() => import('./ImageCropper'));
+const AdminDepartmentTab = lazy(() => import('./AdminDepartmentTab'));
+import MediaPicker, { setImgbbKey } from './MediaPicker';
 
 // ── Error Boundary (prevents white screen on render errors) ───────────────────
 class AdminErrorBoundary extends React.Component {
@@ -110,16 +111,11 @@ const T = {
   shadowHov: '0 12px 35px rgba(15,35,71,.15)',
 };
 
-const IMGBB = '5aa515b21008be464353ea31b1c9894d';
-const uploadToImgBB = (blob, onProg) => new Promise((res, rej) => {
-  const fd = new FormData(); fd.append('image', blob);
-  const xhr = new XMLHttpRequest();
-  xhr.open('POST', `https://api.imgbb.com/1/upload?key=${IMGBB}`, true);
-  xhr.upload.onprogress = e => e.lengthComputable && onProg(Math.round(e.loaded / e.total * 100));
-  xhr.onload = () => xhr.status === 200 ? res(JSON.parse(xhr.responseText).data.url) : rej(new Error('Upload failed'));
-  xhr.onerror = () => rej(new Error('Network error'));
-  xhr.send(fd);
-});
+// ImgBB key ab Settings → Site Settings → ImgBB API Key se aata hai
+// MediaPicker component ke andar handle hota hai (src/components/MediaPicker.jsx)
+// Default demo key (user apni key Settings mein save karein):
+const _IMGBB_DEFAULT = '6391ea11ec7aa4e6f3477f373cdd3592';
+setImgbbKey(_IMGBB_DEFAULT); // override hoga jab settings load ho
 
 // ── CSS ───────────────────────────────────────────────────────────────────────
 const GCSS = `
@@ -278,9 +274,9 @@ const StatCard = React.memo(({ icon, label, count, color, sub, onClick }) => {
 });
 
 const Toggle = ({ checked, onChange, label, color = T.green }) => (
-  <label className="toggle-wrap">
+  <label className="toggle-wrap" onClick={onChange}>
     <div className="toggle">
-      <input type="checkbox" checked={checked} onChange={onChange} />
+      <input type="checkbox" readOnly checked={checked} />
       <span className="toggle-slider" style={checked ? { background: color } : {}} />
     </div>
     {label && <span style={{ fontSize: 13, fontWeight: 700, color: checked ? color : T.t3 }}>{label}</span>}
@@ -332,6 +328,7 @@ const TABS = [
   { id: 'alerts',        icon: '🚨', label: 'Flash Alerts',      section: 'CONTENT' },
   { id: 'placements',    icon: '🎓', label: 'Alumni Wall',       section: '' },
   { id: 'faculty',       icon: '👨‍🏫', label: 'Faculty & Staff',  section: '' },
+  { id: 'departments',   icon: '🏛️',  label: 'Departments',      section: '' },
   { id: 'slider',        icon: '🖼️',  label: 'Hero Slider',      section: '' },
   { id: 'menu_builder',  icon: '🧭', label: 'Menu Editor',       section: '' },
   { id: 'pages',         icon: '📄', label: 'Pages & SEO',       section: '' },
@@ -343,13 +340,210 @@ const TABS = [
   { id: 'youtube',       icon: '▶️',  label: 'YouTube',           section: 'API & INTEGRATIONS' },
   { id: 'drive',         icon: '☁️',  label: 'Drive Sync',        section: '' },
   { id: 'settings',      icon: '⚙️',  label: 'Site Settings',     section: 'SYSTEM' },
+  { id: 'contact',       icon: '📞',  label: 'Contact Settings',  section: '' },
   { id: 'activity',      icon: '📋', label: 'Activity Log',      section: '' },
   { id: 'backup',        icon: '💾', label: 'Backup & Restore',  section: '' },
   { id: 'system_test',   icon: '🛡️', label: 'System Test',       section: '' },
-  { id: 'events', icon: '🏆', label: 'Events', section: '' },
-  { id: 'contact', icon: '📞', label: 'Contact Settings', section: '' },
-  { id: 'departments', icon: '🏛️', label: 'Departments', section: '' },
 ];
+
+// ── Contact Settings Tab Component ───────────────────────────────────────────
+function ContactSettingsTab() {
+  const NAVY = '#0f2347', GOLD = '#f4a023';
+  const INP = { width:'100%', padding:'10px 14px', border:'1.5px solid #e2e8f0', borderRadius:9, fontSize:13.5, fontFamily:'inherit', color:'#334155', background:'#fff', outline:'none', boxSizing:'border-box' };
+  const TEA = { ...INP, resize:'vertical', minHeight:70 };
+
+  // ── campus contact state ─────────────────────────
+  const [campus, setCampus] = useState({
+    bhuda:    { phone:'', email:'', address:'' },
+    bankMore: { phone:'', email:'', address:'' },
+  });
+  const [campusSaving, setCampusSaving] = useState(false);
+  const [campusSaved,  setCampusSaved]  = useState(false);
+  const campusTimerRef = useRef(null);
+
+  // ── directory state ──────────────────────────────
+  const [directory, setDirectory] = useState([]);
+  const [dirSaving,  setDirSaving]  = useState(false);
+  const [dirSaved,   setDirSaved]   = useState(false);
+  const dirTimerRef = useRef(null);
+
+  // cleanup timers on unmount
+  useEffect(() => () => {
+    if (campusTimerRef.current) clearTimeout(campusTimerRef.current);
+    if (dirTimerRef.current)    clearTimeout(dirTimerRef.current);
+  }, []);
+
+  // Load settings/contact
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, 'settings', 'contact'), snap => {
+      if (snap.exists()) {
+        const d = snap.data();
+        setCampus({
+          bhuda:    { phone: d.bhuda?.phone||'',    email: d.bhuda?.email||'',    address: d.bhuda?.address||'' },
+          bankMore: { phone: d.bankMore?.phone||'', email: d.bankMore?.email||'', address: d.bankMore?.address||'' },
+        });
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  // Load contactDirectory collection (ordered)
+  useEffect(() => {
+    const unsub = onSnapshot(
+      query(collection(db, 'contactDirectory'), orderBy('order', 'asc')),
+      snap => setDirectory(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+      () => setDirectory([]) // Firestore index missing → graceful empty
+    );
+    return () => unsub();
+  }, []);
+
+  const saveCampus = async () => {
+    setCampusSaving(true);
+    try {
+      await setDoc(doc(db, 'settings', 'contact'), { ...campus, updatedAt: serverTimestamp() }, { merge: true });
+      setCampusSaved(true);
+      if (campusTimerRef.current) clearTimeout(campusTimerRef.current);
+      campusTimerRef.current = setTimeout(() => setCampusSaved(false), 2500);
+    } catch (e) { toast.error('Save failed: ' + e.message); }
+    setCampusSaving(false);
+  };
+
+  const saveDirectory = async () => {
+    setDirSaving(true);
+    try {
+      const batch = writeBatch(db);
+      // Delete all existing docs
+      const existing = await getDocs(collection(db, 'contactDirectory'));
+      existing.docs.forEach(d => batch.delete(doc(db, 'contactDirectory', d.id)));
+      // Re-add all with updated order
+      directory.forEach((entry, i) => {
+        const ref = entry.id
+          ? doc(db, 'contactDirectory', entry.id)
+          : doc(collection(db, 'contactDirectory'));
+        batch.set(ref, {
+          icon:  entry.icon  || '📞',
+          title: entry.title || '',
+          name:  entry.name  || '',
+          phone: entry.phone || '',
+          order: i,
+          updatedAt: serverTimestamp(),
+        });
+      });
+      await batch.commit();
+      setDirSaved(true);
+      if (dirTimerRef.current) clearTimeout(dirTimerRef.current);
+      dirTimerRef.current = setTimeout(() => setDirSaved(false), 2500);
+    } catch (e) { toast.error('Directory save failed: ' + e.message); }
+    setDirSaving(false);
+  };
+
+  const setC = (campus_key, field, val) =>
+    setCampus(p => ({ ...p, [campus_key]: { ...p[campus_key], [field]: val } }));
+
+  const addDir  = () => setDirectory(p => [...p, { icon:'📞', title:'', name:'', phone:'', order: p.length }]);
+  const delDir  = (i) => setDirectory(p => p.filter((_, j) => j !== i));
+  const updDir  = (i, k, v) => setDirectory(p => p.map((e, j) => j === i ? { ...e, [k]: v } : e));
+
+  const SH = ({ txt }) => (
+    <div style={{ fontWeight:800, fontSize:13.5, color:NAVY, margin:'24px 0 12px', paddingBottom:8, borderBottom:'2px solid #f1f5f9' }}>{txt}</div>
+  );
+  const SaveBar = ({ saving, saved, onSave, label }) => (
+    <div style={{ display:'flex', alignItems:'center', gap:14, marginTop:20 }}>
+      <button onClick={onSave} disabled={saving}
+        style={{ background: saving?'#94a3b8':`linear-gradient(135deg,${NAVY},#1a3a7c)`, color:'#fff', border:'none', padding:'11px 28px', borderRadius:10, cursor: saving?'not-allowed':'pointer', fontWeight:800, fontSize:13.5, fontFamily:'inherit', boxShadow: saving?'none':`0 4px 14px ${NAVY}28` }}>
+        {saving ? '⏳ Saving...' : label}
+      </button>
+      {saved && (
+        <div style={{ display:'flex', alignItems:'center', gap:8, background:'#d1fae5', color:'#065f46', padding:'8px 16px', borderRadius:9, fontSize:13, fontWeight:700 }}>
+          ✅ Saved! Contact page auto-update ho gaya.
+        </div>
+      )}
+    </div>
+  );
+
+  const campusCards = [
+    { key: 'bhuda',    label: '🏛️ Bhuda Campus',     sub: 'Main campus contact details' },
+    { key: 'bankMore', label: '🏢 Bank More Campus',  sub: 'Branch campus contact details' },
+  ];
+
+  return (
+    <div style={{ fontFamily:"'DM Sans','Plus Jakarta Sans',sans-serif", maxWidth:1000 }}>
+      <p style={{ fontWeight:900, fontSize:20, color:NAVY, margin:'0 0 4px' }}>📞 Contact Settings</p>
+      <p style={{ color:'#94a3b8', fontSize:13, margin:'0 0 24px' }}>Campus addresses aur contact directory — Contact page pe auto-update hoga</p>
+
+      {/* ── Campus Contact ────────────────────────────── */}
+      <div style={{ background:'#fff', border:'1.5px solid #f1f5f9', borderRadius:14, padding:20, marginBottom:16 }}>
+        <SH txt="🏫 Campus Contact Details" />
+        <p style={{ fontSize:12.5, color:'#94a3b8', margin:'0 0 18px' }}>Firebase path: <code style={{ background:'#f1f5f9', padding:'1px 6px', borderRadius:4, fontSize:11.5 }}>settings/contact</code></p>
+
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))', gap:16 }}>
+          {campusCards.map(({ key, label, sub }) => (
+            <div key={key} style={{ background:'#f8fafc', border:'1.5px solid #f1f5f9', borderRadius:12, padding:'18px 18px 14px' }}>
+              <div style={{ fontWeight:800, color:NAVY, fontSize:14, marginBottom:3 }}>{label}</div>
+              <div style={{ fontSize:11.5, color:'#94a3b8', marginBottom:16 }}>{sub}</div>
+              <div style={{ marginBottom:12 }}>
+                <div style={{ fontSize:11.5, fontWeight:700, color:'#64748b', marginBottom:5 }}>📞 Phone / WhatsApp</div>
+                <input style={INP} value={campus[key].phone} onChange={e => setC(key, 'phone', e.target.value)} placeholder="+91 XXXXX XXXXX" />
+              </div>
+              <div style={{ marginBottom:12 }}>
+                <div style={{ fontSize:11.5, fontWeight:700, color:'#64748b', marginBottom:5 }}>✉ Email</div>
+                <input style={INP} type="email" value={campus[key].email} onChange={e => setC(key, 'email', e.target.value)} placeholder="contact@gnc.ac.in" />
+              </div>
+              <div>
+                <div style={{ fontSize:11.5, fontWeight:700, color:'#64748b', marginBottom:5 }}>📍 Full Address</div>
+                <textarea style={TEA} value={campus[key].address} onChange={e => setC(key, 'address', e.target.value)} placeholder="Building name, Street, City — PIN" rows={3} />
+              </div>
+            </div>
+          ))}
+        </div>
+        <SaveBar saving={campusSaving} saved={campusSaved} onSave={saveCampus} label="💾 Save Campus Details" />
+      </div>
+
+      {/* ── Contact Directory ─────────────────────────── */}
+      <div style={{ background:'#fff', border:'1.5px solid #f1f5f9', borderRadius:14, padding:20 }}>
+        <SH txt="📋 Contact Directory (Officials list)" />
+        <p style={{ fontSize:12.5, color:'#94a3b8', margin:'0 0 16px' }}>
+          Firebase path: <code style={{ background:'#f1f5f9', padding:'1px 6px', borderRadius:4, fontSize:11.5 }}>contactDirectory/{`{docId}`}</code>
+          &nbsp;— Contact page pe yahi list dikhti hai
+        </p>
+
+        {directory.map((entry, i) => (
+          <div key={entry.id || i} style={{ display:'grid', gridTemplateColumns:'60px 1fr 1fr 1fr auto', gap:10, alignItems:'center', marginBottom:10 }}>
+            <div>
+              {i === 0 && <div style={{ fontSize:11, fontWeight:700, color:'#64748b', marginBottom:5 }}>Icon</div>}
+              <input style={{ ...INP, textAlign:'center', fontSize:18 }} value={entry.icon} onChange={e => updDir(i, 'icon', e.target.value)} placeholder="📞" />
+            </div>
+            <div>
+              {i === 0 && <div style={{ fontSize:11, fontWeight:700, color:'#64748b', marginBottom:5 }}>Title / Role</div>}
+              <input style={INP} value={entry.title} onChange={e => updDir(i, 'title', e.target.value)} placeholder="Principal" />
+            </div>
+            <div>
+              {i === 0 && <div style={{ fontSize:11, fontWeight:700, color:'#64748b', marginBottom:5 }}>Name</div>}
+              <input style={INP} value={entry.name} onChange={e => updDir(i, 'name', e.target.value)} placeholder="Dr. S.K. Sharma" />
+            </div>
+            <div>
+              {i === 0 && <div style={{ fontSize:11, fontWeight:700, color:'#64748b', marginBottom:5 }}>Phone</div>}
+              <input style={INP} value={entry.phone} onChange={e => updDir(i, 'phone', e.target.value)} placeholder="+91 XXXXX XXXXX" />
+            </div>
+            <button onClick={() => delDir(i)}
+              style={{ background:'#fee2e2', border:'none', color:'#ef4444', width:30, height:30, borderRadius:8, cursor:'pointer', fontSize:13, fontWeight:800, marginTop: i===0?22:0, flexShrink:0 }}>
+              ✕
+            </button>
+          </div>
+        ))}
+
+        <button onClick={addDir}
+          style={{ width:'100%', padding:'9px 16px', border:'1.5px dashed #cbd5e1', background:'transparent', color:'#64748b', borderRadius:9, cursor:'pointer', fontFamily:'inherit', fontSize:12.5, fontWeight:600, marginTop:8, transition:'all .16s' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor=GOLD; e.currentTarget.style.color=NAVY; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor='#cbd5e1'; e.currentTarget.style.color='#64748b'; }}>
+          + Add Directory Entry
+        </button>
+
+        <SaveBar saving={dirSaving} saved={dirSaved} onSave={saveDirectory} label="💾 Save Directory" />
+      </div>
+    </div>
+  );
+}
 
 // ── Main component ────────────────────────────────────────────────────────────
 function AdminPanelInner({
@@ -480,16 +674,7 @@ function AdminPanelInner({
   const [placeProg, setPlaceProg] = useState(0);
   const [placeSearch, setPlaceSearch] = useState('');
   const [placeSel, setPlaceSel] = useState([]);
-  const handlePlaceFile = file => {
-    const r = new FileReader();
-    r.onload = e => crop(e.target.result, async blob => {
-      setPlaceUp(true);
-      try { const url = await uploadToImgBB(blob, setPlaceProg); setPlaceData(d => ({ ...d, imageUrl: url })); toast.success('Photo ready!'); }
-      catch (err) { toast.error(err.message); }
-      setPlaceUp(false);
-    });
-    r.readAsDataURL(file);
-  };
+  // handlePlaceFile → replaced by MediaPicker
   const savePlace = async e => {
     e.preventDefault(); setLoading(true);
     try {
@@ -512,16 +697,7 @@ function AdminPanelInner({
   const [facSearch, setFacSearch] = useState('');
   const [facTab, setFacTab] = useState('Teaching');
   const [facSel, setFacSel] = useState([]);
-  const handleFacFile = file => {
-    const r = new FileReader();
-    r.onload = e => crop(e.target.result, async blob => {
-      setFacUp(true);
-      try { const url = await uploadToImgBB(blob, setFacProg); setFacData(d => ({ ...d, imageUrl: url })); toast.success('Photo ready!'); }
-      catch (err) { toast.error(err.message); }
-      setFacUp(false);
-    });
-    r.readAsDataURL(file);
-  };
+  // handleFacFile → replaced by MediaPicker
   const saveFac = async e => {
     e.preventDefault(); setLoading(true);
     try {
@@ -539,16 +715,7 @@ function AdminPanelInner({
   const [slideData, setSlideData] = useState({ title: '', subtitle: '', btnText: '', btnLink: '', image: '', order: 0 });
   const [slideUp, setSlideUp] = useState(false);
   const [slideProg, setSlideProg] = useState(0);
-  const handleSlideFile = file => {
-    const r = new FileReader();
-    r.onload = e => crop(e.target.result, async blob => {
-      setSlideUp(true);
-      try { const url = await uploadToImgBB(blob, setSlideProg); setSlideData(d => ({ ...d, image: url })); }
-      catch { }
-      setSlideUp(false);
-    });
-    r.readAsDataURL(file);
-  };
+  // handleSlideFile → replaced by MediaPicker
   const saveSlide = async e => {
     e.preventDefault(); setLoading(true);
     try {
@@ -565,7 +732,6 @@ function AdminPanelInner({
   // 5. MENU
   const [navData, setNavData] = useState([]);
   const [newMenu, setNewMenu] = useState({ label: '', href: '', parentId: 'top' });
-  const [editMenuId, setEditMenuId] = useState(null);
   useEffect(() => {
     getDoc(doc(db, 'settings', 'navbar'))
       .then(s => {
@@ -657,16 +823,7 @@ function AdminPanelInner({
   const [galProg, setGalProg] = useState(0);
   const [galSearch, setGalSearch] = useState('');
   const [galSel, setGalSel] = useState([]);
-  const handleGalFile = file => {
-    const r = new FileReader();
-    r.onload = e => crop(e.target.result, async blob => {
-      setGalUp(true);
-      try { const url = await uploadToImgBB(blob, setGalProg); setGalData(d => ({ ...d, src: url })); toast.success('Image ready!'); }
-      catch { }
-      setGalUp(false);
-    });
-    r.readAsDataURL(file);
-  };
+  // handleGalFile → replaced by MediaPicker
   const saveGallery = async e => {
     e.preventDefault(); setLoading(true);
     try {
@@ -735,16 +892,7 @@ function AdminPanelInner({
   const [evtProg, setEvtProg] = useState(0);
   const [evtSearch, setEvtSearch] = useState('');
   const [evtSel, setEvtSel] = useState([]);
-  const handleEvtFile = file => {
-    const r = new FileReader();
-    r.onload = e => crop(e.target.result, async blob => {
-      setEvtUp(true);
-      try { const url = await uploadToImgBB(blob, setEvtProg); setEvtData(d => ({ ...d, imageUrl: url })); }
-      catch { }
-      setEvtUp(false);
-    });
-    r.readAsDataURL(file);
-  };
+  // handleEvtFile → replaced by MediaPicker
   const saveEvent = async e => {
     e.preventDefault(); setLoading(true);
     try {
@@ -756,51 +904,11 @@ function AdminPanelInner({
     } catch { }
     setLoading(false);
   };
+
   // 12. YOUTUBE CONFIG
   const [ytCfg, setYtCfg] = useState({ apiKey: '', channelId: '', maxResults: 12 });
   const [ytTest, setYtTest] = useState(null);
   const [ytLoading, setYtLoading] = useState(false);
-  // 14. CONTACT SETTINGS
-const [contactData, setContactData] = useState({
-  bhuda:    { phone: '', email: '', address: 'Guru Nanak College, Bhuda\nDhanbad, Jharkhand - 826001' },
-  bankMore: { phone: '', email: '', address: 'Guru Nanak College, Bank More\nDhanbad, Jharkhand - 826001' },
-});
-const [directoryList, setDirectoryList] = useState([]);
-const [newDirEntry,   setNewDirEntry]   = useState({ title:'', name:'', phone:'', icon:'👤', order:0 });
-useEffect(() => {
-  getDoc(doc(db, 'settings', 'contact'))
-    .then(s => s.exists() && setContactData(prev => ({
-      bhuda:    { ...prev.bhuda,    ...(s.data().bhuda    || {}) },
-      bankMore: { ...prev.bankMore, ...(s.data().bankMore || {}) },
-    }))).catch(() => {});
-  return onSnapshot(
-    query(collection(db, 'contactDirectory'), orderBy('order', 'asc')),
-    snap => setDirectoryList(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
-    () => {}
-  );
-}, []);
-const saveContact = async () => {
-  setLoading(true);
-  try {
-    await setDoc(doc(db, 'settings', 'contact'), { ...contactData, updatedAt: serverTimestamp() });
-    toast.success('Contact info saved!');
-    logAct('update', 'Contact info updated', 'settings');
-  } catch (err) { toast.error(err.message); }
-  setLoading(false);
-};
-const addDirEntry = async () => {
-  if (!newDirEntry.title || !newDirEntry.name) return toast.error('Title aur Name required hai');
-  try {
-    await addDoc(collection(db, 'contactDirectory'), { ...newDirEntry, createdAt: serverTimestamp() });
-    setNewDirEntry({ title:'', name:'', phone:'', icon:'👤', order:0 });
-    toast.success('Entry added!');
-  } catch (err) { toast.error(err.message); }
-};
-const deleteDirEntry = async (id) => {
-  if (!window.confirm('Delete this entry?')) return;
-  await deleteDoc(doc(db, 'contactDirectory', id));
-  toast.success('Deleted!');
-};
   useEffect(() => {
     getDoc(doc(db, 'settings', 'youtube'))
       .then(s => s.exists() && setYtCfg(prev => ({ ...prev, ...s.data() })))
@@ -862,12 +970,21 @@ const deleteDirEntry = async (id) => {
   const [siteCfg, setSiteCfg] = useState({
     name: 'Guru Nanak College', tagline: 'Affiliated to B.B.M.K. University, Dhanbad',
     address: 'Bank More, Dhanbad — 826001, Jharkhand', phone: '', email: '',
-    facebook: '', twitter: '', youtube: '', linkedin: '', footerText: '', maintenanceMode: false
+    facebook: '', twitter: '', youtube: '', linkedin: '',
+    footerText: '', maintenanceMode: false,
+    imgbbKey: '',  // ✅ ImgBB API key — Settings se configure karein
   });
   const [siteLoading, setSiteLoading] = useState(false);
   useEffect(() => {
     getDoc(doc(db, 'settings', 'site'))
-      .then(s => s.exists() && setSiteCfg(prev => ({ ...prev, ...s.data() })))
+      .then(s => {
+        if (s.exists()) {
+          const d = s.data();
+          setSiteCfg(prev => ({ ...prev, ...d }));
+          // ✅ MediaPicker ko ImgBB key de do
+          if (d.imgbbKey) setImgbbKey(d.imgbbKey);
+        }
+      })
       .catch(() => {});
   }, []);
   const saveSite = async e => {
@@ -948,91 +1065,130 @@ const deleteDirEntry = async (id) => {
 
   const runTest = async () => {
     setTestRunning(true); setTestResults([]); setTestProgress(0); setTestScore(null); setSysLog([]);
-    let passed = 0; const TOTAL = 15;
-    sysLogAdd('▶ GNC SYSTEM DIAGNOSTICS v9.1 — 15-PHASE DEEP SCAN');
+    let passed = 0; const TOTAL = 17;
+    sysLogAdd('▶ GNC SYSTEM DIAGNOSTICS v9.1 — 17-PHASE DEEP SCAN');
     sysLogAdd('━'.repeat(42)); await pause(300);
 
     // T1
-    sysLogAdd('[1/15] Checking Vite build environment...');
+    sysLogAdd('[1/17] Checking Vite build environment...');
     try { if (import.meta.env.MODE) { addResult('Vite Environment', 'pass', `Mode: ${import.meta.env.MODE} | Base: ${import.meta.env.BASE_URL}`); passed++; sysLogAdd('  ✓ Vite running correctly'); } } catch (e) { addResult('Vite Environment', 'fail', e.message); }
     setTestProgress(Math.round(1/TOTAL*100)); await pause(400);
 
     // T2
-    sysLogAdd('[2/15] Verifying Firebase initialization...');
+    sysLogAdd('[2/17] Verifying Firebase initialization...');
     try { if (db?.app?.options?.projectId) { addResult('Firebase Init', 'pass', `Project: ${db.app.options.projectId}`); passed++; sysLogAdd(`  ✓ Project: ${db.app.options.projectId}`); } else throw new Error('DB not initialized'); } catch (e) { addResult('Firebase Init', 'fail', e.message); }
     setTestProgress(Math.round(2/TOTAL*100)); await pause(400);
 
     // T3
-    sysLogAdd('[3/15] Testing Firestore read permissions...');
+    sysLogAdd('[3/17] Testing Firestore read permissions...');
     try { const s = await getDocs(query(collection(db, 'pages'), limit(1))); addResult('Firestore Read', 'pass', `Read successful — ${s.size} doc(s)`); passed++; sysLogAdd('  ✓ Read permissions active'); } catch (e) { addResult('Firestore Read', 'fail', 'Permission denied — check Firebase Rules'); }
     setTestProgress(Math.round(3/TOTAL*100)); await pause(400);
 
     // T4
-    sysLogAdd('[4/15] Testing Firestore write permissions...');
+    sysLogAdd('[4/17] Testing Firestore write permissions...');
     let testId = null;
     try { const d = await addDoc(collection(db, '_sysTest'), { t: serverTimestamp(), v: '9.1' }); testId = d.id; addResult('Firestore Write', 'pass', `Write OK — doc: ${d.id.substring(0, 10)}...`); passed++; sysLogAdd('  ✓ Write active'); } catch (e) { addResult('Firestore Write', 'fail', e.message); }
     setTestProgress(Math.round(4/TOTAL*100)); await pause(400);
 
     // T5
-    sysLogAdd('[5/15] Testing Firestore delete permissions...');
+    sysLogAdd('[5/17] Testing Firestore delete permissions...');
     try { if (testId) { await deleteDoc(doc(db, '_sysTest', testId)); addResult('Firestore Delete', 'pass', 'Delete OK — test doc cleaned'); passed++; sysLogAdd('  ✓ Delete active'); } else throw new Error('No test doc'); } catch (e) { addResult('Firestore Delete', 'fail', e.message); }
     setTestProgress(Math.round(5/TOTAL*100)); await pause(400);
 
     // T6
-    sysLogAdd('[6/15] Checking navbar settings structure...');
+    sysLogAdd('[6/17] Checking navbar settings structure...');
     try { const s = await getDoc(doc(db, 'settings', 'navbar')); if (s.exists()) { addResult('Navbar Settings', 'pass', `${s.data().links?.length || 0} top-level nav items`); passed++; } else { addResult('Navbar Settings', 'warn', 'No DB record — using static fallback'); passed++; } sysLogAdd('  ✓ Navbar OK'); } catch (e) { addResult('Navbar Settings', 'fail', e.message); }
     setTestProgress(Math.round(6/TOTAL*100)); await pause(400);
 
     // T7
-    sysLogAdd('[7/15] Checking site settings...');
+    sysLogAdd('[7/17] Checking site settings...');
     try { const s = await getDoc(doc(db, 'settings', 'site')); if (s.exists()) { addResult('Site Settings', 'pass', `Name: "${s.data().name || 'Set'}"`); } else { addResult('Site Settings', 'warn', 'Not configured — Admin → Settings tab'); } passed++; sysLogAdd('  ✓ Settings checked'); } catch (e) { addResult('Site Settings', 'fail', e.message); }
     setTestProgress(Math.round(7/TOTAL*100)); await pause(400);
 
     // T8
-   sysLogAdd('[8/15] Validating ImgBB image upload API...');
-try {
-  if (IMGBB && IMGBB.length > 10) {
-    addResult('ImgBB API', 'pass', `Key configured (${IMGBB.substring(0,8)}...) — CORS blocks test in dev`);
-    passed++;
-    sysLogAdd('  ✓ ImgBB key present');
-  } else throw new Error('Key missing');
-} catch (e) { addResult('ImgBB API', 'fail', e.message); }
+    sysLogAdd('[8/17] Validating ImgBB image upload API...');
+    try { const fd = new FormData(); fd.append('image', 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'); const r = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB}`, { method: 'POST', body: fd }); if (r.ok) { addResult('ImgBB API', 'pass', 'Key valid — upload service active'); passed++; sysLogAdd('  ✓ ImgBB key valid'); } else throw new Error('Invalid key'); } catch (e) { addResult('ImgBB API', 'fail', e.message); }
     setTestProgress(Math.round(8/TOTAL*100)); await pause(400);
 
     // T9
-    sysLogAdd('[9/15] Checking flash alerts collection...');
+    sysLogAdd('[9/17] Checking flash alerts collection...');
     try { const s = await getDocs(collection(db, 'alerts')); const active = s.docs.filter(d => d.data().isActive).length; addResult('Flash Alerts', 'pass', `${s.size} total | ${active} currently LIVE`); passed++; sysLogAdd(`  ✓ ${s.size} alerts, ${active} active`); } catch (e) { addResult('Flash Alerts', 'fail', e.message); }
     setTestProgress(Math.round(9/TOTAL*100)); await pause(400);
 
     // T10
-    sysLogAdd('[10/15] Checking faculty directory...');
+    sysLogAdd('[10/17] Checking faculty directory...');
     try { const s = await getDocs(collection(db, 'faculties')); const te = s.docs.filter(d => (d.data().staffType || 'Teaching') === 'Teaching').length; const nt = s.docs.filter(d => d.data().staffType === 'Non-Teaching').length; addResult('Faculty Directory', 'pass', `Teaching: ${te} | Non-Teaching: ${nt}`); passed++; sysLogAdd(`  ✓ ${te} teaching, ${nt} non-teaching`); } catch (e) { addResult('Faculty Directory', 'fail', e.message); }
     setTestProgress(Math.round(10/TOTAL*100)); await pause(400);
 
     // T11
-    sysLogAdd('[11/15] Checking alumni placements...');
+    sysLogAdd('[11/17] Checking alumni placements...');
     try { const s = await getDocs(collection(db, 'placements')); addResult('Alumni Placements', 'pass', `${s.size} success stories on Wall of Fame`); passed++; } catch (e) { addResult('Alumni Placements', 'fail', e.message); }
     setTestProgress(Math.round(11/TOTAL*100)); await pause(400);
 
     // T12
-    sysLogAdd('[12/15] Content health check...');
+    sysLogAdd('[12/17] Content health check...');
     try { const [ns, as, es, ds] = await Promise.all([getDocs(collection(db, 'notices')), getDocs(collection(db, 'announcements')), getDocs(collection(db, 'events')), getDocs(collection(db, 'pdfReports'))]); addResult('Content Health', 'pass', `Notices:${ns.size} | News:${as.size} | Events:${es.size} | Docs:${ds.size}`); passed++; sysLogAdd('  ✓ All content collections accessible'); } catch (e) { addResult('Content Health', 'fail', e.message); }
     setTestProgress(Math.round(12/TOTAL*100)); await pause(400);
 
     // T13
-    sysLogAdd('[13/15] Checking YouTube API configuration...');
+    sysLogAdd('[13/17] Checking YouTube API configuration...');
     try { const s = await getDoc(doc(db, 'settings', 'youtube')); if (s.exists() && s.data().apiKey) { addResult('YouTube Config', 'pass', `Channel: ${s.data().channelId || '—'} | Max: ${s.data().maxResults || 12} videos`); passed++; } else { addResult('YouTube Config', 'warn', 'Not configured — Admin → YouTube tab'); sysLogAdd('  ⚠ YouTube not set up'); } } catch (e) { addResult('YouTube Config', 'fail', e.message); }
     setTestProgress(Math.round(13/TOTAL*100)); await pause(400);
 
     // T14
-    sysLogAdd('[14/15] Checking Google Drive configuration...');
+    sysLogAdd('[14/17] Checking Google Drive configuration...');
     try { const s = await getDoc(doc(db, 'settings', 'drive')); if (s.exists() && s.data().apiKey) { addResult('Google Drive', 'pass', `Folder: "${s.data().folderName || s.data().folderId}"`); passed++; } else { addResult('Google Drive', 'warn', 'Not configured — Admin → Drive tab'); } } catch (e) { addResult('Google Drive', 'fail', e.message); }
     setTestProgress(Math.round(14/TOTAL*100)); await pause(400);
 
     // T15
-    sysLogAdd('[15/15] Verifying activity logging system...');
+    sysLogAdd('[15/17] Verifying activity logging system...');
     try { const testLog = await addDoc(collection(db, 'adminLogs'), { action: 'system_test', message: 'System test completed', time: new Date().toISOString(), createdAt: serverTimestamp() }); if (testLog.id) { addResult('Activity Logging', 'pass', `Log system active — ID: ${testLog.id.substring(0, 10)}...`); passed++; sysLogAdd('  ✓ Activity log working'); } } catch (e) { addResult('Activity Logging', 'fail', e.message); }
+    setTestProgress(Math.round(15/TOTAL*100)); await pause(400);
+
+    // T16 — Department collections
+    sysLogAdd('[16/17] Checking department data collections...');
+    try {
+      const slugs = ['bca', 'bba', 'commerce', 'humanities', 'social-science'];
+      const snaps = await Promise.all(slugs.map(s => getDoc(doc(db, 'departments', s))));
+      const configured = snaps.filter(s => s.exists() && s.data().fullName).length;
+      const withFees   = snaps.filter(s => s.exists() && (s.data().feeStructure || []).length > 0).length;
+      const withHod    = snaps.filter(s => s.exists() && s.data().hod?.name).length;
+      if (configured === 0) {
+        addResult('Department Data', 'warn', 'Koi bhi department configure nahi hua — Admin → Departments tab se add karein');
+        sysLogAdd('  ⚠ No department data found');
+      } else {
+        addResult('Department Data', 'pass', `${configured}/5 configured | HOD: ${withHod} | Fee Structure: ${withFees}`);
+        sysLogAdd(`  ✓ ${configured}/5 departments active | HOD set: ${withHod}`);
+      }
+      passed++;
+    } catch (e) { addResult('Department Data', 'fail', e.message); sysLogAdd(`  ✗ ${e.message}`); }
+    setTestProgress(Math.round(16/TOTAL*100)); await pause(400);
+
+    // T17 — Contact Settings
+    sysLogAdd('[17/17] Checking contact settings...');
+    try {
+      const [contactSnap, dirSnap] = await Promise.all([
+        getDoc(doc(db, 'settings', 'contact')),
+        getDocs(collection(db, 'contactDirectory')),
+      ]);
+      const hasContact = contactSnap.exists();
+      const bhudaOk    = hasContact && !!contactSnap.data().bhuda?.phone;
+      const bankMoreOk = hasContact && !!contactSnap.data().bankMore?.phone;
+      const dirCount   = dirSnap.size;
+      if (!hasContact) {
+        addResult('Contact Settings', 'warn', 'settings/contact missing — Admin → Contact Settings tab se fill karein');
+        sysLogAdd('  ⚠ Contact settings not configured');
+      } else if (!bhudaOk || !bankMoreOk) {
+        addResult('Contact Settings', 'warn', `Partial: Bhuda ${bhudaOk?'✓':'✗'} | Bank More ${bankMoreOk?'✓':'✗'} | Directory: ${dirCount} entries`);
+        sysLogAdd(`  ⚠ Contact partially configured`);
+      } else {
+        addResult('Contact Settings', 'pass', `Both campuses configured | Directory: ${dirCount} entries`);
+        sysLogAdd(`  ✓ Contact OK — ${dirCount} directory entries`);
+      }
+      passed++;
+    } catch (e) { addResult('Contact Settings', 'fail', e.message); sysLogAdd(`  ✗ ${e.message}`); }
     setTestProgress(100);
+
     const score = Math.round(passed / TOTAL * 100);
     sysLogAdd(''); sysLogAdd('━'.repeat(42)); sysLogAdd(`COMPLETE: ${score}% — ${passed}/${TOTAL} tests passed`);
     if (score === 100) sysLogAdd('✓ ALL SYSTEMS OPERATIONAL');
@@ -1490,20 +1646,14 @@ try {
                     <div><label className="alabel">Department</label><select className="ainp" value={placeData.dept || ''} onChange={e=>setPlaceData(d=>({...d,dept:e.target.value}))}><option value="">Select</option>{[...teachDepts,...nonTeachDepts].map(d=><option key={d}>{d}</option>)}</select></div>
                     <div><label className="alabel">Achievement</label><input className="ainp" value={placeData.achievement || ''} onChange={e=>setPlaceData(d=>({...d,achievement:e.target.value}))} placeholder="Gold Medalist, Topper..." /></div>
                   </div>
-                  <div style={{ marginBottom: 16 }}>
-                    <label className="alabel">Student Photo</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 14, alignItems: 'center' }}>
-                      <label className="upload-zone">
-                        <div style={{ fontSize: 22, marginBottom: 6 }}>📷</div>
-                        <div style={{ fontWeight: 700, color: NAVY, fontSize: 13 }}>{placeUp ? `Uploading ${placeProg}%…` : 'Click to upload (auto-crop)'}</div>
-                        <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e=>e.target.files[0]&&handlePlaceFile(e.target.files[0])} />
-                        {placeUp && <div className="prog"><div className="prog-inner" style={{width:`${placeProg}%`}} /></div>}
-                      </label>
-                      {placeData.imageUrl && <img src={placeData.imageUrl} alt="" style={{ width: 90, height: 90, borderRadius: '50%', objectFit: 'cover', border: `4px solid ${GOLD}` }} />}
-                    </div>
-                  </div>
+                  <MediaPicker
+                    label="Student Photo"
+                    value={placeData.imageUrl}
+                    onChange={url => setPlaceData(d => ({ ...d, imageUrl: url }))}
+                    type="image"
+                  />
                   <div style={{ display: 'flex', gap: 10 }}>
-                    <button type="submit" className="abtn abtn-gold" disabled={loading||placeUp}>🚀 Save Story</button>
+                    <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 Save Story</button>
                     {editPlace && <button type="button" className="abtn abtn-outline" onClick={() => { setEditPlace(null); clearPlaceDraft(); }}>Cancel</button>}
                   </div>
                 </form>
@@ -1554,20 +1704,14 @@ try {
                     <div><label className="alabel">Email</label><input className="ainp" value={facData.email || ''} onChange={e=>setFacData(d=>({...d,email:e.target.value}))} type="email" placeholder="name@gnc.ac.in" /></div>
                     <div style={{ gridColumn: '1/-1' }}><label className="alabel">Specialization</label><input className="ainp" value={facData.specialization || ''} onChange={e=>setFacData(d=>({...d,specialization:e.target.value}))} placeholder="Financial Accounting, Data Structures..." /></div>
                   </div>
-                  <div style={{ marginBottom: 16 }}>
-                    <label className="alabel">Profile Photo</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 14, alignItems: 'center' }}>
-                      <label className="upload-zone">
-                        <div style={{ fontSize: 22, marginBottom: 6 }}>📷</div>
-                        <div style={{ fontWeight: 700, color: NAVY, fontSize: 13 }}>{facUp ? `${facProg}%…` : 'Upload Photo (auto-crop to circle)'}</div>
-                        <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e=>e.target.files[0]&&handleFacFile(e.target.files[0])} />
-                        {facUp && <div className="prog"><div className="prog-inner" style={{width:`${facProg}%`}} /></div>}
-                      </label>
-                      {facData.imageUrl && <img src={facData.imageUrl} alt="" style={{ width: 90, height: 90, borderRadius: 14, objectFit: 'cover', border: `3px solid ${GOLD}` }} />}
-                    </div>
-                  </div>
+                  <MediaPicker
+                    label="Profile Photo"
+                    value={facData.imageUrl}
+                    onChange={url => setFacData(d => ({ ...d, imageUrl: url }))}
+                    type="image"
+                  />
                   <div style={{ display: 'flex', gap: 10 }}>
-                    <button type="submit" className="abtn abtn-gold" disabled={loading||facUp}>🚀 Save Profile</button>
+                    <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 Save Profile</button>
                     {editFac && <button type="button" className="abtn abtn-outline" onClick={() => { setEditFac(null); clearFacDraft(); }}>Cancel</button>}
                   </div>
                 </form>
@@ -1606,6 +1750,20 @@ try {
             </div>
           )}
 
+          {/* ── DEPARTMENTS ──────────────────────────────────────── */}
+          {tab === 'departments' && (
+            <div className="fade-up">
+              <Suspense fallback={
+                <div style={{ textAlign: 'center', padding: 60, color: GOLD }}>
+                  <div style={{ fontSize: 36, marginBottom: 12 }}>🏛️</div>
+                  <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 13 }}>Loading Department Manager...</div>
+                </div>
+              }>
+                <AdminDepartmentTab />
+              </Suspense>
+            </div>
+          )}
+
           {/* ── SLIDER ───────────────────────────────────────────── */}
           {tab === 'slider' && (
             <div className="fade-up">
@@ -1621,15 +1779,14 @@ try {
                     <div><label className="alabel">Button Link</label><input className="ainp" value={slideData.btnLink} onChange={e=>setSlideData(d=>({...d,btnLink:e.target.value}))} placeholder="/admission/rule" /></div>
                     <div><label className="alabel">Display Order</label><input type="number" className="ainp" value={slideData.order} onChange={e=>setSlideData(d=>({...d,order:+e.target.value}))} /></div>
                   </div>
-                  <label className="upload-zone" style={{ marginBottom: 16 }}>
-                    <div style={{ fontSize: 24, marginBottom: 6 }}>🖼️</div>
-                    <div style={{ fontWeight: 700, color: NAVY, fontSize: 13 }}>{slideUp ? `${slideProg}%…` : 'Upload Background Image'}</div>
-                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e=>e.target.files[0]&&handleSlideFile(e.target.files[0])} />
-                    {slideUp && <div className="prog"><div className="prog-inner" style={{width:`${slideProg}%`}} /></div>}
-                  </label>
-                  {slideData.image && <img src={slideData.image} alt="" style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 10, marginBottom: 14 }} />}
+                  <MediaPicker
+                    label="Background Image"
+                    value={slideData.image}
+                    onChange={url => setSlideData(d => ({ ...d, image: url }))}
+                    type="image"
+                  />
                   <div style={{ display: 'flex', gap: 10 }}>
-                    <button type="submit" className="abtn abtn-gold" disabled={loading||slideUp}>🚀 Save Slide</button>
+                    <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 Save Slide</button>
                     {editSlide && <button type="button" className="abtn abtn-outline" onClick={() => { setEditSlide(null); setSlideData({title:'',subtitle:'',btnText:'',btnLink:'',image:'',order:0}); }}>Cancel</button>}
                   </div>
                 </form>
@@ -1656,66 +1813,39 @@ try {
 
           {/* ── MENU BUILDER ─────────────────────────────────────── */}
           {tab === 'menu_builder' && (
-  <div className="fade-up">
-    <p className="asec">🧭 Menu Editor</p>
-    <p className="asub">Navbar links add / edit / delete karein</p>
-    <div className="card-navy">
-      <div className="actitle">{editMenuId ? '✏️ Edit Menu Item' : '➕ Add New Menu Item'}</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
-        <div><label className="alabel">Label *</label><input className="ainp" value={newMenu.label} onChange={e=>setNewMenu(d=>({...d,label:e.target.value}))} placeholder="Menu Text" /></div>
-        <div><label className="alabel">URL *</label><input className="ainp" value={newMenu.href} onChange={e=>setNewMenu(d=>({...d,href:e.target.value}))} placeholder="/about-us/new-page" /></div>
-        {!editMenuId && (
-          <div>
-            <label className="alabel">Parent Menu</label>
-            <select className="ainp" value={newMenu.parentId} onChange={e=>setNewMenu(d=>({...d,parentId:e.target.value}))}>
-              <option value="top">Top Level (L1)</option>
-              {flatMenus.filter(m=>m.level<2).map(m=><option key={m.id} value={m.id}>{m.level===0?'└─ ':m.level===1?'  └─ ':''}{m.path}</option>)}
-            </select>
-          </div>
-        )}
-      </div>
-      <div style={{ display:'flex', gap:10 }}>
-        {editMenuId ? (
-          <>
-            <button className="abtn abtn-gold" onClick={() => {
-              const nav = JSON.parse(JSON.stringify(navData));
-              const idx = editMenuId.split('-');
-              if (idx.length === 1) { nav[idx[0]].label = newMenu.label; nav[idx[0]].href = newMenu.href; }
-              else if (idx.length === 2) { nav[idx[0]].sub[idx[1]].label = newMenu.label; nav[idx[0]].sub[idx[1]].href = newMenu.href; }
-              else { nav[idx[0]].sub[idx[1]].sub[idx[2]].label = newMenu.label; nav[idx[0]].sub[idx[1]].sub[idx[2]].href = newMenu.href; }
-              saveNav(nav);
-              setEditMenuId(null);
-              setNewMenu({ label: '', href: '', parentId: 'top' });
-            }} disabled={!newMenu.label||!newMenu.href}>💾 Update Item</button>
-            <button className="abtn abtn-outline" onClick={() => { setEditMenuId(null); setNewMenu({ label:'', href:'', parentId:'top' }); }}>Cancel</button>
-          </>
-        ) : (
-          <button className="abtn abtn-navy" onClick={addMenu} disabled={!newMenu.label||!newMenu.href}>➕ Add Menu Item</button>
-        )}
-      </div>
-    </div>
-    <div className="card">
-      <div className="actitle">All Menu Items ({flatMenus.length})</div>
-      {flatMenus.map(m => (
-        <div key={m.id} className={`arow ${editMenuId===m.id?'selected':''}`} style={{ paddingLeft: 16 + m.level * 22 }}>
-          <span style={{ fontSize: 11, color: NAVY, fontWeight: 900, minWidth: 24, flexShrink: 0 }}>{'L'+(m.level+1)}</span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 700, color: NAVY, fontSize: 14 }}>{m.label}</div>
-            <div style={{ fontSize: 11, color: T.t3, fontFamily: 'monospace' }}>{m.href || '(no link)'}</div>
-          </div>
-          <div style={{ display:'flex', gap:8 }}>
-            <button className="abtn abtn-outline abtn-sm" onClick={() => {
-              setEditMenuId(m.id);
-              setNewMenu({ label: m.label, href: m.href, parentId: 'top' });
-              window.scrollTo({top:0,behavior:'smooth'});
-            }}>✏️</button>
-            <button className="abtn abtn-red abtn-sm" onClick={() => delMenu(m.id)}>🗑️</button>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
+            <div className="fade-up">
+              <p className="asec">🧭 Menu Editor</p>
+              <p className="asub">Navbar links add / edit / delete karein</p>
+              <div className="card-navy">
+                <div className="actitle">➕ Add New Menu Item</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
+                  <div><label className="alabel">Label *</label><input className="ainp" value={newMenu.label} onChange={e=>setNewMenu(d=>({...d,label:e.target.value}))} placeholder="Menu Text" /></div>
+                  <div><label className="alabel">URL *</label><input className="ainp" value={newMenu.href} onChange={e=>setNewMenu(d=>({...d,href:e.target.value}))} placeholder="/about-us/new-page" /></div>
+                  <div>
+                    <label className="alabel">Parent Menu</label>
+                    <select className="ainp" value={newMenu.parentId} onChange={e=>setNewMenu(d=>({...d,parentId:e.target.value}))}>
+                      <option value="top">Top Level (L1)</option>
+                      {flatMenus.filter(m=>m.level<2).map(m=><option key={m.id} value={m.id}>{m.level===0?'└─ ':m.level===1?'  └─ ':''}{m.path}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <button className="abtn abtn-navy" onClick={addMenu} disabled={!newMenu.label||!newMenu.href}>➕ Add Menu Item</button>
+              </div>
+              <div className="card">
+                <div className="actitle">All Menu Items ({flatMenus.length})</div>
+                {flatMenus.map(m => (
+                  <div key={m.id} className="arow" style={{ paddingLeft: 16 + m.level * 22 }}>
+                    <span style={{ fontSize: 11, color: NAVY, fontWeight: 900, minWidth: 24, flexShrink: 0 }}>{'L'+(m.level+1)}</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, color: NAVY, fontSize: 14 }}>{m.label}</div>
+                      <div style={{ fontSize: 11, color: T.t3, fontFamily: 'monospace' }}>{m.href || '(no link)'}</div>
+                    </div>
+                    <button className="abtn abtn-red abtn-sm" onClick={() => delMenu(m.id)}>🗑️</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* ── PAGES ────────────────────────────────────────────── */}
           {tab === 'pages' && (
@@ -1789,16 +1919,15 @@ try {
                 <form onSubmit={saveGallery}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
                     <div><label className="alabel">Title *</label><input className="ainp" value={galData.title} onChange={e=>setGalData(d=>({...d,title:e.target.value}))} placeholder="Annual Function 2024" required /></div>
-                    <div><label className="alabel">Category</label><select className="ainp" value={galData.cat} onChange={e=>setGalData(d=>({...d,cat:e.target.value}))}>{['Seminars','Cultural Fest','Guest Visit','NSS Programs','Sports','Campus','Departments'].map(c=><option key={c}>{c}</option>)}</select></div>
+                    <div><label className="alabel">Category</label><select className="ainp" value={galData.cat} onChange={e=>setGalData(d=>({...d,cat:e.target.value}))}>{['Seminars','Cultural','NSS','Sports','Campus','Departments','Achievements'].map(c=><option key={c}>{c}</option>)}</select></div>
                   </div>
-                  <label className="upload-zone">
-                    <div style={{ fontSize: 32, marginBottom: 8 }}>📸</div>
-                    <div style={{ fontWeight: 700, color: NAVY }}>{galUp ? `Uploading ${galProg}%…` : 'Click to Upload Photo'}</div>
-                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e=>e.target.files[0]&&handleGalFile(e.target.files[0])} />
-                    {galUp && <div className="prog" style={{ maxWidth: 200, margin: '10px auto 0' }}><div className="prog-inner" style={{width:`${galProg}%`}} /></div>}
-                  </label>
-                  {galData.src && <img src={galData.src} alt="" style={{ width: 140, height: 90, objectFit: 'cover', borderRadius: 10, marginTop: 12 }} />}
-                  <button type="submit" className="abtn abtn-navy" style={{ marginTop: 16 }} disabled={loading||galUp||!galData.src}>🚀 Add to Gallery</button>
+                  <MediaPicker
+                    label="Gallery Photo"
+                    value={galData.src}
+                    onChange={url => setGalData(d => ({ ...d, src: url }))}
+                    type="image"
+                  />
+                  <button type="submit" className="abtn abtn-navy" style={{ marginTop: 16 }} disabled={loading||!galData.src}>🚀 Add to Gallery</button>
                 </form>
               </div>
               <SectionSearch value={galSearch} onChange={setGalSearch} placeholder="Search photos..." />
@@ -1836,7 +1965,15 @@ try {
                   <div style={{ marginBottom: 14 }}><label className="alabel">Notice Text *</label><textarea className="ainp" rows={3} value={noticeData.text || ''} onChange={e=>setNoticeData(d=>({...d,text:e.target.value}))} required placeholder="Notice content..." /></div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 14, marginBottom: 14 }}>
                     <div><label className="alabel">Type</label><select className="ainp" value={noticeData.type || 'General'} onChange={e=>setNoticeData(d=>({...d,type:e.target.value}))}>{['General','Examination','Admission','Result','Holiday','Scholarship','Sports'].map(t=><option key={t}>{t}</option>)}</select></div>
-                    <div><label className="alabel">Link (PDF/URL)</label><input className="ainp" value={noticeData.link || ''} onChange={e=>setNoticeData(d=>({...d,link:e.target.value}))} placeholder="https://..." /></div>
+                    <div style={{ gridColumn: '1/-1' }}>
+                      <MediaPicker
+                        label="Link (PDF ya Document URL — optional)"
+                        value={noticeData.link || ''}
+                        onChange={url => setNoticeData(d => ({ ...d, link: url }))}
+                        type="pdf"
+                        compact={true}
+                      />
+                    </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 22 }}>
                       <Toggle checked={!!noticeData.isNew} onChange={()=>setNoticeData(d=>({...d,isNew:!d.isNew}))} label="Mark as NEW" color={T.red} />
                       <Toggle checked={!!noticeData.pinned} onChange={()=>setNoticeData(d=>({...d,pinned:!d.pinned}))} label="Pin to Top" color={NAVY} />
@@ -1865,7 +2002,7 @@ try {
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <button className="abtn abtn-outline abtn-sm" onClick={()=>{setEditNotice(n);setNoticeData({text:n.text||'',link:n.link||'',type:n.type||'General',isNew:!!n.isNew,pinned:!!n.pinned});window.scrollTo({top:0,behavior:'smooth'});}}>✏️</button>
-                      <button className="abtn abtn-red abtn-sm" onClick={()=>softDelete('notices',n.id,n,(n.text||'').replace(/<[^>]*>/g,'').substring(0,30))}>🗑️</button>
+                      <button className="abtn abtn-red abtn-sm" onClick={()=>softDelete('notices',n.id,n,(n.text||'').substring(0,30))}>🗑️</button>
                     </div>
                   </div>
                 ))}
@@ -1884,7 +2021,15 @@ try {
                   <div style={{ marginBottom: 14 }}><label className="alabel">News Text *</label><textarea className="ainp" rows={3} value={annData.text || ''} onChange={e=>setAnnData(d=>({...d,text:e.target.value}))} required placeholder="News content..." /></div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
                     <div><label className="alabel">Type</label><select className="ainp" value={annData.type || 'News'} onChange={e=>setAnnData(d=>({...d,type:e.target.value}))}>{['News','Achievement','Update','Result','Award'].map(t=><option key={t}>{t}</option>)}</select></div>
-                    <div><label className="alabel">Link</label><input className="ainp" value={annData.link || ''} onChange={e=>setAnnData(d=>({...d,link:e.target.value}))} placeholder="https://..." /></div>
+                    <div>
+                      <MediaPicker
+                        label="Link (News article ya PDF — optional)"
+                        value={annData.link || ''}
+                        onChange={url => setAnnData(d => ({ ...d, link: url }))}
+                        type="any"
+                        compact={true}
+                      />
+                    </div>
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
                     <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editAnn?'Update':'Publish'}</button>
@@ -1901,7 +2046,7 @@ try {
                     <div style={{ flex: 1, fontWeight: 600, color: NAVY, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} dangerouslySetInnerHTML={{__html: DOMPurify.sanitize((a.text||'').substring(0,80))}} />
                     <div style={{ display: 'flex', gap: 8 }}>
                       <button className="abtn abtn-outline abtn-sm" onClick={()=>{setEditAnn(a);setAnnData({text:a.text||'',link:a.link||'',type:a.type||'News'});window.scrollTo({top:0,behavior:'smooth'});}}>✏️</button>
-                      <button className="abtn abtn-red abtn-sm" onClick={()=>softDelete('announcements', a.id, a, (a.text||'').replace(/<[^>]*>/g,'').substring(0,30))}>🗑️</button>
+                      <button className="abtn abtn-red abtn-sm" onClick={()=>softDelete('announcements',a.id,a,(a.text||'').substring(0,30))}>🗑️</button>
                     </div>
                   </div>
                 ))}
@@ -1920,7 +2065,15 @@ try {
                 <form onSubmit={saveDoc}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
                     <div><label className="alabel">Title *</label><input className="ainp" value={docData.title || ''} onChange={e=>setDocData(d=>({...d,title:e.target.value}))} placeholder="NAAC Self Study Report" required /></div>
-                    <div><label className="alabel">PDF Link *</label><input className="ainp" value={docData.link || ''} onChange={e=>setDocData(d=>({...d,link:e.target.value}))} placeholder="https://drive.google.com/..." required /></div>
+                    <div style={{ gridColumn: '1/-1' }}>
+                      <MediaPicker
+                        label="PDF Link * (Google Drive public link ya public/pdfs/ path)"
+                        value={docData.link || ''}
+                        onChange={url => setDocData(d => ({ ...d, link: url }))}
+                        type="pdf"
+                        compact={true}
+                      />
+                    </div>
                     <div><label className="alabel">Type</label><select className="ainp" value={docData.type || 'Document'} onChange={e=>setDocData(d=>({...d,type:e.target.value}))}>{['Document','Report','Syllabus','Circular','Result','Regulation','Affiliation'].map(t=><option key={t}>{t}</option>)}</select></div>
                     <div><label className="alabel">Target Page (optional)</label><input className="ainp" value={docData.targetPage || ''} onChange={e=>setDocData(d=>({...d,targetPage:e.target.value}))} placeholder="/naac/ssr-2nd-cycle/..." /></div>
                   </div>
@@ -1971,15 +2124,20 @@ try {
                   </div>
                   {evtData.status === 'recent' && (
                     <div style={{ background: BG, padding: 16, borderRadius: 12, marginBottom: 14 }}>
-                      <label className="alabel">Post-Event Photo</label>
-                      <label className="upload-zone" style={{ marginBottom: 12 }}>
-                        <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e=>e.target.files[0]&&handleEvtFile(e.target.files[0])} />
-                        <div style={{ fontSize: 20 }}>{evtUp ? `${evtProg}%…` : '📷 Upload Event Photo'}</div>
-                        {evtUp && <div className="prog"><div className="prog-inner" style={{width:`${evtProg}%`}} /></div>}
-                      </label>
-                      {evtData.imageUrl && <img src={evtData.imageUrl} alt="" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }} />}
-                      <label className="alabel">PDF Report Link</label>
-                      <input className="ainp" value={evtData.reportLink || ''} onChange={e=>setEvtData(d=>({...d,reportLink:e.target.value}))} placeholder="https://..." />
+                      <MediaPicker
+                        label="Post-Event Photo"
+                        value={evtData.imageUrl}
+                        onChange={url => setEvtData(d => ({ ...d, imageUrl: url }))}
+                        type="image"
+                        compact={true}
+                      />
+                      <MediaPicker
+                        label="PDF Report Link (Google Drive ya direct URL)"
+                        value={evtData.reportLink}
+                        onChange={url => setEvtData(d => ({ ...d, reportLink: url }))}
+                        type="pdf"
+                        compact={true}
+                      />
                     </div>
                   )}
                   <div style={{ marginBottom: 14 }}>
@@ -1987,7 +2145,7 @@ try {
                     <JoditEditor value={evtData.desc || ''} config={joditCfg} onBlur={c=>setEvtData(d=>({...d,desc:c}))} />
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
-                    <button type="submit" className="abtn abtn-gold" disabled={loading||evtUp}>🚀 {editEvent?'Update':'Publish'} Event</button>
+                    <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editEvent?'Update':'Publish'} Event</button>
                     {editEvent && <button type="button" className="abtn abtn-outline" onClick={()=>{setEditEvent(null);clearEvtDraft();}}>Cancel</button>}
                   </div>
                 </form>
@@ -2018,72 +2176,7 @@ try {
               <MiniLog logs={getSectionLog('events')} />
             </div>
           )}
-          {/* ── CONTACT ──────────────────────────────── */}
-          {tab === 'contact' && (
-            <div className="fade-up">
-              <p className="asec">📞 Contact Settings</p>
-              <p className="asub">Campus info aur Administration Directory manage karo</p>
 
-              {/* Campus Info */}
-              {['bhuda', 'bankMore'].map(campus => (
-                <div key={campus} style={{ background:'#fff', border:'1px solid #e2e8f0', borderRadius:14, padding:'22px 24px', marginBottom:20 }}>
-                  <h3 style={{ fontWeight:800, marginBottom:16, color:'#0f2347' }}>
-                    {campus === 'bhuda' ? '🏛️ Bhuda Campus (Boys Wing)' : '🏢 Bank More Campus (Girls Wing)'}
-                  </h3>
-                  <div className="agrid2">
-                    <div>
-                      <label className="alabel">Phone Number</label>
-                      <input className="ainp" value={contactData[campus].phone}
-                        onChange={e => setContactData(d => ({ ...d, [campus]: { ...d[campus], phone: e.target.value } }))}
-                        placeholder="+91 XXXXX XXXXX" />
-                    </div>
-                    <div>
-                      <label className="alabel">Email</label>
-                      <input className="ainp" value={contactData[campus].email}
-                        onChange={e => setContactData(d => ({ ...d, [campus]: { ...d[campus], email: e.target.value } }))}
-                        placeholder="info@gncollege.org" />
-                    </div>
-                  </div>
-                  <div style={{ marginTop:12 }}>
-                    <label className="alabel">Address (newline se alag karo)</label>
-                    <textarea className="ainp" rows={2} value={contactData[campus].address}
-                      onChange={e => setContactData(d => ({ ...d, [campus]: { ...d[campus], address: e.target.value } }))}
-                      placeholder="College address..." />
-                  </div>
-                </div>
-              ))}
-              <button className="abtn abtn-navy" onClick={saveContact} disabled={loading}>💾 Save Campus Info</button>
-
-              {/* Directory */}
-              <p className="asec" style={{ marginTop:32 }}>👥 Administration Directory</p>
-              <div style={{ background:'#fff', border:'1px solid #e2e8f0', borderRadius:14, padding:'22px 24px', marginBottom:16 }}>
-                <div className="agrid2">
-                  <div><label className="alabel">Title / Role *</label><input className="ainp" value={newDirEntry.title} onChange={e => setNewDirEntry(d=>({...d,title:e.target.value}))} placeholder="BCA Coordinator" /></div>
-                  <div><label className="alabel">Name *</label><input className="ainp" value={newDirEntry.name} onChange={e => setNewDirEntry(d=>({...d,name:e.target.value}))} placeholder="Prof. XYZ" /></div>
-                  <div><label className="alabel">Phone</label><input className="ainp" value={newDirEntry.phone} onChange={e => setNewDirEntry(d=>({...d,phone:e.target.value}))} placeholder="+91 XXXXX XXXXX" /></div>
-                  <div><label className="alabel">Icon (emoji)</label><input className="ainp" value={newDirEntry.icon} onChange={e => setNewDirEntry(d=>({...d,icon:e.target.value}))} placeholder="👤" style={{fontSize:20}} /></div>
-                  <div><label className="alabel">Display Order</label><input className="ainp" type="number" value={newDirEntry.order} onChange={e => setNewDirEntry(d=>({...d,order:+e.target.value}))} placeholder="1" /></div>
-                </div>
-                <button className="abtn abtn-gold" style={{marginTop:12}} onClick={addDirEntry}>➕ Add Entry</button>
-              </div>
-
-              {/* List */}
-              {directoryList.map(p => (
-                <div key={p.id} style={{ background:'#f8fafc', border:'1px solid #e2e8f0', borderRadius:10, padding:'14px 18px', marginBottom:8, display:'flex', justifyContent:'space-between', alignItems:'center', gap:12 }}>
-                  <div style={{ display:'flex', gap:12, alignItems:'center' }}>
-                    <span style={{ fontSize:24 }}>{p.icon}</span>
-                    <div>
-                      <div style={{ fontWeight:800, fontSize:13.5, color:'#0f2347' }}>{p.name}</div>
-                      <div style={{ fontSize:12, color:'#64748b' }}>{p.title} • {p.phone || 'No phone'}</div>
-                    </div>
-                  </div>
-                  <button className="abtn" style={{ background:'#fef2f2', color:'#dc2626', border:'1px solid #fecaca', padding:'6px 14px' }}
-                    onClick={() => deleteDirEntry(p.id)}>🗑️ Delete</button>
-                </div>
-              ))}
-              {directoryList.length === 0 && <p style={{ color:'#94a3b8', fontSize:13 }}>Koi entry nahi — upar se add karo</p>}
-            </div>
-          )}
           {/* ── YOUTUBE ──────────────────────────────────────────── */}
           {tab === 'youtube' && (
             <div className="fade-up">
@@ -2193,9 +2286,32 @@ try {
                     <Toggle checked={siteCfg.maintenanceMode||false} onChange={()=>setSiteCfg(d=>({...d,maintenanceMode:!d.maintenanceMode}))} label={siteCfg.maintenanceMode ? '🔴 Site is DOWN for maintenance' : '🟢 Site is LIVE'} color={T.red} />
                   </div>
                 </div>
+                <div className="settings-group">
+                  <div className="settings-group-title">🖼️ ImgBB — Free Image Hosting</div>
+                  <div style={{ background: '#fffbeb', border: '1px solid #fed7aa', borderRadius: 10, padding: '10px 14px', marginBottom: 14, fontSize: 12.5, color: '#92400e', lineHeight: 1.7 }}>
+                    <strong>ImgBB Free API Key kaise banayein:</strong><br />
+                    1. <a href="https://imgbb.com/signup" target="_blank" rel="noreferrer" style={{ color: '#b45309' }}>imgbb.com/signup</a> pe Free account banayein<br />
+                    2. <a href="https://api.imgbb.com/" target="_blank" rel="noreferrer" style={{ color: '#b45309' }}>api.imgbb.com</a> → apni API key copy karein<br />
+                    3. Neeche paste karein aur Save karein — Lifetime Free, no credit card!
+                  </div>
+                  <div className="settings-row">
+                    <label className="alabel" style={{ minWidth: 140, margin: 0 }}>ImgBB API Key</label>
+                    <input className="ainp" value={siteCfg.imgbbKey||''} onChange={e=>{const k=e.target.value; setSiteCfg(d=>({...d,imgbbKey:k})); setImgbbKey(k);}} placeholder="Paste your ImgBB API key here..." style={{ fontFamily: 'monospace' }} />
+                  </div>
+                  {siteCfg.imgbbKey && (
+                    <div style={{ fontSize: 12, color: '#065f46', background: '#d1fae5', padding: '6px 12px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      ✅ ImgBB key set — saare upload tabs pe kaam karega
+                    </div>
+                  )}
+                </div>
                 <button type="submit" className="abtn abtn-gold" disabled={siteLoading}>💾 Save All Settings</button>
               </form>
             </div>
+          )}
+
+          {/* ── CONTACT SETTINGS ─────────────────────────────────── */}
+          {tab === 'contact' && (
+            <ContactSettingsTab />
           )}
 
           {/* ── ACTIVITY LOG ─────────────────────────────────────── */}
@@ -2253,12 +2369,12 @@ try {
           {tab === 'system_test' && (
             <div className="fade-up">
               <p className="asec">🛡️ System Test Suite</p>
-              <p className="asub">15-phase deep scan — har module ka health check. Download PDF report.</p>
+              <p className="asub">17-phase deep scan — har module ka health check. Download PDF report.</p>
               <div className="sys-bg">
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20, borderBottom:'1px solid rgba(244,160,35,.25)', paddingBottom:18 }}>
                   <div>
                     <div style={{ color:GOLD, fontSize:22, fontWeight:900, fontFamily:"'JetBrains Mono',monospace", letterSpacing:-1 }}>{'>_ GNC.SYS.DIAGNOSTICS'}</div>
-                    <div style={{ color:'rgba(244,160,35,.5)', fontSize:12, fontFamily:"'JetBrains Mono',monospace", marginTop:3 }}>[ 15-Phase Deep Scan | Admin Panel v9.1 ]</div>
+                    <div style={{ color:'rgba(244,160,35,.5)', fontSize:12, fontFamily:"'JetBrains Mono',monospace", marginTop:3 }}>[ 17-Phase Deep Scan | Admin Panel v9.1 ]</div>
                   </div>
                   {testScore !== null && (
                     <div style={{ padding:'10px 20px', borderRadius:10, border:`2px solid ${testScore>=90?T.green:testScore>=70?GOLD:T.red}`, color:testScore>=90?T.green:testScore>=70?GOLD:T.red, fontWeight:900, fontSize:24, fontFamily:"'JetBrains Mono',monospace", background:`rgba(${testScore>=90?'16,185,129':testScore>=70?'244,160,35':'239,68,68'},.08)` }}>
@@ -2285,11 +2401,12 @@ try {
                 {!testRunning && testResults.length === 0 && (
                   <div style={{ textAlign:'center', padding:'44px 20px' }}>
                     <div style={{ fontSize:60, marginBottom:18, filter:`drop-shadow(0 0 20px ${GOLD})` }}>🛡️</div>
-                    <div style={{ color:GOLD, fontSize:18, fontWeight:900, fontFamily:"'JetBrains Mono',monospace", marginBottom:8 }}>15-PHASE DEEP SCAN READY</div>
+                    <div style={{ color:GOLD, fontSize:18, fontWeight:900, fontFamily:"'JetBrains Mono',monospace", marginBottom:8 }}>17-PHASE DEEP SCAN READY</div>
                     <div style={{ color:'rgba(255,255,255,.35)', fontSize:13, marginBottom:28, lineHeight:1.8 }}>
                       Vite • Firebase Init • Firestore Read/Write/Delete<br/>
                       Navbar • Site Settings • ImgBB • Flash Alerts<br/>
-                      Faculty • Alumni • Content Health • YouTube • Drive • Activity Log
+                      Faculty • Alumni • Content Health • YouTube • Drive<br/>
+                      Activity Log • <span style={{ color: GOLD }}>Department Data • Contact Settings</span>
                     </div>
                     <button onClick={runTest} className="sys-btn">▶ EXECUTE FULL DIAGNOSTIC</button>
                   </div>
@@ -2359,7 +2476,6 @@ try {
               </div>
             </div>
           )}
-          {tab === 'departments' && <AdminDepartmentTab />}
 
           {/* ── PREVIEW MODAL ─────────────────────────────────────── */}
           {showPreview && (
