@@ -1,9 +1,11 @@
 // src/firebase.js
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
-import { getAuth } from "firebase/auth"; // ✅ Auth added for AdminLogin
+// ✅ FIXED: getStorage import + export removed — project ImgBB use karta hai
+// ✅ Auth kept for AdminLogin
+// ✅ All credentials from .env only — koi bhi hardcoded value nahi
 
+import { initializeApp } from "firebase/app";
+import { getFirestore }  from "firebase/firestore";
+import { getAuth }       from "firebase/auth";
 
 const firebaseConfig = {
   apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
@@ -16,6 +18,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-export const db      = getFirestore(app);
-export const storage = getStorage(app);
-export const auth    = getAuth(app); // ✅ AdminLogin ke liye export
+export const db   = getFirestore(app);
+export const auth = getAuth(app);
+// ❌ storage export NAHI — project ImgBB use karta hai Firebase Storage nahi

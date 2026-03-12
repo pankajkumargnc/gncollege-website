@@ -435,7 +435,7 @@ const PageViewer = ({ page, loading: externalLoading }) => {
 };
 
 // Standalone version — fetches its own data
-const PageViewerStandalone = () => {
+export const PageViewerStandalone = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage]       = useState(null);
 
