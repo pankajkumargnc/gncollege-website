@@ -20,7 +20,7 @@
 | Database | Firebase Firestore |
 | Auth | Firebase Authentication |
 | Storage | ImgBB (Free, Lifetime) — **No Firebase Storage** |
-| Router | React Router DOM (HashRouter / BrowserRouter with base `/gncollege-website/`) |
+| Router | React Router DOM (HashRouter) — URLs use `#`: `site/#/admin` |
 | Sanitization | DOMPurify |
 | Notifications | react-hot-toast |
 | Animations | AOS (Animate On Scroll) |
@@ -32,24 +32,17 @@
 ```
 gncollege-website/
 ├── public/
-│   ├── images/               ← College photos, logos, fallback images
-│   │   ├── college_photo.jpg ← DEFAULT FALLBACK IMAGE (always exists)
+│   ├── images/
+│   │   ├── college_photo.jpg  ← DEFAULT FALLBACK IMAGE (always exists)
 │   │   ├── logo.png
 │   │   ├── principal.jpg
 │   │   ├── vice_principal.jpg
-│   │   ├── naac.png
-│   │   ├── bbmku.png
-│   │   ├── ugc.png
-│   │   ├── campus1.jpg
-│   │   ├── campus2.jpg
-│   │   ├── library.jpg
-│   │   ├── lab.jpg
-│   │   └── seminar.jpg
-│   └── pdfs/                 ← Static PDFs (prospectus, syllabus, forms)
-│       ├── prospectus.pdf
-│       ├── syllabus.pdf
-│       ├── fee-structure.pdf
-│       └── admission-form.pdf
+│   │   ├── naac.png, bbmku.png, ugc.png
+│   │   ├── campus1.jpg, campus2.jpg
+│   │   └── library.jpg, lab.jpg, seminar.jpg
+│   └── pdfs/
+│       ├── prospectus.pdf, syllabus.pdf
+│       ├── fee-structure.pdf, admission-form.pdf
 │
 ├── src/
 │   ├── App.jsx               ← Root component, all routes, ErrorBoundary wrapper
@@ -57,12 +50,12 @@ gncollege-website/
 │   ├── constants.js          ← Central constants (COLORS, COLLEGE, COLLECTIONS, enums)
 │   │
 │   ├── styles/
-│   │   └── colors.js         ← COLORS object (import from here OR from constants.js)
+│   │   └── colors.js         ← COLORS object
 │   │
 │   ├── data/
-│   │   └── db.js             ← Static data: navLinks, SOCIAL_LINKS, static content
+│   │   └── db.js             ← Static data: navLinks, SOCIAL_LINKS
 │   │
-│   ├── pages/                ← Public-facing pages
+│   ├── pages/
 │   │   ├── HomePage.jsx
 │   │   ├── Contact.jsx
 │   │   ├── CollegeProfile.jsx
@@ -71,33 +64,27 @@ gncollege-website/
 │   │   ├── EventsPage.jsx
 │   │   ├── NewsPage.jsx
 │   │   ├── VideoGallery.jsx
-│   │   ├── DepartmentPage.jsx ← Universal template (all 5 depts + hub)
-│   │   └── StaffPage.jsx
+│   │   ├── DepartmentPage.jsx   ← Universal template (all 5 depts + hub)
+│   │   ├── StaffPage.jsx
+│   │   └── LeadershipPage.jsx   ← ✅ NEW: Presidents / Secretaries / Principals
 │   │
-│   └── components/           ← Reusable components + Admin Panel
-│       ├── Navbar.jsx
-│       ├── Footer.jsx
-│       ├── TopBar.jsx
-│       ├── Breadcrumbs.jsx
-│       ├── AlertBanner.jsx
+│   └── components/
+│       ├── Navbar.jsx, Footer.jsx, TopBar.jsx
+│       ├── Breadcrumbs.jsx, AlertBanner.jsx
 │       ├── ErrorBoundary.jsx
-│       ├── HeroSlider.jsx
-│       ├── PlacementsSection.jsx
-│       ├── NotificationSection.jsx
-│       ├── HomeFeatures.jsx
-│       ├── QuickActionNav.jsx
-│       ├── PageViewer.jsx
-│       ├── Ticker.jsx (lazy)
+│       ├── HeroSlider.jsx, PlacementsSection.jsx
+│       ├── NotificationSection.jsx, HomeFeatures.jsx
+│       ├── QuickActionNav.jsx, Ticker.jsx (lazy)
 │       ├── ImageCropper.jsx (lazy)
-│       ├── MediaPicker.jsx    ← Universal image/pdf picker (ImgBB + local + URL)
+│       ├── MediaPicker.jsx      ← Universal image/pdf picker
+│       ├── PageViewer.jsx       ← ✅ UPDATED: loading prop, gnc-prose CSS, no standalone mode
 │       ├── AdminLogin.jsx
-│       ├── AdminPanel.jsx     ← Main admin panel (lazy loaded)
-│       └── AdminDepartmentTab.jsx ← Departments tab (lazy loaded inside AdminPanel)
-│       ├── LeadershipTab.jsx  ← Leadership profiles (Principal/VP messages)
-│       └── LeadershipAdminTab.jsx ← Admin tab for leadership management
+│       ├── AdminPanel.jsx       ← ✅ UPDATED: Jodit resizable, preview modal gnc-prose
+│       ├── AdminDepartmentTab.jsx (lazy inside AdminPanel)
+│       └── AdminLeadershipTab.jsx ← ✅ NEW: Admin tab for Presidents/Secretaries/Principals
 │
-├── vite.config.js             ← Terser minification, chunks, no sourcemaps
-├── CLAUDE.md                  ← THIS FILE
+├── vite.config.js
+├── CLAUDE.md                    ← THIS FILE
 └── package.json
 ```
 
@@ -110,47 +97,64 @@ gncollege-website/
 import { initializeApp } from 'firebase/app';
 import { getFirestore }  from 'firebase/firestore';
 import { getAuth }       from 'firebase/auth';
-// NOTE: getStorage is NOT used — we use ImgBB instead
-
-const firebaseConfig = { /* project config */ };
-const app = initializeApp(firebaseConfig);
+// storage NAHI — ImgBB use hota hai
 
 export const db   = getFirestore(app);
 export const auth = getAuth(app);
-// export const storage = getStorage(app); // NOT NEEDED — ImgBB use hota hai
+```
+
+### Firebase Credentials (.env)
+```
+VITE_FIREBASE_API_KEY=AIzaSyDeJWUUoU_MJ4ubpbfaLZemvnEr82LF5YA
+VITE_FIREBASE_AUTH_DOMAIN=gnc-college-web.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=gnc-college-web
+VITE_FIREBASE_STORAGE_BUCKET=gnc-college-web.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=78901559372
+VITE_FIREBASE_APP_ID=1:78901559372:web:f76cb101f8aec2daadb4e9
 ```
 
 ### ⚠️ Critical: No Firebase Storage
-- **Storage = ImgBB only.** Firebase Storage kabhi mat use karo.
-- `AdminDepartmentTab.jsx` mein `firebase/storage` import NAHI hai.
-- PDF files → Google Drive public link ya `public/pdfs/` local path.
-- Images → ImgBB API (key Settings tab se configurable).
+- Storage = ImgBB only
+- `AdminDepartmentTab.jsx` mein `firebase/storage` import NAHI hai
+- PDF → Google Drive public link ya `public/pdfs/`
+- Images → ImgBB API (key Settings tab se)
 
 ---
 
 ## 3. ALL FIRESTORE COLLECTIONS
 
-### Collections Map
-
 | Collection | Purpose | Key Fields |
 |------------|---------|-----------|
-| `notices` | Notice board posts | `text, type, link, isNew, pinned, createdAt` |
+| `notices` | Notice board | `text, type, link, isNew, pinned, createdAt` |
 | `announcements` | News & updates | `text, type, link, createdAt` |
 | `events` | College events | `title, desc, day, month, type, location, status, imageUrl, reportLink, date` |
 | `gallery` | Photo gallery | `title, cat, src, createdAt` |
-| `placements` | Alumni Wall of Fame | `name, year, company, package, imageUrl, dept, achievement, createdAt` |
-| `pdfReports` | Document archive | `title, type, link, targetPage, createdAt` |
-| `faculties` | Teaching + Non-Teaching staff | `name, staffType, dept, qual, desig, imageUrl, email, specialization, createdAt` |
-| `sliderSlides` | Hero slider images | `title, subtitle, btnText, btnLink, image, order, createdAt` |
-| `pages` | Dynamic CMS pages | `title, slug, path, content, metaDesc, isLive, createdAt` |
-| `alerts` | Flash alert banner | `text, type, isActive, link, createdAt` |
-| `departments` | Dept page data | See schema below |
-| `contactDirectory` | Contact page directors list | `icon, title, name, phone, order` |
-| `adminLogs` | Admin activity log | `action, message, section, time` |
-| `_sysTest` | System test write check | `test, time` |
-| `leadership` | Leadership profiles | `name, designation, photo, message, order, type` |
+| `placements` | Alumni Wall | `name, year, company, package, imageUrl, dept, achievement, createdAt` |
+| `pdfReports` | Documents | `title, type, link, targetPage, createdAt` |
+| `faculties` | Staff | `name, staffType, dept, qual, desig, imageUrl, email, specialization, createdAt` |
+| `sliderSlides` | Hero slider | `title, subtitle, btnText, btnLink, image, order, createdAt` |
+| `pages` | CMS pages | `title, slug, path, content, seo, createdAt` |
+| `alerts` | Flash banner | `text, type, isActive, link, createdAt` |
+| `departments` | Dept data | slug as doc ID |
+| `contactDirectory` | Contact directors | `icon, title, name, phone, order` |
+| `adminLogs` | Activity log | `action, message, section, time` |
+| `_sysTest` | System test | `test, time` |
+| `leadership` | ✅ NEW: Leaders | `type, name, from, to, photo, note, createdAt` |
 
-### Settings Documents (collection: `settings`)
+### `leadership` Collection Schema ✅ NEW
+```js
+{
+  type:      'president' | 'secretary' | 'principal',
+  name:      'Dr. Gurjit Singh',
+  from:      '2018',       // year string
+  to:        '2022',       // year string, 'Present', ya blank = current
+  photo:     'https://...', // ImgBB URL ya /images/ path (optional)
+  note:      'NAAC B++ awarded under tenure', // optional
+  createdAt: serverTimestamp()
+}
+```
+
+### Settings Documents
 
 | Document | Fields |
 |----------|--------|
@@ -163,186 +167,148 @@ export const auth = getAuth(app);
 ### `departments/{slug}` Schema
 ```js
 {
-  fullName:       "Bachelor of Computer Applications",
-  short:          "BCA",
-  tagline:        "Code. Create. Conquer.",
-  about:          "Department description...",
-  vision:         "Vision statement...",
-  mission:        "Mission statement...",
-
-  hod: {
-    name:         "Prof. Name",
-    desig:        "Head of Department, BCA",
-    qual:         "M.Sc. (CS), Ph.D.",
-    email:        "hod.bca@gncollege.org",
-    phone:        "+91 XXXXX XXXXX",
-    message:      "Welcome message...",
-    imageUrl:     "https://..."   // ImgBB URL ya public/ path
-  },
-
-  stats: [
-    { icon: "📅", value: "3 Years", label: "Duration", sub: "6 Semesters" }
-  ],
-
-  highlights: [
-    { icon: "💻", title: "Modern Labs", desc: "60+ high-end systems..." }
-  ],
-
-  facilities: [
-    { icon: "🖥️", name: "Computer Lab", desc: "60 workstations, Wi-Fi..." }
-  ],
-
-  curriculum: {
-    "Semester I":  ["Subject 1", "Subject 2"],
-    "Semester II": ["Subject 3", "Subject 4"]
-  },
-
-  feeStructure: [
-    { category: "Tuition Fee", amount: "15000", note: "Per semester" }
-  ],
-
-  programReports: [
-    { id: "abc123", title: "Annual Report 2024", year: "2024", pdfUrl: "https://..." }
-  ],
-
-  achievements: [
-    "100+ students placed since 2020"
-  ],
-
+  fullName, short, tagline, about, vision, mission,
+  hod: { name, desig, qual, email, phone, message, imageUrl },
+  stats: [{ icon, value, label, sub }],
+  highlights: [{ icon, title, desc }],
+  facilities: [{ icon, name, desc }],
+  curriculum: { "Semester I": ["Subject 1"] },
+  feeStructure: [{ category, amount, note }],
+  programReports: [{ id, title, year, pdfUrl }],
+  achievements: ["string"],
   updatedAt: serverTimestamp()
 }
 ```
 
 ---
 
-## 4. REACT ROUTES (App.jsx)
+## 4. REACT ROUTES (App.jsx) ✅ UPDATED
 
 ### Public Routes
 
 | Path | Component | Notes |
 |------|-----------|-------|
-| `/` | `HomePage` | AOS animations, all sections |
-| `/contact` | `Contact` | Firebase `settings/contact` + `contactDirectory` |
-| `/about-us/college-profile` | `CollegeProfile` | Static content |
-| `/notifications` | `NotificationsPage` | `notices` collection |
-| `/documents` | `DocumentsPage` | `pdfReports` collection |
-| `/events` | `EventsPage` | `events` collection |
-| `/news` | `NewsPage` | `announcements` collection + DOMPurify |
-| `/video-gallery` | `VideoGallery` | YouTube API (`settings/youtube`) |
-| `/about-us/college-staff/teaching-staff` | `StaffPage` | `faculties` where staffType=Teaching |
-| `/about-us/college-staff/non-teaching-staff` | `StaffPage` | `faculties` where staffType=Non-Teaching |
-| `/gallery` | PhotoGalleryPage | `gallery` collection |
-| `/academics/departments` | `DepartmentPage` | Hub page (no slug) |
-| `/academics/departments/:deptSlug` | `DepartmentPage` | Individual dept (`bca`, `bba`, `commerce`, `humanities`, `social-science`) |
-| `/p/:slug` | `DynamicPageRoute` | CMS pages from `pages` collection |
+| `/` | `HomePage` | AOS, all sections |
+| `/contact` | `Contact` | `settings/contact` + `contactDirectory` |
+| `/about-us/college-profile` | `CollegeProfile` | Static |
+| `/about-us/college-management/presidents` | `LeadershipPage` | ✅ NEW `type="president"` |
+| `/about-us/college-management/secretaries` | `LeadershipPage` | ✅ NEW `type="secretary"` |
+| `/about-us/college-management/principal` | `LeadershipPage` | ✅ NEW `type="principal"` |
+| `/notifications` | `NotificationsPage` | `notices` |
+| `/documents` | `DocumentsPage` | `pdfReports` |
+| `/events` | `EventsPage` | `events` |
+| `/news` | `NewsPage` | `announcements` + DOMPurify |
+| `/video-gallery` | `VideoGallery` | YouTube API |
+| `/about-us/college-staff/teaching-staff` | `StaffPage` | staffType=Teaching |
+| `/about-us/college-staff/non-teaching-staff` | `StaffPage` | staffType=Non-Teaching |
+| `/gallery` | PhotoGalleryPage | `gallery` |
+| `/academics/departments` | `DepartmentPage` | Hub |
+| `/academics/departments/:deptSlug` | `DepartmentPage` | Individual |
+| `/p/:slug` | `DynamicPageRoute` | CMS pages |
 | `/admin` | `AdminPanel` (lazy) | Auth-protected |
 
-### Rich Text Editor (`jodit-react`)
+### ⚠️ PlaceholderPaths — Critical Rules
+- Leadership paths (`/presidents`, `/secretaries`, `/principal`) → **NOT in placeholderPaths** — use `LeadershipPage`
+- Department paths → **NOT in placeholderPaths** — use `:deptSlug` route
+- Pages & SEO path **must match exactly** — slash se shuru, no trailing slash, no space
 
-The project utilizes `jodit-react` which bundles Jodit v4.11.3 for all rich text editing needs. This is primarily implemented within the Admin Panel for managing dynamic content for pages, news, and announcements.
-
-#### Key Configuration & Features
-
-The editor is highly configurable. Based on the project's dependencies, here are some key features and configuration aspects available through the `config` prop:
-
--   **Core Functionality**:
-    -   **File Management**: Integrated `FileBrowser` and `Uploader` modules. The project uses a custom `MediaPicker.jsx` which leverages this.
-    -   **HTML Cleaning**: A robust `cleanHTML` module with options to `allowTags`, `denyTags`, `replaceOldTags` (e.g., `<b>` to `<strong>`), and sanitize styles.
-    -   **Paste Handling**: Advanced control over pasted content, including from Microsoft Word (`pasteFromWord`) with options to clean or keep formatting.
-    -   **Source Mode**: A full-featured source code editor, with support for ACE editor and HTML beautification.
-
--   **UI & UX**:
-    -   **Customizable Toolbar**: The `buttons` array allows for full customization of the toolbar, including responsive layouts for different screen sizes (`buttonsMD`, `buttonsSM`, `buttonsXS`).
-    -   **Inline Popups**: Context-sensitive popups for links, images, and tables (`toolbarInline`).
-    -   **Dialogs & Forms**: Built-in `Dialog`, `Alert`, `Confirm`, and `Prompt` modules, which are used across the admin panel.
-    -   **Theming**: Supports theming via the `theme` option (e.g., `'dark'`).
-
--   **Plugins**:
-    -   The build includes a comprehensive set of default plugins, such as:
-        -   `image-properties` & `image-processor`
-        -   `drag-and-drop` & `drag-and-drop-element`
-        -   `resize-handler` & `resizer`
-        -   `search` (in-editor find and replace)
-        -   `speech-recognize` (voice-to-text)
-        -   `copy-format` (format painter)
-        -   `limit` (character/word limits)
-        -   And many more for tables, fonts, lists, etc.
-
--   **Internationalization (i18n)**:
-    -   The editor supports multiple languages. The project includes built-in language files for:
-        -   Chinese (Simplified & Traditional) (`zh_cn`, `zh_tw`)
-        -   Japanese (`ja`)
-        -   Swedish (`sv`)
-        -   Dutch (`nl`)
-        -   German, French, Spanish, Russian, and others.
-    -   Language is configured via the `language` option in the Jodit config.
-
-#### Implementation in Admin Panel
-
-The `jodit-react` component is used in forms for creating/editing `pages`, `notices`, and `announcements`.
-
-```jsx
-import JoditEditor from 'jodit-react';
-
-const editorConfig = { readonly: false, placeholder: 'Start typing...' };
-
-<JoditEditor value={content} config={editorConfig} onBlur={newContent => setContent(newContent)} />
+```
+✅ /about-us/various-committees/womens-cell
+❌ /about-us/various-committees/womens-cell/
+❌ about-us/various-committees/womens-cell
 ```
 
-### Placeholder Routes
-50+ static paths that render `PageViewer` with content from `pdfReports` collection:
-`/syllabus`, `/about-us`, `/about-us/vision-mission`, `/naac/*`, `/admission/*`, `/activity/*`, etc.
+### `pagesLoaded` State ✅ NEW
+```js
+// App.jsx — pages ke liye separate listener
+const [pagesLoaded, setPagesLoaded] = useState(false);
 
-**⚠️ RULE:** Department paths (`/academics/departments/bca` etc.) are NOT in `placeholderPaths`. They use the `:deptSlug` param route.
+const unsubPages = onSnapshot(
+  query(collection(db, 'pages'), orderBy('createdAt', 'desc')),
+  snap => {
+    setPages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    setPagesLoaded(true);
+  },
+  () => setPagesLoaded(true) // error pe bhi loaded mark karo
+);
+
+// PlaceholderPaths route mein:
+<PageViewer page={pageContentByPath.get(path) ?? null} loading={!pagesLoaded} />
+//                                               ↑ null, undefined nahi
+```
+
+### Jodit Config ✅ UPDATED
+```js
+const joditCfg = {
+  readonly: false,
+  placeholder: 'Content likhein…',
+  height: 420,           // was 280
+  minHeight: 300,
+  allowResizeY: true,    // ✅ NEW — drag se resize
+  allowResizeX: false,
+  theme: 'default',
+  toolbarAdaptive: false,
+  toolbarSticky: true,
+  showCharsCounter: false,
+  showWordsCounter: false,
+  showXPathInStatusbar: false,
+  buttons: [
+    'bold','italic','underline','strikethrough','|',
+    'ul','ol','|',
+    'outdent','indent','|',
+    'font','fontsize','brush','|',
+    'paragraph','|',
+    'table','link','image','|',
+    'align','|',
+    'hr','eraser','|',
+    'undo','redo','|',
+    'fullsize'
+  ],
+  style: {
+    fontFamily: "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif",
+    fontSize: '15px', color: '#334155', lineHeight: '1.8',
+  },
+};
+```
 
 ---
 
 ## 5. CENTRAL CONSTANTS (constants.js)
 
-**ALWAYS import from `constants.js`. Never hardcode values.**
-
 ```js
 import {
-  COLLEGE,         // College info, addresses, social links
-  COLORS,          // All UI colors
-  LAYOUT,          // MAX_WIDTH, MAX_WIDTH_WIDE, MAX_WIDTH_NARROW
-  BP,              // Breakpoints: SM(480), MD(768), LG(1024), XL(1280)
-  MONTHS_SHORT,    // ['Jan','Feb',...,'Dec']
-  MONTHS_FULL,     // ['January','February',...,'December']
-  getTS,           // Firestore timestamp → Date helper
-  fmtDate,         // Format date for display
-  COLLECTIONS,     // Firestore collection name strings
-  FALLBACK_IMAGE,  // '/images/college_photo.jpg'
-  GALLERY_CATEGORIES, // ['Seminars','Cultural Fest','Guest Visit','NSS Programs','Sports','Campus','Departments']
-  DOC_TYPES,       // ['Document','Report','Syllabus','Circular','Result','Regulation','Affiliation']
-  EVENT_TYPES,     // ['WORKSHOP','SEMINAR','CULTURAL','SPORTS','NSS','NCC','ACADEMIC']
-  NOTICE_CATEGORIES, // ['General','Examination','Admission','Holiday','Sports','Cultural','Academic']
-  NEWS_TYPES,      // ['News','Achievement','Update','Result','Scholarship']
-  DEPARTMENTS,     // All teaching/non-teaching dept names
-  ANIM,            // Animation durations: FAST, NORMAL, SLOW, TICKER, BANNER
+  COLLEGE, COLORS, LAYOUT, BP,
+  MONTHS_SHORT, MONTHS_FULL,
+  getTS, fmtDate,
+  COLLECTIONS,
+  FALLBACK_IMAGE,        // '/images/college_photo.jpg'
+  GALLERY_CATEGORIES,
+  DOC_TYPES, EVENT_TYPES,
+  NOTICE_CATEGORIES, NEWS_TYPES,
+  DEPARTMENTS, ANIM,
 } from '../constants';
 ```
 
 ### COLORS Object
 ```js
 COLORS = {
-  navy:      '#0f2347',   // Primary — all headings, buttons
-  navyDark:  '#060e1c',   // Sidebar, deep backgrounds
-  navyLight: '#1a3a7c',   // Hover states, gradients
-  gold:      '#f4a023',   // Accent — CTA buttons, highlights
-  goldDark:  '#d4870e',   // Gold hover
-  goldLight: '#fff8ed',   // Gold background tint
-  red:       '#c0392b',   // Danger, delete
+  navy:      '#0f2347',   // Primary
+  navyDark:  '#060e1c',   // Sidebar
+  navyLight: '#1a3a7c',   // Hover/gradients
+  gold:      '#f4a023',   // Accent
+  goldDark:  '#d4870e',
+  goldLight: '#fff8ed',
+  red:       '#c0392b',
   white:     '#ffffff',
   lightGray: '#f8f9fa',
   gray:      '#6c757d',
   dark:      '#212529',
   green:     '#27ae60',
-  text:      '#334155',   // Body text
-  textMid:   '#64748b',   // Secondary text
-  textLight: '#94a3b8',   // Placeholders, muted
-  border:    '#e2e8f0',   // Borders
-  bg:        '#f8fafc',   // Page backgrounds
+  text:      '#334155',
+  textMid:   '#64748b',
+  textLight: '#94a3b8',
+  border:    '#e2e8f0',
+  bg:        '#f8fafc',
 }
 ```
 
@@ -350,139 +316,125 @@ COLORS = {
 
 ## 6. COMPONENT REFERENCE
 
-### Public Pages
-
-#### `HomePage.jsx`
-- Sections: TopBar → Navbar → HeroSlider → AlertBanner → QuickActionNav → NotificationSection → HomeFeatures → PlacementsSection → VideoGallery → Footer
-- AOS animations on section entrance
-- Departments section with 5 dept cards
-- Gallery link: `'/#gallery'` (with hash, not `'#gallery'`)
-
-#### `DepartmentPage.jsx` — Universal Template
-- **Single file handles ALL 5 departments + hub page**
-- Uses `useParams()` → `deptSlug` to identify department
-- Reads from `departments/{slug}` Firestore document
-- Faculty from `faculties` collection filtered by `dept` field
-- Color themes per department:
-  | Slug | Color |
-  |------|-------|
-  | `bca` | `#0ea5e9` (sky blue) |
-  | `bba` | `#f59e0b` (amber) |
-  | `commerce` | `#10b981` (emerald) |
-  | `humanities` | `#8b5cf6` (violet) |
-  | `social-science` | `#ef4444` (red) |
-- CTA buttons use `scrollIntoView({ behavior: 'smooth' })` — NOT `href="#section"` (React Router breaks hash links)
-- `resolvedRef` Set prevents faculty race condition
-
-#### `Contact.jsx`
-- Firebase connected: reads `settings/contact` and `contactDirectory` collection
-- `contactDirectory` ordered by `order` field (ascending)
-- DOMPurify on any HTML content
-
-#### `NewsPage.jsx`
-- DOMPurify on BOTH list view AND detail view
-- Search checks `n.type` before filtering
-
-#### `VideoGallery.jsx`
-- `fetchVideos` wrapped in `useCallback` (prevents infinite re-renders)
-- YouTube API key from `settings/youtube`
-
-#### `StaffPage.jsx`
-- Receives `staffType` prop: `'Teaching'` or `'Non-Teaching'`
-- Filter `faculties` collection by `staffType` field
-
-### Components
-
-#### `LeadershipTab.jsx`
-- Displays leadership profiles (Principal, Secretary, etc.)
-- Fetches from `leadership` collection ordered by `order`
-
-#### `HeroSlider.jsx`
-- `FALLBACK` array defined OUTSIDE component (not inside — avoids recreation on every render)
-- Reads from `sliderSlides` collection, sorted by `order`
-
-#### `AlertBanner.jsx`
-- `dismissed` ref prevents stale closure
-- `setTimeout` cleanup via `useRef` on unmount
-- Popup `useEffect` separated from main effect
-
-#### `NotificationSection.jsx`
-- ⚠️ PENDING FIX: RAF (requestAnimationFrame) memory leak in 3 useEffects — event listeners never removed
-
-#### `PlacementsSection.jsx`
-- Alumni Wall of Fame — marquee/ticker layout
-- Fallback: `/images/college_photo.jpg`
-
-#### `ErrorBoundary.jsx`
-- Class component (error boundaries must be class-based in React)
-- Per-page error messages based on `window.location.pathname`
-- `minimal` prop for AlertBanner (renders compact fallback)
-- Wraps ALL routes in `App.jsx`
-
-#### `MediaPicker.jsx` — NEW (v2 upload system)
-**Universal media picker — use this EVERYWHERE for photo/PDF upload.**
+### `LeadershipPage.jsx` ✅ NEW
+**Path:** `src/pages/LeadershipPage.jsx`
 
 ```jsx
-import MediaPicker, { setImgbbKey } from './MediaPicker';
+<LeadershipPage type="president"  title="Presidents Over the Years" />
+<LeadershipPage type="secretary"  title="Secretaries Over the Years" />
+<LeadershipPage type="principal"  title="Principals Over the Years" />
+```
 
-// In settings load useEffect:
-setImgbbKey(siteCfg.imgbbKey);
+**Features:**
+- Toggle: Timeline Cards view / Table view
+- Stats strip — count, total years, current leader
+- Current leader: pulsing dot + highlighted card/row
+- `FALLBACK = '/images/college_photo.jpg'`
 
-// Usage:
-<MediaPicker
-  label="Profile Photo"
-  value={data.imageUrl}
-  onChange={url => setData(d => ({ ...d, imageUrl: url }))}
-  type="image"     // 'image' | 'pdf' | 'any'
-  compact={false}  // compact mode for tight UIs
+**⚠️ Query — No orderBy (avoids composite index):**
+```js
+// ✅ Correct
+const q = query(collection(db, 'leadership'), where('type', '==', type));
+// client-side sort:
+.sort((a, b) => parseInt(b.from || 0) - parseInt(a.from || 0))
+
+// ❌ Wrong — composite index needed
+query(..., where('type','==',type), orderBy('from','desc'))
+```
+
+---
+
+### `PageViewer.jsx` ✅ UPDATED
+**Path:** `src/components/PageViewer.jsx`
+
+```jsx
+<PageViewer
+  page={pageObject | null}   // pageContentByPath.get(path) ?? null
+  loading={!pagesLoaded}     // ✅ NEW prop
 />
 ```
 
-**3 Modes:**
-1. `📤 PC se Upload` — File select → ImgBB API → permanent URL (images only)
-2. `🗂️ Public Folder` — Grid of presets from `public/images/` or `public/pdfs/` + custom path input
-3. `🔗 Paste URL` — Direct URL input + clipboard paste button
+- `loading=true` → shimmer skeleton
+- `page` has content → `.gnc-prose` rendered HTML
+- `page=null` → `EmptyState` with path hint
+- **Standalone mode removed**
 
-**Key behavior:**
-- ImgBB key set via `setImgbbKey()` — loaded from `settings/site.imgbbKey`
-- Module-level `_imgbbKey` variable
-- PDFs cannot go to ImgBB — shows Google Drive guidance
-- Progress bar for uploads
+**`.gnc-prose` CSS covers:**
+- h1–h6 (navy, bold, gold underline h2)
+- p, a, strong, em, ul, ol, blockquote, hr, code, pre, img
+- **Tables:** navy gradient header, gold left accent, zebra rows, hover, mobile wrap
+- `wrapTablesForMobile()` wraps `<table>` in `.gnc-table-wrap`
 
-#### `PageViewer.jsx`
-- Reads `pdfReports` collection with `orderBy('createdAt', 'desc')`
-- `pdfLink` fix applied
+---
 
-### Admin Components
+### `AdminLeadershipTab.jsx` ✅ NEW
+**Path:** `src/components/AdminLeadershipTab.jsx`
 
-#### `AdminLogin.jsx`
-- Premium rebuild — glassmorphism design
-- Firebase Auth: `signInWithEmailAndPassword`
+3 sub-tabs (Presidents / Secretaries / Principals), Add/Edit/Delete.
 
-#### `AdminPanel.jsx`
-- **20 tabs total** (see list below)
-- Lazy loaded in App.jsx
-- `AdminDepartmentTab` lazy loaded inside AdminPanel
-- `useLocalDraft` hook for form persistence (localStorage)
-- `crop` function for image cropping before upload
-- `softDelete` → moves to `_deleted_{collection}` subcollection
-- `bulkDelete` → batch delete with WriteBatch
-- `logAct` → writes to `adminLogs` collection
-- `TABS` array defined OUTSIDE component (never recreate)
-- ImgBB key: loaded from `settings/site.imgbbKey` → `setImgbbKey(key)` called in settings useEffect
-- `DOMPurify.sanitize()` on announcements delete toast
+**Critical implementation details:**
+```jsx
+// ✅ React Portal — REQUIRED (AdminPanel transform CSS breaks position:fixed)
+import { createPortal } from 'react-dom';
+{showModal && createPortal(<ModalJSX />, document.body)}
 
-**Admin Tabs:**
+// ✅ Debounced photo preview — prevents flicker
+const [previewUrl, setPreviewUrl] = useState('');
+const previewTimer = useRef(null);
 
-| Tab ID | Icon | Label | Firebase Source |
-|--------|------|-------|----------------|
-| `dashboard` | 📊 | Dashboard | All collections (stat cards) |
-| `quick` | ⚡ | Quick Publish | `events`, `notices`, `announcements` |
+onChange={e => {
+  const val = e.target.value;
+  setForm(f => ({ ...f, photo: val }));
+  clearTimeout(previewTimer.current);
+  previewTimer.current = setTimeout(() => setPreviewUrl(val), 800);
+}}
+onBlur={e => {
+  e.target.style.borderColor = '#e2e8f0';
+  clearTimeout(previewTimer.current);
+  setPreviewUrl(form.photo);
+}}
+
+// ✅ onError → display:none (not src=FALLBACK — avoids re-render loop)
+<img onError={e => { e.target.style.display = 'none'; }} />
+```
+
+**Add to AdminPanel.jsx:**
+```jsx
+// 1. Import
+import AdminLeadershipTab from './AdminLeadershipTab';
+
+// 2. TABS array (after departments)
+{ id: 'leadership', icon: '👑', label: 'Leadership', section: '' },
+
+// 3. JSX (after departments closing )})
+{tab === 'leadership' && (
+  <div className="fade-up">
+    <AdminLeadershipTab />
+  </div>
+)}
+```
+
+---
+
+### `AdminPanel.jsx` ✅ UPDATED
+
+**Live Preview Modal:**
+- Fake page hero banner (navy gradient + title)
+- `.prev-prose` CSS — exact same as `PageViewer`'s `.gnc-prose`
+- Tables: navy header + zebra rows + gold accent — same as live page
+- `wrapTablesForMobile` equivalent applied
+
+**Admin Tabs (22 total):**
+
+| Tab ID | Icon | Label | Firebase |
+|--------|------|-------|---------|
+| `dashboard` | 📊 | Dashboard | All |
+| `quick` | ⚡ | Quick Publish | events, notices, announcements |
 | `alerts` | 🚨 | Flash Alerts | `alerts` |
 | `placements` | 🎓 | Alumni Wall | `placements` |
 | `faculty` | 👨‍🏫 | Faculty & Staff | `faculties` |
-| `leadership` | 👔 | Leadership | `leadership` (new) |
-| `departments` | 🏛️ | Departments | `departments/{slug}` (lazy: AdminDepartmentTab) |
+| `departments` | 🏛️ | Departments | `departments/{slug}` |
+| `leadership` | 👑 | Leadership | `leadership` ✅ NEW |
 | `slider` | 🖼️ | Hero Slider | `sliderSlides` |
 | `menu_builder` | 🧭 | Menu Editor | `settings/navbar` |
 | `pages` | 📄 | Pages & SEO | `pages` |
@@ -496,460 +448,349 @@ setImgbbKey(siteCfg.imgbbKey);
 | `settings` | ⚙️ | Site Settings | `settings/site` |
 | `contact` | 📞 | Contact Settings | `settings/contact` + `contactDirectory` |
 | `activity` | 📋 | Activity Log | `adminLogs` |
-| `backup` | 💾 | Backup & Restore | All collections |
+| `backup` | 💾 | Backup & Restore | All |
 | `system_test` | 🛡️ | System Test | Health checks |
 
-**MediaPicker locations in AdminPanel:**
-1. Alumni Wall — Student Photo (`type="image"`)
-2. Faculty & Staff — Profile Photo (`type="image"`)
-3. Hero Slider — Background Image (`type="image"`)
-4. Gallery — Gallery Photo (`type="image"`)
-5. Events → Post-Event Photo (`type="image"`, `compact=true`)
-6. Events → PDF Report Link (`type="pdf"`, `compact=true`)
-7. Notices → Link (`type="pdf"`, `compact=true`)
-8. News → Link (`type="any"`, `compact=true`)
-9. Documents → PDF Link (`type="pdf"`, `compact=true`)
+**MediaPicker locations (9):** Alumni Wall, Faculty, Hero Slider, Gallery, Events photo, Events PDF, Notices link, News link, Documents PDF
 
-#### `AdminDepartmentTab.jsx`
-- Standalone component, lazy loaded into AdminPanel
-- Reads/writes `departments/{slug}` documents
-- **NO Firebase Storage** — uses MediaPicker for HOD photo, PdfManager for reports
-- `PdfManager` component: Google Drive link or `public/pdfs/` path
-- `InlinePrompt` component: replaces `window.prompt` for Semester/Subject input
-- `useRef` timer cleanup on unmount (no memory leaks)
-- Sticky Save button with `position: sticky; bottom: 0`
+---
 
-#### `LeadershipAdminTab.jsx`
-- Manages `leadership` collection (Principal, VP, etc.)
-- Uses `MediaPicker` for profile photos
-- Sortable by `order` field
+### Other Components
+
+#### `MediaPicker.jsx`
+```jsx
+<MediaPicker label="Photo" value={url} onChange={url => ...} type="image" compact={false} />
+// type: 'image' | 'pdf' | 'any'
+```
+
+#### `HeroSlider.jsx` — `FALLBACK` array OUTSIDE component
+#### `AlertBanner.jsx` — `dismissed` useRef, setTimeout cleanup
+#### `ErrorBoundary.jsx` — class component, wraps ALL routes
+#### `DepartmentPage.jsx` — `resolvedRef` Set, `scrollIntoView()`, no `href="#section"`
 
 ---
 
 ## 7. SYSTEM TEST SUITE (18 Phases)
 
-Located in `AdminPanel.jsx` → `system_test` tab.
-
-**When adding a new major feature or collection: ADD a new phase here.**
-
-| Phase | Test | Logic |
-|-------|------|-------|
-| T1 | Vite Build Env | `import.meta.env.MODE` check |
-| T2 | Firebase Init | `db` object exists |
-| T3 | Firestore Read | `getDocs(_sysTest)` |
-| T4 | Firestore Write | `addDoc(_sysTest, {test:true})` |
-| T5 | Firestore Delete | delete the T4 doc |
-| T6 | Navbar Settings | `settings/navbar` exists |
-| T7 | Site Settings | `settings/site` exists |
-| T8 | ImgBB API | POST to `api.imgbb.com` with 1x1 PNG |
-| T9 | Flash Alerts | `alerts` collection readable |
-| T10 | Faculty Directory | `faculties` readable |
-| T11 | Alumni Placements | `placements` readable |
-| T12 | Content Health | notices + announcements + events + pdfReports all readable |
-| T13 | YouTube API | `settings/youtube` apiKey check |
-| T14 | Google Drive | `settings/drive` config check |
-| T15 | Activity Logging | `adminLogs` write + read |
-| T16 | Department Data | 5 slugs in `departments/{slug}` — HOD set, fee structure exists |
-| T17 | Contact Settings | `settings/contact` + `contactDirectory` |
-| T18 | Leadership | `leadership` collection readable |
-
-**Format for new phase:**
-```js
-sysLogAdd('[18/18] Checking new feature...');
-try {
-  // check logic
-  addResult('Feature Name', 'pass', 'Details');
-  passed++;
-  sysLogAdd('  ✓ Working');
-} catch (e) {
-  addResult('Feature Name', 'fail', e.message);
-  failed++;
-  sysLogAdd('  ✗ ' + e.message);
-}
-total++;
-// Update [X/19] in all previous labels and header badges
-```
+| Phase | Test |
+|-------|------|
+| T1 | Vite Build Env |
+| T2 | Firebase Init |
+| T3 | Firestore Read |
+| T4 | Firestore Write |
+| T5 | Firestore Delete |
+| T6 | Navbar Settings |
+| T7 | Site Settings |
+| T8 | ImgBB API |
+| T9 | Flash Alerts |
+| T10 | Faculty Directory |
+| T11 | Alumni Placements |
+| T12 | Content Health |
+| T13 | YouTube API |
+| T14 | Google Drive |
+| T15 | Activity Logging |
+| T16 | Department Data |
+| T17 | Contact Settings |
+| T18 | Leadership ✅ NEW — `leadership` collection readable |
 
 ---
 
 ## 8. CODING RULES (STRICTLY FOLLOW)
 
-### React Rules
+### React
 ```js
-// ✅ Always functional components + hooks
-const MyComponent = () => {
-  const [data, setData] = useState(null);
-  useEffect(() => { /* fetch */ }, []);
-  return <div />;
-};
+// ✅ Constants OUTSIDE component
+const CONFIG = {};
+export default function MyComp() { /* use CONFIG */ }
 
-// ✅ Constants/config OUTSIDE component (avoid recreation)
-const CONFIG = { ... };   // outside
-export default function MyComponent() { /* use CONFIG */ }
-
-// ✅ Cleanup in useEffects
+// ✅ useEffect cleanup
 useEffect(() => {
-  const timer = setTimeout(() => {}, 1000);
-  return () => clearTimeout(timer);
+  const t = setTimeout(() => {}, 1000);
+  return () => clearTimeout(t);
 }, []);
 
-// ✅ useCallback for functions passed as deps
-const fetchData = useCallback(async () => { ... }, [dependency]);
+// ✅ useCallback for deps
+const fn = useCallback(async () => {}, [dep]);
 ```
 
-### Firebase Rules
+### Firebase
 ```js
-// ✅ Always try/catch
+// ✅ try/catch always
 try {
   const snap = await getDoc(doc(db, 'settings', 'site'));
   if (snap.exists()) setData(snap.data());
-} catch (err) {
-  console.error(err);
-}
+} catch (e) { console.error(e); }
 
-// ✅ onSnapshot for real-time, getDoc for one-time
-const unsub = onSnapshot(collection(db, 'notices'), snap => {
-  setNotices(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-});
-return () => unsub(); // ALWAYS cleanup
+// ✅ onSnapshot cleanup
+const unsub = onSnapshot(q, snap => { ... });
+return () => unsub();
 
-// ✅ serverTimestamp for time fields
-await addDoc(collection(db, 'collection'), {
-  ...data,
-  createdAt: serverTimestamp(),
-});
+// ✅ serverTimestamp
+await addDoc(collection(db, 'x'), { ...data, createdAt: serverTimestamp() });
 
-// ✅ Use COLLECTIONS constants (never hardcode strings)
-import { COLLECTIONS } from '../constants';
-collection(db, COLLECTIONS.NOTICES)   // not collection(db, 'notices')
+// ✅ where + orderBy → composite index issue
+// AVOID mixing — sort client-side instead:
+.sort((a, b) => parseInt(b.from) - parseInt(a.from))
 ```
 
-### Styling Rules
+### Admin Modals — Portal Required
 ```js
-// ✅ Use COLORS (never hardcode hex values)
-import { COLORS } from '../constants';
-const style = { color: COLORS.navy, background: COLORS.gold };
-
-// ✅ Responsive with media queries
-const styles = `
-  @media (max-width: 768px) {
-    .container { flex-direction: column; }
-  }
-`;
-
-// ✅ Flat 2.0 aesthetic — no card shadows, clean borders
-border: `1px solid ${COLORS.border}`   // ✅
-boxShadow: '0 20px 60px rgba(0,0,0,0.3)'  // ❌ too heavy
+// ✅ ALWAYS for Admin Panel modals
+import { createPortal } from 'react-dom';
+{showModal && createPortal(<div style={S.overlay}>...</div>, document.body)}
+// Reason: AdminPanel has transform CSS → breaks position:fixed containing block
 ```
 
-### Security Rules
+### Security
 ```js
-// ✅ DOMPurify on ALL HTML from Firestore
-import DOMPurify from 'dompurify';
+// ✅ DOMPurify on ALL Firestore HTML
 <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }} />
-
-// ❌ Never render raw HTML without sanitization
-<div dangerouslySetInnerHTML={{ __html: content }} />  // WRONG
 ```
 
-### Image Rules
+### Images
 ```js
-// ✅ Always provide fallback
+// ✅ Fallback — onError sets display:none (not src=FALLBACK — avoids flicker loop)
 <img
   src={item.imageUrl || FALLBACK_IMAGE}
-  onError={e => { e.target.src = FALLBACK_IMAGE; }}
-  alt="description"
+  onError={e => { e.target.style.display = 'none'; }}
+  alt="desc"
 />
-
-// FALLBACK_IMAGE = '/images/college_photo.jpg'
+// Exception: card images where replacement is desired:
+onError={e => { e.target.src = FALLBACK_IMAGE; }}
 ```
 
-### MediaPicker Rules
+### Styling
 ```js
-// ✅ ALWAYS use MediaPicker for photo/PDF inputs
-<MediaPicker
-  label="Photo"
-  value={data.imageUrl}
-  onChange={url => setData(d => ({ ...d, imageUrl: url }))}
-  type="image"
-/>
+// ✅ COLORS — no hardcoded hex
+import { COLORS } from '../constants';
+color: COLORS.navy
 
-// ❌ Never create plain <input type="file"> for uploads
-// ❌ Never use Firebase Storage (getStorage, uploadBytes, getDownloadURL)
+// ✅ Flat 2.0 — no heavy shadows
+border: `1px solid ${COLORS.border}` // ✅
+boxShadow: '0 20px 60px rgba(0,0,0,0.3)' // ❌
+```
+
+### MediaPicker
+```js
+// ✅ ALWAYS use for uploads
+<MediaPicker label="Photo" value={url} onChange={url => ...} type="image" />
+// ❌ Never <input type="file"> directly
+// ❌ Never Firebase Storage
 ```
 
 ---
 
 ## 9. MEDIA / IMAGE STRATEGY
 
-### Free Stack (No Paid Services)
-| Type | How | Where |
-|------|-----|-------|
-| Photos | ImgBB API upload | `https://api.imgbb.com/1/upload?key={KEY}` |
-| PDFs | Google Drive public link | User pastes URL |
-| Static assets | `public/images/` | Direct path `/images/file.jpg` |
-| Static PDFs | `public/pdfs/` | Direct path `/pdfs/file.pdf` |
+| Type | How |
+|------|-----|
+| Photos | ImgBB API via MediaPicker |
+| PDFs | Google Drive public link |
+| Static assets | `public/images/` → `/images/file.jpg` |
+| Static PDFs | `public/pdfs/` → `/pdfs/file.pdf` |
 
-### ImgBB Setup
-1. Admin → Site Settings → ImgBB API Key field
-2. Key saved to `settings/site.imgbbKey`
-3. `AdminPanel.jsx` loads key → calls `setImgbbKey(key)` from `MediaPicker.jsx`
-4. All MediaPicker instances use this key automatically
-
-### Google Drive PDF
-1. Upload PDF to Google Drive
-2. Share → "Anyone with the link" → Copy link
-3. Paste in MediaPicker URL mode
-4. Format: `https://drive.google.com/file/d/{ID}/view?usp=sharing`
+**ImgBB key:** Admin → Site Settings → `settings/site.imgbbKey` → `setImgbbKey(key)`
 
 ---
 
 ## 10. DEPARTMENT SYSTEM
 
-### 5 Departments
-| Page | Slug | Color | Faculty `dept` value |
-|------|------|-------|---------------------|
+| Page | Slug | Color | Faculty `dept` |
+|------|------|-------|---------------|
 | BCA | `bca` | `#0ea5e9` | `BCA` |
 | BBA | `bba` | `#f59e0b` | `BBA` |
 | Commerce | `commerce` | `#10b981` | `Commerce` |
 | Humanities | `humanities` | `#8b5cf6` | `Hindi` or `English` |
-| Social Science | `social-science` | `#ef4444` | `History` or `Political Science` or `Economics` |
+| Social Science | `social-science` | `#ef4444` | `History`, `Political Science`, `Economics` |
 
-### Routes
 ```jsx
-<Route path="/academics/departments"          element={<DepartmentPage />} />
+// Routes — NOT in placeholderPaths
+<Route path="/academics/departments"           element={<DepartmentPage />} />
 <Route path="/academics/departments/:deptSlug" element={<DepartmentPage />} />
 ```
-**⚠️ These paths must NOT be in `placeholderPaths` array in App.jsx.**
-
-### Adding New Department
-1. Add entry to `DEPTS` array in `DepartmentPage.jsx`
-2. Add entry to `DEPTS` array in `AdminDepartmentTab.jsx`
-3. Add route if using custom slug
-4. Populate `departments/{slug}` document via Admin Panel
 
 ---
 
 ## 11. ADMIN PANEL — KEY PATTERNS
 
-### `useLocalDraft` Hook
-Persists form state in localStorage — survives page refresh.
 ```js
-const [data, setData, clearDraft] = useLocalDraft('fac', {
-  name: '', dept: 'Commerce', imageUrl: '', /* etc */
-});
-// clearDraft() called after successful save
-```
+// useLocalDraft
+const [data, setData, clearDraft] = useLocalDraft('fac', { name: '' });
+clearDraft(); // after save
 
-### `softDelete` Pattern
-```js
-// Moves deleted item to _deleted_collectionName subcollection
-// Never permanently deletes — restorable from Backup tab
-softDelete('faculties', faculty.id, faculty, faculty.name);
-```
+// softDelete
+softDelete('faculties', id, obj, obj.name);
+// → moves to _deleted_faculties
 
-### `logAct` Pattern
-```js
-// Writes to adminLogs collection
-logAct('add',    'Placement: John Doe', 'placements');
-logAct('update', 'Slide: Welcome',      'sliderSlides');
-logAct('delete', 'Notice: Exam Alert',  'notices');
+// logAct
+logAct('add',    'Name', 'section');
+logAct('update', 'Name', 'section');
+logAct('delete', 'Name', 'section');
 ```
-
-### Contact Settings Tab
-- Campus section: `settings/contact` → `{ bhuda, bankMore }` each with `{ phone, email, address }`
-- Directory section: `contactDirectory` collection → `writeBatch` (delete-all + re-add pattern)
-- `useRef` timer cleanup on unmount
 
 ---
 
-## 12. PENDING FIXES (Must do before production)
-
-> Ye sab issues detected hain. Naya code likhte waqt in par dhyan rakhna.
+## 12. PENDING FIXES
 
 ### 🔴 Critical
-- [ ] `colors.js`: navy → `#0f2347`, navyDark → `#060e1c` (was wrong before)
-- [ ] `firebase.js`: Confirm `storage` export removed (we use ImgBB now)
-- [ ] Firestore Security Rules: Verify public write blocked
+- [ ] `colors.js`: navy → `#0f2347`, navyDark → `#060e1c`
+- [ ] `firebase.js`: Confirm storage export removed
+- [ ] Firestore Security Rules:
   ```js
-  match /departments/{slug} { allow read: if true; allow write: if request.auth != null; }
+  match /leadership/{id}       { allow read: if true; allow write: if request.auth != null; }
+  match /departments/{slug}    { allow read: if true; allow write: if request.auth != null; }
   match /contactDirectory/{id} { allow read: if true; allow write: if request.auth != null; }
-  match /settings/{doc} { allow read: if true; allow write: if request.auth != null; }
+  match /settings/{doc}        { allow read: if true; allow write: if request.auth != null; }
   ```
 
 ### 🟡 Important
 - [ ] `db.js`: Gallery link `'#gallery'` → `'/#gallery'`
-- [ ] `db.js`: Update `SOCIAL_LINKS` with real GNC Facebook/Twitter/YouTube URLs
-- [ ] `Footer.jsx`: Newsletter button — add handler or remove input
-- [ ] `NotificationSection.jsx`: Fix RAF memory leak — 3 useEffects never remove event listeners
-- [ ] `AdminPanel.jsx` Gallery tab: Categories must match `GALLERY_CATEGORIES` from constants.js
-- [ ] `NotificationsPage.jsx`: Month filter pills missing from JSX + DOMPurify on content
-- [ ] Navbar: Add Academics → Departments submenu with 5 dept links
-- [ ] Google Console: YouTube + ImgBB API keys — add HTTP Referrer restriction
-- [ ] Delete `BCADepartmentPage.jsx` (replaced by universal `DepartmentPage.jsx`)
+- [ ] `db.js`: Real GNC social media URLs
+- [ ] `Footer.jsx`: Newsletter button handler or remove
+- [ ] `NotificationSection.jsx`: RAF memory leak fix (3 useEffects)
+- [ ] `AdminPanel.jsx`: Gallery categories → `GALLERY_CATEGORIES` from constants
+- [ ] `NotificationsPage.jsx`: Month filter pills + DOMPurify
+- [ ] Navbar: Academics → Departments submenu (5 links)
+- [ ] Google Console: YouTube + ImgBB API keys → HTTP Referrer restriction
+- [ ] Delete `BCADepartmentPage.jsx`
 
-### 🟢 Data Population (one-time)
-- [ ] Admin → Departments tab → Populate all 5 department documents
-- [ ] Admin → Contact Settings → Add real director names to contactDirectory
-- [ ] Admin → Site Settings → Add real ImgBB API key
-- [ ] Admin → Faculty tab → Add real faculty with `dept` field matching table above
+### 🟢 Data Population
+- [ ] Admin → Leadership → Add Presidents / Secretaries / Principals
+- [ ] Admin → Pages & SEO → Committee pages (path exact match!)
+- [ ] Admin → Departments → All 5 slugs
+- [ ] Admin → Contact Settings → Real director names
+- [ ] Admin → Site Settings → Real ImgBB key
 
 ---
 
-## 13. VITE CONFIG (vite.config.js)
+## 13. VITE CONFIG
 
 ```js
-// Key settings:
-minify: 'terser'                  // Production only
-drop_console: true                // All console.log removed in build
-drop_debugger: true               // All debugger; removed
-sourcemap: false                  // No source maps (security)
+base: '/gncollege-website/'
+minify: 'terser'
+drop_console: true   // prod only
+sourcemap: false
 manualChunks: {
   'vendor-react':    ['react','react-dom','react-router-dom'],
   'vendor-firebase': ['firebase/app','firebase/firestore','firebase/auth'],
   'vendor-ui':       ['dompurify','html-react-parser','react-hot-toast'],
 }
-chunkSizeWarningLimit: 500        // 500KB warning threshold
+chunkSizeWarningLimit: 500
 ```
-Development mein `console.log` kaam karta hai — sirf `npm run build` pe remove hota hai.
 
 ---
 
 ## 14. ROUTING — CRITICAL RULES
 
-### ❌ Hash-based Navigation (Never Use)
 ```js
-// ❌ WRONG — React Router ke saath breaks
+// ✅ HashRouter — correct navigation
+navigate('/admin')
+window.open(`${window.location.origin}${import.meta.env.BASE_URL.replace(/\/$/,'')}/#/admin`, '_blank')
+scrollIntoView({ behavior: 'smooth' })
+href="/#gallery"
+
+// ❌ Never
 window.open('#/admin')
 href="#gallery"
-<button onClick={() => window.location.href = '#/admin'} />
 ```
 
-### ✅ Correct Navigation
-```js
-// ✅ Correct
-window.open('/admin', '_blank')
-href="/#gallery"
-navigate('/admin')
-scrollIntoView({ behavior: 'smooth' })  // for same-page anchor links
-```
-
-### ErrorBoundary Wrapping (Required)
+**ErrorBoundary on every route — required:**
 ```jsx
-// Every Route must be wrapped
-<Route path="/contact" element={
-  <ErrorBoundary>
-    <Contact />
-  </ErrorBoundary>
-} />
+<Route path="/x" element={<ErrorBoundary><MyPage /></ErrorBoundary>} />
 ```
 
 ---
 
 ## 15. DESIGN SYSTEM
 
-### Aesthetic: Flat 2.0 / Apple / Vercel
-- **No heavy shadows** (max `0 2px 8px rgba(0,0,0,0.06)`)
-- **Thin borders** (`1px solid ${COLORS.border}`)
-- **Generous white space**
-- **Bold typography** for headings (font-weight: 800-900)
-- **Smooth transitions** (`transition: all 0.2s ease`)
-- **Borderless tables** where possible
-
-### Typography
-- Primary font: `'Plus Jakarta Sans'` or `'DM Sans'`
-- Monospace (code/keys): `'JetBrains Mono'`
-- Heading weight: 800-900
-- Body weight: 400-500
-- Caption/label weight: 600-700
-
-### Responsive Breakpoints
-```js
-BP = {
-  SM: 480,   // Mobile
-  MD: 768,   // Tablet
-  LG: 1024,  // Desktop
-  XL: 1280,  // Wide desktop
-}
-```
-
-### Spacing System
-- Section padding: `80px 0` (desktop), `40px 0` (mobile)
-- Card padding: `24px` (desktop), `16px` (mobile)
-- Grid gap: `24px` (desktop), `16px` (mobile)
-- Max width: `1200px` (standard), `1300px` (wide), `1000px` (narrow)
+- **Aesthetic:** Flat 2.0 / Apple / Vercel
+- **Shadows:** max `0 2px 8px rgba(0,0,0,0.06)`
+- **Borders:** `1px solid ${COLORS.border}`
+- **Fonts:** `'Plus Jakarta Sans'` / `'DM Sans'` (body), `'JetBrains Mono'` (code)
+- **Heading weight:** 800–900, Body: 400–500, Label: 600–700
+- **Breakpoints:** SM:480, MD:768, LG:1024, XL:1280
+- **Section padding:** `80px 0` desktop / `40px 0` mobile
+- **Card padding:** `24px` desktop / `16px` mobile
+- **Max width:** 1200px standard / 1300px wide / 1000px narrow
 
 ---
 
-## 16. TESTING CHECKLIST (Before any PR/commit)
+## 16. TESTING CHECKLIST
 
-- [ ] `npm run build` completes without errors
-- [ ] No `console.error` in browser dev tools
-- [ ] All Firestore reads wrapped in `try/catch`
-- [ ] All `useEffect` with subscriptions return cleanup function
-- [ ] All images have `onError` fallback to `FALLBACK_IMAGE`
-- [ ] All HTML from Firestore passes through `DOMPurify.sanitize()`
-- [ ] New features have System Test phase added (AdminPanel → system_test tab)
-- [ ] Mobile responsive (check at 375px and 768px widths)
-- [ ] MediaPicker used for all photo/PDF inputs (no plain `<input type="file">`)
-- [ ] No `#/admin` style hash routing
-- [ ] `COLORS.*` used (no hardcoded hex values)
-- [ ] `COLLECTIONS.*` used (no hardcoded collection name strings)
+- [ ] `npm run build` no errors
+- [ ] No `console.error` in browser
+- [ ] Firestore reads in `try/catch`
+- [ ] `useEffect` subscriptions return cleanup
+- [ ] Images have `onError` fallback
+- [ ] HTML from Firestore → `DOMPurify.sanitize()`
+- [ ] New features → System Test phase
+- [ ] Mobile responsive (375px + 768px)
+- [ ] MediaPicker for uploads (no `<input type="file">`)
+- [ ] No `#/admin` hash routing
+- [ ] `COLORS.*` used (no hardcoded hex)
+- [ ] `COLLECTIONS.*` used (no hardcoded strings)
+- [ ] Admin modals → `createPortal(modal, document.body)`
 
 ---
 
-## 17. HOW TO ADD A NEW FEATURE (Checklist)
+## 17. HOW TO ADD A NEW FEATURE
 
 ### New Public Page
-1. Create `src/pages/NewPage.jsx`
-2. Add route in `App.jsx` with `<ErrorBoundary>` wrapper
-3. Import and use `COLORS`, `COLLECTIONS`, `FALLBACK_IMAGE` from constants
-4. If data from Firestore → use `onSnapshot` + `try/catch` + cleanup
-5. If new collection needed → add to `COLLECTIONS` in `constants.js`
-6. Add System Test phase in `AdminPanel.jsx`
+1. `src/pages/NewPage.jsx`
+2. Route in `App.jsx` with `<ErrorBoundary>`
+3. `COLORS`, `COLLECTIONS`, `FALLBACK_IMAGE` from constants
+4. `onSnapshot` + `try/catch` + cleanup
+5. System Test phase
 
 ### New Admin Tab
-1. Add `{ id: 'tabid', icon: '🎯', label: 'Tab Name', section: '' }` to `TABS` array
-2. Add state + Firebase handlers in `AdminPanelInner`
-3. Add JSX section `{tab === 'tabid' && (...)}`
-4. Use `MediaPicker` for any image/PDF fields
-5. Use `logAct()` for all add/update/delete actions
-6. Use `softDelete()` not `deleteDoc()` directly
-7. Add System Test phase
+1. Add to `TABS` array (outside component)
+2. State + handlers in `AdminPanelInner`
+3. JSX `{tab === 'tabid' && (...)}`
+4. `MediaPicker` for images/PDFs
+5. `logAct()` for mutations
+6. `softDelete()` not `deleteDoc()`
+7. **Modals → `createPortal(modal, document.body)`**
+8. System Test phase
 
 ### New Firestore Collection
 1. Add to `COLLECTIONS` in `constants.js`
-2. Define schema in this CLAUDE.md (Section 3)
-3. Add Firestore security rule
-4. Add System Test phase in AdminPanel
-5. Create Admin tab (or add fields to existing tab)
+2. Schema in CLAUDE.md Section 3
+3. Firestore security rule
+4. System Test phase
+5. Admin tab
 
 ---
 
 ## 18. KNOWN BUGS (Permanent Reference)
 
-> These bugs were found and fixed during development. DO NOT reintroduce them.
-
-| # | Location | Bug | Fix Applied |
-|---|----------|-----|------------|
-| B1 | App.jsx | Dept pages used static routes → `useParams()` returned `{}` | 5 static routes → 1 `:deptSlug` param route |
-| B2 | App.jsx | Dept paths were in `placeholderPaths` | Removed 5 dept paths from placeholderPaths |
-| B3 | App.jsx | `window.open('#/admin')` | → `window.open('/admin')` |
-| B4 | HeroSlider.jsx | `FALLBACK` array inside component — recreated every render | Moved outside component |
-| B5 | AlertBanner.jsx | `dismissed` stale closure | → `useRef` for dismissed state |
-| B6 | AlertBanner.jsx | `setTimeout` memory leak | `useRef` + `clearTimeout` on unmount |
-| B7 | VideoGallery.jsx | `fetchVideos` not memoized → infinite loop | → `useCallback` |
-| B8 | NewsPage.jsx | Raw HTML rendered without DOMPurify | → DOMPurify on both list + detail views |
-| B9 | NewsPage.jsx | Search checked wrong field | → check `n.type` |
-| B10 | PageViewer.jsx | `pdfReports` query no `orderBy` | → `orderBy('createdAt', 'desc')` |
-| B11 | DepartmentPage.jsx | Faculty race condition on multi-filter | → `resolvedRef` Set tracking |
-| B12 | DepartmentPage.jsx | `semTab` not reset on dept switch | → `setSem(null)` on slug change |
-| B13 | DepartmentPage.jsx | CTA `href="#faculty"` breaks React Router | → `scrollIntoView()` |
-| B14 | DepartmentPage.jsx | `orderBy` unused import | Removed |
-| B15 | AdminDepartmentTab.jsx | `window.prompt` for Sem/Subject | → `InlinePrompt` component |
-| B16 | AdminDepartmentTab.jsx | PDF upload used Firebase Storage | → ImgBB + Google Drive (MediaPicker) |
-| B17 | AdminPanel.jsx | Gallery categories mismatch with HomePage | → Use `GALLERY_CATEGORIES` from constants |
-| B18 | AdminPanel.jsx | Announcement delete toast had raw HTML | → DOMPurify strip before toast |
+| # | Location | Bug | Fix |
+|---|----------|-----|-----|
+| B1 | App.jsx | Static dept routes → `useParams()` returned `{}` | 5 routes → 1 `:deptSlug` |
+| B2 | App.jsx | Dept paths in `placeholderPaths` | Removed |
+| B3 | App.jsx | `window.open('#/admin')` | → proper URL construction |
+| B4 | HeroSlider.jsx | `FALLBACK` inside component | Moved outside |
+| B5 | AlertBanner.jsx | `dismissed` stale closure | → `useRef` |
+| B6 | AlertBanner.jsx | `setTimeout` leak | → `useRef` + `clearTimeout` |
+| B7 | VideoGallery.jsx | `fetchVideos` → infinite loop | → `useCallback` |
+| B8 | NewsPage.jsx | Raw HTML | → DOMPurify both views |
+| B9 | NewsPage.jsx | Search checked wrong field | → `n.type` |
+| B10 | PageViewer.jsx | No `orderBy` | → `orderBy('createdAt','desc')` |
+| B11 | DepartmentPage.jsx | Faculty race condition | → `resolvedRef` Set |
+| B12 | DepartmentPage.jsx | `semTab` not reset on slug change | → `setSem(null)` |
+| B13 | DepartmentPage.jsx | `href="#faculty"` breaks Router | → `scrollIntoView()` |
+| B14 | DepartmentPage.jsx | Unused `orderBy` import | Removed |
+| B15 | AdminDepartmentTab.jsx | `window.prompt` | → `InlinePrompt` |
+| B16 | AdminDepartmentTab.jsx | Firebase Storage | → MediaPicker + ImgBB |
+| B17 | AdminPanel.jsx | Gallery category mismatch | → `GALLERY_CATEGORIES` |
+| B18 | AdminPanel.jsx | Delete toast raw HTML | → DOMPurify |
+| B19 | LeadershipPage.jsx | `where + orderBy` composite index error | → client-side sort |
+| B20 | App.jsx | Leadership paths in `placeholderPaths` | → Removed, added proper routes |
+| B21 | App.jsx | `pageContentByPath.get()` → `undefined` → standalone mode | → `?? null` + `pagesLoaded` |
+| B22 | PageViewer.jsx | `page !== undefined` check broke rendering | → loading prop, direct render |
+| B23 | AdminLeadershipTab.jsx | Modal broken by AdminPanel `transform` CSS | → `createPortal(modal, document.body)` |
+| B24 | AdminLeadershipTab.jsx | Photo preview flicker on typing | → debounced `previewUrl` (800ms), `onError → display:none` |
+| B25 | AdminPanel.jsx | Jodit `height:280` fixed, not resizable | → `height:420`, `allowResizeY:true` |
+| B26 | AdminPanel.jsx | Preview modal no CSS → tables plain | → `.prev-prose` full CSS |
 
 ---
 
@@ -960,39 +801,30 @@ BP = {
 | Colors | `src/styles/colors.js` or `src/constants.js` |
 | College info | `src/constants.js` → `COLLEGE` |
 | Firebase | `src/firebase.js` |
-| Static nav data | `src/data/db.js` |
+| Static nav | `src/data/db.js` |
 | Fallback image | `public/images/college_photo.jpg` |
-| Department hub | `/academics/departments` |
-| Admin panel | `/admin` |
+| Leadership page | `src/pages/LeadershipPage.jsx` |
+| Leadership admin | `src/components/AdminLeadershipTab.jsx` |
+| Dept hub | `/academics/departments` |
+| Admin | `/admin` |
 | MediaPicker | `src/components/MediaPicker.jsx` |
-| ImgBB key storage | Firestore: `settings/site.imgbbKey` |
+| ImgBB key | Firestore: `settings/site.imgbbKey` |
 
 ---
 
 ## 20. ENVIRONMENT & DEPLOYMENT
 
-### Dev
 ```bash
-npm run dev          # Vite dev server (localhost:5173)
+npm run dev       # localhost:5173
+npm run build     # /dist
+npm run preview   # preview build
+npm run deploy    # → GitHub Pages
 ```
 
-### Production Build
-```bash
-npm run build        # outputs to /dist
-npm run preview      # preview built version locally
-```
+**Base URL:** `base: '/gncollege-website/'` in vite.config.js
 
-### Deploy to GitHub Pages
-```bash
-npm run deploy       # gh-pages package (if configured)
-# OR push to main, GitHub Actions deploys automatically
-```
-
-### Base URL
-- **GitHub Pages**: `/gncollege-website/`
-- Make sure `vite.config.js` has `base: '/gncollege-website/'` if needed
-- All `public/` assets accessible at `/gncollege-website/images/...` in prod
+Public assets in prod: `/gncollege-website/images/...`
 
 ---
 
-*Last updated: March 2026 — Session covers AdminPanel v9.1+ with MediaPicker v2, 17-phase System Test, Departments tab, Contact Settings tab, and universal DepartmentPage.*
+*Last updated: March 12, 2026 — Session: LeadershipPage.jsx (new), AdminLeadershipTab.jsx (new), App.jsx pagesLoaded + leadership routes, PageViewer loading prop, AdminPanel Jodit resizable + preview gnc-prose. Bugs B1–B26 documented.*
