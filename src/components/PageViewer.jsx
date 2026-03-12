@@ -386,43 +386,52 @@ const Skeleton = () => (
 // ─────────────────────────────────────────────────────────────────────────────
 // PageViewer — Main Export
 // ─────────────────────────────────────────────────────────────────────────────
-const PageViewer = ({ page }) => {
+const PageViewer = ({ page, loading: externalLoading }) => {
   // CSS inject on mount
   useEffect(() => { injectProseCSS(); }, []);
 
-  // If page is passed as prop (from App.jsx placeholder routes)
-  if (page !== undefined) {
-    const content = page?.content;
-    const title   = page?.title;
-    const safePath = typeof window !== 'undefined'
-      ? window.location.hash?.replace('#', '') || '/'
-      : '/';
-
+  // loading — jab tak App.jsx se pages array empty hai
+  if (externalLoading) {
     return (
       <div style={{ minHeight: '60vh', background: '#f8fafc' }}>
-        <PageHero title={title || 'Page'} />
         <div style={{
-          maxWidth: 900, margin: '0 auto',
-          padding: '40px 24px 80px',
+          background: 'linear-gradient(135deg, #0f2347 0%, #1a3a7c 100%)',
+          padding: '52px 24px 40px', textAlign: 'center',
         }}>
-          {content ? (
-            <div
-              className="gnc-prose"
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(wrapTablesForMobile(content))
-              }}
-            />
-          ) : (
-            <EmptyState path={safePath} />
-          )}
+          <div style={{ height: 28, width: 240, background: 'rgba(255,255,255,0.15)', borderRadius: 8, margin: '0 auto' }} />
         </div>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}><Skeleton /></div>
       </div>
     );
   }
 
-  // Standalone mode — reads from pdfReports or pages collection
-  // (used when PageViewer is used without a page prop, e.g. directly via route)
-  return <PageViewerStandalone />;
+  // page prop milta hai App.jsx ke placeholder routes se (null bhi valid hai — means no content yet)
+  const content = page?.content;
+  const title   = page?.title;
+  const safePath = typeof window !== 'undefined'
+    ? window.location.hash?.replace('#', '') || '/'
+    : '/';
+
+  return (
+    <div style={{ minHeight: '60vh', background: '#f8fafc' }}>
+      <PageHero title={title || 'Page'} />
+      <div style={{
+        maxWidth: 900, margin: '0 auto',
+        padding: '40px 24px 80px',
+      }}>
+        {content ? (
+          <div
+            className="gnc-prose"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(wrapTablesForMobile(content))
+            }}
+          />
+        ) : (
+          <EmptyState path={safePath} />
+        )}
+      </div>
+    </div>
+  );
 };
 
 // Standalone version — fetches its own data

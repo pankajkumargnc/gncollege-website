@@ -18,7 +18,6 @@ import {
   getDocs, writeBatch, limit
 } from 'firebase/firestore';
 import toast from 'react-hot-toast';
-import AdminLeadershipTab from './AdminLeadershipTab';
 
 const ImageCropper = lazy(() => import('./ImageCropper'));
 const AdminDepartmentTab = lazy(() => import('./AdminDepartmentTab'));
@@ -316,10 +315,35 @@ const BulkBar = ({ count, onDelete, onClear }) => count === 0 ? null : (
 
 const joditCfg = {
   readonly: false,
-  placeholder: 'Content likhein…',
-  height: 280,
+  placeholder: 'Content likhein… (Table insert karne ke liye toolbar mein Table button use karein)',
+  height: 420,
+  minHeight: 300,
+  allowResizeY: true,
+  allowResizeX: false,
   theme: 'default',
-  buttons: ['bold', 'italic', 'underline', '|', 'ul', 'ol', '|', 'font', 'fontsize', '|', 'link', 'align', 'undo', 'redo', '|', 'table', 'image']
+  toolbarAdaptive: false,
+  toolbarSticky: true,
+  showCharsCounter: false,
+  showWordsCounter: false,
+  showXPathInStatusbar: false,
+  buttons: [
+    'bold', 'italic', 'underline', 'strikethrough', '|',
+    'ul', 'ol', '|',
+    'outdent', 'indent', '|',
+    'font', 'fontsize', 'brush', '|',
+    'paragraph', '|',
+    'table', 'link', 'image', '|',
+    'align', '|',
+    'hr', 'eraser', '|',
+    'undo', 'redo', '|',
+    'fullsize'
+  ],
+  style: {
+    fontFamily: "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif",
+    fontSize: '15px',
+    color: '#334155',
+    lineHeight: '1.8',
+  },
 };
 
 // ── TABS config (outside component to avoid recreation every render) ──────────
@@ -345,7 +369,6 @@ const TABS = [
   { id: 'activity',      icon: '📋', label: 'Activity Log',      section: '' },
   { id: 'backup',        icon: '💾', label: 'Backup & Restore',  section: '' },
   { id: 'system_test',   icon: '🛡️', label: 'System Test',       section: '' },
-  { id: 'leadership', icon: '🏛️', label: 'Leadership', section: '' }
 ];
 
 // ── Contact Settings Tab Component ───────────────────────────────────────────
@@ -1765,12 +1788,6 @@ function AdminPanelInner({
               </Suspense>
             </div>
           )}
-          {/* ── LEADERSHIP ───────────────────────────────────────── */}
-          {tab === 'leadership' && (
-            <div className="fade-up">
-              <AdminLeadershipTab />
-            </div>
-          )}
 
           {/* ── SLIDER ───────────────────────────────────────────── */}
           {tab === 'slider' && (
@@ -2487,14 +2504,64 @@ function AdminPanelInner({
 
           {/* ── PREVIEW MODAL ─────────────────────────────────────── */}
           {showPreview && (
-            <div style={{ position:'fixed', inset:0, background:'rgba(15,35,71,.7)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100001, backdropFilter:'blur(5px)' }}>
-              <div style={{ background:WHITE, width:'92%', maxWidth:900, height:'85vh', borderRadius:18, display:'flex', flexDirection:'column', overflow:'hidden', boxShadow:'0 30px 60px rgba(0,0,0,.3)' }}>
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'16px 24px', borderBottom:`1px solid ${T.b1}` }}>
-                  <div style={{ fontWeight:900, color:NAVY, fontSize:15 }}>👁️ Live Preview</div>
+            <div style={{ position:'fixed', inset:0, background:'rgba(15,35,71,.75)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100001, backdropFilter:'blur(6px)' }}>
+              <div style={{ background:WHITE, width:'94%', maxWidth:960, height:'90vh', borderRadius:18, display:'flex', flexDirection:'column', overflow:'hidden', boxShadow:'0 30px 60px rgba(0,0,0,.35)' }}>
+                {/* Preview header */}
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'14px 24px', borderBottom:`1px solid ${T.b1}`, flexShrink:0 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                    <div style={{ fontWeight:900, color:NAVY, fontSize:15 }}>👁️ Live Preview</div>
+                    <span style={{ fontSize:11, background:'#f1f5f9', color:'#64748b', padding:'2px 8px', borderRadius:20, fontWeight:600 }}>
+                      Exact page jaisa dikhega
+                    </span>
+                  </div>
                   <button onClick={()=>setShowPreview(false)} className="abtn abtn-outline abtn-sm">✕ Close</button>
                 </div>
-                <div style={{ padding:'24px 32px', overflowY:'auto', flex:1, color:NAVY }}>
-                  {parse(DOMPurify.sanitize(previewContent||'', { ADD_TAGS:['iframe'], ADD_ATTR:['allow','allowfullscreen','frameborder'] }))}
+                {/* Fake page hero */}
+                <div style={{ background:'linear-gradient(135deg,#0f2347 0%,#1a3a7c 60%,#0f2347 100%)', padding:'28px 32px', textAlign:'center', flexShrink:0, position:'relative' }}>
+                  <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:'linear-gradient(90deg,#f4a023,#ffd57e,#f4a023)' }} />
+                  <div style={{ color:'#fff', fontWeight:900, fontSize:'1.2rem', fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif" }}>
+                    {pageData.title || 'Page Title'}
+                  </div>
+                  <div style={{ width:40, height:3, background:'#f4a023', borderRadius:2, margin:'8px auto 0' }} />
+                </div>
+                {/* Content with gnc-prose styles */}
+                <div style={{ overflowY:'auto', flex:1, padding:'32px 40px', background:'#f8fafc' }}>
+                  <style>{`
+                    .prev-prose { font-family:'Plus Jakarta Sans','DM Sans',system-ui,sans-serif; font-size:15px; line-height:1.8; color:#334155; }
+                    .prev-prose h1,.prev-prose h2,.prev-prose h3,.prev-prose h4 { font-family:'Plus Jakarta Sans',system-ui,sans-serif; color:#0f2347; font-weight:800; line-height:1.3; margin:1.6em 0 0.5em; letter-spacing:-0.02em; }
+                    .prev-prose h1{font-size:1.9rem} .prev-prose h2{font-size:1.45rem;padding-bottom:8px;border-bottom:3px solid #f4a023;display:inline-block} .prev-prose h3{font-size:1.2rem;color:#1a3a7c} .prev-prose h4{font-size:1.05rem;color:#1a3a7c;font-weight:700}
+                    .prev-prose p{margin:0.8em 0 1em}
+                    .prev-prose a{color:#1a3a7c;text-decoration:underline;text-underline-offset:3px;font-weight:600}
+                    .prev-prose strong,.prev-prose b{color:#0f2347;font-weight:700}
+                    .prev-prose ul{list-style:none;padding-left:1.4em;margin:0.8em 0 1.2em} .prev-prose ul li{position:relative;padding-left:1.2em;margin-bottom:0.45em} .prev-prose ul li::before{content:'';position:absolute;left:0;top:0.65em;width:7px;height:7px;border-radius:50%;background:#f4a023}
+                    .prev-prose ol{padding-left:1.6em;margin:0.8em 0 1.2em} .prev-prose ol li{margin-bottom:0.45em} .prev-prose ol li::marker{color:#f4a023;font-weight:700}
+                    .prev-prose blockquote{border-left:4px solid #f4a023;background:#fff8ed;margin:1.4em 0;padding:14px 20px;border-radius:0 8px 8px 0;font-style:italic;color:#475569}
+                    .prev-prose hr{border:none;border-top:2px solid #e2e8f0;margin:1.8em 0}
+                    .prev-prose img{max-width:100%;height:auto;border-radius:10px;border:1px solid #e2e8f0;margin:1em 0;display:block;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+                    .prev-prose-twrap{overflow-x:auto;border-radius:12px;margin:1.5em 0 2em;box-shadow:0 4px 24px rgba(15,35,71,.1);border:1px solid #dde8f5}
+                    .prev-prose table{width:100%;border-collapse:collapse;font-size:0.93rem;min-width:400px}
+                    .prev-prose table tr:first-child{background:linear-gradient(135deg,#0f2347 0%,#1a3a7c 100%)!important}
+                    .prev-prose table tr:first-child td,.prev-prose table tr:first-child th,.prev-prose thead th{color:#fff!important;font-weight:700!important;font-size:0.82rem!important;letter-spacing:0.05em!important;text-transform:uppercase!important;padding:13px 16px!important;border:none!important;border-right:1px solid rgba(255,255,255,.12)!important;background:transparent!important}
+                    .prev-prose table tr:first-child td:first-child,.prev-prose thead th:first-child{border-left:3px solid #f4a023!important}
+                    .prev-prose table tr:first-child td:last-child,.prev-prose thead th:last-child{border-right:none!important}
+                    .prev-prose tbody tr,.prev-prose table tr:not(:first-child){border-bottom:1px solid #e8f0fa}
+                    .prev-prose table tr:nth-child(even):not(:first-child){background:#f8faff}
+                    .prev-prose table tr:nth-child(odd):not(:first-child){background:#fff}
+                    .prev-prose table tr:not(:first-child):hover{background:#edf3ff!important}
+                    .prev-prose td{padding:11px 16px;color:#334155;font-size:0.91rem;border-right:1px solid #e8f0fa;vertical-align:top}
+                    .prev-prose td:first-child{font-weight:600;color:#0f2347;border-left:3px solid transparent}
+                    .prev-prose tr:hover td:first-child{border-left-color:#f4a023}
+                    .prev-prose td:last-child{border-right:none}
+                  `}</style>
+                  <div
+                    className="prev-prose"
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(
+                        (previewContent || '').replace(/<table/gi, '<div class="prev-prose-twrap"><table').replace(/<\/table>/gi, '</table></div>'),
+                        { ADD_TAGS: ['iframe'], ADD_ATTR: ['allow','allowfullscreen','frameborder','style'] }
+                      )
+                    }}
+                  />
                 </div>
               </div>
             </div>

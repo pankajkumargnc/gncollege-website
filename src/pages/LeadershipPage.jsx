@@ -9,7 +9,7 @@
 //     element={<LeadershipPage type="principal" title="Principals Over the Years" />} />
 
 import { useState, useEffect } from 'react';
-import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 
 // ── Config per type ──────────────────────────────────────────────────────────
@@ -388,11 +388,13 @@ const LeadershipPage = ({ type = 'president', title }) => {
   useEffect(() => {
     const q = query(
       collection(db, 'leadership'),
-      where('type', '==', type),
-      orderBy('from', 'desc')
+      where('type', '==', type)
     );
     const unsub = onSnapshot(q, snap => {
-      setRecords(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      const data = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => parseInt(b.from || 0) - parseInt(a.from || 0));
+      setRecords(data);
       setLoading(false);
     }, () => setLoading(false));
     return () => unsub();

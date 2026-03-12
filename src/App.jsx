@@ -19,6 +19,7 @@ import QuickActionNav from './components/QuickActionNav';
 import PageViewer from './components/PageViewer';
 import Contact from './pages/Contact';
 import CollegeProfile from './pages/CollegeProfile';
+import LeadershipPage from './pages/LeadershipPage';
 import NotificationsPage from './pages/NotificationsPage';
 import DocumentsPage from './pages/DocumentsPage';
 import EventsPage from './pages/EventsPage';
@@ -27,11 +28,9 @@ import AlertBanner from './components/AlertBanner';
 import StaffPage from './pages/StaffPage';
 import NewsPage from './pages/NewsPage';
 import DepartmentPage from './pages/DepartmentPage';
-import LeadershipPage from './pages/LeadershipPage';
 import ErrorBoundary from './components/ErrorBoundary';
 import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
 import { db } from './firebase';
-
 
 const AdminPanel = lazy(() => import('./components/AdminPanel'));
 const Ticker     = lazy(() => import('./components/Ticker'));
@@ -113,6 +112,7 @@ export default function App() {
   const [gallery,       setGallery]       = useState([]);
   const [pdfReports,    setPdfReports]    = useState([]);
   const [pages,         setPages]         = useState([]);
+  const [pagesLoaded,   setPagesLoaded]   = useState(false);
   const [sliderSlides,  setSliderSlides]  = useState([]);
   const [faculties,     setFaculties]     = useState([]);
   const [placements,    setPlacements]    = useState([]);
@@ -189,7 +189,6 @@ export default function App() {
       ['events',        setEvents],
       ['gallery',       setGallery],
       ['pdfReports',    setPdfReports],
-      ['pages',         setPages],
       ['faculties',     setFaculties],
       ['placements',    setPlacements],
       ['alerts',        setAlerts],
@@ -208,6 +207,16 @@ export default function App() {
         );
       }
     });
+
+    // Pages — alag listener taaki pagesLoaded track ho sake
+    const unsubPages = onSnapshot(
+      query(collection(db, 'pages'), orderBy('createdAt', 'desc')),
+      snap => {
+        setPages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        setPagesLoaded(true);
+      },
+      () => setPagesLoaded(true) // error pe bhi loaded mark karo
+    );
 
     // Slider — order field se, fallback createdAt
     let unsubSlider;
@@ -229,7 +238,7 @@ export default function App() {
       );
     }
 
-    return () => { unsubs.forEach(u => u()); if (unsubSlider) unsubSlider(); };
+    return () => { unsubs.forEach(u => u()); unsubPages(); if (unsubSlider) unsubSlider(); };
   }, []);
 
   // ✅ FIXED: HashRouter + GitHub Pages ke liye correct URL construction
@@ -320,14 +329,28 @@ export default function App() {
             </ErrorBoundary>
           } />
 
-
-
           <Route path="/contact" element={
             <ErrorBoundary page="Contact"><Contact /></ErrorBoundary>
           } />
 
           <Route path="/about-us/college-profile" element={
             <ErrorBoundary page="CollegeProfile"><CollegeProfile /></ErrorBoundary>
+          } />
+
+          <Route path="/about-us/college-management/presidents" element={
+            <ErrorBoundary page="LeadershipPage">
+              <LeadershipPage type="president" title="Presidents Over the Years" />
+            </ErrorBoundary>
+          } />
+          <Route path="/about-us/college-management/secretaries" element={
+            <ErrorBoundary page="LeadershipPage">
+              <LeadershipPage type="secretary" title="Secretaries Over the Years" />
+            </ErrorBoundary>
+          } />
+          <Route path="/about-us/college-management/principal" element={
+            <ErrorBoundary page="LeadershipPage">
+              <LeadershipPage type="principal" title="Principals Over the Years" />
+            </ErrorBoundary>
           } />
 
           <Route path="/notifications" element={
@@ -372,12 +395,6 @@ export default function App() {
           <Route path="/academics/departments/:deptSlug" element={
             <ErrorBoundary page="DepartmentPage"><DepartmentPage /></ErrorBoundary>
           } />
-          <Route path="/about-us/college-management/presidents"
-  element={<ErrorBoundary><LeadershipPage type="president" title="Presidents Over the Years" /></ErrorBoundary>} />
-<Route path="/about-us/college-management/secretaries"
-  element={<ErrorBoundary><LeadershipPage type="secretary" title="Secretaries Over the Years" /></ErrorBoundary>} />
-<Route path="/about-us/college-management/principal"
-  element={<ErrorBoundary><LeadershipPage type="principal" title="Principals Over the Years" /></ErrorBoundary>} />
 
           <Route path="/admin" element={
             <AdminRouteWrapper
@@ -396,11 +413,11 @@ export default function App() {
           } />
 
           {placeholderPaths.map(path => {
-            const page = pageContentByPath.get(path);
+            const page = pageContentByPath.get(path) ?? null;
             return (
               <Route key={path} path={path} element={
                 <ErrorBoundary page="PageViewer">
-                  <PageViewer page={page} />
+                  <PageViewer page={page} loading={!pagesLoaded} />
                 </ErrorBoundary>
               } />
             );
