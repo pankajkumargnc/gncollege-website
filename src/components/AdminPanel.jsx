@@ -18,6 +18,7 @@ import {
   getDocs, writeBatch, limit
 } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import AdminCampusTab from './AdminCampusTab';
 
 const ImageCropper = lazy(() => import('./ImageCropper'));
 const AdminDepartmentTab = lazy(() => import('./AdminDepartmentTab'));
@@ -354,6 +355,7 @@ const TABS = [
   { id: 'placements',    icon: '🎓', label: 'Alumni Wall',       section: '' },
   { id: 'faculty',       icon: '👨‍🏫', label: 'Faculty & Staff',  section: '' },
   { id: 'departments',   icon: '🏛️',  label: 'Departments',      section: '' },
+  {id:'campus',label:'Campus Gallery',icon:'📸'},
   { id: 'slider',        icon: '🖼️',  label: 'Hero Slider',      section: '' },
   { id: 'menu_builder',  icon: '🧭', label: 'Menu Editor',       section: '' },
   { id: 'pages',         icon: '📄', label: 'Pages & SEO',       section: '' },
@@ -1788,7 +1790,9 @@ function AdminPanelInner({
               </Suspense>
             </div>
           )}
-
+          {tab === 'campus' && (
+             <AdminCampusTab />
+          )}
           {/* ── SLIDER ───────────────────────────────────────────── */}
           {tab === 'slider' && (
             <div className="fade-up">
@@ -1884,7 +1888,7 @@ function AdminPanelInner({
                 </div>
                 <form onSubmit={savePage}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-                    <div><label className="alabel">Page Title *</label><input className="ainp" value={pageData.title} onChange={e=>setPageData(d=>({...d,title:e.target.value}))} required placeholder="About the Principal" /></div>
+                    <div><label className="alabel">Page Title *</label><input className="ainp" value={pageData.title} onChange={e=>{ const t = e.target.value; const s = t.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''); setPageData(d=>({...d, title: t, slug: pageMode === 'create' ? s : d.slug})); }} required placeholder="About the Principal" /></div>
                     {pageMode==='update'
                       ? <div><label className="alabel">Page Path *</label><input className="ainp" value={pageData.path} onChange={e=>setPageData(d=>({...d,path:e.target.value}))} placeholder="/about-us/principal-message" /></div>
                       : <div><label className="alabel">URL Slug *</label><input className="ainp" value={pageData.slug} onChange={e=>setPageData(d=>({...d,slug:e.target.value}))} placeholder="principal-message" /></div>
