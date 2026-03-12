@@ -1,6 +1,6 @@
 // src/App.jsx
 // ✅ UPDATED: ErrorBoundary added on all pages
-// ✅ FIXED: window.open('#/admin') → window.open('/admin') (Batch 1 critical bug)
+// ✅ FIXED v2: window.open HashRouter + GitHub Pages correct URL fix
 
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Routes, Route, useParams, useLocation } from 'react-router-dom';
@@ -27,16 +27,17 @@ import AlertBanner from './components/AlertBanner';
 import StaffPage from './pages/StaffPage';
 import NewsPage from './pages/NewsPage';
 import DepartmentPage from './pages/DepartmentPage';
-// ✅ NEW: ErrorBoundary import
+import LeadershipPage from './pages/LeadershipPage';
 import ErrorBoundary from './components/ErrorBoundary';
 import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
 import { db } from './firebase';
+
 
 const AdminPanel = lazy(() => import('./components/AdminPanel'));
 const Ticker     = lazy(() => import('./components/Ticker'));
 
 const placeholderPaths = [
-  '/syllabus', '/about-us', '/about-us/vision-mission', '/about-us/principal-message', '/about-us/college-management/organogram', '/about-us/college-management/presidents', '/about-us/college-management/secretaries', '/about-us/college-management/principal', '/about-us/various-committees/womens-cell', '/about-us/various-committees/anti-ragging', '/about-us/various-committees/sc-st', '/about-us/various-committees/obc', '/about-us/various-committees/grievance', '/about-us/various-committees/icc', '/about-us/various-committees/minority', '/about-us/various-committees/placement', '/about-us/various-committees/rusa', '/about-us/college-staff/teaching-staff', '/about-us/college-staff/non-teaching-staff', '/about-us/regulations/bbmku/special-ug-regulation', '/about-us/regulations/bbmku/ug-regulation-fyugp', '/about-us/regulations/bbmku/ug-regulation-cbcs', '/about-us/regulations/college-affiliation', '/about-us/regulations/ugc-section', '/about-us/regulations/vbu/ug-regulation-2015', '/about-us/regulations/vbu/bca-regulation', '/about-us/regulations/byelaws', '/about-us/regulations/exemption', '/about-us/audit-report', '/campus/visuals/bhuda', '/campus/visuals/bank-more', '/campus/visuals/vocational-building', '/campus/infrastructure', '/campus/classroom', '/campus/ict-rooms', '/campus/green-campus', '/academics/iqac', '/academics/course-offered', '/academics/academic-calendar', '/admission/rule', '/admission/document-required', '/admission/fee-structure', '/admission/notification/latest', '/admission/notification/upcoming', '/admission/intake-capacity', '/activity/nss', '/activity/ncc', '/activity/workshop', '/activity/games-sports', '/activity/collaboration/rotaract-club', '/activity/collaboration/sadbhavana-diwas', '/naac/ssr-1st-cycle/cycle-1-documents', '/naac/ssr-1st-cycle/peer-team-report', '/naac/ssr-2nd-cycle/cycle-2-documents', '/naac/ssr-2nd-cycle/executive-summary', '/naac/aqar', '/naac/nirf', '/naac/perspective-plan', '/publication/college-library', '/publication/e-magazine', '/publication/examination-results/2024', '/publication/examination-results/2023', '/publication/sss-report/2023-24', '/publication/sss-report/2022-23', '/gallery'
+  '/syllabus', '/about-us', '/about-us/vision-mission', '/about-us/principal-message', '/about-us/college-management/organogram', '/about-us/various-committees/womens-cell', '/about-us/various-committees/anti-ragging', '/about-us/various-committees/sc-st', '/about-us/various-committees/obc', '/about-us/various-committees/grievance', '/about-us/various-committees/icc', '/about-us/various-committees/minority', '/about-us/various-committees/placement', '/about-us/various-committees/rusa', '/about-us/college-staff/teaching-staff', '/about-us/college-staff/non-teaching-staff', '/about-us/regulations/bbmku/special-ug-regulation', '/about-us/regulations/bbmku/ug-regulation-fyugp', '/about-us/regulations/bbmku/ug-regulation-cbcs', '/about-us/regulations/college-affiliation', '/about-us/regulations/ugc-section', '/about-us/regulations/vbu/ug-regulation-2015', '/about-us/regulations/vbu/bca-regulation', '/about-us/regulations/byelaws', '/about-us/regulations/exemption', '/about-us/audit-report', '/campus/visuals/bhuda', '/campus/visuals/bank-more', '/campus/visuals/vocational-building', '/campus/infrastructure', '/campus/classroom', '/campus/ict-rooms', '/campus/green-campus', '/academics/iqac', '/academics/course-offered', '/academics/academic-calendar', '/admission/rule', '/admission/document-required', '/admission/fee-structure', '/admission/notification/latest', '/admission/notification/upcoming', '/admission/intake-capacity', '/activity/nss', '/activity/ncc', '/activity/workshop', '/activity/games-sports', '/activity/collaboration/rotaract-club', '/activity/collaboration/sadbhavana-diwas', '/naac/ssr-1st-cycle/cycle-1-documents', '/naac/ssr-1st-cycle/peer-team-report', '/naac/ssr-2nd-cycle/cycle-2-documents', '/naac/ssr-2nd-cycle/executive-summary', '/naac/aqar', '/naac/nirf', '/naac/perspective-plan', '/publication/college-library', '/publication/e-magazine', '/publication/examination-results/2024', '/publication/examination-results/2023', '/publication/sss-report/2023-24', '/publication/sss-report/2022-23', '/gallery'
 ];
 
 // ── Dynamic page route ────────────────────────────────────────────────────────
@@ -231,10 +232,23 @@ export default function App() {
     return () => { unsubs.forEach(u => u()); if (unsubSlider) unsubSlider(); };
   }, []);
 
-  // ✅ FIXED: window.open('/admin') — Batch 1 critical bug fix
-  // Pehle '#/admin' tha jo React Router ke saath kaam nahi karta tha
+  // ✅ FIXED: HashRouter + GitHub Pages ke liye correct URL construction
+  //
+  // Aapka project HashRouter use karta hai. HashRouter mein routes '#' ke baad aate hain:
+  //   https://pankajkumargnc.github.io/gncollege-website/#/admin
+  //
+  // window.open('#/admin', '_blank') problem:
+  //   Naye blank tab mein '#/admin' ek relative URL hai jiska koi base nahi hota.
+  //   Browser usse resolve nahi kar pata → admin open nahi hota.
+  //
+  // Sahi tarika — pura URL banao:
+  //   window.location.origin  = https://pankajkumargnc.github.io
+  //   import.meta.env.BASE_URL = /gncollege-website/
+  //   Final URL               = https://pankajkumargnc.github.io/gncollege-website/#/admin ✅
   const handleOpenAdminTab = () => {
-    window.open('#/admin', '_blank');
+    const origin  = window.location.origin;                        // https://pankajkumargnc.github.io
+    const base    = import.meta.env.BASE_URL.replace(/\/$/, '');   // /gncollege-website
+    window.open(`${origin}${base}/#/admin`, '_blank');
   };
 
   const tickerItems = [
@@ -276,7 +290,6 @@ export default function App() {
             <Ticker items={tickerItems} />
           </Suspense>
 
-          {/* ✅ AlertBanner — minimal mode: agar crash ho toh banner silently hide hoga */}
           {activeAlerts.length > 0 && (
             <ErrorBoundary page="AlertBanner" minimal={true}>
               <AlertBanner />
@@ -293,7 +306,6 @@ export default function App() {
       <div key={location.pathname} className={isAdminRoute ? '' : 'page-transition'}>
         <Routes location={location}>
 
-          {/* Home */}
           <Route path="/" element={
             <ErrorBoundary page="HomePage">
               <HomePage
@@ -308,91 +320,65 @@ export default function App() {
             </ErrorBoundary>
           } />
 
-          {/* Contact */}
+
+
           <Route path="/contact" element={
-            <ErrorBoundary page="Contact">
-              <Contact />
-            </ErrorBoundary>
+            <ErrorBoundary page="Contact"><Contact /></ErrorBoundary>
           } />
 
-          {/* College Profile */}
           <Route path="/about-us/college-profile" element={
-            <ErrorBoundary page="CollegeProfile">
-              <CollegeProfile />
-            </ErrorBoundary>
+            <ErrorBoundary page="CollegeProfile"><CollegeProfile /></ErrorBoundary>
           } />
 
-          {/* Notifications */}
           <Route path="/notifications" element={
-            <ErrorBoundary page="NotificationsPage">
-              <NotificationsPage />
-            </ErrorBoundary>
+            <ErrorBoundary page="NotificationsPage"><NotificationsPage /></ErrorBoundary>
           } />
 
-          {/* Documents */}
           <Route path="/documents" element={
-            <ErrorBoundary page="DocumentsPage">
-              <DocumentsPage />
-            </ErrorBoundary>
+            <ErrorBoundary page="DocumentsPage"><DocumentsPage /></ErrorBoundary>
           } />
 
-          {/* Events */}
           <Route path="/events" element={
-            <ErrorBoundary page="EventsPage">
-              <EventsPage />
-            </ErrorBoundary>
+            <ErrorBoundary page="EventsPage"><EventsPage /></ErrorBoundary>
           } />
 
-          {/* News */}
           <Route path="/news" element={
-            <ErrorBoundary page="NewsPage">
-              <NewsPage />
-            </ErrorBoundary>
+            <ErrorBoundary page="NewsPage"><NewsPage /></ErrorBoundary>
           } />
 
-          {/* Video Gallery */}
           <Route path="/video-gallery" element={
-            <ErrorBoundary page="VideoGallery">
-              <VideoGallery />
-            </ErrorBoundary>
+            <ErrorBoundary page="VideoGallery"><VideoGallery /></ErrorBoundary>
           } />
 
-          {/* Teaching Staff */}
           <Route path="/about-us/college-staff/teaching-staff" element={
             <ErrorBoundary page="StaffPage">
               <StaffPage faculties={faculties} staffType="Teaching" />
             </ErrorBoundary>
           } />
 
-          {/* Non-Teaching Staff */}
           <Route path="/about-us/college-staff/non-teaching-staff" element={
             <ErrorBoundary page="StaffPage">
               <StaffPage faculties={faculties} staffType="Non-Teaching" />
             </ErrorBoundary>
           } />
 
-          {/* Gallery — scrolls to gallery section on HomePage */}
           <Route path="/gallery" element={
-            <ErrorBoundary page="HomePage">
-              <HomePage />
-            </ErrorBoundary>
+            <ErrorBoundary page="HomePage"><HomePage /></ErrorBoundary>
           } />
 
-          {/* ✅ B1 FIX: Hub + single :deptSlug param route
-               Pehle static routes the (bca, bba...) → useParams() kuch nahi deta tha
-               Ab :deptSlug se sahi slug milta hai */}
           <Route path="/academics/departments" element={
-            <ErrorBoundary page="DepartmentPage">
-              <DepartmentPage />
-            </ErrorBoundary>
+            <ErrorBoundary page="DepartmentPage"><DepartmentPage /></ErrorBoundary>
           } />
           <Route path="/academics/departments/:deptSlug" element={
-            <ErrorBoundary page="DepartmentPage">
-              <DepartmentPage />
-            </ErrorBoundary>
+            <ErrorBoundary page="DepartmentPage"><DepartmentPage /></ErrorBoundary>
           } />
+          <Route path="/about-us/college-management/presidents"
+  element={<ErrorBoundary><LeadershipPage type="president" title="Presidents Over the Years" /></ErrorBoundary>} />
+<Route path="/about-us/college-management/secretaries"
+  element={<ErrorBoundary><LeadershipPage type="secretary" title="Secretaries Over the Years" /></ErrorBoundary>} />
+<Route path="/about-us/college-management/principal"
+  element={<ErrorBoundary><LeadershipPage type="principal" title="Principals Over the Years" /></ErrorBoundary>} />
 
-          {/* Admin — ErrorBoundary nahi — AdminPanel ka apna ErrorBoundary hai */}
           <Route path="/admin" element={
             <AdminRouteWrapper
               notices={notices} announcements={announcements} events={events}
@@ -403,14 +389,12 @@ export default function App() {
             />
           } />
 
-          {/* Dynamic slug pages (/p/:slug) */}
           <Route path="/p/:slug" element={
             <ErrorBoundary page="PageViewer">
               <DynamicPageRoute pages={pages} />
             </ErrorBoundary>
           } />
 
-          {/* Placeholder paths — Firebase se content aata hai */}
           {placeholderPaths.map(path => {
             const page = pageContentByPath.get(path);
             return (
@@ -425,7 +409,7 @@ export default function App() {
         </Routes>
       </div>
 
-      {/* Footer + Admin button */}
+      {/* Footer + Admin FAB button */}
       {!isAdminRoute && (
         <>
           <Footer />

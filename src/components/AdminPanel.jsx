@@ -18,6 +18,7 @@ import {
   getDocs, writeBatch, limit
 } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import AdminLeadershipTab from './AdminLeadershipTab';
 
 const ImageCropper = lazy(() => import('./ImageCropper'));
 const AdminDepartmentTab = lazy(() => import('./AdminDepartmentTab'));
@@ -344,6 +345,7 @@ const TABS = [
   { id: 'activity',      icon: '📋', label: 'Activity Log',      section: '' },
   { id: 'backup',        icon: '💾', label: 'Backup & Restore',  section: '' },
   { id: 'system_test',   icon: '🛡️', label: 'System Test',       section: '' },
+  { id: 'leadership', icon: '🏛️', label: 'Leadership', section: '' }
 ];
 
 // ── Contact Settings Tab Component ───────────────────────────────────────────
@@ -1761,6 +1763,12 @@ function AdminPanelInner({
               }>
                 <AdminDepartmentTab />
               </Suspense>
+            </div>
+          )}
+          {/* ── LEADERSHIP ───────────────────────────────────────── */}
+          {tab === 'leadership' && (
+            <div className="fade-up">
+              <AdminLeadershipTab />
             </div>
           )}
 
