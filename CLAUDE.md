@@ -21,7 +21,6 @@
 | Auth | Firebase Authentication |
 | Storage | ImgBB (Free, Lifetime) — **No Firebase Storage** |
 | Router | React Router DOM (HashRouter / BrowserRouter with base `/gncollege-website/`) |
-| Rich Text | jodit-react |
 | Sanitization | DOMPurify |
 | Notifications | react-hot-toast |
 | Animations | AOS (Animate On Scroll) |
@@ -94,6 +93,8 @@ gncollege-website/
 │       ├── AdminLogin.jsx
 │       ├── AdminPanel.jsx     ← Main admin panel (lazy loaded)
 │       └── AdminDepartmentTab.jsx ← Departments tab (lazy loaded inside AdminPanel)
+│       ├── LeadershipTab.jsx  ← Leadership profiles (Principal/VP messages)
+│       └── LeadershipAdminTab.jsx ← Admin tab for leadership management
 │
 ├── vite.config.js             ← Terser minification, chunks, no sourcemaps
 ├── CLAUDE.md                  ← THIS FILE
@@ -147,6 +148,7 @@ export const auth = getAuth(app);
 | `contactDirectory` | Contact page directors list | `icon, title, name, phone, order` |
 | `adminLogs` | Admin activity log | `action, message, section, time` |
 | `_sysTest` | System test write check | `test, time` |
+| `leadership` | Leadership profiles | `name, designation, photo, message, order, type` |
 
 ### Settings Documents (collection: `settings`)
 
@@ -234,6 +236,58 @@ export const auth = getAuth(app);
 | `/academics/departments/:deptSlug` | `DepartmentPage` | Individual dept (`bca`, `bba`, `commerce`, `humanities`, `social-science`) |
 | `/p/:slug` | `DynamicPageRoute` | CMS pages from `pages` collection |
 | `/admin` | `AdminPanel` (lazy) | Auth-protected |
+
+### Rich Text Editor (`jodit-react`)
+
+The project utilizes `jodit-react` which bundles Jodit v4.11.3 for all rich text editing needs. This is primarily implemented within the Admin Panel for managing dynamic content for pages, news, and announcements.
+
+#### Key Configuration & Features
+
+The editor is highly configurable. Based on the project's dependencies, here are some key features and configuration aspects available through the `config` prop:
+
+-   **Core Functionality**:
+    -   **File Management**: Integrated `FileBrowser` and `Uploader` modules. The project uses a custom `MediaPicker.jsx` which leverages this.
+    -   **HTML Cleaning**: A robust `cleanHTML` module with options to `allowTags`, `denyTags`, `replaceOldTags` (e.g., `<b>` to `<strong>`), and sanitize styles.
+    -   **Paste Handling**: Advanced control over pasted content, including from Microsoft Word (`pasteFromWord`) with options to clean or keep formatting.
+    -   **Source Mode**: A full-featured source code editor, with support for ACE editor and HTML beautification.
+
+-   **UI & UX**:
+    -   **Customizable Toolbar**: The `buttons` array allows for full customization of the toolbar, including responsive layouts for different screen sizes (`buttonsMD`, `buttonsSM`, `buttonsXS`).
+    -   **Inline Popups**: Context-sensitive popups for links, images, and tables (`toolbarInline`).
+    -   **Dialogs & Forms**: Built-in `Dialog`, `Alert`, `Confirm`, and `Prompt` modules, which are used across the admin panel.
+    -   **Theming**: Supports theming via the `theme` option (e.g., `'dark'`).
+
+-   **Plugins**:
+    -   The build includes a comprehensive set of default plugins, such as:
+        -   `image-properties` & `image-processor`
+        -   `drag-and-drop` & `drag-and-drop-element`
+        -   `resize-handler` & `resizer`
+        -   `search` (in-editor find and replace)
+        -   `speech-recognize` (voice-to-text)
+        -   `copy-format` (format painter)
+        -   `limit` (character/word limits)
+        -   And many more for tables, fonts, lists, etc.
+
+-   **Internationalization (i18n)**:
+    -   The editor supports multiple languages. The project includes built-in language files for:
+        -   Chinese (Simplified & Traditional) (`zh_cn`, `zh_tw`)
+        -   Japanese (`ja`)
+        -   Swedish (`sv`)
+        -   Dutch (`nl`)
+        -   German, French, Spanish, Russian, and others.
+    -   Language is configured via the `language` option in the Jodit config.
+
+#### Implementation in Admin Panel
+
+The `jodit-react` component is used in forms for creating/editing `pages`, `notices`, and `announcements`.
+
+```jsx
+import JoditEditor from 'jodit-react';
+
+const editorConfig = { readonly: false, placeholder: 'Start typing...' };
+
+<JoditEditor value={content} config={editorConfig} onBlur={newContent => setContent(newContent)} />
+```
 
 ### Placeholder Routes
 50+ static paths that render `PageViewer` with content from `pdfReports` collection:
@@ -339,6 +393,10 @@ COLORS = {
 
 ### Components
 
+#### `LeadershipTab.jsx`
+- Displays leadership profiles (Principal, Secretary, etc.)
+- Fetches from `leadership` collection ordered by `order`
+
 #### `HeroSlider.jsx`
 - `FALLBACK` array defined OUTSIDE component (not inside — avoids recreation on every render)
 - Reads from `sliderSlides` collection, sorted by `order`
@@ -423,6 +481,7 @@ setImgbbKey(siteCfg.imgbbKey);
 | `alerts` | 🚨 | Flash Alerts | `alerts` |
 | `placements` | 🎓 | Alumni Wall | `placements` |
 | `faculty` | 👨‍🏫 | Faculty & Staff | `faculties` |
+| `leadership` | 👔 | Leadership | `leadership` (new) |
 | `departments` | 🏛️ | Departments | `departments/{slug}` (lazy: AdminDepartmentTab) |
 | `slider` | 🖼️ | Hero Slider | `sliderSlides` |
 | `menu_builder` | 🧭 | Menu Editor | `settings/navbar` |
@@ -460,9 +519,14 @@ setImgbbKey(siteCfg.imgbbKey);
 - `useRef` timer cleanup on unmount (no memory leaks)
 - Sticky Save button with `position: sticky; bottom: 0`
 
+#### `LeadershipAdminTab.jsx`
+- Manages `leadership` collection (Principal, VP, etc.)
+- Uses `MediaPicker` for profile photos
+- Sortable by `order` field
+
 ---
 
-## 7. SYSTEM TEST SUITE (17 Phases)
+## 7. SYSTEM TEST SUITE (18 Phases)
 
 Located in `AdminPanel.jsx` → `system_test` tab.
 
@@ -487,6 +551,7 @@ Located in `AdminPanel.jsx` → `system_test` tab.
 | T15 | Activity Logging | `adminLogs` write + read |
 | T16 | Department Data | 5 slugs in `departments/{slug}` — HOD set, fee structure exists |
 | T17 | Contact Settings | `settings/contact` + `contactDirectory` |
+| T18 | Leadership | `leadership` collection readable |
 
 **Format for new phase:**
 ```js
@@ -502,7 +567,7 @@ try {
   sysLogAdd('  ✗ ' + e.message);
 }
 total++;
-// Update [X/18] in all previous labels and header badges
+// Update [X/19] in all previous labels and header badges
 ```
 
 ---
