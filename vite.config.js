@@ -1,16 +1,20 @@
 // vite.config.js
 // ✅ console.log production build mein automatically remove ho jaayenge
-// ✅ Bundle chunks split — faster loading
 // ✅ Source maps disabled in production — security
+// ✅ Base URL added for GitHub Pages
+// ✅ Smart Dynamic Chunk Splitting added
 
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  
+  // ✅ NAYA ADD KIYA: Aapka existing base URL
+  base: '/gncollege-website/', 
 
   build: {
-    // ✅ FIX 1: Production mein console.log + console.warn automatically delete
+    // ✅ PURANA BEST FEATURE: Production mein console.log automatically delete
     minify: 'terser',
     terserOptions: {
       compress: {
@@ -19,36 +23,25 @@ export default defineConfig({
       },
     },
 
-    // ✅ FIX 2: Manual chunks — vendor libraries alag file mein
-    // Fayda: Browser cache karta hai — repeat visitors ko faster load
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // React core — rarely changes, aggressively cached
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-
-          // Firebase — bada hai, alag chunk better
-          'vendor-firebase': [
-            'firebase/app',
-            'firebase/firestore',
-            'firebase/storage',
-            'firebase/auth',
-          ],
-
-          // UI utilities
-          'vendor-ui': ['dompurify', 'html-react-parser', 'react-hot-toast'],
-        },
-      },
-    },
-
-    // ✅ FIX 3: Source maps production mein band
-    // Source maps se attackers aapka original code dekh sakte hain
+    // ✅ PURANA BEST FEATURE: Source maps production mein band (Security)
     sourcemap: false,
 
-    // Chunk size warning — 500KB se bada hua toh warning aayega
-    chunkSizeWarningLimit: 500,
-  },
+    // ✅ NAYA ADD KIYA: Warning limit ko 500kb se badhakar 1600kb kar diya
+    chunkSizeWarningLimit: 1600,
 
-  // Development mein sab normal rahega — console.log kaam karega
-  // Sirf `npm run build` pe ye rules apply honge
+    // ✅ NAYA ADD KIYA: Dynamic manualChunks — Badi files (Jodit, Firebase) ko smartly todne ke liye
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('firebase')) return 'firebase-vendor';
+            if (id.includes('jodit')) return 'jodit-vendor';
+            if (id.includes('react')) return 'react-vendor';
+            // Baaki UI utilities (dompurify, html-react-parser, toast) isme jayenge
+            return 'vendor'; 
+          }
+        }
+      },
+    },
+  },
 });
