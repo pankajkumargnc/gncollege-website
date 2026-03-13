@@ -99,7 +99,10 @@ export default function AdminLogin({ onSuccess, onClose }) {
     setError(''); setLoading(true); setPhase('checking');
 
     setTimeout(() => {
-      if (username === 'admin' && password === 'admin123') {
+      // ✅ SECURITY FIX: Credentials .env se — hardcoded nahi
+      const validUser = import.meta.env.VITE_ADMIN_USERNAME || 'admin';
+      const validPass = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
+      if (username === validUser && password === validPass) {
         setPhase('success');
         setTimeout(() => onSuccess(), 1000);
       } else {

@@ -3,42 +3,47 @@
 // ✅ Source maps disabled in production — security
 // ✅ Base URL added for GitHub Pages
 // ✅ Smart Dynamic Chunk Splitting added
+// ✅ FIXED: dev server port + strictPort added
 
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  
-  // ✅ NAYA ADD KIYA: Aapka existing base URL
-  base: '/gncollege-website/', 
+
+  // ✅ GitHub Pages base URL
+  base: '/gncollege-website/',
+
+  // ✅ Dev server config
+  server: {
+    port: 5173,
+    strictPort: false,
+    open: true,
+  },
 
   build: {
-    // ✅ PURANA BEST FEATURE: Production mein console.log automatically delete
+    // ✅ Production mein console.log automatically delete
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true,   // console.log, console.info — sab gone
-        drop_debugger: true,  // debugger; statements bhi gone
+        drop_console: true,
+        drop_debugger: true,
       },
     },
 
-    // ✅ PURANA BEST FEATURE: Source maps production mein band (Security)
+    // ✅ Source maps production mein band (Security)
     sourcemap: false,
 
-    // ✅ NAYA ADD KIYA: Warning limit ko 500kb se badhakar 1600kb kar diya
     chunkSizeWarningLimit: 1600,
 
-    // ✅ NAYA ADD KIYA: Dynamic manualChunks — Badi files (Jodit, Firebase) ko smartly todne ke liye
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
             if (id.includes('firebase')) return 'firebase-vendor';
-            if (id.includes('jodit')) return 'jodit-vendor';
-            if (id.includes('react')) return 'react-vendor';
-            // Baaki UI utilities (dompurify, html-react-parser, toast) isme jayenge
-            return 'vendor'; 
+            if (id.includes('jodit'))    return 'jodit-vendor';
+            if (id.includes('react'))   return 'react-vendor';
+            return 'vendor';
           }
         }
       },

@@ -2420,8 +2420,59 @@ function AdminPanelInner({
                         compact={true}
                       />
                     </div>
-                    <div><label className="alabel">Type</label><select className="ainp" value={docData.type || 'Document'} onChange={e=>setDocData(d=>({...d,type:e.target.value}))}>{['Document','Report','Syllabus','Circular','Result','Regulation','Affiliation'].map(t=><option key={t}>{t}</option>)}</select></div>
-                    <div><label className="alabel">Target Page (optional)</label><input className="ainp" value={docData.targetPage || ''} onChange={e=>setDocData(d=>({...d,targetPage:e.target.value}))} placeholder="/naac/ssr-2nd-cycle/..." /></div>
+                    <div>
+                      <label className="alabel">Type (Documents page pe filter hoga)</label>
+                      <select className="ainp" value={docData.type || 'Document'} onChange={e=>setDocData(d=>({...d,type:e.target.value}))}>
+                        <option value="Document">📄 Document — General Documents</option>
+                        <option value="Report">📊 Report — Annual/IQAC Reports</option>
+                        <option value="Syllabus">📚 Syllabus — Course Syllabus</option>
+                        <option value="Circular">📋 Circular — Official Circulars</option>
+                        <option value="Result">🏆 Result — Exam Results</option>
+                        <option value="Regulation">⚖️ Regulation — BBMKU/VBU Rules</option>
+                        <option value="Affiliation">🏛️ Affiliation — College Affiliation Docs</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="alabel" style={{color:'#f4a023',fontWeight:900}}>
+                        🎯 Target Page * — Kaunse page pe dikhega?
+                      </label>
+                      <select className="ainp" value={docData.targetPage || ''} onChange={e=>setDocData(d=>({...d,targetPage:e.target.value}))}>
+                        <option value="">— Sirf /documents page pe (General Archive) —</option>
+                        <optgroup label="📊 NAAC">
+                          <option value="cycle-1">NAAC SSR 1st Cycle (/naac/ssr-1st-cycle)</option>
+                          <option value="cycle-2">NAAC SSR 2nd Cycle (/naac/ssr-2nd-cycle)</option>
+                          <option value="aqar">AQAR Reports (/naac/aqar)</option>
+                          <option value="nirf">NIRF Rankings (/naac/nirf)</option>
+                          <option value="perspective">Perspective Plan (/naac/perspective-plan)</option>
+                        </optgroup>
+                        <optgroup label="📰 Publication">
+                          <option value="magazine">E-Magazine (/publication/e-magazine)</option>
+                          <option value="result-2024">Exam Results 2024 (/publication/examination-results/2024)</option>
+                          <option value="result-2023">Exam Results 2023 (/publication/examination-results/2023)</option>
+                          <option value="sss-2023-24">SSS Report 2023-24 (/publication/sss-report/2023-24)</option>
+                          <option value="sss-2022-23">SSS Report 2022-23 (/publication/sss-report/2022-23)</option>
+                        </optgroup>
+                        <optgroup label="🎓 Academics">
+                          <option value="syllabus">Syllabus (/syllabus)</option>
+                          <option value="academic-calendar">Academic Calendar (/academics/academic-calendar)</option>
+                          <option value="course-offered">Course Offered (/academics/course-offered)</option>
+                        </optgroup>
+                        <optgroup label="📋 Admission">
+                          <option value="admission-rule">Admission Rules (/admission/rule)</option>
+                          <option value="fee-structure">Fee Structure (/admission/fee-structure)</option>
+                          <option value="intake-capacity">Intake Capacity (/admission/intake-capacity)</option>
+                          <option value="admission-notification">Admission Notifications (/admission/notification)</option>
+                        </optgroup>
+                        <optgroup label="🏢 About Us / Regulations">
+                          <option value="audit-report">Audit Report (/about-us/audit-report)</option>
+                          <option value="byelaws">Byelaws (/about-us/regulations/byelaws)</option>
+                          <option value="exemption">Exemption Docs (/about-us/regulations/exemption)</option>
+                        </optgroup>
+                      </select>
+                      <p style={{fontSize:11,color:'#94a3b8',margin:'4px 0 0',lineHeight:1.5}}>
+                        💡 Agar koi page select nahi kiya, document sirf <strong>/documents</strong> page ke archive mein dikhega.
+                      </p>
+                    </div>
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
                     <button type="submit" className="abtn abtn-navy" disabled={loading}>🚀 {editDoc?'Update':'Add'} Document</button>
@@ -2439,7 +2490,11 @@ function AdminPanelInner({
                     <span style={{ fontSize: 24 }}>📄</span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 800, color: NAVY }}>{d.title}</div>
-                      <div style={{ fontSize: 12, color: T.t3, marginTop: 2 }}>{d.type} {d.targetPage && `• ${d.targetPage}`} • <a href={d.link} target="_blank" rel="noreferrer" style={{ color: NAVY }}>View PDF ↗</a></div>
+                      <div style={{ fontSize: 12, color: T.t3, marginTop: 2, display:'flex', gap:6, alignItems:'center', flexWrap:'wrap' }}>
+                          <span style={{background:'#f0f4ff',color:NAVY,borderRadius:4,padding:'1px 8px',fontWeight:700}}>{d.type||'Document'}</span>
+                          {d.targetPage && <span style={{background:'#fef3c7',color:'#92400e',borderRadius:4,padding:'1px 8px',fontWeight:700}}>🎯 {d.targetPage}</span>}
+                          <a href={d.link} target="_blank" rel="noreferrer" style={{ color: NAVY, fontWeight:700 }}>View PDF ↗</a>
+                        </div>
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <button className="abtn abtn-outline abtn-sm" onClick={()=>{setEditDoc(d);setDocData({title:d.title,link:d.link,type:d.type||'Document',targetPage:d.targetPage||''});window.scrollTo({top:0,behavior:'smooth'});}}>✏️</button>

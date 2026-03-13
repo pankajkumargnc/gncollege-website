@@ -35,7 +35,11 @@ function PublicationDocList({ keyword }) {
     const q = query(collection(db, 'pdfReports'), orderBy('createdAt', 'desc'));
     const unsub = onSnapshot(q, snap => {
       const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      setDocs(all.filter(d => (d.title || '').toLowerCase().includes(keyword.toLowerCase())));
+      // ✅ FIX: targetPage field se bhi match karo (Admin Panel dropdown se set hoti hai)
+      setDocs(all.filter(d =>
+        (d.targetPage || '').toLowerCase() === keyword.toLowerCase() ||
+        (d.title || '').toLowerCase().includes(keyword.toLowerCase())
+      ));
     });
     return () => unsub();
   }, [keyword]);

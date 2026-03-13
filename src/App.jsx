@@ -90,7 +90,9 @@ export default function App() {
   const handleAdminLogout = () => { sessionStorage.removeItem('gnc_admin_auth');        setAdminAuthed(false); window.location.hash = '/'; };
 
   const location     = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admin');
+  // HashRouter mein pathname always '/' hoti hai — hash se check karo
+  const isAdminRoute = location.pathname.startsWith('/admin') ||
+    window.location.hash.startsWith('#/admin');
 
 
   useEffect(() => {

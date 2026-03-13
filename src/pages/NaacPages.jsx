@@ -37,10 +37,12 @@ function NaacDocumentList({ categoryKey, emptyMsg = "Documents will be available
     const q = query(collection(db, 'pdfReports'), orderBy('createdAt', 'desc'));
     const unsub = onSnapshot(q, snap => {
       const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      // Filter logic: title ya targetPage mein categoryKey honi chahiye
-      setDocs(all.filter(d => 
-        (d.title || '').toLowerCase().includes(categoryKey.toLowerCase()) || 
-        (d.targetPage || '').toLowerCase().includes(categoryKey.toLowerCase())
+      // ✅ FIX: targetPage exact match pehle (Admin Panel dropdown se set hoti hai)
+      //         Fallback: title mein keyword search (purane docs ke liye)
+      setDocs(all.filter(d =>
+        (d.targetPage || '').toLowerCase() === categoryKey.toLowerCase() ||
+        (d.targetPage || '').toLowerCase().includes(categoryKey.toLowerCase()) ||
+        (d.title || '').toLowerCase().includes(categoryKey.toLowerCase())
       ));
       setLoading(false);
     });
