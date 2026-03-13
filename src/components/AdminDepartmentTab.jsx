@@ -13,8 +13,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { doc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebase';           // ✅ No storage needed
-import MediaPicker from './MediaPicker';    // ✅ Free upload — ImgBB + local + URL
+import { db } from '../firebase';
+import MediaPicker from './MediaPicker';
+import toast from 'react-hot-toast';
 
 /* ─── colours ──────────────────────────────────────────────────────────── */
 const NAVY = '#0f2347';
@@ -196,9 +197,10 @@ export default function AdminDepartmentTab() {
     try {
       await setDoc(doc(db, 'departments', activeDept), { ...data, updatedAt: serverTimestamp() }, { merge: true });
       setSaved(true);
+      toast.success('✅ Department saved!');
       if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
       savedTimerRef.current = setTimeout(() => setSaved(false), 2500);
-    } catch (e) { alert('Save failed: ' + e.message); }
+    } catch (e) { toast.error('Save failed: ' + e.message); }
     setSaving(false);
   };
 

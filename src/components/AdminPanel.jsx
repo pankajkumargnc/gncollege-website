@@ -619,6 +619,7 @@ function ContactSettingsTab() {
     try {
       await setDoc(doc(db, 'settings', 'contact'), { ...campus, updatedAt: serverTimestamp() }, { merge: true });
       setCampusSaved(true);
+      toast.success('✅ Campus details saved!');
       if (campusTimerRef.current) clearTimeout(campusTimerRef.current);
       campusTimerRef.current = setTimeout(() => setCampusSaved(false), 2500);
     } catch (e) { toast.error('Save failed: ' + e.message); }
@@ -648,6 +649,7 @@ function ContactSettingsTab() {
       });
       await batch.commit();
       setDirSaved(true);
+      toast.success('✅ Directory saved!');
       if (dirTimerRef.current) clearTimeout(dirTimerRef.current);
       dirTimerRef.current = setTimeout(() => setDirSaved(false), 2500);
     } catch (e) { toast.error('Directory save failed: ' + e.message); }
