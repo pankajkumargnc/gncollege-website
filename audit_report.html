@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GNC College — Code Audit Report</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc;color:#0f2347;}
+  .hdr{background:#0f2347;color:#fff;padding:28px 40px;display:flex;justify-content:space-between;align-items:center;}
+  .hdr h1{font-size:20px;font-weight:700;letter-spacing:-.3px}
+  .hdr .sub{font-size:13px;opacity:.55;margin-top:4px}
+  .hdr .badge{background:rgba(244,160,35,.15);border:1px solid rgba(244,160,35,.3);color:#f4a023;padding:6px 16px;border-radius:6px;font-size:12px;font-weight:700}
+  .container{max-width:1100px;margin:0 auto;padding:32px 24px;}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:32px;}
+  .card{background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:18px 20px;}
+  .card-lbl{font-size:11px;color:#94a3b8;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+  .card-val{font-size:28px;font-weight:800;line-height:1}
+  .card-sub{font-size:11px;color:#94a3b8;margin-top:4px}
+  .score-card{border-left:4px solid #dc2626;}
+  section{background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;margin-bottom:20px;overflow:hidden;}
+  .sec-hdr{padding:14px 20px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;background:#fafbfc;}
+  .sec-hdr h2{font-size:14px;font-weight:700;}
+  .sec-hdr .cnt{font-size:12px;color:#94a3b8;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid #f1f5f9;background:#fafbfc;}
+  td{padding:10px 16px;border-bottom:1px solid #f8fafc;vertical-align:middle;}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#fafbfc;}
+  code{background:#f1f5f9;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:12px;color:#475569;}
+  .empty{text-align:center;padding:32px;color:#94a3b8;font-size:13px;}
+  .steps{padding:20px;}
+  .step{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid #f1f5f9;align-items:flex-start;}
+  .step:last-child{border-bottom:none}
+  .step-n{width:26px;height:26px;border-radius:50%;background:#0f2347;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;}
+  .step b{font-weight:700;}
+  .step code{background:#f1f5f9;}
+  .green{color:#16a34a} .red{color:#dc2626} .yellow{color:#ca8a04}
+  @media(max-width:640px){.hdr{flex-direction:column;gap:10px;text-align:center}.cards{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div>
+    <h1>🎓 GNC College — Codebase Audit Report</h1>
+    <div class="sub">Project: gnc-college &nbsp;|&nbsp; Scanned: 13 Mar 2026, 12:18</div>
+  </div>
+  <div class="badge">Health Score: 47/100</div>
+</div>
+
+<div class="container">
+
+  <!-- STAT CARDS -->
+  <div class="cards">
+    <div class="card">
+      <div class="card-lbl">Source Files</div>
+      <div class="card-val">60</div>
+      <div class="card-sub">.jsx + .js</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Total Lines</div>
+      <div class="card-val">16,873</div>
+      <div class="card-sub">878.2 KB</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Orphan Files</div>
+      <div class="card-val red">12</div>
+      <div class="card-sub">10 safe delete · 2 review</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Unused Packages</div>
+      <div class="card-val red">1</div>
+      <div class="card-sub">npm uninstall needed</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Security Issues</div>
+      <div class="card-val red">4</div>
+      <div class="card-sub">Fix before deploy!</div>
+    </div>
+    <div class="card score-card">
+      <div class="card-lbl">Health Score</div>
+      <div class="card-val" style="color:#dc2626">47</div>
+      <div class="card-sub">Needs attention</div>
+    </div>
+  </div>
+
+  <!-- NEXT STEPS -->
+  <section>
+    <div class="sec-hdr"><h2>📋 Next Steps (in order)</h2></div>
+    <div class="steps"><div class="step"><div class="step-n">1</div><div><b>Fix Security Issues</b> — Hardcoded credentials/keys ko env variables mein move karo<br><code>python gnc_audit.py</code> se check karte raho</div></div><div class="step"><div class="step-n">2</div><div><b>Delete 10 orphan files</b> — Run: <code>python gnc_audit.py --clean</code></div></div><div class="step"><div class="step-n">3</div><div><b>Uninstall unused packages</b> — <code>npm uninstall aos</code></div></div><div class="step"><div class="step-n">4</div><div><b>Remove 4 console statements</b> — <code>python gnc_audit.py --fix-all</code></div></div><div class="step"><div class="step-n">5</div><div><b>Build & Deploy</b> — <code>npm run build && npm run deploy</code></div></div></div>
+  </section>
+
+  <!-- SECURITY -->
+  <section>
+    <div class="sec-hdr">
+      <h2>🔒 Security Issues</h2>
+      <span class="cnt">4 issues</span>
+    </div>
+    <table><thead><tr><th>Severity</th><th>File</th><th>Line</th><th>Detail</th></tr></thead><tbody>
+        <tr>
+          <td><span style="background:#ca8a0418;color:#ca8a04;border:1px solid #ca8a0444;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">MEDIUM</span></td>
+          <td style="font-family:monospace;font-size:12px">components\AdminCampusTab.jsx</td>
+          <td style="color:#64748b">Line 71</td>
+          <td style="font-size:12px;color:#0f2347">ImgBB API key exposed in source → imgbb.com/1/upload?key=${activeKey}</td>
+        </tr>
+        <tr>
+          <td><span style="background:#dc262618;color:#dc2626;border:1px solid #dc262644;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">CRITICAL</span></td>
+          <td style="font-family:monospace;font-size:12px">components\AdminLogin.jsx</td>
+          <td style="color:#64748b">Line 102</td>
+          <td style="font-size:12px;color:#0f2347">Hardcoded admin credentials → username === 'admin' && password === 'admin123'</td>
+        </tr>
+        <tr>
+          <td><span style="background:#ca8a0418;color:#ca8a04;border:1px solid #ca8a0444;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">MEDIUM</span></td>
+          <td style="font-family:monospace;font-size:12px">components\AdminPanel.jsx</td>
+          <td style="color:#64748b">Line 1374</td>
+          <td style="font-size:12px;color:#0f2347">ImgBB API key exposed in source → imgbb.com/1/upload?key=${IMGBB}</td>
+        </tr>
+        <tr>
+          <td><span style="background:#ca8a0418;color:#ca8a04;border:1px solid #ca8a0444;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">MEDIUM</span></td>
+          <td style="font-family:monospace;font-size:12px">components\MediaPicker.jsx</td>
+          <td style="color:#64748b">Line 63</td>
+          <td style="font-size:12px;color:#0f2347">ImgBB API key exposed in source → imgbb.com/1/upload?key=${_imgbbKey}</td>
+        </tr></tbody></table>
+  </section>
+
+  <!-- ORPHAN FILES -->
+  <section>
+    <div class="sec-hdr">
+      <h2>🗑️ Orphan Files (never imported)</h2>
+      <span class="cnt">12 files · 1574 dead lines</span>
+    </div>
+    <table><thead><tr><th>File</th><th>Lines</th><th>Size</th><th>Action</th></tr></thead><tbody>
+            <tr>
+              <td style="font-family:monospace;font-size:12px;color:#0f2347">components\About.jsx</td>
+              <td style="text-align:center;color:#64748b">12</td>
+              <td style="text-align:center;color:#64748b">0.2 KB</td>
+              <td><code style="font-size:10px;color:#dc2626">SAFE DELETE</code></td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace;font-size:12px;color:#0f2347">components\AboutUs.jsx</td>
+              <td style="text-align:center;color:#64748b">9</td>
+              <td style="text-align:center;color:#64748b">0.2 KB</td>
+              <td><code style="font-size:10px;color:#dc2626">SAFE DELETE</code></td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace;font-size:12px;color:#0f2347">components\AlertBanner.jsx</td>
+              <td style="text-align:center;color:#64748b">221</td>
+              <td style="text-align:center;color:#64748b">9.2 KB</td>
+              <td><code style="font-size:10px;color:#ca8a04">REVIEW</code></td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace;font-size:12px;color:#0f2347">components\Breadcrumb.jsx</td>
+              <td style="text-align:center;color:#64748b">31</td>
+              <td style="text-align:center;color:#64748b">1.2 KB</td>
+              <td><code style="font-size:10px;color:#dc2626">SAFE DELETE</code></td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace;font-size:12px;color:#0f2347">components\Home.jsx</td>
+              <td style="text-align:center;color:#64748b">8</td>
+              <td style="text-align:center;color:#64748b">0.3 KB</td>
+              <td><code style="font-size:10px;color:#dc2626">SAFE DELETE</code></td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace;font-size:12px;color:#0f2347">components\RichTextEditorToolbar.jsx</td>
+              <td style="text-align:center;color:#64748b">114</td>
+              <td style="text-align:center;color:#64748b">3.4 KB</td>
+              <td><code style="font-size:10px;color:#dc2626">SAFE DELETE</code></td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace;font-size:12px;color:#0f2347">components\ScrollingNotices.jsx</td>
+              <td style="text-align:center;color:#64748b">206</td>
+              <td style="text-align:center;color:#64748b">9.5 KB</td>
+              <td><code style="font-size:10px;color:#dc2626">SAFE DELETE</code></td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace;font-size:12px;color:#0f2347">components\Syllabus.jsx</td>
+              <td style="text-align:center;color:#64748b">9</td>
+              <td style="text-align:center;color:#64748b">0.2 KB</td>
+              <td><code style="font-size:10px;color:#dc2626">SAFE DELETE</code></td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace;font-size:12px;color:#0f2347">components\SystemHealth.jsx</td>
+              <td style="text-align:center;color:#64748b">148</td>
+              <td style="text-align:center;color:#64748b">7.0 KB</td>
+              <td><code style="font-size:10px;color:#dc2626">SAFE DELETE</code></td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace;font-size:12px;color:#0f2347">hooks\useHashFragment.js</td>
+              <td style="text-align:center;color:#64748b">18</td>
+              <td style="text-align:center;color:#64748b">0.4 KB</td>
+              <td><code style="font-size:10px;color:#ca8a04">REVIEW</code></td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace;font-size:12px;color:#0f2347">pages\DemoHomePage.jsx</td>
+              <td style="text-align:center;color:#64748b">577</td>
+              <td style="text-align:center;color:#64748b">24.6 KB</td>
+              <td><code style="font-size:10px;color:#dc2626">SAFE DELETE</code></td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace;font-size:12px;color:#0f2347">pages\DemoPage.jsx</td>
+              <td style="text-align:center;color:#64748b">221</td>
+              <td style="text-align:center;color:#64748b">14.2 KB</td>
+              <td><code style="font-size:10px;color:#dc2626">SAFE DELETE</code></td>
+            </tr></tbody></table>
+  </section>
+
+  <!-- NPM PACKAGES -->
+  <section>
+    <div class="sec-hdr">
+      <h2>📦 NPM Package Usage</h2>
+      <span class="cnt">1 unused</span>
+    </div>
+    <table>
+      <thead><tr><th>Package</th><th>Version</th><th>Status</th><th>Used In</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="font-family:monospace;font-size:12px;font-weight:700">aos</td>
+          <td style="font-size:12px;color:#64748b">^2.3.4</td>
+          <td><span style="background:#dc262618;color:#dc2626;border:1px solid #dc262644;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">UNUSED</span></td>
+          <td style="font-size:11px;color:#64748b">—</td>
+          <td style="font-size:11px;color:#94a3b8">Was imported in App.jsx but data-aos never used — now removed</td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px;font-weight:700">dompurify</td>
+          <td style="font-size:12px;color:#64748b">^3.3.3</td>
+          <td><span style="background:#16a34a18;color:#16a34a;border:1px solid #16a34a44;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">USED IN 5</span></td>
+          <td style="font-size:11px;color:#64748b">AdminPanel.jsx, PageViewer.jsx, AdmissionPages.jsx</td>
+          <td style="font-size:11px;color:#94a3b8"></td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px;font-weight:700">firebase</td>
+          <td style="font-size:12px;color:#64748b">^12.10.0</td>
+          <td><span style="background:#16a34a18;color:#16a34a;border:1px solid #16a34a44;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">USED IN 27</span></td>
+          <td style="font-size:11px;color:#64748b">App.jsx, firebase.js, AdminCampusTab.jsx</td>
+          <td style="font-size:11px;color:#94a3b8"></td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px;font-weight:700">html-react-parser</td>
+          <td style="font-size:12px;color:#64748b">^5.2.17</td>
+          <td><span style="background:#16a34a18;color:#16a34a;border:1px solid #16a34a44;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">USED IN 1</span></td>
+          <td style="font-size:11px;color:#64748b">AdminPanel.jsx</td>
+          <td style="font-size:11px;color:#94a3b8"></td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px;font-weight:700">jodit</td>
+          <td style="font-size:12px;color:#64748b">^4.11.3</td>
+          <td><span style="background:#16a34a18;color:#16a34a;border:1px solid #16a34a44;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">USED IN 1</span></td>
+          <td style="font-size:11px;color:#64748b">AdminPanel.jsx</td>
+          <td style="font-size:11px;color:#94a3b8"></td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px;font-weight:700">jodit-react</td>
+          <td style="font-size:12px;color:#64748b">^5.3.21</td>
+          <td><span style="background:#16a34a18;color:#16a34a;border:1px solid #16a34a44;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">USED IN 1</span></td>
+          <td style="font-size:11px;color:#64748b">AdminPanel.jsx</td>
+          <td style="font-size:11px;color:#94a3b8"></td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px;font-weight:700">react</td>
+          <td style="font-size:12px;color:#64748b">^18.2.0</td>
+          <td><span style="background:#16a34a18;color:#16a34a;border:1px solid #16a34a44;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">USED IN 51</span></td>
+          <td style="font-size:11px;color:#64748b">App.jsx, AppWrapper.jsx, main.jsx</td>
+          <td style="font-size:11px;color:#94a3b8"></td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px;font-weight:700">react-dom</td>
+          <td style="font-size:12px;color:#64748b">^18.2.0</td>
+          <td><span style="background:#16a34a18;color:#16a34a;border:1px solid #16a34a44;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">USED IN 3</span></td>
+          <td style="font-size:11px;color:#64748b">main.jsx, AdminLeadershipTab.jsx, HomePage.jsx</td>
+          <td style="font-size:11px;color:#94a3b8"></td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px;font-weight:700">react-hot-toast</td>
+          <td style="font-size:12px;color:#64748b">^2.6.0</td>
+          <td><span style="background:#16a34a18;color:#16a34a;border:1px solid #16a34a44;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">USED IN 4</span></td>
+          <td style="font-size:11px;color:#64748b">App.jsx, AdminCampusTab.jsx, AdminLeadershipTab.jsx</td>
+          <td style="font-size:11px;color:#94a3b8"></td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px;font-weight:700">react-router-dom</td>
+          <td style="font-size:12px;color:#64748b">^7.13.1</td>
+          <td><span style="background:#16a34a18;color:#16a34a;border:1px solid #16a34a44;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">USED IN 19</span></td>
+          <td style="font-size:11px;color:#64748b">App.jsx, AppWrapper.jsx, main.jsx</td>
+          <td style="font-size:11px;color:#94a3b8"></td>
+        </tr></tbody>
+    </table>
+  </section>
+
+  <!-- CONSOLE STATEMENTS -->
+  <section>
+    <div class="sec-hdr">
+      <h2>🧹 Console Statements</h2>
+      <span class="cnt">4 found</span>
+    </div>
+    <table><thead><tr><th>File</th><th>Line</th><th>Code</th></tr></thead><tbody>
+        <tr>
+          <td style="font-family:monospace;font-size:12px">App.jsx</td>
+          <td style="color:#64748b">Line 112</td>
+          <td style="font-size:12px;color:#475569;font-family:monospace">err  => console.error(`[${col}]`, err)</td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px">components\AdminPanel.jsx</td>
+          <td style="color:#64748b">Line 38</td>
+          <td style="font-size:12px;color:#475569;font-family:monospace">console.error('AdminPanel Error:', error, info);</td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px">components\ErrorBoundary.jsx</td>
+          <td style="color:#64748b">Line 55</td>
+          <td style="font-size:12px;color:#475569;font-family:monospace">console.error(`[ErrorBoundary] ${this.props.page || 'Component'} crash</td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px">pages\GalleryPage.jsx</td>
+          <td style="color:#64748b">Line 30</td>
+          <td style="font-size:12px;color:#475569;font-family:monospace">}, (error) => console.error("Gallery Sync Error:", error));</td>
+        </tr></tbody></table>
+  </section>
+
+  <!-- FILE SIZE -->
+  <section>
+    <div class="sec-hdr">
+      <h2>📊 Largest Files</h2>
+      <span class="cnt">Top 10 by line count</span>
+    </div>
+    <table>
+      <thead><tr><th>File</th><th style="text-align:right">Lines</th><th>Size</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="font-family:monospace;font-size:12px">components\AdminPanel.jsx</td>
+          <td style="text-align:right;font-weight:700;color:#0f2347">2920</td>
+          <td style="width:200px">
+            <div style="height:8px;border-radius:4px;background:#f1f5f9">
+              <div style="height:8px;border-radius:4px;background:#dc2626;width:100%"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px">pages\DepartmentPage.jsx</td>
+          <td style="text-align:right;font-weight:700;color:#0f2347">950</td>
+          <td style="width:200px">
+            <div style="height:8px;border-radius:4px;background:#f1f5f9">
+              <div style="height:8px;border-radius:4px;background:#f4a023;width:32%"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px">pages\AboutPages.jsx</td>
+          <td style="text-align:right;font-weight:700;color:#0f2347">835</td>
+          <td style="width:200px">
+            <div style="height:8px;border-radius:4px;background:#f1f5f9">
+              <div style="height:8px;border-radius:4px;background:#f4a023;width:28%"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px">components\AdminLogin.jsx</td>
+          <td style="text-align:right;font-weight:700;color:#0f2347">719</td>
+          <td style="width:200px">
+            <div style="height:8px;border-radius:4px;background:#f1f5f9">
+              <div style="height:8px;border-radius:4px;background:#f4a023;width:24%"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px">components\AdminLeadershipTab.jsx</td>
+          <td style="text-align:right;font-weight:700;color:#0f2347">658</td>
+          <td style="width:200px">
+            <div style="height:8px;border-radius:4px;background:#f1f5f9">
+              <div style="height:8px;border-radius:4px;background:#f4a023;width:22%"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px">pages\LeadershipPage.jsx</td>
+          <td style="text-align:right;font-weight:700;color:#0f2347">624</td>
+          <td style="width:200px">
+            <div style="height:8px;border-radius:4px;background:#f1f5f9">
+              <div style="height:8px;border-radius:4px;background:#f4a023;width:21%"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px">pages\DemoHomePage.jsx</td>
+          <td style="text-align:right;font-weight:700;color:#0f2347">577</td>
+          <td style="width:200px">
+            <div style="height:8px;border-radius:4px;background:#f1f5f9">
+              <div style="height:8px;border-radius:4px;background:#f4a023;width:19%"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px">pages\HomePage.jsx</td>
+          <td style="text-align:right;font-weight:700;color:#0f2347">571</td>
+          <td style="width:200px">
+            <div style="height:8px;border-radius:4px;background:#f1f5f9">
+              <div style="height:8px;border-radius:4px;background:#f4a023;width:19%"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px">components\PageViewer.jsx</td>
+          <td style="text-align:right;font-weight:700;color:#0f2347">504</td>
+          <td style="width:200px">
+            <div style="height:8px;border-radius:4px;background:#f1f5f9">
+              <div style="height:8px;border-radius:4px;background:#f4a023;width:17%"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-family:monospace;font-size:12px">components\AdminDepartmentTab.jsx</td>
+          <td style="text-align:right;font-weight:700;color:#0f2347">476</td>
+          <td style="width:200px">
+            <div style="height:8px;border-radius:4px;background:#f1f5f9">
+              <div style="height:8px;border-radius:4px;background:#0f2347;width:16%"></div>
+            </div>
+          </td>
+        </tr></tbody>
+    </table>
+  </section>
+
+  <div style="text-align:center;padding:24px 0;color:#94a3b8;font-size:12px">
+    Generated by gnc_audit.py · 13 Mar 2026, 12:18 · GNC College Website Audit Tool v1.0
+  </div>
+</div>
+</body>
+</html>
