@@ -112,14 +112,14 @@ export default function AdminLogin({ onSuccess, onClose }) {
   };
 
   const CSS = `
-    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap&subset=latin');
 
     .gnc-login-root *, .gnc-login-root *::before, .gnc-login-root *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     .gnc-login-root {
       position: fixed; inset: 0; z-index: 100000;
       display: flex; align-items: center; justify-content: center;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Inter', sans-serif;
       overflow: hidden;
     }
 
@@ -209,7 +209,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
       box-shadow: 0 8px 24px rgba(244,160,35,.3);
     }
     .gnc-college-name {
-      font-family: 'Syne', sans-serif;
+      font-family: 'Space Grotesk', sans-serif;
       font-size: 19px; font-weight: 800;
       color: #fff; line-height: 1.2; letter-spacing: -.3px;
     }
@@ -219,7 +219,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
     }
 
     .gnc-left-title {
-      font-family: 'Syne', sans-serif;
+      font-family: 'Space Grotesk', sans-serif;
       font-size: 28px; font-weight: 800; color: #fff;
       line-height: 1.25; letter-spacing: -.5px; margin-bottom: 14px;
     }
@@ -269,7 +269,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
       opacity: .7;
     }
     .gnc-right-title {
-      font-family: 'Syne', sans-serif;
+      font-family: 'Space Grotesk', sans-serif;
       font-size: 26px; font-weight: 800; color: #fff;
       letter-spacing: -.4px; margin-bottom: 6px;
     }
@@ -313,7 +313,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
       background: rgba(255,255,255,.04);
       border: none; outline: none;
       font-size: 14.5px; font-weight: 400;
-      color: #fff; font-family: 'DM Sans', sans-serif;
+      color: #fff; font-family: 'Inter', sans-serif;
       border-radius: 12px;
       transition: background .2s;
     }
@@ -358,7 +358,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
       width: 100%; padding: 15px;
       background: linear-gradient(135deg, ${GOLD} 0%, ${GOLD2} 100%);
       border: none; border-radius: 12px;
-      font-family: 'Syne', sans-serif;
+      font-family: 'Space Grotesk', sans-serif;
       font-size: 15px; font-weight: 700;
       color: ${NAVY}; cursor: pointer;
       display: flex; align-items: center; justify-content: center; gap: 10px;

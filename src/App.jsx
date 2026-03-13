@@ -3,8 +3,6 @@
 
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
 import { Toaster } from 'react-hot-toast';
 
 import Navbar         from './components/Navbar';
@@ -13,6 +11,7 @@ import TopBar         from './components/home/TopBar';
 import Breadcrumbs    from './components/Breadcrumbs';
 import QuickActionNav from './components/QuickActionNav';
 import ErrorBoundary  from './components/ErrorBoundary';
+import AdminLogin     from './components/AdminLogin';
 import { COLORS }     from './styles/colors';
 import { navLinks as staticNavLinks } from './data/db';
 import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
@@ -83,11 +82,16 @@ export default function App() {
   const [faculties,     setFaculties]     = useState([]);
   const [sliderSlides,  setSliderSlides]  = useState([]);
   const [firebaseNav,   setFirebaseNav]   = useState(null);
+  // ── Admin auth session (clears on page refresh for security) ────────────
+  const [adminAuthed, setAdminAuthed] = useState(
+    () => sessionStorage.getItem('gnc_admin_auth') === 'true'
+  );
+  const handleAdminLogin  = () => { sessionStorage.setItem('gnc_admin_auth', 'true');  setAdminAuthed(true);  };
+  const handleAdminLogout = () => { sessionStorage.removeItem('gnc_admin_auth');        setAdminAuthed(false); window.location.hash = '/'; };
 
   const location     = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
 
-  useEffect(() => { AOS.init({ duration: 800, easing: 'ease-in-out', once: true }); }, []);
 
   useEffect(() => {
     return onSnapshot(doc(db, 'settings', 'navbar'), snap => {
@@ -237,10 +241,18 @@ export default function App() {
 
         {/* ══ ADMIN ══ */}
         <Route path="/admin" element={
-          <Suspense fallback={<div style={{ minHeight:'60vh', display:'flex', alignItems:'center', justifyContent:'center' }}>Loading Admin...</div>}>
-            <AdminPanel notices={notices} announcements={announcements}
-              events={events} gallery={gallery} faculties={faculties} />
-          </Suspense>
+          adminAuthed ? (
+            <Suspense fallback={<div style={{ minHeight:'60vh', display:'flex', alignItems:'center', justifyContent:'center' }}>Loading Admin...</div>}>
+              <AdminPanel notices={notices} announcements={announcements}
+                events={events} gallery={gallery} faculties={faculties}
+                onClose={handleAdminLogout} />
+            </Suspense>
+          ) : (
+            <AdminLogin
+              onSuccess={handleAdminLogin}
+              onClose={() => { window.location.hash = '/'; }}
+            />
+          )
         } />
       </Routes>
 

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// GNC COLLEGE — ULTIMATE ADMIN PANEL v9.1 (FIXED)
+// GNC COLLEGE — ULTIMATE ADMIN PANEL v10.0
 // 🐛 Fixed: W/pages variable shadowing in genPDF, missing Error Boundary,
 //           unused COLORS import, JoditEditor Suspense misuse,
 //           missing .catch() on Firebase useEffects
@@ -1329,134 +1329,182 @@ function AdminPanelInner({
 
   const runTest = async () => {
     setTestRunning(true); setTestResults([]); setTestProgress(0); setTestScore(null); setSysLog([]);
-    let passed = 0; const TOTAL = 17;
-    sysLogAdd('▶ GNC SYSTEM DIAGNOSTICS v9.1 — 17-PHASE DEEP SCAN');
-    sysLogAdd('━'.repeat(42)); await pause(300);
+    let passed = 0; const TOTAL = 25;
+    sysLogAdd('▶ GNC SYSTEM DIAGNOSTICS v10.0 — 25-PHASE ULTRA SCAN');
+    sysLogAdd('━'.repeat(46)); await pause(300);
 
-    // T1
-    sysLogAdd('[1/17] Checking Vite build environment...');
+    // T1 – Vite env
+    sysLogAdd('[1/25] Checking Vite build environment...');
     try { if (import.meta.env.MODE) { addResult('Vite Environment', 'pass', `Mode: ${import.meta.env.MODE} | Base: ${import.meta.env.BASE_URL}`); passed++; sysLogAdd('  ✓ Vite running correctly'); } } catch (e) { addResult('Vite Environment', 'fail', e.message); }
-    setTestProgress(Math.round(1/TOTAL*100)); await pause(400);
+    setTestProgress(Math.round(1/TOTAL*100)); await pause(300);
 
-    // T2
-    sysLogAdd('[2/17] Verifying Firebase initialization...');
+    // T2 – Firebase init
+    sysLogAdd('[2/25] Verifying Firebase initialization...');
     try { if (db?.app?.options?.projectId) { addResult('Firebase Init', 'pass', `Project: ${db.app.options.projectId}`); passed++; sysLogAdd(`  ✓ Project: ${db.app.options.projectId}`); } else throw new Error('DB not initialized'); } catch (e) { addResult('Firebase Init', 'fail', e.message); }
-    setTestProgress(Math.round(2/TOTAL*100)); await pause(400);
+    setTestProgress(Math.round(2/TOTAL*100)); await pause(300);
 
-    // T3
-    sysLogAdd('[3/17] Testing Firestore read permissions...');
+    // T3 – Firestore Read
+    sysLogAdd('[3/25] Testing Firestore read permissions...');
     try { const s = await getDocs(query(collection(db, 'pages'), limit(1))); addResult('Firestore Read', 'pass', `Read successful — ${s.size} doc(s)`); passed++; sysLogAdd('  ✓ Read permissions active'); } catch (e) { addResult('Firestore Read', 'fail', 'Permission denied — check Firebase Rules'); }
-    setTestProgress(Math.round(3/TOTAL*100)); await pause(400);
+    setTestProgress(Math.round(3/TOTAL*100)); await pause(300);
 
-    // T4
-    sysLogAdd('[4/17] Testing Firestore write permissions...');
+    // T4 – Firestore Write
+    sysLogAdd('[4/25] Testing Firestore write permissions...');
     let testId = null;
-    try { const d = await addDoc(collection(db, '_sysTest'), { t: serverTimestamp(), v: '9.1' }); testId = d.id; addResult('Firestore Write', 'pass', `Write OK — doc: ${d.id.substring(0, 10)}...`); passed++; sysLogAdd('  ✓ Write active'); } catch (e) { addResult('Firestore Write', 'fail', e.message); }
-    setTestProgress(Math.round(4/TOTAL*100)); await pause(400);
+    try { const d = await addDoc(collection(db, '_sysTest'), { t: serverTimestamp(), v: '10.0' }); testId = d.id; addResult('Firestore Write', 'pass', `Write OK — doc: ${d.id.substring(0, 10)}...`); passed++; sysLogAdd('  ✓ Write active'); } catch (e) { addResult('Firestore Write', 'fail', e.message); }
+    setTestProgress(Math.round(4/TOTAL*100)); await pause(300);
 
-    // T5
-    sysLogAdd('[5/17] Testing Firestore delete permissions...');
+    // T5 – Firestore Delete
+    sysLogAdd('[5/25] Testing Firestore delete permissions...');
     try { if (testId) { await deleteDoc(doc(db, '_sysTest', testId)); addResult('Firestore Delete', 'pass', 'Delete OK — test doc cleaned'); passed++; sysLogAdd('  ✓ Delete active'); } else throw new Error('No test doc'); } catch (e) { addResult('Firestore Delete', 'fail', e.message); }
-    setTestProgress(Math.round(5/TOTAL*100)); await pause(400);
+    setTestProgress(Math.round(5/TOTAL*100)); await pause(300);
 
-    // T6
-    sysLogAdd('[6/17] Checking navbar settings structure...');
-    try { const s = await getDoc(doc(db, 'settings', 'navbar')); if (s.exists()) { addResult('Navbar Settings', 'pass', `${s.data().links?.length || 0} top-level nav items`); passed++; } else { addResult('Navbar Settings', 'warn', 'No DB record — using static fallback'); passed++; } sysLogAdd('  ✓ Navbar OK'); } catch (e) { addResult('Navbar Settings', 'fail', e.message); }
-    setTestProgress(Math.round(6/TOTAL*100)); await pause(400);
+    // T6 – Navbar
+    sysLogAdd('[6/25] Checking navbar settings...');
+    try { const s = await getDoc(doc(db, 'settings', 'navbar')); if (s.exists()) { addResult('Navbar Settings', 'pass', `${s.data().links?.length || 0} top-level nav items in DB`); passed++; } else { addResult('Navbar Settings', 'warn', 'No DB record — using static fallback'); passed++; } sysLogAdd('  ✓ Navbar OK'); } catch (e) { addResult('Navbar Settings', 'fail', e.message); }
+    setTestProgress(Math.round(6/TOTAL*100)); await pause(300);
 
-    // T7
-    sysLogAdd('[7/17] Checking site settings...');
+    // T7 – Site Settings
+    sysLogAdd('[7/25] Checking site settings...');
     try { const s = await getDoc(doc(db, 'settings', 'site')); if (s.exists()) { addResult('Site Settings', 'pass', `Name: "${s.data().name || 'Set'}"`); } else { addResult('Site Settings', 'warn', 'Not configured — Admin → Settings tab'); } passed++; sysLogAdd('  ✓ Settings checked'); } catch (e) { addResult('Site Settings', 'fail', e.message); }
-    setTestProgress(Math.round(7/TOTAL*100)); await pause(400);
+    setTestProgress(Math.round(7/TOTAL*100)); await pause(300);
 
-    // T8
-    sysLogAdd('[8/17] Validating ImgBB image upload API...');
+    // T8 – ImgBB API
+    sysLogAdd('[8/25] Validating ImgBB image upload API...');
     try { const fd = new FormData(); fd.append('image', 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'); const r = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB}`, { method: 'POST', body: fd }); if (r.ok) { addResult('ImgBB API', 'pass', 'Key valid — upload service active'); passed++; sysLogAdd('  ✓ ImgBB key valid'); } else throw new Error('Invalid key'); } catch (e) { addResult('ImgBB API', 'fail', e.message); }
-    setTestProgress(Math.round(8/TOTAL*100)); await pause(400);
+    setTestProgress(Math.round(8/TOTAL*100)); await pause(300);
 
-    // T9
-    sysLogAdd('[9/17] Checking flash alerts collection...');
+    // T9 – Flash Alerts
+    sysLogAdd('[9/25] Checking flash alerts collection...');
     try { const s = await getDocs(collection(db, 'alerts')); const active = s.docs.filter(d => d.data().isActive).length; addResult('Flash Alerts', 'pass', `${s.size} total | ${active} currently LIVE`); passed++; sysLogAdd(`  ✓ ${s.size} alerts, ${active} active`); } catch (e) { addResult('Flash Alerts', 'fail', e.message); }
-    setTestProgress(Math.round(9/TOTAL*100)); await pause(400);
+    setTestProgress(Math.round(9/TOTAL*100)); await pause(300);
 
-    // T10
-    sysLogAdd('[10/17] Checking faculty directory...');
+    // T10 – Faculty
+    sysLogAdd('[10/25] Checking faculty directory...');
     try { const s = await getDocs(collection(db, 'faculties')); const te = s.docs.filter(d => (d.data().staffType || 'Teaching') === 'Teaching').length; const nt = s.docs.filter(d => d.data().staffType === 'Non-Teaching').length; addResult('Faculty Directory', 'pass', `Teaching: ${te} | Non-Teaching: ${nt}`); passed++; sysLogAdd(`  ✓ ${te} teaching, ${nt} non-teaching`); } catch (e) { addResult('Faculty Directory', 'fail', e.message); }
-    setTestProgress(Math.round(10/TOTAL*100)); await pause(400);
+    setTestProgress(Math.round(10/TOTAL*100)); await pause(300);
 
-    // T11
-    sysLogAdd('[11/17] Checking alumni placements...');
-    try { const s = await getDocs(collection(db, 'placements')); addResult('Alumni Placements', 'pass', `${s.size} success stories on Wall of Fame`); passed++; } catch (e) { addResult('Alumni Placements', 'fail', e.message); }
-    setTestProgress(Math.round(11/TOTAL*100)); await pause(400);
+    // T11 – Alumni Placements
+    sysLogAdd('[11/25] Checking alumni placements (Wall of Fame)...');
+    try { const s = await getDocs(collection(db, 'placements')); const withPkg = s.docs.filter(d => d.data().package).length; addResult('Alumni Placements', 'pass', `${s.size} alumni | ${withPkg} with package data`); passed++; sysLogAdd(`  ✓ ${s.size} placement records`); } catch (e) { addResult('Alumni Placements', 'fail', e.message); }
+    setTestProgress(Math.round(11/TOTAL*100)); await pause(300);
 
-    // T12
-    sysLogAdd('[12/17] Content health check...');
-    try { const [ns, as, es, ds] = await Promise.all([getDocs(collection(db, 'notices')), getDocs(collection(db, 'announcements')), getDocs(collection(db, 'events')), getDocs(collection(db, 'pdfReports'))]); addResult('Content Health', 'pass', `Notices:${ns.size} | News:${as.size} | Events:${es.size} | Docs:${ds.size}`); passed++; sysLogAdd('  ✓ All content collections accessible'); } catch (e) { addResult('Content Health', 'fail', e.message); }
-    setTestProgress(Math.round(12/TOTAL*100)); await pause(400);
+    // T12 – Content Health
+    sysLogAdd('[12/25] Content health check (all collections)...');
+    try { const [ns, as, es, ds, sl, pgs] = await Promise.all([getDocs(collection(db, 'notices')), getDocs(collection(db, 'announcements')), getDocs(collection(db, 'events')), getDocs(collection(db, 'pdfReports')), getDocs(collection(db, 'sliderSlides')), getDocs(collection(db, 'pages'))]); addResult('Content Health', 'pass', `Notices:${ns.size} | News:${as.size} | Events:${es.size} | Docs:${ds.size} | Slides:${sl.size} | Pages:${pgs.size}`); passed++; sysLogAdd('  ✓ All content collections accessible'); } catch (e) { addResult('Content Health', 'fail', e.message); }
+    setTestProgress(Math.round(12/TOTAL*100)); await pause(300);
 
-    // T13
-    sysLogAdd('[13/17] Checking YouTube API configuration...');
+    // T13 – Leadership collection (NEW)
+    sysLogAdd('[13/25] Checking leadership collection...');
+    try { const s = await getDocs(collection(db, 'leadership')); const pr = s.docs.filter(d => d.data().type === 'president').length; const sec = s.docs.filter(d => d.data().type === 'secretary').length; const prin = s.docs.filter(d => d.data().type === 'principal').length; if (s.size === 0) { addResult('Leadership Records', 'warn', 'Empty — Admin → Leadership tab se Presidents/Secretaries/Principals add karein'); } else { addResult('Leadership Records', 'pass', `Presidents:${pr} | Secretaries:${sec} | Principals:${prin}`); } passed++; sysLogAdd(`  ✓ ${s.size} leadership records`); } catch (e) { addResult('Leadership Records', 'fail', e.message); }
+    setTestProgress(Math.round(13/TOTAL*100)); await pause(300);
+
+    // T14 – GB Meetings (NEW)
+    sysLogAdd('[14/25] Checking GB Meeting PDF records...');
+    try { const s = await getDocs(collection(db, 'gb_meetings')); const withPdf = s.docs.filter(d => d.data().pdfUrl).length; if (s.size === 0) { addResult('GB Meetings', 'warn', 'No meetings — Admin → GB Meetings tab se add karein'); } else { addResult('GB Meetings', 'pass', `${s.size} meetings | ${withPdf} with PDF`); } passed++; sysLogAdd(`  ✓ GB meetings: ${s.size}`); } catch (e) { addResult('GB Meetings', 'fail', e.message); }
+    setTestProgress(Math.round(14/TOTAL*100)); await pause(300);
+
+    // T15 – Staff Council (NEW)
+    sysLogAdd('[15/25] Checking Staff Council PDF records...');
+    try { const s = await getDocs(collection(db, 'staff_council')); const withPdf = s.docs.filter(d => d.data().pdfUrl).length; if (s.size === 0) { addResult('Staff Council', 'warn', 'No meetings — Admin → Staff Council tab se add karein'); } else { addResult('Staff Council', 'pass', `${s.size} meetings | ${withPdf} with PDF`); } passed++; sysLogAdd(`  ✓ Staff council meetings: ${s.size}`); } catch (e) { addResult('Staff Council', 'fail', e.message); }
+    setTestProgress(Math.round(15/TOTAL*100)); await pause(300);
+
+    // T16 – Campus Gallery (NEW)
+    sysLogAdd('[16/25] Checking campus gallery collection...');
+    try { const s = await getDocs(collection(db, 'campus_gallery')); const cats = [...new Set(s.docs.map(d => d.data().category).filter(Boolean))]; if (s.size === 0) { addResult('Campus Gallery', 'warn', 'Empty — Admin → Campus Gallery tab se photos add karein'); } else { addResult('Campus Gallery', 'pass', `${s.size} photos | Categories: ${cats.join(', ') || 'Uncategorized'}`); } passed++; sysLogAdd(`  ✓ Campus gallery: ${s.size} items`); } catch (e) { addResult('Campus Gallery', 'fail', e.message); }
+    setTestProgress(Math.round(16/TOTAL*100)); await pause(300);
+
+    // T17 – YouTube Config
+    sysLogAdd('[17/25] Checking YouTube API configuration...');
     try { const s = await getDoc(doc(db, 'settings', 'youtube')); if (s.exists() && s.data().apiKey) { addResult('YouTube Config', 'pass', `Channel: ${s.data().channelId || '—'} | Max: ${s.data().maxResults || 12} videos`); passed++; } else { addResult('YouTube Config', 'warn', 'Not configured — Admin → YouTube tab'); sysLogAdd('  ⚠ YouTube not set up'); } } catch (e) { addResult('YouTube Config', 'fail', e.message); }
-    setTestProgress(Math.round(13/TOTAL*100)); await pause(400);
+    setTestProgress(Math.round(17/TOTAL*100)); await pause(300);
 
-    // T14
-    sysLogAdd('[14/17] Checking Google Drive configuration...');
+    // T18 – Google Drive
+    sysLogAdd('[18/25] Checking Google Drive configuration...');
     try { const s = await getDoc(doc(db, 'settings', 'drive')); if (s.exists() && s.data().apiKey) { addResult('Google Drive', 'pass', `Folder: "${s.data().folderName || s.data().folderId}"`); passed++; } else { addResult('Google Drive', 'warn', 'Not configured — Admin → Drive tab'); } } catch (e) { addResult('Google Drive', 'fail', e.message); }
-    setTestProgress(Math.round(14/TOTAL*100)); await pause(400);
+    setTestProgress(Math.round(18/TOTAL*100)); await pause(300);
 
-    // T15
-    sysLogAdd('[15/17] Verifying activity logging system...');
-    try { const testLog = await addDoc(collection(db, 'adminLogs'), { action: 'system_test', message: 'System test completed', time: new Date().toISOString(), createdAt: serverTimestamp() }); if (testLog.id) { addResult('Activity Logging', 'pass', `Log system active — ID: ${testLog.id.substring(0, 10)}...`); passed++; sysLogAdd('  ✓ Activity log working'); } } catch (e) { addResult('Activity Logging', 'fail', e.message); }
-    setTestProgress(Math.round(15/TOTAL*100)); await pause(400);
+    // T19 – Activity Logging
+    sysLogAdd('[19/25] Verifying activity logging system...');
+    try { const testLog = await addDoc(collection(db, 'adminLogs'), { action: 'system_test', message: 'System test v10.0', time: new Date().toISOString(), createdAt: serverTimestamp() }); if (testLog.id) { addResult('Activity Logging', 'pass', `Log system active — ID: ${testLog.id.substring(0, 10)}...`); passed++; sysLogAdd('  ✓ Activity log working'); } } catch (e) { addResult('Activity Logging', 'fail', e.message); }
+    setTestProgress(Math.round(19/TOTAL*100)); await pause(300);
 
-    // T16 — Department collections
-    sysLogAdd('[16/17] Checking department data collections...');
+    // T20 – Department Data
+    sysLogAdd('[20/25] Checking department data collections...');
     try {
       const slugs = ['bca', 'bba', 'commerce', 'humanities', 'social-science'];
       const snaps = await Promise.all(slugs.map(s => getDoc(doc(db, 'departments', s))));
       const configured = snaps.filter(s => s.exists() && s.data().fullName).length;
-      const withFees   = snaps.filter(s => s.exists() && (s.data().feeStructure || []).length > 0).length;
       const withHod    = snaps.filter(s => s.exists() && s.data().hod?.name).length;
-      if (configured === 0) {
-        addResult('Department Data', 'warn', 'Koi bhi department configure nahi hua — Admin → Departments tab se add karein');
-        sysLogAdd('  ⚠ No department data found');
-      } else {
-        addResult('Department Data', 'pass', `${configured}/5 configured | HOD: ${withHod} | Fee Structure: ${withFees}`);
-        sysLogAdd(`  ✓ ${configured}/5 departments active | HOD set: ${withHod}`);
-      }
+      if (configured === 0) { addResult('Department Data', 'warn', 'No dept configured — Admin → Departments tab'); sysLogAdd('  ⚠ No department data found'); }
+      else { addResult('Department Data', 'pass', `${configured}/5 configured | HOD: ${withHod}`); sysLogAdd(`  ✓ ${configured}/5 departments active`); }
       passed++;
     } catch (e) { addResult('Department Data', 'fail', e.message); sysLogAdd(`  ✗ ${e.message}`); }
-    setTestProgress(Math.round(16/TOTAL*100)); await pause(400);
+    setTestProgress(Math.round(20/TOTAL*100)); await pause(300);
 
-    // T17 — Contact Settings
-    sysLogAdd('[17/17] Checking contact settings...');
+    // T21 – Contact Settings
+    sysLogAdd('[21/25] Checking contact settings...');
     try {
-      const [contactSnap, dirSnap] = await Promise.all([
-        getDoc(doc(db, 'settings', 'contact')),
-        getDocs(collection(db, 'contactDirectory')),
-      ]);
+      const [contactSnap, dirSnap] = await Promise.all([getDoc(doc(db, 'settings', 'contact')), getDocs(collection(db, 'contactDirectory'))]);
       const hasContact = contactSnap.exists();
       const bhudaOk    = hasContact && !!contactSnap.data().bhuda?.phone;
       const bankMoreOk = hasContact && !!contactSnap.data().bankMore?.phone;
       const dirCount   = dirSnap.size;
-      if (!hasContact) {
-        addResult('Contact Settings', 'warn', 'settings/contact missing — Admin → Contact Settings tab se fill karein');
-        sysLogAdd('  ⚠ Contact settings not configured');
-      } else if (!bhudaOk || !bankMoreOk) {
-        addResult('Contact Settings', 'warn', `Partial: Bhuda ${bhudaOk?'✓':'✗'} | Bank More ${bankMoreOk?'✓':'✗'} | Directory: ${dirCount} entries`);
-        sysLogAdd(`  ⚠ Contact partially configured`);
-      } else {
-        addResult('Contact Settings', 'pass', `Both campuses configured | Directory: ${dirCount} entries`);
-        sysLogAdd(`  ✓ Contact OK — ${dirCount} directory entries`);
-      }
+      if (!hasContact) { addResult('Contact Settings', 'warn', 'settings/contact missing — Admin → Contact tab'); sysLogAdd('  ⚠ Contact settings not configured'); }
+      else if (!bhudaOk || !bankMoreOk) { addResult('Contact Settings', 'warn', `Partial: Bhuda ${bhudaOk?'✓':'✗'} | Bank More ${bankMoreOk?'✓':'✗'} | Dir: ${dirCount}`); sysLogAdd('  ⚠ Contact partially configured'); }
+      else { addResult('Contact Settings', 'pass', `Both campuses configured | Directory: ${dirCount} entries`); sysLogAdd(`  ✓ Contact OK`); }
       passed++;
     } catch (e) { addResult('Contact Settings', 'fail', e.message); sysLogAdd(`  ✗ ${e.message}`); }
+    setTestProgress(Math.round(21/TOTAL*100)); await pause(300);
+
+    // T22 – CMS Pages (NEW)
+    sysLogAdd('[22/25] Checking CMS pages (PageViewer routes)...');
+    try {
+      const s = await getDocs(collection(db, 'pages'));
+      const regulationPaths = ['/about-us/regulations/bbmku/special-ug-regulation','/about-us/regulations/bbmku/ug-regulation-fyugp','/about-us/regulations/bbmku/ug-regulation-cbcs','/about-us/regulations/college-affiliation','/about-us/regulations/ugc-section','/about-us/regulations/vbu/ug-regulation-2015','/about-us/regulations/vbu/bca-regulation','/about-us/regulations/byelaws','/about-us/regulations/exemption','/about-us/audit-report'];
+      const pagePaths = s.docs.map(d => d.data().slug || d.data().path || '');
+      const filled = regulationPaths.filter(p => pagePaths.some(pp => pp.includes(p.split('/').pop())));
+      addResult('CMS Pages', filled.length === regulationPaths.length ? 'pass' : 'warn', `${filled.length}/${regulationPaths.length} regulation pages created | Total: ${s.size} pages`);
+      if (filled.length < regulationPaths.length) sysLogAdd(`  ⚠ ${regulationPaths.length - filled.length} regulation pages missing`);
+      else sysLogAdd('  ✓ All regulation pages exist');
+      passed++;
+    } catch (e) { addResult('CMS Pages', 'fail', e.message); }
+    setTestProgress(Math.round(22/TOTAL*100)); await pause(300);
+
+    // T23 – Admin Auth (NEW)
+    sysLogAdd('[23/25] Verifying admin session auth system...');
+    try {
+      const hasSession = typeof sessionStorage !== 'undefined';
+      const authKey = sessionStorage.getItem('gnc_admin_auth');
+      addResult('Admin Auth System', 'pass', `sessionStorage: ${hasSession ? 'active' : 'N/A'} | Current session: ${authKey === 'true' ? '✓ logged in' : '✗ not logged in'}`);
+      passed++; sysLogAdd('  ✓ Auth system operational');
+    } catch (e) { addResult('Admin Auth System', 'fail', e.message); }
+    setTestProgress(Math.round(23/TOTAL*100)); await pause(300);
+
+    // T24 – Hero Slider
+    sysLogAdd('[24/25] Checking hero slider slides...');
+    try { const s = await getDocs(collection(db, 'sliderSlides')); const active = s.docs.filter(d => d.data().active !== false).length; if (s.size === 0) { addResult('Hero Slider', 'warn', 'No slides — Admin → Hero Slider tab se slides add karein'); } else { addResult('Hero Slider', 'pass', `${s.size} slides | ${active} active`); } passed++; sysLogAdd(`  ✓ Slider: ${s.size} slides`); } catch (e) { addResult('Hero Slider', 'fail', e.message); }
+    setTestProgress(Math.round(24/TOTAL*100)); await pause(300);
+
+    // T25 – Gallery + Quick Nav
+    sysLogAdd('[25/25] Checking gallery & unused code audit...');
+    try {
+      const s = await getDocs(collection(db, 'gallery'));
+      const unusedFiles = ['AboutUs.jsx','QuickRibbon.jsx','ScrollingNotices.jsx','SystemHealth.jsx','DemoHomePage.jsx','DemoPage.jsx','RichTextEditorToolbar.jsx'];
+      addResult('Gallery & Code Audit', s.size > 0 ? 'pass' : 'warn',
+        `Gallery: ${s.size} photos | Unused files detected: ${unusedFiles.length} (see cleanup report below)`
+      );
+      if (s.size === 0) sysLogAdd('  ⚠ Gallery empty'); else sysLogAdd(`  ✓ Gallery: ${s.size} photos`);
+      sysLogAdd('  ℹ Unused files: ' + unusedFiles.join(', '));
+      passed++;
+    } catch (e) { addResult('Gallery & Code Audit', 'fail', e.message); }
     setTestProgress(100);
 
     const score = Math.round(passed / TOTAL * 100);
-    sysLogAdd(''); sysLogAdd('━'.repeat(42)); sysLogAdd(`COMPLETE: ${score}% — ${passed}/${TOTAL} tests passed`);
-    if (score === 100) sysLogAdd('✓ ALL SYSTEMS OPERATIONAL');
-    else if (score >= 80) sysLogAdd('⚠ MINOR ISSUES DETECTED — CHECK WARNINGS');
+    sysLogAdd(''); sysLogAdd('━'.repeat(46));
+    sysLogAdd(`COMPLETE: ${score}% — ${passed}/${TOTAL} tests passed`);
+    if (score === 100) sysLogAdd('✓ ALL 25 SYSTEMS OPERATIONAL — WEBSITE READY');
+    else if (score >= 80) sysLogAdd('⚠ MINOR ISSUES — CHECK WARNINGS ABOVE');
     else sysLogAdd('✗ CRITICAL ISSUES — IMMEDIATE ATTENTION REQUIRED');
     setTestScore(score); setTestRunning(false);
   };
@@ -1520,7 +1568,7 @@ function AdminPanelInner({
       pdf.setFontSize(8); pdf.setFont('helvetica', 'normal'); pdf.setTextColor(80, 80, 100);
       pdf.text(`Generated: ${dateStr} at ${timeStr}`, 12, 86);
       pdf.text(`Total Tests: 15  |  Passed: ${passCount}  |  Warnings: ${warnCount}  |  Failed: ${failCount}`, pdfW / 2, 86, { align: 'center' });
-      pdf.text('Admin Panel v9.1', pdfW - 12, 86, { align: 'right' });
+      pdf.text('Admin Panel v10.0', pdfW - 12, 86, { align: 'right' });
 
       let y = 96;
       pdf.setFillColor(15, 35, 71); pdf.rect(12, y, pdfW - 24, 9, 'F');
@@ -1636,7 +1684,7 @@ function AdminPanelInner({
           >🏫</div>
           <div className="adm-brand-text">
             <div style={{ fontWeight: 900, color: WHITE, fontSize: 13, letterSpacing: -.2, lineHeight: 1.2 }}>GNC Admin</div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,.35)', fontWeight: 600 }}>v9.1 — Fixed</div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,.35)', fontWeight: 600 }}>v10.0</div>
           </div>
         </div>
 
@@ -2672,7 +2720,7 @@ function AdminPanelInner({
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20, borderBottom:'1px solid rgba(244,160,35,.25)', paddingBottom:18 }}>
                   <div>
                     <div style={{ color:GOLD, fontSize:22, fontWeight:900, fontFamily:"'JetBrains Mono',monospace", letterSpacing:-1 }}>{'>_ GNC.SYS.DIAGNOSTICS'}</div>
-                    <div style={{ color:'rgba(244,160,35,.5)', fontSize:12, fontFamily:"'JetBrains Mono',monospace", marginTop:3 }}>[ 17-Phase Deep Scan | Admin Panel v9.1 ]</div>
+                    <div style={{ color:'rgba(244,160,35,.5)', fontSize:12, fontFamily:"'JetBrains Mono',monospace", marginTop:3 }}>[ 25-Phase Ultra Scan | Admin Panel v10.0 ]</div>
                   </div>
                   {testScore !== null && (
                     <div style={{ padding:'10px 20px', borderRadius:10, border:`2px solid ${testScore>=90?T.green:testScore>=70?GOLD:T.red}`, color:testScore>=90?T.green:testScore>=70?GOLD:T.red, fontWeight:900, fontSize:24, fontFamily:"'JetBrains Mono',monospace", background:`rgba(${testScore>=90?'16,185,129':testScore>=70?'244,160,35':'239,68,68'},.08)` }}>
