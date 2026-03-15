@@ -74,7 +74,6 @@ export default function QuickActionNav() {
           position: 'fixed',
           right: 0,
           top: '50%',
-          transform: 'translateY(-50%)',
           zIndex: 990,
           display: 'flex',
           flexDirection: 'column',
