@@ -256,10 +256,15 @@ export const navLinks = [
       },
     ]
   },
-  // ✅ FIX: href changed from '/#gallery' → '/gallery' for HashRouter compatibility
-  // With HashRouter, '/#gallery' becomes http://domain/#/#gallery (broken double-hash)
-  // Use '/gallery' route + scroll logic, OR use a plain <a href="#gallery"> in the component
-  { label: 'Gallery', href: '/#gallery' },
+  // Gallery with sub-menu — Photo Gallery and Video Gallery
+  {
+    label: 'Gallery',
+    href: '/gallery',
+    sub: [
+      { label: 'Photo Gallery',  href: '/gallery/photos' },
+      { label: 'Video Gallery',  href: '/gallery/videos' },
+    ]
+  },
   { label: 'Contact Us', href: '/contact' },
 ]
 

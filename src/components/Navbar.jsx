@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef} from 'react'
 import { Link } from 'react-router-dom'
 import { COLORS } from '../styles/colors'
+
 
 export default function Navbar({ onAdminClick, navLinks }) {
   const [openL1, setOpenL1] = useState(null)
   const [openL2, setOpenL2] = useState(null)
   const [openL3, setOpenL3] = useState(null)
+  const closeTimer = useRef(null)
   
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1250)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -17,7 +19,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
       if (window.innerWidth >= 1250) setMenuOpen(false)
     }
     
-    const handleScroll = () => {
+    function handleScroll() {
       setIsScrolled(window.scrollY > 40)
     }
 
@@ -164,8 +166,15 @@ export default function Navbar({ onAdminClick, navLinks }) {
         }}>
           {navLinks.map(l0 => (
             <div key={l0.label} style={{ position: 'relative', width: isMobile ? '100%' : 'auto' }}
-              onMouseEnter={() => !isMobile && setOpenL1(l0.label)}
-              onMouseLeave={() => { if (!isMobile) { setOpenL1(null); setOpenL2(null); setOpenL3(null); } }}>
+              onMouseEnter={() => {
+  if (closeTimer.current) clearTimeout(closeTimer.current);
+  if (!isMobile) setOpenL1(l0.label);
+}}
+              onMouseLeave={() => {
+  if (!isMobile) closeTimer.current = setTimeout(() => {
+    setOpenL1(null); setOpenL2(null); setOpenL3(null);
+  }, 200);
+}}>
 
               <div onClick={() => isMobile && l0.sub && toggleL1(l0.label)}
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: isMobile && l0.sub ? 'pointer' : 'default' }}>

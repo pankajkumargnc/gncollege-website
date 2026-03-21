@@ -317,27 +317,72 @@ const GalItem = memo(({ img, index }) => {
 
 // ── YouTubeSection ────────────────────────────────────────────────────────────
 function YouTubeSection() {
-  const [ytData, setYt] = useState(null);
-  const [ready, setR]   = useState(false);
+  const [ytData, setYt]   = useState(null);
+  const [videos, setVids] = useState([]);
+  const [ready,  setR]    = useState(false);
+
+  // Firebase se config load
   useEffect(() => {
-    return onSnapshot(doc(db,'settings','youtube'), s => {
-      setYt(s.exists() ? s.data() : null); setR(true);
+    return onSnapshot(doc(db, 'settings', 'youtube'), s => {
+      setYt(s.exists() ? s.data() : null);
+      setR(true);
     }, () => setR(true));
   }, []);
+
+  // API se video IDs fetch karo (jab apiKey + channelId available ho)
+  useEffect(() => {
+    if (!ytData?.apiKey || !ytData?.channelId) {
+      // Fallback: manual videoIds field
+      if (ytData?.videoIds) {
+        const ids = ytData.videoIds.split(/[\n,]/).map(s => s.trim()).filter(Boolean).slice(0, 3);
+        setVids(ids);
+      }
+      return;
+    }
+    const { apiKey, channelId } = ytData;
+    (async () => {
+      try {
+        // Channel ka uploads playlist ID lo
+        const chRes  = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${apiKey}`);
+        const chData = await chRes.json();
+        if (chData.error || !chData.items?.length) return;
+        const uploadId = chData.items[0].contentDetails.relatedPlaylists.uploads;
+
+        // Pehle 3 videos lo
+        const plRes  = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadId}&maxResults=3&key=${apiKey}`);
+        const plData = await plRes.json();
+        if (plData.error) return;
+        const ids = plData.items.map(i => i.snippet.resourceId.videoId);
+        setVids(ids);
+      } catch (_) {}
+    })();
+  }, [ytData]);
+
   if (!ready) return null;
-  const videos  = ytData?.videoIds ? ytData.videoIds.split(/[\n,]/).map(s=>s.trim()).filter(Boolean).slice(0,3) : [];
-  const channel = ytData?.channelName || 'GNC College Official';
+
+  const channel   = ytData?.channelName || 'GNC College Official';
+  const hasVideos = videos.length > 0;
+
   return (
     <section className="hp-yt">
       <div className="hp-yt-inner">
-        <SA variant="up"><h2 className="hp-yt-h">🎬 Campus <span>Video Highlights</span></h2></SA>
-        <SA variant="fade" delay="d1"><p className="hp-yt-sub">Official {channel} channel se latest videos</p></SA>
+        <SA variant="up">
+          <h2 className="hp-yt-h">🎬 Campus <span>Video Highlights</span></h2>
+        </SA>
+        <SA variant="fade" delay="d1">
+          <p className="hp-yt-sub">Official {channel} channel se latest videos</p>
+        </SA>
+
         <div className="hp-yt-grid">
-          {videos.length > 0
+          {hasVideos
             ? videos.map((vid, i) => (
                 <SA key={vid} variant="up" delay={`d${i+1}`}>
                   <div className="gc r16">
-                    <iframe className="hp-yt-frame" src={`https://www.youtube.com/embed/${vid}`} allowFullScreen title={vid} loading="lazy" />
+                    <iframe
+                      className="hp-yt-frame"
+                      src={`https://www.youtube.com/embed/${vid}`}
+                      allowFullScreen title={vid} loading="lazy"
+                    />
                   </div>
                 </SA>
               ))
@@ -346,18 +391,38 @@ function YouTubeSection() {
                   <div className="gc r16">
                     <div className="hp-yt-ph">
                       <div className="hp-yt-ph-icon">▶️</div>
-                      <div className="hp-yt-ph-txt">Admin Panel → Settings → YouTube<br/>mein Video IDs add karein</div>
+                      <div className="hp-yt-ph-txt">
+                        Admin Panel → YouTube tab mein<br/>API Key aur Channel ID add karein
+                      </div>
                     </div>
                   </div>
                 </SA>
               ))
           }
         </div>
+
+        {/* View All Videos — videos hone par hi dikhega */}
+        {hasVideos && (
+          <div style={{ display:'flex', justifyContent:'center', marginTop:32 }}>
+            <Link to="/video-gallery" style={{
+              display:'inline-flex', alignItems:'center', gap:8,
+              background:'#ff0000', color:'#fff',
+              padding:'12px 30px', borderRadius:50,
+              fontSize:14, fontWeight:800, textDecoration:'none',
+              boxShadow:'0 4px 18px rgba(255,0,0,.35)',
+              transition:'transform .2s, box-shadow .2s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 28px rgba(255,0,0,.45)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 4px 18px rgba(255,0,0,.35)'; }}
+            >
+              🎬 View All Videos ›
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );
 }
-
 // ── Main ──────────────────────────────────────────────────────────────────────
 const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, gallery }) => {
   const [tab, setTab] = useState('All Moments');
@@ -543,6 +608,24 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
               )
             }
           </div>
+          {/* ── View All Photos button ── */}
+          {allGal.length > 0 && (
+            <SA variant="up" delay="d2" style={{ display:'flex', justifyContent:'center', marginTop:32 }}>
+              <Link to="/gallery" className="arr-link" style={{
+                display:'inline-flex', alignItems:'center', gap:8,
+                background:N, color:'#fff',
+                padding:'12px 30px', borderRadius:50,
+                fontSize:14, fontWeight:800, textDecoration:'none',
+                boxShadow:`0 4px 18px ${N}44`,
+                transition:'background .2s, transform .2s',
+              }}
+                onMouseEnter={e=>{ e.currentTarget.style.background=G; e.currentTarget.style.color=N; }}
+                onMouseLeave={e=>{ e.currentTarget.style.background=N; e.currentTarget.style.color='#fff'; }}
+              >
+                📸 View All Photos <span className="arr">›</span>
+              </Link>
+            </SA>
+          )}
         </div>
       </section>
 

@@ -2599,6 +2599,19 @@ function AdminPanelInner({
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 14, marginBottom: 14 }}>
                     <div><label className="alabel">API Key *</label><input className="ainp" value={ytCfg.apiKey} onChange={e=>setYtCfg(d=>({...d,apiKey:e.target.value}))} placeholder="AIzaSyxxxxxxxxx" type="password" /></div>
                     <div><label className="alabel">Channel ID *</label><input className="ainp" value={ytCfg.channelId} onChange={e=>setYtCfg(d=>({...d,channelId:e.target.value}))} placeholder="UCxxxxxxxxxxxxxxxxx" /></div>
+                    <div style={{ gridColumn: '1/-1' }}>
+  <label className="alabel">
+    Manual Video IDs (optional — API key ke bina bhi kaam karega)
+  </label>
+  <textarea className="ainp" rows={3}
+    value={ytCfg.videoIds || ''}
+    onChange={e => setYtCfg(d => ({ ...d, videoIds: e.target.value }))}
+    placeholder={"dQw4w9WgXcQ\nabc123xyz\n...ek line mein ek Video ID"}
+  />
+  <p style={{ fontSize: 11, color: '#94a3b8', margin: '4px 0 0' }}>
+    💡 YouTube video URL mein <code>watch?v=</code> ke baad wala ID copy karo. Homepage pe yahi videos dikhenge.
+  </p>
+</div>
                     <div><label className="alabel">Videos to fetch</label><select className="ainp" value={ytCfg.maxResults} onChange={e=>setYtCfg(d=>({...d,maxResults:+e.target.value}))}>{[6,9,12,15,18,24].map(n=><option key={n} value={n}>{n} videos</option>)}</select></div>
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>

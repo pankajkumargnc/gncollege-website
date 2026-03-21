@@ -1,7 +1,7 @@
 // src/App.jsx — COMPLETE v5
 // ✅ All About Us routes fully wired — GoverningBody, StaffCouncil, Organogram, all 9 committees
 
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
@@ -90,9 +90,8 @@ export default function App() {
   const handleAdminLogout = () => { sessionStorage.removeItem('gnc_admin_auth');        setAdminAuthed(false); window.location.hash = '/'; };
 
   const location     = useLocation();
-  // HashRouter mein pathname always '/' hoti hai — hash se check karo
   const isAdminRoute = location.pathname.startsWith('/admin') ||
-    window.location.hash.startsWith('#/admin');
+  window.location.hash.startsWith('#/admin');
 
 
   useEffect(() => {
@@ -117,42 +116,24 @@ export default function App() {
     return () => unsubs.forEach(u => u());
   }, []);
 
-  const baseNavLinks = firebaseNav || staticNavLinks;
+  const baseNavLinks = useMemo(() => {
+  const links = firebaseNav || staticNavLinks;
+  // Gallery sub-menu hamesha correct routes ke saath force karo
+  return links.map(link =>
+    link.label === 'Gallery'
+      ? { ...link, href: '/gallery', sub: [
+          { label: 'Photo Gallery', href: '/gallery/photos' },
+          { label: 'Video Gallery', href: '/gallery/videos' },
+        ]}
+      : link
+  );
+}, [firebaseNav]);
   const handleOpenAdminTab = () =>
     window.open(`${window.location.origin}${import.meta.env.BASE_URL.replace(/\/$/, '')}/#/admin`, '_blank');
 
   return (
     <>
-      <Toaster
-        position="top-right"
-        containerStyle={{ zIndex: 999999 }}
-        toastOptions={{
-          duration: 3500,
-          style: {
-            fontFamily: "'Inter', sans-serif",
-            fontWeight: 600,
-            fontSize: '14px',
-            borderRadius: '12px',
-            padding: '14px 18px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
-          },
-          success: {
-            style: {
-              background: '#0f2347',
-              color: '#fff',
-              border: '1.5px solid #f4a023',
-            },
-            iconTheme: { primary: '#f4a023', secondary: '#0f2347' },
-          },
-          error: {
-            style: {
-              background: '#fff0f0',
-              color: '#b91c1c',
-              border: '1.5px solid #f87171',
-            },
-          },
-        }}
-      />
+      <Toaster position="top-right" />
       {!isAdminRoute && (
         <>
           <TopBar />
@@ -263,8 +244,12 @@ export default function App() {
         <Route path="/publication/sss-report/2022-23"       element={<EB><PublicationPage type="sss"      title="SSS Report 2022-23" subtitle="Student Satisfaction Survey"      icon="📊" keyword="sss-2022-23" /></EB>} />
 
         {/* ══ GALLERY / NEWS ══ */}
-        <Route path="/gallery"       element={<EB><GalleryPage gallery={gallery} /></EB>} />
-        <Route path="/video-gallery" element={<EB><VideoGallery /></EB>} />
+        <Route path="/gallery"               element={<EB><GalleryPage gallery={gallery} /></EB>} />
+        <Route path="/gallery/photos"        element={<EB><GalleryPage gallery={gallery} /></EB>} />
+        <Route path="/gallery/photo-gallery" element={<EB><GalleryPage gallery={gallery} /></EB>} />
+        <Route path="/video-gallery"         element={<EB><VideoGallery /></EB>} />
+        <Route path="/gallery/videos"        element={<EB><VideoGallery /></EB>} />
+        <Route path="/gallery/video-gallery" element={<EB><VideoGallery /></EB>} />
         <Route path="/news"          element={<EB><NewsPage /></EB>} />
         <Route path="/notifications" element={<EB><NotificationsPage /></EB>} />
         <Route path="/documents"     element={<EB><DocumentsPage /></EB>} />
