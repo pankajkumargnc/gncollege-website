@@ -1,5 +1,7 @@
 // src/components/home/NotificationSection.jsx
-// ✅ FIX: Teeno useEffects mein proper event listener cleanup
+// ✅ Gradient glow hover on all 3 notif cards (screenshot-style)
+// ✅ Trailing arrow on attachment/download links
+// ✅ All scroll logic + memory leak fix preserved
 
 import { useRef, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
@@ -46,7 +48,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
     return [...reports, ...reports];
   }, [pdfReports]);
 
-  // ── Scroll helpers ─────────────────────────────────────────────────────────
+  // ── Scroll helpers (unchanged) ─────────────────────────────────────────────
   const startScrolling = (ref, rafRef) => {
     const el = ref.current;
     if (!el) return;
@@ -59,44 +61,23 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
     };
     rafRef.current = requestAnimationFrame(animate);
   };
-
   const stopScrolling = (rafRef) => {
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
   };
-
-  // ── ✅ FIX EXPLAINED ───────────────────────────────────────────────────────
-  // PEHLE KI PROBLEM:
-  //   el.addEventListener('mouseenter', () => stopScrolling(...))
-  //   Anonymous arrow functions thi — inhe remove karna impossible tha
-  //   Har doubledNotices change pe naye listeners add hote the, purane reh jaate the
-  //   Result: memory leak + multiple RAF loops ek saath chalte the
-  //
-  // AB KA FIX:
-  //   Named functions (onEnter, onLeave) banao
-  //   Cleanup mein wahi functions remove karo
-  //   stopScrolling bhi cleanup mein call karo
-  // ──────────────────────────────────────────────────────────────────────────
 
   // ── useEffect 1 — Notices ─────────────────────────────────────────────────
   useEffect(() => {
     const el = noticesRef.current;
     if (!el) return;
-
-    // ✅ Named functions — remove karna possible
     const onEnter = () => stopScrolling(noticesRafRef);
     const onLeave = () => startScrolling(noticesRef, noticesRafRef);
-
     el.addEventListener('mouseenter', onEnter);
     el.addEventListener('mouseleave', onLeave);
     startScrolling(noticesRef, noticesRafRef);
-
     return () => {
-      stopScrolling(noticesRafRef);                  // ✅ RAF cancel
-      el.removeEventListener('mouseenter', onEnter); // ✅ Listener remove
-      el.removeEventListener('mouseleave', onLeave); // ✅ Listener remove
+      stopScrolling(noticesRafRef);
+      el.removeEventListener('mouseenter', onEnter);
+      el.removeEventListener('mouseleave', onLeave);
     };
   }, [doubledNotices]);
 
@@ -104,14 +85,11 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
   useEffect(() => {
     const el = newsRef.current;
     if (!el) return;
-
     const onEnter = () => stopScrolling(newsRafRef);
     const onLeave = () => startScrolling(newsRef, newsRafRef);
-
     el.addEventListener('mouseenter', onEnter);
     el.addEventListener('mouseleave', onLeave);
     startScrolling(newsRef, newsRafRef);
-
     return () => {
       stopScrolling(newsRafRef);
       el.removeEventListener('mouseenter', onEnter);
@@ -123,14 +101,11 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
   useEffect(() => {
     const el = pdfRef.current;
     if (!el) return;
-
     const onEnter = () => stopScrolling(pdfRafRef);
     const onLeave = () => startScrolling(pdfRef, pdfRafRef);
-
     el.addEventListener('mouseenter', onEnter);
     el.addEventListener('mouseleave', onLeave);
     startScrolling(pdfRef, pdfRafRef);
-
     return () => {
       stopScrolling(pdfRafRef);
       el.removeEventListener('mouseenter', onEnter);
@@ -138,10 +113,8 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
     };
   }, [doubledPdfReports]);
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <section style={{ padding: '90px 20px', background: '#f8fafc', position: 'relative' }}>
-
+    <section style={{ padding:'90px 20px', background:'#f8fafc', position:'relative' }}>
       <div style={{ position:'absolute', top:0, left:0, right:0, height:'300px', background:'linear-gradient(180deg,#f1f5f9 0%,rgba(248,250,252,0) 100%)', zIndex:0 }} />
 
       <div style={{ maxWidth:1350, margin:'0 auto', position:'relative', zIndex:1 }}>
@@ -151,6 +124,29 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
         />
 
         <style>{`
+          /* ── Glow card wrapper ── */
+          .nc-glow {
+            position: relative;
+            z-index: 0;
+            border-radius: 26px;      /* must be 2px bigger than inner card */
+          }
+          .nc-glow::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: inherit;
+            background: conic-gradient(
+              from 0deg,
+              #a855f7, #ec4899, #f97316, #eab308,
+              #06b6d4, #6366f1, #a855f7
+            );
+            opacity: 0;
+            filter: blur(10px);
+            z-index: -1;
+            transition: opacity .35s ease;
+          }
+          .nc-glow:hover::before { opacity: .6; }
+
           .notif-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -164,10 +160,10 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
             transition: transform 0.4s cubic-bezier(0.165,0.84,0.44,1), box-shadow 0.4s, border-color 0.4s;
             display: flex; flex-direction: column; height: 520px; position: relative;
           }
-          .notif-card:hover {
+          .nc-glow:hover .notif-card {
             transform: translateY(-8px);
             box-shadow: 0 30px 60px -12px rgba(15,23,42,0.15);
-            border-color: rgba(244,160,35,0.3);
+            border-color: transparent;
           }
           .header-notice { background: linear-gradient(135deg,#1e3a8a 0%,#0f172a 100%); }
           .header-news   { background: linear-gradient(135deg,#e11d48 0%,#9f1239 100%); }
@@ -184,7 +180,6 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
             animation: shine 4s infinite linear;
           }
           @keyframes shine { 0%{background-position:200% center;} 100%{background-position:-200% center;} }
-
           .notif-body {
             padding: 10px 20px; flex: 1; overflow-y: hidden;
             display: flex; flex-direction: column;
@@ -211,6 +206,14 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
           .rich-text-title { margin: 0 0 6px; font-size: 0.95rem; color: #0f172a; font-weight: 700; line-height: 1.5; }
           .rich-text-desc  { margin: 0 0 6px; font-size: 0.85rem; color: #475569; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
+          /* Attachment links — trailing arrow */
+          .notif-alink {
+            font-size: 0.8rem; font-weight: 800; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 4px;
+          }
+          .notif-alink .arr { display: inline-block; transition: transform .2s; }
+          .notif-alink:hover .arr { transform: translateX(4px); }
+
           .view-all-wrapper {
             padding: 18px 20px; background: #fff;
             border-top: 1px solid #f1f5f9; position: relative; z-index: 2;
@@ -222,7 +225,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
             cursor: pointer; transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
             text-align: center; text-transform: uppercase; letter-spacing: 1px; text-decoration: none;
           }
-          .notif-card:hover .view-all-btn {
+          .nc-glow:hover .view-all-btn {
             background: ${COLORS.navy}; color: #fff;
             border-color: ${COLORS.navy}; box-shadow: 0 8px 20px rgba(15,23,42,0.2);
           }
@@ -237,107 +240,115 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
             animation: pulse-red 2s infinite; font-weight: 900;
           }
           @media (max-width: 1100px) { .notif-grid { grid-template-columns: repeat(2,1fr); } }
-          @media (max-width: 768px)  { .notif-grid { grid-template-columns: 1fr; gap: 20px; margin-top: 20px; } .notif-card { height: 420px; } }
+          @media (max-width: 768px)  {
+            .notif-grid { grid-template-columns: 1fr; gap: 20px; margin-top: 20px; }
+            .notif-card { height: 420px; }
+          }
         `}</style>
 
         <div className="notif-grid">
 
-          {/* ── 1. OFFICIAL NOTICES ── */}
-          <div className="notif-card">
-            <div className="notif-header header-notice">
-              <span style={{ fontSize:26 }}>🔔</span> Official Notices
-            </div>
-            <div className="notif-body">
-              <div ref={noticesRef}>
-                {doubledNotices.map((n, i) => {
-                  const isNew = n.isNew && n.date &&
-                    (new Date() - new Date(n.date)) / 86400000 < 5;
-                  return (
-                    <div key={i} className="notif-item">
-                      <div className="notif-meta">
-                        <span>📅 {n.date ? new Date(n.date).toLocaleDateString('en-GB') : 'Recently'}</span>
-                        <span className="cat-badge" style={{ color:'#1e3a8a' }}>{n.type || 'Notice'}</span>
-                        {isNew && <span className="new-badge-pulse">NEW</span>}
-                      </div>
-                      <div className="rich-text-title" dangerouslySetInnerHTML={{ __html: n.text }} />
-                      {n.link && (
-                        <a href={n.link} target="_blank" rel="noreferrer"
-                          style={{ fontSize:'0.8rem', color:'#2563eb', fontWeight:800, textDecoration:'none', display:'flex', alignItems:'center', gap:5 }}>
-                          📎 View Attachment
-                        </a>
-                      )}
-                    </div>
-                  );
-                })}
+          {/* ── 1. OFFICIAL NOTICES — wrapped in .nc-glow ── */}
+          <div className="nc-glow">
+            <div className="notif-card">
+              <div className="notif-header header-notice">
+                <span style={{ fontSize:26 }}>🔔</span> Official Notices
               </div>
-            </div>
-            <div className="view-all-wrapper">
-              <Link to="/notifications" className="view-all-btn">View All Notices</Link>
+              <div className="notif-body">
+                <div ref={noticesRef}>
+                  {doubledNotices.map((n, i) => {
+                    const isNew = n.isNew && n.date &&
+                      (new Date() - new Date(n.date)) / 86400000 < 5;
+                    return (
+                      <div key={i} className="notif-item">
+                        <div className="notif-meta">
+                          <span>📅 {n.date ? new Date(n.date).toLocaleDateString('en-GB') : 'Recently'}</span>
+                          <span className="cat-badge" style={{ color:'#1e3a8a' }}>{n.type || 'Notice'}</span>
+                          {isNew && <span className="new-badge-pulse">NEW</span>}
+                        </div>
+                        <div className="rich-text-title" dangerouslySetInnerHTML={{ __html: n.text }} />
+                        {n.link && (
+                          <a href={n.link} target="_blank" rel="noreferrer"
+                            className="notif-alink" style={{ color:'#2563eb' }}>
+                            📎 View Attachment <span className="arr">›</span>
+                          </a>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="view-all-wrapper">
+                <Link to="/notifications" className="view-all-btn">View All Notices</Link>
+              </div>
             </div>
           </div>
 
-          {/* ── 2. NEWS & EVENTS ── */}
-          <div className="notif-card">
-            <div className="notif-header header-news">
-              <span style={{ fontSize:26 }}>📣</span> News & Events
+          {/* ── 2. NEWS & EVENTS — wrapped in .nc-glow ── */}
+          <div className="nc-glow">
+            <div className="notif-card">
+              <div className="notif-header header-news">
+                <span style={{ fontSize:26 }}>📣</span> News & Events
+              </div>
+              <div className="notif-body">
+                <div ref={newsRef}>
+                  {doubledNews.map((n, i) => {
+                    const isNew = (n.isNew || false) ||
+                      (n.date && (new Date() - new Date(n.date)) / 86400000 < 5);
+                    return (
+                      <div key={i} className="notif-item">
+                        <div className="notif-meta">
+                          <span>📅 {n.date ? new Date(n.date).toLocaleDateString('en-GB') : 'Recently'}</span>
+                          <span className="cat-badge" style={{ color:'#e11d48' }}>{n.type || 'Update'}</span>
+                          {isNew && <span className="new-badge-pulse">NEW</span>}
+                        </div>
+                        <div className="rich-text-title" dangerouslySetInnerHTML={{ __html: n.text || n.title }} />
+                        {n.desc && <div className="rich-text-desc" dangerouslySetInnerHTML={{ __html: n.desc }} />}
+                        {n.link && (
+                          <a href={n.link} target="_blank" rel="noreferrer"
+                            className="notif-alink" style={{ color:'#e11d48' }}>
+                            🔗 Read More <span className="arr">›</span>
+                          </a>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="view-all-wrapper">
+                <Link to="/news" className="view-all-btn">Explore News</Link>
+              </div>
             </div>
-            <div className="notif-body">
-              <div ref={newsRef}>
-                {doubledNews.map((n, i) => {
-                  // ✅ FIX W3: isNew field bhi check karo, sirf date pe depend mat karo
-                  const isNew = (n.isNew || false) ||
-                    (n.date && (new Date() - new Date(n.date)) / 86400000 < 5);
-                  return (
+          </div>
+
+          {/* ── 3. E-DOCUMENTS — wrapped in .nc-glow ── */}
+          <div className="nc-glow">
+            <div className="notif-card">
+              <div className="notif-header header-docs">
+                <span style={{ fontSize:26 }}>📄</span> E-Documents
+              </div>
+              <div className="notif-body">
+                <div ref={pdfRef}>
+                  {doubledPdfReports.map((n, i) => (
                     <div key={i} className="notif-item">
                       <div className="notif-meta">
                         <span>📅 {n.date ? new Date(n.date).toLocaleDateString('en-GB') : 'Recently'}</span>
-                        <span className="cat-badge" style={{ color:'#e11d48' }}>{n.type || 'Update'}</span>
-                        {isNew && <span className="new-badge-pulse">NEW</span>}
+                        <span className="cat-badge" style={{ color:'#059669' }}>{n.type || 'Document'}</span>
                       </div>
                       <div className="rich-text-title" dangerouslySetInnerHTML={{ __html: n.text || n.title }} />
-                      {n.desc && <div className="rich-text-desc" dangerouslySetInnerHTML={{ __html: n.desc }} />}
                       {n.link && (
                         <a href={n.link} target="_blank" rel="noreferrer"
-                          style={{ fontSize:'0.8rem', color:'#e11d48', fontWeight:800, textDecoration:'none', display:'flex', alignItems:'center', gap:5 }}>
-                          🔗 Read More
+                          className="notif-alink" style={{ color:'#059669' }}>
+                          ⬇️ Download PDF <span className="arr">›</span>
                         </a>
                       )}
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="view-all-wrapper">
-              <Link to="/news" className="view-all-btn">Explore News</Link>
-            </div>
-          </div>
-
-          {/* ── 3. E-DOCUMENTS ── */}
-          <div className="notif-card">
-            <div className="notif-header header-docs">
-              <span style={{ fontSize:26 }}>📄</span> E-Documents
-            </div>
-            <div className="notif-body">
-              <div ref={pdfRef}>
-                {doubledPdfReports.map((n, i) => (
-                  <div key={i} className="notif-item">
-                    <div className="notif-meta">
-                      <span>📅 {n.date ? new Date(n.date).toLocaleDateString('en-GB') : 'Recently'}</span>
-                      <span className="cat-badge" style={{ color:'#059669' }}>{n.type || 'Document'}</span>
-                    </div>
-                    <div className="rich-text-title" dangerouslySetInnerHTML={{ __html: n.text || n.title }} />
-                    {n.link && (
-                      <a href={n.link} target="_blank" rel="noreferrer"
-                        style={{ fontSize:'0.8rem', color:'#059669', fontWeight:800, textDecoration:'none', display:'flex', alignItems:'center', gap:5 }}>
-                        ⬇️ Download PDF
-                      </a>
-                    )}
-                  </div>
-                ))}
+              <div className="view-all-wrapper">
+                <Link to="/documents" className="view-all-btn">Document Archive</Link>
               </div>
-            </div>
-            <div className="view-all-wrapper">
-              <Link to="/documents" className="view-all-btn">Document Archive</Link>
             </div>
           </div>
 
