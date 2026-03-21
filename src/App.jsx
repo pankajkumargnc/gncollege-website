@@ -133,7 +133,36 @@ export default function App() {
 
   return (
     <>
-      <Toaster position="top-right" />
+      <Toaster
+  position="top-right"
+  containerStyle={{ zIndex: 999999 }}
+  toastOptions={{
+    duration: 3500,
+    style: {
+      fontFamily: "'Inter', sans-serif",
+      fontWeight: 600,
+      fontSize: '14px',
+      borderRadius: '12px',
+      padding: '14px 18px',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+    },
+    success: {
+      style: {
+        background: '#0f2347',
+        color: '#fff',
+        border: '1.5px solid #f4a023',
+      },
+      iconTheme: { primary: '#f4a023', secondary: '#0f2347' },
+    },
+    error: {
+      style: {
+        background: '#fff0f0',
+        color: '#b91c1c',
+        border: '1.5px solid #f87171',
+      },
+    },
+  }}
+/>
       {!isAdminRoute && (
         <>
           <TopBar />
