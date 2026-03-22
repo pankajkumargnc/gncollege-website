@@ -495,8 +495,8 @@ function SingleDeptPage({ slug }) {
         <div style={{ position: 'absolute', bottom: -50, left: '8%', width: 260, height: 260, borderRadius: '50%', background: 'radial-gradient(circle,rgba(244,160,35,.07) 0%,transparent 70%)', pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          {/* Breadcrumb */}
-          <div style={{ fontSize: 12.5, color: '#94a3b8', marginBottom: 28, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Breadcrumb Start */}
+          {/* <div style={{ fontSize: 12.5, color: '#94a3b8', marginBottom: 28, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
             {[['Home', '/'], ['Academics', '/academics'], ['Departments', '/academics/departments']].map(([l, h]) => (
               <span key={h} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Link to={h} style={{ color: 'inherit', textDecoration: 'none', transition: 'color .15s' }}
@@ -506,8 +506,8 @@ function SingleDeptPage({ slug }) {
               </span>
             ))}
             <span style={{ color: NAVY, fontWeight: 600 }}>{meta.short}</span>
-          </div>
-
+          </div> */}
+          {/* Breadcrumb End */}
           {/* Two-col layout */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 40, alignItems: 'center' }}>
 

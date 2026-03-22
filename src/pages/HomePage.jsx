@@ -466,8 +466,8 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
 
           {/* Text — center aligned */}
           <SA variant="right" slow className="hp-about-text">
-            <span className="hp-asub">Established 1970</span>
             <h2 className="hp-at">About the <span>College</span></h2>
+            <span className="hp-asub">Established 1970</span>
             <p className="hp-adesc">
               Guru Nanak College, Dhanbad (A Sikh Minority Degree College) was established by the
               Gurudwara Prabandhak Committee in 1970 to mark the fifth Birth Centenary of the great
