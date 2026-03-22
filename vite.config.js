@@ -16,10 +16,16 @@ export default defineConfig({
 
   // ✅ Dev server config
   server: {
+  port: 5173,
+  hmr: {
+    protocol: 'ws',
+    host: 'localhost',
     port: 5173,
-    strictPort: false,
-    open: true,
   },
+  watch: {
+    usePolling: false,
+  },
+},
 
   build: {
     // ✅ Production mein console.log automatically delete
