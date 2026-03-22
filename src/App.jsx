@@ -1,6 +1,6 @@
 // src/App.jsx — COMPLETE v5
 // ✅ All About Us routes fully wired — GoverningBody, StaffCouncil, Organogram, all 9 committees
-
+import WhatsAppButton from './components/WhatsAppButton';
 import { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -304,6 +304,7 @@ export default function App() {
       {!isAdminRoute && (
         <>
           <Footer />
+          <WhatsAppButton /> 
           <button onClick={handleOpenAdminTab} title="Open Admin Panel"
             style={{ position:'fixed', bottom:25, right:25, background:COLORS.navy,
               color:'#fff', border:`3px solid ${COLORS.gold}`, borderRadius:'50%',
