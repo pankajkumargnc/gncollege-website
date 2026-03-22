@@ -5,147 +5,166 @@ const TopBar = () => {
   const whatsappLink = { id: 'whatsapp', label: 'W', href: 'https://wa.me/917903340991' };
 
   return (
-    <div className="top-bar-container" style={{ background: `linear-gradient(to right, ${COLORS.navyDark}, #0a1832)`, color: '#e2e8f0', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13, fontWeight: 500, letterSpacing: '0.4px', borderBottom: `1px solid ${COLORS.gold}20` }}>
+    <div style={{
+      background: `linear-gradient(to right, ${COLORS.navyDark}, #0a1832)`,
+      color: '#e2e8f0',
+      borderBottom: `1px solid ${COLORS.gold}20`,
+      width: '100%',
+      maxWidth: '100vw',
+      overflow: 'hidden',
+      boxSizing: 'border-box',
+    }}>
       <style>{`
-        .top-bar-link {
-          display: flex; align-items: center; gap: 8px;
-          cursor: pointer; transition: all 0.3s ease;
-          text-decoration: none; color: inherit;
+        .tb-wrap {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 7px clamp(12px, 2vw, 20px);
+          gap: 8px;
+          min-width: 0;
+          max-width: 100%;
+          flex-wrap: nowrap;
         }
-        .top-bar-link:hover { color: #f4a023; transform: scale(1.05); }
-        .social-icon {
-          width: 30px; height: 30px;
-          background: rgba(255,255,255,0.05); border-radius: 8px;
+
+        /* Left contact */
+        .tb-left {
+          display: flex;
+          align-items: center;
+          gap: clamp(10px, 2vw, 24px);
+          flex-shrink: 1;
+          min-width: 0;
+          overflow: hidden;
+        }
+        .tb-link {
+          display: flex; align-items: center; gap: 6px;
+          text-decoration: none; color: #e2e8f0;
+          font-size: clamp(11px, 1.1vw, 13px);
+          font-weight: 500; white-space: nowrap;
+          transition: color .2s;
+          min-width: 0;
+        }
+        .tb-link:hover { color: #f4a023; }
+        .tb-email { display: flex; }
+        @media(max-width: 520px) { .tb-email { display: none; } }
+
+        /* Right social + quick links */
+        .tb-right {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-shrink: 0;
+        }
+
+        /* Social icons */
+        .tb-soc {
+          width: clamp(24px, 2.8vw, 29px);
+          height: clamp(24px, 2.8vw, 29px);
+          background: rgba(255,255,255,0.07);
+          border: 1px solid rgba(255,255,255,0.12);
+          border-radius: 7px;
           display: flex; align-items: center; justify-content: center;
-          font-size: 14px; font-weight: bold; color: #fff;
-          text-decoration: none;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          border: 1px solid rgba(255,255,255,0.1);
+          font-size: 12px; font-weight: 700; color: #fff;
+          text-decoration: none; flex-shrink: 0;
+          transition: all .25s;
         }
-        .social-icon:hover {
-          background: #f4a023; color: #0f2347;
-          transform: translateY(-3px);
-          box-shadow: 0 8px 15px rgba(244,160,35,0.3);
-        }
-        .social-icon.whatsapp-icon:hover {
-          background: #25D366; color: #fff;
-          box-shadow: 0 8px 15px rgba(37,211,102,0.3);
-        }
-        .social-icon-facebook:hover {
-          background: #1877F2 !important; color: #fff !important;
-          box-shadow: 0 8px 15px rgba(24,119,242,0.3) !important;
-        }
-        .social-icon-youtube:hover {
-          background: #FF0000 !important; color: #fff !important;
-          box-shadow: 0 8px 15px rgba(255,0,0,0.3) !important;
-        }
-        .social-icon-linkedin:hover {
-          background: #0A66C2 !important; color: #fff !important;
-          box-shadow: 0 8px 15px rgba(10,102,194,0.3) !important;
-        }
-        .contact-group { display: flex; gap: 28px; }
+        .tb-soc:hover { background: #f4a023; color: #0f2347; transform: translateY(-2px); }
+        .tb-soc.wa:hover  { background: #25D366; color: #fff; }
+        .tb-soc.fb:hover  { background: #1877F2; color: #fff; }
+        .tb-soc.yt:hover  { background: #FF0000; color: #fff; }
+        .tb-soc.li:hover  { background: #0A66C2; color: #fff; }
 
-        /* ── Quick Link Buttons ── */
-        .tb-qlink {
-          display: inline-flex; align-items: center; gap: 5px;
-          font-size: 11px; font-weight: 800;
-          padding: 4px 10px; border-radius: 5px;
+        /* Quick link buttons */
+        .tb-qbtn {
+          display: inline-flex; align-items: center; gap: 4px;
+          font-size: 10.5px; font-weight: 800;
+          padding: 3px 9px; border-radius: 5px;
           text-decoration: none; white-space: nowrap;
-          transition: all .18s; letter-spacing: 0.3px;
-          border: 1px solid;
+          border: 1px solid; flex-shrink: 0;
+          transition: all .18s;
         }
-        .tb-result {
-          background: rgba(244,160,35,0.12);
-          border-color: rgba(244,160,35,0.45);
-          color: #f4a023;
-        }
-        .tb-result:hover { background: #f4a023; color: #0f2347; border-color: #f4a023; transform: translateY(-2px); }
-        .tb-fee {
-          background: rgba(16,185,129,0.12);
-          border-color: rgba(16,185,129,0.45);
-          color: #10b981;
-        }
-        .tb-fee:hover { background: #10b981; color: #fff; border-color: #10b981; transform: translateY(-2px); }
-        .tb-admission {
-          background: rgba(99,102,241,0.12);
-          border-color: rgba(99,102,241,0.45);
-          color: #818cf8;
-        }
-        .tb-admission:hover { background: #6366f1; color: #fff; border-color: #6366f1; transform: translateY(-2px); }
+        .tb-res { background:rgba(244,160,35,.12); border-color:rgba(244,160,35,.4); color:#f4a023; }
+        .tb-res:hover { background:#f4a023; color:#0f2347; }
+        .tb-fee { background:rgba(16,185,129,.12); border-color:rgba(16,185,129,.4); color:#10b981; }
+        .tb-fee:hover { background:#10b981; color:#fff; }
+        .tb-adm { background:rgba(99,102,241,.12); border-color:rgba(99,102,241,.4); color:#818cf8; }
+        .tb-adm:hover { background:#6366f1; color:#fff; }
 
-        @media (max-width: 900px) { .tb-quick-links { display: none; } }
-        @media (max-width: 650px) {
-          .contact-group { flex-direction: column; gap: 8px; align-items: center; }
-          .top-bar-container { flex-direction: column; gap: 14px; padding: 12px 20px; }
+        /* Hide quick links on small screens */
+        .tb-qlinks { display: flex; align-items: center; gap: 5px; }
+        @media(max-width: 900px) { .tb-adm   { display: none; } }
+        @media(max-width: 720px) { .tb-fee   { display: none; } }
+        @media(max-width: 580px) { .tb-qlinks { display: none; } }
+
+        /* Divider */
+        .tb-div {
+          width: 1px; height: 16px;
+          background: rgba(255,255,255,.15);
+          flex-shrink: 0;
         }
+        @media(max-width: 580px) { .tb-div { display: none; } }
       `}</style>
 
-      {/* ── Left: Phone + Email ── */}
-      <div className="contact-group">
-        <a href="tel:+917903340991" className="top-bar-link">
-          <span style={{ fontSize: 15, color: COLORS.gold }}>📞</span> +91-7903340991
-        </a>
-        <a href="mailto:principal@gncollege.org" className="top-bar-link">
-          <span style={{ fontSize: 15, color: COLORS.gold }}>✉️</span> principal@gncollege.org
-        </a>
-      </div>
-
-      {/* ── Right: Quick Links + Social Icons ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-
-        {/* Quick Action Buttons */}
-        <div className="tb-quick-links" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-          <a
-            href="https://bbmkuniv.in/login"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="tb-qlink tb-result"
-            title="BBMKU Exam Results"
-          >
-            📋 Results
+      <div className="tb-wrap">
+        {/* ── Left: Phone + Email ── */}
+        <div className="tb-left">
+          <a href="tel:+917903340991" className="tb-link">
+            <span style={{ color: COLORS.gold, fontSize: 13 }}>📞</span>
+            <span>+91-7903340991</span>
           </a>
-          <a
-            href="https://cimsstudentnewui.mastersofterp.in/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="tb-qlink tb-fee"
-            title="Online Fee Payment"
-          >
-            💳 Fee Payment
-          </a>
-          <a
-            href="https://jharkhanduniversities.nic.in/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="tb-qlink tb-admission"
-            title="Apply for Admission"
-          >
-            🎓 Apply Now
+          <a href="mailto:principal@gncollege.org" className="tb-link tb-email">
+            <span style={{ color: COLORS.gold, fontSize: 13 }}>✉️</span>
+            <span>principal@gncollege.org</span>
           </a>
         </div>
 
-        {/* Divider */}
-        <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.15)', margin: '0 4px' }} />
+        {/* ── Right: Quick Links + Divider + Social ── */}
+        <div className="tb-right">
 
-        {/* Social Icons */}
-        {SOCIAL_LINKS.map(s => {
-          let iconText = s.label;
-          if (s.id === 'twitter') iconText = '𝕏';
-          if (s.id === 'youtube') iconText = '▶';
-          return (
-            <a key={s.id} href={s.href} aria-label={s.id} target="_blank" rel="noopener noreferrer"
-              className={`social-icon social-icon-${s.id}`}>
-              {iconText}
+          {/* Quick links */}
+          <div className="tb-qlinks">
+            <a href="https://bbmkuniv.in/login"
+               target="_blank" rel="noopener noreferrer"
+               className="tb-qbtn tb-res">
+              📋 Results
             </a>
-          );
-        })}
+            <a href="https://cimsstudentnewui.mastersofterp.in/"
+               target="_blank" rel="noopener noreferrer"
+               className="tb-qbtn tb-fee">
+              💳 Fee
+            </a>
+            <a href="https://jharkhanduniversities.nic.in/"
+               target="_blank" rel="noopener noreferrer"
+               className="tb-qbtn tb-adm">
+              🎓 Apply
+            </a>
+          </div>
 
-        {/* WhatsApp */}
-        <a href={whatsappLink.href} aria-label="whatsapp" target="_blank" rel="noopener noreferrer"
-          className="social-icon whatsapp-icon">
-          W
-        </a>
+          <div className="tb-div" />
 
+          {/* Social icons */}
+          {SOCIAL_LINKS.map(s => {
+            let icon = s.label;
+            let cls  = '';
+            if (s.id === 'twitter')  { icon = '𝕏'; }
+            if (s.id === 'youtube')  { icon = '▶'; cls = 'yt'; }
+            if (s.id === 'facebook') { cls = 'fb'; }
+            if (s.id === 'linkedin') { cls = 'li'; }
+            return (
+              <a key={s.id} href={s.href}
+                 target="_blank" rel="noopener noreferrer"
+                 className={`tb-soc ${cls}`}
+                 aria-label={s.id}>
+                {icon}
+              </a>
+            );
+          })}
+          <a href={whatsappLink.href}
+             target="_blank" rel="noopener noreferrer"
+             className="tb-soc wa"
+             aria-label="whatsapp">
+            W
+          </a>
+        </div>
       </div>
     </div>
   );

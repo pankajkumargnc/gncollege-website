@@ -20,8 +20,8 @@ export default function WhatsAppButton() {
         }
         .wa-btn {
           position: fixed;
-          bottom: 100px;
-          right: 25px;
+          bottom: 'clamp(80px, 12vw, 110px)',
+          right:  'clamp(16px, 3vw, 25px)',
           z-index: 9999;
           display: flex;
           align-items: center;

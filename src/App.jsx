@@ -306,11 +306,23 @@ export default function App() {
           <Footer />
           <WhatsAppButton /> 
           <button onClick={handleOpenAdminTab} title="Open Admin Panel"
-            style={{ position:'fixed', bottom:25, right:25, background:COLORS.navy,
-              color:'#fff', border:`3px solid ${COLORS.gold}`, borderRadius:'50%',
-              width:60, height:60, cursor:'pointer', zIndex:500, fontSize:24 }}>
-            ⚙️
-          </button>
+  style={{
+    position: 'fixed',
+    bottom: 'clamp(16px, 3vw, 25px)',
+    right:   'clamp(16px, 3vw, 25px)',
+    background: COLORS.navy,
+    color: '#fff',
+    border: `3px solid ${COLORS.gold}`,
+    borderRadius: '50%',
+    width:  'clamp(48px, 6vw, 60px)',
+    height: 'clamp(48px, 6vw, 60px)',
+    cursor: 'pointer',
+    zIndex: 500,
+    fontSize: 'clamp(18px, 2.5vw, 24px)',
+    flexShrink: 0,
+  }}>
+  ⚙️
+</button>
         </>
       )}
     </>
