@@ -1,0 +1,67 @@
+{
+  "name": "Guru Nanak College Dhanbad",
+  "short_name": "GNC Dhanbad",
+  "description": "Official website of Guru Nanak College, Dhanbad — Affiliated to B.B.M.K. University",
+  "start_url": "./",
+"scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f2347",
+  "theme_color": "#0f2347",
+  "lang": "en-IN",
+  "categories": ["education"],
+  "icons": [
+    {
+      "src": "images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Notice Board",
+      "short_name": "Notices",
+      "description": "Latest notices and announcements",
+      "url": "./",
+      "icons": [{ "src": "images/logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Photo Gallery",
+      "short_name": "Gallery",
+      "description": "College photo gallery",
+      "url": "./#/gallery",
+      "icons": [{ "src": "images/logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "About College",
+      "short_name": "About",
+      "description": "About Guru Nanak College",
+      "url": "./#/about-us/college-profile",
+      "icons": [{ "src": "images/logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Contact Us",
+      "short_name": "Contact",
+      "description": "Contact Guru Nanak College",
+      "url": "./#/contact",
+      "icons": [{ "src": "images/logo.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "images/college_photo.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Guru Nanak College Homepage"
+    }
+  ]
+
+}

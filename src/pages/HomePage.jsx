@@ -4,6 +4,7 @@
 // ✅ Glow hover on all cards
 // ✅ Trailing arrow on links
 // ✅ All Firebase + scroll functionality preserved
+// ✅ NEW: Quick Action Bar — Result, Fee Payment, Admission, Notice Board
 
 import { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { Link }         from 'react-router-dom';
@@ -61,6 +62,54 @@ const ABOUT_FEATS = [
   { icon:'👨‍🏫', title:'Expert Faculty',  desc:'Highly Experienced'    },
   { icon:'🔬', title:'Modern Labs',      desc:'Tech-enabled Learning' },
   { icon:'🏅', title:'NSS & NCC',        desc:'Character Building'    },
+];
+
+// ── Quick Action Bar Data ─────────────────────────────────────────────────────
+const QUICK_ACTIONS = [
+  {
+    icon: '📋',
+    title: 'Exam Results',
+    sub: 'BBMKU result portal',
+    href: 'https://bbmkuniv.in/login',
+    color: '#f4a023',
+    bg: '#fffbeb',
+    hoverBg: '#fef3c7',
+    iconBg: 'linear-gradient(135deg,#fef3c7,#fde68a)',
+    external: true,
+  },
+  {
+    icon: '💳',
+    title: 'Fee Payment',
+    sub: 'Online fee portal',
+    href: 'https://cimsstudentnewui.mastersofterp.in/',
+    color: '#10b981',
+    bg: '#fff',
+    hoverBg: '#f0fdf4',
+    iconBg: 'linear-gradient(135deg,#dcfce7,#bbf7d0)',
+    external: true,
+  },
+  {
+    icon: '🎓',
+    title: 'Apply for Admission',
+    sub: 'Chancellor portal',
+    href: 'https://jharkhanduniversities.nic.in/',
+    color: '#3b82f6',
+    bg: '#fff',
+    hoverBg: '#eff6ff',
+    iconBg: 'linear-gradient(135deg,#dbeafe,#bfdbfe)',
+    external: true,
+  },
+  {
+    icon: '📢',
+    title: 'Notice Board',
+    sub: 'Latest updates',
+    href: '#notifications',
+    color: '#8b5cf6',
+    bg: '#fff',
+    hoverBg: '#fdf4ff',
+    iconBg: 'linear-gradient(135deg,#f3e8ff,#e9d5ff)',
+    external: false,
+  },
 ];
 
 // ── Scroll animation hook ─────────────────────────────────────────────────────
@@ -130,6 +179,31 @@ const CSS = `
 
   .hp-watermark{position:fixed;inset:0;background-image:url(${import.meta.env.BASE_URL}images/logo.png);background-repeat:repeat;background-size:320px;opacity:.025;z-index:-1;background-color:#f4f7f9;pointer-events:none;}
 
+  /* ── Quick Action Bar ── */
+  .hp-qab{background:#fff;border-bottom:1.5px solid #f1f5f9;box-shadow:0 2px 12px rgba(15,35,71,.06);}
+  .hp-qab-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);}
+  .hp-qab-item{display:flex;align-items:center;gap:14px;padding:16px 22px;text-decoration:none;transition:background .18s;border-right:1px solid #f1f5f9;position:relative;overflow:hidden;}
+  .hp-qab-item:last-child{border-right:none;}
+  .hp-qab-item::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2.5px;transition:width .25s ease;}
+  .hp-qab-item:hover::after{width:100%;}
+  .hp-qab-icon{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:transform .2s;}
+  .hp-qab-item:hover .hp-qab-icon{transform:scale(1.1) rotate(-5deg);}
+  .hp-qab-title{font-size:13.5px;font-weight:800;color:#0f2347;line-height:1.2;}
+  .hp-qab-sub{font-size:11px;color:#94a3b8;margin-top:2px;}
+  .hp-qab-arr{margin-left:auto;font-size:18px;font-weight:700;transition:transform .2s;flex-shrink:0;}
+  .hp-qab-item:hover .hp-qab-arr{transform:translateX(4px);}
+  @media(max-width:768px){
+    .hp-qab-inner{grid-template-columns:repeat(2,1fr);}
+    .hp-qab-item{padding:13px 16px;border-right:none;border-bottom:1px solid #f1f5f9;}
+    .hp-qab-item:nth-child(odd){border-right:1px solid #f1f5f9;}
+    .hp-qab-item:nth-last-child(-n+2){border-bottom:none;}
+  }
+  @media(max-width:420px){
+    .hp-qab-inner{grid-template-columns:1fr;}
+    .hp-qab-item{border-right:none !important;}
+    .hp-qab-item:last-child{border-bottom:none;}
+  }
+
   /* ── About ── */
   .hp-about{background:#fff;padding:clamp(60px,8vw,100px) 20px;overflow:hidden;}
   .hp-about-inner{max-width:1250px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:56px;align-items:center;}
@@ -138,7 +212,6 @@ const CSS = `
   .hp-imgstack:hover .hp-img-main{transform:scale(1.02);}
   .hp-img-accent{position:absolute;bottom:-28px;right:0;background:${N};color:#fff;padding:22px 26px;border-radius:14px;z-index:3;box-shadow:0 10px 30px rgba(0,0,0,.2);animation:float 3s ease-in-out infinite;}
   @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
-  /* About text — center aligned */
   .hp-about-text{text-align:center;}
   .hp-at{font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,4vw,38px);font-weight:800;color:${N};line-height:1.2;margin-bottom:8px;text-align:center;}
   .hp-at span{color:${G};}
@@ -154,7 +227,6 @@ const CSS = `
   .hp-disc:hover .arr{transform:translateX(5px);}
   .hp-soc{width:38px;height:38px;border-radius:50%;background:#f0f2f5;display:flex;align-items:center;justify-content:center;color:${N};font-size:17px;text-decoration:none;transition:background .3s,transform .3s;}
   .hp-soc:hover{background:${N};color:${G};transform:rotate(360deg);}
-  /* Center the button + social row */
   .hp-cta-row{display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:center;}
 
   /* ── Section divider ── */
@@ -270,6 +342,50 @@ const SA = ({ children, variant='up', delay='', slow=false, className='', style=
   );
 };
 
+// ── Quick Action Bar ──────────────────────────────────────────────────────────
+const QuickActionBar = () => (
+  <div className="hp-qab">
+    <div className="hp-qab-inner">
+      {QUICK_ACTIONS.map((item) => {
+        const commonProps = {
+          className: 'hp-qab-item',
+          style: { background: item.bg },
+          onMouseEnter: e => {
+            e.currentTarget.style.background = item.hoverBg;
+            e.currentTarget.querySelector('.hp-qab-arr').style.color = item.color;
+          },
+          onMouseLeave: e => {
+            e.currentTarget.style.background = item.bg;
+            e.currentTarget.querySelector('.hp-qab-arr').style.color = '#cbd5e1';
+          },
+        };
+
+        const inner = (
+          <>
+            <style>{`.hp-qab-item[data-id="${item.title}"]::after{background:${item.color};}`}</style>
+            <div className="hp-qab-icon" style={{ background: item.iconBg }}>{item.icon}</div>
+            <div>
+              <div className="hp-qab-title">{item.title}</div>
+              <div className="hp-qab-sub">{item.sub}</div>
+            </div>
+            <div className="hp-qab-arr" style={{ color: '#cbd5e1' }}>›</div>
+          </>
+        );
+
+        return item.external ? (
+          <a key={item.title} href={item.href} target="_blank" rel="noopener noreferrer" {...commonProps}>
+            {inner}
+          </a>
+        ) : (
+          <a key={item.title} href={item.href} {...commonProps}>
+            {inner}
+          </a>
+        );
+      })}
+    </div>
+  </div>
+);
+
 // ── EventCard ─────────────────────────────────────────────────────────────────
 const EventCard = memo(({ ev, onPdf }) => (
   <div className="gc r16" style={{ flexShrink:0 }}>
@@ -321,7 +437,6 @@ function YouTubeSection() {
   const [videos, setVids] = useState([]);
   const [ready,  setR]    = useState(false);
 
-  // Firebase se config load
   useEffect(() => {
     return onSnapshot(doc(db, 'settings', 'youtube'), s => {
       setYt(s.exists() ? s.data() : null);
@@ -329,10 +444,8 @@ function YouTubeSection() {
     }, () => setR(true));
   }, []);
 
-  // API se video IDs fetch karo (jab apiKey + channelId available ho)
   useEffect(() => {
     if (!ytData?.apiKey || !ytData?.channelId) {
-      // Fallback: manual videoIds field
       if (ytData?.videoIds) {
         const ids = ytData.videoIds.split(/[\n,]/).map(s => s.trim()).filter(Boolean).slice(0, 3);
         setVids(ids);
@@ -342,13 +455,10 @@ function YouTubeSection() {
     const { apiKey, channelId } = ytData;
     (async () => {
       try {
-        // Channel ka uploads playlist ID lo
         const chRes  = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${apiKey}`);
         const chData = await chRes.json();
         if (chData.error || !chData.items?.length) return;
         const uploadId = chData.items[0].contentDetails.relatedPlaylists.uploads;
-
-        // Pehle 3 videos lo
         const plRes  = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadId}&maxResults=3&key=${apiKey}`);
         const plData = await plRes.json();
         if (plData.error) return;
@@ -372,17 +482,13 @@ function YouTubeSection() {
         <SA variant="fade" delay="d1">
           <p className="hp-yt-sub">Official {channel} channel se latest videos</p>
         </SA>
-
         <div className="hp-yt-grid">
           {hasVideos
             ? videos.map((vid, i) => (
                 <SA key={vid} variant="up" delay={`d${i+1}`}>
                   <div className="gc r16">
-                    <iframe
-                      className="hp-yt-frame"
-                      src={`https://www.youtube.com/embed/${vid}`}
-                      allowFullScreen title={vid} loading="lazy"
-                    />
+                    <iframe className="hp-yt-frame" src={`https://www.youtube.com/embed/${vid}`}
+                      allowFullScreen title={vid} loading="lazy" />
                   </div>
                 </SA>
               ))
@@ -391,17 +497,13 @@ function YouTubeSection() {
                   <div className="gc r16">
                     <div className="hp-yt-ph">
                       <div className="hp-yt-ph-icon">▶️</div>
-                      <div className="hp-yt-ph-txt">
-                        Admin Panel → YouTube tab mein<br/>API Key aur Channel ID add karein
-                      </div>
+                      <div className="hp-yt-ph-txt">Admin Panel → YouTube tab mein<br/>API Key aur Channel ID add karein</div>
                     </div>
                   </div>
                 </SA>
               ))
           }
         </div>
-
-        {/* View All Videos — videos hone par hi dikhega */}
         {hasVideos && (
           <div style={{ display:'flex', justifyContent:'center', marginTop:32 }}>
             <Link to="/video-gallery" style={{
@@ -423,6 +525,7 @@ function YouTubeSection() {
     </section>
   );
 }
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, gallery }) => {
   const [tab, setTab] = useState('All Moments');
@@ -447,9 +550,11 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
       {/* ── HERO ── */}
       <HeroSlider slides={sliderSlides} />
       <PremiumTicker items={TICKER_ITEMS} />
-      <NotificationSection notices={notices} announcements={announcements} pdfReports={pdfReports} upcomingEvents={upcomEv} />
 
-      {/* ✅ hp-quick SECTION REMOVED */}
+      {/* ── QUICK ACTION BAR ── Result | Fee | Admission | Notices */}
+      <QuickActionBar />
+
+      <NotificationSection notices={notices} announcements={announcements} pdfReports={pdfReports} upcomingEvents={upcomEv} />
 
       {/* ── ABOUT ── */}
       <section id="about" className="hp-about">
@@ -463,8 +568,6 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
               </div>
             </div>
           </SA>
-
-          {/* Text — center aligned */}
           <SA variant="right" slow className="hp-about-text">
             <h2 className="hp-at">About the <span>College</span></h2>
             <span className="hp-asub">Established 1970</span>
@@ -507,7 +610,6 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
       <section id="events" className="hp-events">
         <div className="hp-ev-inner">
           <SA variant="up">
-            {/* SectionTitle already center — center prop true by default */}
             <SectionTitle title="Recent Events & Happenings" subtitle="Seminars, workshops aur campus activities ki ek jhalak" />
           </SA>
           {recentEv.length > 0 ? (
@@ -608,7 +710,6 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
               )
             }
           </div>
-          {/* ── View All Photos button ── */}
           {allGal.length > 0 && (
             <SA variant="up" delay="d2" style={{ display:'flex', justifyContent:'center', marginTop:32 }}>
               <Link to="/gallery" className="arr-link" style={{
