@@ -26,7 +26,7 @@ export default defineConfig({
     },
 
     // ── Asset optimization ──
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 1200,
     assetsInlineLimit: 4096, // 4KB se chhoti files inline ho jaayengi
 
     // ── Minification ──
