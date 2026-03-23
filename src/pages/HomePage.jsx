@@ -561,7 +561,7 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
         <div className="hp-about-inner">
           <SA variant="left" slow>
             <div className="hp-imgstack">
-              <img src={`${import.meta.env.BASE_URL}images/college_photo.jpg`} alt="Guru Nanak College" className="hp-img-main" loading="lazy" decoding="async" />
+              <img src={`${import.meta.env.BASE_URL}images/college_photo.webp`} alt="Guru Nanak College" className="hp-img-main" loading="lazy" decoding="async" />
               <div className="hp-img-accent">
                 <div style={{ fontSize:30, fontWeight:900, color:G, lineHeight:1 }}>56+</div>
                 <div style={{ fontSize:11, opacity:.8, letterSpacing:1 }}>YEARS OF EXCELLENCE</div>
