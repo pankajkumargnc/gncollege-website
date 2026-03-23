@@ -30,12 +30,15 @@ const resolveImage = (src) => {
 // ── Preload hint for LCP image ────────────────────────────────────
 const preloadLCP = (src) => {
   const { webp, jpg } = resolveImage(src);
-  // WebP preload
+  // ✅ ADDED: Duplicate guard — agar already preload tag hai toh skip karo
+  const existing = document.querySelectorAll('link[rel="preload"][as="image"]');
+  const urls = Array.from(existing).map(l => l.href);
+  if (urls.some(u => u.includes('slider_baisakhi'))) return; // already in HTML head
+
   const linkWebp = document.createElement('link');
   linkWebp.rel = 'preload'; linkWebp.as = 'image';
   linkWebp.href = webp;
   linkWebp.type = 'image/webp';
-  // JPG fallback preload
   const linkJpg = document.createElement('link');
   linkJpg.rel = 'preload'; linkJpg.as = 'image';
   linkJpg.href = jpg;
@@ -247,6 +250,7 @@ const HeroSlider = ({ slides = [] }) => {
                     decoding={i === 0 ? 'sync' : 'async'}
                     width="1920"
                     height="580"
+                    sizes="100vw"
                     onError={e => { e.target.style.opacity = '.15'; }}
                   />
                 </picture>
