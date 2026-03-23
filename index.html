@@ -80,9 +80,22 @@
     <link rel="dns-prefetch" href="https://firebase.googleapis.com" />
     <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
 
-    <!-- Preconnect Google Fonts (existing) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Fonts preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+<!-- ✅ Sirf 2 fonts — Inter (body) + Space Grotesk (headings) -->
+<!-- display=swap → page blank nahi rahega font load hone tak -->
+<link rel="preload" as="style"
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@700;800;900&display=swap" />
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@700;800;900&display=swap"
+  media="print" onload="this.media='all'" />
+<!-- Fallback for no-JS -->
+<noscript>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@700;800;900&display=swap" />
+</noscript>
 
     <!-- ✅ NEW: Hero + Logo preload — FCP/LCP dramatically improve होगा -->
     <link rel="preload" as="image" href="/gncollege-website/images/logo.png"
@@ -133,14 +146,15 @@
       })();
     </script>
 
-    <script type="module" crossorigin src="/gncollege-website/assets/index-DszFJ5Hr.js"></script>
+    <script type="module" crossorigin src="/gncollege-website/assets/index-BZk7WKK4.js"></script>
     <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-react-CzOzt2PS.js">
-    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-admin-BD1p-ZIX.js">
-    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-firebase-CzUb9nGw.js">
-    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/chunk-admin-DS0Dk6HO.js">
-    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/page-about-CVuyh2O4.js">
+    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-admin-D6IP6iy7.js">
+    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-firebase-CQO6Ah9N.js">
+    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/chunk-admin-D-0VY8_W.js">
+    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/page-gallery-DNLXrQFz.js">
+    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/page-about-D6frE1KF.js">
     <link rel="stylesheet" crossorigin href="/gncollege-website/assets/vendor-admin-_rRfbp4A.css">
-    <link rel="stylesheet" crossorigin href="/gncollege-website/assets/page-about-DleScUjN.css">
+    <link rel="stylesheet" crossorigin href="/gncollege-website/assets/page-about-DlOOvLVT.css">
   </head>
   <body>
     <!-- ✅ NEW: No-JS fallback — screen readers + crawlers के लिए -->
