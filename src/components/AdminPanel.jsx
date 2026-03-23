@@ -120,7 +120,7 @@ const T = {
 
 // ── CSS ───────────────────────────────────────────────────────────────────────
 const GCSS = `
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
 
 .adm * { box-sizing: border-box; }
 .adm { font-family: 'Plus Jakarta Sans', sans-serif; }

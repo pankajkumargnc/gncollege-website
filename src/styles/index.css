@@ -79,7 +79,8 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
   background-color: var(--bg);
-  font-family: 'Inter', 'DM Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont,
+               'Segoe UI', Roboto, Arial, sans-serif;
   font-size: var(--text-base);
   color: #1e293b;
   -webkit-font-smoothing: antialiased;
@@ -166,6 +167,7 @@ h1, h2, h3,
 [class*="sec-h"],
 [class*="-heading"] {
   text-align: center;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
 }
 
 /* Left align overrides — specific cases */

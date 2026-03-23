@@ -31,11 +31,11 @@ const getEmbedUrl = (url = '') => {
   return url;
 };
 const getEventImg = t => ({
-  SEMINAR:  '/images/slider_seminar.jpg',
-  WORKSHOP: '/images/slider_ncc.jpg',
-  SPORTS:   '/images/slider_cricket.jpg',
-  CULTURAL: '/images/slider_baisakhi.jpg',
-}[t] || '/images/college_photo.jpg');
+  SEMINAR:  '/images/slider_seminar.webp',
+  WORKSHOP: '/images/slider_ncc.webp',
+  SPORTS:   '/images/slider_cricket.webp',
+  CULTURAL: '/images/slider_baisakhi.webp',
+}[t] || '/images/college_photo.webp');
 
 const TICKER_ITEMS = [
   { text:'B.A./B.Com. Semester 1 Admissions are now open for 2024-25 session.', link:'/admission/info' },
@@ -135,8 +135,6 @@ const ANIM_CSS = `
   .hp-root {
     font-family: "Amazon Ember","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   }
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap&subset=latin');
-
   .sa{opacity:0;will-change:opacity,transform;}
   .sa.visible{will-change:auto;}
   .sa{transition:opacity .65s cubic-bezier(.22,1,.36,1),transform .65s cubic-bezier(.22,1,.36,1);}
@@ -180,7 +178,7 @@ const CSS = `
   p { text-align: justify; }
   h1 + p, h2 + p, h3 + p, h4 + p, h5 + p, h6 + p { text-align: center !important; }
 
-  .hp-watermark{position:fixed;inset:0;background-image:url(${import.meta.env.BASE_URL}images/logo.png);background-repeat:repeat;background-size:320px;opacity:.025;z-index:-1;background-color:#f4f7f9;pointer-events:none;}
+  .hp-watermark{position:fixed;inset:0;background-image:url(${import.meta.env.BASE_URL}images/logo.webp);background-repeat:repeat;background-size:320px;opacity:.025;z-index:-1;background-color:#f4f7f9;pointer-events:none;}
 
   /* ── Quick Action Bar ── */
   .hp-qab{background:#fff;border-bottom:1.5px solid #f1f5f9;box-shadow:0 2px 12px rgba(15,35,71,.06);}
@@ -434,79 +432,158 @@ const GalItem = memo(({ img, index }) => {
   );
 });
 
-// ── YouTubeSection ────────────────────────────────────────────────────────────
+// ── YouTubeSection — Deferred with IntersectionObserver ──────────
 function YouTubeSection() {
-  const [ytData, setYt]   = useState(null);
-  const [videos, setVids] = useState([]);
-  const [ready,  setR]    = useState(false);
+  const [ytData, setYt]     = useState(null);
+  const [videos, setVids]   = useState([]);
+  const [ready,  setR]      = useState(false);
+  const [inView, setInView] = useState(false); // ← NEW
+  const sectionRef          = useRef(null);    // ← NEW
 
+  // ── Step 1: Watch karo kab section screen mein aaye ──
   useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);      // ek baar set, phir observe band
+          observer.unobserve(el);
+        }
+      },
+      { rootMargin: '200px' }  // 200px pehle se load shuru
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // ── Step 2: Sirf tab Firebase listen karo jab inView = true ──
+  useEffect(() => {
+    if (!inView) return; // ← YE LINE DEFER KARTA HAI
+
     return onSnapshot(doc(db, 'settings', 'youtube'), s => {
       setYt(s.exists() ? s.data() : null);
       setR(true);
     }, () => setR(true));
-  }, []);
+  }, [inView]); // ← inView dependency
 
+  // ── Step 3: YouTube API call bhi defer ──
   useEffect(() => {
+    if (!inView || !ytData) return; // ← inView check
+
     if (!ytData?.apiKey || !ytData?.channelId) {
       if (ytData?.videoIds) {
-        const ids = ytData.videoIds.split(/[\n,]/).map(s => s.trim()).filter(Boolean).slice(0, 3);
+        const ids = ytData.videoIds
+          .split(/[\n,]/)
+          .map(s => s.trim())
+          .filter(Boolean)
+          .slice(0, 3);
         setVids(ids);
       }
       return;
     }
+
     const { apiKey, channelId } = ytData;
     (async () => {
       try {
-        const chRes  = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${apiKey}`);
+        const chRes  = await fetch(
+          `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${apiKey}`
+        );
         const chData = await chRes.json();
         if (chData.error || !chData.items?.length) return;
         const uploadId = chData.items[0].contentDetails.relatedPlaylists.uploads;
-        const plRes  = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadId}&maxResults=3&key=${apiKey}`);
+
+        const plRes  = await fetch(
+          `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadId}&maxResults=3&key=${apiKey}`
+        );
         const plData = await plRes.json();
         if (plData.error) return;
-        const ids = plData.items.map(i => i.snippet.resourceId.videoId);
-        setVids(ids);
+        setVids(plData.items.map(i => i.snippet.resourceId.videoId));
       } catch (_) {}
     })();
-  }, [ytData]);
-
-  if (!ready) return null;
+  }, [inView, ytData]); // ← inView dependency
 
   const channel   = ytData?.channelName || 'GNC College Official';
   const hasVideos = videos.length > 0;
 
+  // ── Render ──
   return (
-    <section className="hp-yt">
+    <section className="hp-yt" ref={sectionRef}>  {/* ← ref add kiya */}
       <div className="hp-yt-inner">
+
         <SA variant="up">
           <h2 className="hp-yt-h">🎬 Campus <span>Video Highlights</span></h2>
         </SA>
         <SA variant="fade" delay="d1">
           <p className="hp-yt-sub">Official {channel} channel se latest videos</p>
         </SA>
+
         <div className="hp-yt-grid">
-          {hasVideos
-            ? videos.map((vid, i) => (
-                <SA key={vid} variant="up" delay={`d${i+1}`}>
-                  <div className="gc r16">
-                    <iframe className="hp-yt-frame" src={`https://www.youtube.com/embed/${vid}`}
-                      allowFullScreen title={vid} loading="lazy" />
+          {/* Jab tak inView nahi — placeholder dikhao */}
+          {!inView ? (
+            [1,2,3].map(i => (
+              <SA key={i} variant="up" delay={`d${i}`}>
+                <div className="gc r16">
+                  <div className="hp-yt-ph" style={{
+                    background: '#f1f5f9',
+                    animation: 'yt-shimmer 1.5s infinite',
+                  }}>
+                    <style>{`
+                      @keyframes yt-shimmer {
+                        0%   { opacity: 1; }
+                        50%  { opacity: 0.5; }
+                        100% { opacity: 1; }
+                      }
+                    `}</style>
+                    <div className="hp-yt-ph-icon" style={{ opacity: 0.3 }}>▶️</div>
                   </div>
-                </SA>
-              ))
-            : [1,2,3].map(i => (
-                <SA key={i} variant="up" delay={`d${i}`}>
-                  <div className="gc r16">
-                    <div className="hp-yt-ph">
-                      <div className="hp-yt-ph-icon">▶️</div>
-                      <div className="hp-yt-ph-txt">Admin Panel → YouTube tab mein<br/>API Key aur Channel ID add karein</div>
+                </div>
+              </SA>
+            ))
+          ) : !ready ? (
+            /* Loading state */
+            [1,2,3].map(i => (
+              <SA key={i} variant="up" delay={`d${i}`}>
+                <div className="gc r16">
+                  <div className="hp-yt-ph">
+                    <div className="hp-yt-ph-icon">⏳</div>
+                    <div className="hp-yt-ph-txt">Loading...</div>
+                  </div>
+                </div>
+              </SA>
+            ))
+          ) : hasVideos ? (
+            videos.map((vid, i) => (
+              <SA key={vid} variant="up" delay={`d${i+1}`}>
+                <div className="gc r16">
+                  <iframe
+                    className="hp-yt-frame"
+                    src={`https://www.youtube.com/embed/${vid}`}
+                    allowFullScreen title={vid}
+                    loading="lazy"
+                  />
+                </div>
+              </SA>
+            ))
+          ) : (
+            [1,2,3].map(i => (
+              <SA key={i} variant="up" delay={`d${i}`}>
+                <div className="gc r16">
+                  <div className="hp-yt-ph">
+                    <div className="hp-yt-ph-icon">▶️</div>
+                    <div className="hp-yt-ph-txt">
+                      Admin Panel → YouTube tab mein<br/>
+                      API Key aur Channel ID add karein
                     </div>
                   </div>
-                </SA>
-              ))
-          }
+                </div>
+              </SA>
+            ))
+          )}
         </div>
+
+        {/* View All Videos */}
         {hasVideos && (
           <div style={{ display:'flex', justifyContent:'center', marginTop:32 }}>
             <Link to="/video-gallery" style={{
@@ -517,8 +594,14 @@ function YouTubeSection() {
               boxShadow:'0 4px 18px rgba(255,0,0,.35)',
               transition:'transform .2s, box-shadow .2s',
             }}
-              onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 28px rgba(255,0,0,.45)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 4px 18px rgba(255,0,0,.35)'; }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 8px 28px rgba(255,0,0,.45)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = '';
+                e.currentTarget.style.boxShadow = '0 4px 18px rgba(255,0,0,.35)';
+              }}
             >
               🎬 View All Videos ›
             </Link>

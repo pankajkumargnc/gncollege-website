@@ -125,7 +125,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
           }}>
             <img
               className="spinning-logo"
-              src={`${import.meta.env.BASE_URL}images/logo.png`}
+              src={`${import.meta.env.BASE_URL}images/logo.webp`}
               alt="Guru Nanak College Logo"
               style={{ width: '100%', height: '100%', objectFit: 'contain' }}
             />

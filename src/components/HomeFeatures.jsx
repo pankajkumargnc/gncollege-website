@@ -36,7 +36,6 @@ const DEPTS = [
 ];
 
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@300;400;600;700;800&display=swap');
   .hf-wrap { font-family:"Amazon Ember","DM Sans",-apple-system,BlinkMacSystemFont,sans-serif; }
 
   /* ── Glow card ── */

@@ -80,9 +80,22 @@
     <link rel="dns-prefetch" href="https://firebase.googleapis.com" />
     <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
 
-    <!-- Preconnect Google Fonts (existing) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Fonts preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+<!-- ✅ Sirf 2 fonts — Inter (body) + Space Grotesk (headings) -->
+<!-- display=swap → page blank nahi rahega font load hone tak -->
+<link rel="preload" as="style"
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@700;800;900&display=swap" />
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@700;800;900&display=swap"
+  media="print" onload="this.media='all'" />
+<!-- Fallback for no-JS -->
+<noscript>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@700;800;900&display=swap" />
+</noscript>
 
     <!-- ✅ NEW: Hero + Logo preload — FCP/LCP dramatically improve होगा -->
     <link rel="preload" as="image" href="/gncollege-website/images/logo.png"
