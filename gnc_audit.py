@@ -51,7 +51,7 @@ def _npm(*args):
 # ══════════════════════════════════════════════════════════════════════════════
 # ✏️  CONFIGURE: Apna project path yahan set karo
 # ══════════════════════════════════════════════════════════════════════════════
-PROJECT_ROOT = r"C:\Users\YourName\gncollege-website"   # ← Windows
+PROJECT_ROOT = r"D:\New folder\Last\gnc-college\gnc-college"   # ← Windows
 # PROJECT_ROOT = "/home/yourname/gncollege-website"     # ← Linux / Mac
 # ══════════════════════════════════════════════════════════════════════════════
 

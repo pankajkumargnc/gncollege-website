@@ -230,7 +230,7 @@ export function Organogram() {
             <div className="heading-underline"/>
             <div style={{ textAlign:'center', marginTop:20 }}>
               <img
-                src="images/organogram.jpg"
+                src="/images/organogram.jpg"
                 alt="College Organogram"
                 style={{ maxWidth:'100%', borderRadius:10, boxShadow:'0 4px 16px rgba(0,0,0,0.1)' }}
               />

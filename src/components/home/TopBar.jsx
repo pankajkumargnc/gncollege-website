@@ -130,12 +130,12 @@ const TopBar = () => {
             <a href="https://cimsstudentnewui.mastersofterp.in/"
                target="_blank" rel="noopener noreferrer"
                className="tb-qbtn tb-fee">
-              💳 Fee
+              💳 Fee Paymnet
             </a>
             <a href="https://jharkhanduniversities.nic.in/"
                target="_blank" rel="noopener noreferrer"
                className="tb-qbtn tb-adm">
-              🎓 Apply
+              🎓 Apply Online
             </a>
           </div>
 

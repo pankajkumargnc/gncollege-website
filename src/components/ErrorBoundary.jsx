@@ -52,7 +52,6 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(error, info) {
     // Development mein console mein dikhega
     // Production mein vite.config.js ki wajah se remove ho jaayega
-    console.error(`[ErrorBoundary] ${this.props.page || 'Component'} crashed:`, error, info);
 
     // Future mein yahan Firebase error logging add kar sakte ho:
     // logError({ page: this.props.page, error: error.message, stack: info.componentStack });

@@ -13,7 +13,6 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
-    "aos": "^2.3.4",
     "dompurify": "^3.3.3",
     "firebase": "^12.10.0",
     "html-react-parser": "^5.2.17",

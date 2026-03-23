@@ -357,10 +357,10 @@ export function Organogram() {
             <h2 className="section-heading">Official Organogram (Image)</h2>
             <div className="heading-underline"/>
             <div style={{ textAlign:'center', marginTop:20 }}>
-              <img src="images/organogram.jpg" alt="College Organogram" style={{ maxWidth:'100%', borderRadius:10, boxShadow:'0 4px 16px rgba(0,0,0,0.1)' }}/>
+              <img src={`${import.meta.env.BASE_URL}images/organogram.jpg`} alt="College Organogram" style={{ maxWidth:'100%', borderRadius:10, boxShadow:'0 4px 16px rgba(0,0,0,0.1)' }}/>
             </div>
             <div style={{ textAlign:'center', marginTop:20 }}>
-              <a href="images/organogram.jpg" download
+              <a href={`${import.meta.env.BASE_URL}images/organogram.jpg`} download
                 style={{ display:'inline-flex', alignItems:'center', gap:8, background:'#0f2347', color:'#fff', padding:'10px 22px', borderRadius:10, fontWeight:700, fontSize:14, textDecoration:'none' }}>
                 📥 Download Organogram PDF
               </a>

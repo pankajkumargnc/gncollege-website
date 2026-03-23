@@ -35,7 +35,6 @@ class AdminErrorBoundary extends React.Component {
     return { hasError: true, error };
   }
   componentDidCatch(error, info) {
-    console.error('AdminPanel Error:', error, info);
   }
   render() {
     if (this.state.hasError) {

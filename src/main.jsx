@@ -13,7 +13,6 @@ class RootErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, info) {
-    console.error('[RootErrorBoundary] App crash:', error, info);
   }
 
   render() {
