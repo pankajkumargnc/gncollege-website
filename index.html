@@ -89,6 +89,14 @@
           fetchpriority="high" />
     <link rel="preload" as="image" href="/gncollege-website/images/college_photo.jpg"
           fetchpriority="high" />
+    <!-- ✅ ADDED: First slider image preload — LCP fix (JS se pehle load hoga) -->
+    <link rel="preload" as="image"
+          href="/gncollege-website/images/slider_baisakhi.webp"
+          type="image/webp"
+          fetchpriority="high" />
+    <link rel="preload" as="image"
+          href="/gncollege-website/images/slider_baisakhi.jpg"
+          fetchpriority="high" />
     <!-- 
       ⚠️ अगर hero slider images Firebase Storage से आती हैं तो
          ऊपर वाली college_photo.jpg line comment कर दें।
@@ -98,6 +106,8 @@
     <!-- Prefetch non-critical assets -->
     <link rel="prefetch" href="/gncollege-website/images/logo.png" />
     <link rel="prefetch" href="/gncollege-website/images/college_photo.jpg" />
+    <link rel="prefetch" href="/gncollege-website/images/slider_baisakhi.webp" />
+    <link rel="prefetch" href="/gncollege-website/images/slider_baisakhi.jpg" />
 
     <!-- Canvas fallback favicon (shown only if logo.png fails) -->
     <script>
@@ -123,7 +133,7 @@
       })();
     </script>
 
-    <script type="module" crossorigin src="/gncollege-website/assets/index-C6OhizuV.js"></script>
+    <script type="module" crossorigin src="/gncollege-website/assets/index-DszFJ5Hr.js"></script>
     <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-react-CzOzt2PS.js">
     <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-admin-BD1p-ZIX.js">
     <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-firebase-CzUb9nGw.js">
