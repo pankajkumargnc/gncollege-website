@@ -28,6 +28,9 @@ const CollegeProfile = () => {
         .social-icon-btn:hover { 
           background: var(--accent-gold); color: var(--primary-navy); transform: translateY(-5px) scale(1.1); box-shadow: 0 10px 25px rgba(244,160,35,0.4); border-color: var(--accent-gold);
         }
+        .rich-text-content {
+          text-align: justify;
+        }
       `}</style>
       
       {/* 1. HERO SECTION (Parallax Effect) */}
@@ -44,26 +47,24 @@ const CollegeProfile = () => {
         <div className="profile-layout">
         <main className="profile-main">
         <section className="profile-section anim-slide-up" style={{animationDelay: '0.2s', background: '#fff', borderRadius: '24px'}}>
-          <div className="section-grid" style={{ marginBottom: '3rem' }}>
-            <div className="text-content">
-              <h2 className="section-heading">College Profile</h2>
-              <div className="heading-underline"></div>
-              <p className="rich-text-content">
-                Guru Nanak College, Dhanbad (A Sikh Minority Degree College) was Established by the Gurudwara Prabandhak Committee in 1970 to mark the fifth Birth Centenary of the great Guru after whom this college is named.
-              </p>
-              <p className="rich-text-content mt-4">
-                The college is managed by a Governing Council nominated by the Gurudwara Prabandhak Committee, Dhanbad, and draws its inspiration from the teachings of the faith propounded by Guru Nanak Devji.
-              </p>
-            </div>
-            <div className="image-content">
-              <img 
-                src="https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1986&auto=format&fit=crop" 
-                alt="College Campus" 
-                loading="lazy"
-                decoding="async"
-                className="profile-img hover-scale"
-              />
-            </div>
+          <div style={{ marginBottom: '3rem' }}>
+            <h2 className="section-heading">College Profile</h2>
+            <div className="heading-underline"></div>
+            <img 
+              src="https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1986&auto=format&fit=crop" 
+              alt="College Campus" 
+              loading="lazy"
+              decoding="async"
+              className="profile-img hover-scale"
+              style={{ float: 'right', width: '350px', maxWidth: '100%', marginLeft: '2rem', marginBottom: '1rem', borderRadius: '12px' }}
+            />
+            <p className="rich-text-content">
+              Guru Nanak College, Dhanbad (A Sikh Minority Degree College) was Established by the Gurudwara Prabandhak Committee in 1970 to mark the fifth Birth Centenary of the great Guru after whom this college is named.
+            </p>
+            <p className="rich-text-content mt-4">
+              The college is managed by a Governing Council nominated by the Gurudwara Prabandhak Committee, Dhanbad, and draws its inspiration from the teachings of the faith propounded by Guru Nanak Devji.
+            </p>
+            <div style={{ clear: 'both' }}></div>
           </div>
 
           <div style={{ marginBottom: '3rem' }}>

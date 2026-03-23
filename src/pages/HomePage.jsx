@@ -177,6 +177,9 @@ const ANIM_CSS = `
 const CSS = `
   *,*::before,*::after{box-sizing:border-box;}
 
+  p { text-align: justify; }
+  h1 + p, h2 + p, h3 + p, h4 + p, h5 + p, h6 + p { text-align: center !important; }
+
   .hp-watermark{position:fixed;inset:0;background-image:url(${import.meta.env.BASE_URL}images/logo.png);background-repeat:repeat;background-size:320px;opacity:.025;z-index:-1;background-color:#f4f7f9;pointer-events:none;}
 
   /* ── Quick Action Bar ── */
@@ -216,7 +219,7 @@ const CSS = `
   .hp-at{font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,4vw,38px);font-weight:800;color:${N};line-height:1.2;margin-bottom:8px;text-align:center;}
   .hp-at span{color:${G};}
   .hp-asub{color:${G};font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:22px;font-size:13px;text-align:center;display:block;}
-  .hp-adesc{color:#555;line-height:1.8;font-size:15.5px;margin-bottom:28px;text-align:center;}
+  .hp-adesc{color:#555;line-height:1.8;font-size:15.5px;margin-bottom:28px;text-align:justify;}
   .hp-afeat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:32px;}
   .hp-afeat{display:flex;gap:11px;align-items:flex-start;}
   .hp-afeat-t{font-weight:800;font-size:13.5px;color:${N};}
@@ -248,7 +251,7 @@ const CSS = `
   .hp-ev-dt{position:absolute;bottom:0;left:0;background:${N};color:#fff;padding:8px 14px;border-top-right-radius:12px;z-index:2;}
   .hp-ev-info{padding:20px;flex:1;display:flex;flex-direction:column;}
   .hp-ev-title{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:800;color:${N};margin:0 0 9px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-  .hp-ev-desc{font-size:13px;color:#64748b;line-height:1.6;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+  .hp-ev-desc{font-size:13px;color:#64748b;line-height:1.6;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;text-align:justify;}
   .hp-ev-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:12px;margin-top:14px;}
   .hp-ev-loc{font-size:11px;color:#94a3b8;font-weight:600;}
   .hp-ev-more{background:none;border:none;font-size:11px;color:${G};font-weight:800;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;}

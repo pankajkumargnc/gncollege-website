@@ -8,7 +8,7 @@ const SectionTitle = ({ title, subtitle, darkBg = false }) => (
     </h2>
     <div style={{ width: 60, height: 4, background: COLORS.gold, margin: '0 auto 12px', borderRadius: 2 }} />
     {subtitle && (
-      <p style={{ color: darkBg ? 'rgba(255,255,255,0.72)' : '#666', fontSize: 15 }}>
+      <p style={{ color: darkBg ? 'rgba(255,255,255,0.72)' : '#666', fontSize: 15 , textAlign: 'center', maxWidth: 600, margin: '0 auto' }}>
         {subtitle}
       </p>
     )}
