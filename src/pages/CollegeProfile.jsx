@@ -51,10 +51,12 @@ const CollegeProfile = () => {
             <h2 className="section-heading">College Profile</h2>
             <div className="heading-underline"></div>
             <img 
-              src="https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1986&auto=format&fit=crop" 
+              src="https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=800&auto=format&fit=crop" 
               alt="College Campus" 
               loading="lazy"
               decoding="async"
+              width="350"
+              height="233"
               className="profile-img hover-scale"
               style={{ float: 'right', width: '350px', maxWidth: '100%', marginLeft: '2rem', marginBottom: '1rem', borderRadius: '12px' }}
             />

@@ -2,39 +2,50 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react({
+      // Babel transform sirf .jsx files pe — .js skip hoga, faster build
+      include: '**/*.{jsx,tsx}',
+    }),
+  ],
   base: '/gncollege-website/',
 
   build: {
-    // ── Code splitting — vendor bundles alag ──
     rollupOptions: {
       output: {
-        manualChunks: {
-          // React core — har page pe chahiye
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          // Firebase — sirf jab data chahiye
-          'vendor-firebase': [
-            'firebase/app',
-            'firebase/firestore',
-            'firebase/auth',
-            'firebase/messaging',
-          ],
-          // Heavy UI libs — sirf admin page pe
-          'vendor-admin': ['jodit-react', 'dompurify', 'html-react-parser'],
+        manualChunks(id) {
+          // Firebase — sirf jab chahiye
+          if (id.includes('firebase')) return 'vendor-firebase'
+          // Jodit + DOMPurify — heavy, sirf admin me
+          if (id.includes('jodit') || id.includes('dompurify') || id.includes('html-react-parser'))
+            return 'vendor-admin'
+          // React core
+          if (id.includes('react-dom') || id.includes('react-router'))
+            return 'vendor-react'
+          if (id.includes('react'))
+            return 'vendor-react'
+          // Pages ko route-level chunks me split karo
+          if (id.includes('/pages/AboutPages'))    return 'page-about'
+          if (id.includes('/pages/AcademicsPages'))return 'page-academics'
+          if (id.includes('/pages/AdmissionPages'))return 'page-admission'
+          if (id.includes('/pages/ActivityPages')) return 'page-activity'
+          if (id.includes('/pages/NaacPages'))     return 'page-naac'
+          if (id.includes('/pages/CampusPages'))   return 'page-campus'
+          if (id.includes('/pages/PublicationPages')) return 'page-publication'
+          // AdminPanel — sirf /admin route pe load ho
+          if (id.includes('/components/AdminPanel')) return 'chunk-admin'
         },
       },
     },
 
-    // ── Asset optimization ──
-    chunkSizeWarningLimit: 1200,
-    assetsInlineLimit: 4096, // 4KB se chhoti files inline ho jaayengi
-
-    // ── Minification ──
+    chunkSizeWarningLimit: 1000,
+    assetsInlineLimit: 4096,  // 4KB se chhoti files inline
     minify: 'esbuild',
     target: 'es2015',
-
-    // ── Source maps sirf development mein ──
     sourcemap: false,
+
+    // CSS bhi split ho — har chunk apna CSS load kare
+    cssCodeSplit: true,
   },
 
   server: {

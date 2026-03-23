@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="hi"><!-- ✅ lang="en" → "hi" (college content Hindi/English mix hai) -->
   <head>
     <meta charset="UTF-8" />
 
@@ -11,23 +11,23 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/gncollege-website/images/logo.png" />
 
     <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon"              href="/gncollege-website/images/logo.png" />
-    <link rel="apple-touch-icon" sizes="57x57"   href="/gncollege-website/images/logo.png" />
-    <link rel="apple-touch-icon" sizes="60x60"   href="/gncollege-website/images/logo.png" />
-    <link rel="apple-touch-icon" sizes="72x72"   href="/gncollege-website/images/logo.png" />
-    <link rel="apple-touch-icon" sizes="76x76"   href="/gncollege-website/images/logo.png" />
-    <link rel="apple-touch-icon" sizes="114x114" href="/gncollege-website/images/logo.png" />
-    <link rel="apple-touch-icon" sizes="120x120" href="/gncollege-website/images/logo.png" />
-    <link rel="apple-touch-icon" sizes="144x144" href="/gncollege-website/images/logo.png" />
-    <link rel="apple-touch-icon" sizes="152x152" href="/gncollege-website/images/logo.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/gncollege-website/images/logo.png" />
+    <link rel="apple-touch-icon"                href="/gncollege-website/images/logo.png" />
+    <link rel="apple-touch-icon" sizes="57x57"  href="/gncollege-website/images/logo.png" />
+    <link rel="apple-touch-icon" sizes="60x60"  href="/gncollege-website/images/logo.png" />
+    <link rel="apple-touch-icon" sizes="72x72"  href="/gncollege-website/images/logo.png" />
+    <link rel="apple-touch-icon" sizes="76x76"  href="/gncollege-website/images/logo.png" />
+    <link rel="apple-touch-icon" sizes="114x114"href="/gncollege-website/images/logo.png" />
+    <link rel="apple-touch-icon" sizes="120x120"href="/gncollege-website/images/logo.png" />
+    <link rel="apple-touch-icon" sizes="144x144"href="/gncollege-website/images/logo.png" />
+    <link rel="apple-touch-icon" sizes="152x152"href="/gncollege-website/images/logo.png" />
+    <link rel="apple-touch-icon" sizes="180x180"href="/gncollege-website/images/logo.png" />
 
     <!-- Microsoft Tiles -->
-    <meta name="msapplication-TileImage"         content="/gncollege-website/images/logo.png" />
-    <meta name="msapplication-TileColor"         content="#0f2347" />
-    <meta name="msapplication-navbutton-color"   content="#f4a023" />
-    <meta name="msapplication-starturl"          content="/gncollege-website/" />
-    <meta name="msapplication-tap-highlight"     content="no" />
+    <meta name="msapplication-TileImage"       content="/gncollege-website/images/logo.png" />
+    <meta name="msapplication-TileColor"       content="#0f2347" />
+    <meta name="msapplication-navbutton-color" content="#f4a023" />
+    <meta name="msapplication-starturl"        content="/gncollege-website/" />
+    <meta name="msapplication-tap-highlight"   content="no" />
 
     <!-- Chrome Android tab color -->
     <meta name="theme-color" content="#0f2347" />
@@ -55,15 +55,15 @@
     <link rel="canonical"    href="https://gncollege.ac.in/" />
 
     <!-- Open Graph -->
-    <meta property="og:type"        content="website" />
-    <meta property="og:url"         content="https://gncollege.ac.in/" />
-    <meta property="og:title"       content="Guru Nanak College Dhanbad | NAAC Accredited" />
-    <meta property="og:description" content="Official website of Guru Nanak College, Dhanbad. Affiliated to B.B.M.K. University. Admissions open for B.A., B.Com., BCA, BBA." />
-    <meta property="og:image"       content="/gncollege-website/images/college_photo.jpg" />
+    <meta property="og:type"         content="website" />
+    <meta property="og:url"          content="https://gncollege.ac.in/" />
+    <meta property="og:title"        content="Guru Nanak College Dhanbad | NAAC Accredited" />
+    <meta property="og:description"  content="Official website of Guru Nanak College, Dhanbad. Affiliated to B.B.M.K. University. Admissions open for B.A., B.Com., BCA, BBA." />
+    <meta property="og:image"        content="/gncollege-website/images/college_photo.jpg" />
     <meta property="og:image:width"  content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:locale"      content="en_IN" />
-    <meta property="og:site_name"   content="Guru Nanak College Dhanbad" />
+    <meta property="og:locale"       content="en_IN" />
+    <meta property="og:site_name"    content="Guru Nanak College Dhanbad" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card"        content="summary_large_image" />
@@ -72,11 +72,30 @@
     <meta name="twitter:image"       content="/gncollege-website/images/college_photo.jpg" />
     <!-- ══ End SEO ══ -->
 
-    <!-- Preconnect fonts -->
+    <!-- ✅ NEW: Firebase preconnect — Firestore data faster load होगा (LCP fix) -->
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://firebase.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin />
+    <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
+    <link rel="dns-prefetch" href="https://firebase.googleapis.com" />
+    <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
+
+    <!-- Preconnect Google Fonts (existing) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- Prefetch critical assets (no warning) -->
+    <!-- ✅ NEW: Hero + Logo preload — FCP/LCP dramatically improve होगा -->
+    <link rel="preload" as="image" href="/gncollege-website/images/logo.png"
+          fetchpriority="high" />
+    <link rel="preload" as="image" href="/gncollege-website/images/college_photo.jpg"
+          fetchpriority="high" />
+    <!-- 
+      ⚠️ अगर hero slider images Firebase Storage से आती हैं तो
+         ऊपर वाली college_photo.jpg line comment कर दें।
+         Static hero image है तो यहाँ उसका path डालें।
+    -->
+
+    <!-- Prefetch non-critical assets -->
     <link rel="prefetch" href="/gncollege-website/images/logo.png" />
     <link rel="prefetch" href="/gncollege-website/images/college_photo.jpg" />
 
@@ -106,20 +125,27 @@
 
   </head>
   <body>
+    <!-- ✅ NEW: No-JS fallback — screen readers + crawlers के लिए -->
+    <noscript>
+      <style>body{font-family:sans-serif;padding:20px;text-align:center}</style>
+      <h1>Guru Nanak College, Dhanbad</h1>
+      <p>Please enable JavaScript to use this website.</p>
+      <p>📞 +91-7903340991 | ✉️ principal@gncollege.org</p>
+    </noscript>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
 
     <!-- ══ Service Worker ══ -->
     <script>
       if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function () {
-    // Sirf apne domain pe register karo — preview/Claude environment mein nahi
-    var hostname = window.location.hostname;
-    var isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
-    var isOwnDomain = hostname.includes('gncollege') || isLocalhost;
-    if (!isOwnDomain) return;
-    navigator.serviceWorker
-      .register('./sw.js')
+        window.addEventListener('load', function () {
+          var hostname = window.location.hostname;
+          var isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+          var isOwnDomain = hostname.includes('gncollege') || isLocalhost;
+          if (!isOwnDomain) return;
+          navigator.serviceWorker
+            .register('./sw.js')
             .then(function (reg) {
               console.log('[PWA] SW registered:', reg.scope);
               reg.addEventListener('updatefound', function () {
