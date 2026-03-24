@@ -1,4 +1,4 @@
-import{j as e}from"./vendor-react-CzOzt2PS.js";import{C as a}from"./page-gallery-BJH3vJa4.js";import"./vendor-firebase-BJj4R8JZ.js";function d({items:r}){if(!r||r.length===0)return null;const t=Math.max(20,r.length*6);return e.jsxs("div",{style:{background:a.gold,color:"#000",padding:"8px 0",display:"flex",alignItems:"center",overflow:"hidden",borderBottom:"1px solid rgba(0,0,0,0.1)",zIndex:10},children:[e.jsx("style",{children:`
+import{j as e}from"./vendor-react-BnhLV3Vp.js";import{C as a}from"./page-gallery-DuiEG0Dr.js";import"./vendor-firebase-BJj4R8JZ.js";function d({items:r}){if(!r||r.length===0)return null;const t=Math.max(20,r.length*6);return e.jsxs("div",{style:{background:a.gold,color:"#000",padding:"8px 0",display:"flex",alignItems:"center",overflow:"hidden",borderBottom:"1px solid rgba(0,0,0,0.1)",zIndex:10},children:[e.jsx("style",{children:`
           @keyframes blinker { 50% { opacity: 0; } }
           @keyframes tickerScroll {
             0% { transform: translateX(0); }
