@@ -40,7 +40,7 @@ const TYPE_CONFIG = {
   },
 };
 
-const FALLBACK = '/images/college_photo.jpg';
+const FALLBACK = '/images/college_photo.webp';
 
 // ── Styles ───────────────────────────────────────────────────────────────────
 const css = `

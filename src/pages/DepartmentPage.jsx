@@ -18,7 +18,7 @@ import { COLORS } from '../styles/colors';
 
 /* ── brand colours ─────────────────────────────────────────────── */
 const NAVY = COLORS?.navy || '#0f2347';
-const FALLBACK_IMG = '/images/college_photo.jpg';
+const FALLBACK_IMG = '/images/college_photo.webp';
 
 /* ── per-department static config (icon / palette / faculty keys) ─ */
 const DEPT_META = {

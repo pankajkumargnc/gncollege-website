@@ -82,9 +82,9 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
       case 'SPORTS':
         return '/images/slider_cricket.jpg';
       case 'CULTURAL':
-        return '/images/slider_baisakhi.jpg';
+        return '/images/slider_baisakhi.webp';
       default:
-        return '/images/college_photo.jpg';
+        return '/images/college_photo.webp';
     }
   };
 
@@ -115,7 +115,7 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
             </style>
             <div className="image-stack">
               {/* College ki koi bhi real image yahan use kar sakte hain */}
-              <img src="images/college_photo.jpg" alt="Guru Nanak College Campus" className="main-img" />
+              <img src="images/college_photo.webp" alt="Guru Nanak College Campus" className="main-img" />
               <div className="accent-box">
                 <h4 style={{ fontSize: '32px', margin: 0, fontWeight: 900, color: COLORS.gold }}>56+</h4>
                 <p style={{ fontSize: '12px', margin: 0, opacity: 0.8, letterSpacing: '1px' }}>YEARS OF EXCELLENCE</p>

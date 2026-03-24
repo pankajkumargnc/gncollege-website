@@ -15,8 +15,8 @@ const IMAGE_CACHE    = 'gnc-images-v1';
 const PRECACHE_URLS = [
   './',
   './index.html',
-  './images/logo.png',
-  './images/college_photo.jpg',
+  './images/logo.webp',
+  './images/college_photo.webp',
 ];
 
 // ── These origins always go to network ──────────────────────────────
@@ -208,8 +208,8 @@ self.addEventListener('push', event => {
 
   const options = {
     body:    data.body    || 'Naya update available hai',
-    icon:    '/gncollege-website/images/logo.png',
-    badge:   '/gncollege-website/images/logo.png',
+    icon:    '/gncollege-website/images/logo.webp',
+    badge:   '/gncollege-website/images/logo.webp',
     tag:     data.tag     || 'gnc-notification',
     data:    { url: data.url || '/gncollege-website/' },
     actions: [

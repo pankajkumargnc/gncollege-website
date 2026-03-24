@@ -281,7 +281,7 @@ import {
   MONTHS_SHORT, MONTHS_FULL,
   getTS, fmtDate,
   COLLECTIONS,
-  FALLBACK_IMAGE,        // '/images/college_photo.jpg'
+  FALLBACK_IMAGE,        // '/images/college_photo.webp'
   GALLERY_CATEGORIES,
   DOC_TYPES, EVENT_TYPES,
   NOTICE_CATEGORIES, NEWS_TYPES,
@@ -329,7 +329,7 @@ COLORS = {
 - Toggle: Timeline Cards view / Table view
 - Stats strip — count, total years, current leader
 - Current leader: pulsing dot + highlighted card/row
-- `FALLBACK = '/images/college_photo.jpg'`
+- `FALLBACK = '/images/college_photo.webp'`
 
 **⚠️ Query — No orderBy (avoids composite index):**
 ```js
@@ -802,7 +802,7 @@ href="#gallery"
 | College info | `src/constants.js` → `COLLEGE` |
 | Firebase | `src/firebase.js` |
 | Static nav | `src/data/db.js` |
-| Fallback image | `public/images/college_photo.jpg` |
+| Fallback image | `public/images/college_photo.webp` |
 | Leadership page | `src/pages/LeadershipPage.jsx` |
 | Leadership admin | `src/components/AdminLeadershipTab.jsx` |
 | Dept hub | `/academics/departments` |

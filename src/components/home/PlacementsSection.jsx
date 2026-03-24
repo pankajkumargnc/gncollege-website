@@ -162,7 +162,7 @@ const S = `
 
 const WofCard = memo(({ p }) => {
   const color    = getColor(p.company || '');
-  const fallback = `${import.meta.env.BASE_URL || '/'}images/college_photo.jpg`;
+  const fallback = `${import.meta.env.BASE_URL || '/'}images/college_photo.webp`;
   return (
     // .wof-gc = glow wrapper
     <div className="wof-gc">

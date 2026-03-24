@@ -234,7 +234,7 @@ const Footer = () => {
                 display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px',
                 boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
               }}>
-                <img src={`${import.meta.env.BASE_URL}images/logo.png`} alt="GNC Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                <img src={`${import.meta.env.BASE_URL}images/logo.webp`} alt="GNC Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: '#fff', margin: '0 0 2px 0', lineHeight: '1.1' }}>

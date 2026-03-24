@@ -151,7 +151,7 @@ export const COLLECTIONS = {
 
 
 // ── Fallback Image ──────────────────────────────────────────────────
-export const FALLBACK_IMAGE = '/images/college_photo.jpg';
+export const FALLBACK_IMAGE = '/images/college_photo.webp';
 
 
 // ── Gallery Categories ──────────────────────────────────────────────

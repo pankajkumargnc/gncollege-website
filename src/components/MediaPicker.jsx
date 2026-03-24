@@ -26,8 +26,8 @@ export const setImgbbKey = (key) => { if (key) _imgbbKey = key; };
 
 // ── Common files in public/ folder ─────────────────────────────────
 const LOCAL_IMAGES = [
-  { path: '/images/college_photo.jpg',  label: 'College Photo' },
-  { path: '/images/logo.png',           label: 'Logo' },
+  { path: '/images/college_photo.webp',  label: 'College Photo' },
+  { path: '/images/logo.webp',           label: 'Logo' },
   { path: '/images/principal.jpg',      label: 'Principal' },
   { path: '/images/vice_principal.jpg', label: 'Vice Principal' },
   { path: '/images/naac.png',           label: 'NAAC Badge' },
@@ -313,7 +313,7 @@ export default function MediaPicker({
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <input
                 style={S.inp}
-                placeholder={isPdf && !isImage ? '/pdfs/report.pdf ya /documents/file.pdf' : '/images/photo.jpg ya /images/logo.png'}
+                placeholder={isPdf && !isImage ? '/pdfs/report.pdf ya /documents/file.pdf' : '/images/photo.jpg ya /images/logo.webp'}
                 value={localPath}
                 onChange={e => setLocalPath(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && localPath.trim()) { onChange(localPath.trim()); setLocalPath(''); } }}

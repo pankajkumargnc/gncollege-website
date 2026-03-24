@@ -1539,7 +1539,7 @@ function AdminPanelInner({
       pdf.setFillColor(...scColor); pdf.rect(0, 58, pdfW, 2.5, 'F');
 
       try {
-        const logoUrl = `${window.location.origin}${import.meta.env.BASE_URL || '/'}images/logo.png`;
+        const logoUrl = `${window.location.origin}${import.meta.env.BASE_URL || '/'}images/logo.webp`;
         const imgData = await fetch(logoUrl).then(r => r.blob()).then(b => new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(b); }));
         pdf.addImage(imgData, 'PNG', 12, 9, 30, 30);
       } catch {
@@ -1979,7 +1979,7 @@ function AdminPanelInner({
                     <div key={p.id} className={`arow ${placeSel.includes(p.id)?'selected':''}`} style={{ padding: 16, flexDirection: 'column', alignItems: 'flex-start', gap: 10 }}>
                       <div style={{ display: 'flex', gap: 12, width: '100%', alignItems: 'flex-start' }}>
                         <input type="checkbox" checked={placeSel.includes(p.id)} onChange={() => setPlaceSel(s => s.includes(p.id) ? s.filter(x=>x!==p.id) : [...s,p.id])} style={{ marginTop: 4, accentColor: NAVY }} />
-                        <img src={p.imageUrl||'/images/college_photo.jpg'} alt="" style={{ width: 60, height: 60, borderRadius: '50%', objectFit: 'cover', border: `3px solid ${GOLD}`, flexShrink: 0 }} />
+                        <img src={p.imageUrl||'/images/college_photo.webp'} alt="" style={{ width: 60, height: 60, borderRadius: '50%', objectFit: 'cover', border: `3px solid ${GOLD}`, flexShrink: 0 }} />
                         <div style={{ flex: 1 }}>
                           <div style={{ fontWeight: 900, color: NAVY, fontSize: 15 }}>{p.name}</div>
                           <div style={{ fontSize: 12, color: T.t3, marginTop: 2 }}>Batch {p.year} {p.dept && `• ${p.dept}`}</div>
@@ -2043,7 +2043,7 @@ function AdminPanelInner({
                   {(faculties||[]).filter(f => (f.staffType||'Teaching')===facTab && (!facSearch||f.name?.toLowerCase().includes(facSearch.toLowerCase()))).map(f => (
                     <div key={f.id} className={`arow ${facSel.includes(f.id)?'selected':''}`} style={{ padding: 16, borderLeft: `4px solid ${facTab==='Teaching'?GOLD:T.cyan}` }}>
                       <input type="checkbox" checked={facSel.includes(f.id)} onChange={() => setFacSel(s=>s.includes(f.id)?s.filter(x=>x!==f.id):[...s,f.id])} style={{ accentColor: NAVY }} />
-                      <img src={f.imageUrl||'/images/college_photo.jpg'} alt="" style={{ width: 70, height: 70, borderRadius: 12, objectFit: 'cover', flexShrink: 0 }} />
+                      <img src={f.imageUrl||'/images/college_photo.webp'} alt="" style={{ width: 70, height: 70, borderRadius: 12, objectFit: 'cover', flexShrink: 0 }} />
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 900, color: NAVY, fontSize: 15 }}>{f.name}</div>
                         <div style={{ fontSize: 12, color: facTab==='Teaching'?GOLD:T.cyan, fontWeight: 800, marginTop: 2 }}>{f.desig}</div>

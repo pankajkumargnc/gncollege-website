@@ -35,7 +35,7 @@ const EMPTY_FORM = {
   note:  '',
 };
 
-const FALLBACK = '/images/college_photo.jpg';
+const FALLBACK = '/images/college_photo.webp';
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 const S = {
