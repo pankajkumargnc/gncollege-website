@@ -1,11 +1,9 @@
 // src/firebase.js
-// ✅ Auth kept for AdminLogin
-// ✅ All credentials from .env
-// ✅ Helpful error if .env missing
+// ✅ Auth HATA diya — ab sirf Firestore
+// ✅ Auth ke liye firebase-auth.js use karo (lazy loaded)
 
 import { initializeApp } from "firebase/app";
 import { getFirestore }  from "firebase/firestore";
-import { getAuth }       from "firebase/auth";
 
 const {
   VITE_FIREBASE_API_KEY,
@@ -35,5 +33,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-export const db   = getFirestore(app);
-export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+// ⚠️  auth yahan export NAHI hoga
+// AdminLogin ke liye: import { auth } from './firebase-auth'
