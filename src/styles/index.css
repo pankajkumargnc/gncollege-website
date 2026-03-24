@@ -139,6 +139,7 @@ table {
   box-shadow: 0 4px 20px rgba(0,0,0,.05);
   transition: var(--transition);
   transform: translateZ(0);
+  will-change: transform; /* ✅ GPU compositing — hover animation smooth hogi */
 }
 .glass-card:hover {
   transform: translateY(-7px) scale(1.02);
@@ -202,9 +203,10 @@ p, li, td, th { text-align: left; }
 }
 @keyframes fadeInOut { 0%,100%{opacity:.4} 50%{opacity:1} }
 
-.anim-fade-in  { animation: fadeIn   .8s forwards; }
-.anim-slide-up { opacity:0; animation: slideUp .8s cubic-bezier(.25,.8,.25,1) forwards; }
-.page-transition { animation: pageFadeInUp .6s cubic-bezier(.25,.8,.25,1) forwards; will-change:transform,opacity; }
+/* ✅ will-change added — browser GPU layer pehle se allocate karta hai */
+.anim-fade-in  { animation: fadeIn .8s forwards; will-change: opacity; }
+.anim-slide-up { opacity:0; animation: slideUp .8s cubic-bezier(.25,.8,.25,1) forwards; will-change: transform, opacity; }
+.page-transition { animation: pageFadeInUp .6s cubic-bezier(.25,.8,.25,1) forwards; will-change: transform, opacity; }
 
 /* Respect reduced motion */
 @media(prefers-reduced-motion:reduce) {
@@ -231,12 +233,14 @@ p, li, td, th { text-align: left; }
 .splash-logo {
   height: clamp(80px,12vw,120px);
   animation: pulseGlow 2s infinite ease-in-out;
+  will-change: transform, opacity; /* ✅ pulseGlow ke scale/opacity GPU pe jaaenge */
 }
 .splash-text {
   margin-top: 24px;
   font-size: clamp(11px,.85vw,14px); font-weight: 800;
   color: var(--navy); letter-spacing: 4px; text-transform: uppercase;
   animation: fadeInOut 1.5s infinite;
+  will-change: opacity; /* ✅ sirf opacity animate hoti hai isme */
 }
 
 /* ═══════════════════════════════════════
@@ -310,13 +314,15 @@ p, li, td, th { text-align: left; }
 }
 .heading-underline { width:clamp(50px,8vw,80px); height:5px; background:var(--gold); margin-bottom:1.5rem; border-radius:10px; }
 
-.profile-img { width:100%; height:auto; border-radius:var(--radius-xl); box-shadow:0 15px 35px rgba(0,0,0,.2); transition:transform .4s; }
+/* ✅ will-change: transform — hover scale smoothly GPU pe hogi */
+.profile-img { width:100%; height:auto; border-radius:var(--radius-xl); box-shadow:0 15px 35px rgba(0,0,0,.2); transition:transform .4s; will-change: transform; }
 .hover-scale:hover { transform:scale(1.03); }
 
 /* Stats grid */
 .grid-2-col    { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:clamp(16px,2.5vw,32px); }
 .stats-grid    { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:clamp(14px,2vw,24px); }
-.stat-card     { padding:clamp(16px,2.5vw,32px); text-align:center; transition:transform .3s; border-radius:var(--radius-lg); }
+/* ✅ will-change: transform — translateY(-7px) hover GPU pe jaayega */
+.stat-card     { padding:clamp(16px,2.5vw,32px); text-align:center; transition:transform .3s; border-radius:var(--radius-lg); will-change: transform; }
 .stat-card:hover { transform:translateY(-7px); border-color:var(--gold); }
 .stat-icon  { font-size: clamp(24px,3.5vw,40px); margin-bottom:.5rem; }
 .stat-value { font-size: clamp(24px,3.5vw,36px); font-weight:800; color:var(--navy); }
@@ -367,17 +373,20 @@ p, li, td, th { text-align: left; }
 .newsletter-box { background:rgba(255,255,255,.05); padding:clamp(14px,2vw,20px); border-radius:var(--radius-md); border:1px solid rgba(255,255,255,.1); margin-top:14px; }
 .newsletter-input { width:100%; padding:11px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.2); background:rgba(0,0,0,.2); color:#fff; margin-bottom:10px; outline:none; transition:.3s; font-size:var(--text-sm); }
 .newsletter-input:focus { border-color:var(--gold); }
-.newsletter-btn { width:100%; padding:11px; background:var(--gold); color:var(--navy); border:none; border-radius:8px; font-weight:800; cursor:pointer; text-transform:uppercase; font-size:clamp(11px,.8vw,13px); letter-spacing:1px; transition:all .3s; }
+/* ✅ will-change: transform — hover translateY(-2px) GPU composited */
+.newsletter-btn { width:100%; padding:11px; background:var(--gold); color:var(--navy); border:none; border-radius:8px; font-weight:800; cursor:pointer; text-transform:uppercase; font-size:clamp(11px,.8vw,13px); letter-spacing:1px; transition:all .3s; will-change: transform; }
 .newsletter-btn:hover { background:#fff; transform:translateY(-2px); }
 
 /* ═══════════════════════════════════════
    11. CONTENT CARDS
 ═══════════════════════════════════════ */
+/* ✅ will-change: transform — translateX(5px) hover GPU pe smooth */
 .content-card {
   background:#f8fafc; border-left:5px solid var(--navy);
   padding:clamp(14px,2.5vw,28px) clamp(16px,3vw,32px);
   border-radius:0 8px 8px 0; margin-bottom:clamp(14px,2vw,24px);
   box-shadow:0 4px 14px rgba(0,0,0,.03); transition:all .3s;
+  will-change: transform;
 }
 .content-card:hover { transform:translateX(5px); box-shadow:0 8px 20px rgba(0,0,0,.06); }
 .content-card h4 { text-align:left !important; font-size:clamp(14px,1.2vw,19px); color:var(--navy); margin-bottom:.75rem; font-weight:700; }
@@ -401,7 +410,8 @@ p, li, td, th { text-align: left; }
 .link-arrow { color:var(--gold); font-weight:bold; }
 
 .helpdesk-widget { background:linear-gradient(145deg,var(--navy) 0%,#0a1832 100%); color:#fff; padding:clamp(20px,3vw,30px) clamp(18px,2.5vw,25px); border-radius:var(--radius-lg); text-align:center; box-shadow:0 15px 35px rgba(15,35,71,.25); position:relative; overflow:hidden; }
-.helpdesk-btn { display:inline-block; background:var(--gold); color:var(--navy); padding:clamp(10px,1.5vw,12px) clamp(18px,2.5vw,24px); border-radius:8px; text-decoration:none; font-weight:800; font-size:var(--text-sm); transition:all .3s; position:relative; z-index:2; }
+/* ✅ will-change: transform — hover translateY(-3px) GPU pe */
+.helpdesk-btn { display:inline-block; background:var(--gold); color:var(--navy); padding:clamp(10px,1.5vw,12px) clamp(18px,2.5vw,24px); border-radius:8px; text-decoration:none; font-weight:800; font-size:var(--text-sm); transition:all .3s; position:relative; z-index:2; will-change: transform; }
 .helpdesk-btn:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(244,160,35,.4); }
 
 /* ═══════════════════════════════════════
