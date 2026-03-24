@@ -29,21 +29,16 @@ const resolveImage = (src) => {
 
 // ── Preload hint for LCP image ────────────────────────────────────
 const preloadLCP = (src) => {
-  const { webp, jpg } = resolveImage(src);
-  // ✅ ADDED: Duplicate guard — agar already preload tag hai toh skip karo
+  const { webp } = resolveImage(src);
   const existing = document.querySelectorAll('link[rel="preload"][as="image"]');
   const urls = Array.from(existing).map(l => l.href);
-  if (urls.some(u => u.includes('slider_baisakhi'))) return; // already in HTML head
+  if (urls.some(u => u.includes('slider_baisakhi'))) return;
 
   const linkWebp = document.createElement('link');
   linkWebp.rel = 'preload'; linkWebp.as = 'image';
   linkWebp.href = webp;
   linkWebp.type = 'image/webp';
-  const linkJpg = document.createElement('link');
-  linkJpg.rel = 'preload'; linkJpg.as = 'image';
-  linkJpg.href = jpg;
   document.head.appendChild(linkWebp);
-  document.head.appendChild(linkJpg);
 };
 
 const HeroSlider = ({ slides = [] }) => {

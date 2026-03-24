@@ -8,10 +8,9 @@
 import React, {
   useState, useRef, useEffect, useMemo, useCallback, lazy, Suspense
 } from 'react';
-import JoditEditor from 'jodit-react';
+
 import { db } from '../firebase';
 import DOMPurify from 'dompurify';
-import parse from 'html-react-parser';
 import {
   collection, addDoc, serverTimestamp, doc, deleteDoc,
   updateDoc, setDoc, getDoc, onSnapshot, query, orderBy,
@@ -20,7 +19,7 @@ import {
 import toast from 'react-hot-toast';
 import AdminCampusTab from './AdminCampusTab';
 import AdminLeadershipTab from './AdminLeadershipTab';
-
+const JoditEditor = lazy(() => import('jodit-react'));
 const ImageCropper = lazy(() => import('./ImageCropper'));
 const AdminDepartmentTab = lazy(() => import('./AdminDepartmentTab'));
 import MediaPicker, { setImgbbKey } from './MediaPicker';
@@ -2228,7 +2227,9 @@ function AdminPanelInner({
                   </div>
                   <div style={{ marginBottom: 14 }}>
                     <label className="alabel">Page Content</label>
-                    <JoditEditor ref={editor} value={pageData.content||''} config={joditCfg} tabIndex={1} onBlur={c=>setPageData(d=>({...d,content:c}))} />
+                      <Suspense fallback={<div className="ainp" style={{height:420,display:'flex',alignItems:'center',justifyContent:'center',color:T.t3}}>⏳ Editor loading...</div>}>
+                      <JoditEditor ref={editor} value={pageData.content||''} config={joditCfg} tabIndex={1} onBlur={c=>setPageData(d=>({...d,content:c}))} />
+                      </Suspense>
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
                     <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editPage?'Update':'Publish'} Page</button>
@@ -2544,7 +2545,9 @@ function AdminPanelInner({
                   )}
                   <div style={{ marginBottom: 14 }}>
                     <label className="alabel">Description</label>
-                    <JoditEditor value={evtData.desc || ''} config={joditCfg} onBlur={c=>setEvtData(d=>({...d,desc:c}))} />
+                    <Suspense fallback={<div className="ainp" style={{height:200,display:'flex',alignItems:'center',justifyContent:'center',color:T.t3}}>⏳ Editor loading...</div>}>
+  <JoditEditor value={evtData.desc || ''} config={joditCfg} onBlur={c=>setEvtData(d=>({...d,desc:c}))} />
+</Suspense>
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
                     <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editEvent?'Update':'Publish'} Event</button>
