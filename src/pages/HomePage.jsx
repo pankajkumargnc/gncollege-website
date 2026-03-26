@@ -29,7 +29,6 @@ const TICKER_ITEMS = [
     text: 'Welcome to Guru Nanak College, Dhanbad — A Sikh Minority Degree College.', 
     link: '/about-us/college-profile' 
   },
-  
 ];
 const GALLERY_TABS = ['All Moments','Seminars','Cultural Fest','Guest Visit','Campus','Departments','NSS Programs'];
 const LINKS_DATA   = [
