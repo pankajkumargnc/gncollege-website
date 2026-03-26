@@ -4,8 +4,6 @@
 // Ye file import karo, hardcoded values mat likho
 //
 // Usage:
-//   import { COLLEGE, COLORS, LAYOUT, MONTHS_SHORT } from '../constants';
-//   import { COLLEGE, LAYOUT } from '../../constants';  // nested folders
 // ═══════════════════════════════════════════════════════════════════
 
 

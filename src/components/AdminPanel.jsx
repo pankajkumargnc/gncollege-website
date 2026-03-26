@@ -1,8 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // GNC COLLEGE — ULTIMATE ADMIN PANEL v10.0
-// 🐛 Fixed: W/pages variable shadowing in genPDF, missing Error Boundary,
-//           unused COLORS import, JoditEditor Suspense misuse,
-//           missing .catch() on Firebase useEffects
 // ═══════════════════════════════════════════════════════════════════════════════
 
 import React, {
@@ -19,10 +16,12 @@ import {
 import toast from 'react-hot-toast';
 import AdminCampusTab from './AdminCampusTab';
 import AdminLeadershipTab from './AdminLeadershipTab';
+import MediaPicker, { setImgbbKey } from './MediaPicker';
+import "../styles/admin.css";
+
 const JoditEditor = lazy(() => import('jodit-react'));
 const ImageCropper = lazy(() => import('./ImageCropper'));
 const AdminDepartmentTab = lazy(() => import('./AdminDepartmentTab'));
-import MediaPicker, { setImgbbKey } from './MediaPicker';
 
 // ── Error Boundary (prevents white screen on render errors) ───────────────────
 class AdminErrorBoundary extends React.Component {
@@ -83,8 +82,11 @@ const useLocalDraft = (key, init) => {
     catch { return init; }
   });
   const save = useCallback(nv => {
-    set(nv);
-    try { localStorage.setItem(`gnc_draft_${key}`, JSON.stringify(nv)); } catch { }
+    set(prev => {
+      const next = typeof nv === 'function' ? nv(prev) : nv;
+      try { localStorage.setItem(`gnc_draft_${key}`, JSON.stringify(next)); } catch { }
+      return next;
+    });
   }, [key]);
   const clear = useCallback(() => {
     set(init);
@@ -110,12 +112,6 @@ const T = {
   shadow: '0 4px 20px rgba(15,35,71,.08)',
   shadowHov: '0 12px 35px rgba(15,35,71,.15)',
 };
-
-// ImgBB key ab Settings → Site Settings → ImgBB API Key se aata hai
-// MediaPicker component ke andar handle hota hai (src/components/MediaPicker.jsx)
-// Default demo key (user apni key Settings mein save karein):
-// ✅ SECURITY FIX: Hardcoded ImgBB key removed. Key Settings tab se load hoti hai.
-// setImgbbKey() is called when settings/site is loaded (see useEffect below)
 
 // ── CSS ───────────────────────────────────────────────────────────────────────
 const GCSS = `
@@ -274,18 +270,22 @@ const StatCard = React.memo(({ icon, label, count, color, sub, onClick }) => {
 });
 
 const Toggle = ({ checked, onChange, label, color = T.green }) => (
-  <label className="toggle-wrap" onClick={onChange}>
+  <div
+    className="toggle-wrap"
+    style={{ cursor: 'pointer', userSelect: 'none', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onChange && onChange(); }}
+  >
     <div className="toggle">
-      <input type="checkbox" readOnly checked={checked} />
+      <input type="checkbox" readOnly checked={!!checked} onChange={() => {}} />
       <span className="toggle-slider" style={checked ? { background: color } : {}} />
     </div>
     {label && <span style={{ fontSize: 13, fontWeight: 700, color: checked ? color : T.t3 }}>{label}</span>}
-  </label>
+  </div>
 );
 
 const SectionSearch = ({ value, onChange, placeholder }) => (
   <div className="sec-search" style={{ marginBottom: 16 }}>
-    <input className="ainp" style={{ paddingLeft: 36 }} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder || 'Search...'} />
+    <input className="ainp" style={{ paddingLeft: 36 }} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder || 'Search...'} />
   </div>
 );
 
@@ -347,9 +347,7 @@ const joditCfg = {
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
-// MEETING PDF TAB — Reusable for GB Meetings and Staff Council Meetings
-// Firestore collection schema:
-//   { title, date, pdfUrl, notes, createdAt }
+// MEETING PDF TAB
 // ══════════════════════════════════════════════════════════════════════════════
 function MeetingPDFTab({ collectionName, title, subtitle, accentColor, icon, logAct, getSectionLog }) {
   const NAVY = '#0f2347', GOLD = '#f4a023', WHITE = '#ffffff', BG = '#f4f7f9';
@@ -426,16 +424,16 @@ function MeetingPDFTab({ collectionName, title, subtitle, accentColor, icon, log
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
             <div style={{ gridColumn: '1/-1' }}>
               <label className="alabel">Meeting Title *</label>
-              <input className="ainp" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+              <input className="ainp" value={form.title} onChange={(e) => setForm(f => ({ ...f, title: e.target.value }))}
                 placeholder="e.g. GB Meeting — Quarterly Review Q1 2025" required />
             </div>
             <div>
               <label className="alabel">Meeting Date *</label>
-              <input className="ainp" type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} required />
+              <input className="ainp" type="date" value={form.date} onChange={(e) => setForm(f => ({ ...f, date: e.target.value }))} required />
             </div>
             <div style={{ gridColumn: 'span 2' }}>
               <label className="alabel">PDF Link * (Google Drive ya Direct URL)</label>
-              <input className="ainp" value={form.pdfUrl} onChange={e => setForm(f => ({ ...f, pdfUrl: e.target.value }))}
+              <input className="ainp" value={form.pdfUrl} onChange={(e) => setForm(f => ({ ...f, pdfUrl: e.target.value }))}
                 placeholder="https://drive.google.com/file/d/... ya direct PDF URL" required />
               {form.pdfUrl && (
                 <a href={form.pdfUrl} target="_blank" rel="noreferrer"
@@ -461,7 +459,7 @@ function MeetingPDFTab({ collectionName, title, subtitle, accentColor, icon, log
 
       {/* Search */}
       <div className="sec-search" style={{ marginBottom: 16 }}>
-        <input className="ainp" value={search} onChange={e => setSearch(e.target.value)}
+        <input className="ainp" value={search} onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by title, date, or notes..." style={{ paddingLeft: 36 }} />
       </div>
 
@@ -532,7 +530,7 @@ function MeetingPDFTab({ collectionName, title, subtitle, accentColor, icon, log
   );
 }
 
-// ── TABS config (outside component to avoid recreation every render) ──────────
+// ── TABS config ──────────
 const TABS = [
   { id: 'dashboard',     icon: '📊', label: 'Dashboard',        section: 'OVERVIEW' },
   { id: 'quick',         icon: '⚡', label: 'Quick Publish',     section: '' },
@@ -567,7 +565,6 @@ function ContactSettingsTab() {
   const INP = { width:'100%', padding:'10px 14px', border:'1.5px solid #e2e8f0', borderRadius:9, fontSize:13.5, fontFamily:'inherit', color:'#334155', background:'#fff', outline:'none', boxSizing:'border-box' };
   const TEA = { ...INP, resize:'vertical', minHeight:70 };
 
-  // ── campus contact state ─────────────────────────
   const [campus, setCampus] = useState({
     bhuda:    { phone:'', email:'', address:'' },
     bankMore: { phone:'', email:'', address:'' },
@@ -576,19 +573,16 @@ function ContactSettingsTab() {
   const [campusSaved,  setCampusSaved]  = useState(false);
   const campusTimerRef = useRef(null);
 
-  // ── directory state ──────────────────────────────
   const [directory, setDirectory] = useState([]);
   const [dirSaving,  setDirSaving]  = useState(false);
   const [dirSaved,   setDirSaved]   = useState(false);
   const dirTimerRef = useRef(null);
 
-  // cleanup timers on unmount
   useEffect(() => () => {
     if (campusTimerRef.current) clearTimeout(campusTimerRef.current);
     if (dirTimerRef.current)    clearTimeout(dirTimerRef.current);
   }, []);
 
-  // Load settings/contact
   useEffect(() => {
     const unsub = onSnapshot(doc(db, 'settings', 'contact'), snap => {
       if (snap.exists()) {
@@ -602,12 +596,11 @@ function ContactSettingsTab() {
     return () => unsub();
   }, []);
 
-  // Load contactDirectory collection (ordered)
   useEffect(() => {
     const unsub = onSnapshot(
       query(collection(db, 'contactDirectory'), orderBy('order', 'asc')),
       snap => setDirectory(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
-      () => setDirectory([]) // Firestore index missing → graceful empty
+      () => setDirectory([]) 
     );
     return () => unsub();
   }, []);
@@ -628,10 +621,8 @@ function ContactSettingsTab() {
     setDirSaving(true);
     try {
       const batch = writeBatch(db);
-      // Delete all existing docs
       const existing = await getDocs(collection(db, 'contactDirectory'));
       existing.docs.forEach(d => batch.delete(doc(db, 'contactDirectory', d.id)));
-      // Re-add all with updated order
       directory.forEach((entry, i) => {
         const ref = entry.id
           ? doc(db, 'contactDirectory', entry.id)
@@ -700,11 +691,11 @@ function ContactSettingsTab() {
               <div style={{ fontSize:11.5, color:'#94a3b8', marginBottom:16 }}>{sub}</div>
               <div style={{ marginBottom:12 }}>
                 <div style={{ fontSize:11.5, fontWeight:700, color:'#64748b', marginBottom:5 }}>📞 Phone / WhatsApp</div>
-                <input style={INP} value={campus[key].phone} onChange={e => setC(key, 'phone', e.target.value)} placeholder="+91 XXXXX XXXXX" />
+                <input style={INP} value={campus[key].phone} onChange={(e) => setC(key, 'phone', e.target.value)} placeholder="+91 XXXXX XXXXX" />
               </div>
               <div style={{ marginBottom:12 }}>
                 <div style={{ fontSize:11.5, fontWeight:700, color:'#64748b', marginBottom:5 }}>✉ Email</div>
-                <input style={INP} type="email" value={campus[key].email} onChange={e => setC(key, 'email', e.target.value)} placeholder="contact@gnc.ac.in" />
+                <input style={INP} type="email" value={campus[key].email} onChange={(e) => setC(key, 'email', e.target.value)} placeholder="contact@gnc.ac.in" />
               </div>
               <div>
                 <div style={{ fontSize:11.5, fontWeight:700, color:'#64748b', marginBottom:5 }}>📍 Full Address</div>
@@ -728,19 +719,19 @@ function ContactSettingsTab() {
           <div key={entry.id || i} style={{ display:'grid', gridTemplateColumns:'60px 1fr 1fr 1fr auto', gap:10, alignItems:'center', marginBottom:10 }}>
             <div>
               {i === 0 && <div style={{ fontSize:11, fontWeight:700, color:'#64748b', marginBottom:5 }}>Icon</div>}
-              <input style={{ ...INP, textAlign:'center', fontSize:18 }} value={entry.icon} onChange={e => updDir(i, 'icon', e.target.value)} placeholder="📞" />
+              <input style={{ ...INP, textAlign:'center', fontSize:18 }} value={entry.icon} onChange={(e) => updDir(i, 'icon', e.target.value)} placeholder="📞" />
             </div>
             <div>
               {i === 0 && <div style={{ fontSize:11, fontWeight:700, color:'#64748b', marginBottom:5 }}>Title / Role</div>}
-              <input style={INP} value={entry.title} onChange={e => updDir(i, 'title', e.target.value)} placeholder="Principal" />
+              <input style={INP} value={entry.title} onChange={(e) => updDir(i, 'title', e.target.value)} placeholder="Principal" />
             </div>
             <div>
               {i === 0 && <div style={{ fontSize:11, fontWeight:700, color:'#64748b', marginBottom:5 }}>Name</div>}
-              <input style={INP} value={entry.name} onChange={e => updDir(i, 'name', e.target.value)} placeholder="Dr. S.K. Sharma" />
+              <input style={INP} value={entry.name} onChange={(e) => updDir(i, 'name', e.target.value)} placeholder="Dr. S.K. Sharma" />
             </div>
             <div>
               {i === 0 && <div style={{ fontSize:11, fontWeight:700, color:'#64748b', marginBottom:5 }}>Phone</div>}
-              <input style={INP} value={entry.phone} onChange={e => updDir(i, 'phone', e.target.value)} placeholder="+91 XXXXX XXXXX" />
+              <input style={INP} value={entry.phone} onChange={(e) => updDir(i, 'phone', e.target.value)} placeholder="+91 XXXXX XXXXX" />
             </div>
             <button onClick={() => delDir(i)}
               style={{ background:'#fee2e2', border:'none', color:'#ef4444', width:30, height:30, borderRadius:8, cursor:'pointer', fontSize:13, fontWeight:800, marginTop: i===0?22:0, flexShrink:0 }}>
@@ -772,14 +763,13 @@ function AdminPanelInner({
   const [tab, setTab] = useState('dashboard');
   const [sideOpen, setSideOpen] = useState(false);
 
-  // ── Content container ref (for scroll-to-top on edit) ─────────────────────
+  // ── Content container ref ─────────────────────
   const contentRef = useRef(null);
   const scrollTop = () => {
     if (contentRef.current) contentRef.current.scrollTop = 0;
     else window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // ── Internal data fetching (AdminPanel is self-contained) ─────────────────
   const [_pdfReports,  set_pdfReports]  = useState([]);
   const [_pages,       set_pages]       = useState([]);
   const [_placements,  set_placements]  = useState([]);
@@ -795,17 +785,18 @@ function AdminPanelInner({
       ['sliderSlides',set_sliderSlides],
     ].map(([col, setter]) => {
       try {
-        const q = query(collection(db, col), orderBy('createdAt', 'desc'));
-        return onSnapshot(q,
-          snap => setter(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
-          () => {}
-        );
+        // ✅ FIXED: Removed orderBy to fix Missing Index error. Using Local Sort instead.
+        const q = query(collection(db, col));
+        return onSnapshot(q, snap => {
+          let docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          docs.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0)); // Local Sort Fix
+          setter(docs);
+        }, () => {});
       } catch { return () => {}; }
     });
     return () => subs.forEach(u => u && u());
   }, []);
 
-  // Merge: prefer parent-passed props, fallback to internally-fetched
   const pdfReports  = pdfReportsProp   || _pdfReports;
   const pages       = pagesProp        || _pages;
   const placements  = placementsProp   || _placements;
@@ -831,7 +822,6 @@ function AdminPanelInner({
     return () => window.removeEventListener('resize', fn);
   }, []);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const fn = e => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.querySelector('.top-search input')?.focus(); }
@@ -842,7 +832,6 @@ function AdminPanelInner({
     return () => window.removeEventListener('keydown', fn);
   }, []);
 
-  // ── Activity Log ──────────────────────────────────────────────────────────
   const [actLog, setActLog] = useState([]);
   useEffect(() => {
     try {
@@ -863,13 +852,11 @@ function AdminPanelInner({
 
   const getSectionLog = useCallback(section => actLog.filter(l => l.section === section).slice(0, 3), [actLog]);
 
-  // ── Image Cropper ─────────────────────────────────────────────────────────
   const [cropSrc, setCropSrc] = useState(null);
   const [cropCb, setCropCb] = useState(null);
   const crop = (src, cb) => { setCropSrc(src); setCropCb(() => cb); };
   const handleCrop = async blob => { if (cropCb) await cropCb(blob); setCropSrc(null); setCropCb(null); };
 
-  // ── Undo Delete ───────────────────────────────────────────────────────────
   const softDelete = useCallback(async (colName, id, data, displayName) => {
     await deleteDoc(doc(db, colName, id));
     logAct('delete', `Deleted: ${displayName}`, colName);
@@ -894,7 +881,6 @@ function AdminPanelInner({
     );
   }, [logAct]);
 
-  // ── Bulk Delete ───────────────────────────────────────────────────────────
   const bulkDelete = useCallback(async (colName, ids) => {
     if (!window.confirm(`Delete ${ids.length} items permanently?`)) return;
     const batch = writeBatch(db);
@@ -903,10 +889,6 @@ function AdminPanelInner({
     logAct('delete', `Bulk deleted ${ids.length} from ${colName}`, colName);
     toast.success(`${ids.length} items deleted`);
   }, [logAct]);
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // SECTION STATES
-  // ═══════════════════════════════════════════════════════════════════════════
 
   // 1. ALERTS
   const [editAlert, setEditAlert] = useState(null);
@@ -938,7 +920,6 @@ function AdminPanelInner({
   const [placeProg, setPlaceProg] = useState(0);
   const [placeSearch, setPlaceSearch] = useState('');
   const [placeSel, setPlaceSel] = useState([]);
-  // handlePlaceFile → replaced by MediaPicker
   const savePlace = async e => {
     e.preventDefault(); setLoading(true);
     try {
@@ -961,7 +942,6 @@ function AdminPanelInner({
   const [facSearch, setFacSearch] = useState('');
   const [facTab, setFacTab] = useState('Teaching');
   const [facSel, setFacSel] = useState([]);
-  // handleFacFile → replaced by MediaPicker
   const saveFac = async e => {
     e.preventDefault(); setLoading(true);
     try {
@@ -979,7 +959,6 @@ function AdminPanelInner({
   const [slideData, setSlideData] = useState({ title: '', subtitle: '', btnText: '', btnLink: '', image: '', order: 0 });
   const [slideUp, setSlideUp] = useState(false);
   const [slideProg, setSlideProg] = useState(0);
-  // handleSlideFile → replaced by MediaPicker
   const saveSlide = async e => {
     e.preventDefault(); setLoading(true);
     try {
@@ -1066,12 +1045,22 @@ function AdminPanelInner({
     if (seo?.ogImage) s += 10;
     return s;
   };
+  // ✅ PAGES FIX
   const savePage = async e => {
     e.preventDefault(); setLoading(true);
     try {
+      // Clean up the path ensuring it starts with a single slash
+      let finalPath = (pageMode === 'update' ? pageData.path : pageData.slug).trim().toLowerCase();
+      if (!finalPath.startsWith('/')) finalPath = '/' + finalPath;
+      
       const base = { title: pageData.title, content: pageData.content, seo: seoData || {} };
-      if (editPage) await updateDoc(doc(db, 'pages', editPage.id), { ...base, ...(pageMode === 'update' ? { path: pageData.path } : { slug: pageData.slug }), updatedAt: serverTimestamp() });
-      else await addDoc(collection(db, 'pages'), { ...base, path: pageMode === 'update' ? pageData.path : '', slug: pageMode === 'create' ? pageData.slug : '', createdAt: serverTimestamp() });
+      
+      if (editPage) {
+        await updateDoc(doc(db, 'pages', editPage.id), { ...base, path: finalPath, slug: finalPath.replace('/p/', '').replace('/', ''), updatedAt: serverTimestamp() });
+      } else {
+        await addDoc(collection(db, 'pages'), { ...base, path: finalPath, slug: finalPath.replace('/p/', '').replace('/', ''), createdAt: serverTimestamp() });
+      }
+      
       toast.success('Page saved!');
       logAct(editPage ? 'update' : 'add', `Page: ${pageData.title}`, 'pages');
       setEditPage(null);
@@ -1087,7 +1076,6 @@ function AdminPanelInner({
   const [galProg, setGalProg] = useState(0);
   const [galSearch, setGalSearch] = useState('');
   const [galSel, setGalSel] = useState([]);
-  // handleGalFile → replaced by MediaPicker
   const saveGallery = async e => {
     e.preventDefault(); setLoading(true);
     try {
@@ -1156,7 +1144,6 @@ function AdminPanelInner({
   const [evtProg, setEvtProg] = useState(0);
   const [evtSearch, setEvtSearch] = useState('');
   const [evtSel, setEvtSel] = useState([]);
-  // handleEvtFile → replaced by MediaPicker
   const saveEvent = async e => {
     e.preventDefault(); setLoading(true);
     try {
@@ -1236,17 +1223,20 @@ function AdminPanelInner({
     address: 'Bank More, Dhanbad — 826001, Jharkhand', phone: '', email: '',
     facebook: '', twitter: '', youtube: '', linkedin: '',
     footerText: '', maintenanceMode: false,
-    imgbbKey: '',  // ✅ ImgBB API key — Settings se configure karein
+    imgbbKey: '', 
   });
   const [siteLoading, setSiteLoading] = useState(false);
+  // ✅ GLOBAL IMGBB KEY EXPORT FOR CAMPUS TAB
   useEffect(() => {
     getDoc(doc(db, 'settings', 'site'))
       .then(s => {
         if (s.exists()) {
           const d = s.data();
           setSiteCfg(prev => ({ ...prev, ...d }));
-          // ✅ MediaPicker ko ImgBB key de do
-          if (d.imgbbKey) setImgbbKey(d.imgbbKey);
+          if (d.imgbbKey) {
+             setImgbbKey(d.imgbbKey);
+             window.GN_IMGBB_KEY = d.imgbbKey; // Make available globally for CampusTab
+          }
         }
       })
       .catch(() => {});
@@ -1371,7 +1361,7 @@ function AdminPanelInner({
 
     // T8 – ImgBB API
     sysLogAdd('[8/25] Validating ImgBB image upload API...');
-    try { const fd = new FormData(); fd.append('image', 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'); const r = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB}`, { method: 'POST', body: fd }); if (r.ok) { addResult('ImgBB API', 'pass', 'Key valid — upload service active'); passed++; sysLogAdd('  ✓ ImgBB key valid'); } else throw new Error('Invalid key'); } catch (e) { addResult('ImgBB API', 'fail', e.message); }
+    try { const fd = new FormData(); fd.append('image', 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'); const r = await fetch(`https://api.imgbb.com/1/upload?key=${siteCfg.imgbbKey||'dummy'}`, { method: 'POST', body: fd }); if (r.ok) { addResult('ImgBB API', 'pass', 'Key valid — upload service active'); passed++; sysLogAdd('  ✓ ImgBB key valid'); } else throw new Error('Invalid key'); } catch (e) { addResult('ImgBB API', 'fail', e.message); }
     setTestProgress(Math.round(8/TOTAL*100)); await pause(300);
 
     // T9 – Flash Alerts
@@ -1394,22 +1384,22 @@ function AdminPanelInner({
     try { const [ns, as, es, ds, sl, pgs] = await Promise.all([getDocs(collection(db, 'notices')), getDocs(collection(db, 'announcements')), getDocs(collection(db, 'events')), getDocs(collection(db, 'pdfReports')), getDocs(collection(db, 'sliderSlides')), getDocs(collection(db, 'pages'))]); addResult('Content Health', 'pass', `Notices:${ns.size} | News:${as.size} | Events:${es.size} | Docs:${ds.size} | Slides:${sl.size} | Pages:${pgs.size}`); passed++; sysLogAdd('  ✓ All content collections accessible'); } catch (e) { addResult('Content Health', 'fail', e.message); }
     setTestProgress(Math.round(12/TOTAL*100)); await pause(300);
 
-    // T13 – Leadership collection (NEW)
+    // T13 – Leadership collection
     sysLogAdd('[13/25] Checking leadership collection...');
     try { const s = await getDocs(collection(db, 'leadership')); const pr = s.docs.filter(d => d.data().type === 'president').length; const sec = s.docs.filter(d => d.data().type === 'secretary').length; const prin = s.docs.filter(d => d.data().type === 'principal').length; if (s.size === 0) { addResult('Leadership Records', 'warn', 'Empty — Admin → Leadership tab se Presidents/Secretaries/Principals add karein'); } else { addResult('Leadership Records', 'pass', `Presidents:${pr} | Secretaries:${sec} | Principals:${prin}`); } passed++; sysLogAdd(`  ✓ ${s.size} leadership records`); } catch (e) { addResult('Leadership Records', 'fail', e.message); }
     setTestProgress(Math.round(13/TOTAL*100)); await pause(300);
 
-    // T14 – GB Meetings (NEW)
+    // T14 – GB Meetings
     sysLogAdd('[14/25] Checking GB Meeting PDF records...');
     try { const s = await getDocs(collection(db, 'gb_meetings')); const withPdf = s.docs.filter(d => d.data().pdfUrl).length; if (s.size === 0) { addResult('GB Meetings', 'warn', 'No meetings — Admin → GB Meetings tab se add karein'); } else { addResult('GB Meetings', 'pass', `${s.size} meetings | ${withPdf} with PDF`); } passed++; sysLogAdd(`  ✓ GB meetings: ${s.size}`); } catch (e) { addResult('GB Meetings', 'fail', e.message); }
     setTestProgress(Math.round(14/TOTAL*100)); await pause(300);
 
-    // T15 – Staff Council (NEW)
+    // T15 – Staff Council
     sysLogAdd('[15/25] Checking Staff Council PDF records...');
     try { const s = await getDocs(collection(db, 'staff_council')); const withPdf = s.docs.filter(d => d.data().pdfUrl).length; if (s.size === 0) { addResult('Staff Council', 'warn', 'No meetings — Admin → Staff Council tab se add karein'); } else { addResult('Staff Council', 'pass', `${s.size} meetings | ${withPdf} with PDF`); } passed++; sysLogAdd(`  ✓ Staff council meetings: ${s.size}`); } catch (e) { addResult('Staff Council', 'fail', e.message); }
     setTestProgress(Math.round(15/TOTAL*100)); await pause(300);
 
-    // T16 – Campus Gallery (NEW)
+    // T16 – Campus Gallery
     sysLogAdd('[16/25] Checking campus gallery collection...');
     try { const s = await getDocs(collection(db, 'campus_gallery')); const cats = [...new Set(s.docs.map(d => d.data().category).filter(Boolean))]; if (s.size === 0) { addResult('Campus Gallery', 'warn', 'Empty — Admin → Campus Gallery tab se photos add karein'); } else { addResult('Campus Gallery', 'pass', `${s.size} photos | Categories: ${cats.join(', ') || 'Uncategorized'}`); } passed++; sysLogAdd(`  ✓ Campus gallery: ${s.size} items`); } catch (e) { addResult('Campus Gallery', 'fail', e.message); }
     setTestProgress(Math.round(16/TOTAL*100)); await pause(300);
@@ -1457,7 +1447,7 @@ function AdminPanelInner({
     } catch (e) { addResult('Contact Settings', 'fail', e.message); sysLogAdd(`  ✗ ${e.message}`); }
     setTestProgress(Math.round(21/TOTAL*100)); await pause(300);
 
-    // T22 – CMS Pages (NEW)
+    // T22 – CMS Pages
     sysLogAdd('[22/25] Checking CMS pages (PageViewer routes)...');
     try {
       const s = await getDocs(collection(db, 'pages'));
@@ -1471,7 +1461,7 @@ function AdminPanelInner({
     } catch (e) { addResult('CMS Pages', 'fail', e.message); }
     setTestProgress(Math.round(22/TOTAL*100)); await pause(300);
 
-    // T23 – Admin Auth (NEW)
+    // T23 – Admin Auth
     sysLogAdd('[23/25] Verifying admin session auth system...');
     try {
       const hasSession = typeof sessionStorage !== 'undefined';
@@ -1509,7 +1499,6 @@ function AdminPanelInner({
     setTestScore(score); setTestRunning(false);
   };
 
-  // ── PDF REPORT (FIXED: renamed W→pdfW, pages→numPages to avoid shadowing) ──
   const genPDF = async () => {
     setPdfGen(true);
     try {
@@ -1523,7 +1512,6 @@ function AdminPanelInner({
       }
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF('p', 'mm', 'a4');
-      // FIX: renamed to avoid shadowing outer scope WHITE constant and pages prop
       const pdfW = 210;
       const pdfH = 297;
       const now = new Date();
@@ -1619,7 +1607,6 @@ function AdminPanelInner({
         y += 11;
       });
 
-      // FIX: renamed pages → numPages to avoid shadowing the 'pages' prop
       const numPages = pdf.internal.getNumberOfPages();
       for (let i = 1; i <= numPages; i++) {
         pdf.setPage(i);
@@ -1636,7 +1623,6 @@ function AdminPanelInner({
     setPdfGen(false);
   };
 
-  // ── Global Search ─────────────────────────────────────────────────────────
   const dSearch = useDebounce(globalSearch, 250);
   const allItems = useMemo(() => [
     ...(notices || []).map(n => ({ ...n, _t: n.text?.substring(0, 50), _type: '📢 Notice', _tab: 'notices' })),
@@ -1656,15 +1642,12 @@ function AdminPanelInner({
     [allItems, dSearch]
   );
 
-  // ── Compute live alerts badge dynamically ─────────────────────────────────
   const liveAlertCount = (alerts || []).filter(a => a.isActive).length || null;
 
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="adm" style={{ display: 'flex', height: '100vh', width: '100vw', position: 'fixed', top: 0, left: 0, zIndex: 99999, overflow: 'hidden' }}>
       <style>{GCSS}</style>
 
-      {/* Image Cropper */}
       {cropSrc && (
         <Suspense fallback={
           <div style={{ position: 'fixed', inset: 0, zIndex: 100010, background: 'rgba(15,35,71,.92)', color: WHITE, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1675,7 +1658,6 @@ function AdminPanelInner({
         </Suspense>
       )}
 
-      {/* ── SIDEBAR ─────────────────────────────────────────────── */}
       <div className={`adm-side ${sideCollapsed && !isMobile ? 'collapsed' : ''} ${isMobile && sideOpen ? 'open' : ''}`}>
         <div className="adm-brand">
           <div
@@ -1689,7 +1671,6 @@ function AdminPanelInner({
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
-          {/* FIX: use a local variable inside map instead of mutating outer lastSec */}
           {(() => {
             let lastSec = '';
             return TABS.map(t => {
@@ -1733,16 +1714,13 @@ function AdminPanelInner({
         />
       )}
 
-      {/* ── MAIN ──────────────────────────────────────────────────── */}
       <div className="adm-main">
-        {/* Mobile top bar */}
         <div className="adm-mobile-top">
           <button onClick={() => setSideOpen(true)} style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: NAVY }}>☰</button>
           <span style={{ fontWeight: 900, color: NAVY, fontSize: 14 }}>GNC Admin Panel</span>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: T.red }}>✕</button>
         </div>
 
-        {/* Top bar */}
         <div className="adm-topbar">
           {!isMobile && (
             <button onClick={() => setSideCollapsed(c => !c)} style={{ background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: T.t3, flexShrink: 0 }}>☰</button>
@@ -1751,7 +1729,7 @@ function AdminPanelInner({
             <input
               placeholder="Search everything... (Ctrl+K)"
               value={globalSearch}
-              onChange={e => setGlobalSearch(e.target.value)}
+              onChange={(e) => setGlobalSearch(e.target.value)}
             />
             {searchResults.length > 0 && (
               <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: WHITE, border: `1.5px solid ${T.b1}`, borderRadius: 12, boxShadow: T.shadowHov, zIndex: 1000, maxHeight: 320, overflowY: 'auto', marginTop: 4 }}>
@@ -1782,10 +1760,8 @@ function AdminPanelInner({
           </div>
         </div>
 
-        {/* ── CONTENT AREA ─────────────────────────────────────── */}
         <div className="adm-content" ref={contentRef}>
 
-          {/* ── DASHBOARD ────────────────────────────────────────── */}
           {tab === 'dashboard' && (
             <div className="fade-up">
               <p className="asec">📊 Dashboard</p>
@@ -1846,7 +1822,6 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── QUICK PUBLISH ─────────────────────────────────────── */}
           {tab === 'quick' && (
             <div className="fade-up">
               <p className="asec">⚡ Quick Publish</p>
@@ -1855,25 +1830,25 @@ function AdminPanelInner({
                 <div className="card-gold">
                   <div className="actitle">📢 Quick Notice</div>
                   <form onSubmit={async e => { e.preventDefault(); setLoading(true); try { await addDoc(collection(db, 'notices'), { text: noticeData.text, type: 'General', isNew: true, link: '', date: new Date().toISOString(), createdAt: serverTimestamp() }); toast.success('Notice published!'); logAct('add', `Quick notice: ${noticeData.text?.substring(0,30)}`, 'notices'); setNoticeData(d => ({...d, text: ''})); } catch(err){toast.error(err.message);} setLoading(false); }}>
-                    <textarea className="ainp" rows={3} value={noticeData.text} onChange={e => setNoticeData(d => ({...d, text: e.target.value}))} placeholder="Notice text likhein..." required />
+                    <textarea className="ainp" rows={3} value={noticeData.text} onChange={(e) => setNoticeData(d => ({...d, text: e.target.value}))} placeholder="Notice text likhein..." required />
                     <button type="submit" className="abtn abtn-gold" style={{ marginTop: 12, width: '100%', justifyContent: 'center' }} disabled={loading}>🚀 Publish Notice</button>
                   </form>
                 </div>
                 <div className="card-navy">
                   <div className="actitle">📣 Quick News</div>
                   <form onSubmit={async e => { e.preventDefault(); setLoading(true); try { await addDoc(collection(db, 'announcements'), { text: annData.text, type: 'News', link: '', date: new Date().toISOString(), createdAt: serverTimestamp() }); toast.success('News published!'); logAct('add', `Quick news: ${annData.text?.substring(0,30)}`, 'announcements'); setAnnData(d => ({...d, text: ''})); } catch(err){toast.error(err.message);} setLoading(false); }}>
-                    <textarea className="ainp" rows={3} value={annData.text} onChange={e => setAnnData(d => ({...d, text: e.target.value}))} placeholder="News text likhein..." required />
+                    <textarea className="ainp" rows={3} value={annData.text} onChange={(e) => setAnnData(d => ({...d, text: e.target.value}))} placeholder="News text likhein..." required />
                     <button type="submit" className="abtn abtn-navy" style={{ marginTop: 12, width: '100%', justifyContent: 'center' }} disabled={loading}>🚀 Publish News</button>
                   </form>
                 </div>
                 <div className="card-gold">
                   <div className="actitle">🏆 Quick Event</div>
                   <form onSubmit={async e => { e.preventDefault(); setLoading(true); try { await addDoc(collection(db, 'events'), { title: evtData.title, day: evtData.day, month: evtData.month, type: evtData.type, location: evtData.location || 'Campus', status: 'upcoming', desc: '', imageUrl: '', reportLink: '', date: new Date().toISOString(), createdAt: serverTimestamp() }); toast.success('Event added!'); logAct('add', `Quick event: ${evtData.title}`, 'events'); setEvtData(d => ({...d, title: '', day: '', month: ''})); } catch(err){toast.error(err.message);} setLoading(false); }}>
-                    <input className="ainp" value={evtData.title} onChange={e => setEvtData(d => ({...d, title: e.target.value}))} placeholder="Event title..." required style={{ marginBottom: 8 }} />
+                    <input className="ainp" value={evtData.title} onChange={(e) => setEvtData(d => ({...d, title: e.target.value}))} placeholder="Event title..." required style={{ marginBottom: 8 }} />
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-                      <input className="ainp" value={evtData.day} onChange={e => setEvtData(d => ({...d, day: e.target.value}))} placeholder="Day (24)" />
-                      <input className="ainp" value={evtData.month} onChange={e => setEvtData(d => ({...d, month: e.target.value}))} placeholder="Month (MAR)" />
-                      <select className="ainp" value={evtData.type} onChange={e => setEvtData(d => ({...d, type: e.target.value}))}>
+                      <input className="ainp" value={evtData.day} onChange={(e) => setEvtData(d => ({...d, day: e.target.value}))} placeholder="Day (24)" />
+                      <input className="ainp" value={evtData.month} onChange={(e) => setEvtData(d => ({...d, month: e.target.value}))} placeholder="Month (MAR)" />
+                      <select className="ainp" value={evtData.type} onChange={(e) => setEvtData(d => ({...d, type: e.target.value}))}>
                         {['WORKSHOP','SEMINAR','CULTURAL','SPORTS','NSS','NCC'].map(t => <option key={t}>{t}</option>)}
                       </select>
                     </div>
@@ -1883,7 +1858,7 @@ function AdminPanelInner({
                 <div className="card-navy">
                   <div className="actitle">🚨 Quick Alert</div>
                   <form onSubmit={async e => { e.preventDefault(); setLoading(true); try { await addDoc(collection(db, 'alerts'), { text: alertData.text, isActive: true, type: 'urgent', createdAt: serverTimestamp() }); toast.success('🔴 Alert is LIVE!'); logAct('add', `Quick alert: ${alertData.text?.substring(0,30)}`, 'alerts'); setAlertData(d => ({...d, text: ''})); } catch(err){toast.error(err.message);} setLoading(false); }}>
-                    <textarea className="ainp" rows={3} value={alertData.text} onChange={e => setAlertData(d => ({...d, text: e.target.value}))} placeholder="Urgent message..." required />
+                    <textarea className="ainp" rows={3} value={alertData.text} onChange={(e) => setAlertData(d => ({...d, text: e.target.value}))} placeholder="Urgent message..." required />
                     <button type="submit" className="abtn abtn-navy" style={{ marginTop: 12, width: '100%', justifyContent: 'center', background: T.red }} disabled={loading}>🔴 Go Live Now</button>
                   </form>
                 </div>
@@ -1891,7 +1866,6 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── ALERTS ───────────────────────────────────────────── */}
           {tab === 'alerts' && (
             <div className="fade-up">
               <p className="asec">🚨 Flash Alert Manager</p>
@@ -1901,14 +1875,14 @@ function AdminPanelInner({
                 <form onSubmit={saveAlert}>
                   <div style={{ marginBottom: 14 }}>
                     <label className="alabel">Alert Message *</label>
-                    <textarea className="ainp" rows={3} value={alertData.text || ''} onChange={e => setAlertData(d => ({...d, text: e.target.value}))} required placeholder="College will remain closed tomorrow due to holiday..." />
+                    <textarea className="ainp" rows={3} value={alertData.text || ''} onChange={(e) => setAlertData(d => ({...d, text: e.target.value}))} required placeholder="College will remain closed tomorrow due to holiday..." />
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 20, padding: '14px 18px', background: BG, borderRadius: 12, flexWrap: 'wrap' }}>
                     <Toggle checked={!!alertData.isActive} onChange={() => setAlertData(d => ({...d, isActive: !d.isActive}))} label={alertData.isActive ? '🔴 LIVE — visible to everyone' : '⚪ OFF — hidden'} color={T.red} />
                     <div style={{ height: 32, width: 1, background: T.b1 }} />
                     <div>
                       <label className="alabel">Alert Type</label>
-                      <select className="ainp" style={{ marginTop: 0 }} value={alertData.type || 'urgent'} onChange={e => setAlertData(d => ({...d, type: e.target.value}))}>
+                      <select className="ainp" style={{ marginTop: 0 }} value={alertData.type || 'urgent'} onChange={(e) => setAlertData(d => ({...d, type: e.target.value}))}>
                         {['urgent', 'holiday', 'exam', 'admission', 'event'].map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase()+t.slice(1)}</option>)}
                       </select>
                     </div>
@@ -1942,7 +1916,6 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── PLACEMENTS ───────────────────────────────────────── */}
           {tab === 'placements' && (
             <div className="fade-up">
               <p className="asec">🎓 Alumni Wall of Fame</p>
@@ -1951,12 +1924,12 @@ function AdminPanelInner({
                 <div className="actitle">{editPlace ? '✏️ Edit Story' : '➕ Add Success Story'}</div>
                 <form onSubmit={savePlace}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
-                    <div><label className="alabel">Student Name *</label><input className="ainp" value={placeData.name || ''} onChange={e=>setPlaceData(d=>({...d,name:e.target.value}))} placeholder="Rahul Kumar" required /></div>
-                    <div><label className="alabel">Passing Year *</label><input className="ainp" value={placeData.year || ''} onChange={e=>setPlaceData(d=>({...d,year:e.target.value}))} placeholder="2024" required /></div>
-                    <div><label className="alabel">Company *</label><input className="ainp" value={placeData.company || ''} onChange={e=>setPlaceData(d=>({...d,company:e.target.value}))} placeholder="TCS / SBI / Wipro" required /></div>
-                    <div><label className="alabel">Package</label><input className="ainp" value={placeData.package || ''} onChange={e=>setPlaceData(d=>({...d,package:e.target.value}))} placeholder="4.5 LPA" /></div>
-                    <div><label className="alabel">Department</label><select className="ainp" value={placeData.dept || ''} onChange={e=>setPlaceData(d=>({...d,dept:e.target.value}))}><option value="">Select</option>{[...teachDepts,...nonTeachDepts].map(d=><option key={d}>{d}</option>)}</select></div>
-                    <div><label className="alabel">Achievement</label><input className="ainp" value={placeData.achievement || ''} onChange={e=>setPlaceData(d=>({...d,achievement:e.target.value}))} placeholder="Gold Medalist, Topper..." /></div>
+                    <div><label className="alabel">Student Name *</label><input className="ainp" value={placeData.name || ''} onChange={(e) => setPlaceData(d=>({...d,name:e.target.value}))} placeholder="Rahul Kumar" required /></div>
+                    <div><label className="alabel">Passing Year *</label><input className="ainp" value={placeData.year || ''} onChange={(e) => setPlaceData(d=>({...d,year:e.target.value}))} placeholder="2024" required /></div>
+                    <div><label className="alabel">Company *</label><input className="ainp" value={placeData.company || ''} onChange={(e) => setPlaceData(d=>({...d,company:e.target.value}))} placeholder="TCS / SBI / Wipro" required /></div>
+                    <div><label className="alabel">Package</label><input className="ainp" value={placeData.package || ''} onChange={(e) => setPlaceData(d=>({...d,package:e.target.value}))} placeholder="4.5 LPA" /></div>
+                    <div><label className="alabel">Department</label><select className="ainp" value={placeData.dept || ''} onChange={(e) => setPlaceData(d=>({...d,dept:e.target.value}))}><option value="">Select</option>{[...teachDepts,...nonTeachDepts].map(d=><option key={d}>{d}</option>)}</select></div>
+                    <div><label className="alabel">Achievement</label><input className="ainp" value={placeData.achievement || ''} onChange={(e) => setPlaceData(d=>({...d,achievement:e.target.value}))} placeholder="Gold Medalist, Topper..." /></div>
                   </div>
                   <MediaPicker
                     label="Student Photo"
@@ -1999,7 +1972,6 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── FACULTY ──────────────────────────────────────────── */}
           {tab === 'faculty' && (
             <div className="fade-up">
               <p className="asec">👨‍🏫 Faculty & Staff Directory</p>
@@ -2009,12 +1981,12 @@ function AdminPanelInner({
                 <form onSubmit={saveFac}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
                     <div><label className="alabel">Staff Type *</label><select className="ainp" value={facData.staffType || 'Teaching'} onChange={e => { const t=e.target.value; setFacData(d=>({...d,staffType:t,dept:t==='Teaching'?'Commerce':'General Section'})); }}><option value="Teaching">Teaching Staff</option><option value="Non-Teaching">Non-Teaching Staff</option></select></div>
-                    <div><label className="alabel">Full Name *</label><input className="ainp" value={facData.name || ''} onChange={e=>setFacData(d=>({...d,name:e.target.value}))} placeholder="Dr. S.K. Sharma" required /></div>
-                    <div><label className="alabel">Department *</label><select className="ainp" value={facData.dept || 'Commerce'} onChange={e=>setFacData(d=>({...d,dept:e.target.value}))}>{(facData.staffType==='Teaching'?teachDepts:nonTeachDepts).map(c=><option key={c}>{c}</option>)}</select></div>
-                    <div><label className="alabel">Designation</label><input className="ainp" value={facData.desig || ''} onChange={e=>setFacData(d=>({...d,desig:e.target.value}))} placeholder="Assistant Professor / Clerk" /></div>
-                    <div><label className="alabel">Qualification</label><input className="ainp" value={facData.qual || ''} onChange={e=>setFacData(d=>({...d,qual:e.target.value}))} placeholder="Ph.D., NET, M.Com..." /></div>
-                    <div><label className="alabel">Email</label><input className="ainp" value={facData.email || ''} onChange={e=>setFacData(d=>({...d,email:e.target.value}))} type="email" placeholder="name@gnc.ac.in" /></div>
-                    <div style={{ gridColumn: '1/-1' }}><label className="alabel">Specialization</label><input className="ainp" value={facData.specialization || ''} onChange={e=>setFacData(d=>({...d,specialization:e.target.value}))} placeholder="Financial Accounting, Data Structures..." /></div>
+                    <div><label className="alabel">Full Name *</label><input className="ainp" value={facData.name || ''} onChange={(e) => setFacData(d=>({...d,name:e.target.value}))} placeholder="Dr. S.K. Sharma" required /></div>
+                    <div><label className="alabel">Department *</label><select className="ainp" value={facData.dept || 'Commerce'} onChange={(e) => setFacData(d=>({...d,dept:e.target.value}))}>{(facData.staffType==='Teaching'?teachDepts:nonTeachDepts).map(c=><option key={c}>{c}</option>)}</select></div>
+                    <div><label className="alabel">Designation</label><input className="ainp" value={facData.desig || ''} onChange={(e) => setFacData(d=>({...d,desig:e.target.value}))} placeholder="Assistant Professor / Clerk" /></div>
+                    <div><label className="alabel">Qualification</label><input className="ainp" value={facData.qual || ''} onChange={(e) => setFacData(d=>({...d,qual:e.target.value}))} placeholder="Ph.D., NET, M.Com..." /></div>
+                    <div><label className="alabel">Email</label><input className="ainp" value={facData.email || ''} onChange={(e) => setFacData(d=>({...d,email:e.target.value}))} type="email" placeholder="name@gnc.ac.in" /></div>
+                    <div style={{ gridColumn: '1/-1' }}><label className="alabel">Specialization</label><input className="ainp" value={facData.specialization || ''} onChange={(e) => setFacData(d=>({...d,specialization:e.target.value}))} placeholder="Financial Accounting, Data Structures..." /></div>
                   </div>
                   <MediaPicker
                     label="Profile Photo"
@@ -2062,7 +2034,6 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── DEPARTMENTS ──────────────────────────────────────── */}
           {tab === 'departments' && (
             <div className="fade-up">
               <Suspense fallback={
@@ -2079,12 +2050,10 @@ function AdminPanelInner({
              <AdminCampusTab />
           )}
 
-          {/* ── LEADERSHIP ─────────────────────────────────────── */}
           {tab === 'leadership' && (
             <AdminLeadershipTab />
           )}
 
-          {/* ── GB MEETINGS ────────────────────────────────────── */}
           {tab === 'gb_meetings' && (
             <MeetingPDFTab
               collectionName="gb_meetings"
@@ -2097,7 +2066,6 @@ function AdminPanelInner({
             />
           )}
 
-          {/* ── STAFF COUNCIL ──────────────────────────────────── */}
           {tab === 'staff_council' && (
             <MeetingPDFTab
               collectionName="staff_council"
@@ -2110,7 +2078,6 @@ function AdminPanelInner({
             />
           )}
 
-          {/* ── SLIDER ───────────────────────────────────────────── */}
           {tab === 'slider' && (
             <div className="fade-up">
               <p className="asec">🖼️ Hero Slider Manager</p>
@@ -2119,11 +2086,11 @@ function AdminPanelInner({
                 <div className="actitle">{editSlide ? '✏️ Edit Slide' : '➕ Add New Slide'}</div>
                 <form onSubmit={saveSlide}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
-                    <div><label className="alabel">Title *</label><input className="ainp" value={slideData.title} onChange={e=>setSlideData(d=>({...d,title:e.target.value}))} placeholder="Welcome to GNC" required /></div>
-                    <div><label className="alabel">Subtitle</label><input className="ainp" value={slideData.subtitle} onChange={e=>setSlideData(d=>({...d,subtitle:e.target.value}))} placeholder="NAAC Accredited College" /></div>
-                    <div><label className="alabel">Button Text</label><input className="ainp" value={slideData.btnText} onChange={e=>setSlideData(d=>({...d,btnText:e.target.value}))} placeholder="Admission Open →" /></div>
-                    <div><label className="alabel">Button Link</label><input className="ainp" value={slideData.btnLink} onChange={e=>setSlideData(d=>({...d,btnLink:e.target.value}))} placeholder="/admission/rule" /></div>
-                    <div><label className="alabel">Display Order</label><input type="number" className="ainp" value={slideData.order} onChange={e=>setSlideData(d=>({...d,order:+e.target.value}))} /></div>
+                    <div><label className="alabel">Title *</label><input className="ainp" value={slideData.title} onChange={(e) => setSlideData(d=>({...d,title:e.target.value}))} placeholder="Welcome to GNC" required /></div>
+                    <div><label className="alabel">Subtitle</label><input className="ainp" value={slideData.subtitle} onChange={(e) => setSlideData(d=>({...d,subtitle:e.target.value}))} placeholder="NAAC Accredited College" /></div>
+                    <div><label className="alabel">Button Text</label><input className="ainp" value={slideData.btnText} onChange={(e) => setSlideData(d=>({...d,btnText:e.target.value}))} placeholder="Admission Open →" /></div>
+                    <div><label className="alabel">Button Link</label><input className="ainp" value={slideData.btnLink} onChange={(e) => setSlideData(d=>({...d,btnLink:e.target.value}))} placeholder="/admission/rule" /></div>
+                    <div><label className="alabel">Display Order</label><input type="number" className="ainp" value={slideData.order} onChange={(e) => setSlideData(d=>({...d,order:+e.target.value}))} /></div>
                   </div>
                   <MediaPicker
                     label="Background Image"
@@ -2157,7 +2124,6 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── MENU BUILDER ─────────────────────────────────────── */}
           {tab === 'menu_builder' && (
             <div className="fade-up">
               <p className="asec">🧭 Menu Editor</p>
@@ -2165,11 +2131,11 @@ function AdminPanelInner({
               <div className="card-navy">
                 <div className="actitle">➕ Add New Menu Item</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
-                  <div><label className="alabel">Label *</label><input className="ainp" value={newMenu.label} onChange={e=>setNewMenu(d=>({...d,label:e.target.value}))} placeholder="Menu Text" /></div>
-                  <div><label className="alabel">URL *</label><input className="ainp" value={newMenu.href} onChange={e=>setNewMenu(d=>({...d,href:e.target.value}))} placeholder="/about-us/new-page" /></div>
+                  <div><label className="alabel">Label *</label><input className="ainp" value={newMenu.label} onChange={(e) => setNewMenu(d=>({...d,label:e.target.value}))} placeholder="Menu Text" /></div>
+                  <div><label className="alabel">URL *</label><input className="ainp" value={newMenu.href} onChange={(e) => setNewMenu(d=>({...d,href:e.target.value}))} placeholder="/about-us/new-page" /></div>
                   <div>
                     <label className="alabel">Parent Menu</label>
-                    <select className="ainp" value={newMenu.parentId} onChange={e=>setNewMenu(d=>({...d,parentId:e.target.value}))}>
+                    <select className="ainp" value={newMenu.parentId} onChange={(e) => setNewMenu(d=>({...d,parentId:e.target.value}))}>
                       <option value="top">Top Level (L1)</option>
                       {flatMenus.filter(m=>m.level<2).map(m=><option key={m.id} value={m.id}>{m.level===0?'└─ ':m.level===1?'  └─ ':''}{m.path}</option>)}
                     </select>
@@ -2193,7 +2159,6 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── PAGES ────────────────────────────────────────────── */}
           {tab === 'pages' && (
             <div className="fade-up">
               <p className="asec">📄 Pages & SEO</p>
@@ -2205,10 +2170,10 @@ function AdminPanelInner({
                 </div>
                 <form onSubmit={savePage}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-                    <div><label className="alabel">Page Title *</label><input className="ainp" value={pageData.title} onChange={e=>{ const t = e.target.value; const s = t.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''); setPageData(d=>({...d, title: t, slug: pageMode === 'create' ? s : d.slug})); }} required placeholder="About the Principal" /></div>
+                    <div><label className="alabel">Page Title *</label><input className="ainp" value={pageData.title} onChange={(e) => { const t = e.target.value; const s = t.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''); setPageData(d=>({...d, title: t, slug: pageMode === 'create' ? s : d.slug})); }} required placeholder="About the Principal" /></div>
                     {pageMode==='update'
-                      ? <div><label className="alabel">Page Path *</label><input className="ainp" value={pageData.path} onChange={e=>setPageData(d=>({...d,path:e.target.value}))} placeholder="/about-us/principal-message" /></div>
-                      : <div><label className="alabel">URL Slug *</label><input className="ainp" value={pageData.slug} onChange={e=>setPageData(d=>({...d,slug:e.target.value}))} placeholder="principal-message" /></div>
+                      ? <div><label className="alabel">Page Path *</label><input className="ainp" value={pageData.path} onChange={(e) => setPageData(d=>({...d,path:e.target.value}))} placeholder="/about-us/principal-message" /></div>
+                      : <div><label className="alabel">URL Slug *</label><input className="ainp" value={pageData.slug} onChange={(e) => setPageData(d=>({...d,slug:e.target.value}))} placeholder="principal-message" /></div>
                     }
                   </div>
                   <div style={{ background: BG, borderRadius: 12, padding: 18, marginBottom: 14 }}>
@@ -2220,9 +2185,9 @@ function AdminPanelInner({
                       </div>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                      <div><label className="alabel">Meta Title</label><input className="ainp" value={seoData.metaTitle} onChange={e=>setSeoData(d=>({...d,metaTitle:e.target.value}))} placeholder="GNC Dhanbad | Principal" /></div>
-                      <div><label className="alabel">Keywords</label><input className="ainp" value={seoData.keywords} onChange={e=>setSeoData(d=>({...d,keywords:e.target.value}))} placeholder="GNC, principal, Dhanbad" /></div>
-                      <div style={{ gridColumn: '1/-1' }}><label className="alabel">Meta Description (50+ chars)</label><textarea className="ainp" rows={2} value={seoData.metaDesc} onChange={e=>setSeoData(d=>({...d,metaDesc:e.target.value}))} placeholder="Describe this page..." /></div>
+                      <div><label className="alabel">Meta Title</label><input className="ainp" value={seoData.metaTitle} onChange={(e) => setSeoData(d=>({...d,metaTitle:e.target.value}))} placeholder="GNC Dhanbad | Principal" /></div>
+                      <div><label className="alabel">Keywords</label><input className="ainp" value={seoData.keywords} onChange={(e) => setSeoData(d=>({...d,keywords:e.target.value}))} placeholder="GNC, principal, Dhanbad" /></div>
+                      <div style={{ gridColumn: '1/-1' }}><label className="alabel">Meta Description (50+ chars)</label><textarea className="ainp" rows={2} value={seoData.metaDesc} onChange={(e) => setSeoData(d=>({...d,metaDesc:e.target.value}))} placeholder="Describe this page..." /></div>
                     </div>
                   </div>
                   <div style={{ marginBottom: 14 }}>
@@ -2258,7 +2223,6 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── GALLERY ──────────────────────────────────────────── */}
           {tab === 'gallery' && (
             <div className="fade-up">
               <p className="asec">📸 Photo Gallery</p>
@@ -2266,8 +2230,8 @@ function AdminPanelInner({
               <div className="card-navy">
                 <form onSubmit={saveGallery}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-                    <div><label className="alabel">Title *</label><input className="ainp" value={galData.title} onChange={e=>setGalData(d=>({...d,title:e.target.value}))} placeholder="Annual Function 2024" required /></div>
-                    <div><label className="alabel">Category</label><select className="ainp" value={galData.cat} onChange={e=>setGalData(d=>({...d,cat:e.target.value}))}>{['Seminars','Cultural','NSS','Sports','Campus','Departments','Achievements'].map(c=><option key={c}>{c}</option>)}</select></div>
+                    <div><label className="alabel">Title *</label><input className="ainp" value={galData.title} onChange={(e) => setGalData(d=>({...d,title:e.target.value}))} placeholder="Annual Function 2024" required /></div>
+                    <div><label className="alabel">Category</label><select className="ainp" value={galData.cat} onChange={(e) => setGalData(d=>({...d,cat:e.target.value}))}>{['Seminars','Cultural','NSS','Sports','Campus','Departments','Achievements'].map(c=><option key={c}>{c}</option>)}</select></div>
                   </div>
                   <MediaPicker
                     label="Gallery Photo"
@@ -2302,7 +2266,6 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── NOTICES ──────────────────────────────────────────── */}
           {tab === 'notices' && (
             <div className="fade-up">
               <p className="asec">📢 Notice Board</p>
@@ -2310,9 +2273,9 @@ function AdminPanelInner({
               <div className="card-gold">
                 <div className="actitle">{editNotice ? '✏️ Edit Notice' : '➕ Publish Notice'}</div>
                 <form onSubmit={saveNotice}>
-                  <div style={{ marginBottom: 14 }}><label className="alabel">Notice Text *</label><textarea className="ainp" rows={3} value={noticeData.text || ''} onChange={e=>setNoticeData(d=>({...d,text:e.target.value}))} required placeholder="Notice content..." /></div>
+                  <div style={{ marginBottom: 14 }}><label className="alabel">Notice Text *</label><textarea className="ainp" rows={3} value={noticeData.text || ''} onChange={(e) => setNoticeData(d=>({...d,text:e.target.value}))} required placeholder="Notice content..." /></div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 14, marginBottom: 14 }}>
-                    <div><label className="alabel">Type</label><select className="ainp" value={noticeData.type || 'General'} onChange={e=>setNoticeData(d=>({...d,type:e.target.value}))}>{['General','Examination','Admission','Result','Holiday','Scholarship','Sports'].map(t=><option key={t}>{t}</option>)}</select></div>
+                    <div><label className="alabel">Type</label><select className="ainp" value={noticeData.type || 'General'} onChange={(e) => setNoticeData(d=>({...d,type:e.target.value}))}>{['General','Examination','Admission','Result','Holiday','Scholarship','Sports'].map(t=><option key={t}>{t}</option>)}</select></div>
                     <div style={{ gridColumn: '1/-1' }}>
                       <MediaPicker
                         label="Link (PDF ya Document URL — optional)"
@@ -2339,7 +2302,7 @@ function AdminPanelInner({
                 <div className="actitle">All Notices ({(notices||[]).length})</div>
                 {(notices||[]).filter(n=>!noticeSearch||n.text?.toLowerCase().includes(noticeSearch.toLowerCase())).map(n => (
                   <div key={n.id} className={`arow ${noticeSel.includes(n.id)?'selected':''}`} style={{ borderLeft: `4px solid ${n.pinned?NAVY:n.isNew?T.red:T.b2}` }}>
-                    <input type="checkbox" checked={noticeSel.includes(n.id)} onChange={()=>setNoticeSel(s=>s.includes(n.id)?s.filter(x=>x!==n.id):[...s,n.id])} style={{ accentColor: NAVY }} />
+                    <input type="checkbox" checked={noticeSel.includes(n.id)} onChange={() => setNoticeSel(s=>s.includes(n.id)?s.filter(x=>x!==n.id):[...s,n.id])} style={{ accentColor: NAVY }} />
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', gap: 6, marginBottom: 5, flexWrap: 'wrap' }}>
                         {n.pinned && <span className="abadge" style={{ background: `${NAVY}15`, color: NAVY }}>📌 Pinned</span>}
@@ -2359,16 +2322,15 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── NEWS ─────────────────────────────────────────────── */}
           {tab === 'announcements' && (
             <div className="fade-up">
               <p className="asec">📣 News & Announcements</p>
               <p className="asub">College news, achievements aur updates</p>
               <div className="card-gold">
                 <form onSubmit={saveAnn}>
-                  <div style={{ marginBottom: 14 }}><label className="alabel">News Text *</label><textarea className="ainp" rows={3} value={annData.text || ''} onChange={e=>setAnnData(d=>({...d,text:e.target.value}))} required placeholder="News content..." /></div>
+                  <div style={{ marginBottom: 14 }}><label className="alabel">News Text *</label><textarea className="ainp" rows={3} value={annData.text || ''} onChange={(e) => setAnnData(d=>({...d,text:e.target.value}))} required placeholder="News content..." /></div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-                    <div><label className="alabel">Type</label><select className="ainp" value={annData.type || 'News'} onChange={e=>setAnnData(d=>({...d,type:e.target.value}))}>{['News','Achievement','Update','Result','Award'].map(t=><option key={t}>{t}</option>)}</select></div>
+                    <div><label className="alabel">Type</label><select className="ainp" value={annData.type || 'News'} onChange={(e) => setAnnData(d=>({...d,type:e.target.value}))}>{['News','Achievement','Update','Result','Award'].map(t=><option key={t}>{t}</option>)}</select></div>
                     <div>
                       <MediaPicker
                         label="Link (News article ya PDF — optional)"
@@ -2403,7 +2365,6 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── DOCUMENTS ────────────────────────────────────────── */}
           {tab === 'documents' && (
             <div className="fade-up">
               <p className="asec">📁 Document Archive</p>
@@ -2412,7 +2373,7 @@ function AdminPanelInner({
                 <div className="actitle">{editDoc ? '✏️ Edit Document' : '➕ Add Document'}</div>
                 <form onSubmit={saveDoc}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
-                    <div><label className="alabel">Title *</label><input className="ainp" value={docData.title || ''} onChange={e=>setDocData(d=>({...d,title:e.target.value}))} placeholder="NAAC Self Study Report" required /></div>
+                    <div><label className="alabel">Title *</label><input className="ainp" value={docData.title || ''} onChange={(e) => setDocData(d=>({...d,title:e.target.value}))} placeholder="NAAC Self Study Report" required /></div>
                     <div style={{ gridColumn: '1/-1' }}>
                       <MediaPicker
                         label="PDF Link * (Google Drive public link ya public/pdfs/ path)"
@@ -2424,7 +2385,7 @@ function AdminPanelInner({
                     </div>
                     <div>
                       <label className="alabel">Type (Documents page pe filter hoga)</label>
-                      <select className="ainp" value={docData.type || 'Document'} onChange={e=>setDocData(d=>({...d,type:e.target.value}))}>
+                      <select className="ainp" value={docData.type || 'Document'} onChange={(e) => setDocData(d=>({...d,type:e.target.value}))}>
                         <option value="Document">📄 Document — General Documents</option>
                         <option value="Report">📊 Report — Annual/IQAC Reports</option>
                         <option value="Syllabus">📚 Syllabus — Course Syllabus</option>
@@ -2438,7 +2399,7 @@ function AdminPanelInner({
                       <label className="alabel" style={{color:'#f4a023',fontWeight:900}}>
                         🎯 Target Page * — Kaunse page pe dikhega?
                       </label>
-                      <select className="ainp" value={docData.targetPage || ''} onChange={e=>setDocData(d=>({...d,targetPage:e.target.value}))}>
+                      <select className="ainp" value={docData.targetPage || ''} onChange={(e) => setDocData(d=>({...d,targetPage:e.target.value}))}>
                         <option value="">— Sirf /documents page pe (General Archive) —</option>
                         <optgroup label="📊 NAAC">
                           <option value="cycle-1">NAAC SSR 1st Cycle (/naac/ssr-1st-cycle)</option>
@@ -2488,7 +2449,7 @@ function AdminPanelInner({
                 <div className="actitle">All Documents ({(pdfReports||[]).length})</div>
                 {(pdfReports||[]).filter(d=>!docSearch||d.title?.toLowerCase().includes(docSearch.toLowerCase())).map(d => (
                   <div key={d.id} className={`arow ${docSel.includes(d.id)?'selected':''}`}>
-                    <input type="checkbox" checked={docSel.includes(d.id)} onChange={()=>setDocSel(s=>s.includes(d.id)?s.filter(x=>x!==d.id):[...s,d.id])} style={{ accentColor: NAVY }} />
+                    <input type="checkbox" checked={docSel.includes(d.id)} onChange={() => setDocSel(s=>s.includes(d.id)?s.filter(x=>x!==d.id):[...s,d.id])} style={{ accentColor: NAVY }} />
                     <span style={{ fontSize: 24 }}>📄</span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 800, color: NAVY }}>{d.title}</div>
@@ -2509,7 +2470,6 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── EVENTS ───────────────────────────────────────────── */}
           {tab === 'events' && (
             <div className="fade-up">
               <p className="asec">🏆 Campus Events</p>
@@ -2518,12 +2478,12 @@ function AdminPanelInner({
                 <div className="actitle">{editEvent ? '✏️ Edit Event' : '🎉 Add Event'}</div>
                 <form onSubmit={saveEvent}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 14, marginBottom: 14 }}>
-                    <div><label className="alabel">Title *</label><input className="ainp" value={evtData.title || ''} onChange={e=>setEvtData(d=>({...d,title:e.target.value}))} required placeholder="Annual Sports Day" /></div>
-                    <div><label className="alabel">Type</label><select className="ainp" value={evtData.type || 'WORKSHOP'} onChange={e=>setEvtData(d=>({...d,type:e.target.value}))}>{['WORKSHOP','SEMINAR','CULTURAL','SPORTS','NSS','NCC','ACADEMIC','AWARD'].map(t=><option key={t}>{t}</option>)}</select></div>
-                    <div><label className="alabel">Day</label><input className="ainp" value={evtData.day || ''} onChange={e=>setEvtData(d=>({...d,day:e.target.value}))} placeholder="24" /></div>
-                    <div><label className="alabel">Month</label><input className="ainp" value={evtData.month || ''} onChange={e=>setEvtData(d=>({...d,month:e.target.value}))} placeholder="MAR" /></div>
-                    <div><label className="alabel">Location</label><input className="ainp" value={evtData.location || ''} onChange={e=>setEvtData(d=>({...d,location:e.target.value}))} placeholder="Seminar Hall" /></div>
-                    <div><label className="alabel">Status</label><select className="ainp" value={evtData.status || 'upcoming'} onChange={e=>setEvtData(d=>({...d,status:e.target.value}))}><option value="upcoming">Upcoming</option><option value="recent">Recent / Past</option></select></div>
+                    <div><label className="alabel">Title *</label><input className="ainp" value={evtData.title || ''} onChange={(e) => setEvtData(d=>({...d,title:e.target.value}))} required placeholder="Annual Sports Day" /></div>
+                    <div><label className="alabel">Type</label><select className="ainp" value={evtData.type || 'WORKSHOP'} onChange={(e) => setEvtData(d=>({...d,type:e.target.value}))}>{['WORKSHOP','SEMINAR','CULTURAL','SPORTS','NSS','NCC','ACADEMIC','AWARD'].map(t=><option key={t}>{t}</option>)}</select></div>
+                    <div><label className="alabel">Day</label><input className="ainp" value={evtData.day || ''} onChange={(e) => setEvtData(d=>({...d,day:e.target.value}))} placeholder="24" /></div>
+                    <div><label className="alabel">Month</label><input className="ainp" value={evtData.month || ''} onChange={(e) => setEvtData(d=>({...d,month:e.target.value}))} placeholder="MAR" /></div>
+                    <div><label className="alabel">Location</label><input className="ainp" value={evtData.location || ''} onChange={(e) => setEvtData(d=>({...d,location:e.target.value}))} placeholder="Seminar Hall" /></div>
+                    <div><label className="alabel">Status</label><select className="ainp" value={evtData.status || 'upcoming'} onChange={(e) => setEvtData(d=>({...d,status:e.target.value}))}><option value="upcoming">Upcoming</option><option value="recent">Recent / Past</option></select></div>
                   </div>
                   {evtData.status === 'recent' && (
                     <div style={{ background: BG, padding: 16, borderRadius: 12, marginBottom: 14 }}>
@@ -2546,8 +2506,8 @@ function AdminPanelInner({
                   <div style={{ marginBottom: 14 }}>
                     <label className="alabel">Description</label>
                     <Suspense fallback={<div className="ainp" style={{height:200,display:'flex',alignItems:'center',justifyContent:'center',color:T.t3}}>⏳ Editor loading...</div>}>
-  <JoditEditor value={evtData.desc || ''} config={joditCfg} onBlur={c=>setEvtData(d=>({...d,desc:c}))} />
-</Suspense>
+                      <JoditEditor value={evtData.desc || ''} config={joditCfg} onBlur={c=>setEvtData(d=>({...d,desc:c}))} />
+                    </Suspense>
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
                     <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editEvent?'Update':'Publish'} Event</button>
@@ -2561,7 +2521,7 @@ function AdminPanelInner({
                 <div className="actitle">Events ({(events||[]).length})</div>
                 {(events||[]).filter(e=>!evtSearch||e.title?.toLowerCase().includes(evtSearch.toLowerCase())).map(e => (
                   <div key={e.id} className={`arow ${evtSel.includes(e.id)?'selected':''}`} style={{ borderLeft: `4px solid ${T.purple}` }}>
-                    <input type="checkbox" checked={evtSel.includes(e.id)} onChange={()=>setEvtSel(s=>s.includes(e.id)?s.filter(x=>x!==e.id):[...s,e.id])} style={{ accentColor: NAVY }} />
+                    <input type="checkbox" checked={evtSel.includes(e.id)} onChange={() => setEvtSel(s=>s.includes(e.id)?s.filter(x=>x!==e.id):[...s,e.id])} style={{ accentColor: NAVY }} />
                     {e.imageUrl && <img src={e.imageUrl} alt="" style={{ width: 60, height: 45, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />}
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', gap: 6, marginBottom: 4 }}>
@@ -2582,7 +2542,6 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── YOUTUBE ──────────────────────────────────────────── */}
           {tab === 'youtube' && (
             <div className="fade-up">
               <p className="asec">▶️ YouTube Manager</p>
@@ -2599,22 +2558,22 @@ function AdminPanelInner({
                 </div>
                 <form onSubmit={saveYt}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 14, marginBottom: 14 }}>
-                    <div><label className="alabel">API Key *</label><input className="ainp" value={ytCfg.apiKey} onChange={e=>setYtCfg(d=>({...d,apiKey:e.target.value}))} placeholder="AIzaSyxxxxxxxxx" type="password" /></div>
-                    <div><label className="alabel">Channel ID *</label><input className="ainp" value={ytCfg.channelId} onChange={e=>setYtCfg(d=>({...d,channelId:e.target.value}))} placeholder="UCxxxxxxxxxxxxxxxxx" /></div>
+                    <div><label className="alabel">API Key *</label><input className="ainp" value={ytCfg.apiKey} onChange={(e) => setYtCfg(d=>({...d,apiKey:e.target.value}))} placeholder="AIzaSyxxxxxxxxx" type="password" /></div>
+                    <div><label className="alabel">Channel ID *</label><input className="ainp" value={ytCfg.channelId} onChange={(e) => setYtCfg(d=>({...d,channelId:e.target.value}))} placeholder="UCxxxxxxxxxxxxxxxxx" /></div>
                     <div style={{ gridColumn: '1/-1' }}>
-  <label className="alabel">
-    Manual Video IDs (optional — API key ke bina bhi kaam karega)
-  </label>
-  <textarea className="ainp" rows={3}
-    value={ytCfg.videoIds || ''}
-    onChange={e => setYtCfg(d => ({ ...d, videoIds: e.target.value }))}
-    placeholder={"dQw4w9WgXcQ\nabc123xyz\n...ek line mein ek Video ID"}
-  />
-  <p style={{ fontSize: 11, color: '#94a3b8', margin: '4px 0 0' }}>
-    💡 YouTube video URL mein <code>watch?v=</code> ke baad wala ID copy karo. Homepage pe yahi videos dikhenge.
-  </p>
-</div>
-                    <div><label className="alabel">Videos to fetch</label><select className="ainp" value={ytCfg.maxResults} onChange={e=>setYtCfg(d=>({...d,maxResults:+e.target.value}))}>{[6,9,12,15,18,24].map(n=><option key={n} value={n}>{n} videos</option>)}</select></div>
+                      <label className="alabel">
+                        Manual Video IDs (optional — API key ke bina bhi kaam karega)
+                      </label>
+                      <textarea className="ainp" rows={3}
+                        value={ytCfg.videoIds || ''}
+                        onChange={(e) => setYtCfg(d => ({ ...d, videoIds: e.target.value }))}
+                        placeholder={"dQw4w9WgXcQ\nabc123xyz\n...ek line mein ek Video ID"}
+                      />
+                      <p style={{ fontSize: 11, color: '#94a3b8', margin: '4px 0 0' }}>
+                        💡 YouTube video URL mein <code>watch?v=</code> ke baad wala ID copy karo. Homepage pe yahi videos dikhenge.
+                      </p>
+                    </div>
+                    <div><label className="alabel">Videos to fetch</label><select className="ainp" value={ytCfg.maxResults} onChange={(e) => setYtCfg(d=>({...d,maxResults:+e.target.value}))}>{[6,9,12,15,18,24].map(n=><option key={n} value={n}>{n} videos</option>)}</select></div>
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
                     <button type="submit" className="abtn abtn-navy" disabled={loading}>💾 Save Config</button>
@@ -2626,7 +2585,6 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── DRIVE ────────────────────────────────────────────── */}
           {tab === 'drive' && (
             <div className="fade-up">
               <p className="asec">☁️ Google Drive Sync</p>
@@ -2643,9 +2601,9 @@ function AdminPanelInner({
                 </div>
                 <form onSubmit={saveDrive}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 14, marginBottom: 14 }}>
-                    <div><label className="alabel">Google API Key *</label><input className="ainp" value={driveCfg.apiKey} onChange={e=>setDriveCfg(d=>({...d,apiKey:e.target.value}))} placeholder="AIzaSyxxxxxxxxx" type="password" /></div>
-                    <div><label className="alabel">Folder ID *</label><input className="ainp" value={driveCfg.folderId} onChange={e=>setDriveCfg(d=>({...d,folderId:e.target.value}))} placeholder="1BxxxxxxxxxxxxxFolderID" /></div>
-                    <div><label className="alabel">Folder Display Name</label><input className="ainp" value={driveCfg.folderName} onChange={e=>setDriveCfg(d=>({...d,folderName:e.target.value}))} placeholder="GNC Documents 2024" /></div>
+                    <div><label className="alabel">Google API Key *</label><input className="ainp" value={driveCfg.apiKey} onChange={(e) => setDriveCfg(d=>({...d,apiKey:e.target.value}))} placeholder="AIzaSyxxxxxxxxx" type="password" /></div>
+                    <div><label className="alabel">Folder ID *</label><input className="ainp" value={driveCfg.folderId} onChange={(e) => setDriveCfg(d=>({...d,folderId:e.target.value}))} placeholder="1BxxxxxxxxxxxxxFolderID" /></div>
+                    <div><label className="alabel">Folder Display Name</label><input className="ainp" value={driveCfg.folderName} onChange={(e) => setDriveCfg(d=>({...d,folderName:e.target.value}))} placeholder="GNC Documents 2024" /></div>
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
                     <button type="submit" className="abtn abtn-navy" disabled={loading}>💾 Save Config</button>
@@ -2669,7 +2627,6 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── SITE SETTINGS ────────────────────────────────────── */}
           {tab === 'settings' && (
             <div className="fade-up">
               <p className="asec">⚙️ Site Settings</p>
@@ -2680,7 +2637,7 @@ function AdminPanelInner({
                   {[['name','College Name'],['tagline','Tagline'],['address','Address'],['phone','Phone'],['email','Email']].map(([key, lbl]) => (
                     <div key={key} className="settings-row">
                       <label className="alabel" style={{ minWidth: 140, margin: 0 }}>{lbl}</label>
-                      <input className="ainp" value={siteCfg[key]||''} onChange={e=>setSiteCfg(d=>({...d,[key]:e.target.value}))} type={key==='email'?'email':'text'} />
+                      <input className="ainp" value={siteCfg[key]||''} onChange={(e) => setSiteCfg(d=>({...d,[key]:e.target.value}))} type={key==='email'?'email':'text'} />
                     </div>
                   ))}
                 </div>
@@ -2689,7 +2646,7 @@ function AdminPanelInner({
                   {['facebook','twitter','youtube','linkedin'].map(s => (
                     <div key={s} className="settings-row">
                       <label className="alabel" style={{ minWidth: 140, margin: 0, textTransform: 'capitalize' }}>{s}</label>
-                      <input className="ainp" value={siteCfg[s]||''} onChange={e=>setSiteCfg(d=>({...d,[s]:e.target.value}))} placeholder={`https://${s}.com/...`} />
+                      <input className="ainp" value={siteCfg[s]||''} onChange={(e) => setSiteCfg(d=>({...d,[s]:e.target.value}))} placeholder={`https://${s}.com/...`} />
                     </div>
                   ))}
                 </div>
@@ -2697,11 +2654,11 @@ function AdminPanelInner({
                   <div className="settings-group-title">🔧 Advanced</div>
                   <div className="settings-row">
                     <label className="alabel" style={{ minWidth: 140, margin: 0 }}>Footer Text</label>
-                    <input className="ainp" value={siteCfg.footerText||''} onChange={e=>setSiteCfg(d=>({...d,footerText:e.target.value}))} placeholder="© 2024 Guru Nanak College" />
+                    <input className="ainp" value={siteCfg.footerText||''} onChange={(e) => setSiteCfg(d=>({...d,footerText:e.target.value}))} placeholder="© 2024 Guru Nanak College" />
                   </div>
                   <div className="settings-row">
                     <label className="alabel" style={{ minWidth: 140, margin: 0 }}>Maintenance Mode</label>
-                    <Toggle checked={siteCfg.maintenanceMode||false} onChange={()=>setSiteCfg(d=>({...d,maintenanceMode:!d.maintenanceMode}))} label={siteCfg.maintenanceMode ? '🔴 Site is DOWN for maintenance' : '🟢 Site is LIVE'} color={T.red} />
+                    <Toggle checked={siteCfg.maintenanceMode||false} onChange={() => setSiteCfg(d=>({...d,maintenanceMode:!d.maintenanceMode}))} label={siteCfg.maintenanceMode ? '🔴 Site is DOWN for maintenance' : '🟢 Site is LIVE'} color={T.red} />
                   </div>
                 </div>
                 <div className="settings-group">
@@ -2714,7 +2671,7 @@ function AdminPanelInner({
                   </div>
                   <div className="settings-row">
                     <label className="alabel" style={{ minWidth: 140, margin: 0 }}>ImgBB API Key</label>
-                    <input className="ainp" value={siteCfg.imgbbKey||''} onChange={e=>{const k=e.target.value; setSiteCfg(d=>({...d,imgbbKey:k})); setImgbbKey(k);}} placeholder="Paste your ImgBB API key here..." style={{ fontFamily: 'monospace' }} />
+                    <input className="ainp" value={siteCfg.imgbbKey||''} onChange={(e) => {const k=e.target.value; setSiteCfg(d=>({...d,imgbbKey:k})); setImgbbKey(k);}} placeholder="Paste your ImgBB API key here..." style={{ fontFamily: 'monospace' }} />
                   </div>
                   {siteCfg.imgbbKey && (
                     <div style={{ fontSize: 12, color: '#065f46', background: '#d1fae5', padding: '6px 12px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
@@ -2727,12 +2684,10 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── CONTACT SETTINGS ─────────────────────────────────── */}
           {tab === 'contact' && (
             <ContactSettingsTab />
           )}
 
-          {/* ── ACTIVITY LOG ─────────────────────────────────────── */}
           {tab === 'activity' && (
             <div className="fade-up">
               <p className="asec">📋 Activity Log</p>
@@ -2761,7 +2716,6 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── BACKUP ───────────────────────────────────────────── */}
           {tab === 'backup' && (
             <div className="fade-up">
               <p className="asec">💾 Backup & Restore</p>
@@ -2777,13 +2731,12 @@ function AdminPanelInner({
                   <div style={{ fontWeight: 900, color: T.red, marginBottom: 6 }}>⚠️ DANGER ZONE</div>
                   <p style={{ color: '#b91c1c', margin: 0, fontSize: 13 }}>This will COMPLETELY ERASE all current data and replace with backup. Cannot be undone.</p>
                 </div>
-                <div style={{ marginBottom: 20 }}><label className="alabel">Select JSON Backup File</label><input ref={fileRef} type="file" accept=".json" className="ainp" onChange={e=>setRestoreFile(e.target.files[0])} /></div>
+                <div style={{ marginBottom: 20 }}><label className="alabel">Select JSON Backup File</label><input ref={fileRef} type="file" accept=".json" className="ainp" onChange={(e) => setRestoreFile(e.target.files[0])} /></div>
                 <button className="abtn abtn-red" style={{ background: T.red, color: WHITE, border: 'none' }} onClick={handleRestore} disabled={loading||!restoreFile}>🔥 Restore Database</button>
               </div>
             </div>
           )}
 
-          {/* ── SYSTEM TEST ──────────────────────────────────────── */}
           {tab === 'system_test' && (
             <div className="fade-up">
               <p className="asec">🛡️ System Test Suite</p>
@@ -2895,11 +2848,9 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── PREVIEW MODAL ─────────────────────────────────────── */}
           {showPreview && (
             <div style={{ position:'fixed', inset:0, background:'rgba(15,35,71,.75)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100001, backdropFilter:'blur(6px)' }}>
               <div style={{ background:WHITE, width:'94%', maxWidth:960, height:'90vh', borderRadius:18, display:'flex', flexDirection:'column', overflow:'hidden', boxShadow:'0 30px 60px rgba(0,0,0,.35)' }}>
-                {/* Preview header */}
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'14px 24px', borderBottom:`1px solid ${T.b1}`, flexShrink:0 }}>
                   <div style={{ display:'flex', alignItems:'center', gap:10 }}>
                     <div style={{ fontWeight:900, color:NAVY, fontSize:15 }}>👁️ Live Preview</div>
@@ -2909,7 +2860,6 @@ function AdminPanelInner({
                   </div>
                   <button onClick={()=>setShowPreview(false)} className="abtn abtn-outline abtn-sm">✕ Close</button>
                 </div>
-                {/* Fake page hero */}
                 <div style={{ background:'linear-gradient(135deg,#0f2347 0%,#1a3a7c 60%,#0f2347 100%)', padding:'28px 32px', textAlign:'center', flexShrink:0, position:'relative' }}>
                   <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:'linear-gradient(90deg,#f4a023,#ffd57e,#f4a023)' }} />
                   <div style={{ color:'#fff', fontWeight:900, fontSize:'1.2rem', fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif" }}>
@@ -2917,7 +2867,6 @@ function AdminPanelInner({
                   </div>
                   <div style={{ width:40, height:3, background:'#f4a023', borderRadius:2, margin:'8px auto 0' }} />
                 </div>
-                {/* Content with gnc-prose styles */}
                 <div style={{ overflowY:'auto', flex:1, padding:'32px 40px', background:'#f8fafc' }}>
                   <style>{`
                     .prev-prose { font-family:'Plus Jakarta Sans','DM Sans',system-ui,sans-serif; font-size:15px; line-height:1.8; color:#334155; }
@@ -2960,7 +2909,6 @@ function AdminPanelInner({
             </div>
           )}
 
-          {/* ── KEYBOARD SHORTCUTS ────────────────────────────────── */}
           {showKeyHelp && (
             <div style={{ position:'fixed', inset:0, background:'rgba(15,35,71,.6)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100001, backdropFilter:'blur(4px)' }} onClick={()=>setShowKeyHelp(false)}>
               <div style={{ background:WHITE, borderRadius:18, padding:'28px 32px', width:440, boxShadow:'0 20px 50px rgba(0,0,0,.2)' }} onClick={e=>e.stopPropagation()}>
@@ -2976,8 +2924,8 @@ function AdminPanelInner({
             </div>
           )}
 
-        </div>{/* end adm-content */}
-      </div>{/* end adm-main */}
+        </div>
+      </div>
     </div>
   );
 }

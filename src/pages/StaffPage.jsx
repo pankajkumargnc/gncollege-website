@@ -39,7 +39,7 @@ export default function StaffPage({ faculties }) {
         <h1 style={{ fontSize: 'clamp(28px,5vw,42px)', fontWeight: 900, margin: '0 0 12px', letterSpacing: '-0.5px' }}>
           {label} Staff
         </h1>
-        <p style={{ color: '#cbd5e1', fontSize: 15, margin: 0 }}>
+        <p style={{ color: '#cbd5e1', fontSize: 15, margin: 0, textAlign: 'center' }}>
           Guru Nanak College, Dhanbad — Total: {filteredStaff.length} members
         </p>
       </div>

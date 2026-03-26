@@ -6,7 +6,6 @@
 //
 //  INTEGRATION: (same as before)
 //  1. src/components/AdminDepartmentTab.jsx
-//  2. AdminPanel.jsx mein: import AdminDepartmentTab from './AdminDepartmentTab'
 //  3. TABS array:  { id: 'departments', icon: '🏛️', label: 'Departments', section: '' }
 //  4. Render:      {tab === 'departments' && <Suspense ...><AdminDepartmentTab /></Suspense>}
 // ═══════════════════════════════════════════════════════════════════════
@@ -44,7 +43,7 @@ const TEA = { ...INP, resize: 'vertical', minHeight: 80 };
 const Input = ({ label, ...p }) => (
   <div style={{ marginBottom: 16 }}>
     {label && <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 6, letterSpacing: '.3px' }}>{label}</div>}
-    <input style={INP} {...p} />
+    <input style={INP} {...p} name="field" />
   </div>
 );
 const Textarea = ({ label, ...p }) => (

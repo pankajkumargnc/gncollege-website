@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
+import PDFModal from '../components/PDFModal'; // ✅ PDF Modal Import
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -45,6 +46,7 @@ const PageHeader = ({ title, subtitle, icon }) => (
 ════════════════════════════════════════════════════════════ */
 export function IqacPage() {
   const [docs, setDocs] = useState([]);
+  const [selectedPdf, setSelectedPdf] = useState(null); // ✅ PDF Modal State
   
   useEffect(() => {
     const q = query(collection(db, 'pdfReports'), orderBy('createdAt', 'desc'));
@@ -86,7 +88,16 @@ export function IqacPage() {
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
                 {docs.map(d => (
-                  <a key={d.id} href={d.link} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 16, border: '1.5px solid #e2e8f0', borderRadius: 14, textDecoration: 'none', color: NAVY, transition: 'all 0.2s', background: '#f8fafc' }} onMouseEnter={e=>{e.currentTarget.style.borderColor=GOLD;e.currentTarget.style.background='#fff'}} onMouseLeave={e=>{e.currentTarget.style.borderColor='#e2e8f0';e.currentTarget.style.background='#f8fafc'}}>
+                  <a key={d.id} href={d.link} target="_blank" rel="noreferrer" 
+                    onClick={(e) => { 
+                      if (d.link && (d.link.includes('drive.google') || d.link.toLowerCase().endsWith('.pdf') || d.link.includes('firebase'))) {
+                        e.preventDefault(); 
+                        setSelectedPdf({ url: d.link, title: d.title || 'IQAC Report' }); 
+                      }
+                    }} 
+                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 16, border: '1.5px solid #e2e8f0', borderRadius: 14, textDecoration: 'none', color: NAVY, transition: 'all 0.2s', background: '#f8fafc' }} 
+                    onMouseEnter={e=>{e.currentTarget.style.borderColor=GOLD;e.currentTarget.style.background='#fff'}} 
+                    onMouseLeave={e=>{e.currentTarget.style.borderColor='#e2e8f0';e.currentTarget.style.background='#f8fafc'}}>
                     <div style={{ fontSize: 28 }}>📄</div>
                     <div style={{ flex: 1, fontWeight: 700, fontSize: 14 }}>{d.title}</div>
                     <div style={{ color: GOLD, fontWeight: 800 }}>↗</div>
@@ -97,6 +108,15 @@ export function IqacPage() {
           </div>
         </Fade>
       </div>
+
+      {/* ✅ Modal Render */}
+      {selectedPdf && (
+        <PDFModal 
+          url={selectedPdf.url} 
+          title={selectedPdf.title} 
+          onClose={() => setSelectedPdf(null)} 
+        />
+      )}
     </div>
   );
 }
@@ -107,7 +127,6 @@ export function IqacPage() {
 export function CourseOffered() {
   const [activeTab, setActiveTab] = useState('BCA');
   
-  // 🔥 UPDATED: User ke naye subjects aur categories ke hisaab se
   const courses = {
     'BCA': ['BCA (Computer Application)'],
     'BBA': ['BBA (Business Administration)'],
@@ -162,6 +181,7 @@ export function Syllabus() {
   const [syllabusList, setSyllabusList] = useState([]);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
+  const [selectedPdf, setSelectedPdf] = useState(null); // ✅ PDF Modal State
 
   useEffect(() => {
     const q = query(collection(db, 'pdfReports'), orderBy('createdAt', 'desc'));
@@ -172,13 +192,11 @@ export function Syllabus() {
     return () => unsub();
   }, []);
 
-  // Filter logic: Checks if syllabus title contains the exact filter string
   const filtered = syllabusList.filter(s => 
     (filter === 'All' || (s.title || '').toLowerCase().includes(filter.toLowerCase())) &&
     (s.title || '').toLowerCase().includes(search.toLowerCase())
   );
 
-  // 🔥 Yahan aapke naye specific subjects ka array laga diya gaya hai
   const filterOptions = [
     'All', 'BCA', 'BBA', 'Commerce', 'Hindi', 'English', 
     'History', 'Political Science', 'Psychology', 'Economics'
@@ -194,7 +212,6 @@ export function Syllabus() {
             <input type="text" placeholder="🔍 Search subject or semester... (e.g., BCA Sem 1)" value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%', padding: '16px 20px', borderRadius: 12, border: '1.5px solid #e2e8f0', fontSize: 16, outline: 'none', background: '#f8fafc', color: NAVY, fontWeight: 600, boxSizing: 'border-box' }} />
             
             <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
-              {/* Naye options map ho rahe hain */}
               {filterOptions.map(f => (
                 <button 
                   key={f} 
@@ -231,7 +248,14 @@ export function Syllabus() {
                       <div style={{ fontSize: 12, color: '#64748b', marginTop: 4, fontWeight: 600 }}>NEP 2022 Format</div>
                     </div>
                   </div>
-                  <a href={s.link} target="_blank" rel="noreferrer" style={{ display: 'block', textAlign: 'center', background: `linear-gradient(135deg, ${NAVY}, #1a3a7c)`, color: '#fff', padding: '10px', borderRadius: 10, textDecoration: 'none', fontWeight: 800, fontSize: 14 }}>
+                  <a href={s.link} target="_blank" rel="noreferrer" 
+                    onClick={(e) => { 
+                      if (s.link && (s.link.includes('drive.google') || s.link.toLowerCase().endsWith('.pdf') || s.link.includes('firebase'))) {
+                        e.preventDefault(); 
+                        setSelectedPdf({ url: s.link, title: s.title || 'Syllabus' }); 
+                      }
+                    }} 
+                    style={{ display: 'block', textAlign: 'center', background: `linear-gradient(135deg, ${NAVY}, #1a3a7c)`, color: '#fff', padding: '10px', borderRadius: 10, textDecoration: 'none', fontWeight: 800, fontSize: 14 }}>
                     📥 Download PDF
                   </a>
                 </div>
@@ -240,6 +264,15 @@ export function Syllabus() {
           )}
         </Fade>
       </div>
+
+      {/* ✅ Modal Render */}
+      {selectedPdf && (
+        <PDFModal 
+          url={selectedPdf.url} 
+          title={selectedPdf.title} 
+          onClose={() => setSelectedPdf(null)} 
+        />
+      )}
     </div>
   );
 }

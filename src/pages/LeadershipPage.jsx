@@ -84,6 +84,7 @@ const css = `
     font-size: 0.95rem;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     margin: 0 0 24px;
+    text-align: center;
   }
   .lp-hero-line {
     width: 56px; height: 3px; background: #f4a023;

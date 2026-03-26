@@ -3,10 +3,11 @@
 // Tables, headings, lists, blockquotes, images — sab premium dikhe
 // Admin ko kuch alag nahi karna — Jodit se normal content likho, yahan auto-styled
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import DOMPurify from 'dompurify';
+import PDFModal from './PDFModal'; // ✅ PDF Modal Import
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PREMIUM PROSE CSS — injected once, styles ALL Jodit HTML output
@@ -145,8 +146,6 @@ const PROSE_CSS = `
 
   /* ─────────────────────────────────────────────────────────────────────────
      ★ PREMIUM TABLE STYLES ★
-     Jodit editor ki plain table ko premium bana deta hai
-     Admin ko kuch alag nahi karna — sirf normal table insert karo Jodit mein
   ───────────────────────────────────────────────────────────────────────── */
   .gnc-prose table {
     width: 100%;
@@ -278,6 +277,35 @@ const wrapTablesForMobile = (html) => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// ✅ NEW: PDF Click Interceptor Hook
+// Yeh hook CMS content (Jodit HTML) ke andar ke clicks ko dhyan se dekhta hai.
+// Agar kisi ne PDF link par click kiya toh ye usse naye tab mein khulne se rok kar PDFModal mein open kar dega.
+// ─────────────────────────────────────────────────────────────────────────────
+const usePdfInterceptor = () => {
+  const [pdfPreview, setPdfPreview] = useState(null);
+
+  const handleContentClick = (e) => {
+    let target = e.target;
+    // Anchor tag find karne ke liye DOM tree mein thoda upar traverse karte hain
+    while (target && target.tagName !== 'A' && target !== e.currentTarget) {
+      target = target.parentNode;
+    }
+    
+    // Agar click <a> tag par hua tha
+    if (target && target.tagName === 'A') {
+      const href = target.getAttribute('href');
+      // Agar link PDF ya Google Drive ka hai toh intercept karo
+      if (href && (href.includes('drive.google.com') || href.toLowerCase().endsWith('.pdf') || href.includes('firebasestorage'))) {
+        e.preventDefault();
+        setPdfPreview({ url: href, title: target.innerText || 'Document Preview' });
+      }
+    }
+  };
+
+  return { pdfPreview, setPdfPreview, handleContentClick };
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Page Hero Banner
 // ─────────────────────────────────────────────────────────────────────────────
 const PageHero = ({ title }) => (
@@ -288,7 +316,6 @@ const PageHero = ({ title }) => (
     position: 'relative',
     overflow: 'hidden',
   }}>
-    {/* Decorative circles */}
     <div style={{
       position: 'absolute', top: -40, right: -40,
       width: 200, height: 200, borderRadius: '50%',
@@ -299,105 +326,69 @@ const PageHero = ({ title }) => (
       width: 140, height: 140, borderRadius: '50%',
       background: 'rgba(255,255,255,0.04)', pointerEvents: 'none',
     }} />
-
-    {/* Gold top-bar */}
     <div style={{
       position: 'absolute', top: 0, left: 0, right: 0,
-      height: 4,
-      background: 'linear-gradient(90deg, #f4a023, #ffd57e, #f4a023)',
+      height: 4, background: 'linear-gradient(90deg, #f4a023, #ffd57e, #f4a023)',
     }} />
-
     <h1 style={{
-      color: '#fff',
-      fontSize: 'clamp(1.4rem, 4vw, 2rem)',
-      fontWeight: 900,
-      letterSpacing: '-0.02em',
-      margin: 0,
-      lineHeight: 1.25,
+      color: '#fff', fontSize: 'clamp(1.4rem, 4vw, 2rem)',
+      fontWeight: 900, letterSpacing: '-0.02em', margin: 0, lineHeight: 1.25,
       fontFamily: "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif",
     }}>
       {title || 'Page'}
     </h1>
-
-    {/* Gold underline accent */}
     <div style={{
-      width: 60, height: 3,
-      background: '#f4a023',
-      borderRadius: 2,
-      margin: '12px auto 0',
+      width: 60, height: 3, background: '#f4a023',
+      borderRadius: 2, margin: '12px auto 0',
     }} />
   </div>
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// "Content not found" empty state
+// Empty State & Skeleton Loading
 // ─────────────────────────────────────────────────────────────────────────────
 const EmptyState = ({ path }) => (
-  <div style={{
-    textAlign: 'center',
-    padding: '80px 24px',
-    color: '#94a3b8',
-  }}>
+  <div style={{ textAlign: 'center', padding: '80px 24px', color: '#94a3b8' }}>
     <div style={{ fontSize: 56, marginBottom: 16 }}>📄</div>
-    <h3 style={{
-      color: '#64748b', fontWeight: 700, fontSize: '1.1rem', margin: '0 0 8px',
-      fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-    }}>
+    <h3 style={{ color: '#64748b', fontWeight: 700, fontSize: '1.1rem', margin: '0 0 8px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
       Content Coming Soon
     </h3>
     <p style={{ margin: 0, fontSize: 14 }}>
       Admin Panel → Pages & SEO → Add content for this page
     </p>
-    <code style={{
-      display: 'inline-block', marginTop: 12, background: '#f1f5f9',
-      border: '1px solid #e2e8f0', borderRadius: 6, padding: '4px 12px',
-      fontSize: 12, color: '#475569',
-    }}>
+    <code style={{ display: 'inline-block', marginTop: 12, background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 6, padding: '4px 12px', fontSize: 12, color: '#475569' }}>
       path: {path || window.location.hash?.replace('#', '') || '/'}
     </code>
   </div>
 );
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Loading Skeleton
-// ─────────────────────────────────────────────────────────────────────────────
 const Skeleton = () => (
   <div style={{ padding: '32px 24px' }}>
     {[100, 70, 90, 55, 80].map((w, i) => (
       <div key={i} style={{
-        height: i === 0 ? 20 : 14,
-        width: `${w}%`,
+        height: i === 0 ? 20 : 14, width: `${w}%`,
         background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)',
-        backgroundSize: '200% 100%',
-        borderRadius: 6,
-        marginBottom: i === 0 ? 24 : 12,
-        animation: 'gnc-shimmer 1.5s infinite',
+        backgroundSize: '200% 100%', borderRadius: 6,
+        marginBottom: i === 0 ? 24 : 12, animation: 'gnc-shimmer 1.5s infinite',
       }} />
     ))}
-    <style>{`
-      @keyframes gnc-shimmer {
-        0%   { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-      }
-    `}</style>
+    <style>{`@keyframes gnc-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
   </div>
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PageViewer — Main Export
+// PageViewer — Main Export (Passed as prop from App.jsx)
 // ─────────────────────────────────────────────────────────────────────────────
 const PageViewer = ({ page, loading: externalLoading }) => {
-  // CSS inject on mount
   useEffect(() => { injectProseCSS(); }, []);
+  
+  // ✅ Call the hook here so pdfPreview and handleContentClick exist
+  const { pdfPreview, setPdfPreview, handleContentClick } = usePdfInterceptor(); 
 
-  // loading — jab tak App.jsx se pages array empty hai
   if (externalLoading) {
     return (
       <div style={{ minHeight: '60vh', background: '#f8fafc' }}>
-        <div style={{
-          background: 'linear-gradient(135deg, #0f2347 0%, #1a3a7c 100%)',
-          padding: '52px 24px 40px', textAlign: 'center',
-        }}>
+        <div style={{ background: 'linear-gradient(135deg, #0f2347 0%, #1a3a7c 100%)', padding: '52px 24px 40px', textAlign: 'center' }}>
           <div style={{ height: 28, width: 240, background: 'rgba(255,255,255,0.15)', borderRadius: 8, margin: '0 auto' }} />
         </div>
         <div style={{ maxWidth: 900, margin: '0 auto' }}><Skeleton /></div>
@@ -405,50 +396,47 @@ const PageViewer = ({ page, loading: externalLoading }) => {
     );
   }
 
-  // page prop milta hai App.jsx ke placeholder routes se (null bhi valid hai — means no content yet)
   const content = page?.content;
   const title   = page?.title;
-  const safePath = typeof window !== 'undefined'
-    ? window.location.hash?.replace('#', '') || '/'
-    : '/';
+  const safePath = typeof window !== 'undefined' ? window.location.hash?.replace('#', '') || '/' : '/';
 
   return (
     <div style={{ minHeight: '60vh', background: '#f8fafc' }}>
       <PageHero title={title || 'Page'} />
-      <div style={{
-        maxWidth: 900, margin: '0 auto',
-        padding: '40px 24px 80px',
-      }}>
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 24px 80px' }}>
         {content ? (
           <div
             className="gnc-prose"
-            dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(wrapTablesForMobile(content))
-            }}
+            onClick={handleContentClick} // ✅ Intercept Clicks here
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(wrapTablesForMobile(content)) }}
           />
         ) : (
           <EmptyState path={safePath} />
         )}
       </div>
+
+      {/* ✅ PDF Modal Render */}
+      {pdfPreview && <PDFModal url={pdfPreview.url} title={pdfPreview.title} onClose={() => setPdfPreview(null)} />}
     </div>
   );
 };
 
-// Standalone version — fetches its own data
+// ─────────────────────────────────────────────────────────────────────────────
+// PageViewerStandalone — Standalone version fetching its own data
+// ─────────────────────────────────────────────────────────────────────────────
 export const PageViewerStandalone = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage]       = useState(null);
+  
+  // ✅ Call the hook here too
+  const { pdfPreview, setPdfPreview, handleContentClick } = usePdfInterceptor();
 
   useEffect(() => {
     injectProseCSS();
-    const hash     = window.location.hash?.replace('#', '') || '';
+    const hash = window.location.hash?.replace('#', '') || '';
     const currentPath = hash.startsWith('/') ? hash : '/' + hash;
 
-    const q = query(
-      collection(db, 'pages'),
-      orderBy('createdAt', 'desc')
-    );
-
+    const q = query(collection(db, 'pages'), orderBy('createdAt', 'desc'));
     const unsub = onSnapshot(q, snap => {
       const pages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       const found = pages.find(p => p.path === currentPath || p.slug === currentPath.replace('/', ''));
@@ -462,19 +450,10 @@ export const PageViewerStandalone = () => {
   if (loading) {
     return (
       <div style={{ minHeight: '60vh', background: '#f8fafc' }}>
-        <div style={{
-          background: 'linear-gradient(135deg, #0f2347 0%, #1a3a7c 100%)',
-          padding: '52px 24px 40px', textAlign: 'center',
-        }}>
-          <div style={{
-            height: 28, width: 240,
-            background: 'rgba(255,255,255,0.15)',
-            borderRadius: 8, margin: '0 auto',
-          }} />
+        <div style={{ background: 'linear-gradient(135deg, #0f2347 0%, #1a3a7c 100%)', padding: '52px 24px 40px', textAlign: 'center' }}>
+          <div style={{ height: 28, width: 240, background: 'rgba(255,255,255,0.15)', borderRadius: 8, margin: '0 auto' }} />
         </div>
-        <div style={{ maxWidth: 900, margin: '0 auto' }}>
-          <Skeleton />
-        </div>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}><Skeleton /></div>
       </div>
     );
   }
@@ -482,21 +461,20 @@ export const PageViewerStandalone = () => {
   return (
     <div style={{ minHeight: '60vh', background: '#f8fafc' }}>
       <PageHero title={page?.title || 'Page'} />
-      <div style={{
-        maxWidth: 900, margin: '0 auto',
-        padding: '40px 24px 80px',
-      }}>
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 24px 80px' }}>
         {page?.content ? (
           <div
             className="gnc-prose"
-            dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(wrapTablesForMobile(page.content))
-            }}
+            onClick={handleContentClick} // ✅ Intercept Clicks here
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(wrapTablesForMobile(page.content)) }}
           />
         ) : (
           <EmptyState />
         )}
       </div>
+
+      {/* ✅ PDF Modal Render */}
+      {pdfPreview && <PDFModal url={pdfPreview.url} title={pdfPreview.title} onClose={() => setPdfPreview(null)} />}
     </div>
   );
 };

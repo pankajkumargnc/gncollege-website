@@ -85,8 +85,6 @@
 
 <!-- ✅ Sirf 2 fonts — Inter (body) + Space Grotesk (headings) -->
 <!-- display=swap → page blank nahi rahega font load hone tak -->
-<link rel="preload" as="style"
-  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@700;800;900&display=swap" />
 <link rel="stylesheet"
   href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@700;800;900&display=swap"
   media="print" onload="this.media='all'" />
@@ -97,18 +95,7 @@
 </noscript>
 
     <!-- ✅ NEW: Hero + Logo preload — FCP/LCP dramatically improve होगा -->
-    <link rel="preload" as="image" href="/gncollege-website/images/logo.webp"
-          fetchpriority="high" />
-    <link rel="preload" as="image" href="/gncollege-website/images/college_photo.webp"
-          fetchpriority="high" />
     <!-- ✅ ADDED: First slider image preload — LCP fix (JS se pehle load hoga) -->
-    <link rel="preload" as="image"
-          href="/gncollege-website/images/slider_baisakhi.webp"
-          type="image/webp"
-          fetchpriority="high" />
-    <link rel="preload" as="image"
-          href="/gncollege-website/images/slider_baisakhi.webp"
-          fetchpriority="high" />
     <!-- 
       ⚠️ अगर hero slider images Firebase Storage से आती हैं तो
          ऊपर वाली college_photo.jpg line comment कर दें।

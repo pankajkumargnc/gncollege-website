@@ -8,28 +8,25 @@
 
 import { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { Link }         from 'react-router-dom';
-import { createPortal } from 'react-dom';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db }           from '../firebase';
 import { COLORS }       from '../styles/colors';
 import { SOCIAL_LINKS } from '../data/db';
 
 import HeroSlider          from '../components/HeroSlider';
-import PremiumTicker       from '../components/PremiumTicker';
 import HomeFeatures        from '../components/HomeFeatures';
 import SectionTitle        from '../components/home/SectionTitle';
 import NotificationSection from '../components/home/NotificationSection';
 import PlacementsSection   from '../components/home/PlacementsSection';
+import Ticker from "../components/Ticker";
+import PremiumTicker from "../components/PremiumTicker";
+
+// ✅ Naya Premium PDFModal import kiya
+import PDFModal from '../components/PDFModal';
 
 const N  = COLORS.navy     || '#0f2347';
 const G  = COLORS.gold     || '#f4a023';
-const ND = COLORS.navyDark || '#060e1c';
 
-const getEmbedUrl = (url = '') => {
-  if (url.includes('drive.google.com/file/d/'))
-    return `https://drive.google.com/file/d/${url.split('/d/')[1].split('/')[0]}/preview`;
-  return url;
-};
 const getEventImg = t => ({
   SEMINAR:  '/images/slider_seminar.webp',
   WORKSHOP: '/images/slider_ncc.webp',
@@ -240,16 +237,16 @@ const CSS = `
   .hp-ev-scroller{overflow:hidden;padding:20px 0;margin-top:28px;mask:linear-gradient(90deg,transparent,#fff 5%,#fff 95%,transparent);-webkit-mask:linear-gradient(90deg,transparent,#fff 5%,#fff 95%,transparent);}
   .hp-ev-track{display:flex;width:max-content;gap:28px;animation:hp-ev-scroll 36s linear infinite;will-change:transform;}
   .hp-ev-track:hover{animation-play-state:paused;}
-  .hp-ev-card{width:310px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.07);border:1px solid #edf2f7;transition:transform .35s,box-shadow .35s,border-color .35s;display:flex;flex-direction:column;}
+  .hp-ev-card{width:310px;height:350px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.07);border:1px solid #edf2f7;transition:transform .35s,box-shadow .35s,border-color .35s;display:flex;flex-direction:column;}
   .gc:hover .hp-ev-card{transform:translateY(-10px) scale(1.02);box-shadow:0 20px 40px rgba(15,35,71,.14);border-color:transparent;}
   .hp-ev-imgbox{position:relative;height:190px;overflow:hidden;}
   .hp-ev-img{width:100%;height:100%;object-fit:cover;transition:transform .55s;}
   .gc:hover .hp-ev-img{transform:scale(1.08);}
   .hp-ev-bdg{position:absolute;top:14px;right:14px;background:${G};color:#000;padding:4px 11px;font-size:9.5px;font-weight:800;border-radius:50px;text-transform:uppercase;z-index:2;letter-spacing:.5px;}
   .hp-ev-dt{position:absolute;bottom:0;left:0;background:${N};color:#fff;padding:8px 14px;border-top-right-radius:12px;z-index:2;}
-  .hp-ev-info{padding:20px;flex:1;display:flex;flex-direction:column;}
+  .hp-ev-info{padding:20px;height:250px;display:flex;flex-direction:column;overflow:hidden;}
   .hp-ev-title{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:800;color:${N};margin:0 0 9px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-  .hp-ev-desc{font-size:13px;color:#64748b;line-height:1.6;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;text-align:justify;}
+  .hp-ev-desc{font-size:13px;color:#64748b;line-height:1.6;height:63px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;text-align:justify;flex-shrink:0;}
   .hp-ev-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:12px;margin-top:14px;}
   .hp-ev-loc{font-size:11px;color:#94a3b8;font-weight:600;}
   .hp-ev-more{background:none;border:none;font-size:11px;color:${G};font-weight:800;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;}
@@ -309,13 +306,6 @@ const CSS = `
   .hp-yt-ph{background:#fff;border:1.5px solid #e2e8f0;border-radius:16px;height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
   .hp-yt-ph-icon{font-size:34px;opacity:.35;}
   .hp-yt-ph-txt{color:#94a3b8;font-size:13px;text-align:center;}
-
-  /* ── Modal ── */
-  .hp-modal-ov{position:fixed;inset:0;z-index:9999999;background:rgba(15,35,71,.95);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;}
-  .hp-modal-box{background:#fff;width:90%;max-width:1000px;height:85vh;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 60px rgba(0,0,0,.5);}
-  .hp-modal-head{padding:14px 22px;background:${N};color:#fff;display:flex;justify-content:space-between;align-items:center;font-weight:800;}
-  .hp-modal-close{background:rgba(255,255,255,.15);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background .2s;}
-  .hp-modal-close:hover{background:#e53e3e;}
 
   /* ── Responsive ── */
   @media(max-width:768px){
@@ -388,32 +378,52 @@ const QuickActionBar = () => (
 );
 
 // ── EventCard ─────────────────────────────────────────────────────────────────
-const EventCard = memo(({ ev, onPdf }) => (
-  <div className="gc r16" style={{ flexShrink:0 }}>
-    <div className="hp-ev-card">
-      <div className="hp-ev-imgbox">
-        <div className="hp-ev-bdg">{ev.type}</div>
-        <div className="hp-ev-dt">
-          <div style={{ fontSize:18, fontWeight:900, lineHeight:1 }}>{ev.day||'--'}</div>
-          <div style={{ fontSize:10, fontWeight:700 }}>{ev.month||'---'}</div>
+const EventCard = memo(({ ev, onPdf }) => {
+  // Plain text extract karne ka tareeqa taaki HTML tags text length mein count na ho
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = ev.desc || '';
+  const plainText = tempDiv.textContent || tempDiv.innerText || '';
+  const isLong = plainText.length > 110;
+
+  return (
+    <div className="gc r16" style={{ flexShrink:0 }}>
+      <div className="hp-ev-card" style={{ height: '100%', minHeight: 380 }}>
+        <div className="hp-ev-imgbox">
+          <div className="hp-ev-bdg">{ev.type}</div>
+          <div className="hp-ev-dt">
+            <div style={{ fontSize:18, fontWeight:900, lineHeight:1 }}>{ev.day||'--'}</div>
+            <div style={{ fontSize:10, fontWeight:700 }}>{ev.month||'---'}</div>
+          </div>
+          <img src={ev.imageUrl||getEventImg(ev.type)} alt={ev.title} className="hp-ev-img" loading="lazy" decoding="async" />
         </div>
-        <img src={ev.imageUrl||getEventImg(ev.type)} alt={ev.title} className="hp-ev-img" loading="lazy" decoding="async" />
-      </div>
-      <div className="hp-ev-info">
-        <h3 className="hp-ev-title">{ev.title}</h3>
-        <div className="hp-ev-desc" dangerouslySetInnerHTML={{ __html: ev.desc }} />
-        <div className="hp-ev-foot">
-          <span className="hp-ev-loc">📍 {ev.location||'Campus'}</span>
-          <button className="hp-ev-more" onClick={() => onPdf(ev)}>
-            {ev.reportLink
-              ? <><span className="hp-pdf-bdg">PDF</span> READ REPORT <span className="arr">›</span></>
-              : <>READ MORE <span className="arr">›</span></>}
-          </button>
+        <div className="hp-ev-info">
+          <h3 className="hp-ev-title">{ev.title}</h3>
+          
+          <div style={{ flex: 1, position: 'relative' }}>
+            <div className="hp-ev-desc" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginBottom: 5 }}>
+              {plainText}
+            </div>
+            {/* ✅ CLICK KARTE HI SEEDHA EVENTS PAGE PAR JAYEGA */}
+            {isLong && (
+              <Link to="/events" style={{ display: 'inline-block', color: '#f4a023', fontWeight: 800, fontSize: 12, textDecoration: 'none', marginTop: 4 }}>
+                Read More ↗
+              </Link>
+            )}
+          </div>
+
+          <div className="hp-ev-foot">
+            <span className="hp-ev-loc">📍 {ev.location||'Campus'}</span>
+            <button className="hp-ev-more" onClick={() => onPdf(ev)}>
+              {ev.reportLink
+                ? <><span className="hp-pdf-bdg">PDF</span> READ REPORT <span className="arr">›</span></>
+                : <>FULL DETAILS <span className="arr">›</span></>}
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-));
+  );
+});
 
 // ── GalItem ───────────────────────────────────────────────────────────────────
 const GalItem = memo(({ img, index }) => {
@@ -437,10 +447,9 @@ function YouTubeSection() {
   const [ytData, setYt]     = useState(null);
   const [videos, setVids]   = useState([]);
   const [ready,  setR]      = useState(false);
-  const [inView, setInView] = useState(false); // ← NEW
-  const sectionRef          = useRef(null);    // ← NEW
+  const [inView, setInView] = useState(false);
+  const sectionRef          = useRef(null);
 
-  // ── Step 1: Watch karo kab section screen mein aaye ──
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
@@ -448,29 +457,26 @@ function YouTubeSection() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setInView(true);      // ek baar set, phir observe band
+          setInView(true);
           observer.unobserve(el);
         }
       },
-      { rootMargin: '200px' }  // 200px pehle se load shuru
+      { rootMargin: '200px' }
     );
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
-  // ── Step 2: Sirf tab Firebase listen karo jab inView = true ──
   useEffect(() => {
-    if (!inView) return; // ← YE LINE DEFER KARTA HAI
-
+    if (!inView) return;
     return onSnapshot(doc(db, 'settings', 'youtube'), s => {
       setYt(s.exists() ? s.data() : null);
       setR(true);
     }, () => setR(true));
-  }, [inView]); // ← inView dependency
+  }, [inView]);
 
-  // ── Step 3: YouTube API call bhi defer ──
   useEffect(() => {
-    if (!inView || !ytData) return; // ← inView check
+    if (!inView || !ytData) return;
 
     if (!ytData?.apiKey || !ytData?.channelId) {
       if (ytData?.videoIds) {
@@ -502,14 +508,13 @@ function YouTubeSection() {
         setVids(plData.items.map(i => i.snippet.resourceId.videoId));
       } catch (_) {}
     })();
-  }, [inView, ytData]); // ← inView dependency
+  }, [inView, ytData]);
 
   const channel   = ytData?.channelName || 'GNC College Official';
   const hasVideos = videos.length > 0;
 
-  // ── Render ──
   return (
-    <section className="hp-yt" ref={sectionRef}>  {/* ← ref add kiya */}
+    <section className="hp-yt" ref={sectionRef}>
       <div className="hp-yt-inner">
 
         <SA variant="up">
@@ -520,7 +525,6 @@ function YouTubeSection() {
         </SA>
 
         <div className="hp-yt-grid">
-          {/* Jab tak inView nahi — placeholder dikhao */}
           {!inView ? (
             [1,2,3].map(i => (
               <SA key={i} variant="up" delay={`d${i}`}>
@@ -542,7 +546,6 @@ function YouTubeSection() {
               </SA>
             ))
           ) : !ready ? (
-            /* Loading state */
             [1,2,3].map(i => (
               <SA key={i} variant="up" delay={`d${i}`}>
                 <div className="gc r16">
@@ -583,9 +586,8 @@ function YouTubeSection() {
           )}
         </div>
 
-        {/* View All Videos */}
         {hasVideos && (
-          <div style={{ display:'flex', justifyContent:'center', marginTop:32 }}>
+          <div style={{ display:'flex', justifyCenter:'center', marginTop:32 }}>
             <Link to="/video-gallery" style={{
               display:'inline-flex', alignItems:'center', gap:8,
               background:'#ff0000', color:'#fff',
@@ -615,7 +617,9 @@ function YouTubeSection() {
 // ── Main ──────────────────────────────────────────────────────────────────────
 const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, gallery }) => {
   const [tab, setTab] = useState('All Moments');
-  const [pdf, setPdf] = useState(null);
+  
+  // ✅ Puraane 'pdf' state ko hata kar naya 'selectedPdf' object state banaya hai
+  const [selectedPdf, setSelectedPdf] = useState(null);
 
   const allGal   = gallery || [];
   const filtered = tab === 'All Moments' ? allGal : allGal.filter(i => i.cat === tab);
@@ -624,7 +628,10 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
   const evTriple = [...recentEv, ...recentEv, ...recentEv];
 
   const handlePdf = useCallback(ev => {
-    if (ev.reportLink) setPdf(getEmbedUrl(ev.reportLink));
+    if (ev.reportLink) {
+      // ✅ Naye PDFModal ke liye title aur URL dono bhej rahe hain
+      setSelectedPdf({ url: ev.reportLink, title: ev.title || 'Event Report' });
+    }
     else alert('Full details coming soon!');
   }, []);
 
@@ -635,9 +642,10 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
 
       {/* ── HERO ── */}
       <HeroSlider slides={sliderSlides} />
+      <Ticker/>
       <PremiumTicker items={TICKER_ITEMS} />
 
-      {/* ── QUICK ACTION BAR ── Result | Fee | Admission | Notices */}
+      {/* ── QUICK ACTION BAR ── */}
       <QuickActionBar />
 
       <NotificationSection notices={notices} announcements={announcements} pdfReports={pdfReports} upcomingEvents={upcomEv} />
@@ -819,22 +827,13 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
       {/* ── YOUTUBE ── */}
       <YouTubeSection />
 
-      {/* ── PDF MODAL ── */}
-      {pdf && createPortal(
-        <div className="hp-modal-ov" onClick={() => setPdf(null)}>
-          <div className="hp-modal-box" onClick={e => e.stopPropagation()}>
-            <div className="hp-modal-head">
-              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                <span style={{ fontSize:20 }}>📄</span> Official Event Report
-              </div>
-              <button className="hp-modal-close" onClick={() => setPdf(null)}>✕</button>
-            </div>
-            <div style={{ flex:1, background:'#f1f5f9' }}>
-              <iframe src={pdf} title="Event PDF" width="100%" height="100%" style={{ border:'none' }} allow="autoplay" />
-            </div>
-          </div>
-        </div>,
-        document.body
+      {/* ✅ NAYA PREMIUM PDF MODAL */}
+      {selectedPdf && (
+        <PDFModal
+          url={selectedPdf.url}
+          title={selectedPdf.title}
+          onClose={() => setSelectedPdf(null)}
+        />
       )}
     </div>
   );

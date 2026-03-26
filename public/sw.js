@@ -1,10 +1,12 @@
 // ═══════════════════════════════════════════════════════════════════════
-// GNC College — Service Worker v1.0
+// GNC College — Service Worker v1.1
 // Strategy:
 //   • App Shell (HTML/CSS/JS/fonts) → Cache First
 //   • Images → Cache First with fallback
 //   • Firebase API calls → Network Only (real-time data must be fresh)
 //   • External URLs (YouTube, BBMKU etc.) → Network Only
+// ✅ FIX v1.1: Dev server .jsx/.tsx source files bypass added
+// ✅ FIX v1.1: CDN workers (unpkg, cdnjs) bypass added — CORS error fix
 // ═══════════════════════════════════════════════════════════════════════
 
 const CACHE_NAME     = 'gnc-cache-v1';
@@ -107,6 +109,35 @@ self.addEventListener('fetch', event => {
   // Skip chrome-extension and non-http
   if (!request.url.startsWith('http')) return;
 
+  // ✅ FIX: Dev server source files — kabhi intercept mat karo
+  // Vite dev server localhost pe .jsx/.tsx serve karta hai,
+  // SW intercept se FetchEvent network error aata tha
+  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+    if (
+      url.pathname.endsWith('.jsx')         ||
+      url.pathname.endsWith('.tsx')         ||
+      url.pathname.endsWith('.ts')          ||
+      url.pathname.includes('/@vite/')      ||
+      url.pathname.includes('/@react-refresh') ||
+      url.pathname.includes('/@fs/')        ||
+      url.pathname.includes('/node_modules/') ||
+      url.pathname.includes('?v=')          ||   // Vite versioned assets
+      url.pathname.includes('?import')          // Vite import queries
+    ) {
+      return; // SW bilkul handle nahi karega — browser seedha fetch karega
+    }
+  }
+
+  // ✅ FIX: CDN workers bypass — unpkg/cdnjs CORS block fix
+  // pdfjs-dist worker inhi CDN se aata hai, SW intercept se CORS fail hota tha
+  if (
+    url.hostname.includes('unpkg.com')            ||
+    url.hostname.includes('cdnjs.cloudflare.com') ||
+    url.hostname.includes('cdn.jsdelivr.net')
+  ) {
+    return; // Network directly — no SW caching for CDN workers
+  }
+
   // Network-only origins (Firebase, YouTube, external portals)
   const isNetworkOnly = NETWORK_ONLY_ORIGINS.some(origin => url.hostname.includes(origin));
   if (isNetworkOnly) {
@@ -143,7 +174,7 @@ self.addEventListener('fetch', event => {
   // JS/CSS/Fonts — Stale While Revalidate
   if (
     request.destination === 'script' ||
-    request.destination === 'style' ||
+    request.destination === 'style'  ||
     request.destination === 'font'
   ) {
     event.respondWith(staleWhileRevalidate(request, RUNTIME_CACHE));

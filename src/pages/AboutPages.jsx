@@ -1,9 +1,10 @@
 // src/pages/AboutPages.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
+import PDFModal from '../components/PDFModal'; // ✅ PDF Modal Import
 import '../styles/index.css';
 
 const N = COLORS.navy || '#0f2347';
@@ -171,6 +172,8 @@ function PageLayout({ children }) {
 function MeetingPDFList({ collectionName, accentColor, emptyText }) {
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPdf, setSelectedPdf] = useState(null); // ✅ PDF Modal State
+
   useEffect(() => {
     const q = query(collection(db, collectionName), orderBy('date', 'desc'));
     const unsub = onSnapshot(q,
@@ -179,6 +182,7 @@ function MeetingPDFList({ collectionName, accentColor, emptyText }) {
     );
     return () => unsub();
   }, [collectionName]);
+
   if (loading) return <div style={{ padding: 20, textAlign: 'center', color: '#94a3b8' }}>⏳ Loading…</div>;
   if (meetings.length === 0) return (
     <div style={{ padding: 32, textAlign: 'center', color: '#94a3b8', background: '#f8fafc', borderRadius: 12 }}>
@@ -189,36 +193,53 @@ function MeetingPDFList({ collectionName, accentColor, emptyText }) {
       </div>
     </div>
   );
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {meetings.map(m => {
-        const dt = m.date ? new Date(m.date) : null;
-        return (
-          <div key={m.id} style={{
-            display: 'flex', gap: 16, alignItems: 'flex-start',
-            background: '#fff', borderRadius: 14, padding: 18,
-            border: '1.5px solid #e2e8f0', borderLeft: `5px solid ${accentColor || N}`,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          }}>
-            <div style={{ background: accentColor || N, color: '#fff', borderRadius: 10, padding: '8px 12px', textAlign: 'center', flexShrink: 0, minWidth: 56 }}>
-              <div style={{ fontSize: 20, fontWeight: 900, lineHeight: 1 }}>{dt ? dt.getDate().toString().padStart(2,'0') : '--'}</div>
-              <div style={{ fontSize: 10, fontWeight: 700, marginTop: 2, opacity: 0.85 }}>{dt ? dt.toLocaleString('en-IN',{month:'short'}).toUpperCase() : '--'}</div>
-              <div style={{ fontSize: 9, opacity: 0.7 }}>{dt ? dt.getFullYear() : ''}</div>
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, color: N, fontSize: 15 }}>{m.title}</div>
-              {m.notes && <div style={{ fontSize: 13, color: '#64748b', marginTop: 4, lineHeight: 1.6 }}>{m.notes}</div>}
-              <div style={{ marginTop: 10 }}>
-                <a href={m.pdfUrl} target="_blank" rel="noreferrer"
-                  style={{ display:'inline-flex', alignItems:'center', gap:7, background:accentColor||N, color:'#fff', padding:'7px 16px', borderRadius:8, fontWeight:700, fontSize:13, textDecoration:'none' }}>
-                  📄 View Meeting PDF
-                </a>
+    <>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {meetings.map(m => {
+          const dt = m.date ? new Date(m.date) : null;
+          return (
+            <div key={m.id} style={{
+              display: 'flex', gap: 16, alignItems: 'flex-start',
+              background: '#fff', borderRadius: 14, padding: 18,
+              border: '1.5px solid #e2e8f0', borderLeft: `5px solid ${accentColor || N}`,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+            }}>
+              <div style={{ background: accentColor || N, color: '#fff', borderRadius: 10, padding: '8px 12px', textAlign: 'center', flexShrink: 0, minWidth: 56 }}>
+                <div style={{ fontSize: 20, fontWeight: 900, lineHeight: 1 }}>{dt ? dt.getDate().toString().padStart(2,'0') : '--'}</div>
+                <div style={{ fontSize: 10, fontWeight: 700, marginTop: 2, opacity: 0.85 }}>{dt ? dt.toLocaleString('en-IN',{month:'short'}).toUpperCase() : '--'}</div>
+                <div style={{ fontSize: 9, opacity: 0.7 }}>{dt ? dt.getFullYear() : ''}</div>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 800, color: N, fontSize: 15 }}>{m.title}</div>
+                {m.notes && <div style={{ fontSize: 13, color: '#64748b', marginTop: 4, lineHeight: 1.6 }}>{m.notes}</div>}
+                <div style={{ marginTop: 10 }}>
+                  <a href={m.pdfUrl} target="_blank" rel="noreferrer"
+                    onClick={(e) => {
+                      if (m.pdfUrl && (m.pdfUrl.includes('drive.google') || m.pdfUrl.toLowerCase().endsWith('.pdf') || m.pdfUrl.includes('firebase'))) {
+                        e.preventDefault();
+                        setSelectedPdf({ url: m.pdfUrl, title: m.title || 'Meeting Report' });
+                      }
+                    }}
+                    style={{ display:'inline-flex', alignItems:'center', gap:7, background:accentColor||N, color:'#fff', padding:'7px 16px', borderRadius:8, fontWeight:700, fontSize:13, textDecoration:'none' }}>
+                    📄 View Meeting PDF
+                  </a>
+                </div>
               </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+
+      {selectedPdf && (
+        <PDFModal 
+          url={selectedPdf.url} 
+          title={selectedPdf.title} 
+          onClose={() => setSelectedPdf(null)} 
+        />
+      )}
+    </>
   );
 }
 
@@ -347,6 +368,9 @@ export function PrincipalMessage() {
 ═══════════════════════════════════════════════════════════════ */
 export function Organogram() {
   useScrollTop();
+  const [selectedPdf, setSelectedPdf] = useState(null); // ✅ PDF Modal State
+  const pdfUrl = '/pdfs/organogram.pdf'; // Aap isko Admin Panel ya required file se map kar sakte hain.
+
   return (
     <div>
       <PageHero title="Organogram" subtitle="Organizational structure and hierarchy of Guru Nanak College, Dhanbad" icon="🏛️" />
@@ -357,17 +381,28 @@ export function Organogram() {
             <h2 className="section-heading">Official Organogram (Image)</h2>
             <div className="heading-underline"/>
             <div style={{ textAlign:'center', marginTop:20 }}>
-              <img src={`${import.meta.env.BASE_URL}images/organogram.jpg`} alt="College Organogram" style={{ maxWidth:'100%', borderRadius:10, boxShadow:'0 4px 16px rgba(0,0,0,0.1)' }}/>
+              <img src={`${import.meta.env.BASE_URL}images/organogram.webp`} alt="College Organogram" style={{ maxWidth:'100%', borderRadius:10, boxShadow:'0 4px 16px rgba(0,0,0,0.1)' }}/>
             </div>
             <div style={{ textAlign:'center', marginTop:20 }}>
-              <a href={`${import.meta.env.BASE_URL}images/organogram.jpg`} download
+              <a href={pdfUrl} target="_blank" rel="noreferrer"
+                onClick={(e) => {
+                   e.preventDefault();
+                   setSelectedPdf({ url: pdfUrl, title: 'Organogram' });
+                }}
                 style={{ display:'inline-flex', alignItems:'center', gap:8, background:'#0f2347', color:'#fff', padding:'10px 22px', borderRadius:10, fontWeight:700, fontSize:14, textDecoration:'none' }}>
-                📥 Download Organogram PDF
+                📄 View Organogram PDF
               </a>
             </div>
           </div>
         </Fade>
       </PageLayout>
+      {selectedPdf && (
+        <PDFModal 
+          url={selectedPdf.url} 
+          title={selectedPdf.title} 
+          onClose={() => setSelectedPdf(null)} 
+        />
+      )}
     </div>
   );
 }
@@ -376,22 +411,34 @@ export function Organogram() {
 /* ═══════════════════════════════════════════════════════════════
    4. COMMITTEE PAGE
 ═══════════════════════════════════════════════════════════════ */
-export function CommitteePage({ name, desc, icon, purpose = [], responsibilities = [] }) {
+export function CommitteePage({ name, desc, icon, purpose = [], responsibilities = [], pdfReportLink }) {
   useScrollTop();
+  const [selectedPdf, setSelectedPdf] = useState(null); // ✅ PDF Modal State
   return (
     <div>
       <PageHero title={name} subtitle={desc} icon={icon} />
       <PageLayout>
         <Fade>
           <div style={{ background:'#fff', borderRadius:20, padding:32, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:20 }}>
-            <div style={{ display:'flex', gap:20, alignItems:'center', padding:20, background:`linear-gradient(135deg,${N},#1a3a7c)`, borderRadius:14, color:'#fff', flexWrap:'wrap' }}>
-              <div style={{ width:72, height:72, borderRadius:'50%', background:'rgba(255,255,255,0.15)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:34, border:`3px solid ${G}`, flexShrink:0 }}>{icon}</div>
-              <div>
-                <div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase', letterSpacing:1 }}>Chairperson / Convener</div>
-                <DataMarker label={`${name} ke Chairperson ka naam aur designation`} />
-                <div style={{ fontSize:18, fontWeight:800 }}>✏️ [Chairperson Name]</div>
-                <div style={{ fontSize:13, color:'#cbd5e1', marginTop:4 }}>✏️ [Designation, Department]</div>
+            <div style={{ display:'flex', gap:20, alignItems:'center', padding:20, background:`linear-gradient(135deg,${N},#1a3a7c)`, borderRadius:14, color:'#fff', flexWrap:'wrap', justifyContent: 'space-between' }}>
+              <div style={{display: 'flex', gap: 20, alignItems: 'center'}}>
+                <div style={{ width:72, height:72, borderRadius:'50%', background:'rgba(255,255,255,0.15)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:34, border:`3px solid ${G}`, flexShrink:0 }}>{icon}</div>
+                <div>
+                  <div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase', letterSpacing:1 }}>Chairperson / Convener</div>
+                  <DataMarker label={`${name} ke Chairperson ka naam aur designation`} />
+                  <div style={{ fontSize:18, fontWeight:800 }}>✏️ [Chairperson Name]</div>
+                  <div style={{ fontSize:13, color:'#cbd5e1', marginTop:4 }}>✏️ [Designation, Department]</div>
+                </div>
               </div>
+              
+              {/* ✅ Naya Committee PDF Button */}
+              {pdfReportLink && (
+                  <button 
+                    onClick={() => setSelectedPdf({url: pdfReportLink, title: `${name} Report`})}
+                    style={{ background:G, color:N, padding:'8px 18px', border: 'none', borderRadius:8, fontWeight:800, fontSize:13, cursor:'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s' }}>
+                    📄 View Committee Report
+                  </button>
+              )}
             </div>
           </div>
         </Fade>
@@ -453,6 +500,13 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
           </div>
         </Fade>
       </PageLayout>
+      {selectedPdf && (
+        <PDFModal 
+          url={selectedPdf.url} 
+          title={selectedPdf.title} 
+          onClose={() => setSelectedPdf(null)} 
+        />
+      )}
     </div>
   );
 }
@@ -625,6 +679,100 @@ export function StaffCouncil() {
           </div>
         </Fade>
       </PageLayout>
+    </div>
+  );
+}
+export function AuditReport() {
+  useScrollTop();
+  const [docs, setDocs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedPdf, setSelectedPdf] = useState(null);
+
+  useEffect(() => {
+    const q = query(
+      collection(db, 'pdfReports'),
+      where('targetPage', '==', 'audit-report'),
+      orderBy('createdAt', 'desc')
+    );
+    const unsub = onSnapshot(q,
+      snap => { setDocs(snap.docs.map(d => ({ id: d.id, ...d.data() }))); setLoading(false); },
+      () => setLoading(false)
+    );
+    return () => unsub();
+  }, []);
+
+  return (
+    <div>
+      <PageHero
+        title="Audit Report"
+        subtitle="Annual audit reports and financial statements of Guru Nanak College, Dhanbad"
+        icon="📊"
+      />
+      <PageLayout>
+        <Fade>
+          <div style={{ background:'#fff', borderRadius:20, padding:36, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:24 }}>
+            <h2 className="section-heading">Audit Reports</h2>
+            <div className="heading-underline" />
+
+            {loading ? (
+              <div style={{ padding:32, textAlign:'center', color:'#94a3b8' }}>⏳ Loading…</div>
+            ) : docs.length === 0 ? (
+              <div style={{ padding:32, textAlign:'center', color:'#94a3b8', background:'#f8fafc', borderRadius:12, border:'1px solid #e2e8f0' }}>
+                <div style={{ fontSize:36, marginBottom:10 }}>📊</div>
+                <div style={{ fontWeight:700, marginBottom:6 }}>Koi Audit Report upload nahi ki gayi abhi tak.</div>
+                <div style={{ fontSize:13 }}>Admin Panel → Documents → Target Page: Audit Report se upload karein.</div>
+              </div>
+            ) : (
+              <div style={{ display:'flex', flexDirection:'column', gap:14, marginTop:20 }}>
+                {docs.map(doc => (
+                  <div key={doc.id} style={{
+                    display:'flex', alignItems:'center', gap:16,
+                    padding:'16px 20px', background:'#f8fafc',
+                    border:'1.5px solid #e2e8f0', borderLeft:`5px solid ${N}`,
+                    borderRadius:12, transition:'all .2s',
+                  }}>
+                    <div style={{ fontSize:32, flexShrink:0 }}>📄</div>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontWeight:800, color:N, fontSize:15 }}>{doc.title}</div>
+                      {doc.date && (
+                        <div style={{ fontSize:12, color:'#64748b', marginTop:4 }}>
+                          📅 {new Date(doc.date).toLocaleDateString('en-IN', { year:'numeric', month:'long', day:'numeric' })}
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setSelectedPdf({ url: doc.link, title: doc.title })}
+                      style={{
+                        display:'inline-flex', alignItems:'center', gap:7,
+                        background:N, color:'#fff',
+                        padding:'9px 20px', borderRadius:9, border:'none',
+                        fontWeight:700, fontSize:13, cursor:'pointer',
+                        transition:'all .2s', flexShrink:0,
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = G}
+                      onMouseLeave={e => e.currentTarget.style.background = N}
+                    >
+                      📥 View Report
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div style={{ marginTop:24, padding:'14px 18px', background:'#fffbeb', border:'1.5px dashed #f59e0b', borderRadius:10, fontSize:13, color:'#92400e' }}>
+              💡 <strong>Admin ke liye:</strong> Admin Panel → Documents → Type: Report → Target Page: <code style={{ background:'#fef3c7', padding:'1px 6px', borderRadius:4 }}>Audit Report (/about-us/audit-report)</code> select karein.
+            </div>
+          </div>
+        </Fade>
+      </PageLayout>
+
+      {selectedPdf && (
+        <PDFModal
+          url={selectedPdf.url}
+          title={selectedPdf.title}
+          onClose={() => setSelectedPdf(null)}
+        />
+      )}
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 // ══════════════════════════════════════════════════════════════════
 // STEP 1: Ye 2 helper components AboutPages.jsx mein
 // "function useScrollTop()" se UPAR paste karo (line ~14 ke paas)
@@ -230,13 +231,13 @@ export function Organogram() {
             <div className="heading-underline"/>
             <div style={{ textAlign:'center', marginTop:20 }}>
               <img
-                src="/images/organogram.jpg"
+                src="/images/organogram.webp"
                 alt="College Organogram"
                 style={{ maxWidth:'100%', borderRadius:10, boxShadow:'0 4px 16px rgba(0,0,0,0.1)' }}
               />
             </div>
             <div style={{ textAlign:'center', marginTop:20 }}>
-              <a href="images/organogram.jpg" download
+              <a href="images/organogram.webp" download
                 style={{
                   display:'inline-flex', alignItems:'center', gap:8,
                   background:'#0f2347', color:'#fff', padding:'10px 22px',

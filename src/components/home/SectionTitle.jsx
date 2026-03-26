@@ -1,3 +1,4 @@
+import React from "react";
 // src/components/home/SectionTitle.jsx
 import { COLORS } from '../../styles/colors';
 

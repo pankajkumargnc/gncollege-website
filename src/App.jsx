@@ -1,13 +1,10 @@
-// src/App.jsx — COMPLETE v7 (Performance Optimized + Jodit CSS deferred)
-// ✅ Jodit CSS sirf /admin route pe load hoga
-// ✅ Saari existing functionality intact
-// ✅ Route-level lazy loading
-// ✅ <main> landmark — Accessibility fix
+// src/App.jsx — FINAL VERSION (Original Ticker Restored + Safe Lazy)
 
 import WhatsAppButton      from './components/WhatsAppButton';
 import { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster }         from 'react-hot-toast';
+import AlertBanner from './components/AlertBanner'; // Import karein
 
 import Navbar              from './components/Navbar';
 import Footer              from './components/Footer';
@@ -27,28 +24,40 @@ import { PageViewerStandalone } from './components/PageViewer';
 import HomePage            from './pages/HomePage';
 import Contact             from './pages/Contact';
 
+// ── 🛡️ SMART LAZY LOADER ─────────────────────────────────────────────────────
+const safeLazy = (importFunction) => {
+  return lazy(() =>
+    importFunction().catch((error) => {
+      if (error.message.includes('fetch') || error.message.includes('module')) {
+        window.location.reload();
+      }
+      return Promise.reject(error);
+    })
+  );
+};
+
 // ── Lazy pages ───────────────────────────────────────────────────────────────
-const StaffPage         = lazy(() => import('./pages/StaffPage'));
-const DepartmentPage    = lazy(() => import('./pages/DepartmentPage'));
-const GalleryPage       = lazy(() => import('./pages/GalleryPage'));
-const VideoGallery      = lazy(() => import('./pages/VideoGallery'));
-const CollegeProfile    = lazy(() => import('./pages/CollegeProfile'));
-const LeadershipPage    = lazy(() => import('./pages/LeadershipPage'));
-const NewsPage          = lazy(() => import('./pages/NewsPage'));
-const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
-const DocumentsPage     = lazy(() => import('./pages/DocumentsPage'));
-const EventsPage        = lazy(() => import('./pages/EventsPage'));
-const AdminPanel        = lazy(() => import('./components/AdminPanel'));
-const Ticker            = lazy(() => import('./components/Ticker'));
+const StaffPage         = safeLazy(() => import('./pages/StaffPage'));
+const DepartmentPage    = safeLazy(() => import('./pages/DepartmentPage'));
+const GalleryPage       = safeLazy(() => import('./pages/GalleryPage'));
+const VideoGallery      = safeLazy(() => import('./pages/VideoGallery'));
+const CollegeProfile    = safeLazy(() => import('./pages/CollegeProfile'));
+const LeadershipPage    = safeLazy(() => import('./pages/LeadershipPage'));
+const NewsPage          = safeLazy(() => import('./pages/NewsPage'));
+const NotificationsPage = safeLazy(() => import('./pages/NotificationsPage'));
+const DocumentsPage     = safeLazy(() => import('./pages/DocumentsPage'));
+const EventsPage        = safeLazy(() => import('./pages/EventsPage'));
+const AdminPanel        = safeLazy(() => import('./components/AdminPanel'));
+const Ticker            = safeLazy(() => import('./components/Ticker')); // ✅ Aapka original Ticker wapas aa gaya
 
 // ── Named export lazy helpers ────────────────────────────────────────────────
-const LazyAbout       = n => lazy(() => import('./pages/AboutPages').then(m => ({ default: m[n] })));
-const LazyAcademics   = n => lazy(() => import('./pages/AcademicsPages').then(m => ({ default: m[n] })));
-const LazyAdmission   = n => lazy(() => import('./pages/AdmissionPages').then(m => ({ default: m[n] })));
-const LazyNaac        = n => lazy(() => import('./pages/NaacPages').then(m => ({ default: m[n] })));
-const LazyPublication = n => lazy(() => import('./pages/PublicationPages').then(m => ({ default: m[n] })));
-const LazyActivity    = n => lazy(() => import('./pages/ActivityPages').then(m => ({ default: m[n] })));
-const LazyCampus      = n => lazy(() => import('./pages/CampusPages').then(m => ({ default: m[n] })));
+const LazyAbout       = n => safeLazy(() => import('./pages/AboutPages').then(m => ({ default: m[n] })));
+const LazyAcademics   = n => safeLazy(() => import('./pages/AcademicsPages').then(m => ({ default: m[n] })));
+const LazyAdmission   = n => safeLazy(() => import('./pages/AdmissionPages').then(m => ({ default: m[n] })));
+const LazyNaac        = n => safeLazy(() => import('./pages/NaacPages').then(m => ({ default: m[n] })));
+const LazyPublication = n => safeLazy(() => import('./pages/PublicationPages').then(m => ({ default: m[n] })));
+const LazyActivity    = n => safeLazy(() => import('./pages/ActivityPages').then(m => ({ default: m[n] })));
+const LazyCampus      = n => safeLazy(() => import('./pages/CampusPages').then(m => ({ default: m[n] })));
 
 // About
 const VisionMission    = LazyAbout('VisionMission');
@@ -163,7 +172,6 @@ export default function App() {
   useEffect(() => {
     if (!isAdminRoute) return;
 
-    // Pehle se loaded hai toh skip
     if (document.querySelector('link[data-jodit-css]')) return;
 
     const link    = document.createElement('link');
@@ -171,7 +179,6 @@ export default function App() {
     link.type     = 'text/css';
     link.setAttribute('data-jodit-css', 'true');
 
-    // Try npm build se pehle, fallback CDN
     link.onerror  = () => {
       const cdn     = document.createElement('link');
       cdn.rel       = 'stylesheet';
@@ -181,22 +188,14 @@ export default function App() {
       document.head.appendChild(cdn);
     };
 
-    // Vite build pe vendor-ad….css ka naam hota hai — runtime mein find karo
     const allLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
     const joditLink = allLinks.find(l => l.href.includes('vendor-ad') || l.href.includes('jodit'));
 
-    if (joditLink) {
-      // Pehle se loaded hai, kuch nahi karna
-      return;
-    }
+    if (joditLink) return;
 
-    // Dynamic import se load karo
-    import('jodit-react').then(() => {
-      // jodit-react import hone ke baad CSS bhi bundle mein aa jaati hai
-    }).catch(() => {});
+    import('jodit-react').catch(() => {});
 
     return () => {
-      // Admin se nikalne par CSS cleanup
       const el = document.querySelector('link[data-jodit-css]');
       if (el) el.remove();
     };
@@ -228,7 +227,6 @@ export default function App() {
     return () => unsubs.forEach(u => u());
   }, []);
 
-  // ── Nav links ────────────────────────────────────────────────────────────
   const baseNavLinks = useMemo(() => {
     const links = firebaseNav || staticNavLinks;
     return links.map(link =>
@@ -242,10 +240,7 @@ export default function App() {
   }, [firebaseNav]);
 
   const handleOpenAdminTab = () =>
-    window.open(
-      `${window.location.origin}${import.meta.env.BASE_URL.replace(/\/$/, '')}/#/admin`,
-      '_blank'
-    );
+    window.open(`${window.location.origin}${import.meta.env.BASE_URL.replace(/\/$/, '')}/#/admin`, '_blank');
 
   return (
     <>
@@ -254,62 +249,43 @@ export default function App() {
         containerStyle={{ zIndex: 999999 }}
         toastOptions={{
           duration: 3500,
-          style: {
-            fontFamily: "'Inter', sans-serif",
-            fontWeight: 600, fontSize: '14px',
-            borderRadius: '12px', padding: '14px 18px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
-          },
-          success: {
-            style: { background: '#0f2347', color: '#fff', border: '1.5px solid #f4a023' },
-            iconTheme: { primary: '#f4a023', secondary: '#0f2347' },
-          },
-          error: {
-            style: { background: '#fff0f0', color: '#b91c1c', border: '1.5px solid #f87171' },
-          },
+          style: { fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: '14px', borderRadius: '12px', padding: '14px 18px', boxShadow: '0 8px 32px rgba(0,0,0,0.18)' },
+          success: { style: { background: '#0f2347', color: '#fff', border: '1.5px solid #f4a023' }, iconTheme: { primary: '#f4a023', secondary: '#0f2347' } },
+          error: { style: { background: '#fff0f0', color: '#b91c1c', border: '1.5px solid #f87171' } },
         }}
       />
 
       {!isAdminRoute && (
         <>
+          <AlertBanner /> {/* ✅ AlertBanner ab TopBar ke upar aa gaya */}
           <TopBar />
-          <Suspense fallback={<div style={{ height: 40 }} />}>
-            <Ticker items={notices} />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<div style={{ height: 40 }} />}>
+              <Ticker items={notices} /> {/* ✅ Original Ticker Yahan Use Ho Gaya */}
+            </Suspense>
+          </ErrorBoundary>
           <Navbar onAdminClick={handleOpenAdminTab} navLinks={baseNavLinks} />
           <Breadcrumbs />
           <QuickActionNav />
         </>
       )}
 
-      {/* ✅ <main> landmark — Accessibility fix */}
       <main id="main-content">
         <Routes>
-
-          {/* ── HOME ── */}
-          <Route path="/" element={
-            <EB>
-              <HomePage
-                notices={notices} announcements={announcements}
-                sliderSlides={sliderSlides} events={events} gallery={gallery}
-              />
-            </EB>
-          } />
+          <Route path="/" element={<EB><HomePage notices={notices} announcements={announcements} sliderSlides={sliderSlides} events={events} gallery={gallery}/></EB>} />
           <Route path="/contact" element={<EB><Contact /></EB>} />
 
-          {/* ══ ABOUT US ══ */}
+          {/* About */}
           <Route path="/about-us/college-profile"   element={<R el={<CollegeProfile />} />} />
           <Route path="/about-us/vision-mission"    element={<R el={<VisionMission />} />} />
           <Route path="/about-us/principal-message" element={<R el={<PrincipalMessage />} />} />
           <Route path="/about-us/governing-body"    element={<R el={<GoverningBody />} />} />
           <Route path="/about-us/staff-council"     element={<R el={<StaffCouncil />} />} />
           <Route path="/about-us/audit-report"      element={<PVS />} />
-
           <Route path="/about-us/college-management/organogram"  element={<R el={<Organogram />} />} />
           <Route path="/about-us/college-management/presidents"  element={<R el={<LeadershipPage type="president"  title="Presidents Over the Years"  />} />} />
           <Route path="/about-us/college-management/secretaries" element={<R el={<LeadershipPage type="secretary"  title="Secretaries Over the Years" />} />} />
           <Route path="/about-us/college-management/principal"   element={<R el={<LeadershipPage type="principal"  title="Principals Over the Years"  />} />} />
-
           <Route path="/about-us/various-committees/womens-cell"  element={<R el={<WomensCell />} />} />
           <Route path="/about-us/various-committees/anti-ragging" element={<R el={<AntiRagging />} />} />
           <Route path="/about-us/various-committees/sc-st"        element={<R el={<ScStCell />} />} />
@@ -319,9 +295,7 @@ export default function App() {
           <Route path="/about-us/various-committees/minority"     element={<R el={<MinorityCell />} />} />
           <Route path="/about-us/various-committees/placement"    element={<R el={<PlacementCell />} />} />
           <Route path="/about-us/various-committees/rusa"         element={<R el={<RusaCell />} />} />
-
           <Route path="/about-us/college-staff/:staffType" element={<R el={<StaffPage faculties={faculties} />} />} />
-
           <Route path="/about-us/regulations/bbmku/special-ug-regulation" element={<PVS />} />
           <Route path="/about-us/regulations/bbmku/ug-regulation-fyugp"   element={<PVS />} />
           <Route path="/about-us/regulations/bbmku/ug-regulation-cbcs"    element={<PVS />} />
@@ -332,7 +306,7 @@ export default function App() {
           <Route path="/about-us/regulations/byelaws"                      element={<PVS />} />
           <Route path="/about-us/regulations/exemption"                    element={<PVS />} />
 
-          {/* ══ CAMPUS ══ */}
+          {/* Campus */}
           <Route path="/campus/visuals/bhuda"               element={<R el={<CampusVisuals title="Bhuda Campus"        categoryId="bhuda"      desc="Bhuda campus ki photos"        />} />} />
           <Route path="/campus/visuals/bank-more"           element={<R el={<CampusVisuals title="Bank More Campus"    categoryId="bank-more"  desc="Bank More campus ki photos"    />} />} />
           <Route path="/campus/visuals/vocational-building" element={<R el={<CampusVisuals title="Vocational Building" categoryId="vocational" desc="Vocational building ki photos" />} />} />
@@ -341,7 +315,7 @@ export default function App() {
           <Route path="/campus/ict-rooms"                   element={<R el={<IctRooms />} />} />
           <Route path="/campus/green-campus"                element={<R el={<GreenCampus />} />} />
 
-          {/* ══ ACADEMICS ══ */}
+          {/* Academics */}
           <Route path="/academics/iqac"                  element={<R el={<IqacPage />} />} />
           <Route path="/academics/course-offered"        element={<R el={<CourseOffered />} />} />
           <Route path="/academics/departments"           element={<R el={<DepartmentPage />} />} />
@@ -349,7 +323,7 @@ export default function App() {
           <Route path="/syllabus"                        element={<R el={<Syllabus />} />} />
           <Route path="/academics/academic-calendar"     element={<R el={<AcademicCalendar />} />} />
 
-          {/* ══ ADMISSION ══ */}
+          {/* Admission */}
           <Route path="/admission/rule"                  element={<R el={<AdmissionRule />} />} />
           <Route path="/admission/document-required"     element={<R el={<DocumentRequired />} />} />
           <Route path="/admission/fee-structure"         element={<R el={<FeeStructure />} />} />
@@ -357,7 +331,7 @@ export default function App() {
           <Route path="/admission/notification/upcoming" element={<R el={<AdmissionNotif type="upcoming" title="Upcoming Notifications" />} />} />
           <Route path="/admission/intake-capacity"       element={<R el={<IntakeCapacity />} />} />
 
-          {/* ══ ACTIVITY ══ */}
+          {/* Activity */}
           <Route path="/activity/nss"                            element={<R el={<NssPage />} />} />
           <Route path="/activity/ncc"                            element={<R el={<NccPage />} />} />
           <Route path="/activity/workshop"                       element={<R el={<WorkshopPage />} />} />
@@ -365,7 +339,7 @@ export default function App() {
           <Route path="/activity/collaboration/rotaract-club"    element={<R el={<RotaractClub />} />} />
           <Route path="/activity/collaboration/sadbhavana-diwas" element={<R el={<SadbhavanaDiwas />} />} />
 
-          {/* ══ NAAC ══ */}
+          {/* NAAC */}
           <Route path="/naac/ssr-1st-cycle/cycle-1-documents" element={<R el={<SsrCyclePage cycle={1} />} />} />
           <Route path="/naac/ssr-1st-cycle/peer-team-report"  element={<R el={<SsrCyclePage cycle={1} />} />} />
           <Route path="/naac/ssr-2nd-cycle/cycle-2-documents" element={<R el={<SsrCyclePage cycle={2} />} />} />
@@ -374,7 +348,7 @@ export default function App() {
           <Route path="/naac/nirf"             element={<R el={<NirfPage />} />} />
           <Route path="/naac/perspective-plan" element={<R el={<PerspectivePlan />} />} />
 
-          {/* ══ PUBLICATION ══ */}
+          {/* Publication */}
           <Route path="/publication/college-library"          element={<R el={<LibraryPage />} />} />
           <Route path="/publication/e-magazine"               element={<R el={<PublicationPage type="magazine" title="E-Magazine"        subtitle="College ki digital publications"  icon="📰" keyword="magazine"    />} />} />
           <Route path="/publication/examination-results/2024" element={<R el={<PublicationPage type="result"   title="Exam Results 2024" subtitle="Academic year 2023-24 ke results" icon="📋" keyword="result-2024" />} />} />
@@ -382,7 +356,7 @@ export default function App() {
           <Route path="/publication/sss-report/2023-24"       element={<R el={<PublicationPage type="sss"      title="SSS Report 2023-24" subtitle="Student Satisfaction Survey"     icon="📊" keyword="sss-2023-24" />} />} />
           <Route path="/publication/sss-report/2022-23"       element={<R el={<PublicationPage type="sss"      title="SSS Report 2022-23" subtitle="Student Satisfaction Survey"     icon="📊" keyword="sss-2022-23" />} />} />
 
-          {/* ══ GALLERY / NEWS ══ */}
+          {/* Gallery / News */}
           <Route path="/gallery"               element={<R el={<GalleryPage gallery={gallery} />} />} />
           <Route path="/gallery/photos"        element={<R el={<GalleryPage gallery={gallery} />} />} />
           <Route path="/gallery/photo-gallery" element={<R el={<GalleryPage gallery={gallery} />} />} />
@@ -394,55 +368,24 @@ export default function App() {
           <Route path="/documents"     element={<R el={<DocumentsPage />} />} />
           <Route path="/events"        element={<R el={<EventsPage />} />} />
 
-          {/* ══ ADMIN ══ */}
+          {/* Admin */}
           <Route path="/admin" element={
             adminAuthed ? (
-              <Suspense fallback={
-                <div style={{ minHeight:'60vh', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <PageLoader />
-                </div>
-              }>
-                <AdminPanel
-                  notices={notices} announcements={announcements}
-                  events={events}   gallery={gallery} faculties={faculties}
-                  onClose={handleAdminLogout}
-                />
+              <Suspense fallback={<div style={{ minHeight:'60vh', display:'flex', alignItems:'center', justifyContent:'center' }}><PageLoader /></div>}>
+                <AdminPanel notices={notices} announcements={announcements} events={events} gallery={gallery} faculties={faculties} onClose={handleAdminLogout} />
               </Suspense>
             ) : (
-              <AdminLogin
-                onSuccess={handleAdminLogin}
-                onClose={() => { window.location.hash = '/'; }}
-              />
+              <AdminLogin onSuccess={handleAdminLogin} onClose={() => { window.location.hash = '/'; }} />
             )
           } />
-
         </Routes>
       </main>
 
-      {/* ── Footer + FAB + WhatsApp — non-admin only ── */}
       {!isAdminRoute && (
         <>
           <Footer />
           <WhatsAppButton />
-          <button
-            onClick={handleOpenAdminTab}
-            title="Open Admin Panel"
-            style={{
-              position:     'fixed',
-              bottom:       'clamp(16px, 3vw, 25px)',
-              right:        'clamp(16px, 3vw, 25px)',
-              background:   COLORS.navy,
-              color:        '#fff',
-              border:       `3px solid ${COLORS.gold}`,
-              borderRadius: '50%',
-              width:        'clamp(48px, 6vw, 60px)',
-              height:       'clamp(48px, 6vw, 60px)',
-              cursor:       'pointer',
-              zIndex:       500,
-              fontSize:     'clamp(18px, 2.5vw, 24px)',
-              flexShrink:   0,
-            }}
-          >⚙️</button>
+          <button onClick={handleOpenAdminTab} title="Open Admin Panel" style={{ position: 'fixed', bottom: 'clamp(16px, 3vw, 25px)', right: 'clamp(16px, 3vw, 25px)', background: COLORS.navy, color: '#fff', border: `3px solid ${COLORS.gold}`, borderRadius: '50%', width: 'clamp(48px, 6vw, 60px)', height: 'clamp(48px, 6vw, 60px)', cursor: 'pointer', zIndex: 500, fontSize: 'clamp(18px, 2.5vw, 24px)', flexShrink: 0 }}>⚙️</button>
         </>
       )}
     </>

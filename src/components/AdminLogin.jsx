@@ -655,7 +655,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
                   type="text"
                   placeholder="Enter your username"
                   value={username}
-                  onChange={e => setUsername(e.target.value)}
+                  onChange={(e) => setUsername(e.target.value)}   /* ✅ Sahi Code */
                   onFocus={() => setFocusU(true)}
                   onBlur={() => setFocusU(false)}
                   onKeyDown={handleKeyDown}
@@ -681,7 +681,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
                   type={showPass ? 'text' : 'password'}
                   placeholder="Enter your password"
                   value={password}
-                  onChange={e => setPassword(e.target.value)}
+                  onChange={(e) => setPassword(e.target.value)}   /* ✅ Sahi Code */
                   onFocus={() => setFocusP(true)}
                   onBlur={() => setFocusP(false)}
                   onKeyDown={handleKeyDown}

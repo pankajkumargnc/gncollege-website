@@ -444,3 +444,82 @@ html, body, #root {
   overflow-x: hidden !important;
   max-width: 100vw !important;
 }
+
+/* ══════════════════════════════════════════════════════
+   GNC SAFE FIXES v8 — Non-breaking minimal overrides
+   Does NOT touch: nav, input, button, slider, gallery
+   ══════════════════════════════════════════════════════ */
+
+/* 1. Prevent horizontal scroll only */
+html, body, #root {
+  overflow-x: hidden !important;
+  max-width: 100vw;
+}
+
+/* 2. Images never overflow their container */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 3. Tables scroll on mobile */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 4. WhatsApp button — fixed position safe */
+[class*="WhatsApp"] {
+  position: fixed !important;
+  z-index: 9999 !important;
+}
+
+/* 5. Toast z-index */
+[class*="Toast"], [class*="toast"] {
+  z-index: 999999 !important;
+}
+
+/* 6. Ticker — safe width only */
+[class*="Ticker"] {
+  width: 100%;
+  overflow: hidden;
+}
+
+/* 7. Modal overlay */
+[class*="lightbox"],
+[class*="Lightbox"] {
+  z-index: 99999 !important;
+}
+
+/* 8. Admin panel mobile — only flex direction, nothing else */
+@media (max-width: 768px) {
+  [class*="AdminPanel"] > div[style*="display: flex"],
+  [class*="AdminPanel"] > div[style*="display:flex"] {
+    flex-direction: column;
+  }
+  /* Admin form inputs — prevent iOS zoom */
+  [class*="AdminPanel"] input,
+  [class*="AdminPanel"] select,
+  [class*="AdminPanel"] textarea {
+    font-size: max(16px, 1rem) !important;
+  }
+}
+
+/* GNC-SAFE-V8 */
+/* ══════════════════════════════════════════════════════
+   GNC SAFE FIXES v9 — Non-breaking minimal overrides
+   ══════════════════════════════════════════════════════ */
+html, body, #root { overflow-x: hidden !important; max-width: 100vw; }
+img { max-width: 100%; height: auto; }
+.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+[class*="WhatsApp"] { position: fixed !important; z-index: 9999 !important; }
+[class*="Toast"], [class*="toast"] { z-index: 999999 !important; }
+[class*="Ticker"] { width: 100%; overflow: hidden; }
+[class*="lightbox"], [class*="Lightbox"] { z-index: 99999 !important; }
+@media (max-width: 768px) {
+  [class*="AdminPanel"] > div[style*="display: flex"],
+  [class*="AdminPanel"] > div[style*="display:flex"] { flex-direction: column; }
+  [class*="AdminPanel"] input, [class*="AdminPanel"] select, [class*="AdminPanel"] textarea { font-size: max(16px, 1rem) !important; }
+}
+/* GNC-SAFE-V9 */

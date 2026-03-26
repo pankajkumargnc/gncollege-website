@@ -1,7 +1,9 @@
+// src/pages/EventsPage.jsx
 import React, { useState, useMemo, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
+import PDFModal from '../components/PDFModal'; // ✅ PDF Modal Import
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const EVENT_TYPES  = ['All','WORKSHOP','SEMINAR','CULTURAL','SPORTS','NSS','NCC', 'ACADEMIC'];
@@ -28,16 +30,20 @@ export default function EventsPage() {
   const [search,   setSearch]   = useState('');
   const [expandId, setExpandId] = useState(null);
 
+  // ✅ PDF Preview State
+  const [previewPdf, setPreviewPdf] = useState(null);
+
   const navy = COLORS.navy || '#0B1F4E';
   const gold = COLORS.gold || '#C9A227';
 
   useEffect(() => {
     window.scrollTo(0, 0);
     const q = query(collection(db, 'events'), orderBy('createdAt', 'desc'));
-    return onSnapshot(q, snap => {
+    const unsub = onSnapshot(q, snap => {
       setEvents(snap.docs.map(d => ({ id:d.id, ...d.data() })));
       setLoading(false);
     });
+    return () => unsub();
   }, []);
 
   const upcoming = useMemo(() => events.filter(e => e.status === 'upcoming'), [events]);
@@ -210,7 +216,7 @@ export default function EventsPage() {
             </section>
 
             {/* ── Events ── */}
-            <section style={{ background: '#fff', padding: '30px 40px', borderRadius: '16px', boxShadow: '0 8px 25px rgba(0,0,0,0.07)', marginTop: '30px', animationDelay:'.2s' }}>
+            <section style={{ background: '#fff', padding: '30px 40px', borderRadius: '16px', boxShadow: '0 8px 25px rgba(0,0,0,0.07)', marginTop: '30px', animationDelay:'.2s', marginBottom: '60px' }}>
               <h2 className="section-heading">📅 Events ({filtered.length})</h2>
               <div className="heading-underline" />
 
@@ -242,16 +248,21 @@ export default function EventsPage() {
                         const m   = TYPE_META[ev.type]||{icon:'🏆',grad:`linear-gradient(135deg,${navy},#1a3a7c)`,light:'#EBF0FF',text:'#1a365d'};
                         const isUp = ev.status === 'upcoming';
                         const exp  = expandId === ev.id;
-                        const desc = (ev.desc||'').replace(/<[^>]*>/g,'');
+                        
+                        // Extract plain text for length checking (ignoring HTML tags)
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = ev.desc || '';
+                        const plainText = tempDiv.textContent || tempDiv.innerText || '';
+                        const descLength = plainText.length;
 
                         return (
                           <div key={ev.id}
                             className={`evt-card${isUp?' evt-upcoming':''}`}
-                            style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:isUp?'0 8px 28px rgba(11,31,78,.1)':'0 4px 16px rgba(11,31,78,.06)', border:isUp?`2px solid ${gold}`:'1px solid #edf2f7', position:'relative' }}>
+                            style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:isUp?'0 8px 28px rgba(11,31,78,.1)':'0 4px 16px rgba(11,31,78,.06)', border:isUp?`2px solid ${gold}`:'1px solid #edf2f7', position:'relative', display: 'flex', flexDirection: 'column' }}>
 
                             {/* image or gradient header */}
                             {ev.imageUrl ? (
-                              <div style={{ height:190, position:'relative', overflow:'hidden' }}>
+                              <div style={{ height:190, position:'relative', overflow:'hidden', flexShrink: 0 }}>
                                 <img src={ev.imageUrl} alt={ev.title} className="evt-img"
                                   style={{ width:'100%', height:'100%', objectFit:'cover' }}
                                   onError={e => { e.target.parentElement.style.background=m.grad; e.target.style.display='none'; }} />
@@ -265,7 +276,7 @@ export default function EventsPage() {
                                 </span>
                               </div>
                             ) : (
-                              <div style={{ background:m.grad, padding:'20px 18px 16px' }}>
+                              <div style={{ background:m.grad, padding:'20px 18px 16px', flexShrink: 0 }}>
                                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
                                   <div style={{ background:'rgba(255,255,255,.22)', borderRadius:9, padding:'7px 10px', textAlign:'center', backdropFilter:'blur(4px)', minWidth:44 }}>
                                     <div style={{ fontSize:9.5, fontWeight:700, color:'rgba(255,255,255,.7)', textTransform:'uppercase' }}>{ev.month||'?'}</div>
@@ -285,30 +296,50 @@ export default function EventsPage() {
                               </div>
                             )}
 
-                            <div style={{ padding:'16px 18px 18px' }}>
+                            <div style={{ padding:'16px 18px 18px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                               <h3 style={{ margin:'0 0 6px', fontSize:15.5, fontWeight:800, color:navy, lineHeight:1.35 }}>{ev.title}</h3>
                               <p style={{ margin:'0 0 10px', fontSize:12.5, color:'#718096', display:'flex', alignItems:'center', gap:5 }}>
                                 <span>📍</span> {ev.location||'College Campus'}
                               </p>
-                              {desc && (
-                                <>
-                                  <p style={{ margin:0, fontSize:13, color:'#4a5568', lineHeight:1.65 }}>
-                                    {exp ? desc : desc.substring(0, 100) + (desc.length > 100 ? '…' : '')}
-                                  </p>
-                                  {desc.length > 100 && (
-                                    <button onClick={() => setExpandId(exp?null:ev.id)}
+                              
+                              {/* ✅ UPDATED DESCRIPTION & READ MORE LOGIC */}
+                              {ev.desc && (
+                                <div style={{ position: 'relative', flex: 1 }}>
+                                  {exp ? (
+                                    <div 
+                                      dangerouslySetInnerHTML={{ __html: ev.desc }} 
+                                      style={{ margin:0, fontSize:13, color:'#4a5568', lineHeight:1.65 }} 
+                                    />
+                                  ) : (
+                                    <p style={{ margin:0, fontSize:13, color:'#4a5568', lineHeight:1.65 }}>
+                                      {plainText.substring(0, 150) + (descLength > 150 ? '…' : '')}
+                                    </p>
+                                  )}
+                                  
+                                  {descLength > 150 && (
+                                    <button onClick={() => setExpandId(exp ? null : ev.id)}
                                       style={{ background:'none', border:'none', color:gold, fontWeight:800, fontSize:12.5, cursor:'pointer', padding:'6px 0 0', fontFamily:'inherit' }}>
-                                      {exp?'▲ Less':'▼ Read More'}
+                                      {exp ? '▲ Less' : '▼ Read More'}
                                     </button>
                                   )}
-                                </>
+                                </div>
                               )}
-                              {ev.reportLink && (
-                                <a href={ev.reportLink} target="_blank" rel="noreferrer" className="download-btn"
-                                  style={{ marginTop:12, display:'inline-flex', alignItems:'center', gap:6 }}>
-                                  📄 PDF Report
-                                </a>
-                              )}
+                              
+                              {/* ✅ Modal Trigger for PDF Report */}
+                              <div style={{ marginTop: 'auto', paddingTop: 12 }}>
+                                {ev.reportLink && (
+                                  <a href={ev.reportLink} target="_blank" rel="noreferrer" className="download-btn"
+                                    onClick={(e) => {
+                                      if(ev.reportLink.includes('drive.google') || ev.reportLink.endsWith('.pdf') || ev.reportLink.includes('firebase')) {
+                                        e.preventDefault();
+                                        setPreviewPdf({ url: ev.reportLink, title: ev.title || 'Event Report' });
+                                      }
+                                    }}
+                                    style={{ display:'inline-flex', alignItems:'center', gap:6, cursor: 'pointer' }}>
+                                    📄 View Event PDF
+                                  </a>
+                                )}
+                              </div>
                             </div>
                           </div>
                         );
@@ -321,6 +352,8 @@ export default function EventsPage() {
 
           </main>
       </div>
+      {/* ✅ Modal Render */}
+      {previewPdf && <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />}
       <style>{`
         .download-btn { display:inline-block; background:#f8fafc; color:${navy}; padding:8px 15px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none; border:1px solid #cbd5e1; transition:.2s; }
         .download-btn:hover { background:${navy}; color:#fff; border-color:${navy}; }

@@ -3,10 +3,11 @@
 // ✅ Trailing arrow on attachment/download links
 // ✅ All scroll logic + memory leak fix preserved
 
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { COLORS } from '../../styles/colors';
 import SectionTitle from './SectionTitle';
+import PDFModal from '../PDFModal'; // ✅ PDF Modal Import kiya
 
 const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvents }) => {
   const noticesRef    = useRef(null);
@@ -15,6 +16,9 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
   const noticesRafRef = useRef(null);
   const newsRafRef    = useRef(null);
   const pdfRafRef     = useRef(null);
+
+  // ✅ PDF Popup ke liye State
+  const [previewPdf, setPreviewPdf] = useState(null);
 
   // ── Data prep ──────────────────────────────────────────────────────────────
   const doubledNotices = useMemo(() =>
@@ -354,6 +358,14 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
 
         </div>
       </div>
+      {/* ✅ PDF Modal Yahan Render Hoga */}
+      {previewPdf && (
+        <PDFModal 
+          url={previewPdf.url} 
+          title={previewPdf.title} 
+          onClose={() => setPreviewPdf(null)} 
+        />
+      )}
     </section>
   );
 };

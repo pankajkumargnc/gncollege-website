@@ -15,6 +15,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
+import PDFModal from '../components/PDFModal'; // ✅ NAYA PREMIUM MODAL IMPORT KIYA HAI
 
 /* ── brand colours ─────────────────────────────────────────────── */
 const NAVY = COLORS?.navy || '#0f2347';
@@ -352,58 +353,6 @@ const FacultySection = ({ keys = [], tabs, color }) => {
 };
 
 /* ══════════════════════════════════════════════════════════════════
-   PDF VIEWER MODAL
-══════════════════════════════════════════════════════════════════ */
-const PdfModal = ({ pdf, onClose }) => {
-  // ✅ B12 FIX: Escape key se modal band ho
-  useEffect(() => {
-    const handler = e => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
-
-  return (
-  <div
-    onClick={onClose}
-    style={{
-      position: 'fixed', inset: 0, zIndex: 99999,
-      background: 'rgba(15,35,71,.72)', backdropFilter: 'blur(8px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-    }}
-  >
-    <div
-      onClick={e => e.stopPropagation()}
-      style={{
-        background: '#fff', borderRadius: 20, overflow: 'hidden',
-        width: '92%', maxWidth: 920, height: '88vh',
-        display: 'flex', flexDirection: 'column',
-        boxShadow: '0 32px 64px rgba(0,0,0,.32)',
-      }}
-    >
-      <div style={{ background: NAVY, color: '#fff', padding: '13px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 18 }}>📄</span>
-          <span style={{ fontWeight: 800, fontSize: 14 }}>{pdf.title}</span>
-          {pdf.year && <span style={{ fontSize: 12, opacity: .7 }}>• {pdf.year}</span>}
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <a href={pdf.pdfUrl} target="_blank" rel="noreferrer"
-            style={{ background: 'rgba(255,255,255,.15)', color: '#fff', padding: '5px 13px', borderRadius: 8, textDecoration: 'none', fontSize: 12, fontWeight: 700 }}>
-            ↗ Open
-          </a>
-          <button onClick={onClose}
-            style={{ background: 'rgba(255,255,255,.15)', border: 'none', color: '#fff', width: 32, height: 32, borderRadius: '50%', cursor: 'pointer', fontSize: 14 }}>
-            ✕
-          </button>
-        </div>
-      </div>
-      <iframe src={pdf.pdfUrl} title={pdf.title} style={{ flex: 1, border: 'none', width: '100%' }} />
-    </div>
-  </div>
-  );
-};
-
-/* ══════════════════════════════════════════════════════════════════
    SINGLE DEPARTMENT PAGE  (universal template)
 ══════════════════════════════════════════════════════════════════ */
 function SingleDeptPage({ slug }) {
@@ -412,7 +361,9 @@ function SingleDeptPage({ slug }) {
   const [data, setData] = useState(null);
   const [loading, setL] = useState(true);
   const [semTab, setSem] = useState(null);
-  const [pdfOpen, setPdf] = useState(null);
+  
+  // ✅ MODAL PDF STATE (Naya Premium Modal ke liye)
+  const [previewPdf, setPreviewPdf] = useState(null);
 
   /* Firestore listener */
   useEffect(() => {
@@ -755,7 +706,13 @@ function SingleDeptPage({ slug }) {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 14 }}>
               {reports.map((rep, i) => (
                 <Fade key={i} delay={i * .06} y={14}>
-                  <div className="dp-rep" onClick={() => setPdf(rep)}>
+                  {/* ✅ MODAL CLICK HANDLER */}
+                  <div className="dp-rep" onClick={() => {
+                    const pdfLink = rep.pdfUrl || rep.link;
+                    if (pdfLink) {
+                      setPreviewPdf({ url: pdfLink, title: rep.title || 'Report' });
+                    }
+                  }}>
                     <div style={{ width: 48, height: 48, borderRadius: 12, background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>📄</div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 700, color: NAVY, fontSize: 13.5, marginBottom: 3, lineHeight: 1.3 }}>{rep.title}</div>
@@ -833,8 +790,8 @@ function SingleDeptPage({ slug }) {
         >← Back to All Departments</Link>
       </div>
 
-      {/* PDF modal */}
-      {pdfOpen && <PdfModal pdf={pdfOpen} onClose={() => setPdf(null)} />}
+      {/* ✅ PREMIUM PDF MODAL */}
+      {previewPdf && <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />}
     </div>
   );
 }

@@ -1,21 +1,11 @@
 // src/components/AdminCampusTab.jsx
-// ✅ SECURITY FIX: Hardcoded ImgBB key removed
-//    Key ab MediaPicker ke module-level _imgbbKey se aata hai
-//    (AdminPanel ke settings useEffect mein setImgbbKey() call hoti hai)
-
-import React, { useState, useEffect } from 'react';
-import { doc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import React, { useState, useEffect, useRef } from 'react';
+import { doc, setDoc, onSnapshot, serverTimestamp, getDoc } from 'firebase/firestore'; // ✅ getDoc added
 import { db } from '../firebase';
-import { setImgbbKey } from './MediaPicker'; // key read karne ke liye
 import toast from 'react-hot-toast';
 
 const NAVY = '#0f2347';
 const C    = '#0ea5e9';
-
-// ✅ FIXED: No hardcoded key — key settings se aati hai (AdminPanel load karta hai)
-// getImgbbKey helper — MediaPicker ke _imgbbKey read karta hai
-let _cachedKey = '';
-export function updateCampusImgbbKey(k) { if (k) _cachedKey = k; }
 
 const CATEGORIES = [
   { id: 'bank-more',      label: 'Bank More Campus',    icon: '🏛️' },
@@ -34,10 +24,23 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
   const [uploading, setUploading] = useState(false);
   const [prog,      setProg]      = useState(0);
   const [caption,   setCaption]   = useState('');
+  
+  // ✅ NAYA SYSTEM: Khud ki State jo API key ko track karegi
+  const [apiKey, setApiKey] = useState(imgbbKey || window.GN_IMGBB_KEY || '');
+  const fileInputRef = useRef(null);
 
-  // imgbbKey prop ya cached key — whichever is available
-  const activeKey = imgbbKey || _cachedKey;
+  // ✅ DIRECT FETCH: Agar key nahi hai toh direct Firebase se fetch karke layega
+  useEffect(() => {
+    if (!apiKey) {
+      getDoc(doc(db, 'settings', 'site')).then(s => {
+        if (s.exists() && s.data().imgbbKey) {
+          setApiKey(s.data().imgbbKey);
+        }
+      }).catch(()=>{});
+    }
+  }, [apiKey]);
 
+  // Fetch images for selected category
   useEffect(() => {
     setLoading(true);
     const unsub = onSnapshot(doc(db, 'campus_gallery', activeCat), (snap) => {
@@ -52,8 +55,8 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // ✅ Key check — no silent failure
-    if (!activeKey) {
+    // ✅ Key Check
+    if (!apiKey) {
       toast.error('ImgBB API key missing! Admin → Site Settings → ImgBB API Key set karein.');
       e.target.value = '';
       return;
@@ -67,8 +70,8 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
 
     try {
       setProg(60);
-      // ✅ FIXED: activeKey (from prop or cached) — no hardcoded key
-      const res  = await fetch(`https://api.imgbb.com/1/upload?key=${activeKey}`, {
+      // ✅ Using the local state apiKey
+      const res  = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
         method: 'POST', body: formData,
       });
       const data = await res.json();
@@ -97,7 +100,7 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
     } finally {
       setUploading(false);
       setProg(0);
-      e.target.value = '';
+      if(fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -127,7 +130,8 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
         <p style={{ color: '#94a3b8', fontSize: 13, margin: 0 }}>
           Campus ki photos caption ke sath upload karein.
         </p>
-        {!activeKey && (
+        {/* ✅ Dynamic Warning */}
+        {!apiKey && (
           <div style={{ marginTop: 8, padding: '8px 12px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, color: '#b91c1c', fontSize: 12, fontWeight: 700 }}>
             ⚠️ ImgBB API key missing — Admin → Site Settings → ImgBB API Key
           </div>
@@ -152,14 +156,15 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
           <div style={{ display: 'flex', gap: 12, alignItems: 'center', background: '#f8fafc', padding: '6px 6px 6px 16px', borderRadius: 12, border: '1.5px solid #e2e8f0' }}>
             <input
               type="text"
-              placeholder="Photo caption likhein (Optional)..."
+              placeholder="Photo caption (Optional)..."
               value={caption}
               onChange={e => setCaption(e.target.value)}
               style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: 13, width: 220, color: NAVY, fontWeight: 600 }}
             />
-            <label style={{ background: `linear-gradient(135deg, ${C}, #0284c7)`, color: '#fff', padding: '10px 20px', borderRadius: 9, cursor: (uploading || !activeKey) ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: 13, display: 'inline-flex', alignItems: 'center', opacity: (uploading || !activeKey) ? 0.6 : 1 }}>
+            <label style={{ background: `linear-gradient(135deg, ${C}, #0284c7)`, color: '#fff', padding: '10px 20px', borderRadius: 9, cursor: (uploading || !apiKey) ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: 13, display: 'inline-flex', alignItems: 'center', opacity: (uploading || !apiKey) ? 0.6 : 1 }}>
               {uploading ? `⏳ ${prog}%` : '📤 Upload'}
-              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} disabled={uploading || !activeKey} />
+              {/* ✅ Dynamically enabled/disabled */}
+              <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} disabled={uploading || !apiKey} name="file" />
             </label>
           </div>
         </div>

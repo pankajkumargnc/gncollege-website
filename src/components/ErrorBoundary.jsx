@@ -3,7 +3,6 @@
 //    poora website crash nahi hoga — sirf wo page error message dikhayega
 //
 // Usage — App.jsx mein:
-//   import ErrorBoundary from './components/ErrorBoundary';
 //   <ErrorBoundary page="EventsPage">
 //     <EventsPage />
 //   </ErrorBoundary>

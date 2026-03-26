@@ -1,9 +1,10 @@
 // src/components/home/PlacementsSection.jsx
 // ✅ Gradient glow hover on alumni cards (screenshot-style)
 // ✅ All original Firebase + scroll logic preserved
+// ✅ FIXED: Container width constrained to 1200px (matches Events section)
 
 import React, { useState, useEffect, memo } from 'react';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 const N = '#0f2347';
@@ -15,6 +16,7 @@ const COMPANY_COLORS = {
   google:'#4285f4', amazon:'#f59e0b', microsoft:'#0284c7', flipkart:'#2874f0',
   zomato:'#e23744', cognizant:'#1a77c9', capgemini:'#0070c0',
 };
+
 const getColor = (c = '') => {
   const lc = c.toLowerCase();
   for (const [k, v] of Object.entries(COMPANY_COLORS)) if (lc.includes(k)) return v;
@@ -33,7 +35,18 @@ const S = `
     font-family:'Inter',sans-serif;
   }
 
-  .wof-head{text-align:center;padding:0 20px 44px;position:relative;z-index:2;}
+  /* ✅ FIXED: max-width 1200px to match Events section */
+  .wof-inner { 
+    max-width: 1200px; 
+    width: 100%;
+    margin: 0 auto; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    padding: 0 20px; /* Optional side padding for mobile */
+  }
+
+  .wof-head{text-align:center;padding:0 0 44px;position:relative;z-index:2;}
   .wof-eyebrow{
     display:inline-flex;align-items:center;gap:8px;
     background:#fff;border:1.5px solid #e2e8f0;color:#64748b;
@@ -57,10 +70,12 @@ const S = `
   .wof-stat-num{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;color:${N};}
   .wof-stat-lbl{font-size:10px;color:#94a3b8;letter-spacing:1px;text-transform:uppercase;margin-top:2px;font-weight:600;}
 
+  /* ✅ FIXED: Removed 100vw and negative margins, set width to 100% */
   .wof-mask{
+    width: 100%;
     overflow:hidden;
-    mask:linear-gradient(90deg,transparent 0%,#fff 8%,#fff 92%,transparent 100%);
-    -webkit-mask:linear-gradient(90deg,transparent 0%,#fff 8%,#fff 92%,transparent 100%);
+    mask:linear-gradient(90deg,transparent 0%,#fff 5%,#fff 95%,transparent 100%);
+    -webkit-mask:linear-gradient(90deg,transparent 0%,#fff 5%,#fff 95%,transparent 100%);
     padding:16px 0;
   }
   .wof-track{
@@ -164,7 +179,6 @@ const WofCard = memo(({ p }) => {
   const color    = getColor(p.company || '');
   const fallback = `${import.meta.env.BASE_URL || '/'}images/college_photo.webp`;
   return (
-    // .wof-gc = glow wrapper
     <div className="wof-gc">
       <div className="wof-card">
         <div className="wof-avatar-wrap">
@@ -194,11 +208,14 @@ export default function PlacementsSection() {
   const [loading, setL]   = useState(true);
 
   useEffect(() => {
-    const q = query(collection(db, 'placements'), orderBy('createdAt', 'desc'));
-    return onSnapshot(q,
-      s => { set(s.docs.map(d => ({ id: d.id, ...d.data() }))); setL(false); },
-      ()  => setL(false)
-    );
+    const q = query(collection(db, 'placements'));
+    const unsub = onSnapshot(q, snap => { 
+      let data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      data.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+      set(data);
+      setL(false); 
+    }, ()  => setL(false));
+    return () => unsub();
   }, []);
 
   if (loading) return null;
@@ -211,53 +228,56 @@ export default function PlacementsSection() {
   return (
     <section className="wof-root">
       <style>{S}</style>
-
-      <div className="wof-head">
-        <div className="wof-eyebrow"><div className="wof-dot" /> Our Alumni</div>
-        <h2 className="wof-h2">🏆 Wall of <span>Fame</span></h2>
-        <p className="wof-sub">GNC ke alumni — India ki top companies mein apna career bana rahe hain</p>
-        <div className="wof-bar" />
-        {placements.length > 0 && (
-          <div className="wof-stats">
-            <div className="wof-stat">
-              <div className="wof-stat-num">{placements.length}+</div>
-              <div className="wof-stat-lbl">Placed</div>
-            </div>
-            <div className="wof-stat">
-              <div className="wof-stat-num">{companies.length}+</div>
-              <div className="wof-stat-lbl">Companies</div>
-            </div>
-            {maxPkg && (
+      
+      {/* ✅ Outer Wrapper added to constrain everything centrally */}
+      <div className="wof-inner">
+        <div className="wof-head">
+          <div className="wof-eyebrow"><div className="wof-dot" /> Our Alumni</div>
+          <h2 className="wof-h2">🏆 Wall of <span>Fame</span></h2>
+          <p className="wof-sub">GNC ke alumni — India ki top companies mein apna career bana rahe hain</p>
+          <div className="wof-bar" />
+          {placements.length > 0 && (
+            <div className="wof-stats">
               <div className="wof-stat">
-                <div className="wof-stat-num">{maxPkg} LPA</div>
-                <div className="wof-stat-lbl">Highest Pkg</div>
+                <div className="wof-stat-num">{placements.length}+</div>
+                <div className="wof-stat-lbl">Placed</div>
               </div>
-            )}
+              <div className="wof-stat">
+                <div className="wof-stat-num">{companies.length}+</div>
+                <div className="wof-stat-lbl">Companies</div>
+              </div>
+              {maxPkg && (
+                <div className="wof-stat">
+                  <div className="wof-stat-num">{maxPkg} LPA</div>
+                  <div className="wof-stat-lbl">Highest Pkg</div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {placements.length === 0 ? (
+          <div className="wof-empty">
+            <div style={{ fontSize:40,marginBottom:12,opacity:.4 }}>🎓</div>
+            <div style={{ fontWeight:600,marginBottom:6,color:'#475569' }}>Alumni stories loading soon</div>
+            <div style={{ fontSize:13 }}>Admin Panel → Alumni Wall tab se data add karein</div>
+          </div>
+        ) : (
+          <div className="wof-mask">
+            <div className="wof-track">
+              {triple.map((p, i) => <WofCard key={`${p.id}-${i}`} p={p} />)}
+            </div>
+          </div>
+        )}
+
+        {placements.length > 0 && (
+          <div className="wof-foot">
+            <div className="wof-foot-badge">
+              ✨ <b>{placements.length}</b> success stories — aur badh rahi hain
+            </div>
           </div>
         )}
       </div>
-
-      {placements.length === 0 ? (
-        <div className="wof-empty">
-          <div style={{ fontSize:40,marginBottom:12,opacity:.4 }}>🎓</div>
-          <div style={{ fontWeight:600,marginBottom:6,color:'#475569' }}>Alumni stories loading soon</div>
-          <div style={{ fontSize:13 }}>Admin Panel → Alumni Wall tab se data add karein</div>
-        </div>
-      ) : (
-        <div className="wof-mask">
-          <div className="wof-track">
-            {triple.map((p, i) => <WofCard key={`${p.id}-${i}`} p={p} />)}
-          </div>
-        </div>
-      )}
-
-      {placements.length > 0 && (
-        <div className="wof-foot">
-          <div className="wof-foot-badge">
-            ✨ <b>{placements.length}</b> success stories — aur badh rahi hain
-          </div>
-        </div>
-      )}
     </section>
   );
 }

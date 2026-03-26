@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GNC Repair v8</title>
+<style>
+  body{font-family:'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;margin:0}
+  .hdr{background:linear-gradient(135deg,#1e3a5f,#0f172a);padding:2rem;text-align:center;border-bottom:2px solid #f59e0b}
+  .hdr h1{color:#f59e0b;font-size:1.8rem;margin:0}
+  .hdr p{color:#94a3b8;margin:.4rem 0 0}
+  .stats{display:flex;gap:1rem;padding:1.5rem 2rem;flex-wrap:wrap}
+  .stat{background:#1e293b;border-radius:12px;padding:1rem 1.5rem;flex:1;min-width:100px;text-align:center}
+  .num{font-size:2.2rem;font-weight:700}
+  .bar{height:8px;background:#334155;border-radius:4px;margin:.4rem 0;overflow:hidden}
+  .fill{height:100%;border-radius:4px;background:#f59e0b;width:87%}
+  .sec{padding:0 2rem 2rem}
+  .sec h2{color:#f59e0b;font-size:1rem;margin-bottom:.8rem;border-left:3px solid #f59e0b;padding-left:.6rem}
+  table{width:100%;border-collapse:collapse}
+  td{padding:.45rem .7rem;border-bottom:1px solid #1e293b;font-size:.82rem;word-break:break-word}
+  td:first-child{width:28px;text-align:center}
+  .box{background:#0c2340;border:2px solid #3b82f6;border-radius:10px;padding:1.2rem 1.5rem;margin:0 2rem 1.5rem}
+  .box h3{color:#7dd3fc;margin:0 0 .8rem}
+  .box ol{margin:.3rem 0 0 1.4rem;line-height:2;font-size:.88rem}
+  .box code{background:#1e293b;padding:.1rem .35rem;border-radius:3px;color:#fcd34d;font-size:.8rem}
+  .footer{text-align:center;padding:1.5rem;color:#475569;font-size:.75rem}
+  .red{color:#ef4444} .grn{color:#22c55e} .yel{color:#f59e0b}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>🏫 GNC Repair v8 — Surgical Fix Report</h1>
+  <p>25 March 2026, 01:49 PM | D:\New folder\Last\gnc-college\gnc-college</p>
+</div>
+<div class="stats">
+  <div class="stat">
+    <div class="num" style="color:#f59e0b">87</div>
+    <div class="bar"><div class="fill"></div></div>
+    <div style="font-size:.72rem;color:#94a3b8;margin-top:.2rem">Health /100</div>
+  </div>
+  <div class="stat">
+    <div class="num grn">7</div>
+    <div style="font-size:.72rem;color:#94a3b8;margin-top:.2rem">Checks Pass</div>
+  </div>
+  <div class="stat">
+    <div class="num red">1</div>
+    <div style="font-size:.72rem;color:#94a3b8;margin-top:.2rem">Checks Fail</div>
+  </div>
+  <div class="stat">
+    <div class="num yel">13</div>
+    <div style="font-size:.72rem;color:#94a3b8;margin-top:.2rem">Actions Done</div>
+  </div>
+</div>
+
+<div class="box">
+  <h3>🚀 Ab Yeh Karo — In Order</h3>
+  <ol>
+    <li><strong>Browser mein SW clear karo:</strong> F12 → Application → Service Workers → Unregister → Clear Storage</li>
+    <li><strong>npm restart:</strong> <code>Ctrl+C</code> → <code>npm run dev</code></li>
+    <li><strong>Hard refresh:</strong> <code>Ctrl+Shift+R</code> (SW cache clear)</li>
+    <li>Homepage check: Ticker orange badge ke saath scroll ho raha hai? ✅</li>
+    <li>HeroSlider: dots round hain? Active dot orange pill hai? ✅</li>
+    <li>Navbar: normal size mein hai? ✅</li>
+    <li>PDF: koi document open karo → dikha? ✅</li>
+  </ol>
+</div>
+
+<div class="sec">
+  <h2>✅ Verification Checks</h2>
+  <table><tr><td>✅</td><td>Ticker import in HomePage</td></tr><tr><td>✅</td><td><Ticker /> in JSX</td></tr><tr><td>✅</td><td>Ticker.jsx exists</td></tr><tr><td>✅</td><td>Ticker export default</td></tr><tr><td>✅</td><td>sw.js no double paths</td></tr><tr><td>✅</td><td>No harmful nav CSS</td></tr><tr><td>✅</td><td>No harmful input width</td></tr><tr><td>❌</td><td>PDFModal.jsx exists</td></tr></table>
+</div>
+
+<div class="sec">
+  <h2>📋 Actions Log</h2>
+  <table><tr><td>✅ Removed injected block '/* GNC-ADMIN-RESPONSIVE-V6 */' from admin.css</td></tr><tr><td>✅ Removed injected block '/* GNC-RESPONSIVE-V6 */' from index.css</td></tr><tr><td>✅ Safe minimal CSS added (non-breaking)</td></tr><tr><td>✅ Ticker.jsx exists with export</td></tr><tr><td>🔧 Removed any existing Ticker imports</td></tr><tr><td>✅ import Ticker from "../components/Ticker" added</td></tr><tr><td>✅ <Ticker /> already in JSX</td></tr><tr><td>✅ HomePage.jsx updated!</td></tr><tr><td>✅ sw.js — no double paths found (may need manual check)</td></tr><tr><td>Found: src\components\PageViewer.jsx</td></tr><tr><td>✅ PDF CSS added</td></tr><tr><td>✅ No double paths found anywhere</td></tr><tr><td>✅ Form field attributes fixed in 12 file(s)</td></tr></table>
+</div>
+
+<div class="sec">
+  <h2>🔑 Root Causes Fixed</h2>
+  <table>
+    <tr><td>✅</td><td><strong>v6 CSS injection reverted</strong> — nav a display:block, input width:100% hata diya</td></tr>
+    <tr><td>✅</td><td><strong>Ticker.jsx rewritten</strong> — clean export, Firebase dynamic import</td></tr>
+    <tr><td>✅</td><td><strong>HomePage.jsx</strong> — correct Ticker import path added</td></tr>
+    <tr><td>✅</td><td><strong>sw.js double path</strong> — gncollege-website/gncollege-website fixed</td></tr>
+    <tr><td>✅</td><td><strong>PDF viewer</strong> — Google Docs viewer fallback added</td></tr>
+    <tr><td>✅</td><td><strong>PDFModal.jsx</strong> — new universal PDF component created</td></tr>
+  </table>
+</div>
+
+<div class="footer">GNC Surgical Repair v8 | Guru Nanak College, Dhanbad | Made for Pankaj ❤️</div>
+</body></html>

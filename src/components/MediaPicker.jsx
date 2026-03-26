@@ -6,7 +6,6 @@
 //
 //  SETUP:
 //  1. AdminPanel.jsx site-settings load hone ke baad call karo:
-//       import { setImgbbKey } from './MediaPicker';
 //       setImgbbKey(siteCfg.imgbbKey);
 //
 //  2. Usage:
@@ -19,6 +18,7 @@
 // ═══════════════════════════════════════════════════════════════════
 
 import { useState, useRef } from 'react';
+import PDFModal from './PDFModal'; // ✅ NAYA PREMIUM MODAL IMPORT KIYA HAI
 
 // ── ImgBB key (module-level, set by AdminPanelInner on settings load) ─
 let _imgbbKey = '';
@@ -96,6 +96,9 @@ export default function MediaPicker({
   const [localPath, setLocalPath] = useState('');
   const [dragging,  setDragging]  = useState(false);
   const fileRef = useRef();
+  
+  // ✅ MODAL STATE
+  const [previewPdf, setPreviewPdf] = useState(null);
 
   const localList = isPdf && !isImage ? LOCAL_PDFS : LOCAL_IMAGES;
 
@@ -217,7 +220,12 @@ export default function MediaPicker({
       {/* Mode switcher */}
       <div style={S.modes}>
         {modes.map(m => (
-          <button key={m.id} style={S.modeBtn(mode === m.id)} onClick={() => setMode(m.id)}>
+          <button 
+            type="button" // ✅ Fix: Prevents form auto-submit
+            key={m.id} 
+            style={S.modeBtn(mode === m.id)} 
+            onClick={() => setMode(m.id)}
+          >
             <span>{m.icon}</span>
             <span>{m.label}</span>
           </button>
@@ -316,9 +324,10 @@ export default function MediaPicker({
                 placeholder={isPdf && !isImage ? '/pdfs/report.pdf ya /documents/file.pdf' : '/images/photo.jpg ya /images/logo.webp'}
                 value={localPath}
                 onChange={e => setLocalPath(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter' && localPath.trim()) { onChange(localPath.trim()); setLocalPath(''); } }}
+                onKeyDown={e => { if (e.key === 'Enter' && localPath.trim()) { e.preventDefault(); onChange(localPath.trim()); setLocalPath(''); } }}
               />
               <button
+                type="button" // ✅ Fix
                 onClick={() => { if (localPath.trim()) { onChange(localPath.trim()); setLocalPath(''); } }}
                 style={{ background: NAVY, color: '#fff', border: 'none', borderRadius: 9, padding: '10px 16px', cursor: 'pointer', fontWeight: 700, fontSize: 12, fontFamily: 'inherit', whiteSpace: 'nowrap' }}
               >
@@ -347,9 +356,10 @@ export default function MediaPicker({
                   : 'https://i.ibb.co/... ya https://drive.google.com/...'}
                 value={urlInput}
                 onChange={e => setUrlInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter' && urlInput.trim()) { onChange(urlInput.trim()); setUrlInput(''); } }}
+                onKeyDown={e => { if (e.key === 'Enter' && urlInput.trim()) { e.preventDefault(); onChange(urlInput.trim()); setUrlInput(''); } }}
               />
               <button
+                type="button" // ✅ Fix
                 onClick={async () => {
                   if (urlInput.trim()) { onChange(urlInput.trim()); setUrlInput(''); }
                   else {
@@ -398,16 +408,27 @@ export default function MediaPicker({
           )}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#10b981', marginBottom: 2 }}>✓ Set</div>
-            <a href={value} target="_blank" rel="noreferrer"
-              style={{ fontSize: 11, color: '#64748b', wordBreak: 'break-all', textDecoration: 'none' }}
-              title={value}
+            
+            {/* ✅ PDF MODAL TRIGGER FOR MEDIA PICKER */}
+            <a href={value} target="_blank" rel="noreferrer" 
+               style={{ fontSize: 11, color: '#64748b', wordBreak: 'break-all', textDecoration: 'none', cursor: 'pointer' }}
+               title={value}
+               onClick={(e) => {
+                 if (value && (value.includes('drive.google') || value.toLowerCase().endsWith('.pdf') || value.includes('firebase'))) {
+                   e.preventDefault();
+                   setPreviewPdf({ url: value, title: label || 'Preview Document' });
+                 }
+               }}
             >
               {value.length > 55 ? value.slice(0, 52) + '…' : value}
             </a>
           </div>
-          <button style={S.clearBtn} onClick={() => onChange('')}>✕ Clear</button>
+          <button type="button" style={S.clearBtn} onClick={() => onChange('')}>✕ Clear</button> {/* ✅ Fix */}
         </div>
       )}
+
+      {/* ✅ PDF MODAL RENDERED IN MEDIA PICKER */}
+      {previewPdf && <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />}
     </div>
   );
 }
