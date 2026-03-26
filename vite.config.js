@@ -21,10 +21,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Core React
-          "react-core": ["react", "react-dom"],
-          // Router
-          "router": ["react-router-dom"],
           // Firebase
           "firebase-app"  : ["firebase/app"],
           "firebase-auth" : ["firebase/auth"],
