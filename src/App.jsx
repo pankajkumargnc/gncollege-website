@@ -5,6 +5,7 @@ import { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster }         from 'react-hot-toast';
 import AlertBanner         from './components/AlertBanner';
+import Ticker from './components/Ticker';
 
 
 import Navbar              from './components/Navbar';
@@ -52,7 +53,7 @@ const EventsPage        = safeLazy(() => import('./pages/EventsPage'));
 // ✅ FIXED: AdminPanel ka naya rasta (path) update kar diya gaya hai!
 const AdminPanel        = safeLazy(() => import('./components/admin/AdminPanel'));
 
-const Ticker            = safeLazy(() => import('./components/Ticker')); 
+
 
 // ── Named export lazy helpers ────────────────────────────────────────────────
 const LazyAbout       = n => safeLazy(() => import('./pages/AboutPages').then(m => ({ default: m[n] })));
