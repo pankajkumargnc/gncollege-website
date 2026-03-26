@@ -5,6 +5,7 @@ import { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster }         from 'react-hot-toast';
 import AlertBanner from './components/AlertBanner'; // Import karein
+import Ticker from './components/Ticker';
 
 import Navbar              from './components/Navbar';
 import Footer              from './components/Footer';
