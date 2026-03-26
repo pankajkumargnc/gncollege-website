@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GNC Doctor v5 Report</title>
+<style>
+  :root{--n:#0f172a;--g:#f59e0b;--gr:#22c55e;--r:#ef4444;--c:#1e293b;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:var(--n);color:#e2e8f0;min-height:100vh}
+  .hdr{background:linear-gradient(135deg,#1e3a5f,#0f172a);padding:2rem;text-align:center;border-bottom:2px solid var(--g)}
+  .hdr h1{font-size:2rem;color:var(--g)}
+  .stats{display:flex;gap:1rem;padding:1.5rem 2rem;flex-wrap:wrap}
+  .stat{background:var(--c);border-radius:12px;padding:1.2rem 1.5rem;flex:1;min-width:120px;text-align:center}
+  .num{font-size:2.5rem;font-weight:700}
+  .lbl{font-size:.78rem;color:#94a3b8;margin-top:.3rem}
+  .bar{height:8px;background:#334155;border-radius:4px;margin:.5rem 0;overflow:hidden}
+  .fill{height:100%;border-radius:4px;transition:width .5s}
+  .section{padding:0 2rem 2rem}
+  .section h2{font-size:1.1rem;color:var(--g);margin-bottom:1rem;border-left:3px solid var(--g);padding-left:.7rem}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:.55rem .8rem;text-align:left;border-bottom:1px solid #334155;font-size:.82rem;word-break:break-word;vertical-align:top}
+  th{color:var(--g);background:#1e293b;font-weight:600}
+  td:first-child{width:28px;text-align:center}
+  td:nth-child(2){width:38%;color:#7dd3fc;font-family:monospace;font-size:.8rem}
+  .empty{color:#64748b;padding:1rem;text-align:center;font-style:italic}
+  .note{background:#1e3a5f;border:1px solid var(--g);border-radius:8px;padding:1rem 1.5rem;margin:0 2rem 1.5rem;color:#fcd34d;font-size:.88rem}
+  .alert-box{background:#3b0000;border:2px solid var(--r);border-radius:10px;padding:1.5rem;margin:0 2rem 2rem;}
+  .alert-box h3{color:var(--r);margin-bottom:.8rem}
+  .alert-box p{margin:.5rem 0;font-size:.88rem;line-height:1.6}
+  .alert-box ol{margin:.5rem 0 .5rem 1.5rem;font-size:.88rem;line-height:1.8}
+  .alert-box a{color:#7dd3fc}
+  .alert-box code{background:#1e293b;padding:.1rem .4rem;border-radius:4px;font-size:.82rem}
+  .footer{text-align:center;padding:1.5rem;color:#475569;font-size:.78rem}
+  tr:hover{background:rgba(255,255,255,.03)}
+  h2.perf{color:#7dd3fc}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>🏫 GNC College — Project Doctor v5 ULTRA</h1>
+  <p style="color:#94a3b8;margin-top:.4rem">
+    25 March 2026, 08:07 AM | Scan: 0.7s | D:\New folder\Last\gnc-college\gnc-college
+  </p>
+</div>
+<div class="stats">
+  <div class="stat">
+    <div class="num" style="color:#22c55e">80</div>
+    <div class="bar"><div class="fill" style="background:#22c55e;width:80%"></div></div>
+    <div class="lbl">Health Score /100</div>
+  </div>
+  <div class="stat">
+    <div class="num" style="color:#ef4444">0</div>
+    <div class="lbl">Critical Errors</div>
+  </div>
+  <div class="stat">
+    <div class="num" style="color:#f59e0b">10</div>
+    <div class="lbl">Warnings</div>
+  </div>
+  <div class="stat">
+    <div class="num" style="color:#22c55e">2</div>
+    <div class="lbl">Auto-Fixes</div>
+  </div>
+  <div class="stat">
+    <div class="num" style="color:#7dd3fc">89%</div>
+    <div class="bar"><div class="fill" style="background:#7dd3fc;width:89%"></div></div>
+    <div class="lbl">Perf Checks 17/19</div>
+  </div>
+</div>
+<div class="note">
+  <strong>v5 ULTRA:</strong> constants.js circular fix • Ticker auto-add •
+  Firebase env audit • Admin CRUD per-section check • Performance checklist •
+  Admin data loss diagnosis • PVS/R alias resolve
+</div>
+
+<div class="alert-box">
+  <h3>🔴 Admin Data Loss — Root Cause & Fix</h3>
+  <p><strong>Kyu hua:</strong> .env.local file mein Firebase credentials nahi the / placeholder values the.
+  Isliye Firebase connect nahi hua aur app offline/mock mode mein chala — koi bhi data save nahi hua.</p>
+  <p><strong>Fix steps:</strong></p>
+  <ol>
+    <li>Firebase Console kholо: <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a></li>
+    <li>Project: <strong>gnc-college-web</strong> → Project Settings → Your apps → Web app</li>
+    <li><code>.env.local</code> file mein actual values paste karo</li>
+    <li><code>npm run dev</code> restart karo — ab data persist hoga</li>
+  </ol>
+  <p><strong>Test karo:</strong> Admin panel se ek notice add karo → page refresh karo → notice dikha? ✅</p>
+</div>
+
+<div class="section"><h2>❌ Critical Errors (0)</h2><p class="empty">🎉 Zero critical errors!</p></div>
+<div class="section"><h2>⚠️ Warnings (10)</h2><table><tr><th></th><th>File</th><th>Issue</th></tr><tr><td>⚠️</td><td>src\App.jsx</td><td>'PVS' has no import — add: import PVS from './PageViewer'</td></tr><tr><td>⚠️</td><td>src\App.jsx</td><td>'R' has no import — add: import R from './React'</td></tr><tr><td>⚠️</td><td>AdminPanel</td><td>'Publications' section nahi mila admin code mein</td></tr><tr><td>⚠️</td><td>Performance</td><td>No large images >200KB — fix karo performance ke liye</td></tr><tr><td>⚠️</td><td>Performance</td><td>HashRouter / BrowserRouter — fix karo performance ke liye</td></tr><tr><td>⚠️</td><td>images</td><td>green7.JPG (14165KB) — WebP convert karo, target <100KB</td></tr><tr><td>⚠️</td><td>images</td><td>green1.JPG (12963KB) — WebP convert karo, target <100KB</td></tr><tr><td>⚠️</td><td>images</td><td>green5.JPG (12632KB) — WebP convert karo, target <100KB</td></tr><tr><td>⚠️</td><td>images</td><td>green3.JPG (11239KB) — WebP convert karo, target <100KB</td></tr><tr><td>⚠️</td><td>images</td><td>green2.JPG (11111KB) — WebP convert karo, target <100KB</td></tr></table></div>
+<div class="section"><h2>🔧 Auto-Fixes (2)</h2><table><tr><th></th><th>File</th><th>Issue</th></tr><tr><td>🔧</td><td>src\pages\HomePage.jsx</td><td><Ticker /> added in HomePage return</td></tr><tr><td>🔧</td><td>src\App.jsx</td><td>import PVS from './components/PageViewer' added</td></tr></table></div>
+<div class="footer">
+  GNC Project Doctor v5.0 Ultra | Guru Nanak College, Dhanbad | Made for Pankaj ❤️
+</div>
+</body></html>
