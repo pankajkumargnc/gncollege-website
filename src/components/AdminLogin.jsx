@@ -99,7 +99,6 @@ export default function AdminLogin({ onSuccess, onClose }) {
     setError(''); setLoading(true); setPhase('checking');
 
     setTimeout(() => {
-      // ✅ SECURITY FIX: Credentials .env se — hardcoded nahi
       const validUser = import.meta.env.VITE_ADMIN_USERNAME || 'admin';
       const validPass = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
       if (username === validUser && password === validPass) {
@@ -114,6 +113,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
     }, 1400);
   };
 
+  // ── ✅ PURE GLASSMORPHISM CSS ────────────────────────────────────────────────
   const CSS = `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap&subset=latin');
 
@@ -126,69 +126,58 @@ export default function AdminLogin({ onSuccess, onClose }) {
       overflow: hidden;
     }
 
-    /* ── BACKGROUND ── */
+    /* ── BACKGROUND (High-Quality Image + Dark Navy Gradient Overlay) ── */
     .gnc-bg {
       position: absolute; inset: 0;
-      background: radial-gradient(ellipse at 20% 50%, #0a1628 0%, #060e1c 60%, #030810 100%);
+      background: linear-gradient(135deg, rgba(15, 35, 71, 0.85) 0%, rgba(6, 14, 28, 0.5) 100%),
+                  url('https://images.unsplash.com/photo-1541339907198-e08756defefe?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
     }
-    .gnc-bg canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .gnc-bg canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
     .gnc-bg-grid {
-      position: absolute; inset: 0;
+      position: absolute; inset: 0; z-index: 2;
       background-image:
-        linear-gradient(rgba(244,160,35,.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(244,160,35,.03) 1px, transparent 1px);
+        linear-gradient(rgba(244,160,35,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(244,160,35,.05) 1px, transparent 1px);
       background-size: 44px 44px;
     }
-    .gnc-bg-glow1 {
-      position: absolute; width: 500px; height: 500px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(244,160,35,.07) 0%, transparent 70%);
-      top: -150px; left: -100px; pointer-events: none;
-    }
-    .gnc-bg-glow2 {
-      position: absolute; width: 400px; height: 400px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(15,35,71,.5) 0%, transparent 70%);
-      bottom: -100px; right: -80px; pointer-events: none;
-    }
 
-    /* ── WRAPPER ── */
+    /* ── WRAPPER (Transparent Glass) ── */
     .gnc-wrap {
-      position: relative; z-index: 1;
+      position: relative; z-index: 5;
       display: flex; width: 860px; max-width: 95vw;
       border-radius: 24px; overflow: hidden;
-      box-shadow: 0 40px 100px rgba(0,0,0,.6), 0 0 0 1px rgba(244,160,35,.12);
+      
+      /* GLASS EFFECT PROPERTIES */
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 40px 100px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.05);
+      
       opacity: 0; transform: translateY(28px) scale(0.97);
       transition: opacity .55s cubic-bezier(.22,1,.36,1), transform .55s cubic-bezier(.22,1,.36,1);
     }
     .gnc-wrap.show { opacity: 1; transform: translateY(0) scale(1); }
 
-    /* ── LEFT PANEL ── */
+    /* ── LEFT PANEL (Fully Transparent) ── */
     .gnc-left {
-      width: 42%; background: ${NAVY};
+      width: 42%; 
+      background: transparent; /* Changed from solid NAVY */
       padding: 48px 40px;
       display: flex; flex-direction: column; justify-content: space-between;
       position: relative; overflow: hidden;
-      border-right: 1px solid rgba(244,160,35,.12);
+      border-right: 1px solid rgba(255,255,255,.12); /* Glass divider */
     }
     .gnc-left-pattern {
       position: absolute; inset: 0; pointer-events: none;
       background-image: repeating-linear-gradient(
-        45deg, rgba(244,160,35,.03) 0px, rgba(244,160,35,.03) 1px,
+        45deg, rgba(244,160,35,.04) 0px, rgba(244,160,35,.04) 1px,
         transparent 1px, transparent 22px
       );
     }
-    .gnc-left-circle1 {
-      position: absolute; width: 260px; height: 260px; border-radius: 50%;
-      border: 1px solid rgba(244,160,35,.07);
-      bottom: -80px; right: -80px; pointer-events: none;
-    }
-    .gnc-left-circle2 {
-      position: absolute; width: 180px; height: 180px; border-radius: 50%;
-      border: 1px solid rgba(244,160,35,.05);
-      bottom: -30px; right: -30px; pointer-events: none;
-    }
     .gnc-badge {
       display: inline-flex; align-items: center; gap: 7px;
-      background: rgba(244,160,35,.1); border: 1px solid rgba(244,160,35,.2);
+      background: rgba(244,160,35,.15); border: 1px solid rgba(244,160,35,.25);
       border-radius: 6px; padding: 6px 12px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px; font-weight: 600; color: ${GOLD};
@@ -217,7 +206,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
       color: #fff; line-height: 1.2; letter-spacing: -.3px;
     }
     .gnc-college-sub {
-      font-size: 11px; color: rgba(255,255,255,.35);
+      font-size: 11px; color: rgba(255,255,255,.6);
       font-weight: 400; margin-top: 4px; line-height: 1.5;
     }
 
@@ -228,29 +217,30 @@ export default function AdminLogin({ onSuccess, onClose }) {
     }
     .gnc-left-title span { color: ${GOLD}; }
     .gnc-left-desc {
-      font-size: 13px; color: rgba(255,255,255,.4);
-      line-height: 1.7; font-weight: 300;
+      font-size: 13px; color: rgba(255,255,255,.6);
+      line-height: 1.7; font-weight: 400;
     }
 
     .gnc-features { margin-top: 32px; display: flex; flex-direction: column; gap: 12px; }
     .gnc-feature {
       display: flex; align-items: center; gap: 12px;
-      font-size: 12.5px; color: rgba(255,255,255,.5); font-weight: 400;
+      font-size: 12.5px; color: rgba(255,255,255,.8); font-weight: 500;
     }
     .gnc-feature-icon {
       width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
-      background: rgba(244,160,35,.08); border: 1px solid rgba(244,160,35,.12);
+      background: rgba(244,160,35,.15); border: 1px solid rgba(244,160,35,.2);
       display: flex; align-items: center; justify-content: center; font-size: 13px;
     }
 
     .gnc-left-footer {
-      font-size: 11px; color: rgba(255,255,255,.2);
+      font-size: 11px; color: rgba(255,255,255,.4);
       font-family: 'JetBrains Mono', monospace;
     }
 
-    /* ── RIGHT PANEL ── */
+    /* ── RIGHT PANEL (Fully Transparent) ── */
     .gnc-right {
-      flex: 1; background: #080f1e;
+      flex: 1; 
+      background: transparent; /* Changed from solid dark blue */
       padding: 48px 44px;
       display: flex; flex-direction: column; justify-content: center;
       position: relative;
@@ -258,18 +248,18 @@ export default function AdminLogin({ onSuccess, onClose }) {
     .gnc-close {
       position: absolute; top: 20px; right: 20px;
       width: 34px; height: 34px; border-radius: 9px;
-      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07);
-      color: rgba(255,255,255,.3); font-size: 14px; cursor: pointer;
+      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+      color: rgba(255,255,255,.8); font-size: 14px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: all .2s;
     }
-    .gnc-close:hover { background: rgba(239,68,68,.15); border-color: rgba(239,68,68,.3); color: #ef4444; }
+    .gnc-close:hover { background: rgba(239,68,68,.2); border-color: rgba(239,68,68,.4); color: #ef4444; }
 
     .gnc-right-eyebrow {
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px; font-weight: 600; color: ${GOLD};
       letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px;
-      opacity: .7;
+      opacity: .9;
     }
     .gnc-right-title {
       font-family: 'Space Grotesk', sans-serif;
@@ -277,15 +267,15 @@ export default function AdminLogin({ onSuccess, onClose }) {
       letter-spacing: -.4px; margin-bottom: 6px;
     }
     .gnc-right-sub {
-      font-size: 13px; color: rgba(255,255,255,.3);
-      margin-bottom: 36px; font-weight: 300;
+      font-size: 13px; color: rgba(255,255,255,.6);
+      margin-bottom: 36px; font-weight: 400;
     }
 
-    /* ── INPUT GROUP ── */
+    /* ── INPUT GROUP (Glass Input) ── */
     .gnc-field { margin-bottom: 20px; }
     .gnc-field-label {
       display: flex; align-items: center; justify-content: space-between;
-      font-size: 11px; font-weight: 600; color: rgba(255,255,255,.4);
+      font-size: 11px; font-weight: 600; color: rgba(255,255,255,.7);
       text-transform: uppercase; letter-spacing: .8px; margin-bottom: 9px;
     }
     .gnc-input-wrap {
@@ -297,43 +287,45 @@ export default function AdminLogin({ onSuccess, onClose }) {
       content: '';
       position: absolute; inset: 0;
       border-radius: 12px;
-      border: 1.5px solid rgba(255,255,255,.07);
+      border: 1.5px solid rgba(255,255,255,.15);
       pointer-events: none; z-index: 2;
       transition: border-color .2s;
     }
-    .gnc-input-wrap.focused::before { border-color: rgba(244,160,35,.45); }
-    .gnc-input-wrap.focused { box-shadow: 0 0 0 3px rgba(244,160,35,.08); }
+    .gnc-input-wrap.focused::before { border-color: rgba(244,160,35,.7); }
+    .gnc-input-wrap.focused { box-shadow: 0 0 0 3px rgba(244,160,35,.2); }
 
     .gnc-input-icon {
       position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-      font-size: 15px; z-index: 3; opacity: .35; pointer-events: none;
+      font-size: 15px; z-index: 3; opacity: .5; pointer-events: none;
       transition: opacity .2s;
     }
-    .gnc-input-wrap.focused .gnc-input-icon { opacity: .7; }
+    .gnc-input-wrap.focused .gnc-input-icon { opacity: 1; }
 
     .gnc-input {
       width: 100%; padding: 14px 46px;
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.08); /* Transparent input background */
       border: none; outline: none;
-      font-size: 14.5px; font-weight: 400;
+      font-size: 14.5px; font-weight: 500;
       color: #fff; font-family: 'Inter', sans-serif;
       border-radius: 12px;
       transition: background .2s;
     }
-    .gnc-input:focus { background: rgba(255,255,255,.07); }
-    .gnc-input::placeholder { color: rgba(255,255,255,.18); }
+    .gnc-input:focus { background: rgba(255,255,255,.15); }
+    .gnc-input::placeholder { color: rgba(255,255,255,.4); }
+    
+    /* Fix autofill bug with transparent inputs */
     .gnc-input:-webkit-autofill {
-      -webkit-box-shadow: 0 0 0 100px #0d1929 inset !important;
+      -webkit-box-shadow: 0 0 0 100px rgba(15,35,71,0.8) inset !important;
       -webkit-text-fill-color: #fff !important;
     }
 
     .gnc-eye-btn {
       position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
       background: none; border: none; cursor: pointer;
-      font-size: 14px; color: rgba(255,255,255,.25); z-index: 3;
+      font-size: 14px; color: rgba(255,255,255,.5); z-index: 3;
       transition: color .2s; padding: 4px;
     }
-    .gnc-eye-btn:hover { color: rgba(255,255,255,.6); }
+    .gnc-eye-btn:hover { color: rgba(255,255,255,.9); }
 
     .gnc-caps {
       font-size: 10.5px; color: #f59e0b; font-weight: 600;
@@ -343,7 +335,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
     /* ── ERROR ── */
     .gnc-error {
       display: flex; align-items: center; gap: 10px;
-      background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2);
+      background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.3);
       border-radius: 10px; padding: 11px 14px;
       font-size: 13px; color: #fca5a5; font-weight: 500;
       margin-bottom: 20px;
@@ -385,9 +377,11 @@ export default function AdminLogin({ onSuccess, onClose }) {
     .gnc-btn.success-btn {
       background: linear-gradient(135deg, #10b981, #059669) !important;
       box-shadow: 0 8px 24px rgba(16,185,129,.35) !important;
+      color: #fff;
     }
     .gnc-btn.fail-btn {
       background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+      color: #fff;
       animation: shake .4s ease both;
     }
 
@@ -402,7 +396,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
 
     /* ── PROGRESS BAR ── */
     .gnc-progress {
-      height: 2px; background: rgba(255,255,255,.05);
+      height: 2px; background: rgba(255,255,255,.1);
       border-radius: 99px; overflow: hidden; margin-bottom: 28px;
     }
     .gnc-progress-inner {
@@ -417,21 +411,21 @@ export default function AdminLogin({ onSuccess, onClose }) {
     .gnc-right-footer {
       margin-top: 28px;
       display: flex; align-items: center; justify-content: center; gap: 8px;
-      font-size: 11.5px; color: rgba(255,255,255,.18);
+      font-size: 11.5px; color: rgba(255,255,255,.4);
     }
-    .gnc-right-footer span { color: rgba(244,160,35,.4); }
+    .gnc-right-footer span { color: rgba(244,160,35,.6); }
 
     /* ── SECURITY BADGE ── */
     .gnc-security {
       display: flex; align-items: center; gap: 8px;
       margin-bottom: 28px;
       padding: 10px 14px;
-      background: rgba(16,185,129,.06);
-      border: 1px solid rgba(16,185,129,.12);
+      background: rgba(16,185,129,.15);
+      border: 1px solid rgba(16,185,129,.25);
       border-radius: 9px;
     }
     .gnc-security-icon { font-size: 13px; }
-    .gnc-security-text { font-size: 11.5px; color: rgba(16,185,129,.7); font-weight: 500; }
+    .gnc-security-text { font-size: 11.5px; color: rgba(16,185,129,.9); font-weight: 600; }
     .gnc-security-dot {
       width: 5px; height: 5px; border-radius: 50%;
       background: #10b981; margin-left: auto; flex-shrink: 0;
@@ -440,9 +434,6 @@ export default function AdminLogin({ onSuccess, onClose }) {
 
     /* ── RESPONSIVE ── */
 
-    /* Large Desktop (1200px+) — default styles apply */
-
-    /* Desktop / Laptop (860px - 1199px) */
     @media (max-width: 1199px) {
       .gnc-wrap { width: 820px; }
       .gnc-left { padding: 40px 32px; }
@@ -450,7 +441,6 @@ export default function AdminLogin({ onSuccess, onClose }) {
       .gnc-left-title { font-size: 24px; }
     }
 
-    /* Tablet Landscape (769px - 860px) */
     @media (max-width: 860px) {
       .gnc-wrap { width: 96vw; flex-direction: column; max-height: 96vh; overflow-y: auto; }
       .gnc-left { width: 100%; padding: 28px 28px 24px; flex-direction: row; flex-wrap: wrap; gap: 0; }
@@ -467,13 +457,12 @@ export default function AdminLogin({ onSuccess, onClose }) {
       .gnc-right-title { font-size: 22px; }
     }
 
-    /* Tablet Portrait (481px - 768px) */
     @media (max-width: 768px) {
       .gnc-wrap { width: 96vw; border-radius: 20px; }
       .gnc-left {
         width: 100%; padding: 22px 24px 20px;
         border-right: none;
-        border-bottom: 1px solid rgba(244,160,35,.12);
+        border-bottom: 1px solid rgba(255,255,255,.15);
       }
       .gnc-left > div:first-child { flex-direction: column; align-items: flex-start; gap: 14px; }
       .gnc-logo-wrap { margin: 12px 0 8px; }
@@ -482,7 +471,6 @@ export default function AdminLogin({ onSuccess, onClose }) {
       .gnc-features { display: none; }
       .gnc-badge { margin-bottom: 0; }
       .gnc-left-footer { display: none; }
-      /* On tablet, show compact header only */
       .gnc-left { display: flex; flex-direction: row; align-items: center; gap: 16px; padding: 18px 24px; }
       .gnc-left-pattern { border-radius: 0; }
       .gnc-right { padding: 28px 24px 32px; }
@@ -493,57 +481,19 @@ export default function AdminLogin({ onSuccess, onClose }) {
       .gnc-progress { margin-bottom: 20px; }
     }
 
-    /* Mobile Large (421px - 480px) */
     @media (max-width: 480px) {
-      .gnc-wrap { width: 100vw; height: 100vh; border-radius: 0; max-height: 100vh; }
+      .gnc-wrap { width: 100vw; height: 100vh; border-radius: 0; max-height: 100vh; border: none; }
       .gnc-left { display: none; }
       .gnc-right { padding: 32px 22px 28px; justify-content: flex-start; padding-top: 52px; }
       .gnc-close { top: 14px; right: 14px; }
       .gnc-right-eyebrow { font-size: 9.5px; }
       .gnc-right-title { font-size: 24px; }
       .gnc-right-sub { font-size: 12.5px; margin-bottom: 22px; }
-      .gnc-input { font-size: 16px; /* prevent iOS zoom */ padding: 13px 46px; }
+      .gnc-input { font-size: 16px; padding: 13px 46px; }
       .gnc-btn { padding: 14px; font-size: 14.5px; }
       .gnc-field { margin-bottom: 16px; }
       .gnc-security { margin-bottom: 20px; }
       .gnc-right-footer { font-size: 10.5px; margin-top: 20px; }
-    }
-
-    /* Mobile Small (320px - 420px) */
-    @media (max-width: 420px) {
-      .gnc-right { padding: 28px 18px 24px; padding-top: 50px; }
-      .gnc-right-title { font-size: 22px; }
-      .gnc-input { font-size: 16px; padding: 12px 44px; }
-      .gnc-btn { padding: 13px; font-size: 14px; }
-      .gnc-field-label { font-size: 10px; }
-      .gnc-right-footer { flex-wrap: wrap; justify-content: center; gap: 4px; }
-    }
-
-    /* Landscape phones */
-    @media (max-height: 600px) and (orientation: landscape) {
-      .gnc-wrap { max-height: 96vh; overflow-y: auto; flex-direction: row; width: 95vw; }
-      .gnc-left { display: flex; width: 38%; padding: 20px 24px; }
-      .gnc-left > div:first-child { flex-direction: column; }
-      .gnc-left-title { font-size: 17px; margin-bottom: 6px; }
-      .gnc-left-desc, .gnc-features { display: none; }
-      .gnc-right { padding: 20px 28px; }
-      .gnc-right-title { font-size: 20px; }
-      .gnc-right-sub { margin-bottom: 14px; font-size: 12px; }
-      .gnc-progress { margin-bottom: 14px; }
-      .gnc-security { margin-bottom: 14px; padding: 8px 12px; }
-      .gnc-field { margin-bottom: 12px; }
-      .gnc-input { padding: 11px 44px; font-size: 14px; }
-      .gnc-btn { padding: 12px; }
-      .gnc-right-footer { margin-top: 14px; }
-    }
-
-    /* Very small landscape */
-    @media (max-height: 480px) and (orientation: landscape) {
-      .gnc-left { display: none; }
-      .gnc-right { padding: 16px 24px; padding-top: 40px; }
-      .gnc-right-eyebrow { display: none; }
-      .gnc-security { display: none; }
-      .gnc-progress { margin-bottom: 10px; }
     }
   `;
 
@@ -551,14 +501,14 @@ export default function AdminLogin({ onSuccess, onClose }) {
     if (phase === 'success') return <><span>✓</span> Access Granted</>;
     if (phase === 'fail')    return <><span>✕</span> Invalid Credentials</>;
     if (phase === 'checking') return <><div className="gnc-spinner" /><span>Authenticating{'.'  .repeat(dots)}</span></>;
-    return <><span>🔐</span> Access Admin Portal</>;
+    return <><span>🔐</span> Secure Login</>;
   };
 
   return (
     <div className="gnc-login-root">
       <style>{CSS}</style>
 
-      {/* Background */}
+      {/* ── BACKGROUND IMAGE + CANVAS PARTICLES ── */}
       <div className="gnc-bg">
         <canvas ref={canvasRef} style={{ width:'100%', height:'100%' }} />
         <div className="gnc-bg-grid" />
@@ -566,7 +516,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
         <div className="gnc-bg-glow2" />
       </div>
 
-      {/* Card */}
+      {/* ── TRANSPARENT GLASS CARD ── */}
       <div className={`gnc-wrap ${mounted ? 'show' : ''}`}>
 
         {/* ── LEFT PANEL ── */}
@@ -582,15 +532,25 @@ export default function AdminLogin({ onSuccess, onClose }) {
             </div>
 
             <div className="gnc-logo-wrap">
-              <div className="gnc-logo-icon">🏫</div>
+              {/* ✅ Naya Logo Image */}
+              <img 
+                src="images/logo.webp" 
+                alt="GNC Logo" 
+                style={{ 
+                  width: 58, height: 58, borderRadius: 12, 
+                  objectFit: 'contain', background: '#fff', padding: 4, 
+                  boxShadow: '0 8px 24px rgba(244,160,35,.3)', flexShrink: 0 
+                }} 
+              />
               <div>
-                <div className="gnc-college-name">Guru Nanak<br/>College</div>
-                <div className="gnc-college-sub">Dhanbad, Jharkhand</div>
+                <div className="gnc-college-name">Guru Nanak College</div>
+                {/* ✅ Naya Pincode wala Address */}
+                <div className="gnc-college-sub">Dhanbad, Jharkhand - 826001</div>
               </div>
             </div>
 
             <div className="gnc-left-title">
-              Website<br/><span>Control</span><br/>Center
+              Website <span>Control</span><br/>Center
             </div>
             <div className="gnc-left-desc">
               Manage notices, events, faculty, gallery,
@@ -603,7 +563,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
                 ['📢', 'Real-time Notice Board'],
                 ['👨‍🏫', 'Faculty & Staff Directory'],
                 ['📊', 'Live Dashboard Analytics'],
-                ['🛡️', '15-Phase System Diagnostics'],
+                ['🛡️', '25-Phase System Diagnostics'],
               ].map(([icon, text]) => (
                 <div key={text} className="gnc-feature">
                   <div className="gnc-feature-icon">{icon}</div>
@@ -614,7 +574,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
           </div>
 
           <div className="gnc-left-footer">
-            v9.1 · Admin Panel · GNC Dhanbad
+            v11.0 · Admin Panel · GNC Dhanbad
           </div>
         </div>
 
@@ -655,7 +615,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
                   type="text"
                   placeholder="Enter your username"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}   /* ✅ Sahi Code */
+                  onChange={(e) => setUsername(e.target.value)}
                   onFocus={() => setFocusU(true)}
                   onBlur={() => setFocusU(false)}
                   onKeyDown={handleKeyDown}
@@ -681,7 +641,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
                   type={showPass ? 'text' : 'password'}
                   placeholder="Enter your password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}   /* ✅ Sahi Code */
+                  onChange={(e) => setPassword(e.target.value)}
                   onFocus={() => setFocusP(true)}
                   onBlur={() => setFocusP(false)}
                   onKeyDown={handleKeyDown}
@@ -712,7 +672,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
 
           <div className="gnc-right-footer">
             <span>🛡️</span>
-            Authorized personnel only &nbsp;·&nbsp; GNC Admin v9.1
+            Authorized personnel only &nbsp;·&nbsp; GNC Admin v11.0
           </div>
         </div>
 

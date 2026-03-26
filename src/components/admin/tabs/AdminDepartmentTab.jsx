@@ -12,8 +12,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { doc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebase';
-import MediaPicker from './MediaPicker';
+import { db } from "../../../firebase";
+import MediaPicker from "../../MediaPicker";
 import toast from 'react-hot-toast';
 
 /* ─── colours ──────────────────────────────────────────────────────────── */

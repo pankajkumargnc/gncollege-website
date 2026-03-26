@@ -1,8 +1,4 @@
 // src/components/HomeFeatures.jsx
-// ✅ Ultra Premium Fully Responsive — fluid grids, clamp() fonts
-// ✅ Dept: 5col→3col→2col→1col, Facilities: auto-fill fluid
-// ✅ Zero horizontal scroll, touch-friendly
-
 import { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { COLORS } from '../styles/colors';
@@ -65,12 +61,19 @@ const CSS = `
     font-size:clamp(9px,.75vw,11px);font-weight:800;letter-spacing:2px;
     text-transform:uppercase;margin-bottom:12px;
   }
+  
+  /* ✅ FIXED: "Plus Jakarta Sans" tagda aur colourful heading */
   .hf-sec-h{
-    font-family:'Syne',sans-serif;color:#111827;
-    font-size:clamp(22px,3.5vw,42px);font-weight:900;
-    margin:0 0 10px;letter-spacing:clamp(-.5px,-.05vw,-1px);line-height:1.1;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: ${N};
+    font-size: clamp(28px, 5vw, 50px);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -1.5px;
+    margin: 0 0 14px;
   }
   .hf-sec-h span{color:${G};}
+  
   .hf-sec-sub{
     color:#6b7280;font-size:clamp(13px,.95vw,15px);
     max-width:520px;line-height:1.65;margin:0 auto;
@@ -281,8 +284,8 @@ export default function HomeFeatures() {
           <SA2 variant="up">
             <div className="hf-section-header" style={{ textAlign:'center', marginBottom:'clamp(30px,4vw,46px)' }}>
               <div><div className="hf-fac-label">⭐ World-Class Infrastructure</div></div>
-              <h2 className="hf-fac-h">College <span>Facilities</span></h2>
-              <p className="hf-fac-sub">Students ke holistic development ke liye — modern labs, library, sports aur bahut kuch</p>
+              <h2 className="hf-sec-h">College <span>Facilities</span></h2>
+              <p className="hf-sec-sub">Students ke holistic development ke liye — modern labs, library, sports aur bahut kuch</p>
             </div>
           </SA2>
           <div className="hf-fac-grid">

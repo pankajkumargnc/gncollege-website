@@ -1,10 +1,10 @@
-// src/App.jsx — FINAL VERSION (Original Ticker Restored + Safe Lazy)
+// src/App.jsx — FINAL VERSION (Split Architecture Supported)
 
 import WhatsAppButton      from './components/WhatsAppButton';
 import { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster }         from 'react-hot-toast';
-import AlertBanner from './components/AlertBanner'; // Import karein
+import AlertBanner         from './components/AlertBanner';
 
 
 import Navbar              from './components/Navbar';
@@ -48,8 +48,11 @@ const NewsPage          = safeLazy(() => import('./pages/NewsPage'));
 const NotificationsPage = safeLazy(() => import('./pages/NotificationsPage'));
 const DocumentsPage     = safeLazy(() => import('./pages/DocumentsPage'));
 const EventsPage        = safeLazy(() => import('./pages/EventsPage'));
-const AdminPanel        = safeLazy(() => import('./components/AdminPanel'));
-const Ticker            = safeLazy(() => import('./components/Ticker')); // ✅ Aapka original Ticker wapas aa gaya
+
+// ✅ FIXED: AdminPanel ka naya rasta (path) update kar diya gaya hai!
+const AdminPanel        = safeLazy(() => import('./components/admin/AdminPanel'));
+
+const Ticker            = safeLazy(() => import('./components/Ticker')); 
 
 // ── Named export lazy helpers ────────────────────────────────────────────────
 const LazyAbout       = n => safeLazy(() => import('./pages/AboutPages').then(m => ({ default: m[n] })));
@@ -143,6 +146,7 @@ const R   = ({ el }) => (
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function App() {
+  const [updates,       setUpdates]       = useState([]);
   const [notices,       setNotices]       = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [events,        setEvents]        = useState([]);
@@ -162,7 +166,8 @@ export default function App() {
   const handleAdminLogout = () => {
     sessionStorage.removeItem('gnc_admin_auth');
     setAdminAuthed(false);
-    window.location.hash = '/';
+    // Yahan se `window.location.hash = '/';` hata diya gaya hai. 
+    // Ab logout hone par yeh seedha AdminLogin screen par hi rahega.
   };
 
   const location     = useLocation();
@@ -217,12 +222,17 @@ export default function App() {
       ['gallery',       setGallery],
       ['faculties',     setFaculties],
       ['sliderSlides',  setSliderSlides],
+      ['updates',       setUpdates], // ✅ NEW: Ticker Updates fetched here
     ];
     const unsubs = cols.map(([col, setter]) => {
-      const q = query(collection(db, col), orderBy('createdAt', 'desc'));
-      return onSnapshot(q,
-        snap => setter(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
-        err  => console.error(`[${col}]`, err)
+      return onSnapshot(collection(db, col),
+        snap => {
+          const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          // Local sorting (Sabse naya upar)
+          docs.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+          setter(docs);
+        },
+        err  => console.error(`[${col}] fetching error:`, err)
       );
     });
     return () => unsubs.forEach(u => u());
@@ -258,11 +268,11 @@ export default function App() {
 
       {!isAdminRoute && (
         <>
-          <AlertBanner /> {/* ✅ AlertBanner ab TopBar ke upar aa gaya */}
+          <AlertBanner /> 
           <TopBar />
           <ErrorBoundary>
             <Suspense fallback={<div style={{ height: 40 }} />}>
-              <Ticker items={notices} /> {/* ✅ Original Ticker Yahan Use Ho Gaya */}
+              <Ticker items={notices} /> 
             </Suspense>
           </ErrorBoundary>
           <Navbar onAdminClick={handleOpenAdminTab} navLinks={baseNavLinks} />
@@ -273,7 +283,7 @@ export default function App() {
 
       <main id="main-content">
         <Routes>
-          <Route path="/" element={<EB><HomePage notices={notices} announcements={announcements} sliderSlides={sliderSlides} events={events} gallery={gallery}/></EB>} />
+          <Route path="/" element={<EB><HomePage notices={notices} announcements={announcements} sliderSlides={sliderSlides} events={events} gallery={gallery} updates={updates}/></EB>} />
           <Route path="/contact" element={<EB><Contact /></EB>} />
 
           {/* About */}

@@ -1,11 +1,4 @@
 // src/pages/HomePage.jsx
-// ✅ hp-quick section REMOVED
-// ✅ All section headings + eyebrow labels + subtitles — center aligned
-// ✅ Glow hover on all cards
-// ✅ Trailing arrow on links
-// ✅ All Firebase + scroll functionality preserved
-// ✅ NEW: Quick Action Bar — Result, Fee Payment, Admission, Notice Board
-
 import { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { Link }         from 'react-router-dom';
 import { doc, onSnapshot } from 'firebase/firestore';
@@ -15,14 +8,11 @@ import { SOCIAL_LINKS } from '../data/db';
 
 import HeroSlider          from '../components/HeroSlider';
 import HomeFeatures        from '../components/HomeFeatures';
-import SectionTitle        from '../components/home/SectionTitle';
 import NotificationSection from '../components/home/NotificationSection';
 import PlacementsSection   from '../components/home/PlacementsSection';
-import Ticker from "../components/Ticker";
-import PremiumTicker from "../components/PremiumTicker";
-
-// ✅ Naya Premium PDFModal import kiya
-import PDFModal from '../components/PDFModal';
+import Ticker              from "../components/Ticker";
+import PremiumTicker       from "../components/PremiumTicker";
+import PDFModal            from '../components/PDFModal';
 
 const N  = COLORS.navy     || '#0f2347';
 const G  = COLORS.gold     || '#f4a023';
@@ -35,9 +25,11 @@ const getEventImg = t => ({
 }[t] || '/images/college_photo.webp');
 
 const TICKER_ITEMS = [
-  { text:'B.A./B.Com. Semester 1 Admissions are now open for 2024-25 session.', link:'/admission/info' },
-  { text:'Results for the Semester 6 internal examinations have been published.', link:'/results' },
-  { text:'The college will remain closed on account of Holi from 24th to 26th March.', link:'#' },
+  { 
+    text: 'Welcome to Guru Nanak College, Dhanbad — A Sikh Minority Degree College.', 
+    link: '/about-us/college-profile' 
+  },
+  
 ];
 const GALLERY_TABS = ['All Moments','Seminars','Cultural Fest','Guest Visit','Campus','Departments','NSS Programs'];
 const LINKS_DATA   = [
@@ -50,9 +42,9 @@ const LINKS_DATA   = [
 ];
 const COUNTERS = [
   { label:'Students Enrolled', value:'4,000+', icon:'👨‍🎓' },
-  { label:'Successful Alumni',  value:'45,000+',icon:'🎓'  },
-  { label:'Expert Faculty',     value:'50+',    icon:'👨‍🏫' },
-  { label:'Years of Legacy',    value:'56',     icon:'🏛️'  },
+  { label:'Successful Alumni', value:'45,000+',icon:'🎓'  },
+  { label:'Expert Faculty',    value:'50+',    icon:'👨‍🏫' },
+  { label:'Years of Legacy',   value:'56',     icon:'🏛️'  },
 ];
 const ABOUT_FEATS = [
   { icon:'🛡️', title:'NAAC Accredited', desc:'Grade B Institution'   },
@@ -61,55 +53,25 @@ const ABOUT_FEATS = [
   { icon:'🏅', title:'NSS & NCC',        desc:'Character Building'    },
 ];
 
-// ── Quick Action Bar Data ─────────────────────────────────────────────────────
 const QUICK_ACTIONS = [
   {
-    icon: '📋',
-    title: 'Exam Results',
-    sub: 'BBMKU result portal',
-    href: 'https://bbmkuniv.in/login',
-    color: '#f4a023',
-    bg: '#fffbeb',
-    hoverBg: '#fef3c7',
-    iconBg: 'linear-gradient(135deg,#fef3c7,#fde68a)',
-    external: true,
+    icon: '📋', title: 'Exam Results', sub: 'BBMKU result portal', href: 'https://bbmkuniv.in/login',
+    color: '#f4a023', bg: '#fffbeb', hoverBg: '#fef3c7', iconBg: 'linear-gradient(135deg,#fef3c7,#fde68a)', external: true,
   },
   {
-    icon: '💳',
-    title: 'Fee Payment',
-    sub: 'Online fee portal',
-    href: 'https://cimsstudentnewui.mastersofterp.in/',
-    color: '#10b981',
-    bg: '#fff',
-    hoverBg: '#f0fdf4',
-    iconBg: 'linear-gradient(135deg,#dcfce7,#bbf7d0)',
-    external: true,
+    icon: '💳', title: 'Fee Payment', sub: 'Online fee portal', href: 'https://cimsstudentnewui.mastersofterp.in/',
+    color: '#10b981', bg: '#fff', hoverBg: '#f0fdf4', iconBg: 'linear-gradient(135deg,#dcfce7,#bbf7d0)', external: true,
   },
   {
-    icon: '🎓',
-    title: 'Apply for Admission',
-    sub: 'Chancellor portal',
-    href: 'https://jharkhanduniversities.nic.in/',
-    color: '#3b82f6',
-    bg: '#fff',
-    hoverBg: '#eff6ff',
-    iconBg: 'linear-gradient(135deg,#dbeafe,#bfdbfe)',
-    external: true,
+    icon: '🎓', title: 'Apply for Admission', sub: 'Chancellor portal', href: 'https://jharkhanduniversities.nic.in/',
+    color: '#3b82f6', bg: '#fff', hoverBg: '#eff6ff', iconBg: 'linear-gradient(135deg,#dbeafe,#bfdbfe)', external: true,
   },
   {
-    icon: '📢',
-    title: 'Notice Board',
-    sub: 'Latest updates',
-    href: '#notifications',
-    color: '#8b5cf6',
-    bg: '#fff',
-    hoverBg: '#fdf4ff',
-    iconBg: 'linear-gradient(135deg,#f3e8ff,#e9d5ff)',
-    external: false,
+    icon: '📢', title: 'Notice Board', sub: 'Latest updates', href: '#notifications',
+    color: '#8b5cf6', bg: '#fff', hoverBg: '#fdf4ff', iconBg: 'linear-gradient(135deg,#f3e8ff,#e9d5ff)', external: false,
   },
 ];
 
-// ── Scroll animation hook ─────────────────────────────────────────────────────
 function useScrollAnim(options = {}) {
   const { threshold = 0.12, rootMargin = '0px 0px -60px 0px' } = options;
   const ref = useRef(null);
@@ -127,7 +89,6 @@ function useScrollAnim(options = {}) {
   return [ref, visible];
 }
 
-// ── Animations + Glow System ──────────────────────────────────────────────────
 const ANIM_CSS = `
   .hp-root {
     font-family: "Amazon Ember","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
@@ -153,7 +114,6 @@ const ANIM_CSS = `
     .sa-left,.sa-right{transform:translateX(22px);}
   }
 
-  /* ── Global glow card system ── */
   .gc{position:relative;z-index:0;display:block;}
   .gc::before{
     content:'';position:absolute;inset:-3px;border-radius:inherit;
@@ -164,16 +124,38 @@ const ANIM_CSS = `
   .gc.r4{border-radius:6px;} .gc.r12{border-radius:14px;}
   .gc.r14{border-radius:16px;} .gc.r16{border-radius:18px;} .gc.r50{border-radius:52px;}
 
-  /* ── Trailing arrow ── */
   .arr-link .arr{display:inline-block;transition:transform .2s ease;}
   .arr-link:hover .arr{transform:translateX(5px);}
+  
+  /* ✅ FIXED: Plus Jakarta Sans Heading Styles */
+  .uni-header{text-align:center;margin-bottom:clamp(32px,5vw,52px);}
+  .uni-label{
+    display:inline-flex;align-items:center;gap:8px;
+    background:rgba(15,35,71,.06);border:1px solid rgba(15,35,71,.12);
+    color:${N};padding:5px 16px;border-radius:20px;
+    font-size:clamp(9px,.75vw,11px);font-weight:800;letter-spacing:2px;
+    text-transform:uppercase;margin-bottom:12px;
+  }
+  .uni-h{
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: clamp(28px, 5vw, 50px);
+    font-weight: 800;
+    color: ${N};
+    line-height: 1.08;
+    letter-spacing: -1.5px;
+    margin: 0 0 14px;
+  }
+  .uni-h span{color:${G};}
+  .uni-sub{
+    color:#6b7280;font-size:clamp(13px,.95vw,15px);
+    max-width:600px;line-height:1.65;margin:0 auto;
+  }
 `;
 
 const CSS = `
   *,*::before,*::after{box-sizing:border-box;}
 
   p { text-align: justify; }
-  h1 + p, h2 + p, h3 + p, h4 + p, h5 + p, h6 + p { text-align: center !important; }
 
   .hp-watermark{position:fixed;inset:0;background-image:url(${import.meta.env.BASE_URL}images/logo.webp);background-repeat:repeat;background-size:320px;opacity:.025;z-index:-1;background-color:#f4f7f9;pointer-events:none;}
 
@@ -210,10 +192,6 @@ const CSS = `
   .hp-imgstack:hover .hp-img-main{transform:scale(1.02);}
   .hp-img-accent{position:absolute;bottom:-28px;right:0;background:${N};color:#fff;padding:22px 26px;border-radius:14px;z-index:3;box-shadow:0 10px 30px rgba(0,0,0,.2);animation:float 3s ease-in-out infinite;}
   @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
-  .hp-about-text{text-align:center;}
-  .hp-at{font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,4vw,38px);font-weight:800;color:${N};line-height:1.2;margin-bottom:8px;text-align:center;}
-  .hp-at span{color:${G};}
-  .hp-asub{color:${G};font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:22px;font-size:13px;text-align:center;display:block;}
   .hp-adesc{color:#555;line-height:1.8;font-size:15.5px;margin-bottom:28px;text-align:justify;}
   .hp-afeat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:32px;}
   .hp-afeat{display:flex;gap:11px;align-items:flex-start;}
@@ -234,20 +212,30 @@ const CSS = `
   .hp-events{padding:clamp(60px,8vw,80px) 20px;background:#f8fafc;}
   .hp-ev-inner{max-width:1400px;margin:0 auto;}
   @keyframes hp-ev-scroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
-  .hp-ev-scroller{overflow:hidden;padding:20px 0;margin-top:28px;mask:linear-gradient(90deg,transparent,#fff 5%,#fff 95%,transparent);-webkit-mask:linear-gradient(90deg,transparent,#fff 5%,#fff 95%,transparent);}
+  .hp-ev-scroller{overflow:hidden;padding:20px 0;mask:linear-gradient(90deg,transparent,#fff 5%,#fff 95%,transparent);-webkit-mask:linear-gradient(90deg,transparent,#fff 5%,#fff 95%,transparent);}
   .hp-ev-track{display:flex;width:max-content;gap:28px;animation:hp-ev-scroll 36s linear infinite;will-change:transform;}
   .hp-ev-track:hover{animation-play-state:paused;}
-  .hp-ev-card{width:310px;height:350px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.07);border:1px solid #edf2f7;transition:transform .35s,box-shadow .35s,border-color .35s;display:flex;flex-direction:column;}
+  
+  /* ✅ FIXED: STRICT UNIFORM HEIGHT for Event Cards */
+  .hp-ev-card{width:310px;height:425px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.07);border:1px solid #edf2f7;transition:transform .35s,box-shadow .35s,border-color .35s;display:flex;flex-direction:column;}
   .gc:hover .hp-ev-card{transform:translateY(-10px) scale(1.02);box-shadow:0 20px 40px rgba(15,35,71,.14);border-color:transparent;}
-  .hp-ev-imgbox{position:relative;height:190px;overflow:hidden;}
+  .hp-ev-imgbox{position:relative;height:190px;overflow:hidden;flex-shrink:0;}
   .hp-ev-img{width:100%;height:100%;object-fit:cover;transition:transform .55s;}
   .gc:hover .hp-ev-img{transform:scale(1.08);}
   .hp-ev-bdg{position:absolute;top:14px;right:14px;background:${G};color:#000;padding:4px 11px;font-size:9.5px;font-weight:800;border-radius:50px;text-transform:uppercase;z-index:2;letter-spacing:.5px;}
   .hp-ev-dt{position:absolute;bottom:0;left:0;background:${N};color:#fff;padding:8px 14px;border-top-right-radius:12px;z-index:2;}
-  .hp-ev-info{padding:20px;height:250px;display:flex;flex-direction:column;overflow:hidden;}
-  .hp-ev-title{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:800;color:${N};margin:0 0 9px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-  .hp-ev-desc{font-size:13px;color:#64748b;line-height:1.6;height:63px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;text-align:justify;flex-shrink:0;}
-  .hp-ev-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:12px;margin-top:14px;}
+  
+  .hp-ev-info{padding:20px;display:flex;flex-direction:column;flex:1;}
+  
+  /* Strictly limits Title to 2 lines space */
+  .hp-ev-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:${N};margin:0 0 8px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:44px;flex-shrink:0;}
+  
+  .hp-ev-desc-wrap{flex:1; display:flex; flex-direction:column;}
+  
+  /* Strictly limits Description to 3 lines space */
+  .hp-ev-desc{font-size:13px;color:#64748b;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;height:62px;text-align:justify;margin:0;}
+  
+  .hp-ev-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:14px;margin-top:auto;}
   .hp-ev-loc{font-size:11px;color:#94a3b8;font-weight:600;}
   .hp-ev-more{background:none;border:none;font-size:11px;color:${G};font-weight:800;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;}
   .hp-ev-more .arr{display:inline-block;transition:transform .2s;}
@@ -264,13 +252,13 @@ const CSS = `
   .gc:hover .hp-cnt-box{transform:translateY(-8px);box-shadow:0 16px 36px rgba(15,35,71,.12);border-color:transparent;}
   .hp-cnt-icon{font-size:42px;margin-bottom:14px;display:inline-block;transition:transform .35s;}
   .gc:hover .hp-cnt-icon{transform:scale(1.18) rotate(8deg);}
-  .hp-cnt-num{font-family:'Space Grotesk',sans-serif;font-size:40px;font-weight:800;color:${N};line-height:1;margin-bottom:8px;}
+  .hp-cnt-num{font-family:'Plus Jakarta Sans',sans-serif;font-size:40px;font-weight:800;color:${N};line-height:1;margin-bottom:8px;}
   .hp-cnt-lbl{font-size:12.5px;color:#64748b;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
 
   /* ── Links ── */
   .hp-links{padding:clamp(60px,8vw,80px) 20px;background:#fff;}
   .hp-links-inner{max-width:1200px;margin:0 auto;}
-  .hp-links-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:18px;margin-top:38px;}
+  .hp-links-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:18px;}
   .hp-link-tile{background:#fff;border:1.5px solid #edf2f7;border-radius:12px;padding:24px 14px;text-align:center;text-decoration:none;transition:transform .3s,border-color .3s,box-shadow .3s;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.04);}
   .gc:hover .hp-link-tile{transform:translateY(-7px) scale(1.03);border-color:transparent;box-shadow:0 12px 28px rgba(15,35,71,.1);}
   .hp-link-icon{width:56px;height:56px;background:#f1f5f9;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;transition:background .3s,transform .3s;}
@@ -296,11 +284,8 @@ const CSS = `
   .hp-gal-empty{grid-column:1/-1;text-align:center;background:#f8fafc;padding:48px 20px;border-radius:16px;border:1px dashed #cbd5e1;}
 
   /* ── YouTube ── */
-  .hp-yt{padding:clamp(60px,8vw,80px) 20px;background:#f8fafc;text-align:center;}
+  .hp-yt{padding:clamp(60px,8vw,80px) 20px;background:#f8fafc;}
   .hp-yt-inner{max-width:1200px;margin:0 auto;}
-  .hp-yt-h{font-family:'Space Grotesk',sans-serif;font-size:clamp(24px,3.5vw,36px);font-weight:800;color:${N};margin-bottom:10px;text-align:center;}
-  .hp-yt-h span{color:${G};}
-  .hp-yt-sub{color:#64748b;font-size:14px;margin-bottom:38px;text-align:center;}
   .hp-yt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;}
   .hp-yt-frame{border-radius:16px;border:none;box-shadow:0 10px 32px rgba(0,0,0,.1);width:100%;height:220px;}
   .hp-yt-ph{background:#fff;border:1.5px solid #e2e8f0;border-radius:16px;height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
@@ -320,7 +305,6 @@ const CSS = `
   }
 `;
 
-// ── SA Component ──────────────────────────────────────────────────────────────
 const SA = ({ children, variant='up', delay='', slow=false, className='', style={}, tag:Tag='div' }) => {
   const [ref, vis] = useScrollAnim();
   return (
@@ -330,6 +314,17 @@ const SA = ({ children, variant='up', delay='', slow=false, className='', style=
     >
       {children}
     </Tag>
+  );
+};
+
+// ── Uniform Header Component ──────────────────────────────────────────────────
+const UniHeader = ({ label, title1, title2, sub }) => {
+  return (
+    <div className="uni-header">
+      <div><div className="uni-label">{label}</div></div>
+      <h2 className="uni-h">{title1} <span>{title2}</span></h2>
+      <p className="uni-sub">{sub}</p>
+    </div>
   );
 };
 
@@ -377,17 +372,15 @@ const QuickActionBar = () => (
   </div>
 );
 
-// ── EventCard ─────────────────────────────────────────────────────────────────
+// ── EventCard (STRICT SIZED FIX) ──────────────────────────────────────────────
 const EventCard = memo(({ ev, onPdf }) => {
-  // Plain text extract karne ka tareeqa taaki HTML tags text length mein count na ho
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = ev.desc || '';
   const plainText = tempDiv.textContent || tempDiv.innerText || '';
-  const isLong = plainText.length > 110;
 
   return (
     <div className="gc r16" style={{ flexShrink:0 }}>
-      <div className="hp-ev-card" style={{ height: '100%', minHeight: 380 }}>
+      <div className="hp-ev-card">
         <div className="hp-ev-imgbox">
           <div className="hp-ev-bdg">{ev.type}</div>
           <div className="hp-ev-dt">
@@ -397,15 +390,13 @@ const EventCard = memo(({ ev, onPdf }) => {
           <img src={ev.imageUrl||getEventImg(ev.type)} alt={ev.title} className="hp-ev-img" loading="lazy" decoding="async" />
         </div>
         <div className="hp-ev-info">
-          <h3 className="hp-ev-title">{ev.title}</h3>
+          <h3 className="hp-ev-title" title={ev.title}>{ev.title}</h3>
           
-          <div style={{ flex: 1, position: 'relative' }}>
-            <div className="hp-ev-desc" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginBottom: 5 }}>
-              {plainText}
-            </div>
-            {/* ✅ CLICK KARTE HI SEEDHA EVENTS PAGE PAR JAYEGA */}
-            {isLong && (
-              <Link to="/events" style={{ display: 'inline-block', color: '#f4a023', fontWeight: 800, fontSize: 12, textDecoration: 'none', marginTop: 4 }}>
+          <div className="hp-ev-desc-wrap">
+            <p className="hp-ev-desc">{plainText}</p>
+            {/* Hamesha Read More ka jagah fix rahega */}
+            {plainText.length > 0 && (
+              <Link to="/events" style={{ display: 'inline-block', color: '#f4a023', fontWeight: 800, fontSize: 12, textDecoration: 'none', marginTop: 8 }}>
                 Read More ↗
               </Link>
             )}
@@ -442,7 +433,7 @@ const GalItem = memo(({ img, index }) => {
   );
 });
 
-// ── YouTubeSection — Deferred with IntersectionObserver ──────────
+// ── YouTubeSection ──────────────────────────────────────────────────────────
 function YouTubeSection() {
   const [ytData, setYt]     = useState(null);
   const [videos, setVids]   = useState([]);
@@ -453,16 +444,9 @@ function YouTubeSection() {
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.unobserve(el);
-        }
-      },
-      { rootMargin: '200px' }
-    );
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setInView(true); observer.unobserve(el); }
+    }, { rootMargin: '200px' });
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
@@ -477,32 +461,21 @@ function YouTubeSection() {
 
   useEffect(() => {
     if (!inView || !ytData) return;
-
     if (!ytData?.apiKey || !ytData?.channelId) {
       if (ytData?.videoIds) {
-        const ids = ytData.videoIds
-          .split(/[\n,]/)
-          .map(s => s.trim())
-          .filter(Boolean)
-          .slice(0, 3);
+        const ids = ytData.videoIds.split(/[\n,]/).map(s => s.trim()).filter(Boolean).slice(0, 3);
         setVids(ids);
       }
       return;
     }
-
     const { apiKey, channelId } = ytData;
     (async () => {
       try {
-        const chRes  = await fetch(
-          `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${apiKey}`
-        );
+        const chRes  = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${apiKey}`);
         const chData = await chRes.json();
         if (chData.error || !chData.items?.length) return;
         const uploadId = chData.items[0].contentDetails.relatedPlaylists.uploads;
-
-        const plRes  = await fetch(
-          `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadId}&maxResults=3&key=${apiKey}`
-        );
+        const plRes  = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadId}&maxResults=3&key=${apiKey}`);
         const plData = await plRes.json();
         if (plData.error) return;
         setVids(plData.items.map(i => i.snippet.resourceId.videoId));
@@ -518,10 +491,11 @@ function YouTubeSection() {
       <div className="hp-yt-inner">
 
         <SA variant="up">
-          <h2 className="hp-yt-h">🎬 Campus <span>Video Highlights</span></h2>
-        </SA>
-        <SA variant="fade" delay="d1">
-          <p className="hp-yt-sub">Official {channel} channel se latest videos</p>
+          <UniHeader 
+            label="🎬 Campus Video Highlights" 
+            title1="Campus Video" title2="Highlights" 
+            sub={`Official ${channel} channel se latest videos`} 
+          />
         </SA>
 
         <div className="hp-yt-grid">
@@ -529,17 +503,8 @@ function YouTubeSection() {
             [1,2,3].map(i => (
               <SA key={i} variant="up" delay={`d${i}`}>
                 <div className="gc r16">
-                  <div className="hp-yt-ph" style={{
-                    background: '#f1f5f9',
-                    animation: 'yt-shimmer 1.5s infinite',
-                  }}>
-                    <style>{`
-                      @keyframes yt-shimmer {
-                        0%   { opacity: 1; }
-                        50%  { opacity: 0.5; }
-                        100% { opacity: 1; }
-                      }
-                    `}</style>
+                  <div className="hp-yt-ph" style={{ background: '#f1f5f9', animation: 'yt-shimmer 1.5s infinite' }}>
+                    <style>{`@keyframes yt-shimmer { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }`}</style>
                     <div className="hp-yt-ph-icon" style={{ opacity: 0.3 }}>▶️</div>
                   </div>
                 </div>
@@ -560,12 +525,7 @@ function YouTubeSection() {
             videos.map((vid, i) => (
               <SA key={vid} variant="up" delay={`d${i+1}`}>
                 <div className="gc r16">
-                  <iframe
-                    className="hp-yt-frame"
-                    src={`https://www.youtube.com/embed/${vid}`}
-                    allowFullScreen title={vid}
-                    loading="lazy"
-                  />
+                  <iframe className="hp-yt-frame" src={`https://www.youtube.com/embed/${vid}`} allowFullScreen title={vid} loading="lazy" />
                 </div>
               </SA>
             ))
@@ -575,10 +535,7 @@ function YouTubeSection() {
                 <div className="gc r16">
                   <div className="hp-yt-ph">
                     <div className="hp-yt-ph-icon">▶️</div>
-                    <div className="hp-yt-ph-txt">
-                      Admin Panel → YouTube tab mein<br/>
-                      API Key aur Channel ID add karein
-                    </div>
+                    <div className="hp-yt-ph-txt">Admin Panel → YouTube tab mein<br/>API Key aur Channel ID add karein</div>
                   </div>
                 </div>
               </SA>
@@ -587,25 +544,17 @@ function YouTubeSection() {
         </div>
 
         {hasVideos && (
-          <div style={{ display:'flex', justifyCenter:'center', marginTop:32 }}>
-            <Link to="/video-gallery" style={{
+          <div style={{ display:'flex', justifyContent:'center', marginTop:32 }}>
+            <Link to="/video-gallery" className="arr-link" style={{
               display:'inline-flex', alignItems:'center', gap:8,
-              background:'#ff0000', color:'#fff',
-              padding:'12px 30px', borderRadius:50,
-              fontSize:14, fontWeight:800, textDecoration:'none',
-              boxShadow:'0 4px 18px rgba(255,0,0,.35)',
+              background:'#ff0000', color:'#fff', padding:'12px 30px', borderRadius:50,
+              fontSize:14, fontWeight:800, textDecoration:'none', boxShadow:'0 4px 18px rgba(255,0,0,.35)',
               transition:'transform .2s, box-shadow .2s',
             }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 8px 28px rgba(255,0,0,.45)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = '';
-                e.currentTarget.style.boxShadow = '0 4px 18px rgba(255,0,0,.35)';
-              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(255,0,0,.45)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 18px rgba(255,0,0,.35)'; }}
             >
-              🎬 View All Videos ›
+              🎬 View All Videos <span className="arr">›</span>
             </Link>
           </div>
         )}
@@ -614,11 +563,9 @@ function YouTubeSection() {
   );
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
-const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, gallery }) => {
+// ── Main HomePage ──────────────────────────────────────────────────────────────
+const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, gallery, updates }) => {
   const [tab, setTab] = useState('All Moments');
-  
-  // ✅ Puraane 'pdf' state ko hata kar naya 'selectedPdf' object state banaya hai
   const [selectedPdf, setSelectedPdf] = useState(null);
 
   const allGal   = gallery || [];
@@ -628,10 +575,7 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
   const evTriple = [...recentEv, ...recentEv, ...recentEv];
 
   const handlePdf = useCallback(ev => {
-    if (ev.reportLink) {
-      // ✅ Naye PDFModal ke liye title aur URL dono bhej rahe hain
-      setSelectedPdf({ url: ev.reportLink, title: ev.title || 'Event Report' });
-    }
+    if (ev.reportLink) setSelectedPdf({ url: ev.reportLink, title: ev.title || 'Event Report' });
     else alert('Full details coming soon!');
   }, []);
 
@@ -643,7 +587,8 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
       {/* ── HERO ── */}
       <HeroSlider slides={sliderSlides} />
       <Ticker/>
-      <PremiumTicker items={TICKER_ITEMS} />
+      {/* ✅ FIXED: Agar Admin Panel (Firebase) se updates hain toh wo chalenge, warna fallback (TICKER_ITEMS) chalenge */}
+      <PremiumTicker items={updates?.length > 0 ? updates : TICKER_ITEMS} />
 
       {/* ── QUICK ACTION BAR ── */}
       <QuickActionBar />
@@ -662,9 +607,13 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
               </div>
             </div>
           </SA>
-          <SA variant="right" slow className="hp-about-text">
-            <h2 className="hp-at">About the <span>College</span></h2>
-            <span className="hp-asub">Established 1970</span>
+          <SA variant="right" slow>
+            {/* ✅ UNIFORM HEADER USED HERE */}
+            <UniHeader 
+              label="📚 Established 1970" 
+              title1="About the" title2="College" 
+              sub="" 
+            />
             <p className="hp-adesc">
               Guru Nanak College, Dhanbad (A Sikh Minority Degree College) was established by the
               Gurudwara Prabandhak Committee in 1970 to mark the fifth Birth Centenary of the great
@@ -704,7 +653,12 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
       <section id="events" className="hp-events">
         <div className="hp-ev-inner">
           <SA variant="up">
-            <SectionTitle title="Recent Events & Happenings" subtitle="Seminars, workshops aur campus activities ki ek jhalak" />
+            {/* ✅ UNIFORM HEADER USED HERE */}
+            <UniHeader 
+              label="🌟 Campus Life" 
+              title1="Recent Events &" title2="Happenings" 
+              sub="Seminars, workshops aur campus activities ki ek jhalak" 
+            />
           </SA>
           {recentEv.length > 0 ? (
             <SA variant="fade" delay="d1">
@@ -762,7 +716,12 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
       <section className="hp-links">
         <div className="hp-links-inner">
           <SA variant="up">
-            <SectionTitle title="Important External Links" subtitle="Official education and government portals ka quick access" />
+             {/* ✅ UNIFORM HEADER USED HERE */}
+             <UniHeader 
+              label="🔗 Quick Access" 
+              title1="Important External" title2="Links" 
+              sub="Official education and government portals ka quick access" 
+            />
           </SA>
           <div className="hp-links-grid">
             {LINKS_DATA.map((l, i) => (
@@ -783,7 +742,12 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
       <section id="gallery" className="hp-gal">
         <div className="hp-gal-inner">
           <SA variant="up">
-            <SectionTitle title="📸 Photo Gallery" subtitle="Academic excellence aur cultural heritage ki yadgar jhalak" />
+            {/* ✅ UNIFORM HEADER USED HERE */}
+            <UniHeader 
+              label="📸 Memories" 
+              title1="Photo" title2="Gallery" 
+              sub="Academic excellence aur cultural heritage ki yadgar jhalak" 
+            />
           </SA>
           <SA variant="fade" delay="d1">
             <div className="hp-gal-filters">

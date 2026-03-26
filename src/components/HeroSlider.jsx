@@ -2,7 +2,7 @@
 // ✅ WebP support with JPG fallback
 // ✅ Smart lazy loading — sirf current + next slide load hoga
 // ✅ Touch swipe support
-// ✅ Fluid responsive height
+// ✅ Premium Cinematic Animations & Glassmorphism
 // ✅ LCP optimized — first slide eager load
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
@@ -68,7 +68,7 @@ const HeroSlider = ({ slides = [] }) => {
   // Auto advance
   useEffect(() => {
     if (len <= 1 || paused) return;
-    const id = setInterval(next, 5000);
+    const id = setInterval(next, 5500); 
     return () => clearInterval(id);
   }, [len, paused, next]);
 
@@ -105,57 +105,67 @@ const HeroSlider = ({ slides = [] }) => {
       onTouchEnd={onTouchEnd}
     >
       <style>{`
-        @keyframes hs-kenburns {
-          0%   { transform: scale(1.05); filter: brightness(.88); }
-          100% { transform: scale(1.15) translate(-1%,-1%); filter: brightness(1); }
+        /* ── PREMIUM ANIMATIONS ── */
+        @keyframes cinematicZoom {
+          0%   { transform: scale(1.12); filter: blur(4px) brightness(1.1); }
+          15%  { filter: blur(0px) brightness(1); }
+          100% { transform: scale(1); filter: blur(0px) brightness(1); }
         }
-        @keyframes hs-fadeup {
-          from { opacity:0; transform:translateY(28px); }
-          to   { opacity:1; transform:translateY(0); }
+        @keyframes glideUpText {
+          0%   { opacity: 0; transform: translateY(30px); filter: blur(6px); }
+          100% { opacity: 1; transform: translateY(0); filter: blur(0px); }
         }
-        @keyframes hs-hr {
-          from { width:0; }
-          to   { width: clamp(50px,8vw,80px); }
+        @keyframes expandLine {
+          0%   { width: 0; opacity: 0; }
+          100% { width: clamp(50px,8vw,100px); opacity: 1; }
         }
 
         .hs-root {
-          width:100%; position:relative; overflow:hidden;
-          background:#0f2347;
-          height: clamp(260px,52vw,580px);
-          max-height: 600px;
+          width: 100%; position: relative; overflow: hidden;
+          background: #071124;
+          /* ✅ FIXED: Slider height kam kar di gayi hai */
+          height: clamp(240px, 48vw, 540px);
+          max-height: 540px;
           contain: layout style;
         }
-        @media(max-width:480px) { .hs-root { height: clamp(220px,55vw,340px); } }
+        @media(max-width: 480px) { .hs-root { height: clamp(200px, 50vw, 300px); } }
 
         .hs-slide {
-          position:absolute; inset:0;
-          opacity:0;
-          transition: opacity 1.4s cubic-bezier(.33,1,.68,1);
+          position: absolute; inset: 0;
+          opacity: 0;
+          transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
           will-change: opacity;
-          pointer-events:none;
+          pointer-events: none;
+          z-index: 0;
         }
+        
+        /* ✅ FIXED: Kaali patti ko chhota aur soft kar diya gaya hai (Sirf neeche ke 35% hisse mein) */
         .hs-slide::after {
-          content:''; position:absolute; inset:0; z-index:1;
-          background: linear-gradient(to top, rgba(15,35,71,.75) 0%, rgba(15,35,71,.25) 50%, transparent 100%);
+          content: ''; position: absolute; inset: 0; z-index: 1;
+          background: linear-gradient(to top, rgba(10,20,40,0.85) 0%, transparent 35%);
+          pointer-events: none;
         }
+
         .hs-slide.cur {
-          opacity:1; transition-delay:.1s; pointer-events:auto;
+          opacity: 1; z-index: 1; pointer-events: auto;
         }
 
         /* ── Picture/Image ── */
-        .hs-pic { width:100%; height:100%; display:block; }
+        .hs-pic { width: 100%; height: 100%; display: block; }
         .hs-img {
-          width:100%; height:100%; object-fit:cover;
-          object-position: center 20%;
-          will-change: transform;
-          display:block;
+          width: 100%; height: 100%; object-fit: cover;
+          object-position: center 30%;
+          will-change: transform, filter;
+          display: block;
         }
-        .hs-slide.cur .hs-img { animation: hs-kenburns 12s ease-out forwards; }
+        .hs-slide.cur .hs-img { 
+          animation: cinematicZoom 8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; 
+        }
 
         /* ── Skeleton loader while image loading ── */
         .hs-skeleton {
-          position:absolute; inset:0;
-          background: linear-gradient(90deg, #0f2347 25%, #1a3a6c 50%, #0f2347 75%);
+          position: absolute; inset: 0;
+          background: linear-gradient(90deg, #071124 25%, #0f2347 50%, #071124 75%);
           background-size: 200% 100%;
           animation: hs-shimmer 1.5s infinite;
         }
@@ -166,62 +176,85 @@ const HeroSlider = ({ slides = [] }) => {
 
         /* ── Content ── */
         .hs-content {
-          position:absolute; bottom:0; left:0; right:0; z-index:2;
-          padding: clamp(40px,8vw,90px) clamp(16px,4vw,48px) clamp(20px,3.5vw,36px);
-          text-align:center; color:#fff;
+          position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+          /* ✅ FIXED: Content padding bhi thodi kam ki hai */
+          padding: clamp(30px, 6vw, 70px) clamp(20px, 4vw, 60px) clamp(20px, 4vw, 30px);
+          text-align: center; color: #fff;
         }
         .hs-title {
-          font-size: clamp(16px,3.5vw,34px);
-          font-weight:800; letter-spacing:.4px;
-          text-shadow: 0 2px 14px rgba(0,0,0,.5);
-          margin-bottom: clamp(6px,.8vw,10px);
-          line-height:1.25; opacity:0;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          /* ✅ FIXED: Text size kam kar diya hai */
+          font-size: clamp(18px, 3.2vw, 36px);
+          font-weight: 800; letter-spacing: -0.5px;
+          text-shadow: 0 4px 24px rgba(0,0,0,0.7);
+          margin-bottom: clamp(4px, 1vw, 8px);
+          line-height: 1.15; opacity: 0;
         }
         .hs-subtitle {
-          font-size: clamp(12px,1.8vw,19px);
-          font-weight:500; color:#e2e8f0;
-          text-shadow: 1px 1px 5px rgba(0,0,0,.45);
-          margin-bottom: clamp(12px,2vw,20px);
-          opacity:0; line-height:1.4;
+          font-family: 'Inter', sans-serif;
+          /* ✅ FIXED: Subtitle ka text size bhi kam kar diya hai */
+          font-size: clamp(12px, 1.4vw, 16px);
+          font-weight: 500; color: rgba(255, 255, 255, 0.9);
+          text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+          margin-bottom: clamp(12px, 2vw, 18px);
+          opacity: 0; line-height: 1.4;
+          max-width: 700px; margin-left: auto; margin-right: auto;
         }
         .hs-hr {
-          border: 2px solid #f4a023;
-          width: clamp(50px,8vw,80px); margin:0 auto;
-          border-radius:4px; opacity:0;
+          border: none;
+          height: 3px;
+          background: linear-gradient(90deg, transparent, #f4a023, transparent);
+          width: 0; margin: 0 auto;
+          border-radius: 4px; opacity: 0;
         }
-        .hs-slide.cur .hs-title    { animation: hs-fadeup .8s .4s both cubic-bezier(.2,.6,.2,1); }
-        .hs-slide.cur .hs-subtitle { animation: hs-fadeup .8s .6s both cubic-bezier(.2,.6,.2,1); }
-        .hs-slide.cur .hs-hr       { animation: hs-hr    .8s .8s both cubic-bezier(.2,.6,.2,1); opacity:1; }
+        
+        .hs-slide.cur .hs-title    { animation: glideUpText 0.9s 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        .hs-slide.cur .hs-subtitle { animation: glideUpText 0.9s 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        .hs-slide.cur .hs-hr       { animation: expandLine  0.8s 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
 
         /* ── Arrows ── */
         .hs-arrow {
-          position:absolute; top:50%; transform:translateY(-50%) scale(.85);
-          width: clamp(36px,4.5vw,48px); height: clamp(36px,4.5vw,48px);
-          background:rgba(15,35,71,.32); color:#fff;
-          font-size: clamp(14px,2vw,20px);
-          display:flex; justify-content:center; align-items:center;
-          cursor:pointer; border-radius:50%; z-index:11;
-          transition:all .3s; backdrop-filter:blur(4px);
-          border:1px solid rgba(255,255,255,.12); opacity:0;
+          position: absolute; top: 50%; transform: translateY(-50%) scale(0.9);
+          width: clamp(36px, 4vw, 48px); height: clamp(36px, 4vw, 48px);
+          background: rgba(255, 255, 255, 0.1); color: #fff;
+          font-size: clamp(14px, 1.8vw, 18px);
+          display: flex; justify-content: center; align-items: center;
+          cursor: pointer; border-radius: 50%; z-index: 11;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          border: 1px solid rgba(255, 255, 255, 0.2); 
+          opacity: 0;
         }
-        .hs-root:hover .hs-arrow { opacity:1; transform:translateY(-50%) scale(1); }
-        .hs-arrow:hover { background:#f4a023; color:#000; transform:translateY(-50%) scale(1.1); }
-        .hs-prev { left: clamp(10px,2vw,28px); }
-        .hs-next { right: clamp(10px,2vw,28px); }
-        @media(hover:none) { .hs-arrow { opacity:.7 !important; } }
+        .hs-root:hover .hs-arrow { opacity: 1; transform: translateY(-50%) scale(1); }
+        .hs-arrow:hover { 
+          background: #f4a023; color: #0f2347; 
+          transform: translateY(-50%) scale(1.1); 
+          border-color: #f4a023;
+          box-shadow: 0 4px 15px rgba(244,160,35,0.4);
+        }
+        .hs-prev { left: clamp(10px, 3vw, 24px); }
+        .hs-next { right: clamp(10px, 3vw, 24px); }
+        @media(hover:none) { .hs-arrow { display: none; } }
 
         /* ── Dots ── */
         .hs-dots {
-          position:absolute; bottom: clamp(12px,2vw,20px);
-          left:50%; transform:translateX(-50%);
-          display:flex; gap: clamp(7px,1vw,12px); z-index:11;
+          position: absolute; bottom: clamp(12px, 2.5vw, 18px);
+          left: 50%; transform: translateX(-50%);
+          display: flex; gap: clamp(6px, 1vw, 10px); z-index: 11;
         }
         .hs-dot {
-          width: clamp(7px,1vw,10px); height: clamp(7px,1vw,10px);
-          border-radius:50%; background:rgba(255,255,255,.4);
-          cursor:pointer; transition:all .4s; border:none; padding:0;
+          width: clamp(14px, 2vw, 20px); height: clamp(4px, 0.5vw, 5px);
+          border-radius: 4px; background: rgba(255, 255, 255, 0.35);
+          cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+          border: none; padding: 0;
         }
-        .hs-dot.cur { background:#f4a023; transform:scale(1.3); box-shadow:0 0 10px rgba(244,160,35,.5); }
+        .hs-dot:hover { background: rgba(255, 255, 255, 0.8); }
+        .hs-dot.cur { 
+          width: clamp(28px, 4vw, 40px); 
+          background: #f4a023; 
+          box-shadow: 0 0 10px rgba(244,160,35,0.6); 
+        }
       `}</style>
 
       {/* ── Slides ── */}

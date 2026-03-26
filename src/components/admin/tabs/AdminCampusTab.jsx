@@ -1,7 +1,7 @@
 // src/components/AdminCampusTab.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { doc, setDoc, onSnapshot, serverTimestamp, getDoc } from 'firebase/firestore'; // ✅ getDoc added
-import { db } from '../firebase';
+import { db } from "../../../firebase";
 import toast from 'react-hot-toast';
 
 const NAVY = '#0f2347';

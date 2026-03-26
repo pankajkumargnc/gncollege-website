@@ -2,6 +2,7 @@
 // ✅ Gradient glow hover on alumni cards (screenshot-style)
 // ✅ All original Firebase + scroll logic preserved
 // ✅ FIXED: Container width constrained to 1200px (matches Events section)
+// ✅ FIXED: Uniform Plus Jakarta Sans Premium Heading Applied
 
 import React, { useState, useEffect, memo } from 'react';
 import { collection, query, onSnapshot } from 'firebase/firestore';
@@ -46,26 +47,9 @@ const S = `
     padding: 0 20px; /* Optional side padding for mobile */
   }
 
-  .wof-head{text-align:center;padding:0 0 44px;position:relative;z-index:2;}
-  .wof-eyebrow{
-    display:inline-flex;align-items:center;gap:8px;
-    background:#fff;border:1.5px solid #e2e8f0;color:#64748b;
-    padding:6px 16px;border-radius:50px;font-size:11px;font-weight:700;
-    letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;
-    box-shadow:0 2px 8px rgba(0,0,0,.04);
-  }
-  .wof-dot{width:6px;height:6px;border-radius:50%;background:${G};animation:wof-blink 2s infinite;}
-  @keyframes wof-blink{0%,100%{opacity:1;}50%{opacity:.3;}}
-  .wof-h2{
-    font-family:'Space Grotesk',sans-serif;
-    font-size:clamp(24px,3.5vw,36px);font-weight:800;
-    color:${N};letter-spacing:-0.5px;line-height:1.2;margin-bottom:8px;
-  }
-  .wof-h2 span{color:${G};}
-  .wof-sub{font-size:14px;color:#64748b;font-weight:400;max-width:480px;margin:0 auto;}
-  .wof-bar{width:44px;height:3px;background:linear-gradient(90deg,${G},${N});border-radius:2px;margin:14px auto 0;}
-
-  .wof-stats{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;margin-top:24px;}
+  .wof-head{text-align:center;padding:0 0 24px;position:relative;z-index:2; width: 100%;}
+  
+  .wof-stats{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;margin-top:0px;}
   .wof-stat{text-align:center;}
   .wof-stat-num{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;color:${N};}
   .wof-stat-lbl{font-size:10px;color:#94a3b8;letter-spacing:1px;text-transform:uppercase;margin-top:2px;font-weight:600;}
@@ -168,7 +152,6 @@ const S = `
     .wof-stats{gap:20px;}
   }
   @media(max-width:480px){
-    .wof-h2{font-size:22px;}
     .wof-card{width:175px;}
     .wof-stats{gap:14px;}
     .wof-stat-num{font-size:18px;}
@@ -231,11 +214,24 @@ export default function PlacementsSection() {
       
       {/* ✅ Outer Wrapper added to constrain everything centrally */}
       <div className="wof-inner">
+        
         <div className="wof-head">
-          <div className="wof-eyebrow"><div className="wof-dot" /> Our Alumni</div>
-          <h2 className="wof-h2">🏆 Wall of <span>Fame</span></h2>
-          <p className="wof-sub">GNC ke alumni — India ki top companies mein apna career bana rahe hain</p>
-          <div className="wof-bar" />
+          {/* ✅ FIXED: "Plus Jakarta Sans" Uniform Premium Header */}
+          <div style={{ textAlign:'center', marginBottom:'clamp(20px,3vw,30px)' }}>
+            <div>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:'8px', background:'rgba(15,35,71,.06)', border:'1px solid rgba(15,35,71,.12)', color: N, padding:'5px 16px', borderRadius:'20px', fontSize:'clamp(9px,.75vw,11px)', fontWeight:800, letterSpacing:'2px', textTransform:'uppercase', marginBottom:'12px' }}>
+                🏆 Proud Alumni
+              </div>
+            </div>
+            <h2 style={{ fontFamily:"'Plus Jakarta Sans', sans-serif", color: N, fontSize:'clamp(28px,5vw,50px)', fontWeight:800, margin:'0 0 14px', letterSpacing:'-1.5px', lineHeight:1.08 }}>
+              Wall of <span style={{ color: G }}>Fame</span>
+            </h2>
+            <p style={{ color:'#6b7280', fontSize:'clamp(13px,.95vw,15px)', maxWidth:'600px', lineHeight:1.65, margin:'0 auto' }}>
+              Hamare ho-nhaar students jo aaj leading companies mein kaam kar rahe hain
+            </p>
+          </div>
+
+          {/* Stats below header */}
           {placements.length > 0 && (
             <div className="wof-stats">
               <div className="wof-stat">
