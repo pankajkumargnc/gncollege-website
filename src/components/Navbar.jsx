@@ -58,18 +58,11 @@ export default function Navbar({ onAdminClick, navLinks }) {
         left: 0,
         zIndex: 99999,
         
-        // ✅ PREMIUM GLASSMORPHISM ADDED HERE
-        // Scroll hone par 35% Transparent (0.35 opacity), Top par aane par Solid White (#ffffff)
+        // Main Navbar Glass Effect on Scroll
         background: isScrolled ? 'rgba(255, 255, 255, 0.35)' : '#ffffff',
-        
-        // Shadow for depth
         boxShadow: isScrolled ? '0 8px 32px rgba(15, 35, 71, 0.1)' : '0 4px 15px rgba(0,0,0,0.05)',
-        
-        // Blur effect for glass look
         backdropFilter: isScrolled ? 'blur(16px) saturate(180%)' : 'none',
         WebkitBackdropFilter: isScrolled ? 'blur(16px) saturate(180%)' : 'none',
-        
-        // Light border to define edges of glass
         borderBottom: isScrolled ? '1px solid rgba(255, 255, 255, 0.5)' : 'none',
         
         transition: 'all 0.4s ease-in-out',
@@ -220,7 +213,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
             position: isMobile ? 'absolute' : 'static',
             top: '100%', left: 0, right: 0,
             
-            // ✅ Mobile Dropdown background matching glass effect
+            // Mobile Dropdown background
             background: isMobile ? (isScrolled ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.98)') : 'transparent',
             backdropFilter: isMobile && isScrolled ? 'blur(16px)' : 'none',
             
@@ -276,12 +269,18 @@ export default function Navbar({ onAdminClick, navLinks }) {
                   {!isMobile && l0.sub && <span style={{ color: COLORS.navy, fontSize: 11, marginLeft: 2, marginRight: 8, marginTop: 2 }}>▾</span>}
                 </div>
 
-                {/* L1 dropdown */}
+                {/* ── L1 Dropdown (Glassmorphism Applied) ── */}
                 {l0.sub && openL1 === l0.label && (
                   <div style={{
                     position: isMobile ? 'static' : 'absolute',
                     top: '100%', left: 0,
-                    background: '#fff',
+                    
+                    // ✅ Glass Effect
+                    background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.85)',
+                    backdropFilter: isMobile ? 'none' : 'blur(12px)',
+                    WebkitBackdropFilter: isMobile ? 'none' : 'blur(12px)',
+                    border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.4)',
+                    
                     minWidth: 240,
                     boxShadow: isMobile ? 'none' : '0 12px 30px rgba(0,0,0,.15)',
                     borderTop: isMobile ? 'none' : '3px solid ' + COLORS.navy,
@@ -299,10 +298,12 @@ export default function Navbar({ onAdminClick, navLinks }) {
                           style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             padding: isMobile ? '10px 16px' : '10px 18px',
-                            borderBottom: isMobile ? 'none' : '1px solid #f8f9fa',
+                            borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.05)',
                             cursor: isMobile && l1.sub ? 'pointer' : 'default',
+                            transition: 'background 0.2s',
                           }}
-                          onMouseEnter={e => { if (!isMobile) e.currentTarget.style.background = '#f4f6f9' }}
+                          // ✅ Soft transparent hover jisse glass effect bana rahe
+                          onMouseEnter={e => { if (!isMobile) e.currentTarget.style.background = 'rgba(15, 35, 71, 0.06)' }}
                           onMouseLeave={e => { if (!isMobile) e.currentTarget.style.background = 'transparent' }}
                         >
                           <Link to={getRoute(l1.href)}
@@ -312,12 +313,19 @@ export default function Navbar({ onAdminClick, navLinks }) {
                           {l1.sub && <span style={{ fontSize: 12, color: COLORS.gold, marginLeft: 8 }}>{isMobile ? (openL2 === l1.label ? '▴' : '▾') : '▶'}</span>}
                         </div>
 
-                        {/* L2 dropdown */}
+                        {/* ── L2 Dropdown (Glassmorphism Applied) ── */}
                         {l1.sub && openL2 === l1.label && (
                           <div style={{
                             position: isMobile ? 'static' : 'absolute',
                             top: 0, left: '100%',
-                            background: '#fff', minWidth: 240,
+                            
+                            // ✅ Glass Effect
+                            background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.85)',
+                            backdropFilter: isMobile ? 'none' : 'blur(12px)',
+                            WebkitBackdropFilter: isMobile ? 'none' : 'blur(12px)',
+                            border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.4)',
+                            
+                            minWidth: 240,
                             boxShadow: isMobile ? 'none' : '4px 4px 20px rgba(0,0,0,.15)',
                             borderTop: isMobile ? 'none' : '3px solid ' + COLORS.gold,
                             borderRadius: isMobile ? 4 : '0 8px 8px 8px',
@@ -335,10 +343,12 @@ export default function Navbar({ onAdminClick, navLinks }) {
                                   style={{
                                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                     padding: '10px 16px',
-                                    borderBottom: isMobile ? 'none' : '1px solid #f8f9fa',
+                                    borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.05)',
                                     cursor: isMobile && l2.sub ? 'pointer' : 'default',
+                                    transition: 'background 0.2s',
                                   }}
-                                  onMouseEnter={e => { if (!isMobile) e.currentTarget.style.background = '#f4f6f9' }}
+                                  // ✅ Soft transparent hover
+                                  onMouseEnter={e => { if (!isMobile) e.currentTarget.style.background = 'rgba(15, 35, 71, 0.06)' }}
                                   onMouseLeave={e => { if (!isMobile) e.currentTarget.style.background = 'transparent' }}
                                 >
                                   <Link to={getRoute(l2.href)}
@@ -348,12 +358,19 @@ export default function Navbar({ onAdminClick, navLinks }) {
                                   {l2.sub && <span style={{ fontSize: 11, color: COLORS.gold, marginLeft: 8 }}>{isMobile ? (openL3 === l2.label ? '▴' : '▾') : '▶'}</span>}
                                 </div>
 
-                                {/* L3 dropdown */}
+                                {/* ── L3 Dropdown (Glassmorphism Applied) ── */}
                                 {l2.sub && openL3 === l2.label && (
                                   <div style={{
                                     position: isMobile ? 'static' : 'absolute',
                                     top: 0, left: '100%',
-                                    background: '#fff', minWidth: 240,
+                                    
+                                    // ✅ Glass Effect
+                                    background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.85)',
+                                    backdropFilter: isMobile ? 'none' : 'blur(12px)',
+                                    WebkitBackdropFilter: isMobile ? 'none' : 'blur(12px)',
+                                    border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.4)',
+                                    
+                                    minWidth: 240,
                                     boxShadow: isMobile ? 'none' : '4px 4px 20px rgba(0,0,0,.15)',
                                     borderTop: isMobile ? 'none' : '3px solid ' + COLORS.navy,
                                     borderRadius: isMobile ? 4 : '0 8px 8px 8px',
@@ -365,10 +382,12 @@ export default function Navbar({ onAdminClick, navLinks }) {
                                         style={{
                                           display: 'block', padding: '10px 16px',
                                           fontSize: 12, color: '#555',
-                                          borderBottom: isMobile ? 'none' : '1px solid #f8f9fa',
+                                          borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.05)',
                                           textDecoration: 'none',
+                                          transition: 'background 0.2s',
                                         }}
-                                        onMouseEnter={e => { if (!isMobile) e.currentTarget.style.background = '#f4f6f9' }}
+                                        // ✅ Soft transparent hover
+                                        onMouseEnter={e => { if (!isMobile) e.currentTarget.style.background = 'rgba(15, 35, 71, 0.06)' }}
                                         onMouseLeave={e => { if (!isMobile) e.currentTarget.style.background = 'transparent' }}
                                       >
                                         {l3.label}

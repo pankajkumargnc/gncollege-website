@@ -1,4 +1,4 @@
-// src/App.jsx — FINAL VERSION (Split Architecture Supported)
+// src/App.jsx — FINAL MERGE VERSION
 
 import WhatsAppButton      from './components/WhatsAppButton';
 import { useState, useEffect, Suspense, lazy, useMemo } from 'react';
@@ -7,7 +7,7 @@ import { Toaster }         from 'react-hot-toast';
 import AlertBanner         from './components/AlertBanner';
 import Ticker from './components/Ticker';
 
-
+import PageViewer from './components/PageViewer';
 import Navbar              from './components/Navbar';
 import Footer              from './components/Footer';
 import TopBar              from './components/home/TopBar';
@@ -50,10 +50,7 @@ const NotificationsPage = safeLazy(() => import('./pages/NotificationsPage'));
 const DocumentsPage     = safeLazy(() => import('./pages/DocumentsPage'));
 const EventsPage        = safeLazy(() => import('./pages/EventsPage'));
 
-// ✅ FIXED: AdminPanel ka naya rasta (path) update kar diya gaya hai!
 const AdminPanel        = safeLazy(() => import('./components/admin/AdminPanel'));
-
-
 
 // ── Named export lazy helpers ────────────────────────────────────────────────
 const LazyAbout       = n => safeLazy(() => import('./pages/AboutPages').then(m => ({ default: m[n] })));
@@ -154,7 +151,7 @@ export default function App() {
   const [gallery,       setGallery]       = useState([]);
   const [faculties,     setFaculties]     = useState([]);
   const [sliderSlides,  setSliderSlides]  = useState([]);
-  const [firebaseNav,   setFirebaseNav]   = useState(null);
+  const [navLinks,      setNavLinks]      = useState([]);
 
   // ── Admin auth ───────────────────────────────────────────────────────────
   const [adminAuthed, setAdminAuthed] = useState(
@@ -167,8 +164,6 @@ export default function App() {
   const handleAdminLogout = () => {
     sessionStorage.removeItem('gnc_admin_auth');
     setAdminAuthed(false);
-    // Yahan se `window.location.hash = '/';` hata diya gaya hai. 
-    // Ab logout hone par yeh seedha AdminLogin screen par hi rahega.
   };
 
   const location     = useLocation();
@@ -209,10 +204,26 @@ export default function App() {
   }, [isAdminRoute]);
 
   // ── Firebase listeners ───────────────────────────────────────────────────
+  
   useEffect(() => {
-    return onSnapshot(doc(db, 'settings', 'navbar'), snap => {
-      if (snap.exists() && snap.data().links) setFirebaseNav(snap.data().links);
+    const qNav = query(collection(db, 'navigation'), orderBy('order', 'asc'));
+    const unsubNav = onSnapshot(qNav, snap => {
+      const flatMenus = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      const buildNavTree = (parentId) => {
+        const children = flatMenus.filter(m => (m.parentId || null) === (parentId || null));
+        if (children.length === 0) return null;
+        return children.map(child => ({
+          label: child.label,
+          href: child.href,
+          sub: buildNavTree(child.id)
+        }));
+      };
+
+      const finalTree = buildNavTree(null);
+      setNavLinks(finalTree || []);
     });
+    return () => unsubNav();
   }, []);
 
   useEffect(() => {
@@ -223,13 +234,12 @@ export default function App() {
       ['gallery',       setGallery],
       ['faculties',     setFaculties],
       ['sliderSlides',  setSliderSlides],
-      ['updates',       setUpdates], // ✅ NEW: Ticker Updates fetched here
+      ['updates',       setUpdates], 
     ];
     const unsubs = cols.map(([col, setter]) => {
       return onSnapshot(collection(db, col),
         snap => {
           const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          // Local sorting (Sabse naya upar)
           docs.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
           setter(docs);
         },
@@ -239,17 +249,37 @@ export default function App() {
     return () => unsubs.forEach(u => u());
   }, []);
 
+  // ✅ FIXED: SMART MERGE LOGIC - Purane link safe rahenge, naye end me jud jayenge!
   const baseNavLinks = useMemo(() => {
-    const links = firebaseNav || staticNavLinks;
-    return links.map(link =>
-      link.label === 'Gallery'
+    // 1. Pehle saare static links ko uthao (taaki Navbar gayab na ho)
+    let combinedLinks = [...staticNavLinks];
+
+    // 2. Agar Firebase (Menu Builder) mein kuch naya hai, toh use check karo
+    if (navLinks && navLinks.length > 0) {
+      navLinks.forEach(dynamicLink => {
+        // Check karo ki kya yeh naam already Navbar mein hai (jaise "About Us")
+        const existingIndex = combinedLinks.findIndex(staticLink => staticLink.label.trim().toLowerCase() === dynamicLink.label.trim().toLowerCase());
+        
+        if (existingIndex >= 0) {
+          // Agar hai, toh use override kar do (jisse Menu Builder control le sake)
+          combinedLinks[existingIndex] = dynamicLink;
+        } else {
+          // Agar naya naam hai (jaise "More"), toh usko last mein add kar do
+          combinedLinks.splice(combinedLinks.length - 1, 0, dynamicLink);
+        }
+      });
+    }
+
+    // 3. Gallery ke default child menus ko preserve karo
+    return combinedLinks.map(link =>
+      link.label === 'Gallery' && !link.sub
         ? { ...link, href: '/gallery', sub: [
             { label: 'Photo Gallery', href: '/gallery/photos' },
             { label: 'Video Gallery', href: '/gallery/videos' },
           ]}
         : link
     );
-  }, [firebaseNav]);
+  }, [navLinks]);
 
   const handleOpenAdminTab = () =>
     window.open(`${window.location.origin}${import.meta.env.BASE_URL.replace(/\/$/, '')}/#/admin`, '_blank');
@@ -379,6 +409,8 @@ export default function App() {
           <Route path="/notifications" element={<R el={<NotificationsPage />} />} />
           <Route path="/documents"     element={<R el={<DocumentsPage />} />} />
           <Route path="/events"        element={<R el={<EventsPage />} />} />
+          
+          <Route path="/p/:slug" element={<PageViewer />} />
 
           {/* Admin */}
           <Route path="/admin" element={

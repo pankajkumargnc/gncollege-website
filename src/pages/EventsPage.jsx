@@ -3,7 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
-import PDFModal from '../components/PDFModal'; // ✅ PDF Modal Import
+import PDFModal from '../components/PDFModal'; 
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const EVENT_TYPES  = ['All','WORKSHOP','SEMINAR','CULTURAL','SPORTS','NSS','NCC', 'ACADEMIC'];
@@ -23,14 +23,15 @@ const getTS = ts => ts?.toDate ? ts.toDate() : new Date(ts || Date.now());
 export default function EventsPage() {
   const [events,   setEvents]   = useState([]);
   const [loading,  setLoading]  = useState(true);
-  const [tab,      setTab]      = useState('upcoming');
+  
+  const [tab,      setTab]      = useState('all'); 
+  
   const [selType,  setSelType]  = useState('All');
   const [selYear,  setSelYear]  = useState('All');
   const [selMonth, setSelMonth] = useState('All');
   const [search,   setSearch]   = useState('');
   const [expandId, setExpandId] = useState(null);
 
-  // ✅ PDF Preview State
   const [previewPdf, setPreviewPdf] = useState(null);
 
   const navy = COLORS.navy || '#0B1F4E';
@@ -40,7 +41,29 @@ export default function EventsPage() {
     window.scrollTo(0, 0);
     const q = query(collection(db, 'events'), orderBy('createdAt', 'desc'));
     const unsub = onSnapshot(q, snap => {
-      setEvents(snap.docs.map(d => ({ id:d.id, ...d.data() })));
+      
+      const formattedEvents = snap.docs.map(docSnap => {
+        const d = docSnap.data();
+        let m = d.month || 'Other';
+        let dy = d.day || '';
+        if (d.date) {
+          const dt = new Date(d.date);
+          if (!isNaN(dt)) {
+            dy = dt.getDate();
+            m = dt.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+          }
+        }
+        return {
+          id: docSnap.id,
+          ...d,
+          displayMonth: m,
+          displayDay: dy,
+          displayImage: d.image || d.imageUrl,
+          displayDesc: d.description || d.desc || ''
+        };
+      });
+
+      setEvents(formattedEvents);
       setLoading(false);
     });
     return () => unsub();
@@ -58,7 +81,7 @@ export default function EventsPage() {
     if (tab==='past'     && e.status==='upcoming') return false;
     if (selType  !== 'All' && e.type !== selType)   return false;
     if (selYear  !== 'All' && getTS(e.createdAt).getFullYear() !== Number(selYear)) return false;
-    if (selMonth !== 'All' && (e.month||'').toUpperCase() !== selMonth.toUpperCase()) return false;
+    if (selMonth !== 'All' && (e.displayMonth||'').toUpperCase() !== selMonth.toUpperCase()) return false;
     if (search && !e.title?.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   }), [events, tab, selType, selYear, selMonth, search]);
@@ -66,7 +89,7 @@ export default function EventsPage() {
   const grouped = useMemo(() => {
     const map = {};
     filtered.forEach(e => {
-      const k = e.month || 'Other';
+      const k = e.displayMonth || 'Other';
       if (!map[k]) map[k] = [];
       map[k].push(e);
     });
@@ -97,19 +120,45 @@ export default function EventsPage() {
         </div>
       </header>
 
-      {/* Counters Section */}
-      <div style={{ maxWidth: '1000px', margin: '-80px auto 40px', padding: '20px', position: 'relative', zIndex: 10, background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(10px)', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
-        <div style={{ display:'flex', gap:14, flexWrap:'wrap', justifyContent: 'center' }}>
+      {/* Counters */}
+      <div style={{ maxWidth: '1000px', margin: '-50px auto 40px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+        <div style={{ display:'flex', gap:16, flexWrap:'wrap', justifyContent: 'center' }}>
           {[
-            { val:events.length,   label:'Total Events', icon:'📆' },
-            { val:upcoming.length, label:'Upcoming',     icon:'🔜', hi:true },
+            { val:events.length,   label:'Total Events', icon:'📆', hi: true },
+            { val:upcoming.length, label:'Upcoming',     icon:'🔜' },
             { val:past.length,     label:'Past Events',  icon:'📜' },
-            { val:[...new Set(events.map(e=>e.type))].filter(Boolean).length, label:'Types', icon:'🏷️' },
+            { val:[...new Set(events.map(e=>e.type))].filter(Boolean).length, label:'Categories', icon:'🏷️' },
           ].map((s,i) => (
-            <div key={i} style={{ background:s.hi?'#fffbeb':'#fff', border:`1px solid ${s.hi?gold:'#e2e8f0'}`, borderRadius:11, padding:'10px 20px', textAlign:'center', transition: 'all .2s', flex: 1, minWidth: '150px' }}>
-              <span style={{ display:'block', fontSize:17 }}>{s.icon}</span>
-              <div style={{ fontSize:24, fontWeight:900, color:s.hi?gold:navy, lineHeight:1, marginTop:2 }}>{s.val}</div>
-              <div style={{ fontSize:11, color:'#64748b', marginTop:2, fontWeight: 600 }}>{s.label}</div>
+            <div key={i} style={{ 
+              background: '#fff', 
+              border: `1px solid ${s.hi ? gold : '#e2e8f0'}`, 
+              borderRadius: 14, 
+              padding: '16px 20px', 
+              display: 'flex',
+              alignItems: 'center',
+              gap: 14,
+              boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
+              transition: 'all .2s', 
+              flex: 1, 
+              minWidth: '200px' 
+            }}>
+              <div style={{ 
+                fontSize: 22, 
+                background: s.hi ? '#fffbeb' : '#f1f5f9', 
+                width: 46, height: 46, 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                borderRadius: 12 
+              }}>
+                {s.icon}
+              </div>
+              <div>
+                <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 20, fontWeight: 800, color: s.hi ? '#d97706' : navy, lineHeight: 1.1 }}>
+                  {s.val}
+                </div>
+                <div style={{ fontSize: 11, color: '#64748b', marginTop: 4, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  {s.label}
+                </div>
+              </div>
             </div>
           ))}
         </div>
@@ -119,7 +168,7 @@ export default function EventsPage() {
         <main>
 
             {/* ── Featured upcoming banner ── */}
-            {featured && (
+            {featured && tab !== 'past' && (
               <section className="glass-panel profile-section anim-slide-up" style={{ padding:'18px 22px', animationDelay:'.05s', border:`2px solid ${gold}44` }}>
                 {(() => {
                   const m = TYPE_META[featured.type]||{icon:'🏆',grad:`linear-gradient(135deg,${navy},#1a3a7c)`,light:'#EBF0FF',text:'#1a365d'};
@@ -131,10 +180,10 @@ export default function EventsPage() {
                         <div>
                           <div style={{ display:'flex', gap:8, marginBottom:5, flexWrap:'wrap' }}>
                             <span style={{ background:m.light, color:m.text, padding:'2px 10px', borderRadius:20, fontSize:11, fontWeight:700 }}>{featured.type}</span>
-                            {featured.day && <span style={{ background:`${gold}22`, color:gold, padding:'2px 10px', borderRadius:20, fontSize:11, fontWeight:700 }}>📅 {featured.day} {featured.month}</span>}
+                            {featured.displayDay && <span style={{ background:`${gold}22`, color:gold, padding:'2px 10px', borderRadius:20, fontSize:11, fontWeight:700 }}>📅 {featured.displayDay} {featured.displayMonth}</span>}
                           </div>
                           <h3 style={{ margin:0, fontSize:17, fontWeight:800, color:'#fff' }}>{featured.title}</h3>
-                          <p style={{ margin:'3px 0 0', fontSize:12.5, color:'rgba(255,255,255,.55)' }}>📍 {featured.location||'College Campus'}</p>
+                          <p style={{ margin:'3px 0 0', fontSize:12.5, color:'rgba(255,255,255,.55)' }}>📍 {featured.venue||featured.location||'College Campus'}</p>
                         </div>
                       </div>
                     </div>
@@ -145,12 +194,11 @@ export default function EventsPage() {
 
             {/* ── Filters ── */}
             <section style={{ background: '#fff', padding: '30px 40px', borderRadius: '16px', boxShadow: '0 8px 25px rgba(0,0,0,0.07)', marginTop: '30px', animationDelay:'.1s' }}>
-              {/* Tab buttons */}
               <div style={{ display:'flex', gap:3, marginBottom:16, background:'#f4f7fa', borderRadius:11, padding:3, width:'fit-content' }}>
                 {[
-                  { id:'upcoming', label:'🔜 Upcoming', count:upcoming.length },
                   { id:'all',      label:'📆 All',      count:events.length   },
-                  { id:'past',     label:'📜 Past',      count:past.length     },
+                  { id:'upcoming', label:'🔜 Upcoming', count:upcoming.length },
+                  { id:'past',     label:'📜 Past',     count:past.length     },
                 ].map(t => (
                   <button key={t.id} className="evt-fb" onClick={() => setTab(t.id)}
                     style={{ padding:'8px 18px', borderRadius:9, background:tab===t.id?navy:'transparent', color:tab===t.id?'#fff':'#718096', fontWeight:700, fontSize:13, display:'flex', alignItems:'center', gap:7 }}>
@@ -160,7 +208,6 @@ export default function EventsPage() {
                 ))}
               </div>
 
-              {/* Search */}
               <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'center', marginBottom:12 }}>
                 <div style={{ flex:1, minWidth:200, position:'relative' }}>
                   <span style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', opacity:.4, fontSize:16, pointerEvents:'none' }}>🔍</span>
@@ -172,7 +219,6 @@ export default function EventsPage() {
                 <span style={{ background:'#f0f4ff', color:navy, borderRadius:20, padding:'5px 14px', fontSize:12.5, fontWeight:800 }}>{filtered.length} events</span>
               </div>
 
-              {/* Type */}
               <div style={{ display:'flex', gap:7, flexWrap:'wrap', alignItems:'center', marginBottom:10 }}>
                 <span style={{ fontSize:10.5, fontWeight:700, color:'#a0aec0', textTransform:'uppercase', letterSpacing:.8, flexShrink:0 }}>TYPE:</span>
                 {EVENT_TYPES.map(t => {
@@ -186,7 +232,6 @@ export default function EventsPage() {
                 })}
               </div>
 
-              {/* Year + Month */}
               <div style={{ display:'flex', gap:14, flexWrap:'wrap', alignItems:'center' }}>
                 <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
                   <span style={{ fontSize:10.5, fontWeight:700, color:'#a0aec0', textTransform:'uppercase', letterSpacing:.8, flexShrink:0 }}>YEAR:</span>
@@ -217,8 +262,38 @@ export default function EventsPage() {
 
             {/* ── Events ── */}
             <section style={{ background: '#fff', padding: '30px 40px', borderRadius: '16px', boxShadow: '0 8px 25px rgba(0,0,0,0.07)', marginTop: '30px', animationDelay:'.2s', marginBottom: '60px' }}>
-              <h2 className="section-heading">📅 Events ({filtered.length})</h2>
-              <div className="heading-underline" />
+              
+              {/* ✅ NEW PREMIUM EVENT COUNTING HEADER */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 25, flexWrap: 'wrap' }}>
+                <div style={{ 
+                  width: 48, height: 48, borderRadius: 12, background: '#f1f5f9', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 
+                }}>📅</div>
+                <h2 style={{ 
+                  fontFamily: "'Plus Jakarta Sans', sans-serif", 
+                  fontSize: 'clamp(24px, 4vw, 32px)', 
+                  fontWeight: 800, 
+                  color: navy, 
+                  margin: 0,
+                  letterSpacing: '-0.5px'
+                }}>
+                  Campus Events
+                </h2>
+                <div style={{ 
+                  background: '#fffbeb', 
+                  border: `1.5px solid ${gold}66`, 
+                  color: '#b45309', 
+                  padding: '5px 16px', 
+                  borderRadius: 30, 
+                  fontSize: 13, 
+                  fontWeight: 800,
+                  boxShadow: '0 2px 8px rgba(244,160,35,0.15)',
+                  marginTop: '4px'
+                }}>
+                  {filtered.length} {filtered.length === 1 ? 'Event' : 'Events'} Found
+                </div>
+              </div>
+              <div style={{ width: 80, height: 4, background: `linear-gradient(90deg, ${gold}, #fde68a)`, borderRadius: 2, marginBottom: 35 }} />
 
               {loading ? (
                 <div style={{ textAlign:'center', padding:'60px 20px' }}>
@@ -234,7 +309,6 @@ export default function EventsPage() {
               ) : (
                 Object.entries(grouped).map(([month, items]) => (
                   <div key={month} style={{ marginBottom:32 }}>
-                    {/* Month header */}
                     <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:18 }}>
                       <div style={{ background:`linear-gradient(135deg,${navy},#1a3a7c)`, color:gold, borderRadius:9, padding:'6px 18px', fontWeight:900, fontSize:13.5, whiteSpace:'nowrap', boxShadow:`0 4px 14px ${navy}22` }}>
                         📅 {month}
@@ -249,27 +323,30 @@ export default function EventsPage() {
                         const isUp = ev.status === 'upcoming';
                         const exp  = expandId === ev.id;
                         
-                        // Extract plain text for length checking (ignoring HTML tags)
                         const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = ev.desc || '';
+                        tempDiv.innerHTML = ev.displayDesc || '';
                         const plainText = tempDiv.textContent || tempDiv.innerText || '';
                         const descLength = plainText.length;
+
+                        let imgSrc = ev.displayImage;
+                        if (imgSrc && imgSrc.startsWith('images/')) {
+                          imgSrc = `${import.meta.env.BASE_URL}${imgSrc}`; 
+                        }
 
                         return (
                           <div key={ev.id}
                             className={`evt-card${isUp?' evt-upcoming':''}`}
                             style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:isUp?'0 8px 28px rgba(11,31,78,.1)':'0 4px 16px rgba(11,31,78,.06)', border:isUp?`2px solid ${gold}`:'1px solid #edf2f7', position:'relative', display: 'flex', flexDirection: 'column' }}>
 
-                            {/* image or gradient header */}
-                            {ev.imageUrl ? (
+                            {imgSrc ? (
                               <div style={{ height:190, position:'relative', overflow:'hidden', flexShrink: 0 }}>
-                                <img src={ev.imageUrl} alt={ev.title} className="evt-img"
+                                <img src={imgSrc} alt={ev.title} className="evt-img"
                                   style={{ width:'100%', height:'100%', objectFit:'cover' }}
                                   onError={e => { e.target.parentElement.style.background=m.grad; e.target.style.display='none'; }} />
                                 <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,transparent 50%,rgba(11,31,78,.75))' }} />
                                 <div style={{ position:'absolute', top:12, left:12, background:'rgba(255,255,255,.92)', borderRadius:9, padding:'6px 10px', textAlign:'center', backdropFilter:'blur(4px)', minWidth:44 }}>
-                                  <div style={{ fontSize:9.5, fontWeight:700, color:'#718096', textTransform:'uppercase' }}>{ev.month}</div>
-                                  <div style={{ fontSize:20, fontWeight:900, color:navy, lineHeight:1 }}>{ev.day||'?'}</div>
+                                  <div style={{ fontSize:9.5, fontWeight:700, color:'#718096', textTransform:'uppercase' }}>{ev.displayMonth}</div>
+                                  <div style={{ fontSize:20, fontWeight:900, color:navy, lineHeight:1 }}>{ev.displayDay||'?'}</div>
                                 </div>
                                 <span style={{ position:'absolute', top:12, right:12, background:m.light, color:m.text, padding:'4px 12px', borderRadius:20, fontSize:11.5, fontWeight:700 }}>
                                   {m.icon} {ev.type}
@@ -279,8 +356,8 @@ export default function EventsPage() {
                               <div style={{ background:m.grad, padding:'20px 18px 16px', flexShrink: 0 }}>
                                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
                                   <div style={{ background:'rgba(255,255,255,.22)', borderRadius:9, padding:'7px 10px', textAlign:'center', backdropFilter:'blur(4px)', minWidth:44 }}>
-                                    <div style={{ fontSize:9.5, fontWeight:700, color:'rgba(255,255,255,.7)', textTransform:'uppercase' }}>{ev.month||'?'}</div>
-                                    <div style={{ fontSize:22, fontWeight:900, color:'#fff', lineHeight:1 }}>{ev.day||'?'}</div>
+                                    <div style={{ fontSize:9.5, fontWeight:700, color:'rgba(255,255,255,.7)', textTransform:'uppercase' }}>{ev.displayMonth||'?'}</div>
+                                    <div style={{ fontSize:22, fontWeight:900, color:'#fff', lineHeight:1 }}>{ev.displayDay||'?'}</div>
                                   </div>
                                   <span style={{ background:'rgba(255,255,255,.22)', color:'#fff', padding:'4px 12px', borderRadius:20, fontSize:11, fontWeight:700, backdropFilter:'blur(4px)' }}>
                                     {m.icon} {ev.type}
@@ -289,7 +366,6 @@ export default function EventsPage() {
                               </div>
                             )}
 
-                            {/* upcoming strip */}
                             {isUp && (
                               <div style={{ background:'linear-gradient(135deg,#f6ad55,#ed8936)', color:'#fff', textAlign:'center', padding:'3px 0', fontSize:10.5, fontWeight:900, letterSpacing:.8 }}>
                                 🔜 UPCOMING EVENT
@@ -299,19 +375,18 @@ export default function EventsPage() {
                             <div style={{ padding:'16px 18px 18px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                               <h3 style={{ margin:'0 0 6px', fontSize:15.5, fontWeight:800, color:navy, lineHeight:1.35 }}>{ev.title}</h3>
                               <p style={{ margin:'0 0 10px', fontSize:12.5, color:'#718096', display:'flex', alignItems:'center', gap:5 }}>
-                                <span>📍</span> {ev.location||'College Campus'}
+                                <span>📍</span> {ev.venue||ev.location||'College Campus'}
                               </p>
                               
-                              {/* ✅ UPDATED DESCRIPTION & READ MORE LOGIC */}
-                              {ev.desc && (
+                              {plainText.length > 0 && (
                                 <div style={{ position: 'relative', flex: 1 }}>
                                   {exp ? (
                                     <div 
-                                      dangerouslySetInnerHTML={{ __html: ev.desc }} 
-                                      style={{ margin:0, fontSize:13, color:'#4a5568', lineHeight:1.65 }} 
+                                      dangerouslySetInnerHTML={{ __html: ev.displayDesc }} 
+                                      style={{ margin:0, fontSize:13, color:'#4a5568', lineHeight:1.65, textAlign: 'justify' }} 
                                     />
                                   ) : (
-                                    <p style={{ margin:0, fontSize:13, color:'#4a5568', lineHeight:1.65 }}>
+                                    <p style={{ margin:0, fontSize:13, color:'#4a5568', lineHeight:1.65, textAlign: 'justify' }}>
                                       {plainText.substring(0, 150) + (descLength > 150 ? '…' : '')}
                                     </p>
                                   )}
@@ -325,14 +400,14 @@ export default function EventsPage() {
                                 </div>
                               )}
                               
-                              {/* ✅ Modal Trigger for PDF Report */}
                               <div style={{ marginTop: 'auto', paddingTop: 12 }}>
-                                {ev.reportLink && (
-                                  <a href={ev.reportLink} target="_blank" rel="noreferrer" className="download-btn"
+                                {(ev.reportLink || ev.pdfLink) && (
+                                  <a href={ev.reportLink || ev.pdfLink} target="_blank" rel="noreferrer" className="download-btn"
                                     onClick={(e) => {
-                                      if(ev.reportLink.includes('drive.google') || ev.reportLink.endsWith('.pdf') || ev.reportLink.includes('firebase')) {
+                                      const link = ev.reportLink || ev.pdfLink;
+                                      if(link.includes('drive.google') || link.endsWith('.pdf') || link.includes('firebase')) {
                                         e.preventDefault();
-                                        setPreviewPdf({ url: ev.reportLink, title: ev.title || 'Event Report' });
+                                        setPreviewPdf({ url: link, title: ev.title || 'Event Report' });
                                       }
                                     }}
                                     style={{ display:'inline-flex', alignItems:'center', gap:6, cursor: 'pointer' }}>
@@ -352,7 +427,6 @@ export default function EventsPage() {
 
           </main>
       </div>
-      {/* ✅ Modal Render */}
       {previewPdf && <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />}
       <style>{`
         .download-btn { display:inline-block; background:#f8fafc; color:${navy}; padding:8px 15px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none; border:1px solid #cbd5e1; transition:.2s; }
