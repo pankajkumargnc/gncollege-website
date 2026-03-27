@@ -17,7 +17,7 @@ import PDFModal from "../components/PDFModal";
 const N = COLORS.navy || "#0f2347";
 const G = COLORS.gold || "#f4a023";
 
-// ✅ FIXED: Better fallback image path resolving
+// Fallback image path resolving
 const getEventImg = (t) => {
   const base = import.meta.env.BASE_URL;
   const paths = {
@@ -371,13 +371,11 @@ const QuickActionBar = () => (
           style: { background: item.bg },
           onMouseEnter: (e) => {
             e.currentTarget.style.background = item.hoverBg;
-            e.currentTarget.querySelector(".hp-qab-arr").style.color =
-              item.color;
+            e.currentTarget.querySelector(".hp-qab-arr").style.color = item.color;
           },
           onMouseLeave: (e) => {
             e.currentTarget.style.background = item.bg;
-            e.currentTarget.querySelector(".hp-qab-arr").style.color =
-              "#cbd5e1";
+            e.currentTarget.querySelector(".hp-qab-arr").style.color = "#cbd5e1";
           },
         };
 
@@ -398,13 +396,7 @@ const QuickActionBar = () => (
         );
 
         return item.external ? (
-          <a
-            key={item.title}
-            href={item.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            {...commonProps}
-          >
+          <a key={item.title} href={item.href} target="_blank" rel="noopener noreferrer" {...commonProps}>
             {inner}
           </a>
         ) : (
@@ -417,30 +409,25 @@ const QuickActionBar = () => (
   </div>
 );
 
-// ── EventCard (DATA FIX APPLIED HERE) ──────────────────────────────────────────────
+// ── EventCard ──────────────────────────────────────────────
 const EventCard = memo(({ ev, onPdf }) => {
-  // Fix Description (desc vs description)
   const tempDiv = document.createElement("div");
   tempDiv.innerHTML = ev.description || ev.desc || "";
   const plainText = tempDiv.textContent || tempDiv.innerText || "";
 
-  // Fix Date extraction (Convert 'YYYY-MM-DD' to Day and Month)
   let displayDay = ev.day || "--";
   let displayMonth = ev.month || "---";
   if (ev.date) {
     const d = new Date(ev.date);
     if (!isNaN(d)) {
       displayDay = d.getDate();
-      displayMonth = d
-        .toLocaleString("en-US", { month: "short" })
-        .toUpperCase();
+      displayMonth = d.toLocaleString("en-US", { month: "short" }).toUpperCase();
     }
   }
 
-  // Fix Image URL (image vs imageUrl)
   let imgSrc = ev.image || ev.imageUrl || getEventImg(ev.type?.toUpperCase());
   if (imgSrc && imgSrc.startsWith("images/")) {
-    imgSrc = `${import.meta.env.BASE_URL}${imgSrc}`; // Add base URL for local images
+    imgSrc = `${import.meta.env.BASE_URL}${imgSrc}`; 
   }
 
   return (
@@ -472,14 +459,7 @@ const EventCard = memo(({ ev, onPdf }) => {
             {plainText.length > 0 && (
               <Link
                 to="/events"
-                style={{
-                  display: "inline-block",
-                  color: "#f4a023",
-                  fontWeight: 800,
-                  fontSize: 12,
-                  textDecoration: "none",
-                  marginTop: 8,
-                }}
+                style={{ display: "inline-block", color: "#f4a023", fontWeight: 800, fontSize: 12, textDecoration: "none", marginTop: 8 }}
               >
                 Read More ↗
               </Link>
@@ -509,6 +489,7 @@ const EventCard = memo(({ ev, onPdf }) => {
   );
 });
 
+// ✅ FIXED: Image Priority and React Key logic updated
 const GalItem = memo(({ img, index }) => {
   const [ref, vis] = useScrollAnim({
     threshold: 0.1,
@@ -518,15 +499,16 @@ const GalItem = memo(({ img, index }) => {
   return (
     <div className="gc r14" ref={ref} style={{ transitionDelay: `${delay}s` }}>
       <div className={`hp-gal-item sa sa-scale${vis ? " visible" : ""}`}>
+        {/* ✅ Naya `img.image` pehle check hoga, purana `img.src` fallback me aayega */}
         <img
-          src={img.src}
+          src={img.image || img.src} 
           alt={img.title}
           className="hp-gal-img"
           loading="lazy"
           decoding="async"
         />
         <div className="hp-gal-ov">
-          <div className="hp-gal-cat">{img.cat}</div>
+          <div className="hp-gal-cat">{img.cat || img.album || 'Gallery'}</div>
           <div className="hp-gal-ttl">{img.title}</div>
         </div>
       </div>
@@ -677,36 +659,20 @@ function YouTubeSection() {
                   ))}
         </div>
         {hasVideos && (
-          <div
-            style={{ display: "flex", justifyContent: "center", marginTop: 32 }}
-          >
+          <div style={{ display: "flex", justifyContent: "center", marginTop: 32 }}>
             <Link
               to="/video-gallery"
               className="arr-link"
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                background: "#ff0000",
-                color: "#fff",
-                padding: "12px 30px",
-                borderRadius: 50,
-                fontSize: 14,
-                fontWeight: 800,
-                textDecoration: "none",
+                display: "inline-flex", alignItems: "center", gap: 8,
+                background: "#ff0000", color: "#fff",
+                padding: "12px 30px", borderRadius: 50,
+                fontSize: 14, fontWeight: 800, textDecoration: "none",
                 boxShadow: "0 4px 18px rgba(255,0,0,.35)",
                 transition: "transform .2s, box-shadow .2s",
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow =
-                  "0 8px 28px rgba(255,0,0,.45)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "";
-                e.currentTarget.style.boxShadow =
-                  "0 4px 18px rgba(255,0,0,.35)";
-              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 28px rgba(255,0,0,.45)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 4px 18px rgba(255,0,0,.35)"; }}
             >
               🎬 View All Videos <span className="arr">›</span>
             </Link>
@@ -717,55 +683,35 @@ function YouTubeSection() {
   );
 }
 
-const HomePage = ({
-  notices,
-  announcements,
-  pdfReports,
-  sliderSlides,
-  events,
-  gallery,
-  updates,
-}) => {
+const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, gallery, updates }) => {
   const [tab, setTab] = useState("All Moments");
   const [selectedPdf, setSelectedPdf] = useState(null);
 
   const allGal = gallery || [];
-  const filtered =
-    tab === "All Moments" ? allGal : allGal.filter((i) => i.cat === tab);
+  
+  // ✅ Dual fallback for new and old data types
+  const filtered = tab === "All Moments" 
+      ? allGal 
+      : allGal.filter((i) => (i.cat === tab) || (i.album === tab));
 
-  // FIXED LOGIC: 'upcoming' ke alawa baki saare 'recent'
-  const recentEv = (events || [])
-    .filter((e) => e.status !== "upcoming")
-    .slice(0, 6);
+  const recentEv = (events || []).filter((e) => e.status !== "upcoming").slice(0, 6);
   const upcomEv = (events || []).filter((e) => e.status === "upcoming");
   const evTriple = [...recentEv, ...recentEv, ...recentEv];
 
   const handlePdf = useCallback((ev) => {
-    if (ev.reportLink || ev.pdfLink)
-      setSelectedPdf({
-        url: ev.reportLink || ev.pdfLink,
-        title: ev.title || "Event Report",
-      });
+    if (ev.reportLink || ev.pdfLink) setSelectedPdf({ url: ev.reportLink || ev.pdfLink, title: ev.title || "Event Report" });
     else alert("Full details coming soon!");
   }, []);
 
   return (
-    <div
-      className="hp-root"
-      style={{ background: "#f8fafc", minHeight: "100vh", overflowX: "hidden" }}
-    >
+    <div className="hp-root" style={{ background: "#f8fafc", minHeight: "100vh", overflowX: "hidden" }}>
       <style>{ANIM_CSS + CSS}</style>
       <div className="hp-watermark" />
       <HeroSlider slides={sliderSlides} />
       <Ticker />
       <PremiumTicker items={updates?.length > 0 ? updates : TICKER_ITEMS} />
       <QuickActionBar />
-      <NotificationSection
-        notices={notices}
-        announcements={announcements}
-        pdfReports={pdfReports}
-        upcomingEvents={upcomEv}
-      />
+      <NotificationSection notices={notices} announcements={announcements} pdfReports={pdfReports} upcomingEvents={upcomEv} />
 
       <section id="about" className="hp-about">
         <div className="hp-about-inner">
@@ -779,29 +725,13 @@ const HomePage = ({
                 decoding="async"
               />
               <div className="hp-img-accent">
-                <div
-                  style={{
-                    fontSize: 30,
-                    fontWeight: 900,
-                    color: G,
-                    lineHeight: 1,
-                  }}
-                >
-                  56+
-                </div>
-                <div style={{ fontSize: 11, opacity: 0.8, letterSpacing: 1 }}>
-                  YEARS OF EXCELLENCE
-                </div>
+                <div style={{ fontSize: 30, fontWeight: 900, color: G, lineHeight: 1 }}>56+</div>
+                <div style={{ fontSize: 11, opacity: 0.8, letterSpacing: 1 }}>YEARS OF EXCELLENCE</div>
               </div>
             </div>
           </SA>
           <SA variant="right" slow>
-            <UniHeader
-              label="📚 Established 1970"
-              title1="About the"
-              title2="College"
-              sub=""
-            />
+            <UniHeader label="📚 Established 1970" title1="About the" title2="College" sub="" />
             <p className="hp-adesc">
               Guru Nanak College, Dhanbad (A Sikh Minority Degree College) was
               established by the Gurudwara Prabandhak Committee in 1970 to mark
@@ -825,22 +755,10 @@ const HomePage = ({
                 DISCOVER MORE <span className="arr">›</span>
               </Link>
               <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#888" }}>
-                  FOLLOW US:
-                </span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#888" }}>FOLLOW US:</span>
                 {SOCIAL_LINKS.map((s) => (
-                  <a
-                    key={s.id}
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hp-soc"
-                  >
-                    {s.id === "twitter"
-                      ? "𝕏"
-                      : s.id === "youtube"
-                        ? "▶"
-                        : s.label.charAt(0)}
+                  <a key={s.id} href={s.href} target="_blank" rel="noopener noreferrer" className="hp-soc">
+                    {s.id === "twitter" ? "𝕏" : s.id === "youtube" ? "▶" : s.label.charAt(0)}
                   </a>
                 ))}
               </div>
@@ -856,23 +774,14 @@ const HomePage = ({
       <section id="events" className="hp-events">
         <div className="hp-ev-inner">
           <SA variant="up">
-            <UniHeader
-              label="🌟 Campus Life"
-              title1="Recent Events &"
-              title2="Happenings"
-              sub="Seminars, workshops aur campus activities ki ek jhalak"
-            />
+            <UniHeader label="🌟 Campus Life" title1="Recent Events &" title2="Happenings" sub="Seminars, workshops aur campus activities ki ek jhalak" />
           </SA>
           {recentEv.length > 0 ? (
             <SA variant="fade" delay="d1">
               <div className="hp-ev-scroller">
                 <div className="hp-ev-track">
                   {evTriple.map((ev, i) => (
-                    <EventCard
-                      key={`${ev.id || i}-${i}`}
-                      ev={ev}
-                      onPdf={handlePdf}
-                    />
+                    <EventCard key={`${ev.id || i}-${i}`} ev={ev} onPdf={handlePdf} />
                   ))}
                 </div>
               </div>
@@ -881,45 +790,18 @@ const HomePage = ({
             <SA variant="scale">
               <div className="hp-ev-empty">
                 <div style={{ fontSize: 38, marginBottom: 10 }}>📅</div>
-                <h3
-                  style={{ color: N, margin: "0 0 8px", textAlign: "center" }}
-                >
-                  No Recent Events
-                </h3>
-                <p
-                  style={{
-                    color: "#64748b",
-                    fontSize: 13,
-                    textAlign: "center",
-                  }}
-                >
-                  Admin Panel → Events se data add karein
-                </p>
+                <h3 style={{ color: N, margin: "0 0 8px", textAlign: "center" }}>No Recent Events</h3>
+                <p style={{ color: "#64748b", fontSize: 13, textAlign: "center" }}>Admin Panel → Events se data add karein</p>
               </div>
             </SA>
           )}
-          <SA
-            variant="right"
-            delay="d2"
-            style={{ display: "flex", justifyContent: "center", marginTop: 24 }}
-          >
-            <Link
-              to="/events"
-              className="arr-link"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                background: `linear-gradient(135deg,${G},#a07010)`,
-                color: N,
-                padding: "12px 28px",
-                borderRadius: 50,
-                fontSize: 14,
-                fontWeight: 900,
-                textDecoration: "none",
-                boxShadow: `0 4px 18px ${G}55`,
-              }}
-            >
+          <SA variant="right" delay="d2" style={{ display: "flex", justifyContent: "center", marginTop: 24 }}>
+            <Link to="/events" className="arr-link" style={{
+                display: "inline-flex", alignItems: "center", gap: 8,
+                background: `linear-gradient(135deg,${G},#a07010)`, color: N,
+                padding: "12px 28px", borderRadius: 50, fontSize: 14, fontWeight: 900,
+                textDecoration: "none", boxShadow: `0 4px 18px ${G}55`,
+              }}>
               🏆 View All Events <span className="arr">›</span>
             </Link>
           </SA>
@@ -948,23 +830,13 @@ const HomePage = ({
       <section className="hp-links">
         <div className="hp-links-inner">
           <SA variant="up">
-            <UniHeader
-              label="🔗 Quick Access"
-              title1="Important External"
-              title2="Links"
-              sub="Official education and government portals ka quick access"
-            />
+            <UniHeader label="🔗 Quick Access" title1="Important External" title2="Links" sub="Official education and government portals ka quick access" />
           </SA>
           <div className="hp-links-grid">
             {LINKS_DATA.map((l, i) => (
               <SA key={l.name} variant="scale" delay={`d${(i % 4) + 1}`}>
                 <div className="gc r12">
-                  <a
-                    href={l.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hp-link-tile"
-                  >
+                  <a href={l.url} target="_blank" rel="noopener noreferrer" className="hp-link-tile">
                     <div className="hp-link-icon">{l.icon}</div>
                     <div className="hp-link-name">{l.name}</div>
                   </a>
@@ -978,21 +850,12 @@ const HomePage = ({
       <section id="gallery" className="hp-gal">
         <div className="hp-gal-inner">
           <SA variant="up">
-            <UniHeader
-              label="📸 Memories"
-              title1="Photo"
-              title2="Gallery"
-              sub="Academic excellence aur cultural heritage ki yadgar jhalak"
-            />
+            <UniHeader label="📸 Memories" title1="Photo" title2="Gallery" sub="Academic excellence aur cultural heritage ki yadgar jhalak" />
           </SA>
           <SA variant="fade" delay="d1">
             <div className="hp-gal-filters">
               {GALLERY_TABS.map((t) => (
-                <button
-                  key={t}
-                  className={`hp-filter${tab === t ? " active" : ""}`}
-                  onClick={() => setTab(t)}
-                >
+                <button key={t} className={`hp-filter${tab === t ? " active" : ""}`} onClick={() => setTab(t)}>
                   {t}
                 </button>
               ))}
@@ -1000,70 +863,25 @@ const HomePage = ({
           </SA>
           <div className="hp-gal-grid">
             {filtered.length > 0 ? (
-              filtered.map((img, i) => <GalItem key={i} img={img} index={i} />)
+              // ✅ FIXED: Har photo map hote waqt unique 'img.id' ko key banaya! (Pehle 'i' tha)
+              filtered.map((img, i) => <GalItem key={img.id || i} img={img} index={i} />)
             ) : (
               <SA variant="scale" className="hp-gal-empty">
-                <div
-                  style={{
-                    fontSize: 32,
-                    marginBottom: 10,
-                    textAlign: "center",
-                  }}
-                >
-                  📸
-                </div>
-                <h3
-                  style={{ color: N, margin: "0 0 6px", textAlign: "center" }}
-                >
-                  Gallery Empty
-                </h3>
-                <p
-                  style={{
-                    color: "#64748b",
-                    fontSize: 13,
-                    textAlign: "center",
-                  }}
-                >
-                  Admin Panel → Gallery se photos upload karein
-                </p>
+                <div style={{ fontSize: 32, marginBottom: 10, textAlign: "center" }}>📸</div>
+                <h3 style={{ color: N, margin: "0 0 6px", textAlign: "center" }}>Gallery Empty</h3>
+                <p style={{ color: "#64748b", fontSize: 13, textAlign: "center" }}>Admin Panel → Gallery se photos upload karein</p>
               </SA>
             )}
           </div>
           {allGal.length > 0 && (
-            <SA
-              variant="up"
-              delay="d2"
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                marginTop: 32,
-              }}
-            >
-              <Link
-                to="/gallery"
-                className="arr-link"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  background: N,
-                  color: "#fff",
-                  padding: "12px 30px",
-                  borderRadius: 50,
-                  fontSize: 14,
-                  fontWeight: 800,
-                  textDecoration: "none",
-                  boxShadow: `0 4px 18px ${N}44`,
-                  transition: "background .2s, transform .2s",
+            <SA variant="up" delay="d2" style={{ display: "flex", justifyContent: "center", marginTop: 32 }}>
+              <Link to="/gallery" className="arr-link" style={{
+                  display: "inline-flex", alignItems: "center", gap: 8, background: N, color: "#fff",
+                  padding: "12px 30px", borderRadius: 50, fontSize: 14, fontWeight: 800, textDecoration: "none",
+                  boxShadow: `0 4px 18px ${N}44`, transition: "background .2s, transform .2s",
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = G;
-                  e.currentTarget.style.color = N;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = N;
-                  e.currentTarget.style.color = "#fff";
-                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = G; e.currentTarget.style.color = N; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = N; e.currentTarget.style.color = "#fff"; }}
               >
                 📸 View All Photos <span className="arr">›</span>
               </Link>
@@ -1075,11 +893,7 @@ const HomePage = ({
       <YouTubeSection />
 
       {selectedPdf && (
-        <PDFModal
-          url={selectedPdf.url}
-          title={selectedPdf.title}
-          onClose={() => setSelectedPdf(null)}
-        />
+        <PDFModal url={selectedPdf.url} title={selectedPdf.title} onClose={() => setSelectedPdf(null)} />
       )}
     </div>
   );

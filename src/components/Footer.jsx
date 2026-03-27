@@ -1,337 +1,300 @@
-import React from 'react';
+// src/components/Footer.jsx — ULTRA PRO MAX (Compact Height & Fixed Map)
+
+import { useState, useEffect, memo, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
+import { COLORS } from '../styles/colors';
 import { SOCIAL_LINKS } from '../data/db';
 
-const Footer = () => {
+const N = COLORS?.navy || '#0f2347';
+const G = COLORS?.gold || '#f4a023';
+
+// 🎬 Smart Scroll Animation Hook
+function useIntersectAnim(threshold = 0.1) {
+  const ref = useRef(null);
+  const [vis, setVis] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setVis(true); obs.unobserve(el); }
+    }, { threshold });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return [ref, vis];
+}
+
+// 🌀 Animation Wrapper
+const SA = ({ children, variant = 'up', delay = '', style = {}, className = '' }) => {
+  const [ref, vis] = useIntersectAnim();
   return (
-    <footer className="premium-footer">
-      {/* INTERNAL CSS FOR PREMIUM LOOK */}
+    <div
+      ref={ref}
+      className={`sa sa-${variant}${delay ? ` sa-${delay}` : ''}${vis ? ' visible' : ''}${className ? ' ' + className : ''}`}
+      style={style}
+    >
+      {children}
+    </div>
+  );
+};
+
+// 🗺️ Premium Glass Map (Fixed Valid Google Maps Embed URL)
+const DualCampusMap = () => (
+  <div className="glass-map-wrapper">
+    <div className="map-glow"></div>
+    <iframe
+      title="GNC Dual Campus Map"
+      className="g-map-frame"
+      loading="lazy"
+      allowFullScreen
+      // ✅ 100% Working Google Maps Embed Link for Dhanbad
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d116833.9730352447!2d86.35338166046033!3d23.780635391515366!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f6a74b0fb59bb3%3A0xc3dfbb016c905ed4!2sDhanbad%2C%20Jharkhand!5e0!3m2!1sen!2sin!4v1711532163901!5m2!1sen!2sin"
+    />
+    <div className="map-badge">🗺️ Campus Locator</div>
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+const Footer = memo(({ dynamicSocialLinks }) => {
+  const [firebaseSocials, setFirebaseSocials] = useState(null);
+
+  useEffect(() => {
+    return onSnapshot(doc(db, 'settings', 'socialLinks'), snap => {
+      if (snap.exists() && snap.data().links) setFirebaseSocials(snap.data().links);
+    });
+  }, []);
+
+  const linksToUse = dynamicSocialLinks || firebaseSocials || SOCIAL_LINKS;
+
+  return (
+    <footer className="f-ultra-root">
       <style>{`
-        .premium-footer {
-          background: linear-gradient(135deg, #071022 0%, #0f172a 100%);
-          color: #e2e8f0;
-          font-family: 'Inter', 'Segoe UI', sans-serif;
+        /* 🌌 Deep Premium Background */
+        .f-ultra-root {
           position: relative;
+          background: #030914; 
+          color: #e2e8f0;
+          font-family: 'Plus Jakarta Sans', "Inter", sans-serif;
           overflow: hidden;
-          border-top: 4px solid #f4a023; /* Gold accent line */
-        }
-        
-        /* Subtle Glow Effect in Background */
-        .premium-footer::before {
-          content: '';
-          position: absolute;
-          top: -50%; left: -50%; width: 200%; height: 200%;
-          background: radial-gradient(circle at center, rgba(244, 160, 35, 0.03) 0%, transparent 50%);
-          pointer-events: none;
+          padding-top: 25px; /* REDUCED HEIGHT */
+          z-index: 10;
         }
 
-        .footer-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-          gap: 50px;
+        /* ✨ Animated Aura Blobs */
+        .aura-blob {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(90px);
+          opacity: 0.35;
+          z-index: -1;
+          animation: floatAura 15s ease-in-out infinite alternate;
+        }
+        .aura-1 { background: ${G}; width: 350px; height: 350px; top: -50px; left: -50px; }
+        .aura-2 { background: ${N}; width: 500px; height: 500px; bottom: -150px; right: -50px; animation-delay: -5s; opacity: 0.5; }
+
+        @keyframes floatAura {
+          0% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(30px, 20px) scale(1.05); }
+          100% { transform: translate(-20px, 40px) scale(0.95); }
+        }
+
+        /* 🧊 True Glassmorphism Container */
+        .f-glass-panel {
+          position: relative;
           max-width: 1400px;
           margin: 0 auto;
-          padding: 80px 20px;
-          position: relative;
-          z-index: 1;
+          background: rgba(255, 255, 255, 0.03);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          border-left: 1px solid rgba(255, 255, 255, 0.05);
+          border-right: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 24px 24px 0 0;
+          padding: 25px 25px 15px; /* REDUCED PADDING */
+          box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
         }
 
-        .footer-widget {
-          display: flex;
-          flex-direction: column;
+        .f-grid {
+          display: grid;
+          grid-template-columns: 2fr 1.5fr 1fr 1.5fr;
+          gap: clamp(15px, 2vw, 30px); /* REDUCED GAP */
         }
 
-        .footer-heading {
-          color: #fff;
-          font-size: 1.25rem;
-          font-weight: 800;
-          margin-bottom: 30px;
-          position: relative;
-          display: inline-block;
-          letter-spacing: 0.5px;
-        }
-        
-        .footer-heading::after {
-          content: '';
-          position: absolute;
-          left: 0; bottom: -10px;
-          width: 40px; height: 3px;
-          background: #f4a023;
-          border-radius: 2px;
-          transition: width 0.3s ease;
-        }
-        
-        .footer-widget:hover .footer-heading::after {
-          width: 70px;
-        }
+        /* 🎓 Logo & Brand Styling */
+        .f-brand-logo { width: 50px; height: 50px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); transition: transform 0.5s; }
+        .f-brand-logo:hover { transform: rotateY(180deg); }
+        .f-brand-title { font-size: 18px; font-weight: 900; color: #fff; line-height: 1.15; letter-spacing: -0.5px; }
+        .f-brand-title span { background: linear-gradient(90deg, ${G}, #fde68a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .f-brand-desc { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.5; font-weight: 500; margin-bottom: 12px; }
 
-        .footer-desc {
-          color: #94a3b8;
-          font-size: 0.95rem;
-          line-height: 1.8;
-          margin-bottom: 25px;
-        }
+        /* 📍 Contact / Addresses */
+        .f-heading { font-size: 13px; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        .f-heading::before { content: ''; width: 16px; height: 3px; background: ${G}; border-radius: 2px; }
+        
+        .f-address-card { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 10px; margin-bottom: 8px; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
+        .f-address-card:hover { background: rgba(255,255,255,0.05); border-color: rgba(244,160,35,0.3); transform: translateX(4px); }
+        .f-address-icon { font-size: 16px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); flex-shrink: 0; }
+        .f-address-title { color: ${G}; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+        .f-address-text { color: rgba(255,255,255,0.8); font-size: 11px; line-height: 1.3; }
 
-        /* Social Icons */
-        .social-btn {
-          width: 40px; height: 40px;
-          border-radius: 10px;
-          background: rgba(255,255,255,0.03);
-          display: inline-flex; align-items: center; justify-content: center;
-          color: #fff;
-          text-decoration: none;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          border: 1px solid rgba(255,255,255,0.05);
-          font-size: 1.1rem;
-        }
-        
-        .social-btn:hover {
-          background: #f4a023;
-          color: #071022;
-          transform: translateY(-5px);
-          box-shadow: 0 10px 20px rgba(244, 160, 35, 0.25);
-          border-color: #f4a023;
-        }
+        /* 🔗 Links */
+        .f-link-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; } /* REDUCED GAP */
+        .f-link { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; transition: all 0.3s; position: relative; }
+        .f-link::before { content: '→'; position: absolute; left: 0; opacity: 0; color: ${G}; transform: translateX(-8px); transition: 0.3s; }
+        .f-link:hover { color: #fff; transform: translateX(14px); }
+        .f-link:hover::before { opacity: 1; transform: translateX(-12px); }
 
-        /* Links */
-        .footer-links {
-          list-style: none; padding: 0; margin: 0;
-        }
-        
-        .footer-link-item {
-          margin-bottom: 15px;
-        }
+        /* 🗺️ Glass Map Styling */
+        .glass-map-wrapper { position: relative; width: 100%; height: 140px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .map-glow { position: absolute; inset: 0; background: ${G}; opacity: 0; transition: 0.4s; z-index: 1; pointer-events: none; mix-blend-mode: overlay; }
+        .glass-map-wrapper:hover .map-glow { opacity: 0.3; }
+        .g-map-frame { width: 100%; height: 100%; border: none; filter: grayscale(80%) invert(100%) contrast(120%); transition: 0.5s; }
+        .glass-map-wrapper:hover .g-map-frame { filter: grayscale(20%) invert(90%); }
+        .map-badge { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 9px; font-weight: 800; border: 1px solid rgba(255,255,255,0.1); z-index: 2; pointer-events: none; }
 
-        .footer-link {
-          display: inline-flex;
-          align-items: center;
-          color: #cbd5e1;
-          text-decoration: none;
-          transition: all 0.3s ease;
-          font-size: 0.95rem;
-          font-weight: 500;
-        }
-        
-        .footer-link:hover {
-          color: #f4a023;
-          transform: translateX(8px);
-        }
-        
-        .footer-link span {
-          margin-right: 10px;
-          font-size: 1.2rem;
-          color: #f4a023;
-          transition: transform 0.3s ease;
-        }
-        
-        .footer-link:hover span {
-          transform: translateX(3px);
-        }
+        /* 🌐 Social Icons */
+        .f-socials { display: flex; gap: 8px; flex-wrap: wrap; }
+        .f-soc-btn { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; text-decoration: none; transition: 0.3s; }
+        .f-soc-btn:hover { background: ${G}; color: #000; transform: translateY(-3px) rotate(8deg); border-color: ${G}; box-shadow: 0 5px 12px rgba(244,160,35,0.3); }
 
-        /* Contact Details */
-        .contact-item {
-          display: flex; align-items: flex-start; gap: 15px; margin-bottom: 25px;
-        }
-        
-        .contact-icon {
-          width: 40px; height: 40px;
-          background: rgba(244, 160, 35, 0.1);
-          color: #f4a023;
-          border-radius: 10px;
-          display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0;
-          font-size: 1.2rem;
-          border: 1px solid rgba(244, 160, 35, 0.2);
-          transition: all 0.3s ease;
-        }
+        /* © Bottom Bar */
+        .f-bottom { margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .f-copy { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 500; }
+        .f-dev { font-size: 11px; color: rgba(255,255,255,0.4); background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
 
-        .contact-item:hover .contact-icon {
-          background: #f4a023;
-          color: #071022;
-          transform: rotate(10deg);
-        }
-        
-        .contact-text {
-          color: #94a3b8; font-size: 0.95rem; line-height: 1.5;
-        }
-        
-        .contact-text strong {
-          color: #fff; display: block; margin-bottom: 5px; font-size: 1rem; font-weight: 700;
-        }
-        
-        .contact-link {
-          color: #94a3b8; text-decoration: none; transition: 0.2s;
-        }
-        .contact-link:hover { color: #f4a023; text-decoration: underline; }
+        /* Animations */
+        .sa { opacity: 0; transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+        .sa-up { transform: translateY(20px); }
+        .sa.visible { opacity: 1; transform: none; }
+        .sa-d1 { transition-delay: 0.1s; } .sa-d2 { transition-delay: 0.15s; } .sa-d3 { transition-delay: 0.2s; }
 
-        /* Newsletter */
-        .newsletter-box {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 12px;
-          padding: 6px;
-          display: flex;
-          margin-top: 10px;
-          transition: all 0.3s ease;
-        }
-        .newsletter-box:focus-within {
-          border-color: rgba(244, 160, 35, 0.5);
-          box-shadow: 0 0 20px rgba(244, 160, 35, 0.1);
-          background: rgba(255,255,255,0.05);
-        }
-        
-        .newsletter-input {
-          background: transparent; border: none; outline: none;
-          color: #fff; padding: 12px 15px; width: 100%;
-          font-size: 0.95rem;
-        }
-        .newsletter-input::placeholder { color: #64748b; }
-        
-        .newsletter-btn {
-          background: #f4a023; color: #071022;
-          border: none; border-radius: 8px;
-          padding: 0 22px; font-weight: 800; cursor: pointer;
-          transition: all 0.3s ease;
-          text-transform: uppercase;
-          font-size: 0.85rem;
-          letter-spacing: 0.5px;
-        }
-        .newsletter-btn:hover {
-          background: #ffb142; 
-          box-shadow: 0 5px 15px rgba(244, 160, 35, 0.3);
-        }
-
-        /* Bottom Bar */
-        .footer-bottom {
-          border-top: 1px solid rgba(255,255,255,0.05);
-          padding: 25px 20px;
-          background: #040a15;
-          position: relative;
-          z-index: 1;
-        }
-        
-        .footer-bottom-content {
-          max-width: 1400px; margin: 0 auto;
-          display: flex; justify-content: space-between; align-items: center;
-          flex-wrap: wrap; gap: 15px;
-        }
-        
-        .footer-copyright { margin: 0; color: #94a3b8; font-size: 0.95rem; }
-        .footer-dev { margin: 0; font-size: 0.85rem; color: #64748b; }
-        
-        @media (max-width: 768px) {
-          .footer-bottom-content { justify-content: center; text-align: center; flex-direction: column; }
-        }
+        @media(max-width: 1100px) { .f-grid { grid-template-columns: 1fr 1fr; } }
+        @media(max-width: 600px) { .f-grid { grid-template-columns: 1fr; gap: 25px; } .f-glass-panel { padding: 25px 20px 15px; } .f-bottom { flex-direction: column; text-align: center; } }
       `}</style>
 
-      <div className="footer-grid">
-        
-        {/* WIDGET 1: Premium Brand Logo & About */}
-        <div className="footer-widget">
-           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', marginBottom: '25px' }}>
-              <div style={{
-                width: '75px', height: '75px', background: 'rgba(255,255,255,0.95)', borderRadius: '16px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
-              }}>
-                <img src={`${import.meta.env.BASE_URL}images/logo.webp`} alt="GNC Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: '#fff', margin: '0 0 2px 0', lineHeight: '1.1' }}>
-                  GURU NANAK
-                </h2>
-                <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: '#f4a023', margin: 0, lineHeight: '1.1' }}>
-                  COLLEGE
-                </h2>
-                <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: '6px 0 0', fontWeight: '700', letterSpacing: '1.5px' }}>
-                  DHANBAD, JHARKHAND
-                </p>
-              </div>
-           </div>
+      {/* 🌌 Animated Background Aura */}
+      <div className="aura-blob aura-1"></div>
+      <div className="aura-blob aura-2"></div>
 
-           <p className="footer-desc">
-             A Sikh Minority Degree College established in 1970. We are dedicated to providing premium quality education and fostering holistic development based on the core teachings of Guru Nanak Dev Ji.
-           </p>
-
-           <div style={{ display: 'flex', gap: '12px' }}>
-              {SOCIAL_LINKS && SOCIAL_LINKS.map(s => (
-                <a key={s.id} href={s.href} target="_blank" rel="noreferrer" className="social-btn" aria-label={s.label}>
-                  {s.id === 'twitter' ? '𝕏' : s.id === 'youtube' ? '▶' : s.id === 'facebook' ? 'f' : s.id === 'instagram' ? 'in' : s.label.charAt(0)}
+      {/* 🧊 Glass Container */}
+      <div className="f-glass-panel">
+        <div className="f-grid">
+          
+          {/* COL 1: Brand & Logo */}
+          <SA variant="up">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+              <img src={`${import.meta.env.BASE_URL}images/logo.webp`} alt="GNC Logo" className="f-brand-logo" />
+              <h2 className="f-brand-title" style={{ margin: 0 }}>Guru Nanak College,<br/><span>Dhanbad</span></h2>
+            </div>
+            
+            <p className="f-brand-desc">
+              A Sikh Minority Degree College Established & Managed by Gurudwara Prabhandhak Committee, Dhanbad. Fostering excellence since 1970.
+            </p>
+            <div className="f-socials">
+              {linksToUse.map(link => (
+                <a key={link.id} href={link.href} target="_blank" rel="noopener noreferrer" className="f-soc-btn" title={link.label}>
+                  {link.icon || link.label.charAt(0)}
                 </a>
               ))}
-           </div>
-        </div>
-
-        {/* WIDGET 2: Quick Navigation */}
-        <div className="footer-widget">
-          <h3 className="footer-heading">Quick Links</h3>
-          <ul className="footer-links">
-            {[
-              { label: 'Home', path: '/' },
-              { label: 'College Profile', path: '/about-us/college-profile' },
-              { label: 'Admission Rules', path: '/admission/rule' },
-              { label: 'Courses Offered', path: '/academics/course-offered' },
-              { label: 'Photo Gallery', path: '/gallery' },
-              { label: 'Contact Us', path: '/contact' }
-            ].map((link, idx) => (
-              <li key={idx} className="footer-link-item">
-                <Link to={link.path} onClick={() => window.scrollTo(0,0)} className="footer-link">
-                  <span>›</span> {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* WIDGET 3: Enhanced Contact Info */}
-        <div className="footer-widget">
-          <h3 className="footer-heading">Get In Touch</h3>
-          
-          <div className="contact-item">
-            <div className="contact-icon">📍</div>
-            <div className="contact-text">
-              <strong>Main Campus</strong>
-              Bhuda, Dhanbad,<br/>Jharkhand - 826001, India
             </div>
-          </div>
-          
-          <div className="contact-item">
-            <div className="contact-icon">📞</div>
-            <div className="contact-text">
-              <strong>Phone Enquiries</strong>
-              <a href="tel:+917903340991" className="contact-link">+91 79033 40991</a>
+          </SA>
+
+          {/* COL 2: Contact Info */}
+          <SA variant="up" delay="d1">
+            <h4 className="f-heading">Get In Touch</h4>
+            
+            <div className="f-address-card">
+              <div className="f-address-icon">🏢</div>
+              <div>
+                <div className="f-address-title">Bank More Campus</div>
+                <div className="f-address-text">Bank More, Dhanbad - 826001</div>
+              </div>
             </div>
-          </div>
-          
-          <div className="contact-item">
-            <div className="contact-icon">✉️</div>
-            <div className="contact-text">
-              <strong>Email Us</strong>
-              <a href="mailto:principal@gncollege.org" className="contact-link">principal@gncollege.org</a>
+
+            <div className="f-address-card">
+              <div className="f-address-icon">🏫</div>
+              <div>
+                <div className="f-address-title">Bhuda Campus</div>
+                <div className="f-address-text">Rani Road, Barmasiya - 826001</div>
+              </div>
             </div>
+
+            <div className="f-address-card">
+              <div className="f-address-icon">📞</div>
+              <div>
+                <div className="f-address-title">Contact No.</div>
+                <div className="f-address-text">+91 79033 40991</div>
+              </div>
+            </div>
+
+            <div className="f-address-card">
+              <div className="f-address-icon">✉️</div>
+              <div>
+                <div className="f-address-title">Email Address</div>
+                <div className="f-address-text" style={{ wordBreak: 'break-all' }}>principal@gncollege.org</div>
+              </div>
+            </div>
+          </SA>
+
+          {/* COL 3: Quick Links */}
+          <SA variant="up" delay="d2">
+            <h4 className="f-heading">Quick Links</h4>
+            <ul className="f-link-list">
+              {[ 
+                {name: "About College", href: "/about-us/college-profile"}, 
+                {name: "Academic Courses", href: "/academics/course-offered"}, 
+                {name: "Admission 2024", href: "/admission/notification/latest"}, 
+                {name: "Campus Events", href: "/events"}, 
+                {name: "Photo Gallery", href: "/gallery"},
+                {name: "BBMKU Portal", href: "https://bbmku.ac.in/", external: true} 
+              ].map(link => (
+                <li key={link.name}>
+                  {link.external ? (
+                    <a href={link.href} target="_blank" rel="noopener noreferrer" className="f-link">{link.name}</a>
+                  ) : (
+                    <Link to={link.href} className="f-link">{link.name}</Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </SA>
+
+          {/* COL 4: Map & Admin */}
+          <SA variant="up" delay="d3" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <h4 className="f-heading">Location Map</h4>
+            <DualCampusMap />
+            
+            <Link to="/#/admin" style={{ 
+              background: 'rgba(255,255,255,0.05)', color: '#fff', border: `1px solid rgba(255,255,255,0.1)`, 
+              padding: '8px 16px', borderRadius: '8px', fontSize: 11, fontWeight: 800, textDecoration: 'none', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: '0.3s' 
+            }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = G; e.currentTarget.style.color = '#000'; e.currentTarget.style.borderColor = G; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
+            >
+              🔒 Admin Access Portal
+            </Link>
+          </SA>
+
+        </div>
+
+        {/* © Bottom Bar */}
+        <div className="f-bottom">
+          <div className="f-copy">
+            © {new Date().getFullYear()} <strong>Guru Nanak College, Dhanbad.</strong> All Rights Reserved.
+            <span style={{ margin: '0 8px', color: 'rgba(255,255,255,0.2)' }}>|</span>
+            Sikh Minority Degree College
+          </div>
+          <div className="f-dev">
+            Design & Developed dynamically with <span style={{ color: '#ef4444' }}>❤️</span> By Pankaj Kumar
           </div>
         </div>
 
-        {/* WIDGET 4: Newsletter */}
-        <button className="newsletter-btn" onClick={() => alert('Newsletter coming soon!')}>
-  Subscribe
-</button>
-
-      </div>
-
-      {/* FOOTER BOTTOM */}
-      <div className="footer-bottom">
-        <div className="footer-bottom-content">
-          <p className="footer-copyright">
-            &copy; {new Date().getFullYear()} <span style={{color: '#f4a023', fontWeight: '800'}}>Guru Nanak College, Dhanbad</span>. All Rights Reserved.
-          </p>
-          <p className="footer-dev">
-            Designed & Developed dynamically with ❤️ By Pankaj Kumar
-          </p>
-        </div>
       </div>
     </footer>
   );
-};
+});
 
 export default Footer;

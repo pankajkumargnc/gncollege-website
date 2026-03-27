@@ -1,9 +1,8 @@
 // src/pages/GalleryPage.jsx
-// ✅ Firebase field fix: img.src (not img.url), img.cat (not img.category)
-// ✅ Categories match AdminPanel exactly
+// ✅ Firebase field fix: img.image (new) & img.src (old) fallback
+// ✅ Categories match AdminPanel & HomePage exactly
 // ✅ Lightbox with keyboard nav
 // ✅ Glow hover effect (same as homepage)
-// ✅ "Back to Homepage" link
 
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
@@ -15,20 +14,24 @@ import { createPortal } from 'react-dom';
 const N = COLORS?.navy || '#0f2347';
 const G = COLORS?.gold || '#f4a023';
 
-// ── Categories — same as AdminPanel gallery tab ───────────────────────────────
-const CATS = ['All', 'Seminars', 'Cultural', 'NSS', 'Sports', 'Campus', 'Departments', 'Achievements'];
+// ── Categories — EXACT match with AdminPanel & HomePage ───────────────────────
+const CATS = ['All Moments', 'Seminars', 'Cultural Fest', 'Guest Visit', 'Campus', 'Departments', 'NSS Programs'];
 
 export default function GalleryPage({ gallery: galleryProp }) {
   const [images,  setImages]  = useState([]);
-  const [filter,  setFilter]  = useState('All');
+  const [filter,  setFilter]  = useState('All Moments'); // ✅ Default 'All Moments'
   const [light,   setLight]   = useState(null); // index of open lightbox
   const [loading, setLoading] = useState(true);
 
-  // ── Firebase realtime — same collection as homepage ───────────────────────
+  // ── Firebase realtime ───────────────────────────────────────────────────────
   useEffect(() => {
     window.scrollTo(0, 0);
     // If parent already passed gallery prop (from App.jsx), use it
-    if (galleryProp) { setImages(galleryProp); setLoading(false); return; }
+    if (galleryProp && galleryProp.length > 0) { 
+      setImages(galleryProp); 
+      setLoading(false); 
+      return; 
+    }
     const q = query(collection(db, 'gallery'), orderBy('createdAt', 'desc'));
     return onSnapshot(q,
       snap => { setImages(snap.docs.map(d => ({ id: d.id, ...d.data() }))); setLoading(false); },
@@ -36,7 +39,10 @@ export default function GalleryPage({ gallery: galleryProp }) {
     );
   }, [galleryProp]);
 
-  const filtered = filter === 'All' ? images : images.filter(img => img.cat === filter);
+  // ✅ FIXED LOGIC: Checks both 'cat' (new) and 'album' (old) fields
+  const filtered = filter === 'All Moments' 
+    ? images 
+    : images.filter(img => (img.cat || img.album) === filter);
 
   // ── Lightbox keyboard nav ─────────────────────────────────────────────────
   const closeLB   = useCallback(() => setLight(null), []);
@@ -171,7 +177,7 @@ export default function GalleryPage({ gallery: galleryProp }) {
         <div style={{ display:'flex', justifyContent:'center', gap:8, flexWrap:'wrap', marginBottom:40 }}>
           {CATS.map(cat => (
             <button key={cat} className={`gal-filter${filter===cat?' active':''}`} onClick={() => setFilter(cat)}>
-              {cat === 'All' ? '📸 ' + cat : cat}
+              {cat === 'All Moments' ? '📸 All' : cat}
             </button>
           ))}
         </div>
@@ -180,7 +186,7 @@ export default function GalleryPage({ gallery: galleryProp }) {
         <div style={{ textAlign:'center', marginBottom:28 }}>
           <span style={{ background:`${N}12`, color:N, fontWeight:800, fontSize:13, padding:'5px 16px', borderRadius:20 }}>
             {filtered.length} photo{filtered.length !== 1 ? 's' : ''}
-            {filter !== 'All' ? ` in ${filter}` : ' total'}
+            {filter !== 'All Moments' ? ` in ${filter}` : ' total'}
           </span>
         </div>
 
@@ -204,14 +210,14 @@ export default function GalleryPage({ gallery: galleryProp }) {
               >
                 <div className="gal-img-item">
                   <img
-                    src={img.src}
-                    alt={img.title || img.cat || 'Gallery'}
+                    src={img.image || img.src} // ✅ Fallback support for new and old structure
+                    alt={img.title || img.cat || img.album || 'Gallery'}
                     className="gal-img"
                     loading="lazy"
                     decoding="async"
                   />
                   <div className="gal-ov">
-                    <div className="gal-cat">{img.cat}</div>
+                    <div className="gal-cat">{img.cat || img.album || 'Gallery'}</div>
                     <div className="gal-ttl">{img.title}</div>
                   </div>
                 </div>
@@ -225,16 +231,16 @@ export default function GalleryPage({ gallery: galleryProp }) {
           <div style={{ textAlign:'center', background:'#fff', padding:'60px 20px', borderRadius:16, border:'1px dashed #e2e8f0', maxWidth:500, margin:'0 auto' }}>
             <div style={{ fontSize:48, marginBottom:14 }}>📸</div>
             <h3 style={{ color:N, margin:'0 0 8px', fontWeight:800 }}>
-              {filter === 'All' ? 'Gallery Empty' : `${filter} mein koi photo nahi`}
+              {filter === 'All Moments' ? 'Gallery Empty' : `${filter} mein koi photo nahi`}
             </h3>
             <p style={{ color:'#94a3b8', fontSize:13 }}>
-              {filter === 'All'
+              {filter === 'All Moments'
                 ? 'Admin Panel → Gallery tab se photos upload karein'
                 : 'Doosri category select karein ya Admin Panel se photos add karein'
               }
             </p>
-            {filter !== 'All' && (
-              <button className="gal-filter" style={{ marginTop:16 }} onClick={() => setFilter('All')}>
+            {filter !== 'All Moments' && (
+              <button className="gal-filter" style={{ marginTop:16 }} onClick={() => setFilter('All Moments')}>
                 Show All Photos
               </button>
             )}
@@ -256,14 +262,14 @@ export default function GalleryPage({ gallery: galleryProp }) {
           {/* Image */}
           <div onClick={e => e.stopPropagation()} style={{ textAlign:'center' }}>
             <img
-              src={filtered[light].src}
+              src={filtered[light].image || filtered[light].src}
               alt={filtered[light].title || 'Photo'}
               className="lb-img"
             />
-            {(filtered[light].title || filtered[light].cat) && (
+            {(filtered[light].title || filtered[light].cat || filtered[light].album) && (
               <div style={{ marginTop:14, color:'rgba(255,255,255,.8)', fontSize:14, fontWeight:600 }}>
                 {filtered[light].title}
-                {filtered[light].cat && <span style={{ color:G, marginLeft:8, fontSize:12 }}>#{filtered[light].cat}</span>}
+                {(filtered[light].cat || filtered[light].album) && <span style={{ color:G, marginLeft:8, fontSize:12 }}>#{(filtered[light].cat || filtered[light].album)}</span>}
               </div>
             )}
             <div style={{ marginTop:8, color:'rgba(255,255,255,.35)', fontSize:12 }}>

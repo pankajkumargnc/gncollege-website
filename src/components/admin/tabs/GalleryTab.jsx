@@ -6,15 +6,18 @@ import toast from 'react-hot-toast';
 import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, useLocalDraft, Toggle, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
 
-const ALBUM_TYPES = ['Event', 'Campus', 'Sports', 'Cultural', 'Academic', 'Convocation', 'Other'];
+// ✅ FIXED: Exact categories required for HomePage
+const ALBUM_TYPES = ['Seminars', 'Cultural Fest', 'Guest Visit', 'Campus', 'Departments', 'NSS Programs'];
 
 export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete, bulkDelete }) {
   const [editItem, setEditItem]   = useState(null);
   const [formData, setFormData, clearDraft] = useLocalDraft('gallery', {
-    title: '', album: 'Event', year: new Date().getFullYear().toString(), image: '', featured: false,
+    title: '', cat: 'Seminars', year: new Date().getFullYear().toString(), image: '', featured: false,
   });
   const [search, setSearch]     = useState('');
-  const [albumFilter, setAlbumFilter] = useState('All');
+  
+  // ✅ FIXED: Default tab 'All Moments' set kar diya
+  const [albumFilter, setAlbumFilter] = useState('All Moments');
   const [selected, setSelected] = useState([]);
   const [loading, setLoading]   = useState(false);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
@@ -23,11 +26,20 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
     e.preventDefault(); setLoading(true);
     try {
       if (!formData.image) { toast.error('Image required!'); setLoading(false); return; }
+      
+      const payload = {
+        title: formData.title,
+        cat: formData.cat, // 'cat' field HomePage ke filter se match karta hai
+        year: formData.year,
+        image: formData.image,
+        featured: formData.featured
+      };
+
       if (editItem) {
-        await updateDoc(doc(db, 'gallery', editItem.id), { ...formData, updatedAt: serverTimestamp() });
+        await updateDoc(doc(db, 'gallery', editItem.id), { ...payload, updatedAt: serverTimestamp() });
         toast.success('Photo updated!');
       } else {
-        await addDoc(collection(db, 'gallery'), { ...formData, createdAt: serverTimestamp() });
+        await addDoc(collection(db, 'gallery'), { ...payload, createdAt: serverTimestamp() });
         toast.success('📸 Photo added!');
       }
       logAct(editItem ? 'update' : 'add', `Gallery: ${formData.title}`, 'gallery');
@@ -36,10 +48,12 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
     setLoading(false);
   };
 
-  const albums = ['All', ...ALBUM_TYPES];
+  // ✅ Filter logic: Agar 'All Moments' hai toh sab dikhao, warna matching category
+  const albums = ['All Moments', ...ALBUM_TYPES];
   const filtered = (gallery || []).filter(g => {
+    const itemCat = g.cat || g.album || 'Other'; // Purane photos support ke liye g.album
     const matchSearch = !search || g.title?.toLowerCase().includes(search.toLowerCase());
-    const matchAlbum  = albumFilter === 'All' || g.album === albumFilter;
+    const matchAlbum  = albumFilter === 'All Moments' || itemCat === albumFilter;
     return matchSearch && matchAlbum;
   });
 
@@ -57,9 +71,9 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
               <input className="ainp" value={formData.title || ''} onChange={e => setFormData(d => ({ ...d, title: e.target.value }))} required placeholder="Annual Day 2025" />
             </div>
             <div>
-              <label className="alabel">Album</label>
-              <select className="ainp" value={formData.album || 'Event'} onChange={e => setFormData(d => ({ ...d, album: e.target.value }))}>
-                {ALBUM_TYPES.map(a => <option key={a}>{a}</option>)}
+              <label className="alabel">Album / Category</label>
+              <select className="ainp" value={formData.cat || 'Seminars'} onChange={e => setFormData(d => ({ ...d, cat: e.target.value }))}>
+                {ALBUM_TYPES.map(a => <option key={a} value={a}>{a}</option>)}
               </select>
             </div>
             <div>
@@ -88,12 +102,12 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
         </form>
       </div>
 
-      {/* Album filter */}
+      {/* Album filter Tabs */}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
         {albums.map(a => (
           <button key={a} onClick={() => setAlbumFilter(a)}
             className="abtn abtn-sm"
-            style={{ background: albumFilter === a ? NAVY : 'white', color: albumFilter === a ? 'white' : T.t2, border: `1.5px solid ${albumFilter === a ? NAVY : T.b1}` }}>
+            style={{ background: albumFilter === a ? NAVY : 'white', color: albumFilter === a ? 'white' : T.t2, border: `1.5px solid ${albumFilter === a ? NAVY : T.b1}`, fontWeight: albumFilter === a ? 800 : 600 }}>
             {a}
           </button>
         ))}
@@ -117,11 +131,11 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
                 <img src={g.image} alt={g.title} style={{ width: '100%', height: 120, objectFit: 'cover' }} />
                 <div style={{ padding: '8px 10px', background: 'white' }}>
                   <div style={{ fontSize: 12, fontWeight: 700, color: NAVY, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.title}</div>
-                  <div style={{ fontSize: 11, color: T.t3 }}>{g.album} · {g.year}</div>
+                  <div style={{ fontSize: 11, color: T.t3 }}>{g.cat || g.album} · {g.year}</div>
                 </div>
                 <div style={{ position: 'absolute', top: 6, right: 6, display: 'flex', gap: 4 }}>
                   <button className="abtn abtn-xs" style={{ background: 'rgba(255,255,255,.9)', padding: '3px 7px' }}
-                    onClick={e => { e.stopPropagation(); setEditItem(g); setFormData({ title: g.title||'', album: g.album||'Event', year: g.year||'', image: g.image||'', featured: !!g.featured }); window.scrollTo({top:0,behavior:'smooth'}); }}>✏️</button>
+                    onClick={e => { e.stopPropagation(); setEditItem(g); setFormData({ title: g.title||'', cat: g.cat || g.album || 'Seminars', year: g.year||'', image: g.image||'', featured: !!g.featured }); window.scrollTo({top:0,behavior:'smooth'}); }}>✏️</button>
                   <button className="abtn abtn-xs" style={{ background: 'rgba(239,68,68,.9)', color: 'white', padding: '3px 7px' }}
                     onClick={e => { e.stopPropagation(); softDelete('gallery', g.id, g, g.title); }}>🗑️</button>
                 </div>
@@ -139,13 +153,13 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, color: NAVY, fontSize: 14 }}>{g.title}</div>
                 <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
-                  <span className="abadge" style={{ background: BG, color: T.t2 }}>{g.album}</span>
+                  <span className="abadge" style={{ background: BG, color: T.t2 }}>{g.cat || g.album}</span>
                   {g.year && <span className="abadge" style={{ background: BG, color: T.t3 }}>{g.year}</span>}
                   {g.featured && <span className="abadge" style={{ background: '#fef3c7', color: '#92400e' }}>⭐ Featured</span>}
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button className="abtn abtn-outline abtn-sm" onClick={() => { setEditItem(g); setFormData({ title: g.title||'', album: g.album||'Event', year: g.year||'', image: g.image||'', featured: !!g.featured }); window.scrollTo({top:0,behavior:'smooth'}); }}>✏️</button>
+                <button className="abtn abtn-outline abtn-sm" onClick={() => { setEditItem(g); setFormData({ title: g.title||'', cat: g.cat || g.album || 'Seminars', year: g.year||'', image: g.image||'', featured: !!g.featured }); window.scrollTo({top:0,behavior:'smooth'}); }}>✏️</button>
                 <button className="abtn abtn-red abtn-sm" onClick={() => softDelete('gallery', g.id, g, g.title)}>🗑️</button>
               </div>
             </div>
