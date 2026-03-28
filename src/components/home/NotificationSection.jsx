@@ -2,12 +2,15 @@
 // ✅ Gradient glow hover on all 3 notif cards (screenshot-style)
 // ✅ Trailing arrow on attachment/download links
 // ✅ All scroll logic + memory leak fix preserved
+// ✅ v2: E-Documents card ab Google Drive se bhi data fetch karta hai
+// ✅ v2: PDF items pe click → PDFModal opens (setPreviewPdf fix)
 
 import { useRef, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { COLORS } from '../../styles/colors';
 import SectionTitle from './SectionTitle';
-import PDFModal from '../PDFModal'; // ✅ PDF Modal Import kiya
+import PDFModal from '../PDFModal';
+import { useDriveDocs } from '../../hooks/useDriveDocs'; // ✅ Drive hook
 
 const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvents }) => {
   const noticesRef    = useRef(null);
@@ -19,6 +22,12 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
 
   // ✅ PDF Popup ke liye State
   const [previewPdf, setPreviewPdf] = useState(null);
+
+  // ✅ Drive se E-Documents fetch karo
+  // VITE_DRIVE_DOCUMENT_FOLDER .env mein set hai (1a9oCoEq5xpmsL_YeF0UKev9giHE0Eq_X)
+  const { docs: driveDocs, loading: driveLoading } = useDriveDocs(
+    import.meta.env.VITE_DRIVE_DOCUMENT_FOLDER
+  );
 
   // ── Data prep ──────────────────────────────────────────────────────────────
   const doubledNotices = useMemo(() =>
@@ -43,14 +52,38 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
     [...combinedNews, ...combinedNews],
   [combinedNews]);
 
-  const doubledPdfReports = useMemo(() => {
-    const reports = (pdfReports || []).map(p => ({
-      ...p, text: p.title,
-      date: p.createdAt?.toDate?.() || p.date,
+  // ✅ E-Documents: Drive docs + Firebase pdfReports combined
+  const combinedDocs = useMemo(() => {
+    // Drive docs ko Firebase format mein convert karo
+    const driveFormatted = (driveDocs || []).map(d => ({
+      id: `drive_${d.id}`,
+      text: d.name,
+      title: d.name,
+      link: d.previewUrl,      // PDFModal me open hoga (drive iframe mode)
+      downloadUrl: d.downloadUrl,
+      date: d.date,
       type: 'Document',
+      source: 'drive',         // badge ke liye
     }));
-    return [...reports, ...reports];
-  }, [pdfReports]);
+
+    // Firebase pdfReports ko standard format mein
+    const fbFormatted = (pdfReports || []).map(p => ({
+      ...p,
+      text: p.title,
+      link: p.link || p.pdfUrl,
+      date: p.createdAt?.toDate?.() || p.date,
+      type: p.type || 'Document',
+      source: 'firebase',
+    }));
+
+    // Drive docs pehle dikhao (fresh content), Firebase baad mein
+    return [...driveFormatted, ...fbFormatted];
+  }, [driveDocs, pdfReports]);
+
+  const doubledPdfReports = useMemo(() => {
+    if (combinedDocs.length === 0) return [];
+    return [...combinedDocs, ...combinedDocs];
+  }, [combinedDocs]);
 
   // ── Scroll helpers (unchanged) ─────────────────────────────────────────────
   const startScrolling = (ref, rafRef) => {
@@ -132,7 +165,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
           .nc-glow {
             position: relative;
             z-index: 0;
-            border-radius: 26px;      /* must be 2px bigger than inner card */
+            border-radius: 26px;
           }
           .nc-glow::before {
             content: '';
@@ -207,6 +240,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
             margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
           }
           .cat-badge { padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 0.65rem; background: #f1f5f9; }
+          .drive-badge { padding: 2px 7px; border-radius: 5px; font-weight: 800; font-size: 0.6rem; background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
           .rich-text-title { margin: 0 0 6px; font-size: 0.95rem; color: #0f172a; font-weight: 700; line-height: 1.5; }
           .rich-text-desc  { margin: 0 0 6px; font-size: 0.85rem; color: #475569; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
@@ -217,6 +251,18 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
           }
           .notif-alink .arr { display: inline-block; transition: transform .2s; }
           .notif-alink:hover .arr { transform: translateX(4px); }
+
+          /* ✅ View PDF button for Drive docs */
+          .pdf-view-btn {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 0.78rem; font-weight: 800;
+            background: #e8f5e9; color: #2e7d32;
+            border: 1px solid #c8e6c9; border-radius: 6px;
+            padding: 4px 10px; cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            margin-top: 6px;
+          }
+          .pdf-view-btn:hover { background: #c8e6c9; transform: translateX(2px); }
 
           .view-all-wrapper {
             padding: 18px 20px; background: #fff;
@@ -243,6 +289,13 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
             padding: 2px 6px; border-radius: 4px;
             animation: pulse-red 2s infinite; font-weight: 900;
           }
+          @keyframes drive-spin { to { transform: rotate(360deg); } }
+          .drive-loading-dot {
+            display: inline-block; width: 8px; height: 8px;
+            border: 2px solid #059669; border-top-color: transparent;
+            border-radius: 50%; animation: drive-spin 0.7s linear infinite;
+            margin-right: 6px; vertical-align: middle;
+          }
           @media (max-width: 1100px) { .notif-grid { grid-template-columns: repeat(2,1fr); } }
           @media (max-width: 768px)  {
             .notif-grid { grid-template-columns: 1fr; gap: 20px; margin-top: 20px; }
@@ -252,7 +305,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
 
         <div className="notif-grid">
 
-          {/* ── 1. OFFICIAL NOTICES — wrapped in .nc-glow ── */}
+          {/* ── 1. OFFICIAL NOTICES ── */}
           <div className="nc-glow">
             <div className="notif-card">
               <div className="notif-header header-notice">
@@ -288,7 +341,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
             </div>
           </div>
 
-          {/* ── 2. NEWS & EVENTS — wrapped in .nc-glow ── */}
+          {/* ── 2. NEWS & EVENTS ── */}
           <div className="nc-glow">
             <div className="notif-card">
               <div className="notif-header header-news">
@@ -325,29 +378,88 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
             </div>
           </div>
 
-          {/* ── 3. E-DOCUMENTS — wrapped in .nc-glow ── */}
+          {/* ── 3. E-DOCUMENTS (Firebase + Google Drive) ── */}
           <div className="nc-glow">
             <div className="notif-card">
               <div className="notif-header header-docs">
-                <span style={{ fontSize:26 }}>📄</span> E-Documents
+                <span style={{ fontSize:26 }}>📄</span>
+                E-Documents
+                {/* Drive sync indicator */}
+                {driveLoading && (
+                  <span style={{ marginLeft: 'auto', fontSize: 11, opacity: 0.85, display: 'flex', alignItems: 'center' }}>
+                    <span className="drive-loading-dot" />
+                    Syncing Drive...
+                  </span>
+                )}
+                {!driveLoading && driveDocs.length > 0 && (
+                  <span style={{ marginLeft: 'auto', fontSize: 11, opacity: 0.8, background: 'rgba(255,255,255,0.2)', padding: '3px 8px', borderRadius: 12 }}>
+                    ☁️ {driveDocs.length} Drive
+                  </span>
+                )}
               </div>
               <div className="notif-body">
                 <div ref={pdfRef}>
-                  {doubledPdfReports.map((n, i) => (
-                    <div key={i} className="notif-item">
-                      <div className="notif-meta">
-                        <span>📅 {n.date ? new Date(n.date).toLocaleDateString('en-GB') : 'Recently'}</span>
-                        <span className="cat-badge" style={{ color:'#059669' }}>{n.type || 'Document'}</span>
+                  {doubledPdfReports.length > 0 ? (
+                    doubledPdfReports.map((n, i) => (
+                      <div key={`${n.id || i}-${i}`} className="notif-item">
+                        <div className="notif-meta">
+                          <span>📅 {n.date ? new Date(n.date).toLocaleDateString('en-GB') : 'Recently'}</span>
+                          <span className="cat-badge" style={{ color:'#059669' }}>{n.type || 'Document'}</span>
+                          {/* ✅ Show Drive badge for Drive files */}
+                          {n.source === 'drive' && (
+                            <span className="drive-badge">☁️ Drive</span>
+                          )}
+                        </div>
+                        <div className="rich-text-title" dangerouslySetInnerHTML={{ __html: n.text || n.title }} />
+
+                        {/* ✅ Drive docs → View in PDFModal */}
+                        {n.source === 'drive' && n.link && (
+                          <button
+                            className="pdf-view-btn"
+                            onClick={() => setPreviewPdf({ url: n.link, title: n.text || n.title || 'Document' })}
+                          >
+                            👁️ View PDF <span style={{ fontSize: 10 }}>›</span>
+                          </button>
+                        )}
+
+                        {/* Firebase docs → Download link + optional view */}
+                        {n.source !== 'drive' && n.link && (
+                          <a
+                            href={n.link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="notif-alink"
+                            style={{ color:'#059669' }}
+                            onClick={(e) => {
+                              // PDF link ho to modal mein open karo
+                              if (n.link.includes('drive.google') ||
+                                  n.link.includes('firebase') ||
+                                  n.link.toLowerCase().endsWith('.pdf')) {
+                                e.preventDefault();
+                                setPreviewPdf({ url: n.link, title: n.text || n.title || 'Document' });
+                              }
+                            }}
+                          >
+                            ⬇️ Download PDF <span className="arr">›</span>
+                          </a>
+                        )}
                       </div>
-                      <div className="rich-text-title" dangerouslySetInnerHTML={{ __html: n.text || n.title }} />
-                      {n.link && (
-                        <a href={n.link} target="_blank" rel="noreferrer"
-                          className="notif-alink" style={{ color:'#059669' }}>
-                          ⬇️ Download PDF <span className="arr">›</span>
-                        </a>
+                    ))
+                  ) : (
+                    // Empty state — Drive loading or no docs
+                    <div style={{ padding: '30px 15px', textAlign: 'center', color: '#94a3b8' }}>
+                      {driveLoading ? (
+                        <><span className="drive-loading-dot" /> Loading Drive documents...</>
+                      ) : (
+                        <>
+                          <div style={{ fontSize: 32, marginBottom: 8 }}>📁</div>
+                          <p style={{ fontSize: 13, margin: 0 }}>
+                            Drive folder mein PDFs upload karein ya Admin Panel → Documents se add karein
+                          </p>
+                        </>
                       )}
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
               <div className="view-all-wrapper">
@@ -358,12 +470,13 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
 
         </div>
       </div>
-      {/* ✅ PDF Modal Yahan Render Hoga */}
+
+      {/* ✅ PDF Modal — Drive ya Firebase dono ke liye */}
       {previewPdf && (
-        <PDFModal 
-          url={previewPdf.url} 
-          title={previewPdf.title} 
-          onClose={() => setPreviewPdf(null)} 
+        <PDFModal
+          url={previewPdf.url}
+          title={previewPdf.title}
+          onClose={() => setPreviewPdf(null)}
         />
       )}
     </section>

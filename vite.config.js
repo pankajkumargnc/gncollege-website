@@ -1,7 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// GNC College — Optimized Vite Config v6
+// GNC College — Optimized Vite Config v7
+// ✅ v7: Added pdfjs-dist worker support (fixes "fake worker" crash)
 export default defineConfig({
   base: "/gncollege-website/",
   plugins: [react()],
@@ -37,6 +38,11 @@ export default defineConfig({
     },
   },
 
+  // ✅ CRITICAL: Tell Vite how to handle Web Worker files
+  worker: {
+    format: "es",
+  },
+
   // Dev server
   server: {
     port: 3000,
@@ -48,9 +54,14 @@ export default defineConfig({
     devSourcemap: false,
   },
 
-  // Optimize deps
+  // ✅ CRITICAL: Include pdfjs worker so ?url import resolves correctly
   optimizeDeps: {
-    include: ["react", "react-dom", "react-router-dom"],
+    include: [
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "pdfjs-dist/build/pdf.worker.min.mjs",
+    ],
     exclude: ["jodit-react"],
   },
 });
