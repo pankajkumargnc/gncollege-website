@@ -3,10 +3,12 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
-import PDFModal from '../components/PDFModal'; 
+import PDFModal from '../components/PDFModal';
+import PremiumPagination from '../components/PremiumPagination';
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const EVENT_TYPES  = ['All','WORKSHOP','SEMINAR','CULTURAL','SPORTS','NSS','NCC', 'ACADEMIC'];
+const ITEMS_PER_PAGE = 12;
 
 const TYPE_META = {
   WORKSHOP: { icon:'🛠️', grad:'linear-gradient(135deg,#667eea,#764ba2)', light:'#FAF5FF', text:'#44337a', border:'#E9D8FD', color:'#805ad5' },
@@ -23,15 +25,15 @@ const getTS = ts => ts?.toDate ? ts.toDate() : new Date(ts || Date.now());
 export default function EventsPage() {
   const [events,   setEvents]   = useState([]);
   const [loading,  setLoading]  = useState(true);
-  
-  const [tab,      setTab]      = useState('all'); 
-  
+
+  const [tab,      setTab]      = useState('all');
+
   const [selType,  setSelType]  = useState('All');
   const [selYear,  setSelYear]  = useState('All');
   const [selMonth, setSelMonth] = useState('All');
   const [search,   setSearch]   = useState('');
   const [expandId, setExpandId] = useState(null);
-
+  const [currentPage, setCurrentPage] = useState(1);
   const [previewPdf, setPreviewPdf] = useState(null);
 
   const navy = COLORS.navy || '#0B1F4E';
@@ -76,25 +78,33 @@ export default function EventsPage() {
     return ['All', ...Array.from(s).sort((a,b)=>b-a)];
   }, [events]);
 
-  const filtered = useMemo(() => events.filter(e => {
-    if (tab==='upcoming' && e.status!=='upcoming') return false;
-    if (tab==='past'     && e.status==='upcoming') return false;
-    if (selType  !== 'All' && e.type !== selType)   return false;
-    if (selYear  !== 'All' && getTS(e.createdAt).getFullYear() !== Number(selYear)) return false;
-    if (selMonth !== 'All' && (e.displayMonth||'').toUpperCase() !== selMonth.toUpperCase()) return false;
-    if (search && !e.title?.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  }), [events, tab, selType, selYear, selMonth, search]);
+  const filtered = useMemo(() => {
+    setCurrentPage(1);
+    return events.filter(e => {
+      if (tab==='upcoming' && e.status!=='upcoming') return false;
+      if (tab==='past'     && e.status==='upcoming') return false;
+      if (selType  !== 'All' && e.type !== selType)   return false;
+      if (selYear  !== 'All' && getTS(e.createdAt).getFullYear() !== Number(selYear)) return false;
+      if (selMonth !== 'All' && (e.displayMonth||'').toUpperCase() !== selMonth.toUpperCase()) return false;
+      if (search && !e.title?.toLowerCase().includes(search.toLowerCase())) return false;
+      return true;
+    });
+  }, [events, tab, selType, selYear, selMonth, search]);
+
+  const paginated = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filtered.slice(start, start + ITEMS_PER_PAGE);
+  }, [filtered, currentPage]);
 
   const grouped = useMemo(() => {
     const map = {};
-    filtered.forEach(e => {
+    paginated.forEach(e => {
       const k = e.displayMonth || 'Other';
       if (!map[k]) map[k] = [];
       map[k].push(e);
     });
     return map;
-  }, [filtered]);
+  }, [paginated]);
 
   const featured = upcoming[0];
 
@@ -422,6 +432,14 @@ export default function EventsPage() {
                     </div>
                   </div>
                 ))
+              )}
+              {!loading && filtered.length > 0 && (
+                <PremiumPagination
+                  totalItems={filtered.length}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                />
               )}
             </section>
 

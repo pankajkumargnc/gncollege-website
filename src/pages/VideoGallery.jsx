@@ -5,11 +5,14 @@
 // ✅ Glow hover effect on video cards
 // ✅ All original functionality preserved
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
+import PremiumPagination from '../components/PremiumPagination';
+
+const ITEMS_PER_PAGE = 9; // 3×3 grid pe perfect fit
 
 const N = COLORS?.navy || '#0f2347';
 const G = COLORS?.gold || '#f4a023';
@@ -37,12 +40,13 @@ const fmtCount = n => {
 export default function VideoGallery() {
   const [ytConfig,  setYtConfig]  = useState(null);
   const [ready,     setReady]     = useState(false);
-  const [videos,    setVideos]    = useState([]);      // full API mode
-  const [videoIds,  setVideoIds]  = useState([]);      // simple embed mode
+  const [videos,    setVideos]    = useState([]);
+  const [videoIds,  setVideoIds]  = useState([]);
   const [loading,   setLoading]   = useState(false);
   const [error,     setError]     = useState('');
   const [playingId, setPlayingId] = useState(null);
   const [filter,    setFilter]    = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
 
   // ── Firestore — YouTube config ────────────────────────────────────────────
   useEffect(() => {
@@ -94,10 +98,27 @@ export default function VideoGallery() {
   const hasVideoIds = videoIds.length > 0;
 
   const TYPES = ['all','seminar','cultural','sports','nss','ncc','workshop'];
-  const filtered = filter==='all' ? videos : videos.filter(v =>
-    v.snippet?.title?.toLowerCase().includes(filter) ||
-    v.snippet?.description?.toLowerCase().includes(filter)
-  );
+
+  // API mode filtered
+  const filtered = useMemo(() => {
+    setCurrentPage(1);
+    return filter==='all' ? videos : videos.filter(v =>
+      v.snippet?.title?.toLowerCase().includes(filter) ||
+      v.snippet?.description?.toLowerCase().includes(filter)
+    );
+  }, [videos, filter]);
+
+  // Simple embed mode paginated
+  const paginatedIds = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return videoIds.slice(start, start + ITEMS_PER_PAGE);
+  }, [videoIds, currentPage]);
+
+  // API mode paginated
+  const paginatedVideos = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filtered.slice(start, start + ITEMS_PER_PAGE);
+  }, [filtered, currentPage]);
 
   if (!ready) return null;
 
@@ -140,20 +161,22 @@ export default function VideoGallery() {
 
         <div style={{ maxWidth:1280, margin:'0 auto', padding:'48px 20px' }}>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))', gap:24 }}>
-            {videoIds.map((vid, i) => (
+            {paginatedIds.map((vid, i) => {
+              const globalIdx = (currentPage - 1) * ITEMS_PER_PAGE + i;
+              return (
               <div key={vid} className="gc r16 vf" style={{ animationDelay:`${i * .06}s` }}>
                 <div className="yt-embed-card">
                   <div style={{ position:'relative', aspectRatio:'16/9' }}>
                     <iframe
                       src={`https://www.youtube.com/embed/${vid}`}
-                      title={`Video ${i+1}`}
+                      title={`Video ${globalIdx + 1}`}
                       allowFullScreen
                       loading="lazy"
                       style={{ width:'100%', height:'100%', border:'none', position:'absolute', inset:0 }}
                     />
                   </div>
                   <div style={{ padding:'14px 16px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                    <span style={{ fontSize:12, color:'#94a3b8', fontWeight:600 }}>Video {i+1} of {videoIds.length}</span>
+                    <span style={{ fontSize:12, color:'#94a3b8', fontWeight:600 }}>Video {globalIdx + 1} of {videoIds.length}</span>
                     <a href={`https://youtube.com/watch?v=${vid}`} target="_blank" rel="noreferrer"
                       style={{ color:'#ff0000', fontWeight:800, textDecoration:'none', fontSize:12 }}>
                       ▶ YouTube →
@@ -161,8 +184,15 @@ export default function VideoGallery() {
                   </div>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
+          <PremiumPagination
+            totalItems={videoIds.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
+        </div>
 
           {ytConfig?.channelId && (
             <div style={{ textAlign:'center', marginTop:48 }}>
@@ -175,7 +205,6 @@ export default function VideoGallery() {
               </a>
             </div>
           )}
-        </div>
       </div>
     );
   }
@@ -294,7 +323,7 @@ export default function VideoGallery() {
 
             {/* Grid */}
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))', gap:24 }}>
-              {filtered.map((v, i) => {
+              {paginatedVideos.map((v, i) => {
                 const vid = v.id;
                 const sn  = v.snippet || {};
                 const st  = v.statistics || {};

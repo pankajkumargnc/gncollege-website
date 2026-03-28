@@ -92,6 +92,8 @@ const PremiumTicker = ({ items }) => {
         }
         .pt-track {
           display: flex;
+          align-items: center; /* ✅ FIX: Vertically centers items */
+          height: 100%; /* ✅ FIX: Takes full height of container */
           white-space: nowrap;
           width: max-content;
           animation: pt-scroll 50s linear infinite;
@@ -107,8 +109,10 @@ const PremiumTicker = ({ items }) => {
 
         /* ── ITEMS & GLOWING STAR ── */
         .pt-item {
-          display: inline-flex;
-          align-items: center;
+          display: flex; /* ✅ FIX: Changed from inline-flex to flex */
+          align-items: center; /* ✅ FIX: Center content */
+          height: 100%; /* ✅ FIX: Forces full height */
+          flex-shrink: 0; /* ✅ FIX: Prevents items from overlapping on Mobile */
           padding: 0 22px;
           font-size: 13px;
           font-weight: 600;
@@ -118,6 +122,8 @@ const PremiumTicker = ({ items }) => {
         }
         .pt-item::before {
           content: '✦';
+          display: flex; /* ✅ FIX: Centering the star */
+          align-items: center;
           color: ${COLORS.gold};
           font-size: 13px;
           margin-right: 22px;
@@ -130,6 +136,9 @@ const PremiumTicker = ({ items }) => {
 
         /* ── LINKS HOVER EFFECT ── */
         .pt-link {
+          display: flex; /* ✅ FIX: Vertically centers the text perfectly */
+          align-items: center;
+          height: 100%;
           color: #e2e8f0;
           text-decoration: none;
           transition: all 0.3s ease;

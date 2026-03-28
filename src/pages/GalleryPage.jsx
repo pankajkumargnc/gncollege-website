@@ -3,13 +3,17 @@
 // ✅ Categories match AdminPanel & HomePage exactly
 // ✅ Lightbox with keyboard nav
 // ✅ Glow hover effect (same as homepage)
+// ✅ Pagination — 12 photos per page
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import { createPortal } from 'react-dom';
+import PremiumPagination from '../components/PremiumPagination';
+
+const ITEMS_PER_PAGE = 12;
 
 const N = COLORS?.navy || '#0f2347';
 const G = COLORS?.gold || '#f4a023';
@@ -19,9 +23,10 @@ const CATS = ['All Moments', 'Seminars', 'Cultural Fest', 'Guest Visit', 'Campus
 
 export default function GalleryPage({ gallery: galleryProp }) {
   const [images,  setImages]  = useState([]);
-  const [filter,  setFilter]  = useState('All Moments'); // ✅ Default 'All Moments'
-  const [light,   setLight]   = useState(null); // index of open lightbox
+  const [filter,  setFilter]  = useState('All Moments');
+  const [light,   setLight]   = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // ── Firebase realtime ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -40,11 +45,19 @@ export default function GalleryPage({ gallery: galleryProp }) {
   }, [galleryProp]);
 
   // ✅ FIXED LOGIC: Checks both 'cat' (new) and 'album' (old) fields
-  const filtered = filter === 'All Moments' 
-    ? images 
-    : images.filter(img => (img.cat || img.album) === filter);
+  const filtered = useMemo(() => {
+    setCurrentPage(1);
+    return filter === 'All Moments'
+      ? images
+      : images.filter(img => (img.cat || img.album) === filter);
+  }, [images, filter]);
 
-  // ── Lightbox keyboard nav ─────────────────────────────────────────────────
+  // Paginated slice — lightbox uses full filtered array so navigation stays correct
+  const paginated = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filtered.slice(start, start + ITEMS_PER_PAGE);
+  }, [filtered, currentPage]);
+
   const closeLB   = useCallback(() => setLight(null), []);
   const prevImg   = useCallback(() => setLight(i => (i > 0 ? i - 1 : filtered.length - 1)), [filtered.length]);
   const nextImg   = useCallback(() => setLight(i => (i < filtered.length - 1 ? i + 1 : 0)), [filtered.length]);
@@ -201,17 +214,24 @@ export default function GalleryPage({ gallery: galleryProp }) {
 
         {/* Grid */}
         {!loading && filtered.length > 0 && (
+          <>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:14 }}>
-            {filtered.map((img, i) => (
+            {paginated.map((img, i) => {
+              const globalIdx = (currentPage - 1) * ITEMS_PER_PAGE + i; // lightbox uses global index
+              return (
               <div key={img.id}
                 className="gc r14 gal-in"
                 style={{ animationDelay:`${(i % 12) * 0.04}s` }}
-                onClick={() => setLight(i)}
+                onClick={() => setLight(globalIdx)}
+                role="button"
+                tabIndex={0}
+                aria-label={`Open photo: ${img.title || img.cat || 'Gallery image'}`}
+                onKeyDown={e => e.key === 'Enter' && setLight(globalIdx)}
               >
                 <div className="gal-img-item">
                   <img
-                    src={img.image || img.src} // ✅ Fallback support for new and old structure
-                    alt={img.title || img.cat || img.album || 'Gallery'}
+                    src={img.image || img.src}
+                    alt={img.title || img.cat || img.album || 'Gallery photo'}
                     className="gal-img"
                     loading="lazy"
                     decoding="async"
@@ -222,8 +242,15 @@ export default function GalleryPage({ gallery: galleryProp }) {
                   </div>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
+          <PremiumPagination
+            totalItems={filtered.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
+          </>
         )}
 
         {/* Empty state */}

@@ -1,6 +1,7 @@
-// src/App.jsx — FINAL MERGE VERSION
+// src/App.jsx — FINAL MERGE VERSION (With BackToTop & Premium Footer Sync)
 
 import WhatsAppButton      from './components/WhatsAppButton';
+import BackToTop           from './components/BackToTop';
 import { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster }         from 'react-hot-toast';
@@ -427,8 +428,14 @@ export default function App() {
 
       {!isAdminRoute && (
         <>
-          <Footer />
+          {/* ✅ Naya Ultra Pro Max Footer yahan render hoga */}
+          <Footer dynamicSocialLinks={navLinks} />
+          
           <WhatsAppButton />
+          
+          {/* ✅ YAHAN BACK TO TOP ADD KIYA HAI */}
+          <BackToTop />
+          
           <button onClick={handleOpenAdminTab} title="Open Admin Panel" style={{ position: 'fixed', bottom: 'clamp(16px, 3vw, 25px)', right: 'clamp(16px, 3vw, 25px)', background: COLORS.navy, color: '#fff', border: `3px solid ${COLORS.gold}`, borderRadius: '50%', width: 'clamp(48px, 6vw, 60px)', height: 'clamp(48px, 6vw, 60px)', cursor: 'pointer', zIndex: 500, fontSize: 'clamp(18px, 2.5vw, 24px)', flexShrink: 0 }}>⚙️</button>
         </>
       )}

@@ -95,6 +95,8 @@ export default function Ticker({ items }) {
 
         .gnc-marquee-track {
           display: flex;
+          align-items: center; /* ✅ FIX: Vertically centers items */
+          height: 100%; /* ✅ FIX: Takes full height of container */
           width: max-content;
           animation: tickerScroll ${duration}s linear infinite;
           will-change: transform;
@@ -105,18 +107,30 @@ export default function Ticker({ items }) {
 
         /* ── TICKER ITEMS ── */
         .gnc-ticker-item {
-          display: flex;
-          align-items: center;
-          padding: 0 35px;
+          display: flex; /* ✅ FIX: Changed to flex for perfect centering */
+          align-items: center; /* ✅ FIX: Centers text & star */
+          height: 100%; /* ✅ FIX: Full height */
+          flex-shrink: 0; /* ✅ FIX: Prevents overlap/squishing on Mobile */
+          padding: 0 20px;
           font-size: 13.5px;
           font-weight: 600;
           position: relative;
           white-space: nowrap;
-          height: 40px;
-          line-height: 40px;
         }
         
+        .gnc-ticker-item::before {
+          content: '★';
+          display: flex;
+          align-items: center; /* ✅ FIX: Perfect center */
+          color: ${COLORS.gold}90;
+          font-size: 10px;
+          margin-right: 12px;
+        }
+
         .gnc-ticker-item a {
+          display: flex;
+          align-items: center; /* ✅ FIX: Text centered */
+          height: 100%;
           color: rgba(255,255,255,0.95);
           text-decoration: none;
           transition: color 0.3s;
@@ -135,31 +149,28 @@ export default function Ticker({ items }) {
           text-shadow: 0 0 10px rgba(244,160,35,0.4);
           animation: none;
         }
-        
-        .gnc-ticker-item::before {
-          content: '★';
-          position: absolute;
-          left: -4px;
-          color: ${COLORS.gold}90;
-          font-size: 10px;
-        }
 
         /* ── RESPONSIVE ── */
         @media (max-width: 768px) {
           .gnc-ticker-root { height: 36px; }
           .gnc-ribbon { padding: 0 24px 0 12px; font-size: 10px; clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%); }
-          .gnc-ticker-item { font-size: 12px; padding: 0 25px; }
+          .gnc-ticker-item { font-size: 12px; padding: 0 15px; }
         }
         @media (max-width: 480px) {
-          .gnc-ticker-item { padding: 0 20px; }
-          .gnc-ribbon-text { display: none; } /* Mobile par text hide hoke sirf blinker dikhega space bachane k liye */
+          .gnc-ticker-item { padding: 0 15px; }
+          .gnc-ribbon-text { display: none; }
           .gnc-ribbon { padding: 0 20px 0 12px; }
           .gnc-ribbon-dot { margin-right: 0; }
+        }
+        /* Reduced motion — animation bahut slow ho jaati hai */
+        @media (prefers-reduced-motion: reduce) {
+          .gnc-marquee-track { animation-duration: 120s !important; }
+          .gnc-ribbon-dot { animation: none !important; opacity: 1; }
         }
       `}</style>
       
       {/* ── Red Ribbon Label ── */}
-      <div className="gnc-ribbon-wrapper">
+      <div className="gnc-ribbon-wrapper" aria-hidden="true">
         <div className="gnc-ribbon">
           <span className="gnc-ribbon-dot"></span>
           <span className="gnc-ribbon-text">LATEST UPDATES</span>
@@ -167,25 +178,42 @@ export default function Ticker({ items }) {
       </div>
       
       {/* ── Ticker Text Area ── */}
-      <div className="gnc-ticker-area">
+      {/* aria-live="off" — moving text pe screen reader continuously announce nahi karta */}
+      {/* Screen readers ke liye static list #ticker-sr-list use karo */}
+      <div className="gnc-ticker-area" aria-hidden="true">
         <div className="gnc-marquee-track">
           {items.map((item, idx) => (
             <div key={idx} className="gnc-ticker-item">
-              <a href={item.link || '#'} target={item.link && item.link.startsWith('http') ? '_blank' : '_self'} rel="noopener noreferrer">
+              <a href={item.link || '#'} target={item.link && item.link.startsWith('http') ? '_blank' : '_self'} rel="noopener noreferrer" tabIndex={-1}>
                 {item.text || item.title}
               </a>
             </div>
           ))}
-          {/* Duplicate items for seamless loop */}
+          {/* Duplicate for seamless loop */}
           {items.map((item, idx) => (
-            <div key={'dup-' + idx} className="gnc-ticker-item">
-              <a href={item.link || '#'} target={item.link && item.link.startsWith('http') ? '_blank' : '_self'} rel="noopener noreferrer">
+            <div key={'dup-' + idx} className="gnc-ticker-item" aria-hidden="true">
+              <a href={item.link || '#'} target={item.link && item.link.startsWith('http') ? '_blank' : '_self'} rel="noopener noreferrer" tabIndex={-1}>
                 {item.text || item.title}
               </a>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Screen reader only — static list of all notices */}
+      <ul
+        id="ticker-sr-list"
+        style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}
+        aria-label="Latest updates list"
+      >
+        {items.map((item, idx) => (
+          <li key={`sr-${idx}`}>
+            <a href={item.link || '#'} rel="noopener noreferrer">
+              {item.text || item.title}
+            </a>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

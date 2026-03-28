@@ -4,10 +4,12 @@ import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import DOMPurify from 'dompurify';
-import PDFModal from '../components/PDFModal'; // ✅ NAYA PREMIUM MODAL IMPORT
+import PDFModal from '../components/PDFModal';
+import PremiumPagination from '../components/PremiumPagination';
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const CATEGORIES   = ['All','General','Examination','Admission','Holiday','Sports','Cultural','Academic'];
+const ITEMS_PER_PAGE = 15;
 
 const getTS = ts => ts?.toDate ? ts.toDate() : new Date(ts || Date.now());
 
@@ -18,7 +20,8 @@ export default function NotificationsPage() {
   const [selMonth, setSelMonth] = useState('All');
   const [selCat,   setSelCat]   = useState('All');
   const [search,   setSearch]   = useState('');
-  const [previewPdf, setPreviewPdf] = useState(null); // ✅ MODAL PDF STATE
+  const [currentPage, setCurrentPage] = useState(1);
+  const [previewPdf, setPreviewPdf] = useState(null);
 
   const navy = COLORS.navy || '#0B1F4E';
   const gold = COLORS.gold || '#C9A227';
@@ -38,25 +41,34 @@ export default function NotificationsPage() {
     return ['All', ...Array.from(s).sort((a, b) => b - a)];
   }, [notices]);
 
-  const filtered = useMemo(() => notices.filter(n => {
-    const d = getTS(n.createdAt);
-    if (selYear  !== 'All' && d.getFullYear() !== Number(selYear))        return false;
-    if (selMonth !== 'All' && MONTHS_SHORT[d.getMonth()] !== selMonth)    return false;
-    if (selCat   !== 'All' && (n.type || 'General') !== selCat)           return false;
-    if (search && !n.text?.toLowerCase().includes(search.toLowerCase()))  return false;
-    return true;
-  }), [notices, selYear, selMonth, selCat, search]);
+  const filtered = useMemo(() => {
+    setCurrentPage(1); // filter badlne pe page 1 pe jaao
+    return notices.filter(n => {
+      const d = getTS(n.createdAt);
+      if (selYear  !== 'All' && d.getFullYear() !== Number(selYear))        return false;
+      if (selMonth !== 'All' && MONTHS_SHORT[d.getMonth()] !== selMonth)    return false;
+      if (selCat   !== 'All' && (n.type || 'General') !== selCat)           return false;
+      if (search && !n.text?.toLowerCase().includes(search.toLowerCase()))  return false;
+      return true;
+    });
+  }, [notices, selYear, selMonth, selCat, search]);
+
+  // Paginate filtered list
+  const paginated = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filtered.slice(start, start + ITEMS_PER_PAGE);
+  }, [filtered, currentPage]);
 
   const grouped = useMemo(() => {
     const map = {};
-    filtered.forEach(n => {
+    paginated.forEach(n => {
       const d = getTS(n.createdAt);
       const k = `${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`;
       if (!map[k]) map[k] = [];
       map[k].push(n);
     });
     return map;
-  }, [filtered]);
+  }, [paginated]);
 
   return (
     <div style={{ minHeight: '100vh', background: '#fff', fontFamily: "'DM Sans', sans-serif" }}>
@@ -107,10 +119,19 @@ export default function NotificationsPage() {
           </div>
         </div>
 
+        {/* Result count */}
+        {!loading && (
+          <div style={{ marginBottom: 16, fontSize: 13, color: '#64748b', fontWeight: 600 }}>
+            Showing {paginated.length} of {filtered.length} notice{filtered.length !== 1 ? 's' : ''}
+            {filtered.length !== notices.length ? ` (filtered from ${notices.length} total)` : ''}
+          </div>
+        )}
+
         {/* List */}
         {loading ? <div style={{ textAlign: 'center', padding: '40px', color: '#64748b', fontWeight: 700 }}>Syncing Database...</div> : 
          filtered.length === 0 ? <div style={{ textAlign: 'center', padding: '60px', border: '2px dashed #cbd5e1', borderRadius: '16px', color: '#64748b' }}>No notices match your filter.</div> : (
-          Object.entries(grouped).map(([monthYear, items]) => (
+          <>
+          {Object.entries(grouped).map(([monthYear, items]) => (
             <div key={monthYear} style={{ marginBottom: '40px' }}>
               <h3 style={{ fontSize: '16px', fontWeight: 900, color: navy, borderBottom: '2px solid #e2e8f0', paddingBottom: '10px', marginBottom: '20px' }}>📅 {monthYear}</h3>
               {items.map(n => {
@@ -122,16 +143,14 @@ export default function NotificationsPage() {
                       <div style={{ fontSize: '26px', fontWeight: 900, color: navy, lineHeight: 1, marginTop: '4px' }}>{d.getDate()}</div>
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
+                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap' }}>
                         <span style={{ fontSize: '11px', fontWeight: 800, padding: '4px 12px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '50px', color: navy, textTransform: 'uppercase' }}>{n.type || 'General'}</span>
-                        {n.isNew && <span style={{ fontSize: '10px', fontWeight: 900, color: '#fff', background: '#ef4444', padding: '3px 8px', borderRadius: '50px' }}>NEW</span>}
+                        {n.isNew && <span className="badge-new" style={{ fontSize: '10px', fontWeight: 900, color: '#fff', background: '#ef4444', padding: '3px 8px', borderRadius: '50px' }}>NEW</span>}
                       </div>
                       <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(n.text) }} />
-                      
-                      {/* ✅ PDF MODAL TRIGGER */}
                       {n.link && (
-                        <a href={n.link} target="_blank" rel="noreferrer" 
-                          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '16px', fontSize: '13px', fontWeight: 800, color: navy, textDecoration: 'none', background: '#f1f5f9', padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', transition: 'all .2s' }} 
+                        <a href={n.link} target="_blank" rel="noreferrer"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '16px', fontSize: '13px', fontWeight: 800, color: navy, textDecoration: 'none', background: '#f1f5f9', padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', transition: 'all .2s' }}
                           onClick={(e) => {
                             if (n.link && (n.link.includes('drive.google') || n.link.toLowerCase().endsWith('.pdf') || n.link.includes('firebase'))) {
                               e.preventDefault();
@@ -147,7 +166,14 @@ export default function NotificationsPage() {
                 );
               })}
             </div>
-          ))
+          ))}
+          <PremiumPagination
+            totalItems={filtered.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
+          </>
         )}
       </div>
 

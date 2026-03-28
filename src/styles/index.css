@@ -523,3 +523,174 @@ img { max-width: 100%; height: auto; }
   [class*="AdminPanel"] input, [class*="AdminPanel"] select, [class*="AdminPanel"] textarea { font-size: max(16px, 1rem) !important; }
 }
 /* GNC-SAFE-V9 */
+
+/* ═══════════════════════════════════════════════════
+   GNC ENHANCEMENTS v10
+   Performance · UX · Accessibility · SEO
+═══════════════════════════════════════════════════ */
+
+/* ── Focus Visible — Global (WCAG 2.1 AA) ── */
+*:focus { outline: none; }
+*:focus-visible {
+  outline: 3px solid var(--gold) !important;
+  outline-offset: 3px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 0 6px rgba(244,160,35,.15) !important;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--gold) !important;
+  outline-offset: 2px !important;
+}
+
+/* ── Back to Top Button ── */
+.back-to-top {
+  position: fixed;
+  bottom: clamp(80px, 10vw, 100px);
+  right: clamp(16px, 3vw, 28px);
+  z-index: 9990;
+  width: 44px;
+  height: 44px;
+  background: var(--navy);
+  color: var(--gold);
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: 900;
+  box-shadow: 0 4px 16px rgba(15,35,71,.3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  transition: opacity .3s, visibility .3s, transform .3s, background .2s;
+  will-change: transform, opacity;
+}
+.back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.back-to-top:hover {
+  background: var(--gold);
+  color: var(--navy);
+  transform: translateY(-4px);
+}
+/* ── Ticker — Screen Reader Support ── */
+.gnc-ticker-root [role="marquee"],
+.gnc-ticker-root .ticker-track {
+  /* aria-live handled via JS — CSS contains motion */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gnc-ticker-root * {
+    animation-duration: 120s !important; /* Very slow, effectively paused */
+  }
+}
+
+/* ── Page Transition — main content ── */
+#main-content {
+  outline: none; /* Skip link target — no focus ring needed */
+}
+
+/* ── Image Lazy Load Skeleton ── */
+img[loading="lazy"] {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+}
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+img.loaded, img[loading="lazy"][src] {
+  background: none;
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  img[loading="lazy"] { animation: none; background: #e2e8f0; }
+}
+
+/* ── Pagination — PremiumPagination component ── */
+.pagination-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 40px;
+  padding: 20px 0;
+  flex-wrap: wrap;
+}
+.pagination-wrap button {
+  min-width: 44px;
+  min-height: 44px; /* WCAG touch target */
+}
+
+/* ── isNew Badge — Pulse Animation ── */
+@keyframes newPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
+  70%       { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+}
+.badge-new {
+  animation: newPulse 2s infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .badge-new { animation: none; }
+}
+
+/* ── Empty State — Improved ── */
+.empty-state {
+  text-align: center;
+  padding: clamp(40px, 8vw, 80px) 20px;
+  background: #fff;
+  border-radius: 20px;
+  border: 2px dashed #e2e8f0;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.empty-state-icon {
+  font-size: clamp(40px, 6vw, 56px);
+  margin-bottom: 16px;
+  display: block;
+}
+
+/* ── Loading Spinner — Standard ── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  width: 44px; height: 44px;
+  border: 4px solid var(--gold);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  margin: 0 auto;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 2s; }
+}
+
+/* ── Touch Target Safety ── */
+button, a, [role="button"], input[type="checkbox"], input[type="radio"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+/* Exception: inline text links */
+p a, li a, td a {
+  min-height: unset;
+  min-width: unset;
+}
+
+/* ── High Contrast Mode Support ── */
+@media (forced-colors: active) {
+  .glass-card, .glass-navbar, .glass-panel {
+    border: 2px solid ButtonText;
+    background: Canvas;
+  }
+}
+
+/* GNC-ENHANCEMENTS-V10 */

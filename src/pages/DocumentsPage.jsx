@@ -2,7 +2,10 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
-import PDFModal from '../components/PDFModal'; // ✅ PDF Modal Import
+import PDFModal from '../components/PDFModal';
+import PremiumPagination from '../components/PremiumPagination';
+
+const ITEMS_PER_PAGE = 15;
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DOC_TYPES = ['All','Document','Report','Syllabus','Circular','Result','Regulation','Affiliation'];
@@ -27,8 +30,7 @@ export default function DocumentsPage() {
   const [selType,  setSelType]  = useState('All');
   const [search,   setSearch]   = useState('');
   const [view,     setView]     = useState('grid');
-  
-  // ✅ PDF Popup State
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedPdf, setSelectedPdf] = useState(null);
 
   const navy = COLORS.navy || '#0B1F4E';
@@ -55,24 +57,32 @@ export default function DocumentsPage() {
     return m;
   }, [docs]);
 
-  const filtered = useMemo(() => docs.filter(d => {
-    const dt = getTS(d.createdAt);
-    if (selYear  !== 'All' && dt.getFullYear() !== Number(selYear))         return false;
-    if (selMonth !== 'All' && MONTHS_SHORT[dt.getMonth()] !== selMonth)     return false;
-    if (selType  !== 'All' && (d.type||'Document') !== selType)             return false;
-    if (search && !d.title?.toLowerCase().includes(search.toLowerCase()))   return false;
-    return true;
-  }), [docs, selYear, selMonth, selType, search]);
+  const filtered = useMemo(() => {
+    setCurrentPage(1);
+    return docs.filter(d => {
+      const dt = getTS(d.createdAt);
+      if (selYear  !== 'All' && dt.getFullYear() !== Number(selYear))         return false;
+      if (selMonth !== 'All' && MONTHS_SHORT[dt.getMonth()] !== selMonth)     return false;
+      if (selType  !== 'All' && (d.type||'Document') !== selType)             return false;
+      if (search && !d.title?.toLowerCase().includes(search.toLowerCase()))   return false;
+      return true;
+    });
+  }, [docs, selYear, selMonth, selType, search]);
+
+  const paginated = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filtered.slice(start, start + ITEMS_PER_PAGE);
+  }, [filtered, currentPage]);
 
   const grouped = useMemo(() => {
     const map = {};
-    filtered.forEach(d => {
+    paginated.forEach(d => {
       const y = String(getTS(d.createdAt).getFullYear());
       if (!map[y]) map[y] = [];
       map[y].push(d);
     });
     return map;
-  }, [filtered]);
+  }, [paginated]);
 
   return (
     <div className="profile-page-wrapper">
@@ -203,7 +213,7 @@ export default function DocumentsPage() {
 
                 /* ── GRID VIEW ── */
                 <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))', gap:18 }}>
-                  {filtered.map(d => {
+                  {paginated.map(d => {
                     const m = DOC_META[d.type]||DOC_META.Document;
                     return (
                       <div key={d.id} className="doc-card-hover"
@@ -280,12 +290,19 @@ export default function DocumentsPage() {
                   </div>
                 ))
               )}
+              {!loading && filtered.length > 0 && (
+                <PremiumPagination
+                  totalItems={filtered.length}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                />
+              )}
             </section>
 
           </main>
         </div>
 
-      {/* ✅ Modal Render */}
       {selectedPdf && (
         <PDFModal 
           url={selectedPdf.url} 

@@ -5,10 +5,12 @@ import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import DOMPurify from 'dompurify';
-import PDFModal from '../components/PDFModal'; // ✅ PDF Modal Import
+import PDFModal from '../components/PDFModal';
+import PremiumPagination from '../components/PremiumPagination';
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const CATEGORIES   = ['All','News','Achievement','Update','Result','Scholarship'];
+const ITEMS_PER_PAGE = 15;
 
 const TYPE_COLORS = {
   News:        { bg:'#EBF0FF', text:'#1a365d', border:'#BED0FF', dot:'#4a7fd4' },
@@ -30,8 +32,7 @@ export default function NewsPage() {
   const [selCat,   setSelCat]   = useState('All');
   const [search,   setSearch]   = useState('');
   const [view,     setView]     = useState('list');
-  
-  // ✅ PDF Preview State
+  const [currentPage, setCurrentPage] = useState(1);
   const [previewPdf, setPreviewPdf] = useState(null);
 
   const navy = COLORS.navy || '#0f2347';
@@ -52,30 +53,38 @@ export default function NewsPage() {
     return ['All', ...Array.from(s).sort((a, b) => b - a)];
   }, [newsList]);
 
-  const filtered = useMemo(() => newsList.filter(n => {
-    const d = getTS(n.createdAt);
-    if (selYear  !== 'All' && d.getFullYear() !== Number(selYear))     return false;
-    if (selMonth !== 'All' && MONTHS_SHORT[d.getMonth()] !== selMonth) return false;
-    if (selCat   !== 'All' && (n.type || 'News') !== selCat)           return false;
-    if (search) {
-      const q = search.toLowerCase();
-      const inText = n.text?.toLowerCase().includes(q);
-      const inType = (n.type || '').toLowerCase().includes(q);
-      if (!inText && !inType) return false;
-    }
-    return true;
-  }), [newsList, selYear, selMonth, selCat, search]);
+  const filtered = useMemo(() => {
+    setCurrentPage(1);
+    return newsList.filter(n => {
+      const d = getTS(n.createdAt);
+      if (selYear  !== 'All' && d.getFullYear() !== Number(selYear))     return false;
+      if (selMonth !== 'All' && MONTHS_SHORT[d.getMonth()] !== selMonth) return false;
+      if (selCat   !== 'All' && (n.type || 'News') !== selCat)           return false;
+      if (search) {
+        const q = search.toLowerCase();
+        const inText = n.text?.toLowerCase().includes(q);
+        const inType = (n.type || '').toLowerCase().includes(q);
+        if (!inText && !inType) return false;
+      }
+      return true;
+    });
+  }, [newsList, selYear, selMonth, selCat, search]);
+
+  const paginated = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filtered.slice(start, start + ITEMS_PER_PAGE);
+  }, [filtered, currentPage]);
 
   const grouped = useMemo(() => {
     const map = {};
-    filtered.forEach(n => {
+    paginated.forEach(n => {
       const d = getTS(n.createdAt);
       const k = `${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`;
       if (!map[k]) map[k] = [];
       map[k].push(n);
     });
     return map;
-  }, [filtered]);
+  }, [paginated]);
 
   return (
     <div className="profile-page-wrapper">
@@ -217,7 +226,7 @@ export default function NewsPage() {
               ))
             ) : (
               <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:16, marginTop:4 }}>
-                {filtered.map(n => {
+                {paginated.map(n => {
                   const tc = TYPE_COLORS[n.type] || TYPE_COLORS.News;
                   return (
                     <div key={n.id} className="ntf-card-hover" style={{ background:'#fff', borderRadius:13, overflow:'hidden', boxShadow:'0 4px 16px rgba(11,31,78,.07)', border:'1px solid #edf2f7' }}>
@@ -242,11 +251,18 @@ export default function NewsPage() {
                 })}
               </div>
             )}
+            {!loading && filtered.length > 0 && (
+              <PremiumPagination
+                totalItems={filtered.length}
+                itemsPerPage={ITEMS_PER_PAGE}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+              />
+            )}
           </section>
         </main>
       </div>
 
-      {/* ✅ Modal Render */}
       {previewPdf && <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />}
 
       <style>{`

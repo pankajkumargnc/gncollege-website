@@ -1,4 +1,4 @@
-// src/components/Footer.jsx — ULTRA PRO MAX (Compact Height & Fixed Map)
+// src/components/Footer.jsx — ULTRA PRO MAX (Fixed Animated Social Icons)
 
 import { useState, useEffect, memo, useRef } from 'react';
 import { Link } from 'react-router-dom';
@@ -40,7 +40,7 @@ const SA = ({ children, variant = 'up', delay = '', style = {}, className = '' }
   );
 };
 
-// 🗺️ Premium Glass Map (Fixed Valid Google Maps Embed URL)
+// 🗺️ Premium Glass Map
 const DualCampusMap = () => (
   <div className="glass-map-wrapper">
     <div className="map-glow"></div>
@@ -49,7 +49,6 @@ const DualCampusMap = () => (
       className="g-map-frame"
       loading="lazy"
       allowFullScreen
-      // ✅ 100% Working Google Maps Embed Link for Dhanbad
       src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d116833.9730352447!2d86.35338166046033!3d23.780635391515366!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f6a74b0fb59bb3%3A0xc3dfbb016c905ed4!2sDhanbad%2C%20Jharkhand!5e0!3m2!1sen!2sin!4v1711532163901!5m2!1sen!2sin"
     />
     <div className="map-badge">🗺️ Campus Locator</div>
@@ -57,7 +56,8 @@ const DualCampusMap = () => (
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-const Footer = memo(({ dynamicSocialLinks }) => {
+// ✅ Removed external dependency, Footer is now self-sufficient!
+const Footer = memo(() => {
   const [firebaseSocials, setFirebaseSocials] = useState(null);
 
   useEffect(() => {
@@ -66,7 +66,30 @@ const Footer = memo(({ dynamicSocialLinks }) => {
     });
   }, []);
 
-  const linksToUse = dynamicSocialLinks || firebaseSocials || SOCIAL_LINKS;
+  // ✅ Fallback Database if nothing is found
+  const FALLBACK_SOCIALS = [
+    { id: 'facebook', label: 'Facebook', href: '#' },
+    { id: 'twitter', label: 'Twitter', href: '#' },
+    { id: 'instagram', label: 'Instagram', href: '#' },
+    { id: 'youtube', label: 'YouTube', href: '#' }
+  ];
+
+  // Logic to determine which links to show
+  const rawLinks = (firebaseSocials && firebaseSocials.length > 0) 
+                   ? firebaseSocials 
+                   : (SOCIAL_LINKS && SOCIAL_LINKS.length > 0 ? SOCIAL_LINKS : FALLBACK_SOCIALS);
+
+  // Auto-detect Icons logic
+  const getIcon = (link) => {
+    if (link.icon) return link.icon;
+    const id = link.id?.toLowerCase() || '';
+    if (id.includes('twitter') || id.includes('x')) return '𝕏';
+    if (id.includes('youtube')) return '▶';
+    if (id.includes('facebook')) return 'f';
+    if (id.includes('instagram')) return '📸';
+    if (id.includes('linkedin')) return 'in';
+    return link.label?.charAt(0) || '🌐';
+  };
 
   return (
     <footer className="f-ultra-root">
@@ -78,7 +101,7 @@ const Footer = memo(({ dynamicSocialLinks }) => {
           color: #e2e8f0;
           font-family: 'Plus Jakarta Sans', "Inter", sans-serif;
           overflow: hidden;
-          padding-top: 25px; /* REDUCED HEIGHT */
+          padding-top: 25px; 
           z-index: 10;
         }
 
@@ -112,14 +135,14 @@ const Footer = memo(({ dynamicSocialLinks }) => {
           border-left: 1px solid rgba(255, 255, 255, 0.05);
           border-right: 1px solid rgba(255, 255, 255, 0.05);
           border-radius: 24px 24px 0 0;
-          padding: 25px 25px 15px; /* REDUCED PADDING */
+          padding: 25px 25px 15px; 
           box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
         }
 
         .f-grid {
           display: grid;
           grid-template-columns: 2fr 1.5fr 1fr 1.5fr;
-          gap: clamp(15px, 2vw, 30px); /* REDUCED GAP */
+          gap: clamp(15px, 2vw, 30px);
         }
 
         /* 🎓 Logo & Brand Styling */
@@ -140,7 +163,7 @@ const Footer = memo(({ dynamicSocialLinks }) => {
         .f-address-text { color: rgba(255,255,255,0.8); font-size: 11px; line-height: 1.3; }
 
         /* 🔗 Links */
-        .f-link-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; } /* REDUCED GAP */
+        .f-link-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
         .f-link { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; transition: all 0.3s; position: relative; }
         .f-link::before { content: '→'; position: absolute; left: 0; opacity: 0; color: ${G}; transform: translateX(-8px); transition: 0.3s; }
         .f-link:hover { color: #fff; transform: translateX(14px); }
@@ -154,10 +177,57 @@ const Footer = memo(({ dynamicSocialLinks }) => {
         .glass-map-wrapper:hover .g-map-frame { filter: grayscale(20%) invert(90%); }
         .map-badge { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 9px; font-weight: 800; border: 1px solid rgba(255,255,255,0.1); z-index: 2; pointer-events: none; }
 
-        /* 🌐 Social Icons */
-        .f-socials { display: flex; gap: 8px; flex-wrap: wrap; }
-        .f-soc-btn { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; text-decoration: none; transition: 0.3s; }
-        .f-soc-btn:hover { background: ${G}; color: #000; transform: translateY(-3px) rotate(8deg); border-color: ${G}; box-shadow: 0 5px 12px rgba(244,160,35,0.3); }
+        /* 🚀 ULTRA PRO MAX ANIMATED SOCIAL ICONS */
+        @keyframes floatIcon {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+        }
+        
+        .f-socials { display: flex; gap: 12px; flex-wrap: wrap; padding-top: 5px; }
+        
+        .f-soc-btn { 
+          position: relative;
+          width: 36px; height: 36px; 
+          border-radius: 10px; 
+          background: rgba(255,255,255,0.03); 
+          border: 1px solid rgba(255,255,255,0.1); 
+          display: flex; align-items: center; justify-content: center; 
+          color: #fff; font-size: 16px; text-decoration: none; 
+          overflow: hidden;
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+          animation: floatIcon 3s ease-in-out infinite;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+          z-index: 1;
+        }
+
+        /* Staggered Floating Wave Delay */
+        .f-socials a:nth-child(1) { animation-delay: 0s; }
+        .f-socials a:nth-child(2) { animation-delay: 0.2s; }
+        .f-socials a:nth-child(3) { animation-delay: 0.4s; }
+        .f-socials a:nth-child(4) { animation-delay: 0.6s; }
+        .f-socials a:nth-child(5) { animation-delay: 0.8s; }
+
+        /* Liquid Fill Effect on Hover */
+        .f-soc-btn::before {
+          content: ''; position: absolute; 
+          bottom: -100%; left: 0; width: 100%; height: 100%;
+          background: linear-gradient(180deg, ${G}, #f59e0b); 
+          transition: all 0.4s ease; z-index: -1;
+          border-radius: 50% 50% 0 0;
+        }
+
+        .f-soc-btn:hover::before { 
+          bottom: 0; 
+          border-radius: 0;
+        }
+
+        .f-soc-btn:hover { 
+          color: #000; 
+          transform: translateY(-8px) scale(1.15) rotate(10deg) !important; 
+          border-color: ${G}; 
+          animation: none; 
+          box-shadow: 0 10px 25px rgba(244,160,35,0.5); 
+        }
 
         /* © Bottom Bar */
         .f-bottom { margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
@@ -192,10 +262,14 @@ const Footer = memo(({ dynamicSocialLinks }) => {
             <p className="f-brand-desc">
               A Sikh Minority Degree College Established & Managed by Gurudwara Prabhandhak Committee, Dhanbad. Fostering excellence since 1970.
             </p>
+            
+            {/* 🚀 ANIMATED SOCIAL ICONS */}
             <div className="f-socials">
-              {linksToUse.map(link => (
+              {rawLinks.map(link => (
                 <a key={link.id} href={link.href} target="_blank" rel="noopener noreferrer" className="f-soc-btn" title={link.label}>
-                  {link.icon || link.label.charAt(0)}
+                  <span style={{ position: 'relative', zIndex: 2, fontWeight: 'bold' }}>
+                    {getIcon(link)}
+                  </span>
                 </a>
               ))}
             </div>
