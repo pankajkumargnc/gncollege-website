@@ -262,9 +262,9 @@ const CSS = `
   .hp-ev-desc-wrap{flex:1; display:flex; flex-direction:column;}
   .hp-ev-desc{font-size:13px;color:#64748b;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;height:62px;text-align:justify;margin:0;}
   
-  .hp-ev-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:14px;margin-top:auto;}
-  .hp-ev-loc{font-size:11px;color:#94a3b8;font-weight:600;}
-  .hp-ev-more{background:none;border:none;font-size:11px;color:${G};font-weight:800;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;}
+  .hp-ev-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:0px;margin-top:auto; gap:8px;}
+  .hp-ev-loc{font-size:11px;color:#94a3b8;font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;}
+  .hp-ev-more{flex-shrink:0; background:none;border:none;font-size:11px;color:${G};font-weight:800;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;}
   .hp-ev-more .arr{display:inline-block;transition:transform .2s;}
   .hp-ev-more:hover{color:${N};}
   .hp-ev-more:hover .arr{transform:translateX(5px);}
