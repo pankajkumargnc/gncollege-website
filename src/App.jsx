@@ -1,4 +1,4 @@
-// src/App.jsx — FINAL MERGE VERSION (With BackToTop & Premium Footer Sync)
+// src/App.jsx — FINAL MERGE VERSION (With Hardcoded Sub-menus & Partial PDF Embed)
 
 import WhatsAppButton      from './components/WhatsAppButton';
 import BackToTop           from './components/BackToTop';
@@ -6,9 +6,9 @@ import { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster }         from 'react-hot-toast';
 import AlertBanner         from './components/AlertBanner';
-import Ticker from './components/Ticker';
+import Ticker              from './components/Ticker';
 
-import PageViewer from './components/PageViewer';
+import PageViewer          from './components/PageViewer';
 import Navbar              from './components/Navbar';
 import Footer              from './components/Footer';
 import TopBar              from './components/home/TopBar';
@@ -52,6 +52,7 @@ const DocumentsPage     = safeLazy(() => import('./pages/DocumentsPage'));
 const EventsPage        = safeLazy(() => import('./pages/EventsPage'));
 
 const AdminPanel        = safeLazy(() => import('./components/admin/AdminPanel'));
+const EmbeddedPDFPage   = safeLazy(() => import('./pages/EmbeddedPDFPage'));
 
 // ── Named export lazy helpers ────────────────────────────────────────────────
 const LazyAbout       = n => safeLazy(() => import('./pages/AboutPages').then(m => ({ default: m[n] })));
@@ -158,10 +159,12 @@ export default function App() {
   const [adminAuthed, setAdminAuthed] = useState(
     () => sessionStorage.getItem('gnc_admin_auth') === 'true'
   );
+  
   const handleAdminLogin  = () => {
     sessionStorage.setItem('gnc_admin_auth', 'true');
     setAdminAuthed(true);
   };
+  
   const handleAdminLogout = () => {
     sessionStorage.removeItem('gnc_admin_auth');
     setAdminAuthed(false);
@@ -205,7 +208,6 @@ export default function App() {
   }, [isAdminRoute]);
 
   // ── Firebase listeners ───────────────────────────────────────────────────
-  
   useEffect(() => {
     const qNav = query(collection(db, 'navigation'), orderBy('order', 'asc'));
     const unsubNav = onSnapshot(qNav, snap => {
@@ -250,30 +252,75 @@ export default function App() {
     return () => unsubs.forEach(u => u());
   }, []);
 
-  // ✅ FIXED: SMART MERGE LOGIC - Purane link safe rahenge, naye end me jud jayenge!
+  // 🚀 SMART DEEP MERGE & HARDCODE INJECTION
   const baseNavLinks = useMemo(() => {
-    // 1. Pehle saare static links ko uthao (taaki Navbar gayab na ho)
     let combinedLinks = [...staticNavLinks];
 
-    // 2. Agar Firebase (Menu Builder) mein kuch naya hai, toh use check karo
+    // 1. Menu Builder Merging
     if (navLinks && navLinks.length > 0) {
       navLinks.forEach(dynamicLink => {
-        // Check karo ki kya yeh naam already Navbar mein hai (jaise "About Us")
         const existingIndex = combinedLinks.findIndex(staticLink => staticLink.label.trim().toLowerCase() === dynamicLink.label.trim().toLowerCase());
         
         if (existingIndex >= 0) {
-          // Agar hai, toh use override kar do (jisse Menu Builder control le sake)
-          combinedLinks[existingIndex] = dynamicLink;
+          const existingSub = combinedLinks[existingIndex].sub || [];
+          const dynamicSub = dynamicLink.sub || [];
+          
+          let mergedSub = [...existingSub];
+          
+          dynamicSub.forEach(dSub => {
+            const subIdx = mergedSub.findIndex(eSub => eSub.label.trim().toLowerCase() === dSub.label.trim().toLowerCase());
+            if (subIdx >= 0) {
+              const eL3 = mergedSub[subIdx].sub || [];
+              const dL3 = dSub.sub || [];
+              let mergedL3 = [...eL3];
+              
+              dL3.forEach(dItem => {
+                const l3Idx = mergedL3.findIndex(eItem => eItem.label.trim().toLowerCase() === dItem.label.trim().toLowerCase());
+                if (l3Idx >= 0) mergedL3[l3Idx] = dItem;
+                else mergedL3.push(dItem);
+              });
+              
+              mergedSub[subIdx] = { ...dSub, sub: mergedL3 };
+            } else {
+              mergedSub.push(dSub);
+            }
+          });
+          combinedLinks[existingIndex] = { ...dynamicLink, sub: mergedSub };
         } else {
-          // Agar naya naam hai (jaise "More"), toh usko last mein add kar do
           combinedLinks.splice(combinedLinks.length - 1, 0, dynamicLink);
         }
       });
     }
 
-    // 3. Gallery ke default child menus ko preserve karo
+    // 2. 🚀 HARDCODE GOVERNING BODY & STAFF COUNCIL INTO "ABOUT US"
+    const aboutIdx = combinedLinks.findIndex(l => l.label.toLowerCase() === 'about us');
+    if (aboutIdx >= 0) {
+      let aboutSub = combinedLinks[aboutIdx].sub || [];
+      
+      // Ensure "College Management" Category exists
+      let mgmtIdx = aboutSub.findIndex(s => s.label.toLowerCase() === 'college management');
+      if (mgmtIdx === -1) {
+        aboutSub.push({ label: 'College Management', sub: [] });
+        mgmtIdx = aboutSub.length - 1;
+      }
+      
+      let mgmtSub = aboutSub[mgmtIdx].sub || [];
+      
+      // Inject missing submenus automatically
+      if (!mgmtSub.some(s => s.label.toLowerCase() === 'governing body')) {
+        mgmtSub.push({ label: 'Governing Body', href: '/about-us/governing-body' });
+      }
+      if (!mgmtSub.some(s => s.label.toLowerCase() === 'staff council')) {
+        mgmtSub.push({ label: 'Staff Council', href: '/about-us/staff-council' });
+      }
+      
+      aboutSub[mgmtIdx].sub = mgmtSub;
+      combinedLinks[aboutIdx].sub = aboutSub;
+    }
+
+    // 3. Keep Gallery Fallback
     return combinedLinks.map(link =>
-      link.label === 'Gallery' && !link.sub
+      link.label === 'Gallery' && (!link.sub || link.sub.length === 0)
         ? { ...link, href: '/gallery', sub: [
             { label: 'Photo Gallery', href: '/gallery/photos' },
             { label: 'Video Gallery', href: '/gallery/videos' },
@@ -325,10 +372,12 @@ export default function App() {
           <Route path="/about-us/governing-body"    element={<R el={<GoverningBody />} />} />
           <Route path="/about-us/staff-council"     element={<R el={<StaffCouncil />} />} />
           <Route path="/about-us/audit-report"      element={<PVS />} />
+          
           <Route path="/about-us/college-management/organogram"  element={<R el={<Organogram />} />} />
           <Route path="/about-us/college-management/presidents"  element={<R el={<LeadershipPage type="president"  title="Presidents Over the Years"  />} />} />
           <Route path="/about-us/college-management/secretaries" element={<R el={<LeadershipPage type="secretary"  title="Secretaries Over the Years" />} />} />
           <Route path="/about-us/college-management/principal"   element={<R el={<LeadershipPage type="principal"  title="Principals Over the Years"  />} />} />
+          
           <Route path="/about-us/various-committees/womens-cell"  element={<R el={<WomensCell />} />} />
           <Route path="/about-us/various-committees/anti-ragging" element={<R el={<AntiRagging />} />} />
           <Route path="/about-us/various-committees/sc-st"        element={<R el={<ScStCell />} />} />
@@ -339,15 +388,19 @@ export default function App() {
           <Route path="/about-us/various-committees/placement"    element={<R el={<PlacementCell />} />} />
           <Route path="/about-us/various-committees/rusa"         element={<R el={<RusaCell />} />} />
           <Route path="/about-us/college-staff/:staffType" element={<R el={<StaffPage faculties={faculties} />} />} />
-          <Route path="/about-us/regulations/bbmku/special-ug-regulation" element={<PVS />} />
-          <Route path="/about-us/regulations/bbmku/ug-regulation-fyugp"   element={<PVS />} />
-          <Route path="/about-us/regulations/bbmku/ug-regulation-cbcs"    element={<PVS />} />
-          <Route path="/about-us/regulations/college-affiliation"          element={<PVS />} />
-          <Route path="/about-us/regulations/ugc-section"                  element={<PVS />} />
-          <Route path="/about-us/regulations/vbu/ug-regulation-2015"       element={<PVS />} />
-          <Route path="/about-us/regulations/vbu/bca-regulation"           element={<PVS />} />
-          <Route path="/about-us/regulations/byelaws"                      element={<PVS />} />
-          <Route path="/about-us/regulations/exemption"                    element={<PVS />} />
+          
+          {/* Regulations (Embedded PDFs) */}
+          <Route path="/about-us/regulations/college-affiliation" element={<R el={<EmbeddedPDFPage title="College Affiliation" subtitle="B.B.M.K.U. Affiliation Papers" pdfUrl="docs/affiliation.pdf" />} />} />
+          <Route path="/about-us/regulations/ugc-section" element={<R el={<EmbeddedPDFPage title="UGC Section 2(f) & 12(B)" subtitle="University Grants Commission" pdfUrl="docs/ugc_section.pdf" />} />} />
+          <Route path="/about-us/regulations/byelaws" element={<R el={<EmbeddedPDFPage title="College ByeLaws" subtitle="Rules & Regulations" pdfUrl="docs/byelaws.pdf" />} />} />
+          <Route path="/about-us/regulations/exemption" element={<R el={<EmbeddedPDFPage title="Exemption Document" subtitle="Official Notice" pdfUrl="docs/exemption.pdf" />} />} />
+
+          <Route path="/about-us/regulations/bbmku/special-ug-regulation" element={<R el={<EmbeddedPDFPage title="Special UG Regulation" subtitle="B.B.M.K. University" pdfUrl="docs/bbmku_special_ug.pdf" />} />} />
+          <Route path="/about-us/regulations/bbmku/ug-regulation-fyugp" element={<R el={<EmbeddedPDFPage title="UG Regulation FYUGP" subtitle="B.B.M.K. University" pdfUrl="docs/bbmku_fyugp.pdf" />} />} />
+          <Route path="/about-us/regulations/bbmku/ug-regulation-cbcs" element={<R el={<EmbeddedPDFPage title="UG Regulation CBCS" subtitle="B.B.M.K. University" pdfUrl="docs/bbmku_cbcs.pdf" />} />} />
+
+          <Route path="/about-us/regulations/vbu/ug-regulation-2015" element={<R el={<EmbeddedPDFPage title="UG Regulation 2015" subtitle="V.B.U. Hazaribag" pdfUrl="docs/vbu_ug_2015.pdf" />} />} />
+          <Route path="/about-us/regulations/vbu/bca-regulation" element={<R el={<EmbeddedPDFPage title="BCA Regulation" subtitle="V.B.U. Hazaribag" pdfUrl="docs/vbu_bca.pdf" />} />} />
 
           {/* Campus */}
           <Route path="/campus/visuals/bhuda"               element={<R el={<CampusVisuals title="Bhuda Campus"        categoryId="bhuda"      desc="Bhuda campus ki photos"        />} />} />
@@ -428,12 +481,8 @@ export default function App() {
 
       {!isAdminRoute && (
         <>
-          {/* ✅ Naya Ultra Pro Max Footer yahan render hoga */}
           <Footer dynamicSocialLinks={navLinks} />
-          
           <WhatsAppButton />
-          
-          {/* ✅ YAHAN BACK TO TOP ADD KIYA HAI */}
           <BackToTop />
           
           <button onClick={handleOpenAdminTab} title="Open Admin Panel" style={{ position: 'fixed', bottom: 'clamp(16px, 3vw, 25px)', right: 'clamp(16px, 3vw, 25px)', background: COLORS.navy, color: '#fff', border: `3px solid ${COLORS.gold}`, borderRadius: '50%', width: 'clamp(48px, 6vw, 60px)', height: 'clamp(48px, 6vw, 60px)', cursor: 'pointer', zIndex: 500, fontSize: 'clamp(18px, 2.5vw, 24px)', flexShrink: 0 }}>⚙️</button>

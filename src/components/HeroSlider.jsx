@@ -2,8 +2,9 @@
 // ✅ WebP support with JPG fallback
 // ✅ Smart lazy loading — sirf current + next slide load hoga
 // ✅ Touch swipe support
-// ✅ Premium Cinematic Animations & Glassmorphism
+// ✅ Premium Cinematic Animations & Glassmorphism (Transparent Box & Justified Text)
 // ✅ LCP optimized — first slide eager load
+// 🔥 Reduced Height & Compact Design
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 
@@ -16,7 +17,6 @@ const FALLBACK_SLIDES = [
 ];
 
 // ── WebP path generator ───────────────────────────────────────────
-// JPG → WebP automatically try karta hai, fallback pe JPG use karta hai
 const resolveImage = (src) => {
   if (!src) return { webp: '', jpg: '' };
   const isExternal = src.startsWith('http://') || src.startsWith('https://');
@@ -44,7 +44,7 @@ const preloadLCP = (src) => {
 const HeroSlider = ({ slides = [] }) => {
   const [cur,    setCur]    = useState(0);
   const [paused, setPaused] = useState(false);
-  const [loaded, setLoaded] = useState(new Set([0])); // Track loaded slides
+  const [loaded, setLoaded] = useState(new Set([0])); 
   const touchStart = useRef(null);
   const touchEnd   = useRef(null);
 
@@ -57,22 +57,18 @@ const HeroSlider = ({ slides = [] }) => {
   const next = useCallback(() => setCur(p => (p === len-1 ? 0 : p+1)), [len]);
   const prev = useCallback(() => setCur(p => (p === 0 ? len-1 : p-1)), [len]);
 
-  // Reset on slide count change
   useEffect(() => { setCur(0); setLoaded(new Set([0])); }, [len]);
 
-  // Preload LCP image on mount
   useEffect(() => {
     if (displaySlides[0]?.image) preloadLCP(displaySlides[0].image);
   }, []);
 
-  // Auto advance
   useEffect(() => {
     if (len <= 1 || paused) return;
-    const id = setInterval(next, 5500); 
+    const id = setInterval(next, 6000); 
     return () => clearInterval(id);
   }, [len, paused, next]);
 
-  // Mark current + adjacent slides as "should load"
   useEffect(() => {
     setLoaded(prev => {
       const next_idx = cur === len - 1 ? 0 : cur + 1;
@@ -85,7 +81,6 @@ const HeroSlider = ({ slides = [] }) => {
     });
   }, [cur, len]);
 
-  // Touch handlers
   const onTouchStart = e => { touchStart.current = e.targetTouches[0].clientX; }
   const onTouchMove  = e => { touchEnd.current   = e.targetTouches[0].clientX; }
   const onTouchEnd   = () => {
@@ -117,18 +112,17 @@ const HeroSlider = ({ slides = [] }) => {
         }
         @keyframes expandLine {
           0%   { width: 0; opacity: 0; }
-          100% { width: clamp(50px,8vw,100px); opacity: 1; }
+          100% { width: clamp(40px, 8vw, 100px); opacity: 1; }
         }
 
+        /* ── ROOT (HEIGHT REDUCED HERE) ── */
         .hs-root {
           width: 100%; position: relative; overflow: hidden;
           background: #071124;
-          /* ✅ FIXED: Slider height kam kar di gayi hai */
-          height: clamp(240px, 48vw, 540px);
-          max-height: 540px;
+          /* 🔥 Reduced height for a sleeker look */
+          height: clamp(300px, 50vh, 550px); 
           contain: layout style;
         }
-        @media(max-width: 480px) { .hs-root { height: clamp(200px, 50vw, 300px); } }
 
         .hs-slide {
           position: absolute; inset: 0;
@@ -138,23 +132,22 @@ const HeroSlider = ({ slides = [] }) => {
           pointer-events: none;
           z-index: 0;
         }
-        
-        /* ✅ FIXED: Kaali patti ko chhota aur soft kar diya gaya hai (Sirf neeche ke 35% hisse mein) */
-        .hs-slide::after {
-          content: ''; position: absolute; inset: 0; z-index: 1;
-          background: linear-gradient(to top, rgba(10,20,40,0.85) 0%, transparent 35%);
-          pointer-events: none;
-        }
-
         .hs-slide.cur {
           opacity: 1; z-index: 1; pointer-events: auto;
+        }
+
+        /* ── DARK GRADIENT OVERLAY ── */
+        .hs-overlay {
+          position: absolute; inset: 0; z-index: 2;
+          background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 50%, transparent 100%);
+          pointer-events: none;
         }
 
         /* ── Picture/Image ── */
         .hs-pic { width: 100%; height: 100%; display: block; }
         .hs-img {
           width: 100%; height: 100%; object-fit: cover;
-          object-position: center 30%;
+          object-position: center 20%;
           will-change: transform, filter;
           display: block;
         }
@@ -162,60 +155,77 @@ const HeroSlider = ({ slides = [] }) => {
           animation: cinematicZoom 8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; 
         }
 
-        /* ── Skeleton loader while image loading ── */
+        /* ── Skeleton loader ── */
         .hs-skeleton {
           position: absolute; inset: 0;
           background: linear-gradient(90deg, #071124 25%, #0f2347 50%, #071124 75%);
           background-size: 200% 100%;
           animation: hs-shimmer 1.5s infinite;
         }
-        @keyframes hs-shimmer {
-          0%   { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
+        @keyframes hs-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* ── PREMIUM GLASSMORPHISM CONTENT BOX ── */
+        .hs-content-box {
+          position: absolute;
+          bottom: 8%; /* Adjusted for new height */
+          left: clamp(15px, 5vw, 60px);
+          max-width: 750px;
+          width: 90%;
+          z-index: 4;
+          
+          /* The Transparent Glass Effect */
+          background: rgba(15, 35, 71, 0.35); 
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          
+          /* Styling & Borders */
+          border-left: 5px solid #f4a023; 
+          border-radius: 0 16px 16px 0;
+          /* Adjusted padding for smaller height */
+          padding: clamp(15px, 3vw, 30px);
+          box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+          border-top: 1px solid rgba(255,255,255,0.1);
+          border-right: 1px solid rgba(255,255,255,0.05);
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+          text-align: left;
         }
 
-        /* ── Content ── */
-        .hs-content {
-          position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
-          /* ✅ FIXED: Content padding bhi thodi kam ki hai */
-          padding: clamp(30px, 6vw, 70px) clamp(20px, 4vw, 60px) clamp(20px, 4vw, 30px);
-          text-align: center; color: #fff;
-        }
         .hs-title {
           font-family: 'Plus Jakarta Sans', sans-serif;
-          /* ✅ FIXED: Text size kam kar diya hai */
-          font-size: clamp(18px, 3.2vw, 36px);
-          font-weight: 800; letter-spacing: -0.5px;
-          text-shadow: 0 4px 24px rgba(0,0,0,0.7);
-          margin-bottom: clamp(4px, 1vw, 8px);
-          line-height: 1.15; opacity: 0;
+          color: #fff;
+          /* Reduced font sizes to fit the new height */
+          font-size: clamp(18px, 3.5vw, 38px);
+          font-weight: 900; letter-spacing: -0.5px;
+          text-shadow: 0 4px 15px rgba(0,0,0,0.6);
+          margin: 0 0 8px 0;
+          line-height: 1.2; opacity: 0;
         }
+
         .hs-subtitle {
           font-family: 'Inter', sans-serif;
-          /* ✅ FIXED: Subtitle ka text size bhi kam kar diya hai */
-          font-size: clamp(12px, 1.4vw, 16px);
+          /* Reduced subtitle size */
+          font-size: clamp(12px, 1.3vw, 15px);
           font-weight: 500; color: rgba(255, 255, 255, 0.9);
           text-shadow: 0 2px 10px rgba(0,0,0,0.6);
-          margin-bottom: clamp(12px, 2vw, 18px);
-          opacity: 0; line-height: 1.4;
-          max-width: 700px; margin-left: auto; margin-right: auto;
+          margin: 0; opacity: 0; line-height: 1.5;
+          text-align: justify; 
         }
+
         .hs-hr {
-          border: none;
-          height: 3px;
-          background: linear-gradient(90deg, transparent, #f4a023, transparent);
-          width: 0; margin: 0 auto;
+          border: none; height: 3px;
+          background: linear-gradient(90deg, #f4a023, transparent);
+          width: 0; margin: 12px 0 0 0;
           border-radius: 4px; opacity: 0;
         }
         
-        .hs-slide.cur .hs-title    { animation: glideUpText 0.9s 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-        .hs-slide.cur .hs-subtitle { animation: glideUpText 0.9s 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-        .hs-slide.cur .hs-hr       { animation: expandLine  0.8s 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        .hs-slide.cur .hs-title    { animation: glideUpText 0.8s 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        .hs-slide.cur .hs-subtitle { animation: glideUpText 0.8s 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        .hs-slide.cur .hs-hr       { animation: expandLine  0.7s 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
 
         /* ── Arrows ── */
         .hs-arrow {
           position: absolute; top: 50%; transform: translateY(-50%) scale(0.9);
-          width: clamp(36px, 4vw, 48px); height: clamp(36px, 4vw, 48px);
+          width: clamp(32px, 4vw, 44px); height: clamp(32px, 4vw, 44px);
           background: rgba(255, 255, 255, 0.1); color: #fff;
           font-size: clamp(14px, 1.8vw, 18px);
           display: flex; justify-content: center; align-items: center;
@@ -239,21 +249,38 @@ const HeroSlider = ({ slides = [] }) => {
 
         /* ── Dots ── */
         .hs-dots {
-          position: absolute; bottom: clamp(12px, 2.5vw, 18px);
-          left: 50%; transform: translateX(-50%);
-          display: flex; gap: clamp(6px, 1vw, 10px); z-index: 11;
+          position: absolute; bottom: 15px;
+          right: clamp(20px, 5vw, 60px); 
+          display: flex; gap: 8px; z-index: 11;
         }
         .hs-dot {
-          width: clamp(14px, 2vw, 20px); height: clamp(4px, 0.5vw, 5px);
-          border-radius: 4px; background: rgba(255, 255, 255, 0.35);
+          width: clamp(8px, 1.2vw, 12px); height: clamp(8px, 1.2vw, 12px);
+          border-radius: 50%; background: rgba(255, 255, 255, 0.35);
           cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
           border: none; padding: 0;
         }
         .hs-dot:hover { background: rgba(255, 255, 255, 0.8); }
         .hs-dot.cur { 
-          width: clamp(28px, 4vw, 40px); 
+          width: clamp(24px, 3.5vw, 32px); 
+          border-radius: 8px;
           background: #f4a023; 
           box-shadow: 0 0 10px rgba(244,160,35,0.6); 
+        }
+
+        /* ── RESPONSIVE FIXES FOR SHORTER HEIGHT ── */
+        @media (max-width: 768px) {
+          .hs-root { height: clamp(260px, 45vh, 400px); }
+          .hs-content-box {
+            bottom: 6%; left: 0; width: 95%;
+            border-radius: 0 12px 12px 0;
+            padding: 15px 20px;
+          }
+          .hs-dots { right: 50%; transform: translateX(50%); bottom: 12px; }
+        }
+        @media (max-width: 480px) { 
+          .hs-root { height: clamp(220px, 40vh, 320px); } 
+          .hs-content-box { padding: 12px 15px; }
+          .hs-title { margin-bottom: 4px; }
         }
       `}</style>
 
@@ -283,10 +310,13 @@ const HeroSlider = ({ slides = [] }) => {
                   />
                 </picture>
 
-                {/* Slide content */}
-                <div className="hs-content">
+                {/* Dark Gradient Overlay for text readability */}
+                <div className="hs-overlay" />
+
+                {/* The Transparent Glassmorphism Content Box */}
+                <div className="hs-content-box">
                   <h2 className="hs-title">{slide.title}</h2>
-                  <p  className="hs-subtitle">{slide.subtitle}</p>
+                  {slide.subtitle && <p className="hs-subtitle">{slide.subtitle}</p>}
                   <hr className="hs-hr" />
                 </div>
               </>

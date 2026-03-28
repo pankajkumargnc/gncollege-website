@@ -1,56 +1,157 @@
+// src/components/Breadcrumbs.jsx
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { COLORS } from '../styles/colors';
 
-const Breadcrumbs = () => {
+export default function Breadcrumbs() {
   const location = useLocation();
+  const pathnames = location.pathname.split('/').filter((x) => x);
 
-  // HashRouter ke liye path ko sahi se handle karna
-  let path = location.pathname;
-  if (path === '/' && location.hash.startsWith('#/')) {
-    path = location.hash.substring(1);
-  }
-  
-  const pathnames = path.split('/').filter((x) => x);
+  // 🚀 Smart Formatter: College ke short-forms ko Capital rakhega
+  const formatName = (name) => {
+    const map = {
+      'bbmku': 'BBMKU',
+      'vbu': 'VBU',
+      'ug': 'UG',
+      'pg': 'PG',
+      'iqac': 'IQAC',
+      'aqar': 'AQAR',
+      'nirf': 'NIRF',
+      'nss': 'NSS',
+      'ncc': 'NCC',
+      'rusa': 'RUSA',
+      'icc': 'ICC',
+      'obc': 'OBC',
+      'sc-st': 'SC/ST',
+      'ssr-1st-cycle': 'SSR 1st Cycle',
+      'ssr-2nd-cycle': 'SSR 2nd Cycle',
+      'fyugp': 'FYUGP',
+      'cbcs': 'CBCS',
+      'bca': 'BCA'
+    };
+    
+    const lowerName = name.toLowerCase();
+    if (map[lowerName]) return map[lowerName];
 
-  if (pathnames.length === 0) {
-    return null; // Homepage par breadcrumb nahi dikhega
-  }
+    return name
+      .replace(/-/g, ' ')
+      .split(' ')
+      .map(word => {
+        if (map[word.toLowerCase()]) return map[word.toLowerCase()];
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join(' ');
+  };
+
+  // 🚀 SMART REDIRECTOR: Blank Pages rokne ke liye
+  // Agar koi in categories pe click karega toh usko inke first valid page par bhej diya jayega
+  const categoryRedirects = {
+    '/about-us': '/about-us/college-profile',
+    '/about-us/college-management': '/about-us/college-management/principal',
+    '/about-us/various-committees': '/about-us/various-committees/womens-cell',
+    '/about-us/regulations': '/about-us/regulations/college-affiliation',
+    '/about-us/regulations/bbmku': '/about-us/regulations/bbmku/ug-regulation-cbcs',
+    '/about-us/regulations/vbu': '/about-us/regulations/vbu/ug-regulation-2015',
+    '/campus': '/campus/infrastructure',
+    '/campus/visuals': '/campus/visuals/bhuda',
+    '/academics': '/academics/course-offered',
+    '/admission': '/admission/rule',
+    '/admission/notification': '/admission/notification/latest',
+    '/activity': '/activity/nss',
+    '/activity/collaboration': '/activity/collaboration/rotaract-club',
+    '/naac': '/naac/aqar',
+    '/naac/ssr-1st-cycle': '/naac/ssr-1st-cycle/cycle-1-documents',
+    '/naac/ssr-2nd-cycle': '/naac/ssr-2nd-cycle/cycle-2-documents',
+    '/publication': '/publication/college-library',
+    '/publication/examination-results': '/publication/examination-results/2024',
+    '/publication/sss-report': '/publication/sss-report/2023-24'
+  };
+
+  if (pathnames.length === 0 || location.pathname.startsWith('/admin')) return null;
 
   return (
-    <div style={{ background: '#f8f9fa', borderBottom: '1px solid #e0e0e0' }}>
-      <div style={{ 
+    <div style={{
+      width: '100%',
+      background: '#fff',
+      borderBottom: '1px solid #e2e8f0',
+    }}>
+      <div style={{
         maxWidth: '1400px', 
-        margin: '0 auto', 
-        padding: '12px 20px', 
-        fontSize: '13.5px', 
-        color: '#666',
+        margin: '0 auto',
+        padding: '10px 20px', 
         display: 'flex',
-        alignItems: 'center',
-        fontWeight: '500'
+        alignItems: 'center', 
+        flexWrap: 'wrap',
+        fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif",
+        fontSize: '13.5px',
       }}>
-        <Link to="/" style={{ color: COLORS.navy, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span>🏠</span> Home
+        
+        {/* Home Link */}
+        <Link to="/" style={{
+          display: 'flex',
+          alignItems: 'center',
+          color: COLORS.navy,
+          textDecoration: 'none',
+          fontWeight: 700,
+          gap: '5px'
+        }}>
+          <span style={{ fontSize: '15px', display: 'flex', alignItems: 'center' }}>🏠</span>
+          <span style={{ display: 'flex', alignItems: 'center', paddingTop: '1px' }}>Home</span>
         </Link>
+
+        {/* Dynamic Breadcrumb Path */}
         {pathnames.map((value, index) => {
           const to = `/${pathnames.slice(0, index + 1).join('/')}`;
           const isLast = index === pathnames.length - 1;
-          const label = value.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-
+          
+          // ✅ Checking if the path needs to be redirected
+          const finalTo = categoryRedirects[to] || to;
+          
           return (
-            <span key={to} style={{ display: 'flex', alignItems: 'center' }}>
-              <span style={{ margin: '0 10px', color: '#ccc', fontSize: '10px' }}>❯</span>
+            <React.Fragment key={to}>
+              {/* Separator */}
+              <span style={{
+                display: 'flex',
+                alignItems: 'center',
+                color: '#94a3b8',
+                margin: '0 8px',
+                fontSize: '14px',
+                fontWeight: 600
+              }}>
+                ›
+              </span>
+              
+              {/* Text */}
               {isLast ? (
-                <span style={{ color: COLORS.gold, fontWeight: '700' }}>{label}</span>
+                <span style={{
+                  color: COLORS.gold,
+                  fontWeight: 800,
+                  display: 'flex',
+                  alignItems: 'center',
+                  paddingTop: '1px'
+                }}>
+                  {formatName(value)}
+                </span>
               ) : (
-                <Link to={to} style={{ color: COLORS.navy, textDecoration: 'none' }}>{label}</Link>
+                <Link to={finalTo} style={{
+                  color: COLORS.navy,
+                  textDecoration: 'none',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  paddingTop: '1px',
+                  transition: 'color 0.2s'
+                }}
+                onMouseEnter={e => e.target.style.color = COLORS.gold}
+                onMouseLeave={e => e.target.style.color = COLORS.navy}
+                >
+                  {formatName(value)}
+                </Link>
               )}
-            </span>
+            </React.Fragment>
           );
         })}
       </div>
     </div>
   );
-};
-
-export default Breadcrumbs;
+}

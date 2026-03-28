@@ -59,7 +59,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
         zIndex: 99999,
         
         // Main Navbar Glass Effect on Scroll
-        background: isScrolled ? 'rgba(255, 255, 255, 0.35)' : '#ffffff',
+        background: isScrolled ? 'rgba(255, 255, 255, 0.65)' : '#ffffff',
         boxShadow: isScrolled ? '0 8px 32px rgba(15, 35, 71, 0.1)' : '0 4px 15px rgba(0,0,0,0.05)',
         backdropFilter: isScrolled ? 'blur(16px) saturate(180%)' : 'none',
         WebkitBackdropFilter: isScrolled ? 'blur(16px) saturate(180%)' : 'none',
@@ -79,6 +79,15 @@ export default function Navbar({ onAdminClick, navLinks }) {
             50%  { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
           }
+          /* Smooth Fade and Drop animations for dropdowns */
+          @keyframes dropdownFadeDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes dropdownFadeSide {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+          }
           .spinning-logo {
             animation: coinSpin 6s linear infinite;
             transform-style: preserve-3d;
@@ -97,6 +106,14 @@ export default function Navbar({ onAdminClick, navLinks }) {
           .clean-divider {
             border-left: 2.5px solid ${COLORS.gold};
             border-radius: 2px;
+          }
+          /* Premium Hover Link Class */
+          .nav-hover-link {
+            transition: all 0.25s ease;
+          }
+          .nav-hover-link:hover {
+            color: ${COLORS.gold} !important;
+            transform: translateX(4px);
           }
         `}</style>
 
@@ -213,8 +230,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
             position: isMobile ? 'absolute' : 'static',
             top: '100%', left: 0, right: 0,
             
-            // Mobile Dropdown background
-            background: isMobile ? (isScrolled ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.98)') : 'transparent',
+            background: isMobile ? (isScrolled ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.98)') : 'transparent',
             backdropFilter: isMobile && isScrolled ? 'blur(16px)' : 'none',
             
             padding: isMobile ? '10px 20px 20px' : 0,
@@ -253,6 +269,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                   <Link
                     to={getRoute(l0.href)}
                     onClick={() => { if (l0.label === 'Home') window.scrollTo(0, 0) }}
+                    className="nav-hover-link"
                     style={{
                       color: COLORS.navy,
                       padding: isMobile ? '12px 0' : '24px 11px',
@@ -260,7 +277,6 @@ export default function Navbar({ onAdminClick, navLinks }) {
                       fontSize: 13.5, fontWeight: 700,
                       whiteSpace: 'nowrap',
                       textDecoration: 'none',
-                      transition: 'all .2s',
                       width: '100%',
                     }}>
                     {l0.label === 'Home' ? '🏠 ' : ''}{l0.label}
@@ -269,23 +285,25 @@ export default function Navbar({ onAdminClick, navLinks }) {
                   {!isMobile && l0.sub && <span style={{ color: COLORS.navy, fontSize: 11, marginLeft: 2, marginRight: 8, marginTop: 2 }}>▾</span>}
                 </div>
 
-                {/* ── L1 Dropdown (Glassmorphism Applied) ── */}
+                {/* ── L1 Dropdown (Sleek & Animated) ── */}
                 {l0.sub && openL1 === l0.label && (
                   <div style={{
                     position: isMobile ? 'static' : 'absolute',
                     top: '100%', left: 0,
                     
-                    // ✅ Glass Effect
-                    background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.85)',
-                    backdropFilter: isMobile ? 'none' : 'blur(12px)',
-                    WebkitBackdropFilter: isMobile ? 'none' : 'blur(12px)',
-                    border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.4)',
+                    background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: isMobile ? 'none' : 'blur(16px)',
+                    WebkitBackdropFilter: isMobile ? 'none' : 'blur(16px)',
+                    border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.5)',
                     
-                    minWidth: 240,
-                    boxShadow: isMobile ? 'none' : '0 12px 30px rgba(0,0,0,.15)',
+                    minWidth: isMobile ? '100%' : 210, // Reduced width for sleeker look
+                    boxShadow: isMobile ? 'none' : '0 15px 35px rgba(0,0,0,.12)',
                     borderTop: isMobile ? 'none' : '3px solid ' + COLORS.navy,
-                    borderRadius: isMobile ? 8 : '0 0 8px 8px',
-                    zIndex: 200, padding: isMobile ? '5px 0' : '8px 0',
+                    borderRadius: isMobile ? 8 : '0 0 12px 12px',
+                    zIndex: 200, 
+                    padding: isMobile ? '5px 0' : '8px 0',
+                    animation: isMobile ? 'none' : 'dropdownFadeDown 0.25s ease-out forwards',
+                    transformOrigin: 'top center'
                   }}>
                     {l0.sub.map(l1 => (
                       <div key={l1.label}
@@ -297,40 +315,41 @@ export default function Navbar({ onAdminClick, navLinks }) {
                           onClick={e => { if (isMobile && l1.sub) { e.stopPropagation(); toggleL2(l1.label) } }}
                           style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                            padding: isMobile ? '10px 16px' : '10px 18px',
-                            borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.05)',
+                            padding: isMobile ? '10px 16px' : '8px 16px', // Tighter padding
+                            borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
                             cursor: isMobile && l1.sub ? 'pointer' : 'default',
-                            transition: 'background 0.2s',
+                            transition: 'background 0.2s ease',
                           }}
-                          // ✅ Soft transparent hover jisse glass effect bana rahe
-                          onMouseEnter={e => { if (!isMobile) e.currentTarget.style.background = 'rgba(15, 35, 71, 0.06)' }}
+                          onMouseEnter={e => { if (!isMobile) e.currentTarget.style.background = 'rgba(15, 35, 71, 0.04)' }}
                           onMouseLeave={e => { if (!isMobile) e.currentTarget.style.background = 'transparent' }}
                         >
-                          <Link to={getRoute(l1.href)}
+                          <Link to={getRoute(l1.href)} className="nav-hover-link"
                             style={{ fontSize: 13, fontWeight: 600, color: COLORS.navy, display: 'block', width: '100%', textDecoration: 'none' }}>
                             {l1.label}
                           </Link>
                           {l1.sub && <span style={{ fontSize: 12, color: COLORS.gold, marginLeft: 8 }}>{isMobile ? (openL2 === l1.label ? '▴' : '▾') : '▶'}</span>}
                         </div>
 
-                        {/* ── L2 Dropdown (Glassmorphism Applied) ── */}
+                        {/* ── L2 Dropdown (Sleek & Animated) ── */}
                         {l1.sub && openL2 === l1.label && (
                           <div style={{
                             position: isMobile ? 'static' : 'absolute',
                             top: 0, left: '100%',
                             
-                            // ✅ Glass Effect
-                            background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.85)',
-                            backdropFilter: isMobile ? 'none' : 'blur(12px)',
-                            WebkitBackdropFilter: isMobile ? 'none' : 'blur(12px)',
-                            border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.4)',
+                            background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.9)',
+                            backdropFilter: isMobile ? 'none' : 'blur(16px)',
+                            WebkitBackdropFilter: isMobile ? 'none' : 'blur(16px)',
+                            border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.5)',
                             
-                            minWidth: 240,
-                            boxShadow: isMobile ? 'none' : '4px 4px 20px rgba(0,0,0,.15)',
+                            minWidth: isMobile ? '100%' : 210, // Reduced width
+                            boxShadow: isMobile ? 'none' : '5px 5px 25px rgba(0,0,0,.12)',
                             borderTop: isMobile ? 'none' : '3px solid ' + COLORS.gold,
-                            borderRadius: isMobile ? 4 : '0 8px 8px 8px',
+                            borderRadius: isMobile ? 4 : '0 12px 12px 12px',
                             margin: isMobile ? '0 16px 10px' : 0,
                             borderLeft: isMobile ? '2px solid ' + COLORS.gold : 'none',
+                            padding: isMobile ? '5px 0' : '8px 0',
+                            animation: isMobile ? 'none' : 'dropdownFadeSide 0.25s ease-out forwards',
+                            transformOrigin: 'left top'
                           }}>
                             {l1.sub.map(l2 => (
                               <div key={l2.label}
@@ -342,52 +361,51 @@ export default function Navbar({ onAdminClick, navLinks }) {
                                   onClick={e => { if (isMobile && l2.sub) { e.stopPropagation(); toggleL3(l2.label) } }}
                                   style={{
                                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                    padding: '10px 16px',
-                                    borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.05)',
+                                    padding: '8px 16px', // Tighter padding
+                                    borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
                                     cursor: isMobile && l2.sub ? 'pointer' : 'default',
-                                    transition: 'background 0.2s',
+                                    transition: 'background 0.2s ease',
                                   }}
-                                  // ✅ Soft transparent hover
-                                  onMouseEnter={e => { if (!isMobile) e.currentTarget.style.background = 'rgba(15, 35, 71, 0.06)' }}
+                                  onMouseEnter={e => { if (!isMobile) e.currentTarget.style.background = 'rgba(15, 35, 71, 0.04)' }}
                                   onMouseLeave={e => { if (!isMobile) e.currentTarget.style.background = 'transparent' }}
                                 >
-                                  <Link to={getRoute(l2.href)}
+                                  <Link to={getRoute(l2.href)} className="nav-hover-link"
                                     style={{ fontSize: 12.5, fontWeight: 600, color: '#444', display: 'block', width: '100%', textDecoration: 'none' }}>
                                     {l2.label}
                                   </Link>
                                   {l2.sub && <span style={{ fontSize: 11, color: COLORS.gold, marginLeft: 8 }}>{isMobile ? (openL3 === l2.label ? '▴' : '▾') : '▶'}</span>}
                                 </div>
 
-                                {/* ── L3 Dropdown (Glassmorphism Applied) ── */}
+                                {/* ── L3 Dropdown (Sleek & Animated) ── */}
                                 {l2.sub && openL3 === l2.label && (
                                   <div style={{
                                     position: isMobile ? 'static' : 'absolute',
                                     top: 0, left: '100%',
                                     
-                                    // ✅ Glass Effect
-                                    background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.85)',
-                                    backdropFilter: isMobile ? 'none' : 'blur(12px)',
-                                    WebkitBackdropFilter: isMobile ? 'none' : 'blur(12px)',
-                                    border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.4)',
+                                    background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.9)',
+                                    backdropFilter: isMobile ? 'none' : 'blur(16px)',
+                                    WebkitBackdropFilter: isMobile ? 'none' : 'blur(16px)',
+                                    border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.5)',
                                     
-                                    minWidth: 240,
-                                    boxShadow: isMobile ? 'none' : '4px 4px 20px rgba(0,0,0,.15)',
+                                    minWidth: isMobile ? '100%' : 210, // Reduced width
+                                    boxShadow: isMobile ? 'none' : '5px 5px 25px rgba(0,0,0,.12)',
                                     borderTop: isMobile ? 'none' : '3px solid ' + COLORS.navy,
-                                    borderRadius: isMobile ? 4 : '0 8px 8px 8px',
+                                    borderRadius: isMobile ? 4 : '0 12px 12px 12px',
                                     margin: isMobile ? '0 16px 10px' : 0,
                                     borderLeft: isMobile ? '2px solid ' + COLORS.navy : 'none',
+                                    padding: isMobile ? '5px 0' : '8px 0',
+                                    animation: isMobile ? 'none' : 'dropdownFadeSide 0.25s ease-out forwards',
+                                    transformOrigin: 'left top'
                                   }}>
                                     {l2.sub.map(l3 => (
-                                      <Link key={l3.label} to={getRoute(l3.href)}
+                                      <Link key={l3.label} to={getRoute(l3.href)} className="nav-hover-link"
                                         style={{
-                                          display: 'block', padding: '10px 16px',
+                                          display: 'block', padding: '8px 16px', // Tighter padding
                                           fontSize: 12, color: '#555',
-                                          borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.05)',
+                                          borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
                                           textDecoration: 'none',
-                                          transition: 'background 0.2s',
                                         }}
-                                        // ✅ Soft transparent hover
-                                        onMouseEnter={e => { if (!isMobile) e.currentTarget.style.background = 'rgba(15, 35, 71, 0.06)' }}
+                                        onMouseEnter={e => { if (!isMobile) e.currentTarget.style.background = 'rgba(15, 35, 71, 0.04)' }}
                                         onMouseLeave={e => { if (!isMobile) e.currentTarget.style.background = 'transparent' }}
                                       >
                                         {l3.label}
