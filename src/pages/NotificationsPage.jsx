@@ -1,24 +1,20 @@
 // src/pages/NotificationsPage.jsx
+// 🚀 100% Synced with Google Drive Notice Folder
+
 import React, { useState, useMemo, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
-import DOMPurify from 'dompurify';
 import PDFModal from '../components/PDFModal';
 import PremiumPagination from '../components/PremiumPagination';
+import { useDriveDocs } from '../hooks/useDriveDocs'; // ✅ Drive Hook Import
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const CATEGORIES   = ['All','General','Examination','Admission','Holiday','Sports','Cultural','Academic'];
 const ITEMS_PER_PAGE = 15;
 
 const getTS = ts => ts?.toDate ? ts.toDate() : new Date(ts || Date.now());
 
 export default function NotificationsPage() {
-  const [notices,  setNotices]  = useState([]);
-  const [loading,  setLoading]  = useState(true);
   const [selYear,  setSelYear]  = useState('All');
   const [selMonth, setSelMonth] = useState('All');
-  const [selCat,   setSelCat]   = useState('All');
   const [search,   setSearch]   = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [previewPdf, setPreviewPdf] = useState(null);
@@ -26,15 +22,23 @@ export default function NotificationsPage() {
   const navy = COLORS.navy || '#0B1F4E';
   const gold = COLORS.gold || '#C9A227';
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    const q = query(collection(db, 'notices'), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, snap => {
-      setNotices(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-      setLoading(false);
-    });
-    return () => unsub();
-  }, []);
+  // ✅ Fetching Notices directly from Google Drive
+  const NOTICE_FOLDER_ID = import.meta.env.VITE_DRIVE_NOTICE_FOLDER;
+  const { docs: driveNotices, loading, error } = useDriveDocs(NOTICE_FOLDER_ID);
+
+  // Mapping Drive Data to match existing UI logic
+  const notices = useMemo(() => {
+    return driveNotices.map(doc => ({
+      id: doc.id,
+      text: doc.name, 
+      createdAt: { toDate: () => new Date(doc.rawDate) }, // Firebase jaisa object taaki logic break na ho
+      link: doc.previewUrl,
+      type: 'General',
+      isNew: (new Date() - new Date(doc.rawDate)) < 7 * 24 * 60 * 60 * 1000 // 7 din tak "NEW" badge dikhega
+    }));
+  }, [driveNotices]);
+
+  useEffect(() => { window.scrollTo(0, 0); }, []);
 
   const years = useMemo(() => {
     const s = new Set(notices.map(n => getTS(n.createdAt).getFullYear()));
@@ -42,18 +46,16 @@ export default function NotificationsPage() {
   }, [notices]);
 
   const filtered = useMemo(() => {
-    setCurrentPage(1); // filter badlne pe page 1 pe jaao
+    setCurrentPage(1);
     return notices.filter(n => {
       const d = getTS(n.createdAt);
       if (selYear  !== 'All' && d.getFullYear() !== Number(selYear))        return false;
       if (selMonth !== 'All' && MONTHS_SHORT[d.getMonth()] !== selMonth)    return false;
-      if (selCat   !== 'All' && (n.type || 'General') !== selCat)           return false;
       if (search && !n.text?.toLowerCase().includes(search.toLowerCase()))  return false;
       return true;
     });
-  }, [notices, selYear, selMonth, selCat, search]);
+  }, [notices, selYear, selMonth, search]);
 
-  // Paginate filtered list
   const paginated = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filtered.slice(start, start + ITEMS_PER_PAGE);
@@ -96,7 +98,7 @@ export default function NotificationsPage() {
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to right, ${navy}f2, ${navy}cc)` }} />
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '1000px', margin: '0 auto' }}>
           <h1 style={{ color: '#fff', fontSize: '48px', fontWeight: 900, margin: '0 0 15px', letterSpacing: '-1px' }}>Notice Board</h1>
-          <p style={{ color: '#cbd5e1', fontSize: '18px', maxWidth: '600px', margin: 0, lineHeight: 1.6 }}>Official announcements, circulars, and administrative updates.</p>
+          <p style={{ color: '#cbd5e1', fontSize: '18px', maxWidth: '600px', margin: 0, lineHeight: 1.6 }}>Official announcements & circulars directly from our Cloud Drive.</p>
         </div>
       </header>
 
@@ -107,8 +109,8 @@ export default function NotificationsPage() {
               <span className="search-icon">🔍</span>
               <input className="premium-input" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search notices by title or keyword..." />
             </div>
-            {(selYear!=='All'||selMonth!=='All'||selCat!=='All'||search) && (
-              <button className="clear-btn" onClick={() => { setSelYear('All'); setSelMonth('All'); setSelCat('All'); setSearch(''); }}>✕ Clear All</button>
+            {(selYear!=='All'||selMonth!=='All'||search) && (
+              <button className="clear-btn" onClick={() => { setSelYear('All'); setSelMonth('All'); setSearch(''); }}>✕ Clear All</button>
             )}
           </div>
           <div className="filter-row">
@@ -119,16 +121,15 @@ export default function NotificationsPage() {
           </div>
         </div>
 
-        {/* Result count */}
+        {error && <div style={{ color: 'red', textAlign: 'center', fontWeight: 'bold' }}>⚠️ Failed to sync with Google Drive</div>}
+
         {!loading && (
           <div style={{ marginBottom: 16, fontSize: 13, color: '#64748b', fontWeight: 600 }}>
             Showing {paginated.length} of {filtered.length} notice{filtered.length !== 1 ? 's' : ''}
-            {filtered.length !== notices.length ? ` (filtered from ${notices.length} total)` : ''}
           </div>
         )}
 
-        {/* List */}
-        {loading ? <div style={{ textAlign: 'center', padding: '40px', color: '#64748b', fontWeight: 700 }}>Syncing Database...</div> : 
+        {loading ? <div style={{ textAlign: 'center', padding: '40px', color: '#64748b', fontWeight: 700 }}>⏳ Syncing with Google Drive...</div> : 
          filtered.length === 0 ? <div style={{ textAlign: 'center', padding: '60px', border: '2px dashed #cbd5e1', borderRadius: '16px', color: '#64748b' }}>No notices match your filter.</div> : (
           <>
           {Object.entries(grouped).map(([monthYear, items]) => (
@@ -144,21 +145,19 @@ export default function NotificationsPage() {
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '11px', fontWeight: 800, padding: '4px 12px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '50px', color: navy, textTransform: 'uppercase' }}>{n.type || 'General'}</span>
+                        <span style={{ fontSize: '11px', fontWeight: 800, padding: '4px 12px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '50px', color: navy, textTransform: 'uppercase' }}>Document</span>
                         {n.isNew && <span className="badge-new" style={{ fontSize: '10px', fontWeight: 900, color: '#fff', background: '#ef4444', padding: '3px 8px', borderRadius: '50px' }}>NEW</span>}
                       </div>
-                      <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(n.text) }} />
+                      <div style={{ fontSize: '16px', fontWeight: 'bold', color: navy, lineHeight: '1.4' }}>{n.text}</div>
                       {n.link && (
                         <a href={n.link} target="_blank" rel="noreferrer"
                           style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '16px', fontSize: '13px', fontWeight: 800, color: navy, textDecoration: 'none', background: '#f1f5f9', padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', transition: 'all .2s' }}
                           onClick={(e) => {
-                            if (n.link && (n.link.includes('drive.google') || n.link.toLowerCase().endsWith('.pdf') || n.link.includes('firebase'))) {
-                              e.preventDefault();
-                              setPreviewPdf({ url: n.link, title: n.type || 'Notice Document' });
-                            }
+                            e.preventDefault();
+                            setPreviewPdf({ url: n.link, title: n.text });
                           }}
                         >
-                          📄 View Attachment Document
+                          📄 View Official Notice
                         </a>
                       )}
                     </div>
@@ -167,17 +166,11 @@ export default function NotificationsPage() {
               })}
             </div>
           ))}
-          <PremiumPagination
-            totalItems={filtered.length}
-            itemsPerPage={ITEMS_PER_PAGE}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-          />
+          <PremiumPagination totalItems={filtered.length} itemsPerPage={ITEMS_PER_PAGE} currentPage={currentPage} setCurrentPage={setCurrentPage} />
           </>
         )}
       </div>
 
-      {/* ✅ PREMIUM PDF MODAL */}
       {previewPdf && <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />}
     </div>
   );

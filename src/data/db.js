@@ -118,25 +118,24 @@ export const navLinks = [
           {
             label: 'B.B.M.K. University Dhanbad',
             sub: [
-              { label: 'Special UG Regulation (CBCS) Session 2020-23', href: '/about-us/regulations/bbmku/special-ug-regulation' },
-              { label: 'UG Regulation (FYUGP)',                         href: '/about-us/regulations/bbmku/ug-regulation-fyugp' },
-              { label: 'UG Regulation (CBCS)',                          href: '/about-us/regulations/bbmku/ug-regulation-cbcs' },
+              { label: 'UG Regulation (CBCS)', href: '/about-us/regulations/bbmku-ug' },
+              { label: 'UG Circular (Eligibility 2020-23)', href: '/about-us/regulations/bbmku-circular' },
+              { label: 'FYUGP (NEP-2020)', href: '/about-us/regulations/fyugp-nep' },
             ]
           },
           { label: 'College Affiliation Paper B.B.M.K.U.', href: '/about-us/regulations/college-affiliation' },
-          { label: 'UGC Under Section 2(f) & 12(B)',        href: '/about-us/regulations/ugc-section' },
+          { label: 'UGC Under Section 2(f) & 12(B)', href: '/about-us/regulations/ugc-certificate' },
           {
             label: 'V.B.U. Hazaribag',
             sub: [
-              { label: 'UG Regulation 2015', href: '/about-us/regulations/vbu/ug-regulation-2015' },
-              { label: 'BCA Regulation',     href: '/about-us/regulations/vbu/bca-regulation' },
+              { label: 'UG Regulation 2015', href: '/about-us/regulations/vbu-ug' },
+              { label: 'BCA Regulation', href: '/about-us/regulations/vbu-bca' },
             ]
           },
-          { label: 'ByeLaws',   href: '/about-us/regulations/byelaws' },
-          { label: 'Exemption', href: '/about-us/regulations/exemption' },
+          { label: 'ByeLaws', href: '/about-us/regulations/college-byelaws' },
+          { label: 'Minority Exemption', href: '/about-us/regulations/minority-exemption' },
         ]
       },
-      { label: 'Audit Report', href: '/about-us/audit-report' },
     ]
   },
   {

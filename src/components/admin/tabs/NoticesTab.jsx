@@ -48,8 +48,15 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
               </select>
             </div>
             <div style={{ gridColumn: '1/-1' }}>
-              <MediaPicker label="Link (PDF ya URL — optional)" value={noticeData.link || ''} onChange={url => setNoticeData(d => ({ ...d, link: url }))} type="pdf" compact={true} />
-            </div>
+  <MediaPicker 
+    label="Link (Drive PDF ya URL)" 
+    value={noticeData.link || ''} 
+    onChange={url => setNoticeData(d => ({ ...d, link: url }))} 
+    type="pdf" 
+    compact={true} 
+    driveFolderId={import.meta.env.VITE_DRIVE_NOTICE_FOLDER} // ✅ MAGIC HAPPPENS HERE
+  />
+</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 22 }}>
               <Toggle checked={!!noticeData.isNew} onChange={()=>setNoticeData(d=>({...d,isNew:!d.isNew}))} label="Mark as NEW" color={T.red} />
               <Toggle checked={!!noticeData.pinned} onChange={()=>setNoticeData(d=>({...d,pinned:!d.pinned}))} label="Pin to Top" color={NAVY} />

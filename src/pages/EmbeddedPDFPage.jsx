@@ -1,5 +1,5 @@
 // src/pages/EmbeddedPDFPage.jsx
-// 🚀 ULTRA PRO MAX PDF ENGINE (Inception Bug Fixed)
+// 🚀 ULTRA PRO MAX PDF ENGINE (Height Increased for Full Page View)
 
 import React, { useState, useRef } from 'react';
 import { COLORS } from '../styles/colors';
@@ -165,10 +165,11 @@ export default function EmbeddedPDFPage({ title, subtitle, pdfUrl }) {
           box-shadow: 0 5px 15px rgba(244,160,35,0.3);
         }
 
+        /* 🔥 HEIGHT INCREASED HERE 🔥 */
         .epdf-iframe-wrap {
           position: relative;
           width: 100%;
-          height: clamp(500px, 70vh, 800px);
+          height: clamp(800px, 85vh, 1400px); /* Pura page dikhane ke liye lamba kiya gaya */
           border-radius: 12px;
           overflow: hidden;
           background: #e2e8f0;

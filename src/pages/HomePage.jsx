@@ -5,6 +5,8 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import { COLORS } from "../styles/colors";
 import { SOCIAL_LINKS } from "../data/db";
+import { useDriveDocs } from "../hooks/useDriveDocs";
+
 
 import HeroSlider from "../components/HeroSlider";
 import HomeFeatures from "../components/HomeFeatures";
@@ -687,9 +689,24 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
   const [tab, setTab] = useState("All Moments");
   const [selectedPdf, setSelectedPdf] = useState(null);
 
-  const allGal = gallery || [];
+  // ✅ NAYA LOGIC: Google Drive se latest notices fetch karna
+  const NOTICE_FOLDER_ID = import.meta.env.VITE_DRIVE_NOTICE_FOLDER;
+  const { docs: driveNotices } = useDriveDocs(NOTICE_FOLDER_ID);
   
-  // ✅ Dual fallback for new and old data types
+  // In notices ko UI format me map karna
+  const liveDriveNotices = driveNotices.map(doc => ({
+    id: doc.id,
+    text: doc.name,
+    createdAt: { toDate: () => new Date(doc.rawDate) },
+    link: doc.previewUrl,
+    isNew: (new Date() - new Date(doc.rawDate)) < 7 * 24 * 60 * 60 * 1000
+  }));
+
+  // Agar Drive se notice aagaye toh wo use karo, warna fallback wale (props) use karo
+  const finalNotices = liveDriveNotices.length > 0 ? liveDriveNotices : notices;
+
+  // ✅ YAHAN GADBAD THI (Variables Restored)
+  const allGal = gallery || [];
   const filtered = tab === "All Moments" 
       ? allGal 
       : allGal.filter((i) => (i.cat === tab) || (i.album === tab));
@@ -711,8 +728,8 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
       <Ticker />
       <PremiumTicker items={updates?.length > 0 ? updates : TICKER_ITEMS} />
       <QuickActionBar />
-      <NotificationSection notices={notices} announcements={announcements} pdfReports={pdfReports} upcomingEvents={upcomEv} />
-
+      {/* Yahan 'notices' ki jagah 'finalNotices' paas kar diya gaya hai */}
+      <NotificationSection notices={finalNotices} announcements={announcements} pdfReports={pdfReports} upcomingEvents={upcomEv} />
       <section id="about" className="hp-about">
         <div className="hp-about-inner">
           <SA variant="left" slow>

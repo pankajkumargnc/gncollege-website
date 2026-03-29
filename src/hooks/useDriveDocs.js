@@ -1,59 +1,90 @@
-// useDriveDocs.js
-import { useState, useEffect } from "react";
+// src/hooks/useDriveDocs.js
+// ✅ Google Drive folder se files fetch karne ka reusable hook
+// Usage: const { docs, loading, error } = useDriveDocs(folderId, 'pdf')
 
-const API_KEY   = import.meta.env.VITE_GOOGLE_API_KEY;
-const BASE_URL  = "https://www.googleapis.com/drive/v3/files";
+import { useState, useEffect } from 'react';
 
-// Fetch all PDFs from a specific Drive folder
-export function useDriveDocs(folderId) {
+const BASE_URL = 'https://www.googleapis.com/drive/v3/files';
+
+export function useDriveDocs(folderId, fileType = 'any') {
   const [docs,    setDocs]    = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState(null);
 
   useEffect(() => {
-    if (!folderId) return;
+    // folderId nahi hai toh kuch mat karo
+    if (!folderId) {
+      setDocs([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
+    if (!API_KEY) {
+      setError('VITE_GOOGLE_API_KEY missing in .env file');
+      return;
+    }
+
+    let cancelled = false;
 
     async function fetchFiles() {
       setLoading(true);
       setError(null);
+
       try {
-        const query = encodeURIComponent(
-          `'${folderId}' in parents and mimeType='application/pdf' and trashed=false`
-        );
-        const url = `${BASE_URL}?q=${query}&key=${API_KEY}&fields=files(id,name,createdTime,modifiedTime,size)&orderBy=createdTime desc`;
+        // MIME type filter
+        let mimeFilter = '';
+        if (fileType === 'pdf')   mimeFilter = " and mimeType='application/pdf'";
+        if (fileType === 'image') mimeFilter = " and mimeType contains 'image/'";
 
-        const res  = await fetch(url);
-        if (!res.ok) throw new Error(`Drive API error: ${res.status}`);
+        const q   = encodeURIComponent(`'${folderId}' in parents${mimeFilter} and trashed=false`);
+        const url = `${BASE_URL}?q=${q}&key=${API_KEY}&fields=files(id,name,mimeType,createdTime,size)&orderBy=createdTime desc&pageSize=100`;
+
+        const res = await fetch(url);
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData?.error?.message || `Drive API error: ${res.status}`);
+        }
+
         const data = await res.json();
+        if (cancelled) return;
 
-        // Convert to usable format with preview/download URLs
-        const files = data.files.map((f) => ({
-          id:           f.id,
-          name:         f.name.replace(".pdf", ""),
-          size:         formatSize(f.size),
-          date:         new Date(f.modifiedTime).toLocaleDateString("en-IN"),
-          previewUrl:   `https://drive.google.com/file/d/${f.id}/preview`,
-          downloadUrl:  `https://drive.google.com/uc?export=download&id=${f.id}`,
-          viewUrl:      `https://drive.google.com/file/d/${f.id}/view`,
+        const files = (data.files || []).map(f => ({
+          id:         f.id,
+          name:       f.name.replace(/\.pdf$/i, '').trim(),
+          mimeType:   f.mimeType,
+          size:       formatSize(f.size),
+          date:       new Date(f.createdTime).toLocaleDateString('en-IN', {
+                        day: '2-digit', month: 'short', year: 'numeric'
+                      }),
+          previewUrl: `https://drive.google.com/file/d/${f.id}/preview`,
+          viewUrl:    `https://drive.google.com/file/d/${f.id}/view`,
         }));
 
         setDocs(files);
       } catch (err) {
-        console.error("[useDriveDocs]", err);
-        setError(err.message);
+        if (!cancelled) {
+          console.error('[useDriveDocs]', err);
+          setError(err.message);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     fetchFiles();
-  }, [folderId]);
+
+    // Cleanup — component unmount pe cancel karo
+    return () => { cancelled = true; };
+  }, [folderId, fileType]);
 
   return { docs, loading, error };
 }
 
 function formatSize(bytes) {
-  if (!bytes) return "—";
-  const kb = bytes / 1024;
-  return kb > 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${Math.round(kb)} KB`;
+  if (!bytes) return '—';
+  const kb = parseInt(bytes) / 1024;
+  if (kb > 1024) return `${(kb / 1024).toFixed(1)} MB`;
+  return `${Math.round(kb)} KB`;
 }
