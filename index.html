@@ -70,7 +70,6 @@
     </script>
 
     <!-- ══ PWA ══ -->
-    <link rel="manifest" href="./manifest.json" />
     <meta name="mobile-web-app-capable"                content="yes" />
     <meta name="apple-mobile-web-app-capable"          content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -99,28 +98,97 @@
     <link rel="dns-prefetch" href="https://i.ibb.co" />
 
     <!-- ══ Performance — LCP Critical Image Preload ══ -->
-    <link rel="preload" as="image" href="/gncollege-website/images/HeroSlider/slide0.webp"
-          type="image/webp" fetchpriority="high" />
-    <link rel="preload" as="image" href="/gncollege-website/images/logo.webp" type="image/webp" />
+    <link rel="preload" as="image" href="images/logo.webp" type="image/webp" />
 
     <!-- ══ Fonts — Non-blocking (print trick) ══ -->
     <link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Space+Grotesk:wght@700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap"
       media="print" onload="this.media='all'" />
     <noscript>
       <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Space+Grotesk:wght@700;800;900&display=swap" />
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Space+Grotesk:wght@700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" />
     </noscript>
 
     <!-- ══ Prefetch Next-Load Assets ══ -->
-    <link rel="prefetch" href="/gncollege-website/images/college_photo.webp" />
-    <link rel="prefetch" href="/gncollege-website/images/HeroSlider/slide1.webp" />
+    <link rel="prefetch" href="images/college_photo.webp" />
+    <link rel="prefetch" href="images/HeroSlider/slide1.webp" />
+
+    <!-- ══ Google Translate Script ══ -->
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+          pageLanguage: 'en',
+          includedLanguages: 'en,hi,bn,ur', // English, Hindi, Bengali, Urdu
+          layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+          autoDisplay: false
+        }, 'google_translate_element');
+      }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
 
     <!-- ══ Critical Inline CSS — Prevents FOUC & CLS ══ -->
     <style>
+      /* ── Google Translate Custom Premium Styling ── */
+      #google_translate_element { display: inline-block; vertical-align: middle; }
+      .goog-te-gadget { font-family: 'Inter', sans-serif !important; color: transparent !important; }
+      .goog-te-gadget .goog-te-combo {
+        padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color, #e2e8f0);
+        background: var(--bg-card, #fff); color: var(--text-primary, #1e293b);
+        font-size: 11px; font-weight: 700; cursor: pointer; height: 26px; outline: none; margin: 0;
+      }
+      .goog-te-gadget .goog-te-combo:focus { border-color: #f4a023; }
+      .goog-logo-link { display: none !important; }
+      .goog-te-gadget span { display: none !important; }
+      /* Hide top Google frame */
+      .goog-te-banner-frame { display: none !important; }
+      body { top: 0px !important; }
+      
+      /* ── 🛡️ Admin Shortcut: KILL SPLASH ── */
+      body.is-admin .splash-screen { display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+      body.is-admin #root > main { animation: none !important; opacity: 1 !important; transform: none !important; }
+
+      /* ── Dark Mode CSS Variables ── */
+      :root {
+        --bg-primary: #f4f7f9;
+        --bg-secondary: #ffffff;
+        --bg-card: #ffffff;
+        --bg-nav: #ffffff;
+        --text-primary: #1e293b;
+        --text-secondary: #475569;
+        --text-muted: #94a3b8;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 2px 8px rgba(0,0,0,.04);
+        --shadow-md: 0 8px 25px rgba(0,0,0,.07);
+        --shadow-lg: 0 14px 36px rgba(11,31,78,.13);
+        --navy: #0f2347;
+        --gold: #f4a023;
+        --glass-bg: rgba(255,255,255,0.65);
+        --glass-border: rgba(255,255,255,0.5);
+        --overlay-light: rgba(15,35,71,0.06);
+        color-scheme: light;
+      }
+      [data-theme="dark"] {
+        --bg-primary: #0a0f1a;
+        --bg-secondary: #111827;
+        --bg-card: #1a2234;
+        --bg-nav: rgba(17,24,39,0.92);
+        --text-primary: #e2e8f0;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --border-color: #1e293b;
+        --shadow-sm: 0 2px 8px rgba(0,0,0,.3);
+        --shadow-md: 0 8px 25px rgba(0,0,0,.4);
+        --shadow-lg: 0 14px 36px rgba(0,0,0,.5);
+        --navy: #1e3a6e;
+        --gold: #f4a023;
+        --glass-bg: rgba(17,24,39,0.85);
+        --glass-border: rgba(255,255,255,0.08);
+        --overlay-light: rgba(244,160,35,0.06);
+        color-scheme: dark;
+      }
       *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
       html{overflow-x:hidden;scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-      body{overflow-x:hidden;max-width:100vw;background:#f4f7f9;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1e293b;-webkit-font-smoothing:antialiased}
+      body{overflow-x:hidden;max-width:100vw;background:var(--bg-primary);font-family:'Inter','Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text-primary);-webkit-font-smoothing:antialiased;transition:background .3s ease,color .3s ease}
       #root{overflow-x:hidden;max-width:100vw}
       /* ── Skip Navigation Link (Accessibility) ── */
       .skip-link{position:absolute;top:-100%;left:16px;z-index:999999;background:#0f2347;color:#f4a023;padding:12px 20px;border-radius:0 0 8px 8px;font-weight:700;font-size:15px;text-decoration:none;transition:top .15s;border:2px solid #f4a023}
@@ -129,25 +197,38 @@
       :focus-visible{outline:3px solid #f4a023;outline-offset:2px;border-radius:4px}
       /* ── Splash Screen ── */
       .splash-screen{position:fixed;inset:0;background:rgba(255,255,255,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:999999;display:flex;flex-direction:column;justify-content:center;align-items:center;transition:opacity .8s ease,visibility .8s ease}
+      [data-theme="dark"] .splash-screen{background:rgba(10,15,26,.95)}
       .splash-screen.hide{opacity:0;visibility:hidden;pointer-events:none}
       @keyframes pulseGlow{0%,100%{transform:scale(.96);opacity:.85}50%{transform:scale(1.05);opacity:1}}
       @keyframes fadeInOut{0%,100%{opacity:.4}50%{opacity:1}}
       @media(prefers-reduced-motion:reduce){.splash-logo,.splash-text{animation:none!important}}
       .splash-logo{height:clamp(80px,12vw,120px);animation:pulseGlow 2s infinite ease-in-out;will-change:transform,opacity}
-      .splash-text{margin-top:24px;font-size:clamp(11px,.85vw,14px);font-weight:800;color:#0f2347;letter-spacing:4px;text-transform:uppercase;animation:fadeInOut 1.5s infinite;will-change:opacity}
+      .splash-text{margin-top:24px;font-size:clamp(11px,.85vw,14px);font-weight:800;color:var(--navy);letter-spacing:4px;text-transform:uppercase;animation:fadeInOut 1.5s infinite;will-change:opacity}
+      /* ── Page Transition Animation ── */
+      @keyframes pageEnter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+      #root>main{animation:pageEnter .4s cubic-bezier(.22,1,.36,1) both}
     </style>
 
-    <script type="module" crossorigin src="/gncollege-website/assets/index-CP4_ZMC5.js"></script>
+    <script type="module" crossorigin src="/gncollege-website/assets/index-DoEmPkwO.js"></script>
     <link rel="modulepreload" crossorigin href="/gncollege-website/assets/jodit-tif5fz24.js">
     <link rel="modulepreload" crossorigin href="/gncollege-website/assets/firebase-db-BOfJWJsG.js">
     <link rel="modulepreload" crossorigin href="/gncollege-website/assets/firebase-app-Ck8nMlqm.js">
     <link rel="stylesheet" crossorigin href="/gncollege-website/assets/jodit-vLJvXAYP.css">
-    <link rel="stylesheet" crossorigin href="/gncollege-website/assets/index-CEHD5OzR.css">
+    <link rel="stylesheet" crossorigin href="/gncollege-website/assets/index-Da_5MOEa.css">
   </head>
   <body>
 
     <!-- ══ Accessibility — Skip Navigation ══ -->
     <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <script>
+      // 🛡️ Admin Shortcut: Immediate class addition to kill splash via CSS
+      if (window.location.hash.indexOf('admin') !== -1 || window.location.href.indexOf('admin') !== -1) {
+        document.body.classList.add('is-admin');
+        var splash = document.getElementById('splash');
+        if (splash) splash.parentNode.removeChild(splash);
+      }
+    </script>
 
     <!-- ══ No-JS Fallback ══ -->
     <noscript>
@@ -166,10 +247,9 @@
       </div>
     </noscript>
 
-    <!-- ══ Splash Screen ══ -->
     <div class="splash-screen" id="splash" role="status" aria-live="polite" aria-label="Website load ho rahi hai, kripya pratiksha karein">
       <img class="splash-logo"
-           src="/gncollege-website/images/logo.webp"
+           src="images/logo.webp"
            alt="Guru Nanak College, Dhanbad"
            width="120" height="120"
            onerror="this.style.display='none'" />
@@ -184,6 +264,14 @@
       (function() {
         var splash = document.getElementById('splash');
         if (!splash) return;
+        
+        // 🛡️ Admin Shortcut: If we are on admin route, kill splash NOW
+        if (window.location.hash.indexOf('admin') !== -1 || window.location.href.indexOf('admin') !== -1 || document.body.classList.contains('is-admin')) {
+          splash.style.display = 'none';
+          if (splash.parentNode) splash.parentNode.removeChild(splash);
+          return;
+        }
+
         var done = false;
         function hide() {
           if (done) return; done = true;
@@ -195,25 +283,15 @@
       })();
     </script>
 
-    <!-- ══ Service Worker ══ -->
+    <!-- ══ Service Worker Forcible Unregister (Dev Bypass CACHE) ══ -->
     <script>
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          var host = window.location.hostname;
-          var isValid = host === 'localhost' || host === '127.0.0.1' ||
-                        host.includes('gncollege') || host.includes('github');
-          if (!isValid) return;
-          navigator.serviceWorker.register('./sw.js')
-            .then(function(reg) {
-              reg.addEventListener('updatefound', function() {
-                var nw = reg.installing;
-                nw.addEventListener('statechange', function() {
-                  if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-                    window.location.reload();
-                  }
-                });
-              });
-            }).catch(function() {});
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister().then(function(boolean) {
+              console.log('Unregistered stale service worker to fetch fresh local code: ', boolean);
+            });
+          }
         });
       }
     </script>
