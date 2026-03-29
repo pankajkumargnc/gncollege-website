@@ -28,6 +28,7 @@ import {
 import { db } from "./firebase";
 
 import { PageViewerStandalone } from "./components/PageViewer";
+import VideoLibrary from './pages/VideoLibrary';
 
 // ── Core pages — eager load ──────────────────────────────────────────────────
 import HomePage from "./pages/HomePage";
@@ -839,7 +840,7 @@ export default function App() {
             path="/admission/intake-capacity"
             element={<R el={<IntakeCapacity />} />}
           />
-
+          <Route path="/videos" element={<VideoLibrary />} />
           {/* Activity */}
           <Route path="/activity/nss" element={<R el={<NssPage />} />} />
           <Route path="/activity/ncc" element={<R el={<NccPage />} />} />

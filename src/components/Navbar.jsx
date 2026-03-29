@@ -1,3 +1,4 @@
+// src/components/Navbar.jsx
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { COLORS } from '../styles/colors'
@@ -79,7 +80,6 @@ export default function Navbar({ onAdminClick, navLinks }) {
             50%  { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
           }
-          /* Smooth Fade and Drop animations for dropdowns */
           @keyframes dropdownFadeDown {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -107,7 +107,6 @@ export default function Navbar({ onAdminClick, navLinks }) {
             border-left: 2.5px solid ${COLORS.gold};
             border-radius: 2px;
           }
-          /* Premium Hover Link Class */
           .nav-hover-link {
             transition: all 0.25s ease;
           }
@@ -136,8 +135,9 @@ export default function Navbar({ onAdminClick, navLinks }) {
             padding: '8px 0',
             flexShrink: 0,
             textDecoration: 'none',
-            gap: isMobile ? '8px' : '15px',
+            gap: isMobile ? '6px' : '15px',
             marginLeft: isMobile ? '0' : '-20px',
+            minWidth: 0 // ✅ Prevent overflow on tiny screens
           }}>
 
             <div className="logo-box-container" style={{
@@ -146,8 +146,8 @@ export default function Navbar({ onAdminClick, navLinks }) {
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
-              width:  isMobile ? '45px' : '75px',
-              height: isMobile ? '45px' : '75px',
+              width:  isMobile ? 'clamp(38px, 10vw, 45px)' : '75px',
+              height: isMobile ? 'clamp(38px, 10vw, 45px)' : '75px',
             }}>
               <img
                 className="spinning-logo"
@@ -161,13 +161,15 @@ export default function Navbar({ onAdminClick, navLinks }) {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
-              paddingLeft: isMobile ? '8px' : '15px',
+              paddingLeft: isMobile ? '6px' : '15px',
               textAlign: 'left',
               alignItems: 'flex-start',
+              minWidth: 0 // ✅ Allow text truncation if needed
             }}>
               <h1 className="shimmering-title" style={{
                 margin: '0 0 5px 0',
-                fontSize: isMobile ? '13px' : '21.5px',
+                // ✅ FLUID TYPE HERE FOR EXTREME RESPONSIVENESS
+                fontSize: isMobile ? 'clamp(11px, 3.5vw, 14px)' : 'clamp(16px, 1.8vw, 21.5px)',
                 fontWeight: '900',
                 fontFamily: 'Georgia, serif',
                 whiteSpace: 'nowrap',
@@ -193,7 +195,8 @@ export default function Navbar({ onAdminClick, navLinks }) {
 
               <p style={{
                 margin: 0,
-                fontSize: isMobile ? '8.5px' : '10.5px',
+                // ✅ FLUID SUBTITLE
+                fontSize: isMobile ? 'clamp(7.5px, 2.2vw, 9px)' : '10.5px',
                 color: COLORS.gold,
                 fontWeight: '800',
                 letterSpacing: isMobile ? '0.2px' : '1.8px',
@@ -285,7 +288,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                   {!isMobile && l0.sub && <span style={{ color: COLORS.navy, fontSize: 11, marginLeft: 2, marginRight: 8, marginTop: 2 }}>▾</span>}
                 </div>
 
-                {/* ── L1 Dropdown (Sleek & Animated) ── */}
+                {/* ── L1 Dropdown ── */}
                 {l0.sub && openL1 === l0.label && (
                   <div style={{
                     position: isMobile ? 'static' : 'absolute',
@@ -296,7 +299,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                     WebkitBackdropFilter: isMobile ? 'none' : 'blur(16px)',
                     border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.5)',
                     
-                    minWidth: isMobile ? '100%' : 210, // Reduced width for sleeker look
+                    minWidth: isMobile ? '100%' : 210,
                     boxShadow: isMobile ? 'none' : '0 15px 35px rgba(0,0,0,.12)',
                     borderTop: isMobile ? 'none' : '3px solid ' + COLORS.navy,
                     borderRadius: isMobile ? 8 : '0 0 12px 12px',
@@ -315,7 +318,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                           onClick={e => { if (isMobile && l1.sub) { e.stopPropagation(); toggleL2(l1.label) } }}
                           style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                            padding: isMobile ? '10px 16px' : '8px 16px', // Tighter padding
+                            padding: isMobile ? '10px 16px' : '8px 16px',
                             borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
                             cursor: isMobile && l1.sub ? 'pointer' : 'default',
                             transition: 'background 0.2s ease',
@@ -330,7 +333,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                           {l1.sub && <span style={{ fontSize: 12, color: COLORS.gold, marginLeft: 8 }}>{isMobile ? (openL2 === l1.label ? '▴' : '▾') : '▶'}</span>}
                         </div>
 
-                        {/* ── L2 Dropdown (Sleek & Animated) ── */}
+                        {/* ── L2 Dropdown ── */}
                         {l1.sub && openL2 === l1.label && (
                           <div style={{
                             position: isMobile ? 'static' : 'absolute',
@@ -341,7 +344,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                             WebkitBackdropFilter: isMobile ? 'none' : 'blur(16px)',
                             border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.5)',
                             
-                            minWidth: isMobile ? '100%' : 210, // Reduced width
+                            minWidth: isMobile ? '100%' : 210,
                             boxShadow: isMobile ? 'none' : '5px 5px 25px rgba(0,0,0,.12)',
                             borderTop: isMobile ? 'none' : '3px solid ' + COLORS.gold,
                             borderRadius: isMobile ? 4 : '0 12px 12px 12px',
@@ -361,7 +364,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                                   onClick={e => { if (isMobile && l2.sub) { e.stopPropagation(); toggleL3(l2.label) } }}
                                   style={{
                                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                    padding: '8px 16px', // Tighter padding
+                                    padding: '8px 16px',
                                     borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
                                     cursor: isMobile && l2.sub ? 'pointer' : 'default',
                                     transition: 'background 0.2s ease',
@@ -376,7 +379,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                                   {l2.sub && <span style={{ fontSize: 11, color: COLORS.gold, marginLeft: 8 }}>{isMobile ? (openL3 === l2.label ? '▴' : '▾') : '▶'}</span>}
                                 </div>
 
-                                {/* ── L3 Dropdown (Sleek & Animated) ── */}
+                                {/* ── L3 Dropdown ── */}
                                 {l2.sub && openL3 === l2.label && (
                                   <div style={{
                                     position: isMobile ? 'static' : 'absolute',
@@ -387,7 +390,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                                     WebkitBackdropFilter: isMobile ? 'none' : 'blur(16px)',
                                     border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.5)',
                                     
-                                    minWidth: isMobile ? '100%' : 210, // Reduced width
+                                    minWidth: isMobile ? '100%' : 210,
                                     boxShadow: isMobile ? 'none' : '5px 5px 25px rgba(0,0,0,.12)',
                                     borderTop: isMobile ? 'none' : '3px solid ' + COLORS.navy,
                                     borderRadius: isMobile ? 4 : '0 12px 12px 12px',
@@ -400,7 +403,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                                     {l2.sub.map(l3 => (
                                       <Link key={l3.label} to={getRoute(l3.href)} className="nav-hover-link"
                                         style={{
-                                          display: 'block', padding: '8px 16px', // Tighter padding
+                                          display: 'block', padding: '8px 16px',
                                           fontSize: 12, color: '#555',
                                           borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
                                           textDecoration: 'none',

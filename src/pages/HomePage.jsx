@@ -7,7 +7,6 @@ import { COLORS } from "../styles/colors";
 import { SOCIAL_LINKS } from "../data/db";
 import { useDriveDocs } from "../hooks/useDriveDocs";
 
-
 import HeroSlider from "../components/HeroSlider";
 import HomeFeatures from "../components/HomeFeatures";
 import NotificationSection from "../components/home/NotificationSection";
@@ -202,13 +201,14 @@ const ANIM_CSS = `
   }
 `;
 
+// ✅ ULTRA PRO MAX RESPONSIVE CSS INJECTED HERE
 const CSS = `
   *,*::before,*::after{box-sizing:border-box;}
   p { text-align: justify; }
   .hp-watermark{position:fixed;inset:0;background-image:url(${import.meta.env.BASE_URL}images/logo.webp);background-repeat:repeat;background-size:320px;opacity:.025;z-index:-1;background-color:#f4f7f9;pointer-events:none;}
 
   .hp-qab{background:#fff;border-bottom:1.5px solid #f1f5f9;box-shadow:0 2px 12px rgba(15,35,71,.06);}
-  .hp-qab-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);}
+  .hp-qab-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%, 250px),1fr));}
   .hp-qab-item{display:flex;align-items:center;gap:14px;padding:16px 22px;text-decoration:none;transition:background .18s;border-right:1px solid #f1f5f9;position:relative;overflow:hidden;}
   .hp-qab-item:last-child{border-right:none;}
   .hp-qab-item::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2.5px;transition:width .25s ease;}
@@ -223,14 +223,14 @@ const CSS = `
   @media(max-width:420px){ .hp-qab-inner{grid-template-columns:1fr;} .hp-qab-item{border-right:none !important;} .hp-qab-item:last-child{border-bottom:none;} }
 
   .hp-about{background:#fff;padding:clamp(60px,8vw,100px) 20px;overflow:hidden;}
-  .hp-about-inner{max-width:1250px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:56px;align-items:center;}
+  .hp-about-inner{max-width:1250px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%, 400px),1fr));gap:56px;align-items:center;}
   .hp-imgstack{position:relative;width:100%;height:420px;}
   .hp-img-main{width:90%;height:100%;object-fit:cover;border-radius:20px;box-shadow:20px 20px 0 ${G};position:relative;z-index:2;transition:transform .5s;}
   .hp-imgstack:hover .hp-img-main{transform:scale(1.02);}
   .hp-img-accent{position:absolute;bottom:-28px;right:0;background:${N};color:#fff;padding:22px 26px;border-radius:14px;z-index:3;box-shadow:0 10px 30px rgba(0,0,0,.2);animation:float 3s ease-in-out infinite;}
   @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
   .hp-adesc{color:#555;line-height:1.8;font-size:15.5px;margin-bottom:28px;text-align:justify;}
-  .hp-afeat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:32px;}
+  .hp-afeat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%, 200px),1fr));gap:14px;margin-bottom:32px;}
   .hp-afeat{display:flex;gap:11px;align-items:flex-start;}
   .hp-afeat-t{font-weight:800;font-size:13.5px;color:${N};}
   .hp-afeat-d{font-size:12px;color:#888;}
@@ -251,7 +251,8 @@ const CSS = `
   .hp-ev-track{display:flex;width:max-content;gap:28px;animation:hp-ev-scroll 36s linear infinite;will-change:transform;}
   .hp-ev-track:hover{animation-play-state:paused;}
   
-  .hp-ev-card{width:310px;height:425px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.07);border:1px solid #edf2f7;transition:transform .35s,box-shadow .35s,border-color .35s;display:flex;flex-direction:column;}
+  /* ✅ FIXED: Mobile Card Width for horizontal scroll */
+  .hp-ev-card{width:clamp(260px, 80vw, 310px);height:425px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.07);border:1px solid #edf2f7;transition:transform .35s,box-shadow .35s,border-color .35s;display:flex;flex-direction:column;}
   .gc:hover .hp-ev-card{transform:translateY(-10px) scale(1.02);box-shadow:0 20px 40px rgba(15,35,71,.14);border-color:transparent;}
   .hp-ev-imgbox{position:relative;height:190px;overflow:hidden;flex-shrink:0;}
   .hp-ev-img{width:100%;height:100%;object-fit:cover;transition:transform .55s;}
@@ -275,7 +276,8 @@ const CSS = `
 
   .hp-cnt{background:linear-gradient(135deg,#f0f4ff 0%,#e8eef8 100%);padding:clamp(60px,8vw,80px) 20px;position:relative;overflow:hidden;border-top:1px solid #dde8f5;border-bottom:1px solid #dde8f5;}
   .hp-cnt-bg{position:absolute;inset:0;opacity:.4;pointer-events:none;background-image:radial-gradient(${N}18 1px,transparent 1px);background-size:30px 30px;}
-  .hp-cnt-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:36px;text-align:center;position:relative;z-index:2;}
+  /* ✅ FIXED: Min-width handled perfectly with min() */
+  .hp-cnt-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%, 200px),1fr));gap:36px;text-align:center;position:relative;z-index:2;}
   .hp-cnt-box{padding:28px 18px;border-radius:16px;cursor:default;background:#fff;border:1.5px solid #dde8f5;box-shadow:0 4px 16px rgba(15,35,71,.06);transition:transform .35s,box-shadow .35s,border-color .35s;}
   .gc:hover .hp-cnt-box{transform:translateY(-8px);box-shadow:0 16px 36px rgba(15,35,71,.12);border-color:transparent;}
   .hp-cnt-icon{font-size:42px;margin-bottom:14px;display:inline-block;transition:transform .35s;}
@@ -285,7 +287,7 @@ const CSS = `
 
   .hp-links{padding:clamp(60px,8vw,80px) 20px;background:#fff;}
   .hp-links-inner{max-width:1200px;margin:0 auto;}
-  .hp-links-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:18px;}
+  .hp-links-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%, 160px),1fr));gap:18px;}
   .hp-link-tile{background:#fff;border:1.5px solid #edf2f7;border-radius:12px;padding:24px 14px;text-align:center;text-decoration:none;transition:transform .3s,border-color .3s,box-shadow .3s;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.04);}
   .gc:hover .hp-link-tile{transform:translateY(-7px) scale(1.03);border-color:transparent;box-shadow:0 12px 28px rgba(15,35,71,.1);}
   .hp-link-icon{width:56px;height:56px;background:#f1f5f9;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;transition:background .3s,transform .3s;}
@@ -297,7 +299,7 @@ const CSS = `
   .hp-gal-filters{display:flex;justify-content:center;gap:10px;margin-bottom:44px;flex-wrap:wrap;}
   .hp-filter{padding:9px 22px;border-radius:50px;border:2px solid #edf2f7;background:#fff;color:${N};font-weight:700;font-size:13px;cursor:pointer;transition:background .25s,color .25s,border-color .25s,transform .25s,box-shadow .25s;}
   .hp-filter:hover,.hp-filter.active{background:${N};color:#fff;border-color:${N};transform:translateY(-2px);box-shadow:0 5px 14px rgba(15,35,71,.2);}
-  .hp-gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+  .hp-gal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%, 280px),1fr));gap:14px;}
   .hp-gal-item{position:relative;border-radius:14px;overflow:hidden;aspect-ratio:4/3;box-shadow:0 4px 14px rgba(0,0,0,.06);cursor:pointer;transition:box-shadow .3s;}
   .gc:hover .hp-gal-item{box-shadow:0 8px 24px rgba(0,0,0,.12);}
   .hp-gal-img{width:100%;height:100%;object-fit:cover;transition:transform .55s;}
@@ -311,21 +313,18 @@ const CSS = `
 
   .hp-yt{padding:clamp(60px,8vw,80px) 20px;background:#f8fafc;}
   .hp-yt-inner{max-width:1200px;margin:0 auto;}
-  .hp-yt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;}
+  .hp-yt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%, 280px),1fr));gap:24px;}
   .hp-yt-frame{border-radius:16px;border:none;box-shadow:0 10px 32px rgba(0,0,0,.1);width:100%;height:220px;}
   .hp-yt-ph{background:#fff;border:1.5px solid #e2e8f0;border-radius:16px;height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
   .hp-yt-ph-icon{font-size:34px;opacity:.35;}
   .hp-yt-ph-txt{color:#94a3b8;font-size:13px;text-align:center;}
 
   @media(max-width:768px){
-    .hp-imgstack{height:300px;} .hp-img-accent{display:none;} .hp-afeat-grid{grid-template-columns:1fr;}
-    .hp-cnt-grid{grid-template-columns:1fr 1fr;} .hp-links-grid{grid-template-columns:repeat(3,1fr);}
+    .hp-imgstack{height:300px;} .hp-img-accent{display:none;}
   }
   @media(max-width:480px){
-    .hp-about-inner{grid-template-columns:1fr;} .hp-imgstack{height:240px;}
-    .hp-cnt-grid{grid-template-columns:1fr 1fr;gap:18px;} .hp-cnt-num{font-size:30px;}
-    .hp-links-grid{grid-template-columns:repeat(2,1fr);} .hp-gal-grid{grid-template-columns:1fr;}
-    .hp-yt-grid{grid-template-columns:1fr;}
+    .hp-imgstack{height:240px;}
+    .hp-cnt-num{font-size:30px;}
   }
 `;
 
@@ -373,11 +372,13 @@ const QuickActionBar = () => (
           style: { background: item.bg },
           onMouseEnter: (e) => {
             e.currentTarget.style.background = item.hoverBg;
-            e.currentTarget.querySelector(".hp-qab-arr").style.color = item.color;
+            e.currentTarget.querySelector(".hp-qab-arr").style.color =
+              item.color;
           },
           onMouseLeave: (e) => {
             e.currentTarget.style.background = item.bg;
-            e.currentTarget.querySelector(".hp-qab-arr").style.color = "#cbd5e1";
+            e.currentTarget.querySelector(".hp-qab-arr").style.color =
+              "#cbd5e1";
           },
         };
 
@@ -398,7 +399,13 @@ const QuickActionBar = () => (
         );
 
         return item.external ? (
-          <a key={item.title} href={item.href} target="_blank" rel="noopener noreferrer" {...commonProps}>
+          <a
+            key={item.title}
+            href={item.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            {...commonProps}
+          >
             {inner}
           </a>
         ) : (
@@ -411,7 +418,6 @@ const QuickActionBar = () => (
   </div>
 );
 
-// ── EventCard ──────────────────────────────────────────────
 const EventCard = memo(({ ev, onPdf }) => {
   const tempDiv = document.createElement("div");
   tempDiv.innerHTML = ev.description || ev.desc || "";
@@ -423,13 +429,15 @@ const EventCard = memo(({ ev, onPdf }) => {
     const d = new Date(ev.date);
     if (!isNaN(d)) {
       displayDay = d.getDate();
-      displayMonth = d.toLocaleString("en-US", { month: "short" }).toUpperCase();
+      displayMonth = d
+        .toLocaleString("en-US", { month: "short" })
+        .toUpperCase();
     }
   }
 
   let imgSrc = ev.image || ev.imageUrl || getEventImg(ev.type?.toUpperCase());
   if (imgSrc && imgSrc.startsWith("images/")) {
-    imgSrc = `${import.meta.env.BASE_URL}${imgSrc}`; 
+    imgSrc = `${import.meta.env.BASE_URL}${imgSrc}`;
   }
 
   return (
@@ -455,19 +463,24 @@ const EventCard = memo(({ ev, onPdf }) => {
           <h3 className="hp-ev-title" title={ev.title}>
             {ev.title}
           </h3>
-
           <div className="hp-ev-desc-wrap">
             <p className="hp-ev-desc">{plainText}</p>
             {plainText.length > 0 && (
               <Link
                 to="/events"
-                style={{ display: "inline-block", color: "#f4a023", fontWeight: 800, fontSize: 12, textDecoration: "none", marginTop: 8 }}
+                style={{
+                  display: "inline-block",
+                  color: "#f4a023",
+                  fontWeight: 800,
+                  fontSize: 12,
+                  textDecoration: "none",
+                  marginTop: 8,
+                }}
               >
                 Read More ↗
               </Link>
             )}
           </div>
-
           <div className="hp-ev-foot">
             <span className="hp-ev-loc">
               📍 {ev.venue || ev.location || "Campus"}
@@ -491,7 +504,6 @@ const EventCard = memo(({ ev, onPdf }) => {
   );
 });
 
-// ✅ FIXED: Image Priority and React Key logic updated
 const GalItem = memo(({ img, index }) => {
   const [ref, vis] = useScrollAnim({
     threshold: 0.1,
@@ -501,16 +513,15 @@ const GalItem = memo(({ img, index }) => {
   return (
     <div className="gc r14" ref={ref} style={{ transitionDelay: `${delay}s` }}>
       <div className={`hp-gal-item sa sa-scale${vis ? " visible" : ""}`}>
-        {/* ✅ Naya `img.image` pehle check hoga, purana `img.src` fallback me aayega */}
         <img
-          src={img.image || img.src} 
+          src={img.image || img.src}
           alt={img.title}
           className="hp-gal-img"
           loading="lazy"
           decoding="async"
         />
         <div className="hp-gal-ov">
-          <div className="hp-gal-cat">{img.cat || img.album || 'Gallery'}</div>
+          <div className="hp-gal-cat">{img.cat || img.album || "Gallery"}</div>
           <div className="hp-gal-ttl">{img.title}</div>
         </div>
       </div>
@@ -556,14 +567,14 @@ function YouTubeSection() {
   useEffect(() => {
     if (!inView || !ytData) return;
     if (!ytData?.apiKey || !ytData?.channelId) {
-      if (ytData?.videoIds) {
-        const ids = ytData.videoIds
-          .split(/[\n,]/)
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .slice(0, 3);
-        setVids(ids);
-      }
+      if (ytData?.videoIds)
+        setVids(
+          ytData.videoIds
+            .split(/[\n,]/)
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .slice(0, 3),
+        );
       return;
     }
     const { apiKey, channelId } = ytData;
@@ -612,7 +623,6 @@ function YouTubeSection() {
                         animation: "yt-shimmer 1.5s infinite",
                       }}
                     >
-                      <style>{`@keyframes yt-shimmer { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }`}</style>
                       <div className="hp-yt-ph-icon" style={{ opacity: 0.3 }}>
                         ▶️
                       </div>
@@ -661,20 +671,26 @@ function YouTubeSection() {
                   ))}
         </div>
         {hasVideos && (
-          <div style={{ display: "flex", justifyContent: "center", marginTop: 32 }}>
+          <div
+            style={{ display: "flex", justifyContent: "center", marginTop: 32 }}
+          >
             <Link
               to="/video-gallery"
               className="arr-link"
               style={{
-                display: "inline-flex", alignItems: "center", gap: 8,
-                background: "#ff0000", color: "#fff",
-                padding: "12px 30px", borderRadius: 50,
-                fontSize: 14, fontWeight: 800, textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                background: "#ff0000",
+                color: "#fff",
+                padding: "12px 30px",
+                borderRadius: 50,
+                fontSize: 14,
+                fontWeight: 800,
+                textDecoration: "none",
                 boxShadow: "0 4px 18px rgba(255,0,0,.35)",
                 transition: "transform .2s, box-shadow .2s",
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 28px rgba(255,0,0,.45)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 4px 18px rgba(255,0,0,.35)"; }}
             >
               🎬 View All Videos <span className="arr">›</span>
             </Link>
@@ -685,51 +701,69 @@ function YouTubeSection() {
   );
 }
 
-const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, gallery, updates }) => {
+const HomePage = ({
+  notices,
+  announcements,
+  pdfReports,
+  sliderSlides,
+  events,
+  gallery,
+  updates,
+}) => {
   const [tab, setTab] = useState("All Moments");
   const [selectedPdf, setSelectedPdf] = useState(null);
 
-  // ✅ NAYA LOGIC: Google Drive se latest notices fetch karna
   const NOTICE_FOLDER_ID = import.meta.env.VITE_DRIVE_NOTICE_FOLDER;
   const { docs: driveNotices } = useDriveDocs(NOTICE_FOLDER_ID);
-  
-  // In notices ko UI format me map karna
-  const liveDriveNotices = driveNotices.map(doc => ({
+
+  const liveDriveNotices = driveNotices.map((doc) => ({
     id: doc.id,
     text: doc.name,
     createdAt: { toDate: () => new Date(doc.rawDate) },
     link: doc.previewUrl,
-    isNew: (new Date() - new Date(doc.rawDate)) < 7 * 24 * 60 * 60 * 1000
+    isNew: new Date() - new Date(doc.rawDate) < 7 * 24 * 60 * 60 * 1000,
   }));
 
-  // Agar Drive se notice aagaye toh wo use karo, warna fallback wale (props) use karo
   const finalNotices = liveDriveNotices.length > 0 ? liveDriveNotices : notices;
-
-  // ✅ YAHAN GADBAD THI (Variables Restored)
   const allGal = gallery || [];
-  const filtered = tab === "All Moments" 
-      ? allGal 
-      : allGal.filter((i) => (i.cat === tab) || (i.album === tab));
+  const filtered =
+    tab === "All Moments"
+      ? allGal
+      : allGal.filter((i) => i.cat === tab || i.album === tab);
 
-  const recentEv = (events || []).filter((e) => e.status !== "upcoming").slice(0, 6);
+  const recentEv = (events || [])
+    .filter((e) => e.status !== "upcoming")
+    .slice(0, 6);
   const upcomEv = (events || []).filter((e) => e.status === "upcoming");
   const evTriple = [...recentEv, ...recentEv, ...recentEv];
 
   const handlePdf = useCallback((ev) => {
-    if (ev.reportLink || ev.pdfLink) setSelectedPdf({ url: ev.reportLink || ev.pdfLink, title: ev.title || "Event Report" });
+    if (ev.reportLink || ev.pdfLink)
+      setSelectedPdf({
+        url: ev.reportLink || ev.pdfLink,
+        title: ev.title || "Event Report",
+      });
     else alert("Full details coming soon!");
   }, []);
 
   return (
-    <div className="hp-root" style={{ background: "#f8fafc", minHeight: "100vh", overflowX: "hidden" }}>
+    <div
+      className="hp-root"
+      style={{ background: "#f8fafc", minHeight: "100vh", overflowX: "hidden" }}
+    >
       <style>{ANIM_CSS + CSS}</style>
       <div className="hp-watermark" />
       <HeroSlider slides={sliderSlides} />
       <Ticker />
       <PremiumTicker items={updates?.length > 0 ? updates : TICKER_ITEMS} />
       <QuickActionBar />
-      {/* Yahan 'notices' ki jagah 'finalNotices' paas kar diya gaya hai */}
-      <NotificationSection notices={finalNotices} announcements={announcements} pdfReports={pdfReports} upcomingEvents={upcomEv} />
+      <NotificationSection
+        notices={finalNotices}
+        announcements={announcements}
+        pdfReports={pdfReports}
+        upcomingEvents={upcomEv}
+      />
+
       <section id="about" className="hp-about">
         <div className="hp-about-inner">
           <SA variant="left" slow>
@@ -742,13 +776,29 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
                 decoding="async"
               />
               <div className="hp-img-accent">
-                <div style={{ fontSize: 30, fontWeight: 900, color: G, lineHeight: 1 }}>56+</div>
-                <div style={{ fontSize: 11, opacity: 0.8, letterSpacing: 1 }}>YEARS OF EXCELLENCE</div>
+                <div
+                  style={{
+                    fontSize: 30,
+                    fontWeight: 900,
+                    color: G,
+                    lineHeight: 1,
+                  }}
+                >
+                  56+
+                </div>
+                <div style={{ fontSize: 11, opacity: 0.8, letterSpacing: 1 }}>
+                  YEARS OF EXCELLENCE
+                </div>
               </div>
             </div>
           </SA>
           <SA variant="right" slow>
-            <UniHeader label="📚 Established 1970" title1="About the" title2="College" sub="" />
+            <UniHeader
+              label="📚 Established 1970"
+              title1="About the"
+              title2="College"
+              sub=""
+            />
             <p className="hp-adesc">
               Guru Nanak College, Dhanbad (A Sikh Minority Degree College) was
               established by the Gurudwara Prabandhak Committee in 1970 to mark
@@ -772,10 +822,22 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
                 DISCOVER MORE <span className="arr">›</span>
               </Link>
               <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#888" }}>FOLLOW US:</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#888" }}>
+                  FOLLOW US:
+                </span>
                 {SOCIAL_LINKS.map((s) => (
-                  <a key={s.id} href={s.href} target="_blank" rel="noopener noreferrer" className="hp-soc">
-                    {s.id === "twitter" ? "𝕏" : s.id === "youtube" ? "▶" : s.label.charAt(0)}
+                  <a
+                    key={s.id}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hp-soc"
+                  >
+                    {s.id === "twitter"
+                      ? "𝕏"
+                      : s.id === "youtube"
+                        ? "▶"
+                        : s.label.charAt(0)}
                   </a>
                 ))}
               </div>
@@ -791,14 +853,23 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
       <section id="events" className="hp-events">
         <div className="hp-ev-inner">
           <SA variant="up">
-            <UniHeader label="🌟 Campus Life" title1="Recent Events &" title2="Happenings" sub="Seminars, workshops aur campus activities ki ek jhalak" />
+            <UniHeader
+              label="🌟 Campus Life"
+              title1="Recent Events &"
+              title2="Happenings"
+              sub="Seminars, workshops aur campus activities ki ek jhalak"
+            />
           </SA>
           {recentEv.length > 0 ? (
             <SA variant="fade" delay="d1">
               <div className="hp-ev-scroller">
                 <div className="hp-ev-track">
                   {evTriple.map((ev, i) => (
-                    <EventCard key={`${ev.id || i}-${i}`} ev={ev} onPdf={handlePdf} />
+                    <EventCard
+                      key={`${ev.id || i}-${i}`}
+                      ev={ev}
+                      onPdf={handlePdf}
+                    />
                   ))}
                 </div>
               </div>
@@ -807,18 +878,45 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
             <SA variant="scale">
               <div className="hp-ev-empty">
                 <div style={{ fontSize: 38, marginBottom: 10 }}>📅</div>
-                <h3 style={{ color: N, margin: "0 0 8px", textAlign: "center" }}>No Recent Events</h3>
-                <p style={{ color: "#64748b", fontSize: 13, textAlign: "center" }}>Admin Panel → Events se data add karein</p>
+                <h3
+                  style={{ color: N, margin: "0 0 8px", textAlign: "center" }}
+                >
+                  No Recent Events
+                </h3>
+                <p
+                  style={{
+                    color: "#64748b",
+                    fontSize: 13,
+                    textAlign: "center",
+                  }}
+                >
+                  Admin Panel → Events se data add karein
+                </p>
               </div>
             </SA>
           )}
-          <SA variant="right" delay="d2" style={{ display: "flex", justifyContent: "center", marginTop: 24 }}>
-            <Link to="/events" className="arr-link" style={{
-                display: "inline-flex", alignItems: "center", gap: 8,
-                background: `linear-gradient(135deg,${G},#a07010)`, color: N,
-                padding: "12px 28px", borderRadius: 50, fontSize: 14, fontWeight: 900,
-                textDecoration: "none", boxShadow: `0 4px 18px ${G}55`,
-              }}>
+          <SA
+            variant="right"
+            delay="d2"
+            style={{ display: "flex", justifyContent: "center", marginTop: 24 }}
+          >
+            <Link
+              to="/events"
+              className="arr-link"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                background: `linear-gradient(135deg,${G},#a07010)`,
+                color: N,
+                padding: "12px 28px",
+                borderRadius: 50,
+                fontSize: 14,
+                fontWeight: 900,
+                textDecoration: "none",
+                boxShadow: `0 4px 18px ${G}55`,
+              }}
+            >
               🏆 View All Events <span className="arr">›</span>
             </Link>
           </SA>
@@ -847,13 +945,23 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
       <section className="hp-links">
         <div className="hp-links-inner">
           <SA variant="up">
-            <UniHeader label="🔗 Quick Access" title1="Important External" title2="Links" sub="Official education and government portals ka quick access" />
+            <UniHeader
+              label="🔗 Quick Access"
+              title1="Important External"
+              title2="Links"
+              sub="Official education and government portals ka quick access"
+            />
           </SA>
           <div className="hp-links-grid">
             {LINKS_DATA.map((l, i) => (
               <SA key={l.name} variant="scale" delay={`d${(i % 4) + 1}`}>
                 <div className="gc r12">
-                  <a href={l.url} target="_blank" rel="noopener noreferrer" className="hp-link-tile">
+                  <a
+                    href={l.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hp-link-tile"
+                  >
                     <div className="hp-link-icon">{l.icon}</div>
                     <div className="hp-link-name">{l.name}</div>
                   </a>
@@ -867,12 +975,21 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
       <section id="gallery" className="hp-gal">
         <div className="hp-gal-inner">
           <SA variant="up">
-            <UniHeader label="📸 Memories" title1="Photo" title2="Gallery" sub="Academic excellence aur cultural heritage ki yadgar jhalak" />
+            <UniHeader
+              label="📸 Memories"
+              title1="Photo"
+              title2="Gallery"
+              sub="Academic excellence aur cultural heritage ki yadgar jhalak"
+            />
           </SA>
           <SA variant="fade" delay="d1">
             <div className="hp-gal-filters">
               {GALLERY_TABS.map((t) => (
-                <button key={t} className={`hp-filter${tab === t ? " active" : ""}`} onClick={() => setTab(t)}>
+                <button
+                  key={t}
+                  className={`hp-filter${tab === t ? " active" : ""}`}
+                  onClick={() => setTab(t)}
+                >
                   {t}
                 </button>
               ))}
@@ -880,25 +997,64 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
           </SA>
           <div className="hp-gal-grid">
             {filtered.length > 0 ? (
-              // ✅ FIXED: Har photo map hote waqt unique 'img.id' ko key banaya! (Pehle 'i' tha)
-              filtered.map((img, i) => <GalItem key={img.id || i} img={img} index={i} />)
+              filtered.map((img, i) => (
+                <GalItem key={img.id || i} img={img} index={i} />
+              ))
             ) : (
               <SA variant="scale" className="hp-gal-empty">
-                <div style={{ fontSize: 32, marginBottom: 10, textAlign: "center" }}>📸</div>
-                <h3 style={{ color: N, margin: "0 0 6px", textAlign: "center" }}>Gallery Empty</h3>
-                <p style={{ color: "#64748b", fontSize: 13, textAlign: "center" }}>Admin Panel → Gallery se photos upload karein</p>
+                <div
+                  style={{
+                    fontSize: 32,
+                    marginBottom: 10,
+                    textAlign: "center",
+                  }}
+                >
+                  📸
+                </div>
+                <h3
+                  style={{ color: N, margin: "0 0 6px", textAlign: "center" }}
+                >
+                  Gallery Empty
+                </h3>
+                <p
+                  style={{
+                    color: "#64748b",
+                    fontSize: 13,
+                    textAlign: "center",
+                  }}
+                >
+                  Admin Panel → Gallery se photos upload karein
+                </p>
               </SA>
             )}
           </div>
           {allGal.length > 0 && (
-            <SA variant="up" delay="d2" style={{ display: "flex", justifyContent: "center", marginTop: 32 }}>
-              <Link to="/gallery" className="arr-link" style={{
-                  display: "inline-flex", alignItems: "center", gap: 8, background: N, color: "#fff",
-                  padding: "12px 30px", borderRadius: 50, fontSize: 14, fontWeight: 800, textDecoration: "none",
-                  boxShadow: `0 4px 18px ${N}44`, transition: "background .2s, transform .2s",
+            <SA
+              variant="up"
+              delay="d2"
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: 32,
+              }}
+            >
+              <Link
+                to="/gallery"
+                className="arr-link"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  background: N,
+                  color: "#fff",
+                  padding: "12px 30px",
+                  borderRadius: 50,
+                  fontSize: 14,
+                  fontWeight: 800,
+                  textDecoration: "none",
+                  boxShadow: `0 4px 18px ${N}44`,
+                  transition: "background .2s, transform .2s",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = G; e.currentTarget.style.color = N; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = N; e.currentTarget.style.color = "#fff"; }}
               >
                 📸 View All Photos <span className="arr">›</span>
               </Link>
@@ -910,7 +1066,11 @@ const HomePage = ({ notices, announcements, pdfReports, sliderSlides, events, ga
       <YouTubeSection />
 
       {selectedPdf && (
-        <PDFModal url={selectedPdf.url} title={selectedPdf.title} onClose={() => setSelectedPdf(null)} />
+        <PDFModal
+          url={selectedPdf.url}
+          title={selectedPdf.title}
+          onClose={() => setSelectedPdf(null)}
+        />
       )}
     </div>
   );

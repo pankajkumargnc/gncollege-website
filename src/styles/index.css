@@ -581,10 +581,14 @@ textarea:focus-visible {
   color: var(--navy);
   transform: translateY(-4px);
 }
-/* ── Ticker — Screen Reader Support ── */
-.gnc-ticker-root [role="marquee"],
-.gnc-ticker-root .ticker-track {
-  /* aria-live handled via JS — CSS contains motion */
+/* ── Ticker — Accessibility & Motion Support ── */
+/* aria-live handled via JS. */
+@media (prefers-reduced-motion: reduce) {
+  .gnc-ticker-root [role="marquee"],
+  .gnc-ticker-root .ticker-track {
+    animation-play-state: paused !important; /* Ticker ko pause kar dega */
+    /* ya phir: animation: none !important; */
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
