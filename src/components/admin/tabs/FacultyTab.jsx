@@ -132,7 +132,14 @@ export default function FacultyTab({ faculties, logAct, getSectionLog, softDelet
           </div>
 
           <div style={{ marginBottom: 20 }}>
-            <MediaPicker label="Photo" value={formData.photo || ''} onChange={url => setFormData(d => ({ ...d, photo: url }))} type="image" compact />
+            <MediaPicker 
+              label="Photo" 
+              value={formData.photo || ''} 
+              onChange={url => setFormData(d => ({ ...d, photo: url }))} 
+              type="image" 
+              driveFolderId={import.meta.env.VITE_DRIVE_IMAGES_FOLDER}
+              compact 
+            />
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>

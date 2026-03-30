@@ -80,7 +80,14 @@ export default function PlacementsTab({ placements, logAct, getSectionLog, softD
           </div>
 
           <div style={{ marginBottom: 20 }}>
-            <MediaPicker label="Student Photo" value={formData.photo || ''} onChange={url => setFormData(d => ({ ...d, photo: url }))} type="image" compact />
+            <MediaPicker 
+              label="Student Photo" 
+              value={formData.photo || ''} 
+              onChange={url => setFormData(d => ({ ...d, photo: url }))} 
+              type="image" 
+              driveFolderId={import.meta.env.VITE_DRIVE_IMAGES_FOLDER}
+              compact 
+            />
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>

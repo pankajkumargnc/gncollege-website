@@ -1,7 +1,7 @@
 // src/components/admin/tabs/PagesTab.jsx
 import React, { useState } from 'react';
 import { db } from "../../../firebase";
-import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, query, where, writeBatch } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { T, NAVY, GOLD, WHITE, useLocalDraft, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
 
@@ -141,10 +141,69 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const resetEditor = () => {
-    setEditItem(null);
-    clearDraft();
+  // 🗑️ ENHANCED DELETE: Also removes associated Navbar links
+  const handleDeletePage = async (page) => {
+    if (!window.confirm(`Kya aap "${page.title}" ko delete karna chahte hain? Isse Navbar se link bhi hat jayega.`)) return;
+    try {
+      const navRef = collection(db, 'navigation');
+      const navSnap = await getDocs(navRef);
+      const batch = writeBatch(db);
+      navSnap.forEach(d => {
+        const h = d.data().href || '';
+        if (h.includes(page.slug)) batch.delete(d.ref);
+      });
+      await batch.commit();
+      softDelete('pages', page.id, page, page.title);
+      triggerAutoCleanup();
+    } catch (err) {
+      softDelete('pages', page.id, page, page.title);
+      triggerAutoCleanup();
+    }
   };
+
+  const handleBulkDeletePages = async (selectedIds) => {
+    if (!window.confirm(`Delete ${selectedIds.length} items?`)) return;
+    try {
+      bulkDelete('pages', selectedIds);
+      triggerAutoCleanup();
+    } catch (err) {
+      bulkDelete('pages', selectedIds);
+      triggerAutoCleanup();
+    }
+  };
+
+  // 🧹 CLEANUP ORPHANED LINKS: Matches Navbar items against current Page list
+  const handleCleanupNavbar = async (silent = false) => {
+    try {
+      const navRef = collection(db, 'navigation');
+      const navSnap = await getDocs(navRef);
+      const batch = writeBatch(db);
+      let removed = 0;
+
+      navSnap.forEach(d => {
+        const h = d.data().href || '';
+        if (h.includes('/p/')) {
+          const parts = h.split('/p/');
+          const slug = parts[1]?.split('?')[0]?.split('#')[0];
+          if (slug && !pages.some(p => p.slug === slug)) {
+            batch.delete(d.ref);
+            removed++;
+          }
+        }
+      });
+
+      if (removed > 0) {
+        await batch.commit();
+        if (!silent) toast.success(`Navbar Cleaned: ${removed} links removed.`);
+      } else if (!silent) {
+        toast.success("Navbar is already clean!");
+      }
+    } catch (err) {}
+  };
+
+  const triggerAutoCleanup = () => setTimeout(() => handleCleanupNavbar(true), 2000);
+
+  const resetEditor = () => { setEditItem(null); clearDraft(); };
 
   const filtered = (pages || []).filter(p =>
     !search || p.title?.toLowerCase().includes(search.toLowerCase()) || p.slug?.toLowerCase().includes(search.toLowerCase())
@@ -332,10 +391,15 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
       {activeTab === 'manage' && (
         <div className="fade-up">
           <SectionSearch value={search} onChange={setSearch} placeholder="Search pages by title or URL..." />
-          <BulkBar count={selected.length} onDelete={() => { bulkDelete('pages', selected); setSelected([]); }} onClear={() => setSelected([])} />
+          <BulkBar count={selected.length} onDelete={() => { handleBulkDeletePages(selected); setSelected([]); }} onClear={() => setSelected([])} />
 
           <div className="card">
-            <div className="actitle">All Custom Pages ({filtered.length})</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15, padding: '0 5px' }}>
+              <div className="actitle" style={{ margin: 0 }}>All Custom Pages ({filtered.length})</div>
+              <button className="abtn abtn-outline abtn-sm" onClick={handleCleanupNavbar} style={{ fontSize: 11, background: '#f8fafc' }}>
+                🧹 Sync & Cleanup Navbar
+              </button>
+            </div>
             {filtered.map(page => {
               const isSeoGood = page.seoDesc?.length > 100 && page.seoTitle?.length > 0;
               
@@ -362,7 +426,7 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
                   <div style={{ display: 'flex', gap: 8 }}>
                     <a href={`${import.meta.env.BASE_URL}#/p/${page.slug}`} target="_blank" rel="noreferrer" className="abtn abtn-outline abtn-sm" style={{ textDecoration: 'none' }}>👁️ View</a>
                     <button className="abtn abtn-navy abtn-sm" onClick={() => startEdit(page)}>✏️ Edit</button>
-                    <button className="abtn abtn-red abtn-sm" onClick={() => softDelete('pages', page.id, page, page.title)}>🗑️</button>
+                    <button className="abtn abtn-red abtn-sm" onClick={() => handleDeletePage(page)}>🗑️</button>
                   </div>
                 </div>
               );

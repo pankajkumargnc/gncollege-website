@@ -159,7 +159,13 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
             </div>
 
             <div style={{ marginBottom: 20 }}>
-              <MediaPicker label="Photo *" value={formData.image || ''} onChange={url => setFormData(d => ({ ...d, image: url }))} type="image" />
+              <MediaPicker 
+                label="Photo *" 
+                value={formData.image || ''} 
+                onChange={url => setFormData(d => ({ ...d, image: url }))} 
+                type="image" 
+                driveFolderId={import.meta.env.VITE_DRIVE_IMAGES_FOLDER}
+              />
             </div>
 
             {formData.image && (

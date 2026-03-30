@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { doc, setDoc, onSnapshot, serverTimestamp, getDoc } from 'firebase/firestore'; // ✅ getDoc added
 import { db } from "../../../firebase";
 import toast from 'react-hot-toast';
+import MediaPicker from '../../MediaPicker';
 
 const NAVY = '#0f2347';
 const C    = '#0ea5e9';
@@ -153,19 +154,41 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
           <div style={{ fontWeight: 800, fontSize: 16, color: NAVY }}>{activeLabel} Photos</div>
 
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center', background: '#f8fafc', padding: '6px 6px 6px 16px', borderRadius: 12, border: '1.5px solid #e2e8f0' }}>
-            <input
-              type="text"
-              placeholder="Photo caption (Optional)..."
-              value={caption}
-              onChange={e => setCaption(e.target.value)}
-              style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: 13, width: 220, color: NAVY, fontWeight: 600 }}
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) auto', gap: 16, flex: 1, maxWidth: 600, alignItems: 'end' }}>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 6, display: 'block' }}>Photo Caption</label>
+              <input
+                type="text"
+                placeholder="e.g. Science Lab..."
+                value={caption}
+                onChange={e => setCaption(e.target.value)}
+                style={{ width: '100%', padding: '10px 14px', border: '1.5px solid #e2e8f0', borderRadius: 9, fontSize: 13.5, background: '#fff', outline: 'none' }}
+              />
+            </div>
+            <MediaPicker 
+              label="Select/Upload" 
+              value="" 
+              onChange={async (url) => {
+                if (!url) return;
+                const newPhoto = {
+                  id: Date.now().toString(),
+                  url: url,
+                  caption: caption.trim() || 'Campus View',
+                  addedAt: new Date().toISOString(),
+                };
+                const updatedPhotos = [newPhoto, ...images];
+                await setDoc(
+                  doc(db, 'campus_gallery', activeCat),
+                  { photos: updatedPhotos, updatedAt: serverTimestamp() },
+                  { merge: true }
+                );
+                toast.success('Photo added to gallery!');
+                setCaption('');
+              }} 
+              type="image" 
+              driveFolderId={import.meta.env.VITE_DRIVE_IMAGES_FOLDER}
+              compact={true}
             />
-            <label style={{ background: `linear-gradient(135deg, ${C}, #0284c7)`, color: '#fff', padding: '10px 20px', borderRadius: 9, cursor: (uploading || !apiKey) ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: 13, display: 'inline-flex', alignItems: 'center', opacity: (uploading || !apiKey) ? 0.6 : 1 }}>
-              {uploading ? `⏳ ${prog}%` : '📤 Upload'}
-              {/* ✅ Dynamically enabled/disabled */}
-              <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} disabled={uploading || !apiKey} name="file" />
-            </label>
           </div>
         </div>
 

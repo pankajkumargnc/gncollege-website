@@ -248,6 +248,61 @@ const PROSE_CSS = `
   }
   .gnc-table-wrap .gnc-prose table { margin: 0; }
 
+  /* ─────────────────────────────────────────────────────────────────────────
+     ★ PREMIUM TEMPLATES (from Admin Pages) ★
+  ───────────────────────────────────────────────────────────────────────── */
+  
+  /* 1. Notice Card */
+  .premium-notice-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .premium-notice-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, #f4a023, #ffd57e);
+  }
+  [data-theme="dark"] .premium-notice-card {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  }
+
+  /* 2. Event Report */
+  .event-report h1 { text-align: left !important; margin-top: 0; }
+  .event-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 20px 0;
+  }
+  @media (max-width: 600px) { .event-grid { grid-template-columns: 1fr; } }
+  .event-grid img { margin: 0; }
+
+  /* 3. IQAC / Academic Templates */
+  .iqac-page h1 { text-align: center; color: #0f2347; }
+  .iqac-meta {
+    display: flex; justify-content: center; gap: 20px;
+    font-size: 0.9rem; color: #64748b; margin-bottom: 20px;
+    font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+  }
+  [data-theme="dark"] .iqac-meta { color: #94a3b8; }
+
+  /* 4. Support for .premium-table alias */
+  .premium-table {
+    width: 100%; border-collapse: collapse; margin: 1.5em 0;
+    border-radius: 12px; overflow: hidden; border: 1px solid #dde8f5;
+  }
+  .premium-table th { background: #0f2347; color: #fff; padding: 12px; }
+  .premium-table td { padding: 12px; border: 1px solid #e8f0fa; }
+  [data-theme="dark"] .premium-table { border-color: #334155; }
+  [data-theme="dark"] .premium-table td { border-color: #1e293b; color: #cbd5e1; }
+
   /* ── Responsive ── */
   @media (max-width: 768px) {
     .gnc-prose { font-size: 15px; }
@@ -255,17 +310,79 @@ const PROSE_CSS = `
     .gnc-prose h2 { font-size: 1.3rem; }
     .gnc-prose td, .gnc-prose th { padding: 10px 12px; font-size: 0.85rem; }
   }
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     ★ DARK MODE COMPATIBILITY ★
+  ───────────────────────────────────────────────────────────────────────── */
+  [data-theme="dark"] .gnc-prose { color: #cbd5e1; }
+  [data-theme="dark"] .gnc-prose h1,
+  [data-theme="dark"] .gnc-prose h2,
+  [data-theme="dark"] .gnc-prose h3 { color: #f1f5f9; }
+  [data-theme="dark"] .gnc-prose h2 { border-bottom-color: #f4a023; }
+  [data-theme="dark"] .gnc-prose h4,
+  [data-theme="dark"] .gnc-prose h5,
+  [data-theme="dark"] .gnc-prose h6 { color: #e2e8f0; }
+  [data-theme="dark"] .gnc-prose p { color: #cbd5e1; }
+  
+  [data-theme="dark"] .gnc-prose a { color: #f4a023; }
+  [data-theme="dark"] .gnc-prose a:hover { color: #fff; }
+  
+  [data-theme="dark"] .gnc-prose strong,
+  [data-theme="dark"] .gnc-prose b { color: #fff; }
+  [data-theme="dark"] .gnc-prose em,
+  [data-theme="dark"] .gnc-prose i { color: #94a3b8; }
+  
+  [data-theme="dark"] .gnc-prose hr { border-top-color: #334155; }
+  
+  [data-theme="dark"] .gnc-prose ul li,
+  [data-theme="dark"] .gnc-prose ol li { color: #cbd5e1; }
+  
+  [data-theme="dark"] .gnc-prose blockquote {
+    background: rgba(244, 160, 35, 0.05);
+    color: #e2e8f0;
+    border-left-color: #f4a023;
+  }
+
+  [data-theme="dark"] .gnc-prose code { background: #1e293b; border-color: #334155; color: #f4a023; }
+  
+  [data-theme="dark"] .gnc-prose table {
+    border-color: #334155;
+    background: #0f172a;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  }
+  [data-theme="dark"] .gnc-prose tbody tr,
+  [data-theme="dark"] .gnc-prose table tr:not(:first-child) {
+    border-bottom-color: #1e293b;
+  }
+  [data-theme="dark"] .gnc-prose tbody tr:nth-child(odd),
+  [data-theme="dark"] .gnc-prose table tr:nth-child(even):not(:first-child) {
+    background: #111d35;
+  }
+  [data-theme="dark"] .gnc-prose tbody tr:nth-child(even),
+  [data-theme="dark"] .gnc-prose table tr:nth-child(odd):not(:first-child) {
+    background: #0f172a;
+  }
+  [data-theme="dark"] .gnc-prose td {
+    color: #cbd5e1;
+    border-right-color: #1e293b;
+  }
+  [data-theme="dark"] .gnc-prose td:first-child { color: #f1f5f9; border-left-color: #f4a023; }
+  
+  [data-theme="dark"] .gnc-prose tbody tr:hover,
+  [data-theme="dark"] .gnc-prose table tr:not(:first-child):hover {
+    background: #1e293b !important;
+  }
 `;
 
 // Inject CSS once into document head
-let cssInjected = false;
 const injectProseCSS = () => {
-  if (cssInjected || typeof document === 'undefined') return;
+  if (typeof document === 'undefined') return;
+  if (document.getElementById('gnc-prose-styles')) return;
+
   const style = document.createElement('style');
   style.id = 'gnc-prose-styles';
   style.textContent = PROSE_CSS;
   document.head.appendChild(style);
-  cssInjected = true;
 };
 
 // Wrap all tables in a scrollable div for mobile responsiveness
@@ -315,36 +432,37 @@ const usePdfInterceptor = () => {
 const PageHero = ({ title }) => (
   <div style={{
     background: 'linear-gradient(135deg, #0f2347 0%, #1a3a7c 60%, #0f2347 100%)',
-    padding: '52px 24px 40px',
+    padding: 'clamp(50px, 10vw, 80px) 24px clamp(40px, 8vw, 60px)',
     textAlign: 'center',
     position: 'relative',
     overflow: 'hidden',
+    borderBottom: '4px solid #f4a023'
   }}>
     <div style={{
       position: 'absolute', top: -40, right: -40,
-      width: 200, height: 200, borderRadius: '50%',
+      width: 'clamp(150px, 20vw, 300px)', height: 'clamp(150px, 20vw, 300px)', borderRadius: '50%',
       background: 'rgba(244,160,35,0.08)', pointerEvents: 'none',
     }} />
     <div style={{
       position: 'absolute', bottom: -30, left: -30,
-      width: 140, height: 140, borderRadius: '50%',
+      width: 'clamp(100px, 15vw, 200px)', height: 'clamp(100px, 15vw, 200px)', borderRadius: '50%',
       background: 'rgba(255,255,255,0.04)', pointerEvents: 'none',
     }} />
-    <div style={{
-      position: 'absolute', top: 0, left: 0, right: 0,
-      height: 4, background: 'linear-gradient(90deg, #f4a023, #ffd57e, #f4a023)',
-    }} />
-    <h1 style={{
-      color: '#fff', fontSize: 'clamp(1.4rem, 4vw, 2rem)',
-      fontWeight: 900, letterSpacing: '-0.02em', margin: 0, lineHeight: 1.25,
-      fontFamily: "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif",
-    }}>
-      {title || 'Page'}
-    </h1>
-    <div style={{
-      width: 60, height: 3, background: '#f4a023',
-      borderRadius: 2, margin: '12px auto 0',
-    }} />
+    <div style={{ position: 'relative', zIndex: 2 }}>
+      <h1 style={{
+        color: '#fff', fontSize: 'clamp(1.6rem, 5vw, 2.5rem)',
+        fontWeight: 900, letterSpacing: '-0.03em', margin: 0, lineHeight: 1.2,
+        fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
+        textShadow: '0 4px 12px rgba(0,0,0,0.2)'
+      }}>
+        {title || 'Page'}
+      </h1>
+      <div style={{
+        width: 60, height: 4, background: '#f4a023',
+        borderRadius: 10, margin: '20px auto 0',
+        boxShadow: '0 2px 8px rgba(244,160,35,0.4)'
+      }} />
+    </div>
   </div>
 );
 
@@ -422,30 +540,34 @@ const PageViewer = ({ path, content, title, gallery, events, faculties }) => {
   useEffect(() => {
     injectProseCSS();
     
+    let unsubs = [];
+
     // If we have a slug and no content, fetch it
     if (!content && slug) {
       setLoading(true);
       const q = query(collection(db, 'pages'), orderBy('createdAt', 'desc'));
-      const unsub = onSnapshot(q, snap => {
+      const unsubPage = onSnapshot(q, snap => {
         const pages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        const found = pages.find(p => p.slug === slug || p.path === `/p/${slug}`);
+        // Try to match by slug directly or full path
+        const found = pages.find(p => p.slug === slug || p.slug === `/p/${slug}` || p.path === `/p/${slug}`);
         setPage(found || null);
         setLoading(false);
       }, () => setLoading(false));
+      unsubs.push(unsubPage);
 
-      // Also fetch site data if missing
+      // Fetch site data if missing
       if (!gallery || gallery.length === 0) {
-        onSnapshot(collection(db, 'gallery'), s => setSiteData(prev => ({ ...prev, gallery: s.docs.map(d => ({ id: d.id, ...d.data() })) })));
+        unsubs.push(onSnapshot(collection(db, 'gallery'), s => setSiteData(prev => ({ ...prev, gallery: s.docs.map(d => ({ id: d.id, ...d.data() })) }))));
       }
       if (!events || events.length === 0) {
-        onSnapshot(collection(db, 'events'), s => setSiteData(prev => ({ ...prev, events: s.docs.map(d => ({ id: d.id, ...d.data() })) })));
+        unsubs.push(onSnapshot(collection(db, 'events'), s => setSiteData(prev => ({ ...prev, events: s.docs.map(d => ({ id: d.id, ...d.data() })) }))));
       }
       if (!faculties || faculties.length === 0) {
-        onSnapshot(collection(db, 'faculty'), s => setSiteData(prev => ({ ...prev, faculties: s.docs.map(d => ({ id: d.id, ...d.data() })) })));
+        unsubs.push(onSnapshot(collection(db, 'faculty'), s => setSiteData(prev => ({ ...prev, faculties: s.docs.map(d => ({ id: d.id, ...d.data() })) }))));
       }
-
-      return () => unsub();
     }
+
+    return () => unsubs.forEach(u => u && u());
   }, [slug, content, gallery, events, faculties]);
 
   if (loading) return (
@@ -495,7 +617,7 @@ export const PageViewerStandalone = () => {
     const q = query(collection(db, 'pages'), orderBy('createdAt', 'desc'));
     const unsub = onSnapshot(q, snap => {
       const pages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      const slugValue = currentPath.replace('/', '');
+      const slugValue = currentPath.split('/p/')[1] || currentPath.replace('/', '');
       const found = pages.find(p => p.slug === slugValue || p.path === currentPath);
       setPage(found || null);
       setLoading(false);

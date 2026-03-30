@@ -87,7 +87,13 @@ export default function TestimonialsTab({ testimonials, logAct, getSectionLog })
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 20, alignItems: 'end', marginBottom: 20 }}>
-            <MediaPicker label="Profile Image" value={formData.image || ''} onChange={url => setFormData(d => ({ ...d, image: url }))} type="image" />
+            <MediaPicker 
+              label="Profile Image" 
+              value={formData.image || ''} 
+              onChange={url => setFormData(d => ({ ...d, image: url }))} 
+              type="image" 
+              driveFolderId={import.meta.env.VITE_DRIVE_IMAGES_FOLDER}
+            />
             <div style={{ paddingBottom: 12 }}>
               <Toggle checked={!!formData.active} onChange={() => setFormData(d => ({ ...d, active: !d.active }))} label="Visible on Site" color={GOLD} />
             </div>

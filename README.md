@@ -58,7 +58,8 @@
 | Aspect | What Was Built |
 |--------|---------------|
 | 🔥 **Real-time Database** | Firebase Firestore — live updates across all pages |
-| 🎛️ **Full CMS** | Admin panel with 20+ management modules |
+| 🎛️ **Full CMS** | Admin panel with 25+ management modules |
+| ☁️ **Drive Sync v3** | Universal MediaPicker with Google Drive (Images/PDFs) across ALL tabs |
 | 📱 **Progressive Web App** | Installable, offline-capable, app-like experience |
 | ⚡ **Blazing Performance** | Code splitting, lazy loading, WebP images, terser compression |
 | 🎨 **Premium Design System** | Glass morphism, fluid typography (clamp), smooth animations |
@@ -69,8 +70,9 @@
 | 🖼️ **Bulk Media Engine**| Drag & Drop multi-image uploader for Gallery (ImgBB) |
 | 📊 **Dynamic Stats** | Automated counters (Faculty, Legacy Years) from Firestore |
 | 💬 **Premium Slider** | Auto-rotating Testimonials for Students & Alumni |
-| 🛠️ **Diagnostics** | 60-Phase Deep Core System Scanner in Admin |
+| 🛠️ **Diagnostics** | 70-Phase Deep Core System Scanner in Admin (v100.1) |
 | 📄 **Dynamic Pages** | Custom rich-text pages via Jodit editor + Firestore |
+| 🔄 **Auto-Sync HUD** | Automated Navbar cleanup & background orphan link removal |
 
 ---
 
@@ -213,18 +215,17 @@
 | **Departments** | Department info editor |
 | **Campus** | Campus photos & information |
 | **Documents** | PDF document upload & management |
-| **Drive** | Google Drive document integration |
+| **Drive** | Centralized Google Drive management & sync |
 | **Meeting PDFs** | Meeting minutes management |
 | **YouTube** | Video gallery management |
 | **Slider** | Hero slider image management |
-| **Placements** | Placement data management |
+| **Placements** | Placement data (Alumni Wall) |
 | **Pages** | Dynamic rich-text page builder (Jodit) |
 | **Menu Builder** | Navigation structure editor |
 | **Alerts** | Alert banner management |
 | **Settings** | Site configuration |
-| **Backup** | Firestore data export/import |
-| **Backup** | Firestore data export/import |
-| **System Test** | 60-Phase premium diagnostic engine (v100.0) |
+| **Backup** | Firestore data export/import (JSON) |
+| **System Test** | 70-Phase premium diagnostic engine (v100.1) |
 | **Activity Log** | Full admin audit trail |
 | **Contact** | Form submission viewer |
 

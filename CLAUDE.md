@@ -73,12 +73,32 @@ html, body, #root { overflow-x: hidden !important; }
 - This is deliberate to prevent horizontal scroll on any device
 - The `!important` is intentional here
 
-### 6. Image Format: WebP Everywhere
+### 6. Automated Navbar Lifecycle & Cleanup
+```jsx
+// PagesTab.jsx — background auto-cleanup
+const triggerAutoCleanup = () => {
+    setTimeout(handleCleanupNavbar, 2000); // Delayed silent sync
+};
+```
+- When a page is created or deleted, the system automatically triggers a background synchronization.
+- It scans the `navigation` collection and removes any orphaned links pointing to non-existent page IDs.
+- **DO NOT** remove these triggers from `handleDeletePage` or `handleBulkDelete`.
+
+### 7. Layout Wrapper Persistence (R)
+```jsx
+// App.jsx — All dynamic routes MUST be wrapped in <R />
+<Route path="/p/:slug" element={<R><PageViewerStandalone /></R>} />
+```
+- `<R />` is the site's layout wrapper (Navbar + Footer).
+- Without it, dynamic pages will render without a menu.
+- **ALWAYS** ensure dynamic routes are wrapped.
+
+### 8. Image Format: WebP Everywhere
 - All `/public/images/` files are `.webp`
 - Images are pre-optimized; further compression is via `vite-plugin-imagemin`
 - **DO NOT** suggest adding JPEG/PNG without a specific reason
 
-### 7. DOMPurify is Non-Negotiable
+### 9. DOMPurify is Non-Negotiable
 ```jsx
 // Any Firestore HTML content MUST go through:
 import DOMPurify from 'dompurify';
@@ -135,6 +155,11 @@ optimizeDeps: { exclude: ["jodit-react"] }
 ### Images: External CDN (ImgBB) for Gallery
 - **Why ImgBB for gallery?** — Keeps Firebase Storage egress costs at zero.
 - **Bulk Media Engine:** Admin Tab includes a drag-and-drop multi-image uploader for ImgBB/Firestore synchronization.
+
+### Cloud Integration: Google Drive Sync v3 (Universal)
+- **Multi-Category Drive Sync:** The `MediaPicker` now supports `driveFolderId`.
+- **Steering Logic:** It automatically switches between `VITE_DRIVE_IMAGES_FOLDER`, `VITE_DRIVE_DOCUMENT_FOLDER`, and `VITE_DRIVE_NOTICE_FOLDER` based on the context (e.g., Department HOD vs. Student Notices).
+- **One-Click Sync:** Admin Tab `DriveTab.jsx` provides a central "Central Drive Manager" for publishing/unpublishing files in bulk.
 
 ---
 
@@ -268,11 +293,13 @@ backdrop-filter: blur(12px);
 
 ## 🧪 Testing & Quality
 
-- **Admin Panel System Test Tab** — 60-Phase premium diagnostic engine (v100.0)
+- **Admin Panel System Test Tab** — 70-Phase premium diagnostic engine (v100.1)
+- **Lifecycle Logic Scans** — Detects orphaned links & Firestore-to-Navigation consistency
 - **Offline HUD** — Real-time connectivity status indicator
 - **ErrorBoundary** — wraps all routes for graceful failure
 - **RootErrorBoundary** — wraps entire app in `main.jsx`
 - **Console warnings** — Firebase config errors show styled console messages
+- **Layout Wrapper Consistency** — Verifies `<R />` persistence on dynamic routes
 
 ### Pre-PR Checklist
 - [ ] `npm run build` completes without errors

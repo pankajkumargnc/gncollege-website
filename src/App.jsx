@@ -1078,7 +1078,7 @@ export default function App() {
           <Route path="/documents" element={<R el={<DocumentsPage />} />} />
           <Route path="/events" element={<R el={<EventsPage />} />} />
 
-          <Route path="/p/:slug" element={<PageViewer gallery={gallery} events={events} faculties={faculties} />} />
+          <Route path="/p/:slug" element={<R el={<PageViewer gallery={gallery} events={events} faculties={faculties} />} />} />
 
           {/* ── 404 Catch-All ── */}
           <Route path="*" element={<R el={<NotFoundPage />} />} />

@@ -15,6 +15,7 @@ import {
 } from 'firebase/firestore';
 import { db } from "../../../firebase";
 import toast from 'react-hot-toast';
+import MediaPicker from '../../MediaPicker';
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const TYPES = [
@@ -509,38 +510,20 @@ const AdminLeadershipTab = () => {
                 </div>
               </div>
 
-              {/* Photo URL */}
+              {/* Photo selection with Google Drive support */}
               <div style={{ marginBottom: 16 }}>
-                <label style={S.label}>Photo URL (optional)</label>
-                <input
-                  style={S.input}
-                  placeholder="https://i.ibb.co/... or /images/principal.jpg"
+                <MediaPicker
+                  label="Leadership Photo"
                   value={form.photo}
-                  onChange={e => {
-                    const val = e.target.value;
-                    setForm(f => ({ ...f, photo: val }));
-                    // Debounce preview — update only after user stops typing 800ms
-                    clearTimeout(previewTimer.current);
-                    previewTimer.current = setTimeout(() => setPreviewUrl(val), 800);
+                  onChange={url => {
+                    setForm(f => ({ ...f, photo: url }));
+                    setPreviewUrl(url);
                   }}
-                  onFocus={e => e.target.style.borderColor = '#0f2347'}
-                  onBlur={e => {
-                    e.target.style.borderColor = '#e2e8f0';
-                    // Update preview immediately on blur
-                    clearTimeout(previewTimer.current);
-                    setPreviewUrl(form.photo);
-                  }}
+                  type="image"
+                  driveFolderId={import.meta.env.VITE_DRIVE_IMAGES_FOLDER}
+                  compact={true}
                 />
-                {previewUrl && (
-                  <img
-                    key={previewUrl}
-                    src={previewUrl}
-                    alt="preview"
-                    style={S.photoPreview}
-                    onError={e => { e.target.style.display = 'none'; }}
-                  />
-                )}
-                <p style={S.tip}>ImgBB link paste karo ya /images/ local path use karo</p>
+                <p style={S.tip}>Google Drive se select karein ya direct link paste karein</p>
               </div>
 
               {/* Note / Achievement */}

@@ -139,6 +139,7 @@ const PdfManager = ({ reports = [], onUpdate, color = C }) => {
             value={pdfUrl}
             onChange={setPdfUrl}
             type="pdf"
+            driveFolderId={import.meta.env.VITE_DRIVE_DOCUMENT_FOLDER}
             compact={true}
           />
           <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
@@ -307,6 +308,7 @@ export default function AdminDepartmentTab() {
               value={data.hod?.imageUrl || ''}
               onChange={url => setHod('imageUrl', url)}
               type="image"
+              driveFolderId={import.meta.env.VITE_DRIVE_IMAGES_FOLDER}
               compact={true}
             />
 
