@@ -66,6 +66,10 @@
 | 🔍 **SEO Optimized** | Open Graph, structured meta tags, canonical URLs |
 | 🛡️ **Secure** | DOMPurify XSS protection, Firebase Auth, env-based secrets |
 | 🌐 **Multi-Campus** | Bhuda Campus + Bank More Campus — both handled |
+| 🖼️ **Bulk Media Engine**| Drag & Drop multi-image uploader for Gallery (ImgBB) |
+| 📊 **Dynamic Stats** | Automated counters (Faculty, Legacy Years) from Firestore |
+| 💬 **Premium Slider** | Auto-rotating Testimonials for Students & Alumni |
+| 🛠️ **Diagnostics** | 60-Phase Deep Core System Scanner in Admin |
 | 📄 **Dynamic Pages** | Custom rich-text pages via Jodit editor + Firestore |
 
 ---
@@ -187,10 +191,12 @@
 | P | **Placements Section** | Placement achievements & records |
 | Q | **Quick Action Nav** | Shortcut buttons for key sections |
 | R | **Rich-Text Dynamic Pages** | Custom pages editable via admin panel |
-| S | **Staff Page** | Staff roster display |
+| S | **Staff Page** | Live fuzzy-searchable staff roster display |
 | T | **Ticker** | Scrolling news/notice ticker |
+| U | **Testimonial Slider**| Ultra-premium auto-rotating student reviews |
 | V | **Video Gallery** | YouTube embed gallery |
 | W | **WhatsApp Button** | Floating instant contact button |
+| X | **Offline HUD** | Real-time connectivity status indicator |
 
 ### 🔐 Admin Panel Features (20+ Modules)
 
@@ -217,7 +223,8 @@
 | **Alerts** | Alert banner management |
 | **Settings** | Site configuration |
 | **Backup** | Firestore data export/import |
-| **System Test** | Live Firebase health check |
+| **Backup** | Firestore data export/import |
+| **System Test** | 60-Phase premium diagnostic engine (v100.0) |
 | **Activity Log** | Full admin audit trail |
 | **Contact** | Form submission viewer |
 

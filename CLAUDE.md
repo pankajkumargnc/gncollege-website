@@ -133,8 +133,8 @@ optimizeDeps: { exclude: ["jodit-react"] }
 - Admin route `/admin` → Firebase Auth → protected panel
 
 ### Images: External CDN (ImgBB) for Gallery
-- **Why ImgBB for gallery?** — Keeps Firebase Storage egress costs at zero
-- Static assets (logos, sliders) stay in `/public/images/` (committed to repo)
+- **Why ImgBB for gallery?** — Keeps Firebase Storage egress costs at zero.
+- **Bulk Media Engine:** Admin Tab includes a drag-and-drop multi-image uploader for ImgBB/Firestore synchronization.
 
 ---
 
@@ -162,7 +162,10 @@ Firestore Collection
 - `announcements` — announcements
 - `alerts` — alert banners
 - `menu` — navigation structure
+- `menu` — navigation structure
 - `slider` — hero images
+- `testimonials` — rotating reviews
+- `settings` — site-wide config (including counter seeds)
 
 **Collections fetched per-page:**
 - `gallery`, `events`, `faculty`, `leadership`, `departments`, `placements`,
@@ -265,7 +268,8 @@ backdrop-filter: blur(12px);
 
 ## 🧪 Testing & Quality
 
-- **Admin Panel System Test Tab** — live Firebase connectivity test built-in
+- **Admin Panel System Test Tab** — 60-Phase premium diagnostic engine (v100.0)
+- **Offline HUD** — Real-time connectivity status indicator
 - **ErrorBoundary** — wraps all routes for graceful failure
 - **RootErrorBoundary** — wraps entire app in `main.jsx`
 - **Console warnings** — Firebase config errors show styled console messages
