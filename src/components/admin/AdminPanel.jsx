@@ -234,18 +234,20 @@ function AdminPanelInner({
   // ── Shared props passed to all tabs ───────────────────────────────────────
   const sharedProps = { logAct, getSectionLog, softDelete, bulkDelete };
 
-  // ── ✅ PREMIUM LOGOUT FUNCTION ADDED HERE ─────────────────────────────────
+  const [isExiting, setIsExiting] = useState(false);
+
+  // ── ✅ PREMIUM LOGOUT FUNCTION WITH ANIMATION ─────────────────────────────
   const handlePremiumLogout = () => {
-    toast.success('Logout Successfully 👋', {
-      duration: 2000,
-      style: { background: '#0f2347', color: '#fff', border: '1.5px solid #f4a023', fontWeight: 800, fontSize: '15px', padding: '12px 20px', borderRadius: '12px' },
-      iconTheme: { primary: '#f4a023', secondary: '#fff' }
+    setIsExiting(true);
+    toast.success('Terminating Session... 👋', {
+      duration: 2500,
+      style: { background: '#0f2347', color: '#fff', border: '1.5px solid #f4a023' }
     });
     
-    // 1 second ka wait taaki toast dikh jaye, fir purana onClose() trigger hoga
+    // Simulate a secure shutdown sequence
     setTimeout(() => {
       if(onClose) onClose();
-    }, 1000);
+    }, 2500);
   };
 
   // ── Render tab content ────────────────────────────────────────────────────
@@ -283,7 +285,73 @@ function AdminPanelInner({
 
   return (
     <div className="adm" style={{ display:'flex', height:'100vh', width:'100vw', position:'fixed', top:0, left:0, zIndex:99999, overflow:'hidden' }}>
-      <style>{GCSS}</style>
+      <style>{GCSS + `
+        .exit-overlay {
+            position: fixed; inset: 0; background: #0f172a; z-index: 1000000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 1; transition: opacity 0.5s;
+        }
+        .exit-shutter {
+            position: absolute; left: 0; right: 0; height: 50%; background: #000;
+            transition: all 1s cubic-bezier(0.85, 0, 0.15, 1);
+        }
+        .exit-top { top: 0; transform: translateY(-100%); }
+        .exit-bottom { bottom: 0; transform: translateY(100%); }
+        .is-exiting .exit-top { transform: translateY(0); }
+        .is-exiting .exit-bottom { transform: translateY(0); }
+        
+        .exit-monitor {
+            width: 300px; padding: 24px; background: rgba(0,0,0,0.4); border: 2px solid rgba(244,160,35,0.4);
+            border-radius: 20px; text-align: center; color: #fff; position: relative; z-index: 2;
+            backdrop-filter: blur(20px);
+        }
+        .exit-scan {
+            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: #f4a023; opacity: 0.8; box-shadow: 0 0 15px #f4a023;
+            animation: exit-scan 1.5s infinite;
+        }
+        @keyframes exit-scan { 0% { top: 0; } 100% { top: 100%; } }
+
+        /* 🌊 FLUID FILL & BOUNCY BUTTON CUSTOM CSS */
+        .fluid-btn {
+            position: relative; overflow: hidden; height: 38px !important;
+            padding: 0 16px !important; margin: 0 auto !important; width: fit-content !important;
+            background: rgba(239, 68, 68, 0.1) !important;
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+            color: #ef4444 !important; font-size: 11.5px !important; font-weight: 800 !important;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+            border-radius: 50px !important; cursor: pointer;
+            display: flex; align-items: center; gap: 8px; z-index: 1;
+        }
+        .fluid-btn:hover { transform: scale(1.08); background: transparent !important; color: #fff !important; border-color: #ef4444 !important; }
+        .fluid-btn:active { transform: scale(0.95); }
+        .fluid-btn::before {
+            content: ''; position: absolute; top: 100%; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: -1; border-radius: 50px;
+        }
+        .fluid-btn:hover::before { top: 0; }
+      `}</style>
+
+      {/* 🛡️ ULTRA ADVANCE LOGOUT TRANSITION OVERLAY */}
+      {isExiting && (
+        <div className={`exit-overlay ${isExiting ? 'is-exiting' : ''}`}>
+           <div className="exit-shutter exit-top" />
+           <div className="exit-shutter exit-bottom" />
+           <div className="exit-monitor fade-up">
+              <div className="exit-scan" />
+              <div style={{ fontSize: 42, marginBottom:16 }}>🔒</div>
+              <div style={{ fontWeight: 900, color: '#f4a023', letterSpacing: 2, marginBottom: 8 }}>SESSION TERMINATED</div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>Disconnecting from GNC Core...</div>
+              <div style={{ marginTop: 24, fontSize: 11, fontFamily: 'monospace', color: '#94a3b8' }}>
+                CLEANING CACHE... DONE<br/>
+                UPLOADING LOGS... DONE<br/>
+                SECURE LOGOUT... READY
+              </div>
+           </div>
+        </div>
+      )}
 
       {/* Crop overlay */}
       {cropSrc && (
@@ -342,11 +410,10 @@ function AdminPanelInner({
           })()}
         </div>
 
-        <div className="adm-side-footer">
-          {/* ✅ CHANGED: `onClose` ki jagah `handlePremiumLogout` laga diya */}
-          <div className="anav" style={{ background:'rgba(239,68,68,.15)', color:T.red, border:'1px solid rgba(239,68,68,.2)' }} onClick={handlePremiumLogout}>
-            <span style={{ fontSize:16, width:22, textAlign:'center', flexShrink:0 }}>✕</span>
-            <span className="nav-label">Exit Admin</span>
+        <div className="adm-side-footer" style={{ padding: '16px 12px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="fluid-btn" onClick={handlePremiumLogout}>
+            <span style={{ fontSize: 14 }}>🚪</span>
+            <span className="nav-label" style={{ opacity: sideCollapsed && !isMobile ? 0 : 1 }}>EXIT CORE</span>
           </div>
         </div>
       </div>
@@ -360,8 +427,7 @@ function AdminPanelInner({
         <div className="adm-mobile-top">
           <button onClick={()=>setSideOpen(true)} style={{ background:'none', border:'none', fontSize:22, cursor:'pointer', color:NAVY }}>☰</button>
           <span style={{ fontWeight:900, color:NAVY, fontSize:14 }}>GNC Admin Panel</span>
-          {/* ✅ CHANGED: `onClose` ki jagah `handlePremiumLogout` laga diya */}
-          <button onClick={handlePremiumLogout} style={{ background:'none', border:'none', fontSize:18, cursor:'pointer', color:T.red }}>✕</button>
+          <div style={{ width: 44 }} /> {/* ✅ Removed Cross; added padding for balance */}
         </div>
 
         {/* Top bar */}

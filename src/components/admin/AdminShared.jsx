@@ -62,11 +62,20 @@ export const useLocalDraft = (key, init) => {
 export const StatCard = React.memo(({ icon, label, count, color, sub, onClick }) => {
   const a = useCountUp(count);
   return (
-    <div className="stat-card count-anim" onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default', borderBottom: `3px solid ${color}` }}>
-      <div className="stat-icon">{icon}</div>
+    <div className="stat-card count-anim" onClick={onClick} 
+      style={{ 
+        cursor: onClick ? 'pointer' : 'default', 
+        borderBottom: `3px solid ${color}`,
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+      <div style={{ position:'absolute', top:-15, right:-15, fontSize:64, opacity:0.05, transform:'rotate(15deg)', pointerEvents:'none' }}>{icon}</div>
+      <div className="stat-icon" style={{ background: `${color}15`, color }}>{icon}</div>
       <div className="stat-num" style={{ color }}>{a.toLocaleString()}</div>
       <div className="stat-label">{label}</div>
-      {sub && <div style={{ fontSize: 11, color, marginTop: 3, fontWeight: 700 }}>{sub}</div>}
+      {sub && <div style={{ fontSize: 10, color: T.t4, marginTop: 4, fontWeight: 700, textTransform: 'uppercase' }}>{sub}</div>}
+      
+      {/* Subtle Glow on Hover logic is handled by CSS class .stat-card */}
     </div>
   );
 });
@@ -198,11 +207,19 @@ export const GCSS = `
 .sec-search { position:relative; }
 .sec-search input { padding-left:36px !important; }
 .sec-search::before { content:'🔍'; position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:13px; pointer-events:none; z-index:1; }
-.stat-card { background:${WHITE}; border-radius:14px; padding:20px 22px; border:1.5px solid ${T.b1}; box-shadow:${T.shadow}; position:relative; overflow:hidden; transition:all .2s; }
-.stat-card:hover { transform:translateY(-3px); box-shadow:${T.shadowHov}; border-color:${T.b2}; }
-.stat-card .stat-icon { font-size:32px; margin-bottom:10px; }
-.stat-card .stat-num { font-size:32px; font-weight:900; color:${NAVY}; font-family:'JetBrains Mono',monospace; line-height:1; }
-.stat-card .stat-label { font-size:11px; font-weight:800; color:${T.t3}; text-transform:uppercase; letter-spacing:.6px; margin-top:5px; }
+.stat-card { 
+    background:${WHITE}; border-radius:20px; padding:24px; border:1.5px solid ${T.b1}; 
+    box-shadow:${T.shadow}; position:relative; overflow:hidden; transition:all .3s cubic-bezier(.25,.8,.25,1); 
+}
+.stat-card:hover { transform:translateY(-8px); box-shadow:${T.shadowHov}; border-color:${T.b2}; }
+.stat-card:hover .stat-icon { transform:scale(1.1) rotate(-5deg); }
+.stat-card .stat-icon { 
+    width: 44px; height: 44px; border-radius: 12px; display: flex; 
+    align-items: center; justify-content: center; font-size: 20px; 
+    margin-bottom: 16px; transition: transform 0.3s; 
+}
+.stat-card .stat-num { font-size: 32px; font-weight: 900; color:${NAVY}; font-family:'JetBrains Mono',monospace; line-height: 1; margin-bottom: 4px; }
+.stat-card .stat-label { font-size: 11px; font-weight: 800; color:${T.t3}; text-transform:uppercase; letter-spacing: 1px; }
 .toggle-wrap { display:inline-flex; align-items:center; gap:8px; cursor:pointer; }
 .toggle { position:relative; width:44px; height:24px; }
 .toggle input { opacity:0; width:0; height:0; }
@@ -234,12 +251,12 @@ export const GCSS = `
 @keyframes fadeUp { from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);} }
 .fade-up { animation:fadeUp .3s ease both; }
 @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:.5;} }
-.pulse { animation:pulse 2s infinite; }
-@keyframes spin { to{transform:rotate(360deg);} }
-.spin { animation:spin .8s linear infinite; display:inline-block; }
-@keyframes countUp { from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);} }
-.count-anim { animation:countUp .5s ease both; }
-.adm-mobile-top { display:none; }
+@keyframes pulse-red-soft {
+  0% { box-shadow: 0 4px 15px rgba(239,68,68,0.3); }
+  50% { box-shadow: 0 4px 30px rgba(239,68,68,0.6); }
+  100% { box-shadow: 0 4px 15px rgba(239,68,68,0.3); }
+}
+.pulse-red-soft { animation: pulse-red-soft 2s infinite ease-in-out; }
 @media(max-width:1024px) {
   .adm-side { position:fixed !important; z-index:10001; transform:translateX(-100%); transition:transform .3s ease; }
   .adm-side.open { transform:translateX(0); }

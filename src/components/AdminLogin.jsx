@@ -141,18 +141,19 @@ export default function AdminLogin({ onSuccess, onClose }) {
       background-size: 44px 44px;
     }
 
-    /* ── WRAPPER (Transparent Glass) ── */
+    /* ── WRAPPER (Ultra Glassmorphism applied as requested) ── */
     .gnc-wrap {
       position: relative; z-index: 5;
       display: flex; width: 860px; max-width: 95vw;
-      border-radius: 24px; overflow: hidden;
+      overflow: hidden;
       
-      /* GLASS EFFECT PROPERTIES */
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 40px 100px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.05);
+      /* User Specified Glass Effect */
+      background: rgba(255, 255, 255, 0.17);
+      border-radius: 16px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(2.6px);
+      -webkit-backdrop-filter: blur(2.6px);
+      border: 1px solid rgba(255, 255, 255, 0.48);
       
       opacity: 0; transform: translateY(28px) scale(0.97);
       transition: opacity .55s cubic-bezier(.22,1,.36,1), transform .55s cubic-bezier(.22,1,.36,1);
@@ -560,10 +561,10 @@ export default function AdminLogin({ onSuccess, onClose }) {
 
             <div className="gnc-features">
               {[
-                ['📢', 'Real-time Notice Board'],
-                ['👨‍🏫', 'Faculty & Staff Directory'],
-                ['📊', 'Live Dashboard Analytics'],
-                ['🛡️', '25-Phase System Diagnostics'],
+                ['🔍', 'AI-Powered Campus Command'],
+                ['⚡', 'Ultra-Fast Quick Publishing'],
+                ['🎓', 'Integrated Alumni Wall'],
+                ['📢', 'Priority Flash Broadcaster'],
               ].map(([icon, text]) => (
                 <div key={text} className="gnc-feature">
                   <div className="gnc-feature-icon">{icon}</div>
