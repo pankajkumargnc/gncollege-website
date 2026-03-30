@@ -9,8 +9,9 @@ import { COLORS } from '../styles/colors';
 const N = COLORS.navy || '#0f2347';
 const G = COLORS.gold || '#f4a023';
 
-export default function StaffPage({ faculties }) {
-  const { staffType } = useParams(); // 'teaching-staff' or 'non-teaching-staff'
+export default function StaffPage({ faculties, headless, type: forcedType }) {
+  const { staffType: urlType } = useParams(); 
+  const staffType = forcedType || urlType || 'teaching-staff';
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
@@ -38,6 +39,7 @@ export default function StaffPage({ faculties }) {
     <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
 
       {/* Hero */}
+      {!headless && (
       <div style={{ background: `linear-gradient(135deg, ${N} 0%, #1a3a7c 100%)`, padding: '70px 20px 50px', textAlign: 'center', color: '#fff' }}>
         <div style={{ fontSize: 48, marginBottom: 14 }}>{isTeaching ? '🎓' : '🏢'}</div>
         <h1 style={{ fontSize: 'clamp(28px,5vw,42px)', fontWeight: 900, margin: '0 0 12px', letterSpacing: '-0.5px' }}>
@@ -46,8 +48,11 @@ export default function StaffPage({ faculties }) {
         <p style={{ color: '#cbd5e1', fontSize: 15, margin: 0, textAlign: 'center' }}>
           Guru Nanak College, Dhanbad
         </p>
+      </div>
+      )}
 
-        {/* ── Live Search Bar ── */}
+      {/* ── Content ── */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: headless ? '0' : '40px 20px' }}>
         <div style={{ maxWidth: 500, margin: '25px auto 0', position: 'relative' }}>
           <span style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', opacity: 0.6 }}>🔍</span>
           <input

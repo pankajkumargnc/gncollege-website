@@ -7,7 +7,11 @@ import React, { useEffect, useState } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import DOMPurify from 'dompurify';
-import PDFModal from './PDFModal'; // ✅ PDF Modal Import
+import { useParams } from 'react-router-dom';
+import PDFModal from './PDFModal'; 
+import GalleryPage from '../pages/GalleryPage';
+import EventsPage from '../pages/EventsPage';
+import StaffPage from '../pages/StaffPage';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PREMIUM PROSE CSS — injected once, styles ALL Jodit HTML output
@@ -377,42 +381,89 @@ const Skeleton = () => (
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PageViewer — Main Export (Passed as prop from App.jsx)
+// ✅ NEW: SHORTCODE ENGINE
 // ─────────────────────────────────────────────────────────────────────────────
-const PageViewer = ({ page, loading: externalLoading }) => {
-  useEffect(() => { injectProseCSS(); }, []);
+const ShortcodeRenderer = ({ code, gallery, events, faculties }) => {
+  const [tag, val] = code.replace('[', '').replace(']', '').split(':');
   
-  // ✅ Call the hook here so pdfPreview and handleContentClick exist
-  const { pdfPreview, setPdfPreview, handleContentClick } = usePdfInterceptor(); 
+  if (tag === 'GALLERY') return <GalleryPage gallery={gallery} headless />;
+  if (tag === 'EVENTS')  return <EventsPage headless />; 
+  if (tag === 'STAFF')   return <StaffPage faculties={faculties} type={val === 'non-teaching' ? 'non-teaching-staff' : 'teaching-staff'} headless />;
+  if (tag === 'TABLE')   return <div style={{ background: '#fff', padding: 20, borderRadius: 12, border: '1px dashed #ccc', textAlign: 'center', fontSize: 13 }}>[ Table Placeholder - Use Jodit Table Tool instead ]</div>;
 
-  if (externalLoading) {
-    return (
-      <div style={{ minHeight: '60vh', background: '#f8fafc' }}>
-        <div style={{ background: 'linear-gradient(135deg, #0f2347 0%, #1a3a7c 100%)', padding: '52px 24px 40px', textAlign: 'center' }}>
-          <div style={{ height: 28, width: 240, background: 'rgba(255,255,255,0.15)', borderRadius: 8, margin: '0 auto' }} />
-        </div>
-        <div style={{ maxWidth: 900, margin: '0 auto' }}><Skeleton /></div>
-      </div>
-    );
-  }
+  return <span style={{ color: 'red', fontWeight: 800 }}>{code}</span>;
+};
 
-  const content = page?.content;
-  const title   = page?.title;
-  const safePath = typeof window !== 'undefined' ? window.location.hash?.replace('#', '') || '/' : '/';
+const renderWithShortcodes = (html, props) => {
+  if (!html) return null;
+  
+  // Regex to find [TAG:VAL]
+  const regex = /(\[GALLERY:[^\]]+\]|\[EVENTS:[^\]]+\]|\[STAFF:[^\]]+\]|\[TABLE:[^\]]+\])/g;
+  const parts = html.split(regex);
+
+  return parts.map((part, i) => {
+    if (part.match(regex)) {
+      return <ShortcodeRenderer key={i} code={part} {...props} />;
+    }
+    return <div key={i} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(wrapTablesForMobile(part)) }} />;
+  });
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ✅ PageViewer Component (Main)
+// ─────────────────────────────────────────────────────────────────────────────
+const PageViewer = ({ path, content, title, gallery, events, faculties }) => {
+  const { slug } = useParams();
+  const [loading, setLoading] = useState(!content);
+  const [page, setPage] = useState(content ? { content, title } : null);
+  const [siteData, setSiteData] = useState({ gallery: gallery || [], events: events || [], faculties: faculties || [] });
+  const { pdfPreview, setPdfPreview, handleContentClick } = usePdfInterceptor();
+  
+  useEffect(() => {
+    injectProseCSS();
+    
+    // If we have a slug and no content, fetch it
+    if (!content && slug) {
+      setLoading(true);
+      const q = query(collection(db, 'pages'), orderBy('createdAt', 'desc'));
+      const unsub = onSnapshot(q, snap => {
+        const pages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const found = pages.find(p => p.slug === slug || p.path === `/p/${slug}`);
+        setPage(found || null);
+        setLoading(false);
+      }, () => setLoading(false));
+
+      // Also fetch site data if missing
+      if (!gallery || gallery.length === 0) {
+        onSnapshot(collection(db, 'gallery'), s => setSiteData(prev => ({ ...prev, gallery: s.docs.map(d => ({ id: d.id, ...d.data() })) })));
+      }
+      if (!events || events.length === 0) {
+        onSnapshot(collection(db, 'events'), s => setSiteData(prev => ({ ...prev, events: s.docs.map(d => ({ id: d.id, ...d.data() })) })));
+      }
+      if (!faculties || faculties.length === 0) {
+        onSnapshot(collection(db, 'faculty'), s => setSiteData(prev => ({ ...prev, faculties: s.docs.map(d => ({ id: d.id, ...d.data() })) })));
+      }
+
+      return () => unsub();
+    }
+  }, [slug, content, gallery, events, faculties]);
+
+  if (loading) return (
+    <div style={{ minHeight: '60vh', background: '#f8fafc' }}>
+      <PageHero title="Loading..." />
+      <div style={{ maxWidth: 900, margin: '0 auto' }}><Skeleton /></div>
+    </div>
+  );
+
+  if (!page && !loading) return <EmptyState path={slug || path} />;
 
   return (
     <div style={{ minHeight: '60vh', background: '#f8fafc' }}>
-      <PageHero title={title || 'Page'} />
+      <PageHero title={page?.title || title || 'Page'} />
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 24px 80px' }}>
-        {content ? (
-          <div
-            className="gnc-prose"
-            onClick={handleContentClick} // ✅ Intercept Clicks here
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(wrapTablesForMobile(content)) }}
-          />
-        ) : (
-          <EmptyState path={safePath} />
-        )}
+        <div className="gnc-prose" onClick={handleContentClick}>
+           {renderWithShortcodes(page?.content, siteData)}
+        </div>
       </div>
 
       {/* ✅ PDF Modal Render */}
@@ -422,29 +473,35 @@ const PageViewer = ({ page, loading: externalLoading }) => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PageViewerStandalone — Standalone version fetching its own data
+// ✅ PageViewerStandalone Component
 // ─────────────────────────────────────────────────────────────────────────────
 export const PageViewerStandalone = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage]       = useState(null);
-  
-  // ✅ Call the hook here too
   const { pdfPreview, setPdfPreview, handleContentClick } = usePdfInterceptor();
+  const [siteData, setSiteData] = useState({ gallery: [], events: [], faculties: [] });
 
   useEffect(() => {
     injectProseCSS();
+    
+    // Fetch site data for shortcodes
+    const unsubG = onSnapshot(collection(db, 'gallery'), s => setSiteData(prev => ({ ...prev, gallery: s.docs.map(d => ({ id: d.id, ...d.data() })) })));
+    const unsubE = onSnapshot(collection(db, 'events'), s => setSiteData(prev => ({ ...prev, events: s.docs.map(d => ({ id: d.id, ...d.data() })) })));
+    const unsubF = onSnapshot(collection(db, 'faculty'), s => setSiteData(prev => ({ ...prev, faculties: s.docs.map(d => ({ id: d.id, ...d.data() })) })));
+
     const hash = window.location.hash?.replace('#', '') || '';
     const currentPath = hash.startsWith('/') ? hash : '/' + hash;
 
     const q = query(collection(db, 'pages'), orderBy('createdAt', 'desc'));
     const unsub = onSnapshot(q, snap => {
       const pages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      const found = pages.find(p => p.path === currentPath || p.slug === currentPath.replace('/', ''));
+      const slugValue = currentPath.replace('/', '');
+      const found = pages.find(p => p.slug === slugValue || p.path === currentPath);
       setPage(found || null);
       setLoading(false);
     }, () => setLoading(false));
 
-    return () => unsub();
+    return () => { unsub(); unsubG(); unsubE(); unsubF(); };
   }, []);
 
   if (loading) {
@@ -462,15 +519,9 @@ export const PageViewerStandalone = () => {
     <div style={{ minHeight: '60vh', background: '#f8fafc' }}>
       <PageHero title={page?.title || 'Page'} />
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 24px 80px' }}>
-        {page?.content ? (
-          <div
-            className="gnc-prose"
-            onClick={handleContentClick} // ✅ Intercept Clicks here
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(wrapTablesForMobile(page.content)) }}
-          />
-        ) : (
-          <EmptyState />
-        )}
+        <div className="gnc-prose" onClick={handleContentClick}>
+           {renderWithShortcodes(page?.content, siteData)}
+        </div>
       </div>
 
       {/* ✅ PDF Modal Render */}

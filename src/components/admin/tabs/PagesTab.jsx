@@ -10,8 +10,11 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
   const [editItem, setEditItem] = useState(null);
   
   const [formData, setFormData, clearDraft] = useLocalDraft('custom_page', {
-    title: '', slug: '', content: '', seoTitle: '', seoDesc: '', addToMenu: true // ✅ Naya Checkbox State
+    title: '', slug: '', content: '', seoTitle: '', seoDesc: '', addToMenu: true, template: 'none'
   });
+  
+  const [showShortcodes, setShowShortcodes] = useState(false);
+  const [showScorecard, setShowScorecard] = useState(false);
   
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState([]);
@@ -21,10 +24,38 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
     const newTitle = e.target.value;
     if (!editItem) { 
       const autoSlug = newTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-      setFormData({ ...formData, title: newTitle, slug: autoSlug, seoTitle: newTitle });
+      setFormData({ ...formData, title: newTitle, slug: autoSlug, seoTitle: `${newTitle} | Guru Nanak College` });
     } else {
       setFormData({ ...formData, title: newTitle });
     }
+  };
+
+  const applyTemplate = (t) => {
+    let content = '';
+    if (t === 'notice') content = `<div class="premium-notice-card"><h2>📢 Important Notice</h2><p>Priya chhatron, yahan notice ka content likhein...</p><ul><li>Point 1</li><li>Point 2</li></ul><p><b>Adesh anusar,</b><br/>Principal</p></div>`;
+    if (t === 'event') content = `<section class="event-report"><h1>🏆 Event Report: [Title]</h1><p>Date: ${new Date().toLocaleDateString()}</p><div class="event-grid"><img src="PLACEHOLDER" alt="Event" /><div><h3>Key Highlights:</h3><p>Event ka poora vivaran yahan likhein...</p></div></div>[GALLERY:all]</section>`;
+    if (t === 'iqac') content = `<div class="iqac-page"><h1>📄 IQAC Meeting Minutes</h1><div class="iqac-meta"><span>Date: ${new Date().toLocaleDateString()}</span></div><table class="premium-table"><tr><th>S.No</th><th>Agenda</th><th>Decision Taken</th></tr><tr><td>1</td><td>Budget Approval</td><td>Approved</td></tr></table></div>`;
+    
+    setFormData({ ...formData, content, template: t });
+    toast.success(`${t.toUpperCase()} Template applied!`);
+  };
+
+  const injectShortcode = (code) => {
+    setFormData({ ...formData, content: (formData.content || '') + `\n${code}\n` });
+    toast.success('Shortcode added to bottom!');
+    setShowShortcodes(false);
+  };
+
+  // 📝 SEO SCORECARD LOGIC
+  const getSeoScore = () => {
+    let score = 0;
+    let checks = [];
+    if (formData.title.length > 5) { score += 20; checks.push({ l: 'Title found', s: 'Y' }); }
+    if (formData.seoTitle?.length >= 40 && formData.seoTitle?.length <= 60) { score += 20; checks.push({ l: 'Optimal Title' , s: 'Y'}); } else checks.push({ l: 'Title Length', s: 'N' });
+    if (formData.seoDesc?.length >= 120 && formData.seoDesc?.length <= 160) { score += 20; checks.push({ l: 'Optimal Desc', s: 'Y' }); } else checks.push({ l: 'Desc Length', s: 'N' });
+    if (formData.content?.includes('<h1>')) { score += 20; checks.push({ l: 'H1 Header', s: 'Y' }); } else checks.push({ l: 'H1 missing', s: 'N' });
+    if (formData.content?.includes('<img')) { score += 20; checks.push({ l: 'Visuals (IMG)', s: 'Y' }); } else checks.push({ l: 'Missing IMG', s: 'N' });
+    return { score, checks };
   };
 
   const save = async (e) => {
@@ -134,6 +165,11 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
         .count-good { color: #16a34a; }
         .count-warn { color: #d97706; }
         .count-err { color: #dc2626; }
+        .sc-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .sc-badge:hover { transform: scale(1.05); }
+        .short-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .short-item { padding: 8px; background: ${T.b1}; border-radius: 6px; font-size: 11px; cursor: pointer; border: 1px solid transparent; text-align: left; transition: 0.2s; }
+        .short-item:hover { background: #fff; border-color: ${GOLD}; }
       `}</style>
 
       {/* ── HEADER ── */}
@@ -183,11 +219,36 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: NAVY }}>Page Content (HTML Supported) *</label>
-                  <span style={{ fontSize: 11, color: T.t3 }}>{formData.content?.length || 0} chars</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, alignItems: 'center' }}>
+                  <label style={{ fontSize: 13, fontWeight: 800, color: NAVY }}>Page Content (Automation Enabled)</label>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <div className="sc-badge" style={{ background: '#fef3c7', color: '#b45309' }} onClick={() => setShowShortcodes(!showShortcodes)}>🧩 Shortcodes</div>
+                    <div className="sc-badge" style={{ background: '#e0f2fe', color: '#0369a1' }} onClick={() => applyTemplate('none')}>🔄 Clear</div>
+                  </div>
                 </div>
-                <textarea className="ainp" rows="12" value={formData.content} onChange={e => setFormData({ ...formData, content: e.target.value })} placeholder="<h1>Heading</h1><p>Start writing your page content here...</p>" style={{ fontFamily: 'monospace', fontSize: 13, background: '#f8fafc', lineHeight: 1.6 }} required></textarea>
+
+                {/* SHORTCODE PICKER */}
+                {showShortcodes && (
+                  <div className="fade-up" style={{ background: '#0f172a', padding: 15, borderRadius: 12, marginBottom: 15, border: `1px solid ${NEO_CYAN}` }}>
+                    <div style={{ color: '#fff', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', marginBottom: 10 }}>Embed DB Content Automatically</div>
+                    <div className="short-grid">
+                      <button type="button" className="short-item" onClick={() => injectShortcode('[GALLERY:all]')}>🖼️ Full Gallery</button>
+                      <button type="button" className="short-item" onClick={() => injectShortcode('[EVENTS:3]')}>📅 Latest 3 Events</button>
+                      <button type="button" className="short-item" onClick={() => injectShortcode('[STAFF:all]')}>👨‍🏫 Staff Roster</button>
+                      <button type="button" className="short-item" onClick={() => injectShortcode('[TABLE:2x3]')}>📊 Data Table</button>
+                    </div>
+                  </div>
+                )}
+
+                {!formData.content && (
+                   <div style={{ marginBottom: 10, display: 'flex', gap: 6 }}>
+                      <button type="button" className="sc-badge" style={{ background: '#fff', border: '1px solid #e2e8f0', color: T.t2 }} onClick={() => applyTemplate('notice')}>📝 Notice Tpl</button>
+                      <button type="button" className="sc-badge" style={{ background: '#fff', border: '1px solid #e2e8f0', color: T.t2 }} onClick={() => applyTemplate('event')}>🏆 Event Tpl</button>
+                      <button type="button" className="sc-badge" style={{ background: '#fff', border: '1px solid #e2e8f0', color: T.t2 }} onClick={() => applyTemplate('iqac')}>📄 IQAC Tpl</button>
+                   </div>
+                )}
+
+                <textarea className="ainp" rows="12" value={formData.content} onChange={e => setFormData({ ...formData, content: e.target.value })} placeholder="<h1>Heading</h1><p>Start writing... or use a template above.</p>" style={{ fontFamily: 'monospace', fontSize: 13, background: '#f8fafc', lineHeight: 1.6 }} required></textarea>
               </div>
 
               {/* ✅ AUTO MENU LINK CHECKBOX */}
@@ -209,9 +270,21 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
           {/* RIGHT: SEO & GOOGLE PREVIEW */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <div style={{ background: WHITE, padding: 24, borderRadius: 16, border: `1px solid ${T.b1}`, boxShadow: '0 8px 30px rgba(15,35,71,0.06)' }}>
-              <div style={{ fontSize: 16, fontWeight: 800, color: NAVY, marginBottom: 16, borderBottom: `1px solid ${T.b1}`, paddingBottom: 10 }}>
-                🔍 SEO Optimizer
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, borderBottom: `1px solid ${T.b1}`, paddingBottom: 10 }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: NAVY }}>🔍 SEO Optimizer</div>
+                <div className="sc-badge" style={{ background: getSeoScore().score >= 80 ? '#dcfce7' : '#fee2e2', color: getSeoScore().score >= 80 ? '#166534' : '#b91c1c' }} onClick={() => setShowScorecard(!showScorecard)}>Score: {getSeoScore().score}%</div>
               </div>
+              
+              {showScorecard && (
+                <div className="fade-up" style={{ background: '#f8fafc', padding: 12, borderRadius: 10, marginBottom: 15, border: `1px solid #e2e8f0` }}>
+                  {getSeoScore().checks.map((c, i) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 4 }}>
+                      <span style={{ fontWeight: 600, color: T.t3 }}>{c.l}</span>
+                      <span style={{ fontWeight: 900, color: c.s === 'Y' ? '#166534' : '#b91c1c' }}>{c.s === 'Y' ? '✓' : '✗'}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div>

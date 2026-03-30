@@ -21,7 +21,7 @@ const G = COLORS?.gold || '#f4a023';
 // ── Categories — EXACT match with AdminPanel & HomePage ───────────────────────
 const CATS = ['All Moments', 'Seminars', 'Cultural Fest', 'Guest Visit', 'Campus', 'Departments', 'NSS Programs'];
 
-export default function GalleryPage({ gallery: galleryProp }) {
+export default function GalleryPage({ gallery: galleryProp, headless }) {
   const [images,  setImages]  = useState([]);
   const [filter,  setFilter]  = useState('All Moments');
   const [light,   setLight]   = useState(null);
@@ -153,6 +153,7 @@ export default function GalleryPage({ gallery: galleryProp }) {
       `}</style>
 
       {/* ── HERO ── */}
+      {!headless && (
       <div style={{ background:`linear-gradient(135deg,${N} 0%,#1a3a7c 100%)`, padding:'70px 20px 60px', textAlign:'center', position:'relative', overflow:'hidden' }}>
         <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(rgba(244,160,35,.07) 1px, transparent 1px)', backgroundSize:'28px 28px', pointerEvents:'none' }} />
         <div style={{ position:'absolute', top:0, left:0, right:0, height:4, background:G }} />
@@ -182,9 +183,10 @@ export default function GalleryPage({ gallery: galleryProp }) {
           </div>
         </div>
       </div>
+      )}
 
       {/* ── CONTENT ── */}
-      <div style={{ maxWidth:1300, margin:'0 auto', padding:'48px 20px' }}>
+      <div style={{ maxWidth:1300, margin:'0 auto', padding:headless ? '10px 0' : '48px 20px' }}>
 
         {/* Filter tabs */}
         <div style={{ display:'flex', justifyContent:'center', gap:8, flexWrap:'wrap', marginBottom:40 }}>

@@ -25,7 +25,7 @@ const TYPE_META = {
 
 const getTS = ts => ts?.toDate ? ts.toDate() : new Date(ts || Date.now());
 
-export default function EventsPage() {
+export default function EventsPage({ headless }) {
   const [events,     setEvents]     = useState([]);
   const [loading,    setLoading]    = useState(true);
   const [tab,        setTab]        = useState('all');
@@ -135,6 +135,7 @@ export default function EventsPage() {
       `}</style>
 
       {/* ── HERO ── */}
+      {!headless && (
       <header className="profile-hero" style={{ backgroundImage:`url('https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=2070&auto=format&fit=crop')` }}>
         <div className="hero-overlay" />
         <div className="hero-content anim-fade-in">
@@ -142,8 +143,9 @@ export default function EventsPage() {
           <p className="hero-subtitle">Workshops, seminars, cultural fests aur khel-kud — saari activities ek jagah</p>
         </div>
       </header>
+      )}
 
-      <div style={{ maxWidth:'1200px', margin:'-50px auto 0', padding:'0 20px', position:'relative', zIndex:10 }}>
+      <div style={{ maxWidth:'1200px', margin:headless ? '0' : '-50px auto 0', padding:headless ? '0' : '0 20px', position:'relative', zIndex:10 }}>
 
         {/* Counters */}
         <div style={{ display:'flex', gap:16, flexWrap:'wrap', justifyContent:'center', marginBottom:40 }}>
