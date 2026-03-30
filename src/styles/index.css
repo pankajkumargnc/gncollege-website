@@ -440,94 +440,32 @@ p, li, td, th { text-align: left; }
   h3 { font-size:clamp(16px,4.5vw,22px); }
   .stats-grid { grid-template-columns:1fr 1fr; }
 }
+/* ═══════════════════════════════════════════════════
+   GNC CONSOLIDATED v11
+   Merged v8+v9+v10 + Dark Mode + Print + Responsive fixes
+   🎨 @UI_Agent — No duplicates, single source of truth
+═══════════════════════════════════════════════════ */
+
+/* ── Overflow Lock (single declaration) ── */
 html, body, #root {
   overflow-x: hidden !important;
   max-width: 100vw !important;
 }
 
-/* ══════════════════════════════════════════════════════
-   GNC SAFE FIXES v8 — Non-breaking minimal overrides
-   Does NOT touch: nav, input, button, slider, gallery
-   ══════════════════════════════════════════════════════ */
-
-/* 1. Prevent horizontal scroll only */
-html, body, #root {
-  overflow-x: hidden !important;
-  max-width: 100vw;
-}
-
-/* 2. Images never overflow their container */
-img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* 3. Tables scroll on mobile */
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* 4. WhatsApp button — fixed position safe */
-[class*="WhatsApp"] {
-  position: fixed !important;
-  z-index: 9999 !important;
-}
-
-/* 5. Toast z-index */
-[class*="Toast"], [class*="toast"] {
-  z-index: 999999 !important;
-}
-
-/* 6. Ticker — safe width only */
-[class*="Ticker"] {
-  width: 100%;
-  overflow: hidden;
-}
-
-/* 7. Modal overlay */
-[class*="lightbox"],
-[class*="Lightbox"] {
-  z-index: 99999 !important;
-}
-
-/* 8. Admin panel mobile — only flex direction, nothing else */
-@media (max-width: 768px) {
-  [class*="AdminPanel"] > div[style*="display: flex"],
-  [class*="AdminPanel"] > div[style*="display:flex"] {
-    flex-direction: column;
-  }
-  /* Admin form inputs — prevent iOS zoom */
-  [class*="AdminPanel"] input,
-  [class*="AdminPanel"] select,
-  [class*="AdminPanel"] textarea {
-    font-size: max(16px, 1rem) !important;
-  }
-}
-
-/* GNC-SAFE-V8 */
-/* ══════════════════════════════════════════════════════
-   GNC SAFE FIXES v9 — Non-breaking minimal overrides
-   ══════════════════════════════════════════════════════ */
-html, body, #root { overflow-x: hidden !important; max-width: 100vw; }
-img { max-width: 100%; height: auto; }
-.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* ── Z-Index Safety ── */
 [class*="WhatsApp"] { position: fixed !important; z-index: 9999 !important; }
 [class*="Toast"], [class*="toast"] { z-index: 999999 !important; }
 [class*="Ticker"] { width: 100%; overflow: hidden; }
 [class*="lightbox"], [class*="Lightbox"] { z-index: 99999 !important; }
+
+/* ── Admin Mobile ── */
 @media (max-width: 768px) {
   [class*="AdminPanel"] > div[style*="display: flex"],
   [class*="AdminPanel"] > div[style*="display:flex"] { flex-direction: column; }
-  [class*="AdminPanel"] input, [class*="AdminPanel"] select, [class*="AdminPanel"] textarea { font-size: max(16px, 1rem) !important; }
+  [class*="AdminPanel"] input,
+  [class*="AdminPanel"] select,
+  [class*="AdminPanel"] textarea { font-size: max(16px, 1rem) !important; }
 }
-/* GNC-SAFE-V9 */
-
-/* ═══════════════════════════════════════════════════
-   GNC ENHANCEMENTS v10
-   Performance · UX · Accessibility · SEO
-═══════════════════════════════════════════════════ */
 
 /* ── Focus Visible — Global (WCAG 2.1 AA) ── */
 *:focus { outline: none; }
@@ -552,57 +490,30 @@ textarea:focus-visible {
   bottom: clamp(80px, 10vw, 100px);
   right: clamp(16px, 3vw, 28px);
   z-index: 9990;
-  width: 44px;
-  height: 44px;
-  background: var(--navy);
-  color: var(--gold);
-  border: 2px solid var(--gold);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 20px;
-  font-weight: 900;
+  width: 44px; height: 44px;
+  background: var(--navy); color: var(--gold);
+  border: 2px solid var(--gold); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 20px; font-weight: 900;
   box-shadow: 0 4px 16px rgba(15,35,71,.3);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(12px);
+  opacity: 0; visibility: hidden; transform: translateY(12px);
   transition: opacity .3s, visibility .3s, transform .3s, background .2s;
   will-change: transform, opacity;
 }
-.back-to-top.visible {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-.back-to-top:hover {
-  background: var(--gold);
-  color: var(--navy);
-  transform: translateY(-4px);
-}
-/* ── Ticker — Accessibility & Motion Support ── */
-/* aria-live handled via JS. */
+.back-to-top.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+.back-to-top:hover { background: var(--gold); color: var(--navy); transform: translateY(-4px); }
+
+/* ── Ticker Motion ── */
 @media (prefers-reduced-motion: reduce) {
   .gnc-ticker-root [role="marquee"],
-  .gnc-ticker-root .ticker-track {
-    animation-play-state: paused !important; /* Ticker ko pause kar dega */
-    /* ya phir: animation: none !important; */
-  }
+  .gnc-ticker-root .ticker-track { animation-play-state: paused !important; }
+  .gnc-ticker-root * { animation-duration: 120s !important; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .gnc-ticker-root * {
-    animation-duration: 120s !important; /* Very slow, effectively paused */
-  }
-}
+/* ── Main Content ── */
+#main-content { outline: none; }
 
-/* ── Page Transition — main content ── */
-#main-content {
-  outline: none; /* Skip link target — no focus ring needed */
-}
-
-/* ── Image Lazy Load Skeleton ── */
+/* ── Lazy Image Skeleton ── */
 img[loading="lazy"] {
   background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
   background-size: 200% 100%;
@@ -612,89 +523,199 @@ img[loading="lazy"] {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
-img.loaded, img[loading="lazy"][src] {
-  background: none;
-  animation: none;
-}
+img.loaded, img[loading="lazy"][src] { background: none; animation: none; }
 @media (prefers-reduced-motion: reduce) {
   img[loading="lazy"] { animation: none; background: #e2e8f0; }
 }
 
-/* ── Pagination — PremiumPagination component ── */
+/* ── Pagination (WCAG) ── */
 .pagination-wrap {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin-top: 40px;
-  padding: 20px 0;
-  flex-wrap: wrap;
+  display: flex; justify-content: center; align-items: center;
+  gap: 8px; margin-top: 40px; padding: 20px 0; flex-wrap: wrap;
 }
-.pagination-wrap button {
-  min-width: 44px;
-  min-height: 44px; /* WCAG touch target */
-}
+.pagination-wrap button { min-width: 44px; min-height: 44px; }
 
-/* ── isNew Badge — Pulse Animation ── */
+/* ── "New" Badge Pulse ── */
 @keyframes newPulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
-  70%       { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+  70%      { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
 }
-.badge-new {
-  animation: newPulse 2s infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .badge-new { animation: none; }
-}
+.badge-new { animation: newPulse 2s infinite; }
+@media (prefers-reduced-motion: reduce) { .badge-new { animation: none; } }
 
-/* ── Empty State — Improved ── */
+/* ── Empty State ── */
 .empty-state {
-  text-align: center;
-  padding: clamp(40px, 8vw, 80px) 20px;
-  background: #fff;
-  border-radius: 20px;
-  border: 2px dashed #e2e8f0;
-  max-width: 480px;
-  margin: 0 auto;
+  text-align: center; padding: clamp(40px, 8vw, 80px) 20px;
+  background: #fff; border-radius: 20px; border: 2px dashed #e2e8f0;
+  max-width: 480px; margin: 0 auto;
 }
-.empty-state-icon {
-  font-size: clamp(40px, 6vw, 56px);
-  margin-bottom: 16px;
-  display: block;
-}
+.empty-state-icon { font-size: clamp(40px, 6vw, 56px); margin-bottom: 16px; display: block; }
 
-/* ── Loading Spinner — Standard ── */
+/* ── Loading Spinner ── */
 @keyframes spin { to { transform: rotate(360deg); } }
 .spinner {
   width: 44px; height: 44px;
-  border: 4px solid var(--gold);
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin .8s linear infinite;
-  margin: 0 auto;
-  will-change: transform;
+  border: 4px solid var(--gold); border-top-color: transparent;
+  border-radius: 50%; animation: spin .8s linear infinite;
+  margin: 0 auto; will-change: transform;
 }
-@media (prefers-reduced-motion: reduce) {
-  .spinner { animation-duration: 2s; }
-}
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2s; } }
 
 /* ── Touch Target Safety ── */
 button, a, [role="button"], input[type="checkbox"], input[type="radio"] {
-  min-height: 44px;
-  min-width: 44px;
+  min-height: 44px; min-width: 44px;
 }
-/* Exception: inline text links */
-p a, li a, td a {
-  min-height: unset;
-  min-width: unset;
-}
+p a, li a, td a { min-height: unset; min-width: unset; }
 
-/* ── High Contrast Mode Support ── */
+/* ── High Contrast Mode ── */
 @media (forced-colors: active) {
   .glass-card, .glass-navbar, .glass-panel {
-    border: 2px solid ButtonText;
-    background: Canvas;
+    border: 2px solid ButtonText; background: Canvas;
   }
 }
 
-/* GNC-ENHANCEMENTS-V10 */
+/* ═══════════════════════════════════════════════════
+   DARK MODE — CSS Custom Property Overrides
+   Activated via [data-theme="dark"] on <html>
+═══════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  --bg: #0c1222;
+  --glass-bg: rgba(15,25,50,.85);
+  --glass-border: rgba(255,255,255,.08);
+  --glass-shadow: 0 8px 32px rgba(0,0,0,.4);
+  color-scheme: dark;
+}
+
+[data-theme="dark"] body { background: #0c1222; color: #e2e8f0; }
+
+/* Cards & Panels */
+[data-theme="dark"] .glass-card,
+[data-theme="dark"] .widget,
+[data-theme="dark"] .content-card,
+[data-theme="dark"] .profile-section {
+  background: rgba(15,25,50,.7) !important;
+  border-color: rgba(255,255,255,.06) !important;
+  color: #e2e8f0;
+}
+
+/* General backgrounds */
+[data-theme="dark"] .hp-about,
+[data-theme="dark"] .hp-links,
+[data-theme="dark"] .hp-gal,
+[data-theme="dark"] .hp-ev-card,
+[data-theme="dark"] .hp-qab,
+[data-theme="dark"] .hp-cnt-box {
+  background: #111827 !important;
+  border-color: rgba(255,255,255,.06) !important;
+}
+
+[data-theme="dark"] .hp-events,
+[data-theme="dark"] .hp-yt,
+[data-theme="dark"] .hp-cnt {
+  background: #0f172a !important;
+}
+
+/* Text colors */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5 { color: #f1f5f9; }
+
+[data-theme="dark"] p,
+[data-theme="dark"] li,
+[data-theme="dark"] td,
+[data-theme="dark"] .content-card p,
+[data-theme="dark"] .footer-desc { color: #94a3b8; }
+
+[data-theme="dark"] .section-heading { color: #f1f5f9; }
+[data-theme="dark"] .hero-subtitle { color: var(--gold) !important; }
+
+/* Inputs */
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: rgba(15,25,50,.6);
+  color: #e2e8f0;
+  border-color: rgba(255,255,255,.1);
+}
+
+/* Scrollbar */
+[data-theme="dark"] ::-webkit-scrollbar-track { background: #1e293b; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #475569; }
+
+/* Empty state */
+[data-theme="dark"] .empty-state {
+  background: #111827;
+  border-color: #1e293b;
+}
+
+/* Stat cards */
+[data-theme="dark"] .stat-card {
+  background: rgba(15,25,50,.5);
+  border-color: rgba(255,255,255,.06);
+}
+[data-theme="dark"] .stat-value { color: var(--gold); }
+[data-theme="dark"] .stat-label { color: #94a3b8; }
+
+/* Quick links */
+[data-theme="dark"] .quick-link { color: #94a3b8; }
+[data-theme="dark"] .quick-link:hover { color: var(--gold); }
+
+/* 404 page */
+[data-theme="dark"] .nf-wrap { background: linear-gradient(135deg,#0c1222 0%,#111827 100%); }
+[data-theme="dark"] .nf-card { background: #1e293b; border-color: #334155; }
+[data-theme="dark"] .nf-title { color: #f1f5f9; }
+[data-theme="dark"] .nf-desc { color: #94a3b8; }
+[data-theme="dark"] .nf-btn-secondary { background: #334155; color: #f1f5f9; }
+
+/* Notification cards */
+[data-theme="dark"] .notif-card { background: #111827 !important; border-color: rgba(255,255,255,.06) !important; }
+
+/* ═══════════════════════════════════════════════════
+   PRINT STYLESHEET
+   ✍️ @SEO_Agent — Clean printable layouts
+═══════════════════════════════════════════════════ */
+@media print {
+  /* Hide non-essential elements */
+  .glass-navbar,
+  .site-footer,
+  .back-to-top,
+  .splash-screen,
+  [class*="WhatsApp"],
+  [class*="Ticker"],
+  [class*="AlertBanner"],
+  .qas-wrap,
+  .hp-watermark,
+  .hp-qab,
+  nav,
+  button[title="Open Admin Panel"] {
+    display: none !important;
+  }
+
+  /* Reset backgrounds */
+  body { background: #fff !important; color: #000 !important; }
+  .glass-card, .widget, .content-card, .profile-section {
+    background: #fff !important;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    break-inside: avoid;
+  }
+
+  /* Text readability */
+  h1, h2, h3, h4, h5 { color: #000 !important; page-break-after: avoid; }
+  p, li, td { color: #333 !important; }
+  a { color: #000 !important; text-decoration: underline; }
+  a::after { content: " (" attr(href) ")"; font-size: 0.8em; color: #666; }
+
+  /* Page layout */
+  .profile-container { margin-top: 0 !important; }
+  .profile-hero { height: auto !important; padding: 20px !important; }
+  .profile-layout { flex-direction: column !important; }
+  .profile-sidebar { position: static !important; width: 100% !important; }
+
+  /* Images */
+  img { max-width: 100% !important; page-break-inside: avoid; }
+}
+
+/* GNC-CONSOLIDATED-V11 */

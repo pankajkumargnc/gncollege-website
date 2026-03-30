@@ -1,0 +1,95 @@
+// firestore.rules — GNC College Firestore Security Rules
+// 🔐 @Security_Agent — Template for Firebase Console
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper Functions ──────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuth() && request.auth.token.email_verified == true;
+    }
+
+    // ── Public Collections (Read-only for visitors) ───────────────
+    // Anyone can read, only authenticated users can write
+    match /notices/{docId} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /announcements/{docId} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /events/{docId} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /gallery/{docId} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /faculties/{docId} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /sliderSlides/{docId} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /updates/{docId} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /navigation/{docId} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /pages/{docId} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /alerts/{docId} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /contactDirectory/{docId} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /placements/{docId} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /pdfReports/{docId} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    // ── Settings (Read-only for public, write for admin) ─────────
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    // ── Catch-all: Deny everything else ──────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

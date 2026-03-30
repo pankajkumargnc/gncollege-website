@@ -4,7 +4,7 @@ import React from "react";
 import { COLORS } from '../../styles/colors';
 import { SOCIAL_LINKS } from '../../data/db';
 
-const TopBar = () => {
+const TopBar = ({ isDark, onToggleDark, onSearchOpen }) => {
   const whatsappLink = { id: 'whatsapp', label: 'W', href: 'https://wa.me/917903340991' };
 
   return (
@@ -196,6 +196,57 @@ const TopBar = () => {
               🎓 Apply Online
             </a>
           </div>
+
+          <div className="tb-div" />
+
+          {/* Search + Dark Mode */}
+          {onSearchOpen && (
+            <button
+              onClick={onSearchOpen}
+              style={{
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: 8,
+                padding: '4px 14px',
+                color: '#94a3b8',
+                fontSize: 11,
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                transition: 'all .2s',
+                fontFamily: 'Inter, sans-serif',
+                whiteSpace: 'nowrap',
+              }}
+              title="Search (Ctrl+K)"
+            >
+              🔍 <span style={{ opacity: 0.6 }}>Ctrl+K</span>
+            </button>
+          )}
+          {onToggleDark && (
+            <button
+              onClick={onToggleDark}
+              style={{
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: 8,
+                width: 32,
+                height: 28,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                fontSize: 14,
+                transition: 'all .25s',
+                flexShrink: 0,
+                color: '#fff',
+              }}
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {isDark ? '☀️' : '🌙'}
+            </button>
+          )}
 
           <div className="tb-div" />
 

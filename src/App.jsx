@@ -1,8 +1,10 @@
-// src/App.jsx — FINAL MERGE VERSION (With Hardcoded Sub-menus & Partial PDF Embed)
+// src/App.jsx — NEXTGEN MERGE VERSION (Universal Search, Dark Mode, SEO, Quick Access)
 
 import WhatsAppButton from "./components/WhatsAppButton";
 import BackToTop from "./components/BackToTop";
-import { useState, useEffect, Suspense, lazy, useMemo } from "react";
+import UniversalSearch from "./components/UniversalSearch";
+import QuickAccessSidebar from "./components/QuickAccessSidebar";
+import { useState, useEffect, Suspense, lazy, useMemo, useCallback } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import AlertBanner from "./components/AlertBanner";
@@ -18,6 +20,8 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import AdminLogin from "./components/AdminLogin";
 import { COLORS } from "./styles/colors";
 import { navLinks as staticNavLinks } from "./data/db";
+import useDarkMode from "./hooks/useDarkMode";
+import { updateSEO } from "./utils/seoManager";
 import {
   collection,
   onSnapshot,
@@ -60,6 +64,7 @@ const EventsPage = safeLazy(() => import("./pages/EventsPage"));
 
 const AdminPanel = safeLazy(() => import("./components/admin/AdminPanel"));
 const EmbeddedPDFPage = safeLazy(() => import("./pages/EmbeddedPDFPage"));
+const NotFoundPage = safeLazy(() => import("./pages/NotFoundPage"));
 
 // ── Named export lazy helpers ────────────────────────────────────────────────
 const LazyAbout = (n) =>
@@ -193,6 +198,10 @@ export default function App() {
   const [faculties, setFaculties] = useState([]);
   const [sliderSlides, setSliderSlides] = useState([]);
   const [navLinks, setNavLinks] = useState([]);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  // ── Dark Mode ────────────────────────────────────────────────────────────
+  const { isDark, toggle: toggleDark } = useDarkMode();
 
   // ── Admin auth ───────────────────────────────────────────────────────────
   const [adminAuthed, setAdminAuthed] = useState(
@@ -213,6 +222,23 @@ export default function App() {
   const isAdminRoute =
     location.pathname.startsWith("/admin") ||
     window.location.hash.startsWith("#/admin");
+
+  // ── Universal Search (Ctrl+K) ────────────────────────────────────────────
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // ── SEO Manager — update meta tags on route change ────────────────────────
+  useEffect(() => {
+    updateSEO(location.pathname);
+  }, [location.pathname]);
 
   // ── Jodit CSS — sirf /admin route pe load karo ──────────────────────────
   useEffect(() => {
@@ -445,10 +471,13 @@ export default function App() {
         }}
       />
 
+      {/* ── Universal Search Modal ── */}
+      <UniversalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+
       {!isAdminRoute && (
         <>
           <AlertBanner />
-          <TopBar />
+          <TopBar isDark={isDark} onToggleDark={toggleDark} onSearchOpen={() => setSearchOpen(true)} />
           <ErrorBoundary>
             <Suspense fallback={<div style={{ height: 40 }} />}>
               <Ticker items={notices} />
@@ -1000,6 +1029,9 @@ export default function App() {
 
           <Route path="/p/:slug" element={<PageViewer />} />
 
+          {/* ── 404 Catch-All ── */}
+          <Route path="*" element={<R el={<NotFoundPage />} />} />
+
           {/* Admin */}
           <Route
             path="/admin"
@@ -1046,28 +1078,7 @@ export default function App() {
           <Footer dynamicSocialLinks={navLinks} />
           <WhatsAppButton />
           <BackToTop />
-
-          <button
-            onClick={handleOpenAdminTab}
-            title="Open Admin Panel"
-            style={{
-              position: "fixed",
-              bottom: "clamp(16px, 3vw, 25px)",
-              right: "clamp(16px, 3vw, 25px)",
-              background: COLORS.navy,
-              color: "#fff",
-              border: `3px solid ${COLORS.gold}`,
-              borderRadius: "50%",
-              width: "clamp(48px, 6vw, 60px)",
-              height: "clamp(48px, 6vw, 60px)",
-              cursor: "pointer",
-              zIndex: 500,
-              fontSize: "clamp(18px, 2.5vw, 24px)",
-              flexShrink: 0,
-            }}
-          >
-            ⚙️
-          </button>
+          <QuickAccessSidebar />
         </>
       )}
     </>
