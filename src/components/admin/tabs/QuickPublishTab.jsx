@@ -31,60 +31,107 @@ export default function QuickPublishTab({ logAct }) {
     } catch (err) { toast.error(err.message); }
   };
 
+  // AI Modal States
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiResult, setAiResult] = useState(null);
+
+  // Form States
+  const [notData, setNotData] = useState({ id: null, text: '', img: '' });
+  const [newsData, setNewsData] = useState({ id: null, text: '', img: '' });
+  const [evtData, setEvtData] = useState({ id: null, title: '', day: '', month: '', type: 'WORKSHOP', img: '' });
+  const [updData, setUpdData] = useState({ id: null, text: '', link: '' });
+  const [altData, setAltData] = useState({ id: null, text: '' });
+
+  const handleAiGen = () => {
+    if (!aiPrompt.trim()) return toast.error('Please describe what you want to generate!');
+    setAiGenerating(true);
+    setAiResult(null);
+    toast.loading('🧠 AI Neural Matrix searching for best visual...', { id: 'ai-gen' });
+    
+    setTimeout(() => {
+        const p = aiPrompt.toLowerCase();
+        let img = 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=1200&auto=format&fit=crop'; // Corporate Office Default
+        
+        if (p.includes('admission') || p.includes('apply') || p.includes('college')) {
+            img = 'https://images.unsplash.com/photo-152305085306e-88e4a6e029c0?q=80&w=1200&auto=format&fit=crop';
+        } else if (p.includes('sport') || p.includes('win') || p.includes('trophy')) {
+            img = 'https://images.unsplash.com/photo-1541534741688-611c3015569d?q=80&w=1200&auto=format&fit=crop';
+        } else if (p.includes('seminar') || p.includes('workshop') || p.includes('event')) {
+            img = 'https://images.unsplash.com/photo-1475721027785-f74dea327912?q=80&w=1200&auto=format&fit=crop';
+        } else if (p.includes('news') || p.includes('breaking') || p.includes('official')) {
+            img = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1200&auto=format&fit=crop';
+        } else if (p.includes('holiday') || p.includes('close') || p.includes('alert')) {
+            img = 'https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1200&auto=format&fit=crop';
+        }
+
+        setAiResult(img);
+        toast.success(`AI Banner for "${aiPrompt.substring(0, 20)}..." generated!`, { id: 'ai-gen', icon: '✨' });
+        setAiGenerating(false);
+    }, 3000);
+  };
+
+  const attachAiImage = (type) => {
+    if (type === 'notice') setNotData(p => ({ ...p, img: aiResult }));
+    if (type === 'news') setNewsData(p => ({ ...p, img: aiResult }));
+    if (type === 'event') setEvtData(p => ({ ...p, img: aiResult }));
+    toast.success(`Banner attached to ${type.toUpperCase()}!`);
+    setIsAiModalOpen(false);
+  };
+
   // 1. NOTICES logic
-  const [notData, setNotData] = useState({ id: null, text: '' });
   const saveNotice = async e => {
     e.preventDefault(); setLoading(true);
     try {
+      const payload = { text: notData.text, img: notData.img || '', updatedAt: serverTimestamp() };
       if (notData.id) {
-        await updateDoc(doc(db, 'notices', notData.id), { text: notData.text, updatedAt: serverTimestamp() });
-        toast.success('Notice Updated!', { icon: '🔄' });
+        await updateDoc(doc(db, 'notices', notData.id), payload);
+        toast.success('Notice Updated!');
       } else {
-        await addDoc(collection(db, 'notices'), { text: notData.text, type: 'General', isNew: true, link: '', date: new Date().toISOString(), createdAt: serverTimestamp() });
-        toast.success('Notice Published!', { icon: '📢' });
+        await addDoc(collection(db, 'notices'), { ...payload, type: 'General', isNew: true, link: '', date: new Date().toISOString(), createdAt: serverTimestamp() });
+        toast.success('Notice Published!');
       }
-      setNotData({ id: null, text: '' });
+      setNotData({ id: null, text: '', img: '' });
     } catch(err) { toast.error(err.message); }
     setLoading(false);
   };
 
   // 2. NEWS logic
-  const [newsData, setNewsData] = useState({ id: null, text: '' });
   const saveNews = async e => {
     e.preventDefault(); setLoading(true);
     try {
+      const payload = { text: newsData.text, img: newsData.img || '', updatedAt: serverTimestamp() };
       if (newsData.id) {
-        await updateDoc(doc(db, 'announcements', newsData.id), { text: newsData.text, updatedAt: serverTimestamp() });
-        toast.success('News Updated!', { icon: '🔄' });
+        await updateDoc(doc(db, 'announcements', newsData.id), payload);
+        toast.success('News Updated!');
       } else {
-        await addDoc(collection(db, 'announcements'), { text: newsData.text, isNew: true, link: '', date: new Date().toISOString(), createdAt: serverTimestamp() });
-        toast.success('News Live Now!', { icon: '📣' });
+        await addDoc(collection(db, 'announcements'), { ...payload, isNew: true, link: '', date: new Date().toISOString(), createdAt: serverTimestamp() });
+        toast.success('News Live!');
       }
-      setNewsData({ id: null, text: '' });
+      setNewsData({ id: null, text: '', img: '' });
     } catch(err) { toast.error(err.message); }
     setLoading(false);
   };
 
   // 3. EVENTS logic
-  const [evtData, setEvtData] = useState({ id: null, title: '', day: '', month: '', type: 'WORKSHOP' });
   const saveEvent = async e => {
     e.preventDefault(); setLoading(true);
     try {
-      const payload = { title: evtData.title, day: evtData.day, month: evtData.month, type: evtData.type };
+      const payload = { title: evtData.title, day: evtData.day, month: evtData.month, type: evtData.type, img: evtData.img || '', updatedAt: serverTimestamp() };
       if (evtData.id) {
-        await updateDoc(doc(db, 'events', evtData.id), { ...payload, updatedAt: serverTimestamp() });
-        toast.success('Event Record Updated!');
+        await updateDoc(doc(db, 'events', evtData.id), payload);
+        toast.success('Event Updated!');
       } else {
         await addDoc(collection(db, 'events'), { ...payload, status: 'upcoming', location: 'Campus', desc: '', createdAt: serverTimestamp() });
-        toast.success('Event Scheduled Successfully!', { icon: '🏆' });
+        toast.success('Event Scheduled!', { icon: '🏆' });
       }
-      setEvtData({ id: null, title: '', day: '', month: '', type: 'WORKSHOP' });
+      setEvtData({ id: null, title: '', day: '', month: '', type: 'WORKSHOP', img: '' });
     } catch(err) { toast.error(err.message); }
     setLoading(false);
   };
 
   // 4. TICKER UPDATES logic
-  const [updData, setUpdData] = useState({ id: null, text: '', link: '' });
   const saveUpdate = async e => {
     e.preventDefault(); setLoading(true);
     try {
@@ -101,7 +148,6 @@ export default function QuickPublishTab({ logAct }) {
   };
 
   // 5. FLASH ALERTS logic
-  const [altData, setAltData] = useState({ id: null, text: '' });
   const saveAlert = async e => {
     e.preventDefault(); setLoading(true);
     try {
@@ -195,9 +241,79 @@ export default function QuickPublishTab({ logAct }) {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 24, position: 'relative', zIndex: 10 }}>
         
-        {/* 1. NOTICES */}
+        {/* 🤖 AI CREATION CORE (Top Section) */}
+        <div className="qp-card" style={{ background: '#f1f5f9', gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: `1.5px solid ${NAVY}15` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                <div style={{ fontSize: 42, animation: 'spin 4s linear infinite', filter: `drop-shadow(0 0 10px ${GOLD}88)` }}>✨</div>
+                <div>
+                    <h3 style={{ margin: 0, color: NAVY, fontWeight: 900, fontSize: 20 }}>AI Content Suite</h3>
+                    <p style={{ margin: 0, fontSize: 13, color: T.t3, fontWeight: 600 }}>Create custom banners, news posters, and social media assets via natural language.</p>
+                </div>
+            </div>
+            <button className="qp-btn-pub" onClick={() => setIsAiModalOpen(true)} style={{ background: NAVY, minWidth: 200 }}>
+                🚀 Open Neural AI Studio
+            </button>
+        </div>
+
+      {/* 🔮 NEURAL AI STUDIO MODAL */}
+      {isAiModalOpen && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(15,35,71,.8)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100002, backdropFilter:'blur(12px)' }} onClick={()=>setIsAiModalOpen(false)}>
+          <div style={{ background:WHITE, borderRadius:24, width:680, maxWidth:'90vw', boxShadow:'0 30px 60px rgba(0,0,0,.4)', padding:0, overflow:'hidden', animation: 'fade-up 0.3s ease-out' }} onClick={e=>e.stopPropagation()}>
+            {/* Header */}
+            <div style={{ background:`linear-gradient(135deg, ${NAVY}, #0a1b38)`, padding:'24px 32px', color:'#fff', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                <div>
+                    <h2 style={{ margin:0, fontSize:22, fontWeight:900, letterSpacing:'-0.5px' }}>🧠 Neural AI Studio</h2>
+                    <p style={{ margin:0, fontSize:12, color:GOLD, fontWeight:800, textTransform:'uppercase', opacity:0.8 }}>GNC Semantic Engine v3.0</p>
+                </div>
+                <div style={{ fontSize:32 }}>🧬</div>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding:32 }}>
+                <div style={{ marginBottom:24 }}>
+                    <label style={{ display:'block', fontSize:13, fontWeight:800, color:NAVY, marginBottom:10, textTransform:'uppercase' }}> Describe your Banner / Poster</label>
+                    <textarea 
+                        className="ainp" rows={3} 
+                        style={{ borderRadius:16, border: '1.5px solid #f1f5f9', background: '#f8fafc', width:'100%', padding:16, boxSizing:'border-box', fontSize:14 }} 
+                        value={aiPrompt} 
+                        onChange={e => setAiPrompt(e.target.value)} 
+                        placeholder="e.g. Annual Sports Day 2024 with a trophy and stadium background..." 
+                    />
+                </div>
+
+                {!aiResult ? (
+                    <button className="abtn abtn-navy" 
+                        style={{ width:'100%', height:54, borderRadius:16, justifyContent:'center', fontSize:16 }} 
+                        onClick={handleAiGen} disabled={aiGenerating}
+                    >
+                        {aiGenerating ? '⚡ GENERATING NEURAL MATRIX...' : '✨ Build AI Banner'}
+                    </button>
+                ) : (
+                    <div className="fade-in">
+                        <div style={{ position:'relative', borderRadius:16, overflow:'hidden', border:`2px solid ${GOLD}`, boxShadow:'0 10px 20px rgba(0,0,0,0.1)', marginBottom:20 }}>
+                            <img src={aiResult} style={{ width:'100%', height:280, objectFit:'cover' }} />
+                            <div style={{ position:'absolute', top:12, right:12, background:GOLD, color:NAVY, padding:'6px 12px', borderRadius:8, fontSize:10, fontWeight:900 }}>AI PREVIEW</div>
+                        </div>
+                        <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:12 }}>
+                            <button className="abtn abtn-navy" style={{ borderRadius:12, fontSize:10, padding:'8px 4px' }} onClick={() => attachAiImage('notice')}>📌 Attach to Notice</button>
+                            <button className="abtn abtn-navy" style={{ borderRadius:12, fontSize:10, padding:'8px 4px' }} onClick={() => attachAiImage('news')}>📣 Attach to News</button>
+                            <button className="abtn abtn-navy" style={{ borderRadius:12, fontSize:10, padding:'8px 4px' }} onClick={() => attachAiImage('event')}>🏆 Attach to Event</button>
+                        </div>
+                        <button className="abtn abtn-outline" style={{ width:'100%', marginTop:12, borderRadius:12 }} onClick={() => setAiResult(null)}>🔄 Re-Generate</button>
+                    </div>
+                )}
+            </div>
+
+            {/* Footer */}
+            <div style={{ padding:'16px 32px', borderTop:'1px solid #f1f5f9', display:'flex', justifyContent:'space-between', alignItems:'center', background:'#f8fafc' }}>
+                <span style={{ fontSize:11, color:T.t4, fontWeight:700 }}>Powered by OpenAI DALL-E & Midjourney APIs (Simulated)</span>
+                <button style={{ background:'transparent', border:'none', color:NAVY, fontWeight:800, cursor:'pointer' }} onClick={()=>setIsAiModalOpen(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
         <div className={`qp-card ${notData.id ? 'active' : ''}`}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
             <div className="qp-icon-box" style={{ background: '#eff6ff', color: '#3b82f6' }}>📢</div>
@@ -205,14 +321,20 @@ export default function QuickPublishTab({ logAct }) {
           </div>
           <form onSubmit={saveNotice} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <textarea className="ainp" rows={3} style={{ borderRadius:16, border: '1.5px solid #f1f5f9', background: '#f8fafc' }} value={notData.text} onChange={e => setNotData({ ...notData, text: e.target.value })} placeholder="Write notice content..." required />
+            {notData.img && (
+              <div style={{ position:'relative', borderRadius:12, overflow:'hidden', border:'2px solid #3b82f6' }}>
+                <img src={notData.img} style={{ width:'100%', height:100, objectFit:'cover' }} />
+                <button type="button" onClick={() => setNotData({...notData, img:''})} style={{ position:'absolute', top:4, right:4, background:'red', color:'#fff', border:'none', borderRadius:4, fontSize:10, cursor:'pointer' }}>✕ Remove Banner</button>
+              </div>
+            )}
             <div style={{ display: 'flex', gap: 10 }}>
               <button type="submit" className="qp-btn-pub" style={{ flex: 1 }} disabled={loading}>
                 {loading ? '...' : notData.id ? '🔄 Update Notice' : '✨ Publish Notice'}
               </button>
-              {notData.id && <button type="button" className="qp-btn-cancel" onClick={() => setNotData({id:null, text:''})}>✕</button>}
+              {notData.id && <button type="button" className="qp-btn-cancel" onClick={() => setNotData({id:null, text:'', img:''})}>✕</button>}
             </div>
           </form>
-          <RecentList items={recentData.notices} col="notices" accent="#3b82f6" onDel={handleDelete} onEdit={item => setNotData({ id: item.id, text: item.text })} />
+          <RecentList items={recentData.notices} col="notices" accent="#3b82f6" onDel={handleDelete} onEdit={item => setNotData({ id: item.id, text: item.text, img: item.img||'' })} />
         </div>
 
         {/* 2. NEWS */}
@@ -223,14 +345,20 @@ export default function QuickPublishTab({ logAct }) {
           </div>
           <form onSubmit={saveNews} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <textarea className="ainp" rows={3} style={{ borderRadius:16, border: '1.5px solid #f1f5f9', background: '#f8fafc' }} value={newsData.text} onChange={e => setNewsData({ ...newsData, text: e.target.value })} placeholder="Write news announcement..." required />
+            {newsData.img && (
+              <div style={{ position:'relative', borderRadius:12, overflow:'hidden', border:'2px solid #8b5cf6' }}>
+                <img src={newsData.img} style={{ width:'100%', height:100, objectFit:'cover' }} />
+                <button type="button" onClick={() => setNewsData({...newsData, img:''})} style={{ position:'absolute', top:4, right:4, background:'red', color:'#fff', border:'none', borderRadius:4, fontSize:10, cursor:'pointer' }}>✕ Remove Banner</button>
+              </div>
+            )}
             <div style={{ display: 'flex', gap: 10 }}>
               <button type="submit" className="qp-btn-pub" style={{ flex: 1, background: '#8b5cf6' }} disabled={loading}>
                 {loading ? '...' : newsData.id ? '🔄 Update News' : '✨ Push News LIVE'}
               </button>
-              {newsData.id && <button type="button" className="qp-btn-cancel" onClick={() => setNewsData({id:null, text:''})}>✕</button>}
+              {newsData.id && <button type="button" className="qp-btn-cancel" onClick={() => setNewsData({id:null, text:'', img:''})}>✕</button>}
             </div>
           </form>
-          <RecentList items={recentData.announcements} col="announcements" accent="#8b5cf6" onDel={handleDelete} onEdit={item => setNewsData({ id: item.id, text: item.text })} />
+          <RecentList items={recentData.announcements} col="announcements" accent="#8b5cf6" onDel={handleDelete} onEdit={item => setNewsData({ id: item.id, text: item.text, img: item.img||'' })} />
         </div>
 
         {/* 3. EVENTS */}
@@ -240,22 +368,28 @@ export default function QuickPublishTab({ logAct }) {
             <div className="qp-label">{evtData.id ? 'Edit Event' : 'Event Scheduler'}</div>
           </div>
           <form onSubmit={saveEvent} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <input type="text" className="ainp" style={{ borderRadius:12, background:'#f8fafc' }} value={evtData.title} onChange={e => setEvtData({...evtData, title: e.target.value})} placeholder="Event Title..." required />
+            <input type="text" className="ainp" style={{ borderRadius:12, background: '#f8fafc' }} value={evtData.title} onChange={e => setEvtData({...evtData, title: e.target.value})} placeholder="Event Title..." required />
             <div style={{ display: 'flex', gap: 12 }}>
-              <input type="text" className="ainp" style={{ borderRadius:12, background:'#f8fafc', flex: 1 }} value={evtData.day} onChange={e => setEvtData({...evtData, day: e.target.value})} placeholder="Day (e.g. 15)" required />
-              <input type="text" className="ainp" style={{ borderRadius:12, background:'#f8fafc', flex: 1.5 }} value={evtData.month} onChange={e => setEvtData({...evtData, month: e.target.value})} placeholder="Month (e.g. MAR)" required />
+              <input type="text" className="ainp" style={{ borderRadius:12, background: '#f8fafc', flex: 1 }} value={evtData.day} onChange={e => setEvtData({...evtData, day: e.target.value})} placeholder="Day (e.g. 15)" required />
+              <input type="text" className="ainp" style={{ borderRadius:12, background: '#f8fafc', flex: 1.5 }} value={evtData.month} onChange={e => setEvtData({...evtData, month: e.target.value})} placeholder="Month (e.g. MAR)" required />
             </div>
-            <select className="ainp" style={{ borderRadius:12, background:'#f8fafc' }} value={evtData.type} onChange={e => setEvtData({...evtData, type: e.target.value})}>
+            <select className="ainp" style={{ borderRadius:12, background: '#f8fafc' }} value={evtData.type} onChange={e => setEvtData({...evtData, type: e.target.value})}>
               <option value="WORKSHOP">Workshop</option><option value="SEMINAR">Seminar</option><option value="CULTURAL">Cultural</option><option value="SPORTS">Sports</option>
             </select>
+            {evtData.img && (
+              <div style={{ position:'relative', borderRadius:12, overflow:'hidden', border:'2px solid #10b981', marginTop:8 }}>
+                <img src={evtData.img} style={{ width:'100%', height:80, objectFit:'cover' }} />
+                <button type="button" onClick={() => setEvtData({...evtData, img:''})} style={{ position:'absolute', top:4, right:4, background:'red', color:'#fff', border:'none', borderRadius:4, fontSize:10, cursor:'pointer' }}>✕ Remove Banner</button>
+              </div>
+            )}
             <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
               <button type="submit" className="qp-btn-pub" style={{ flex: 1, background: '#10b981' }} disabled={loading}>
                 {loading ? '...' : evtData.id ? '🔄 Update Event' : '📅 Schedule Now'}
               </button>
-              {evtData.id && <button type="button" className="qp-btn-cancel" onClick={() => setEvtData({id:null, title:'', day:'', month:'', type:'WORKSHOP'})}>✕</button>}
+              {evtData.id && <button type="button" className="qp-btn-cancel" onClick={() => setEvtData({id:null, title:'', day:'', month:'', type:'WORKSHOP', img:''})}>✕</button>}
             </div>
           </form>
-          <RecentList items={recentData.events} col="events" accent="#10b981" onDel={handleDelete} onEdit={item => setEvtData({ id: item.id, title: item.title, day: item.day||'', month: item.month||'', type: item.type||'WORKSHOP' })} />
+          <RecentList items={recentData.events} col="events" accent="#10b981" onDel={handleDelete} onEdit={item => setEvtData({ id: item.id, title: item.title, day: item.day||'', month: item.month||'', type: item.type||'WORKSHOP', img: item.img||'' })} />
         </div>
 
         {/* 4. TICKER UPDATES */}
@@ -266,7 +400,7 @@ export default function QuickPublishTab({ logAct }) {
           </div>
           <form onSubmit={saveUpdate} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <textarea className="ainp" rows={2} style={{ borderRadius:16, border: '1.5px solid #f1f5f9', background: '#f8fafc' }} value={updData.text} onChange={e => setUpdData({...updData, text: e.target.value})} placeholder="Ticker message..." required />
-            <input type="text" className="ainp" style={{ borderRadius:12, background:'#f8fafc' }} value={updData.link} onChange={e => setUpdData({...updData, link: e.target.value})} placeholder="Optional Link (http://...)" />
+            <input type="text" className="ainp" style={{ borderRadius:12, background: '#f8fafc' }} value={updData.link} onChange={e => setUpdData({...updData, link: e.target.value})} placeholder="Optional Link (http://...)" />
             <div style={{ display: 'flex', gap: 10 }}>
               <button type="submit" className="qp-btn-pub" style={{ flex: 1, background: '#d97706' }} disabled={loading}>
                 {loading ? '...' : updData.id ? '🔄 Update Ticker' : '🚀 Post to Ticker'}

@@ -32,7 +32,7 @@ const DriveTab          = lazy(() => import('./tabs/DriveTab'));
 const SettingsTab       = lazy(() => import('./tabs/SettingsTab'));
 const ContactTab        = lazy(() => import('./tabs/ContactTab'));
 const ActivityTab       = lazy(() => import('./tabs/ActivityTab'));
-const BackupTab         = lazy(() => import('./tabs/BackupTab'));
+const BackupRestoreTab  = lazy(() => import('./tabs/BackupRestoreTab'));
 const SystemTestTab     = lazy(() => import('./tabs/SystemTestTab'));
 const MeetingPDFTab     = lazy(() => import('./tabs/MeetingPDFTab'));
 const TestimonialsTab   = lazy(() => import('./tabs/TestimonialsTab'));
@@ -88,7 +88,7 @@ const TABS = [
   { id:'settings',      icon:'⚙️', label:'Site Settings',    section:'SYSTEM' },
   { id:'contact',       icon:'📞', label:'Contact Settings', section:'' },
   { id:'activity',      icon:'📋', label:'Activity Log',     section:'' },
-  { id:'backup',        icon:'💾', label:'Backup & Restore', section:'' },
+  { id:'backup',        icon:'🏰', label:'Cloud Vault & Backup', section:'' },
   { id:'system_test',   icon:'🛡️', label:'System Test',      section:'' },
 ];
 
@@ -253,7 +253,7 @@ function AdminPanelInner({
   // ── Render tab content ────────────────────────────────────────────────────
   const renderTab = () => {
     switch(tab) {
-      case 'dashboard':    return <DashboardTab notices={notices} events={events} faculties={faculties} placements={placements} pdfReports={pdfReports} alerts={alerts} gallery={gallery} pages={pages} actLog={actLog} onNavigate={setTab} />;
+      case 'dashboard':    return <DashboardTab notices={notices} events={events} faculties={faculties} placements={placements} pdfReports={pdfReports} alerts={alerts} gallery={gallery} pages={pages} actLog={actLog} onNavigate={setTab} {...sharedProps} />;
       case 'quick':        return <QuickPublishTab {...sharedProps} />;
       case 'alerts':       return <AlertsTab alerts={alerts} {...sharedProps} />;
       case 'placements':   return <PlacementsTab placements={placements} {...sharedProps} />;
@@ -277,14 +277,14 @@ function AdminPanelInner({
       case 'settings':     return <SettingsTab {...sharedProps} />;
       case 'contact':      return <ContactTab {...sharedProps} />;
       case 'activity':     return <ActivityTab actLog={actLog} />;
-      case 'backup':       return <BackupTab {...sharedProps} />;
+      case 'backup':       return <BackupRestoreTab {...sharedProps} />;
       case 'system_test':  return <SystemTestTab {...sharedProps} />;
       default: return null;
     }
   };
 
   return (
-    <div className="adm" style={{ display:'flex', height:'100vh', width:'100vw', position:'fixed', top:0, left:0, zIndex:99999, overflow:'hidden' }}>
+    <div className="adm" style={{ display:'flex', height:'100vh', width:'100vw', position:'fixed', top:0, left:0, zIndex:99999, overflow:'hidden', background: '#f8fafc' }}>
       <style>{GCSS + `
         .exit-overlay {
             position: fixed; inset: 0; background: #0f172a; z-index: 1000000;
@@ -311,6 +311,19 @@ function AdminPanelInner({
             animation: exit-scan 1.5s infinite;
         }
         @keyframes exit-scan { 0% { top: 0; } 100% { top: 100%; } }
+
+        /* 💓 HEARTBEAT PULSE */
+        .live-pulse {
+            width: 8px; height: 8px; background: #22c55e; border-radius: 50%;
+            display: inline-block; margin-right: 8px;
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+            animation: pulse-green 2s infinite;
+        }
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
 
         /* 🌊 FLUID FILL & BOUNCY BUTTON CUSTOM CSS */
         .fluid-btn {
@@ -363,7 +376,6 @@ function AdminPanelInner({
       {/* ── Sidebar ── */}
       <div className={`adm-side ${sideCollapsed&&!isMobile?'collapsed':''} ${isMobile&&sideOpen?'open':''}`}>
         <div className="adm-brand">
-          {/* ✅ Naya Logo Image */}
           <img 
             src="images/logo.webp" 
             alt="GNC Logo" 
@@ -375,12 +387,10 @@ function AdminPanelInner({
             onClick={() => isMobile ? setSideOpen(false) : setSideCollapsed(c=>!c)}
           />
           <div className="adm-brand-text" style={{ marginLeft: 10, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            {/* ✅ Full College Name */}
-            <div style={{ fontWeight: 900, color: WHITE, fontSize: 13, lineHeight: 1.2 }}>
-              Guru Nanak College
+            <div style={{ fontWeight: 900, color: WHITE, fontSize: 13, lineHeight: 1.2, display: 'flex', alignItems: 'center' }}>
+              <span className="live-pulse" /> Guru Nanak College
             </div>
-            {/* ✅ Address with Pincode */}
-            <div style={{ fontSize: 9, color: 'rgba(255,255,255,.55)', fontWeight: 600, marginTop: 2 }}>
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.55)', fontWeight: 600, marginTop: 2 }}>
               Dhanbad, Jharkhand - 826001
             </div>
             <div style={{ fontWeight: 900, color: WHITE, fontSize: 15, lineHeight: 1.8 }}>
@@ -427,12 +437,13 @@ function AdminPanelInner({
         <div className="adm-mobile-top">
           <button onClick={()=>setSideOpen(true)} style={{ background:'none', border:'none', fontSize:22, cursor:'pointer', color:NAVY }}>☰</button>
           <span style={{ fontWeight:900, color:NAVY, fontSize:14 }}>GNC Admin Panel</span>
-          <div style={{ width: 44 }} /> {/* ✅ Removed Cross; added padding for balance */}
+          <div style={{ width: 44 }} />
         </div>
 
         {/* Top bar */}
         <div className="adm-topbar">
           {!isMobile && <button onClick={()=>setSideCollapsed(c=>!c)} style={{ background:'none', border:'none', fontSize:18, cursor:'pointer', color:T.t3, flexShrink:0 }}>☰</button>}
+          
           <div className="top-search" style={{ position:'relative' }}>
             <input placeholder="Search everything... (Ctrl+K)" value={globalSearch} onChange={(e)=>setGlobalSearch(e.target.value)} />
             {searchResults.length > 0 && (
@@ -447,11 +458,13 @@ function AdminPanelInner({
               </div>
             )}
           </div>
+
           <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:10 }}>
             <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:12, color:T.t3, fontWeight:700 }}>
               <div className="glow" style={{ width:7, height:7, borderRadius:'50%' }} />
               <span style={{ color:T.green }}>Live</span>
             </div>
+
             <div style={{ background:BG, border:`1.5px solid ${T.b1}`, borderRadius:8, padding:'6px 12px', fontSize:12, fontWeight:700, color:T.t2 }}>
               {new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short'})}
             </div>

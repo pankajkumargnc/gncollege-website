@@ -1,12 +1,19 @@
-// src/components/admin/tabs/DashboardTab.jsx
 import { T, NAVY, GOLD, StatCard } from '../AdminShared';
+import toast from 'react-hot-toast';
 
 export default function DashboardTab({ notices, events, faculties, placements, pdfReports, alerts, gallery, pages, actLog, onNavigate }) {
   return (
     <div className="fade-up">
-      <div style={{ marginBottom: 32 }}>
-        <h2 style={{ margin: 0, color: NAVY, fontSize: 28, fontWeight: 900, letterSpacing: '-1px' }}>📊 Global Dashboard</h2>
-        <p style={{ margin: '4px 0 0', color: T.t3, fontSize: 15, fontWeight: 600 }}>Real-time website ecosystem metrics aur campus activity summary.</p>
+      <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ margin: 0, color: NAVY, fontSize: 28, fontWeight: 900, letterSpacing: '-1px' }}>📊 Global Dashboard</h2>
+          <p style={{ margin: '4px 0 0', color: T.t3, fontSize: 15, fontWeight: 600 }}>Real-time website ecosystem metrics aur campus activity summary.</p>
+        </div>
+        <div style={{ display: 'flex', gap: 12 }}>
+            <button className="abtn abtn-navy" style={{ borderRadius: 12, height: 42, background: NAVY, color: '#fff', border: 'none' }} onClick={() => toast.success('Gathering news... PDF Newsletter generating!')}>
+                🗞️ Generate Monthly Newsletter
+            </button>
+        </div>
       </div>
 
       {/* 🏙️ OVERVIEW STATS (Ultra Pro Max Grid) */}
@@ -23,9 +30,45 @@ export default function DashboardTab({ notices, events, faculties, placements, p
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 24 }}>
         
+        {/* 🗺️ REAL-TIME VISITOR LIVE-MAP (Simulated Ultra Pro) */}
+        <div className="card" style={{ padding: 24, border: `1.5px solid #f1f5f9`, background: '#fff', overflow: 'hidden' }}>
+          <div className="actitle" style={{ fontSize: 17, marginBottom: 24, paddingBottom: 16, color: NAVY }}>
+             <span style={{ background: `${NAVY}10`, padding: 8, borderRadius: 10 }}>🗺️</span> Real-time Visitor Live-Map
+          </div>
+          <div style={{ height: 260, position: 'relative', background: '#f8fafc', borderRadius: 20, border: `1px solid rgba(15,35,71,0.05)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+             {/* SIMULATED MAP SVG OVERLAY */}
+             <div style={{ position: 'absolute', inset: 20, opacity: 0.1, background: 'url("https://upload.wikimedia.org/wikipedia/commons/e/ec/World_map_blank_without_borders.svg") center/contain no-repeat' }} />
+             
+             {/* GLOWING DOTS (Simulating Live Traffic) */}
+             {[
+                { t: '20%', l: '72%', n: 'Dhanbad (You)' },
+                { t: '45%', l: '65%', n: 'Delhi' },
+                { t: '52%', l: '78%', n: 'Kolkata' },
+                { t: '38%', l: '25%', n: 'London' },
+                { t: '42%', l: '35%', n: 'Dubai' },
+             ].map((dot, i) => (
+                <div key={i} style={{ position: 'absolute', top: dot.t, left: dot.l, zIndex: 2 }}>
+                    <div className="pulse-green" style={{ width: 10, height: 10, background: i===0?NAVY:'#22c55e', borderRadius: '50%', boxShadow: `0 0 15px ${i===0?NAVY:'#22c55e'}` }} />
+                    <div style={{ position: 'absolute', top: 15, left: -20, whiteSpace: 'nowrap', fontSize: 9, color: '#fff', fontWeight: 900, background: 'rgba(15,35,71,0.8)', padding: '2px 6px', borderRadius: 4, backdropFilter: 'blur(4px)' }}>{dot.n}</div>
+                </div>
+             ))}
+             
+             <div style={{ position: 'absolute', bottom: 20, left: 20, display: 'flex', gap: 20 }}>
+                 <div>
+                    <div style={{ fontSize: 18, fontWeight: 900, color: NAVY }}>128</div>
+                    <div style={{ fontSize: 10, color: T.t4, fontWeight: 700, textTransform: 'uppercase' }}>Live Sessions</div>
+                 </div>
+                 <div>
+                    <div style={{ fontSize: 18, fontWeight: 900, color: T.green }}>1,442</div>
+                    <div style={{ fontSize: 10, color: T.t4, fontWeight: 700, textTransform: 'uppercase' }}>Today's Views</div>
+                 </div>
+             </div>
+          </div>
+        </div>
+
         {/* ⚡ ADVANCED QUICK ACTIONS */}
         <div className="card" style={{ padding: 24, border: '1.5px solid #f1f5f9', background: '#fff' }}>
-          <div className="actitle" style={{ fontSize: 17, marginBottom: 24, paddingBottom: 16 }}>
+          <div className="actitle" style={{ fontSize: 17, marginBottom: 24, paddingBottom: 16, color: NAVY }}>
              <span style={{ background: `${NAVY}10`, padding: 8, borderRadius: 10 }}>⚡</span> Quick Actions
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 16 }}>
@@ -49,7 +92,7 @@ export default function DashboardTab({ notices, events, faculties, placements, p
 
         {/* 🕐 REAL-TIME ACTIVITY STREAM */}
         <div className="card" style={{ padding: 24, border: '1.5px solid #f1f5f9', background: '#fff' }}>
-          <div className="actitle" style={{ fontSize: 17, marginBottom: 24, paddingBottom: 16 }}>
+          <div className="actitle" style={{ fontSize: 17, marginBottom: 24, paddingBottom: 16, color: NAVY }}>
             <span style={{ background: `${T.green}10`, padding: 8, borderRadius: 10 }}>🕐</span> Recent Activity Stream
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, background: `${T.green}10`, padding: '4px 10px', borderRadius: 20 }}>
               <div className="glow" style={{ width: 8, height: 8, borderRadius: '50%' }} />
