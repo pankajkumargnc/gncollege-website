@@ -3,7 +3,7 @@
 // ✅ Auth ke liye firebase-auth.js use karo (lazy loaded)
 
 import { initializeApp } from "firebase/app";
-import { getFirestore }  from "firebase/firestore";
+import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 
 const {
   VITE_FIREBASE_API_KEY,
@@ -34,6 +34,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
+
+// Enable offline caching (persistent data)
+enableIndexedDbPersistence(db).catch((err) => {
+  if (err.code == 'failed-precondition') {
+    // Multiple tabs open, persistence can only be enabled in one tab at a a time.
+    console.warn('[GNC Firebase] Offline persistence failed (multiple tabs open).');
+  } else if (err.code == 'unimplemented') {
+    // The current browser does not support all of the features required to enable persistence
+    console.warn('[GNC Firebase] Offline persistence unsupported in this browser.');
+  }
+});
 
 // ⚠️  auth yahan export NAHI hoga
 // AdminLogin ke liye: import { auth } from './firebase-auth'

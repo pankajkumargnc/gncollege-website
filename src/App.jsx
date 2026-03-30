@@ -28,6 +28,7 @@ import {
   query,
   orderBy,
   doc,
+  limit,
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -313,8 +314,16 @@ export default function App() {
       ["updates", setUpdates],
     ];
     const unsubs = cols.map(([col, setter]) => {
+      // ✅ Apply limits to large, constantly growing collections
+      let collectionQuery;
+      if (col === "gallery" || col === "events") {
+        collectionQuery = query(collection(db, col), limit(30));
+      } else {
+        collectionQuery = collection(db, col);
+      }
+
       return onSnapshot(
-        collection(db, col),
+        collectionQuery,
         (snap) => {
           const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
           docs.sort(
