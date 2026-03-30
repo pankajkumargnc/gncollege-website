@@ -198,32 +198,6 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen }) => {
           </div>
 
           <div className="tb-div" />
-
-          {/* Search + Dark Mode */}
-          {onSearchOpen && (
-            <button
-              onClick={onSearchOpen}
-              style={{
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: 8,
-                padding: '4px 14px',
-                color: '#94a3b8',
-                fontSize: 11,
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                transition: 'all .2s',
-                fontFamily: 'Inter, sans-serif',
-                whiteSpace: 'nowrap',
-              }}
-              title="Search (Ctrl+K)"
-            >
-              🔍 <span style={{ opacity: 0.6 }}>Ctrl+K</span>
-            </button>
-          )}
           {onToggleDark && (
             <button
               onClick={onToggleDark}

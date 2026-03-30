@@ -111,6 +111,33 @@ export default function Contact() {
 
         @media(max-width:900px) { .campus-container { grid-template-columns:1fr; } }
         @media(max-width:768px) { .contact-header { padding:60px 20px 80px; } .header-title { font-size:36px; } .campus-container { margin-top:-60px; } }
+
+        /* ── Dark Mode Overrides ── */
+        [data-theme="dark"] .campus-card {
+          background: rgba(10, 22, 48, 0.9) !important;
+          border-color: rgba(244,160,35,0.15) !important;
+          box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important;
+        }
+        [data-theme="dark"] .card-header {
+          background: rgba(6,14,28,0.8) !important;
+          border-bottom-color: rgba(255,255,255,0.06) !important;
+        }
+        [data-theme="dark"] .campus-title { color: #f1f5f9 !important; }
+        [data-theme="dark"] .d-text h4 { color: #64748b !important; }
+        [data-theme="dark"] .d-text p, [data-theme="dark"] .d-text a { color: #cbd5e1 !important; }
+        [data-theme="dark"] .d-text a:hover { color: #f4a023 !important; }
+        [data-theme="dark"] .map-container { border-top-color: rgba(255,255,255,0.06) !important; }
+        [data-theme="dark"] .map-container iframe { filter: invert(90%) hue-rotate(180deg) !important; }
+        [data-theme="dark"] .directory-card {
+          background: rgba(10, 22, 48, 0.85) !important;
+          border-color: rgba(255,255,255,0.08) !important;
+        }
+        [data-theme="dark"] .directory-card:hover { border-color: #f4a023 !important; }
+        [data-theme="dark"] .dir-icon { background: rgba(244,160,35,0.1) !important; }
+        [data-theme="dark"] .dir-title { color: #64748b !important; }
+        [data-theme="dark"] .dir-name { color: #f1f5f9 !important; }
+        [data-theme="dark"] .dir-contact { color: #94a3b8 !important; }
+        [data-theme="dark"] .dir-contact:hover { color: #f4a023 !important; }
       `}</style>
 
       {/* Hero */}

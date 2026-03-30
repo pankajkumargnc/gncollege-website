@@ -14,6 +14,7 @@ import PlacementsSection from "../components/home/PlacementsSection";
 import Ticker from "../components/Ticker";
 import PremiumTicker from "../components/PremiumTicker";
 import PDFModal from "../components/PDFModal";
+import TestimonialsSection from "../components/home/TestimonialsSection";
 
 const N = COLORS.navy || "#0f2347";
 const G = COLORS.gold || "#f4a023";
@@ -221,6 +222,14 @@ const CSS = `
   .hp-qab-item:hover .hp-qab-arr{transform:translateX(4px);}
   @media(max-width:768px){ .hp-qab-inner{grid-template-columns:repeat(2,1fr);} .hp-qab-item{padding:13px 16px;border-right:none;border-bottom:1px solid #f1f5f9;} .hp-qab-item:nth-child(odd){border-right:1px solid #f1f5f9;} .hp-qab-item:nth-last-child(-n+2){border-bottom:none;} }
   @media(max-width:420px){ .hp-qab-inner{grid-template-columns:1fr;} .hp-qab-item{border-right:none !important;} .hp-qab-item:last-child{border-bottom:none;} }
+
+  /* ── Dark Mode Overrides for HP QAB ── */
+  [data-theme="dark"] .hp-qab { background: rgba(10, 22, 48, 0.95) !important; border-bottom-color: rgba(255,255,255,0.05) !important; }
+  [data-theme="dark"] .hp-qab-item { border-right-color: rgba(255,255,255,0.05) !important; background: transparent !important; }
+  [data-theme="dark"] .hp-qab-item:hover { background: rgba(255,255,255,0.02) !important; }
+  [data-theme="dark"] .hp-qab-title { color: #f1f5f9 !important; }
+  [data-theme="dark"] .hp-qab-icon { background: rgba(255,255,255,0.08) !important; }
+  @media(max-width:768px){ [data-theme="dark"] .hp-qab-item { border-bottom-color: rgba(255,255,255,0.05) !important; } }
 
   .hp-about{background:#fff;padding:clamp(60px,8vw,100px) 20px;overflow:hidden;}
   .hp-about-inner{max-width:1250px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%, 400px),1fr));gap:56px;align-items:center;}
@@ -730,6 +739,12 @@ const HomePage = ({
     tab === "All Moments"
       ? allGal
       : allGal.filter((i) => i.cat === tab || i.album === tab);
+  
+  // ── 8-image limit & auto-fill logic ──
+  const slicedGal = filtered.slice(0, 8);
+  const extraPads = slicedGal.length > 0 && slicedGal.length < 8
+    ? Array.from({ length: 8 - slicedGal.length })
+    : [];
 
   const recentEv = (events || [])
     .filter((e) => e.status !== "upcoming")
@@ -924,6 +939,10 @@ const HomePage = ({
       </section>
 
       <PlacementsSection />
+      
+      <div className="hp-sec-divider" />
+      <TestimonialsSection />
+      <div className="hp-sec-divider" />
 
       <section className="hp-cnt">
         <div className="hp-cnt-bg" />
@@ -996,10 +1015,21 @@ const HomePage = ({
             </div>
           </SA>
           <div className="hp-gal-grid">
-            {filtered.length > 0 ? (
-              filtered.map((img, i) => (
-                <GalItem key={img.id || i} img={img} index={i} />
-              ))
+            {slicedGal.length > 0 ? (
+              <>
+                {slicedGal.map((img, i) => (
+                  <GalItem key={img.id || i} img={img} index={i} />
+                ))}
+                {extraPads.map((_, i) => (
+                  <div key={`pad-${i}`} className="hp-gal-item" style={{ 
+                    background: 'rgba(15,35,71,0.02)', 
+                    border: '1px dashed rgba(15,35,71,0.1)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  }}>
+                    <span style={{ fontSize: '24px', opacity: 0.1 }}>📸</span>
+                  </div>
+                ))}
+              </>
             ) : (
               <SA variant="scale" className="hp-gal-empty">
                 <div

@@ -79,7 +79,8 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
   background-color: var(--bg);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont,
+  /* ── UNIFORM FONT SYSTEM: Inter everywhere ── */
+  font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont,
                'Segoe UI', Roboto, Arial, sans-serif;
   font-size: var(--text-base);
   color: #1e293b;
@@ -87,6 +88,57 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
 }
+
+/* ═══════════════════════════════════════
+   UNIFORM TYPOGRAPHY SYSTEM
+   Inter → body/UI | Plus Jakarta Sans → headings | Space Grotesk → display
+═══════════════════════════════════════ */
+
+/* All headings — Plus Jakarta Sans for premium feel */
+h1, h2, h3, h4, h5, h6,
+.section-heading,
+[class*="section-head"],
+[class*="SectionHead"] {
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+  color: var(--navy);
+}
+
+/* Display / hero numbers */
+[class*="stat-value"],
+[class*="hp-stat-num"],
+[class*="hero-num"],
+.display-num {
+  font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 900;
+}
+
+/* Buttons and nav — Inter for readability */
+button, input, select, textarea,
+nav, .glass-navbar,
+[class*="Navbar"],
+[class*="TopBar"] {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Rich body text — slightly more relaxed tracking */
+p, li, td, blockquote,
+.rich-text-content,
+[class*="content-card"] p {
+  font-family: 'Inter', sans-serif;
+  line-height: 1.75;
+  letter-spacing: 0.01em;
+}
+
+/* Monospace — admin/code areas */
+code, pre, .code,
+[class*="AdminPanel"] textarea {
+  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+  font-size: 0.92em;
+}
+
 
 #root {
   width: 100%;
@@ -146,6 +198,150 @@ table {
   box-shadow: 0 16px 32px rgba(15,35,71,.14);
   border-color: var(--gold);
 }
+
+/* ═══════════════════════════════════════
+   DARK MODE — Complete Override System
+   data-theme="dark" applied to <html> by useDarkMode.js
+═══════════════════════════════════════ */
+
+/* ── Navbar Dark — override hardcoded white inline style ── */
+[data-theme="dark"] .glass-navbar,
+[data-theme="dark"] nav.glass-navbar {
+  background: rgba(6, 14, 28, 0.97) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(244, 160, 35, 0.15) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5) !important;
+  color: #e2e8f0 !important;
+}
+
+/* College title in dark mode — gold shimmer stays, rest becomes light */
+[data-theme="dark"] .glass-navbar h1,
+[data-theme="dark"] .glass-navbar .shimmering-title {
+  color: #f1f5f9 !important;
+  -webkit-text-fill-color: unset !important;
+}
+
+/* Sub text in Navbar dark */
+[data-theme="dark"] .glass-navbar p {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .glass-navbar p[style*="color: rgb(244, 160, 35)"],
+[data-theme="dark"] .glass-navbar p[style*="color: #f4a023"],
+[data-theme="dark"] .glass-navbar [style*="color: rgb(244"] {
+  color: #f4a023 !important;
+}
+
+/* Nav links in dark mode */
+[data-theme="dark"] .glass-navbar a,
+[data-theme="dark"] .glass-navbar button:not([class]) {
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .glass-navbar a:hover {
+  color: #f4a023 !important;
+}
+
+/* Dropdown panels in dark mode */
+[data-theme="dark"] .nav-dropdown-panel,
+[data-theme="dark"] [style*="background: white"],
+[data-theme="dark"] [style*="background: #fff"],
+[data-theme="dark"] [style*="background: #ffffff"],
+[data-theme="dark"] [style*="background: rgb(255, 255, 255)"] {
+  background: rgba(10, 22, 48, 0.95) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .nav-dropdown-item:hover,
+[data-theme="dark"] a.nav-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Dropdown text links */
+[data-theme="dark"] .dropdown-link-text,
+[data-theme="dark"] [style*="color: #1e293b"],
+[data-theme="dark"] [style*="color: rgb(30, 41, 59)"],
+[data-theme="dark"] [style*="color: #0f2347"],
+[data-theme="dark"] [style*="color: rgb(15, 35, 71)"],
+[data-theme="dark"] [style*="color: #374151"],
+[data-theme="dark"] [style*="color: #4b5563"],
+[data-theme="dark"] [style*="color: #475569"],
+[data-theme="dark"] [style*="color: rgb(71, 85, 105)"] {
+  color: #cbd5e1 !important;
+}
+
+/* Glass panels in dark mode */
+[data-theme="dark"] .glass-panel,
+[data-theme="dark"] .glass-card {
+  background: rgba(15, 30, 55, 0.85) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: #e2e8f0 !important;
+}
+
+/* Page backgrounds in dark mode */
+[data-theme="dark"] main,
+[data-theme="dark"] section,
+[data-theme="dark"] .page-wrapper,
+[data-theme="dark"] [class*="page-wrapper"],
+[data-theme="dark"] [class*="PageWrapper"] {
+  background: transparent !important;
+}
+
+/* Table cells dark */
+[data-theme="dark"] td, 
+[data-theme="dark"] th {
+  border-color: rgba(255,255,255,0.08) !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] tr:nth-child(even) {
+  background: rgba(255,255,255,0.03) !important;
+}
+
+/* Input fields dark */
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background: rgba(255,255,255,0.05) !important;
+  border-color: rgba(255,255,255,0.12) !important;
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Cards/sections with white bg */
+[data-theme="dark"] [style*="background: #f"],
+[data-theme="dark"] [style*="background: #e"],
+[data-theme="dark"] [style*="background-color: #f"],
+[data-theme="dark"] [style*="background: rgb(244"],
+[data-theme="dark"] [style*="background: rgb(248"] {
+  background: rgba(15,25,45,0.6) !important;
+}
+
+/* Footer dark */
+[data-theme="dark"] footer {
+  background: #060d1a !important;
+  border-top: 1px solid rgba(244,160,35,0.15) !important;
+}
+
+/* Breadcrumbs dark */
+[data-theme="dark"] [class*="breadcrumb"],
+[data-theme="dark"] [class*="Breadcrumb"] {
+  background: rgba(6,14,28,0.8) !important;
+  border-color: rgba(255,255,255,0.06) !important;
+}
+[data-theme="dark"] [class*="breadcrumb"] *,
+[data-theme="dark"] [class*="Breadcrumb"] * {
+  color: #94a3b8 !important;
+}
+
+/* Scrollbar dark */
+[data-theme="dark"] ::-webkit-scrollbar-track { background: #0c1222; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #1e3a5f; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #f4a023; }
+
+
 
 /* ═══════════════════════════════════════
    4. TYPOGRAPHY — FLUID

@@ -2,8 +2,8 @@
 
 import WhatsAppButton from "./components/WhatsAppButton";
 import BackToTop from "./components/BackToTop";
+import AIChatbot from "./components/AIChatbot";
 import UniversalSearch from "./components/UniversalSearch";
-import QuickAccessSidebar from "./components/QuickAccessSidebar";
 import { useState, useEffect, Suspense, lazy, useMemo, useCallback } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
@@ -1077,8 +1077,8 @@ export default function App() {
         <>
           <Footer dynamicSocialLinks={navLinks} />
           <WhatsAppButton />
+          <AIChatbot />
           <BackToTop />
-          <QuickAccessSidebar />
         </>
       )}
     </>

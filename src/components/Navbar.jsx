@@ -9,9 +9,13 @@ export default function Navbar({ onAdminClick, navLinks }) {
   const [openL3, setOpenL3] = useState(null)
   const closeTimer = useRef(null)
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1250)
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [isMobile,  setIsMobile]  = useState(window.innerWidth < 1250)
+  const [menuOpen,  setMenuOpen]  = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  // ── Dark mode detection (reads html[data-theme]) ──
+  const [isDark, setIsDark] = useState(
+    () => document.documentElement.getAttribute('data-theme') === 'dark'
+  )
 
   useEffect(() => {
     const handleResize = () => {
@@ -21,11 +25,18 @@ export default function Navbar({ onAdminClick, navLinks }) {
     function handleScroll() {
       setIsScrolled(window.scrollY > 40)
     }
+    // MutationObserver — watch data-theme on <html>
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark')
+    })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+
     window.addEventListener('resize', handleResize)
     window.addEventListener('scroll', handleScroll)
     return () => {
       window.removeEventListener('resize', handleResize)
       window.removeEventListener('scroll', handleScroll)
+      observer.disconnect()
     }
   }, [])
 
@@ -58,14 +69,16 @@ export default function Navbar({ onAdminClick, navLinks }) {
         top: 0,
         left: 0,
         zIndex: 99999,
-        
-        // Main Navbar Glass Effect on Scroll
-        background: isScrolled ? 'rgba(255, 255, 255, 0.65)' : '#ffffff',
-        boxShadow: isScrolled ? '0 8px 32px rgba(15, 35, 71, 0.1)' : '0 4px 15px rgba(0,0,0,0.05)',
-        backdropFilter: isScrolled ? 'blur(16px) saturate(180%)' : 'none',
-        WebkitBackdropFilter: isScrolled ? 'blur(16px) saturate(180%)' : 'none',
-        borderBottom: isScrolled ? '1px solid rgba(255, 255, 255, 0.5)' : 'none',
-        
+        // ── Dark-aware background ──
+        background: isDark
+          ? (isScrolled ? 'rgba(6,14,28,0.97)' : 'rgba(6,14,28,1)')
+          : (isScrolled ? 'rgba(255,255,255,0.72)' : '#ffffff'),
+        boxShadow: isDark
+          ? '0 4px 30px rgba(0,0,0,0.55)'
+          : (isScrolled ? '0 8px 32px rgba(15,35,71,0.1)' : '0 4px 15px rgba(0,0,0,0.05)'),
+        backdropFilter: isScrolled ? 'blur(20px) saturate(180%)' : 'none',
+        WebkitBackdropFilter: isScrolled ? 'blur(20px) saturate(180%)' : 'none',
+        borderBottom: isDark ? '1px solid rgba(244,160,35,0.15)' : (isScrolled ? '1px solid rgba(255,255,255,0.5)' : 'none'),
         transition: 'all 0.4s ease-in-out',
         width: '100%'
       }}>
@@ -184,7 +197,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                 <p style={{
                   margin: '0 0 3px 0',
                   fontSize: '11px',
-                  color: '#475569',
+                  color: isDark ? '#94a3b8' : '#475569',
                   fontWeight: '700',
                   whiteSpace: 'nowrap',
                   textAlign: 'left',
@@ -233,7 +246,9 @@ export default function Navbar({ onAdminClick, navLinks }) {
             position: isMobile ? 'absolute' : 'static',
             top: '100%', left: 0, right: 0,
             
-            background: isMobile ? (isScrolled ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.98)') : 'transparent',
+            background: isMobile
+              ? (isDark ? 'rgba(6,14,28,0.98)' : (isScrolled ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.98)'))
+              : 'transparent',
             backdropFilter: isMobile && isScrolled ? 'blur(16px)' : 'none',
             
             padding: isMobile ? '10px 20px 20px' : 0,
@@ -274,7 +289,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                     onClick={() => { if (l0.label === 'Home') window.scrollTo(0, 0) }}
                     className="nav-hover-link"
                     style={{
-                      color: COLORS.navy,
+                      color: isDark ? '#e2e8f0' : COLORS.navy,
                       padding: isMobile ? '12px 0' : '24px 11px',
                       display: 'block',
                       fontSize: 13.5, fontWeight: 700,
@@ -284,20 +299,20 @@ export default function Navbar({ onAdminClick, navLinks }) {
                     }}>
                     {l0.label === 'Home' ? '🏠 ' : ''}{l0.label}
                   </Link>
-                  {isMobile  && l0.sub && <span style={{ color: COLORS.navy, fontSize: 20 }}>{openL1 === l0.label ? '▴' : '▾'}</span>}
-                  {!isMobile && l0.sub && <span style={{ color: COLORS.navy, fontSize: 11, marginLeft: 2, marginRight: 8, marginTop: 2 }}>▾</span>}
+                  {isMobile  && l0.sub && <span style={{ color: isDark ? '#94a3b8' : COLORS.navy, fontSize: 20 }}>{openL1 === l0.label ? '▴' : '▾'}</span>}
+                  {!isMobile && l0.sub && <span style={{ color: isDark ? '#94a3b8' : COLORS.navy, fontSize: 11, marginLeft: 2, marginRight: 8, marginTop: 2 }}>▾</span>}
                 </div>
 
                 {/* ── L1 Dropdown ── */}
                 {l0.sub && openL1 === l0.label && (
-                  <div style={{
+                  <div className="nav-dropdown-panel" style={{
                     position: isMobile ? 'static' : 'absolute',
                     top: '100%', left: 0,
                     
-                    background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.9)',
-                    backdropFilter: isMobile ? 'none' : 'blur(16px)',
-                    WebkitBackdropFilter: isMobile ? 'none' : 'blur(16px)',
-                    border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.5)',
+                    background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: isMobile ? 'none' : 'blur(20px)',
+                    WebkitBackdropFilter: isMobile ? 'none' : 'blur(20px)',
+                    border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.6)',
                     
                     minWidth: isMobile ? '100%' : 210,
                     boxShadow: isMobile ? 'none' : '0 15px 35px rgba(0,0,0,.12)',
@@ -314,7 +329,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                         onMouseEnter={() => !isMobile && setOpenL2(l1.label)}
                         onMouseLeave={() => !isMobile && setOpenL2(null)}
                       >
-                        <div
+                        <div className="nav-dropdown-item"
                           onClick={e => { if (isMobile && l1.sub) { e.stopPropagation(); toggleL2(l1.label) } }}
                           style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -323,10 +338,8 @@ export default function Navbar({ onAdminClick, navLinks }) {
                             cursor: isMobile && l1.sub ? 'pointer' : 'default',
                             transition: 'background 0.2s ease',
                           }}
-                          onMouseEnter={e => { if (!isMobile) e.currentTarget.style.background = 'rgba(15, 35, 71, 0.04)' }}
-                          onMouseLeave={e => { if (!isMobile) e.currentTarget.style.background = 'transparent' }}
                         >
-                          <Link to={getRoute(l1.href)} className="nav-hover-link"
+                          <Link to={getRoute(l1.href)} className="nav-hover-link dropdown-link-text"
                             style={{ fontSize: 13, fontWeight: 600, color: COLORS.navy, display: 'block', width: '100%', textDecoration: 'none' }}>
                             {l1.label}
                           </Link>
@@ -335,14 +348,14 @@ export default function Navbar({ onAdminClick, navLinks }) {
 
                         {/* ── L2 Dropdown ── */}
                         {l1.sub && openL2 === l1.label && (
-                          <div style={{
+                          <div className="nav-dropdown-panel" style={{
                             position: isMobile ? 'static' : 'absolute',
                             top: 0, left: '100%',
                             
-                            background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.9)',
-                            backdropFilter: isMobile ? 'none' : 'blur(16px)',
-                            WebkitBackdropFilter: isMobile ? 'none' : 'blur(16px)',
-                            border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.5)',
+                            background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.95)',
+                            backdropFilter: isMobile ? 'none' : 'blur(20px)',
+                            WebkitBackdropFilter: isMobile ? 'none' : 'blur(20px)',
+                            border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.6)',
                             
                             minWidth: isMobile ? '100%' : 210,
                             boxShadow: isMobile ? 'none' : '5px 5px 25px rgba(0,0,0,.12)',
@@ -360,7 +373,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                                 onMouseEnter={() => !isMobile && setOpenL3(l2.label)}
                                 onMouseLeave={() => !isMobile && setOpenL3(null)}
                               >
-                                <div
+                                <div className="nav-dropdown-item"
                                   onClick={e => { if (isMobile && l2.sub) { e.stopPropagation(); toggleL3(l2.label) } }}
                                   style={{
                                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -369,10 +382,8 @@ export default function Navbar({ onAdminClick, navLinks }) {
                                     cursor: isMobile && l2.sub ? 'pointer' : 'default',
                                     transition: 'background 0.2s ease',
                                   }}
-                                  onMouseEnter={e => { if (!isMobile) e.currentTarget.style.background = 'rgba(15, 35, 71, 0.04)' }}
-                                  onMouseLeave={e => { if (!isMobile) e.currentTarget.style.background = 'transparent' }}
                                 >
-                                  <Link to={getRoute(l2.href)} className="nav-hover-link"
+                                  <Link to={getRoute(l2.href)} className="nav-hover-link dropdown-link-text"
                                     style={{ fontSize: 12.5, fontWeight: 600, color: '#444', display: 'block', width: '100%', textDecoration: 'none' }}>
                                     {l2.label}
                                   </Link>
@@ -381,14 +392,14 @@ export default function Navbar({ onAdminClick, navLinks }) {
 
                                 {/* ── L3 Dropdown ── */}
                                 {l2.sub && openL3 === l2.label && (
-                                  <div style={{
+                                  <div className="nav-dropdown-panel" style={{
                                     position: isMobile ? 'static' : 'absolute',
                                     top: 0, left: '100%',
                                     
-                                    background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.9)',
-                                    backdropFilter: isMobile ? 'none' : 'blur(16px)',
-                                    WebkitBackdropFilter: isMobile ? 'none' : 'blur(16px)',
-                                    border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.5)',
+                                    background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.95)',
+                                    backdropFilter: isMobile ? 'none' : 'blur(20px)',
+                                    WebkitBackdropFilter: isMobile ? 'none' : 'blur(20px)',
+                                    border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.6)',
                                     
                                     minWidth: isMobile ? '100%' : 210,
                                     boxShadow: isMobile ? 'none' : '5px 5px 25px rgba(0,0,0,.12)',
@@ -401,15 +412,13 @@ export default function Navbar({ onAdminClick, navLinks }) {
                                     transformOrigin: 'left top'
                                   }}>
                                     {l2.sub.map(l3 => (
-                                      <Link key={l3.label} to={getRoute(l3.href)} className="nav-hover-link"
+                                      <Link key={l3.label} to={getRoute(l3.href)} className="nav-hover-link nav-dropdown-item dropdown-link-text"
                                         style={{
                                           display: 'block', padding: '8px 16px',
                                           fontSize: 12, color: '#555',
                                           borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
                                           textDecoration: 'none',
                                         }}
-                                        onMouseEnter={e => { if (!isMobile) e.currentTarget.style.background = 'rgba(15, 35, 71, 0.04)' }}
-                                        onMouseLeave={e => { if (!isMobile) e.currentTarget.style.background = 'transparent' }}
                                       >
                                         {l3.label}
                                       </Link>
