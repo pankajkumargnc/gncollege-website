@@ -138,7 +138,7 @@ export default function NewsPage() {
               <div style={{ display:'flex', gap:7 }}>
                 {['list','card'].map(v => (
                   <button key={v} className="ntf-fb" onClick={() => setView(v)}
-                    style={{ padding:'9px 16px', borderRadius:9, border:`2px solid ${view===v?navy:'#e2e8f0'}`, background:view===v?navy:'transparent', color:view===v?'#fff':'#718096', fontWeight:700, fontSize:12.5 }}>
+                    style={{ padding:'9px 16px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius:9, border:`2px solid ${view===v?navy:'#e2e8f0'}`, background:view===v?navy:'transparent', color:view===v?'#fff':'#718096', fontWeight:700, fontSize:12.5 }}>
                     {v==='list' ? '☰ List' : '⊞ Cards'}
                   </button>
                 ))}
@@ -149,19 +149,19 @@ export default function NewsPage() {
             {/* Filters */}
             <div style={{ display:'flex', gap:7, flexWrap:'wrap', alignItems:'center', marginBottom:10 }}>
               <span style={{ fontSize:10.5, fontWeight:700, color:'#a0aec0', textTransform:'uppercase', letterSpacing:.8, flexShrink:0 }}>YEAR:</span>
-              {years.map(y => <button key={y} className="ntf-fb" onClick={() => setSelYear(String(y))} style={{ padding:'4px 14px', borderRadius:20, border:`2px solid ${selYear===String(y)?gold:'#e2e8f0'}`, background:selYear===String(y)?gold:'transparent', color:selYear===String(y)?navy:'#718096', fontWeight:700, fontSize:12.5 }}>{y}</button>)}
+              {years.map(y => <button key={y} className="ntf-fb" onClick={() => setSelYear(String(y))} style={{ padding:'4px 14px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius:20, border:`2px solid ${selYear===String(y)?gold:'#e2e8f0'}`, background:selYear===String(y)?gold:'transparent', color:selYear===String(y)?navy:'#718096', fontWeight:700, fontSize:12.5 }}>{y}</button>)}
             </div>
             <div style={{ display:'flex', gap:5, flexWrap:'wrap', alignItems:'center', marginBottom:10 }}>
               <span style={{ fontSize:10.5, fontWeight:700, color:'#a0aec0', textTransform:'uppercase', letterSpacing:.8, flexShrink:0 }}>MONTH:</span>
-              {['All', ...MONTHS_SHORT].map(m => <button key={m} className="ntf-fb" onClick={() => setSelMonth(m)} style={{ padding:'4px 10px', borderRadius:7, border:`1.5px solid ${selMonth===m?navy:'#e2e8f0'}`, background:selMonth===m?navy:'transparent', color:selMonth===m?'#fff':'#718096', fontWeight:600, fontSize:12 }}>{m}</button>)}
+              {['All', ...MONTHS_SHORT].map(m => <button key={m} className="ntf-fb" onClick={() => setSelMonth(m)} style={{ padding:'4px 10px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius:7, border:`1.5px solid ${selMonth===m?navy:'#e2e8f0'}`, background:selMonth===m?navy:'transparent', color:selMonth===m?'#fff':'#718096', fontWeight:600, fontSize:12 }}>{m}</button>)}
             </div>
             <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
               <span style={{ fontSize:10.5, fontWeight:700, color:'#a0aec0', textTransform:'uppercase', letterSpacing:.8, flexShrink:0 }}>CATEGORY:</span>
               {CATEGORIES.map(c => {
                 const col = TYPE_COLORS[c] || { bg:'#f4f7fa', text:'#4a5568', border:'#e2e8f0' };
-                return <button key={c} className="ntf-fb" onClick={() => setSelCat(c)} style={{ padding:'4px 13px', borderRadius:20, border:`2px solid ${selCat===c?col.border:'#e2e8f0'}`, background:selCat===c?col.bg:'transparent', color:selCat===c?col.text:'#718096', fontWeight:700, fontSize:12 }}>{c}</button>
+                return <button key={c} className="ntf-fb" onClick={() => setSelCat(c)} style={{ padding:'4px 13px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius:20, border:`2px solid ${selCat===c?col.border:'#e2e8f0'}`, background:selCat===c?col.bg:'transparent', color:selCat===c?col.text:'#718096', fontWeight:700, fontSize:12 }}>{c}</button>
               })}
-              {(selYear!=='All'||selMonth!=='All'||selCat!=='All'||search) && <button className="ntf-fb" onClick={() => { setSelYear('All'); setSelMonth('All'); setSelCat('All'); setSearch(''); }} style={{ padding:'4px 12px', borderRadius:20, border:'2px solid #FEB2B2', background:'#FFF5F5', color:'#e53e3e', fontWeight:700, fontSize:12 }}>✕ Clear</button>}
+              {(selYear!=='All'||selMonth!=='All'||selCat!=='All'||search) && <button className="ntf-fb" onClick={() => { setSelYear('All'); setSelMonth('All'); setSelCat('All'); setSearch(''); }} style={{ padding:'4px 12px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius:20, border:'2px solid #FEB2B2', background:'#FFF5F5', color:'#e53e3e', fontWeight:700, fontSize:12 }}>✕ Clear</button>}
             </div>
           </section>
 
@@ -213,7 +213,7 @@ export default function NewsPage() {
                                     setPreviewPdf({ url: n.link, title: n.type || 'News' });
                                   }
                                 }}
-                                style={{ display:'inline-flex', alignItems:'center', gap:5, marginTop:8, background:'#f8fafc', border:`1px solid ${navy}22`, color:navy, padding:'5px 12px', borderRadius:7, fontSize:12.5, fontWeight:700, textDecoration:'none', cursor:'pointer' }}>
+                                style={{ display:'inline-flex', alignItems:'center', justifyContent: 'center', minHeight: 44, gap:5, marginTop:8, background:'#f8fafc', border:`1px solid ${navy}22`, color:navy, padding:'5px 12px', borderRadius:7, fontSize:12.5, fontWeight:700, textDecoration:'none', cursor:'pointer' }}>
                                 📄 View Document
                               </a>
                             )}
@@ -266,7 +266,7 @@ export default function NewsPage() {
       {previewPdf && <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />}
 
       <style>{`
-        .ntf-dl-btn { display:inline-block; background:#f8fafc; color:${navy}; padding:8px 15px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none; border:1px solid #cbd5e1; transition:.2s; cursor:pointer; }
+        .ntf-dl-btn { display:inline-flex; align-items:center; justify-content:center; min-height:44px; background:#f8fafc; color:${navy}; padding:8px 15px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none; border:1px solid #cbd5e1; transition:.2s; cursor:pointer; }
         .ntf-dl-btn:hover { background:${navy}; color:#fff; border-color:${navy}; }
       `}</style>
     </div>

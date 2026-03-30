@@ -93,7 +93,8 @@ export default function Contact() {
         .detail-row:last-child { margin-bottom:0; }
         .d-icon { font-size:20px; color:${COLORS.navy}; margin-top:2px; }
         .d-text h4 { margin:0 0 4px; font-size:13px; text-transform:uppercase; letter-spacing:.5px; font-weight:700; color:#718096; }
-        .d-text p, .d-text a { margin:0; font-size:15px; color:#2d3748; font-weight:600; text-decoration:none; line-height:1.5; transition:color .2s; white-space:pre-line; }
+        .d-text p { margin:0; font-size:15px; color:#2d3748; font-weight:600; line-height:1.5; white-space:pre-line; }
+        .d-text a { margin:0; font-size:15px; color:#2d3748; font-weight:600; text-decoration:none; line-height:1.5; transition:color .2s; white-space:pre-line; display: inline-flex; align-items: center; min-height: 44px; }
         .d-text a:hover { color:${COLORS.gold}; }
 
         .map-container { width:100%; height:250px; border-top:1px solid #edf2f7; }
@@ -106,7 +107,7 @@ export default function Contact() {
         .dir-icon { font-size:1.8rem; width:50px; height:50px; display:flex; align-items:center; justify-content:center; background:#f1f5f9; border-radius:50%; flex-shrink:0; }
         .dir-title { font-size:.8rem; text-transform:uppercase; letter-spacing:1px; color:#64748b; font-weight:700; margin-bottom:4px; }
         .dir-name  { font-size:1.1rem; font-weight:800; color:${COLORS.navy}; margin-bottom:6px; }
-        .dir-contact { font-size:.9rem; font-weight:600; color:#4a5568; text-decoration:none; }
+        .dir-contact { font-size:.9rem; font-weight:600; color:#4a5568; text-decoration:none; display: inline-flex; align-items: center; min-height: 44px; margin-top: -6px; }
         .dir-contact:hover { color:${COLORS.gold}; }
 
         @media(max-width:900px) { .campus-container { grid-template-columns:1fr; } }

@@ -131,7 +131,7 @@ function AdminPanelInner({
     ].map(([col, setter]) => {
       try {
         return onSnapshot(query(collection(db, col)), snap => {
-          const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          const docs = snap.docs.map(d => ({ ...d.data(), id: d.id }));
           docs.sort((a, b) => (b.createdAt?.toMillis()||0) - (a.createdAt?.toMillis()||0));
           setter(docs);
         }, () => {});

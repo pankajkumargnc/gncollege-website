@@ -217,26 +217,27 @@ export default function App() {
     setAdminAuthed(true);
   };
 
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin") || window.location.hash.startsWith("#/admin");
+
   const handleAdminLogout = () => {
     sessionStorage.removeItem("gnc_admin_auth");
     setAdminAuthed(false);
   };
 
-  const location = useLocation();
-  const isAdminRoute =
-    location.pathname.startsWith("/admin") ||
-    window.location.hash.startsWith("#/admin");
-
-  // ── Universal Search (Ctrl+K) ────────────────────────────────────────────
+  // ── ⌨️ GLOBAL KEYBOARD SHORTCUTS ──
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeys = (e) => {
+      // Toggle Search with Ctrl+K or Meta+K
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         setSearchOpen(prev => !prev);
       }
+      // Close with Escape
+      if (e.key === 'Escape') setSearchOpen(false);
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeys);
+    return () => window.removeEventListener('keydown', handleKeys);
   }, []);
 
   // ── SEO Manager — update meta tags on route change ────────────────────────
@@ -521,7 +522,13 @@ export default function App() {
       )}
 
       {/* ── Universal Search Modal ── */}
-      <UniversalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      <UniversalSearch 
+        isOpen={searchOpen} 
+        onClose={() => setSearchOpen(false)} 
+        notices={notices}
+        faculties={faculties}
+        gallery={gallery}
+      />
 
       {!isAdminRoute && (
         <>

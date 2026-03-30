@@ -143,7 +143,7 @@ export default function DocumentsPage() {
                 <div style={{ display:'flex', gap:7 }}>
                   {['grid','list'].map(v => (
                     <button key={v} className="doc-fb" onClick={() => setView(v)}
-                      style={{ padding:'9px 16px', borderRadius:9, border:`2px solid ${view===v?navy:'#e2e8f0'}`, background:view===v?navy:'transparent', color:view===v?'#fff':'#718096', fontWeight:700, fontSize:12.5 }}>
+                      style={{ padding:'9px 16px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius:9, border:`2px solid ${view===v?navy:'#e2e8f0'}`, background:view===v?navy:'transparent', color:view===v?'#fff':'#718096', fontWeight:700, fontSize:12.5 }}>
                       {v==='grid'?'⊞ Grid':'☰ List'}
                     </button>
                   ))}
@@ -156,7 +156,7 @@ export default function DocumentsPage() {
                 <span style={{ fontSize:10.5, fontWeight:700, color:'#a0aec0', textTransform:'uppercase', letterSpacing:.8, flexShrink:0 }}>YEAR:</span>
                 {years.map(y => (
                   <button key={y} className="doc-fb" onClick={() => setSelYear(String(y))}
-                    style={{ padding:'4px 14px', borderRadius:20, border:`2px solid ${selYear===String(y)?gold:'#e2e8f0'}`, background:selYear===String(y)?gold:'transparent', color:selYear===String(y)?navy:'#718096', fontWeight:700, fontSize:12.5 }}>
+                    style={{ padding:'4px 14px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius:20, border:`2px solid ${selYear===String(y)?gold:'#e2e8f0'}`, background:selYear===String(y)?gold:'transparent', color:selYear===String(y)?navy:'#718096', fontWeight:700, fontSize:12.5 }}>
                     {y}
                   </button>
                 ))}
@@ -167,7 +167,7 @@ export default function DocumentsPage() {
                 <span style={{ fontSize:10.5, fontWeight:700, color:'#a0aec0', textTransform:'uppercase', letterSpacing:.8, flexShrink:0 }}>MONTH:</span>
                 {['All',...MONTHS_SHORT].map(m => (
                   <button key={m} className="doc-fb" onClick={() => setSelMonth(m)}
-                    style={{ padding:'4px 10px', borderRadius:7, border:`1.5px solid ${selMonth===m?navy:'#e2e8f0'}`, background:selMonth===m?navy:'transparent', color:selMonth===m?'#fff':'#718096', fontWeight:600, fontSize:12 }}>
+                    style={{ padding:'4px 10px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius:7, border:`1.5px solid ${selMonth===m?navy:'#e2e8f0'}`, background:selMonth===m?navy:'transparent', color:selMonth===m?'#fff':'#718096', fontWeight:600, fontSize:12 }}>
                     {m}
                   </button>
                 ))}
@@ -179,14 +179,14 @@ export default function DocumentsPage() {
                   const m = DOC_META[t]||{bg:'#f4f7fa',text:'#4a5568',border:'#e2e8f0'};
                   return (
                     <button key={t} className="doc-fb" onClick={() => setSelType(t)}
-                      style={{ padding:'4px 13px', borderRadius:20, border:`2px solid ${selType===t?m.border:'#e2e8f0'}`, background:selType===t?m.bg:'transparent', color:selType===t?m.text:'#718096', fontWeight:700, fontSize:12 }}>
+                      style={{ padding:'4px 13px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius:20, border:`2px solid ${selType===t?m.border:'#e2e8f0'}`, background:selType===t?m.bg:'transparent', color:selType===t?m.text:'#718096', fontWeight:700, fontSize:12 }}>
                       {t!=='All'&&((DOC_META[t]?.icon||'📄')+' ')}{t}
                     </button>
                   );
                 })}
                 {(selYear!=='All'||selMonth!=='All'||selType!=='All'||search) && (
                   <button className="doc-fb" onClick={() => { setSelYear('All'); setSelMonth('All'); setSelType('All'); setSearch(''); }}
-                    style={{ padding:'4px 12px', borderRadius:20, border:'2px solid #FEB2B2', background:'#FFF5F5', color:'#e53e3e', fontWeight:700, fontSize:12 }}>
+                    style={{ padding:'4px 12px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius:20, border:'2px solid #FEB2B2', background:'#FFF5F5', color:'#e53e3e', fontWeight:700, fontSize:12 }}>
                     ✕ Clear
                   </button>
                 )}
@@ -236,7 +236,7 @@ export default function DocumentsPage() {
                               }
                             }} 
                             className="dl-btn-hover"
-                            style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:8, background:navy, color:'#fff', padding:'10px 16px', borderRadius:9, fontSize:13.5, fontWeight:700, textDecoration:'none', border:'none', cursor:'pointer' }}>
+                            style={{ width:'100%', display:'inline-flex', alignItems:'center', justifyContent:'center', minHeight: 44, gap:8, background:navy, color:'#fff', padding:'10px 16px', borderRadius:9, fontSize:13.5, fontWeight:700, textDecoration:'none', border:'none', cursor:'pointer' }}>
                             👁️ View PDF
                           </a>
                         </div>
@@ -280,7 +280,7 @@ export default function DocumentsPage() {
                                 }
                               }} 
                               className="dl-btn-hover"
-                              style={{ display:'inline-flex', alignItems:'center', gap:6, background:navy, color:'#fff', padding:'9px 18px', borderRadius:9, fontSize:13, fontWeight:700, textDecoration:'none', border:'none', cursor:'pointer', flexShrink:0, whiteSpace:'nowrap' }}>
+                              style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', minHeight: 44, gap:6, background:navy, color:'#fff', padding:'9px 18px', borderRadius:9, fontSize:13, fontWeight:700, textDecoration:'none', border:'none', cursor:'pointer', flexShrink:0, whiteSpace:'nowrap' }}>
                               👁️ Open
                             </a>
                           </div>

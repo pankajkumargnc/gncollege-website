@@ -174,7 +174,7 @@ export default function EventsPage({ headless }) {
                 { id:'upcoming', label:'🔜 Upcoming', count:upcoming.length },
                 { id:'past',     label:'📜 Past',     count:past.length     },
               ].map(t => (
-                <button key={t.id} className="evt-fb" onClick={() => setTab(t.id)} style={{ padding:'8px 18px', borderRadius:9, background:tab===t.id?navy:'transparent', color:tab===t.id?'#fff':'#718096', fontWeight:700, fontSize:13, display:'flex', alignItems:'center', gap:7 }}>
+                <button key={t.id} className="evt-fb" onClick={() => setTab(t.id)} style={{ padding:'8px 18px', minHeight: 44, justifyContent: 'center', borderRadius:9, background:tab===t.id?navy:'transparent', color:tab===t.id?'#fff':'#718096', fontWeight:700, fontSize:13, display:'flex', alignItems:'center', gap:7 }}>
                   {t.label}
                   <span style={{ background:tab===t.id?gold:'#e2e8f0', color:tab===t.id?navy:'#718096', borderRadius:20, padding:'1px 8px', fontSize:11.5, fontWeight:800 }}>{t.count}</span>
                 </button>
@@ -255,7 +255,7 @@ export default function EventsPage({ headless }) {
                                   </p>
                                   {plainText.length > 120 && (
                                     <button onClick={() => setExpandId(exp?null:ev.id)}
-                                      style={{ background:'none', border:'none', color:gold, fontWeight:800, fontSize:12, cursor:'pointer', padding:'4px 0 0' }}>
+                                      style={{ background:'none', border:'none', color:gold, fontWeight:800, fontSize:12, cursor:'pointer', padding:'4px 0 0', minHeight: 44, display: 'inline-flex', alignItems: 'center' }}>
                                       {exp ? '▲ Read Less' : '▼ Read More'}
                                     </button>
                                   )}
@@ -279,7 +279,7 @@ export default function EventsPage({ headless }) {
                                     <span style={{ background:'#fee2e2', color:'#e53e3e', padding:'2px 6px', fontSize:10, fontWeight:800, borderRadius:4 }}>PDF</span>
                                     <button
                                       onClick={e => openReport(e, ev)}
-                                      style={{ background:'none', border:'none', color:'#d97706', fontSize:12, fontWeight:800, cursor:'pointer', padding:0 }}
+                                      style={{ background:'none', border:'none', color:'#d97706', fontSize:12, fontWeight:800, cursor:'pointer', padding:0, minHeight: 44, display: 'inline-flex', alignItems: 'center' }}
                                     >
                                       READ REPORT ❯
                                     </button>

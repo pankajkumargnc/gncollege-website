@@ -71,19 +71,31 @@ export const StatCard = React.memo(({ icon, label, count, color, sub, onClick })
   );
 });
 
-export const Toggle = ({ checked, onChange, label, color = T.green }) => (
-  <div
-    className="toggle-wrap"
-    style={{ cursor: 'pointer', userSelect: 'none', display: 'inline-flex', alignItems: 'center', gap: 8 }}
-    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onChange && onChange(); }}
-  >
-    <div className="toggle">
-      <input type="checkbox" readOnly checked={!!checked} onChange={() => {}} />
-      <span className="toggle-slider" style={checked ? { background: color } : {}} />
+export const Toggle = ({ checked, onChange, label, color = T.green }) => {
+  return (
+    <div
+      className="toggle-wrap"
+      style={{ userSelect: 'none', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onChange && onChange();
+      }}
+    >
+      <div className="toggle">
+        {/* We use a visible checkbox overlayed by the slider but clickable via the div */}
+        <input 
+          type="checkbox" 
+          checked={!!checked} 
+          readOnly
+          style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer', zIndex: 1 }}
+        />
+        <span className="toggle-slider" style={checked ? { background: color } : {}} />
+      </div>
+      {label && <span style={{ fontSize: 13, fontWeight: 700, color: checked ? color : T.t3 }}>{label}</span>}
     </div>
-    {label && <span style={{ fontSize: 13, fontWeight: 700, color: checked ? color : T.t3 }}>{label}</span>}
-  </div>
-);
+  );
+};
 
 export const SectionSearch = ({ value, onChange, placeholder }) => (
   <div className="sec-search" style={{ marginBottom: 16 }}>

@@ -1,0 +1,17 @@
+{
+  "agent": "cto-agent",
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Agent(cto-agent)",
+      "Agent(ui-agent)",
+      "Agent(backend-agent)",
+      "Agent(security-agent)",
+      "Agent(seo-agent)",
+      "Agent(deploy-agent)",
+      "Agent(review-agent)"
+    ]
+  }
+}

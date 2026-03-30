@@ -121,11 +121,20 @@ export default function Navbar({ onAdminClick, navLinks }) {
             border-radius: 2px;
           }
           .nav-hover-link {
-            transition: all 0.25s ease;
+            transition: color 0.25s ease, transform 0.25s cubic-bezier(.22,1,.36,1);
           }
           .nav-hover-link:hover {
             color: ${COLORS.gold} !important;
             transform: translateX(4px);
+          }
+          .nav-dropdown-item {
+            transition: background 0.2s ease;
+          }
+          .nav-dropdown-item:hover {
+            background: rgba(15,35,71,0.03);
+          }
+          [data-theme="dark"] .nav-dropdown-item:hover {
+            background: rgba(255,255,255,0.04);
           }
         `}</style>
 
@@ -138,7 +147,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          gap: isMobile ? '5px' : '20px'
+          gap: isMobile ? '8px' : '20px'
         }}>
 
           {/* ── LOGO & TITLE ── */}
@@ -184,7 +193,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                 // ✅ FLUID TYPE HERE FOR EXTREME RESPONSIVENESS
                 fontSize: isMobile ? 'clamp(11px, 3.5vw, 14px)' : 'clamp(16px, 1.8vw, 21.5px)',
                 fontWeight: '900',
-                fontFamily: 'Georgia, serif',
+                fontFamily: "'Plus Jakarta Sans', Georgia, serif",
                 whiteSpace: 'nowrap',
                 letterSpacing: isMobile ? '0px' : '2.5px',
                 textAlign: 'left',
@@ -228,12 +237,21 @@ export default function Navbar({ onAdminClick, navLinks }) {
           {isMobile && (
             <button
               onClick={() => setMenuOpen(!menuOpen)}
+              aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={menuOpen}
               style={{
                 background: 'transparent', border: 'none',
-                color: COLORS.navy, fontSize: 28,
-                cursor: 'pointer', padding: '4px',
+                color: isDark ? '#e2e8f0' : COLORS.navy, fontSize: 26,
+                cursor: 'pointer', padding: '8px',
                 flexShrink: 0, zIndex: 200,
-              }}>
+                minWidth: '44px', minHeight: '44px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: '8px',
+                transition: 'background 0.2s ease',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,35,71,0.05)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
               {menuOpen ? '✕' : '☰'}
             </button>
           )}
@@ -290,12 +308,14 @@ export default function Navbar({ onAdminClick, navLinks }) {
                     className="nav-hover-link"
                     style={{
                       color: isDark ? '#e2e8f0' : COLORS.navy,
-                      padding: isMobile ? '12px 0' : '24px 11px',
+                      padding: isMobile ? '14px 0' : '16px 11px',
                       display: 'block',
                       fontSize: 13.5, fontWeight: 700,
                       whiteSpace: 'nowrap',
                       textDecoration: 'none',
                       width: '100%',
+                      minHeight: '44px',
+                      lineHeight: isMobile ? '16px' : 'normal',
                     }}>
                     {l0.label === 'Home' ? '🏠 ' : ''}{l0.label}
                   </Link>
@@ -333,10 +353,10 @@ export default function Navbar({ onAdminClick, navLinks }) {
                           onClick={e => { if (isMobile && l1.sub) { e.stopPropagation(); toggleL2(l1.label) } }}
                           style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                            padding: isMobile ? '10px 16px' : '8px 16px',
+                            padding: isMobile ? '12px 16px' : '6px 16px',
+                            minHeight: isMobile ? '44px' : 'auto',
                             borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
                             cursor: isMobile && l1.sub ? 'pointer' : 'default',
-                            transition: 'background 0.2s ease',
                           }}
                         >
                           <Link to={getRoute(l1.href)} className="nav-hover-link dropdown-link-text"
@@ -377,10 +397,10 @@ export default function Navbar({ onAdminClick, navLinks }) {
                                   onClick={e => { if (isMobile && l2.sub) { e.stopPropagation(); toggleL3(l2.label) } }}
                                   style={{
                                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                    padding: '8px 16px',
+                                    padding: isMobile ? '12px 16px' : '6px 16px',
+                                    minHeight: isMobile ? '44px' : 'auto',
                                     borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
                                     cursor: isMobile && l2.sub ? 'pointer' : 'default',
-                                    transition: 'background 0.2s ease',
                                   }}
                                 >
                                   <Link to={getRoute(l2.href)} className="nav-hover-link dropdown-link-text"
@@ -414,7 +434,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
                                     {l2.sub.map(l3 => (
                                       <Link key={l3.label} to={getRoute(l3.href)} className="nav-hover-link nav-dropdown-item dropdown-link-text"
                                         style={{
-                                          display: 'block', padding: '8px 16px',
+                                          display: 'block', padding: '6px 16px',
                                           fontSize: 12, color: '#555',
                                           borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
                                           textDecoration: 'none',
@@ -439,23 +459,26 @@ export default function Navbar({ onAdminClick, navLinks }) {
             {/* Admin Button */}
             <button
               onClick={onAdminClick}
+              aria-label="Open Admin Panel"
               style={{
                 flexShrink: 0,
                 background: COLORS.gold, color: '#000',
-                border: 'none', padding: '7px 18px',
-                borderRadius: 6, cursor: 'pointer',
-                fontSize: 12, fontWeight: 800,
+                border: 'none', padding: '10px 20px',
+                borderRadius: 8, cursor: 'pointer',
+                fontSize: 12.5, fontWeight: 800,
                 marginLeft: isMobile ? 0 : 10,
                 marginTop: isMobile ? 12 : 0,
                 width: isMobile ? '100%' : 'auto',
+                minHeight: '44px',
                 boxShadow: '0 4px 15px rgba(244,160,35,0.3)',
                 whiteSpace: 'nowrap',
                 display: 'flex', alignItems: 'center',
                 justifyContent: 'center', gap: '6px',
-                transition: 'all 0.3s ease',
+                transition: 'transform 0.25s cubic-bezier(.22,1,.36,1), box-shadow 0.25s ease',
+                letterSpacing: '0.3px',
               }}
-              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(244,160,35,0.4)' }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(244,160,35,0.3)' }}
             >
               <span style={{ fontSize: 16 }}>⚙️</span> Admin Login
             </button>

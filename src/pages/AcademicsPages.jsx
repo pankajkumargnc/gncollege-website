@@ -32,7 +32,7 @@ function Fade({ children, delay = 0, y = 20 }) {
 
 /* ─── Shared Hero Header ─── */
 const PageHeader = ({ title, subtitle, icon }) => (
-  <div style={{ background: NAVY, padding: '80px 20px 60px', textAlign: 'center', color: '#fff' }}>
+  <div style={{ background: NAVY, padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px) clamp(44px,6vw,60px)', textAlign: 'center', color: '#fff' }}>
     <Fade>
       <div style={{ fontSize: 48, marginBottom: 16 }}>{icon}</div>
       <h1 style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 900, margin: '0 0 16px', letterSpacing: '-0.5px' }}>{title}</h1>
@@ -154,7 +154,7 @@ export function CourseOffered() {
         <Fade delay={0.2}>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24, justifyContent: 'center' }}>
             {Object.keys(courses).map(tab => (
-              <button key={tab} onClick={() => setActiveTab(tab)} style={{ padding: '12px 24px', border: 'none', borderRadius: 99, fontWeight: 800, fontSize: 14, cursor: 'pointer', transition: 'all 0.3s', background: activeTab === tab ? NAVY : '#fff', color: activeTab === tab ? '#fff' : '#64748b', boxShadow: activeTab === tab ? `0 8px 20px ${NAVY}40` : '0 2px 10px rgba(0,0,0,0.05)' }}>
+              <button key={tab} onClick={() => setActiveTab(tab)} style={{ padding: '12px 24px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: 'none', borderRadius: 99, fontWeight: 800, fontSize: 14, cursor: 'pointer', transition: 'all 0.3s', background: activeTab === tab ? NAVY : '#fff', color: activeTab === tab ? '#fff' : '#64748b', boxShadow: activeTab === tab ? `0 8px 20px ${NAVY}40` : '0 2px 10px rgba(0,0,0,0.05)' }}>
                 {tab}
               </button>
             ))}
@@ -217,7 +217,7 @@ export function Syllabus() {
                   key={f} 
                   onClick={() => setFilter(f)} 
                   style={{ 
-                    padding: '8px 16px', borderRadius: 8, border: 'none', 
+                    padding: '8px 16px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, border: 'none', 
                     background: filter === f ? `${NAVY}15` : 'transparent', 
                     color: filter === f ? NAVY : '#64748b', 
                     fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' 
@@ -255,7 +255,7 @@ export function Syllabus() {
                         setSelectedPdf({ url: s.link, title: s.title || 'Syllabus' }); 
                       }
                     }} 
-                    style={{ display: 'block', textAlign: 'center', background: `linear-gradient(135deg, ${NAVY}, #1a3a7c)`, color: '#fff', padding: '10px', borderRadius: 10, textDecoration: 'none', fontWeight: 800, fontSize: 14 }}>
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 44, textAlign: 'center', background: `linear-gradient(135deg, ${NAVY}, #1a3a7c)`, color: '#fff', padding: '10px', borderRadius: 10, textDecoration: 'none', fontWeight: 800, fontSize: 14 }}>
                     📥 Download PDF
                   </a>
                 </div>

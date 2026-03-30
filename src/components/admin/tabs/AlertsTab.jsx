@@ -1,7 +1,7 @@
 // src/components/admin/tabs/AlertsTab.jsx
 import { useState } from 'react';
 import { db } from '../../../firebase'; // ✅ FIXED: Teen folder peechhe
-import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, setDoc, doc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { T, NAVY, GOLD, WHITE, BG, useLocalDraft, Toggle, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
 
@@ -26,10 +26,18 @@ export default function AlertsTab({ alerts, logAct, getSectionLog, softDelete, b
     setLoading(false);
   };
 
-  const toggleAlert = async a => {
-    await updateDoc(doc(db, 'alerts', a.id), { isActive: !a.isActive });
-    toast.success(a.isActive ? 'Alert turned OFF' : '🔴 Alert is LIVE!');
-    logAct('update', `Alert ${a.isActive ? 'deactivated' : 'activated'}`, 'alerts');
+  const toggleAlert = async (a) => {
+    try {
+      const newStatus = !a.isActive;
+      await updateDoc(doc(db, 'alerts', a.id), { 
+        isActive: newStatus,
+        updatedAt: serverTimestamp()
+      });
+      toast.success(newStatus ? '🔴 Alert is LIVE!' : 'Alert turned OFF');
+      logAct('update', `Alert ${newStatus ? 'activated' : 'deactivated'}: ${a.text?.substring(0,30)}`, 'alerts');
+    } catch (err) {
+      toast.error('Toggle failed: ' + err.message);
+    }
   };
 
   const filtered = (alerts || []).filter(a => !alertSearch || a.text?.toLowerCase().includes(alertSearch.toLowerCase()));
@@ -72,7 +80,18 @@ export default function AlertsTab({ alerts, logAct, getSectionLog, softDelete, b
           <div key={a.id} className={`arow ${alertSel.includes(a.id) ? 'selected' : ''}`} style={{ borderLeft: `4px solid ${a.isActive ? T.red : T.b2}` }}>
             <input type="checkbox" checked={alertSel.includes(a.id)} onChange={() => toggleAlertSel(a.id)} style={{ width: 16, height: 16, accentColor: NAVY }} />
             <div style={{ flex: 1 }}>
-              <span className="abadge" style={{ background: a.isActive ? '#fee2e2' : BG, color: a.isActive ? T.red : T.t3, marginBottom: 5 }}>{a.isActive ? '🔴 LIVE' : '⚪ OFF'}</span>
+              <span 
+                className="abadge" 
+                onClick={() => toggleAlert(a)}
+                style={{ 
+                  background: a.isActive ? '#fee2e2' : BG, 
+                  color: a.isActive ? T.red : T.t3, 
+                  marginBottom: 5,
+                  cursor: 'pointer' 
+                }}
+              >
+                {a.isActive ? '🔴 LIVE' : '⚪ OFF'}
+              </span>
               <div style={{ fontWeight: 700, color: NAVY, fontSize: 14, marginTop: 3 }}>{a.text}</div>
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>

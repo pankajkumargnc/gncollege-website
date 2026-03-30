@@ -19,7 +19,7 @@ function Fade({ children, delay = 0, y = 20 }) {
 }
 
 const PageHeader = ({ title, subtitle, icon }) => (
-  <div style={{ background: NAVY, padding: '80px 20px 60px', textAlign: 'center', color: '#fff' }}>
+  <div style={{ background: NAVY, padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px) clamp(44px,6vw,60px)', textAlign: 'center', color: '#fff' }}>
     <Fade>
       <div style={{ fontSize: 48, marginBottom: 16 }}>{icon}</div>
       <h1 style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 900, margin: '0 0 16px', letterSpacing: '-0.5px' }}>{title}</h1>

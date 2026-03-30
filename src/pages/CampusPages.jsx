@@ -73,7 +73,7 @@ function LiveGallery({ categoryId }) {
 export function CampusVisuals({ title, desc, categoryId }) {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
-      <div style={{ background: NAVY, padding: '80px 20px 60px', textAlign: 'center', color: '#fff' }}>
+      <div style={{ background: NAVY, padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px) clamp(44px,6vw,60px)', textAlign: 'center', color: '#fff' }}>
         <Fade><h1 style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 800, margin: '0 0 16px' }}>{title}</h1></Fade>
         <Fade delay={0.1}><p style={{ color: '#cbd5e1', fontSize: 16, maxWidth: 600, margin: '0 auto' }}>{desc}</p></Fade>
       </div>
@@ -97,7 +97,7 @@ export function Infrastructure() {
   ];
 
   return (
-    <div style={{ background: '#f8fafc', padding: '80px 20px', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', fontFamily: "'DM Sans', sans-serif" }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <Fade>
           <div style={{ color: GOLD, fontWeight: 700, letterSpacing: 2, marginBottom: 8 }}>OVERVIEW</div>
@@ -126,7 +126,7 @@ export function Infrastructure() {
 ════════════════════════════════════════════════════════════ */
 export function Classrooms() {
   return (
-    <div style={{ background: '#fff', padding: '80px 20px', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#fff', padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', fontFamily: "'DM Sans', sans-serif" }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: 60, alignItems: 'center', marginBottom: 60 }}>
           <Fade>
@@ -159,7 +159,7 @@ export function Classrooms() {
 ════════════════════════════════════════════════════════════ */
 export function IctRooms() {
   return (
-    <div style={{ background: NAVY, padding: '80px 20px', color: '#fff', fontFamily: "'DM Sans', sans-serif", minHeight: '100vh' }}>
+    <div style={{ background: NAVY, padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', color: '#fff', fontFamily: "'DM Sans', sans-serif", minHeight: '100vh' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 60 }}>
           <Fade><h2 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, margin: '0 0 16px' }}>ICT & Computer Labs</h2></Fade>
@@ -176,7 +176,7 @@ export function IctRooms() {
 ════════════════════════════════════════════════════════════ */
 export function GreenCampus() {
   return (
-    <div style={{ background: 'linear-gradient(145deg, #f0fdf4 0%, #ffffff 100%)', padding: '80px 20px', fontFamily: "'DM Sans', sans-serif", minHeight: '100vh' }}>
+    <div style={{ background: 'linear-gradient(145deg, #f0fdf4 0%, #ffffff 100%)', padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', fontFamily: "'DM Sans', sans-serif", minHeight: '100vh' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 60 }}>
           <Fade>

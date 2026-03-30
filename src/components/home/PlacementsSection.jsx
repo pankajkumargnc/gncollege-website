@@ -1,15 +1,12 @@
 // src/components/home/PlacementsSection.jsx
-// ✅ Gradient glow hover on alumni cards (screenshot-style)
-// ✅ All original Firebase + scroll logic preserved
-// ✅ FIXED: Container width constrained to 1200px (matches Events section)
-// ✅ FIXED: Uniform Plus Jakarta Sans Premium Heading Applied
-
 import React, { useState, useEffect, memo } from 'react';
+import { Link } from 'react-router-dom';
 import { collection, query, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase';
+import { COLORS } from '../../styles/colors';
 
-const N = '#0f2347';
-const G = '#f4a023';
+const N = COLORS.navy;
+const G = COLORS.gold;
 
 const COMPANY_COLORS = {
   tcs:'#0066cc', wipro:'#7c3aed', infosys:'#007dc1', accenture:'#a100ff',
@@ -25,163 +22,154 @@ const getColor = (c = '') => {
 };
 
 const S = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap&subset=latin');
-  .wof-root,.wof-root *{box-sizing:border-box;}
-  .wof-root{
-    padding:72px 0 60px;
-    background:#f8fafc;
-    border-top:1px solid #e8eef5;
-    border-bottom:1px solid #e8eef5;
-    overflow:hidden;position:relative;
-    font-family:'Inter',sans-serif;
-  }
-
-  /* ✅ FIXED: max-width 1200px to match Events section */
-  .wof-inner { 
-    max-width: 1200px; 
-    width: 100%;
-    margin: 0 auto; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    padding: 0 20px; /* Optional side padding for mobile */
-  }
-
-  .wof-head{text-align:center;padding:0 0 24px;position:relative;z-index:2; width: 100%;}
-  
-  .wof-stats{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;margin-top:0px;}
-  .wof-stat{text-align:center;}
-  .wof-stat-num{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;color:${N};}
-  .wof-stat-lbl{font-size:10px;color:#94a3b8;letter-spacing:1px;text-transform:uppercase;margin-top:2px;font-weight:600;}
-
-  /* ✅ FIXED: Removed 100vw and negative margins, set width to 100% */
-  .wof-mask{
-    width: 100%;
-    overflow:hidden;
-    mask:linear-gradient(90deg,transparent 0%,#fff 5%,#fff 95%,transparent 100%);
-    -webkit-mask:linear-gradient(90deg,transparent 0%,#fff 5%,#fff 95%,transparent 100%);
-    padding:16px 0;
-  }
-  .wof-track{
-    display:flex;width:max-content;gap:16px;
-    animation:wof-scroll 40s linear infinite;will-change:transform;
-  }
-  .wof-track:hover{animation-play-state:paused;}
-  @keyframes wof-scroll{0%{transform:translateX(0);}100%{transform:translateX(-33.3333%)}}
-
-  /* ── Glow wrapper for each card ── */
-  .wof-gc {
+  .wof-root {
+    padding: clamp(60px, 10vw, 120px) 0;
+    background: #f8fafc;
     position: relative;
-    z-index: 0;
-    border-radius: 18px;   /* 2px bigger than inner card's 16px */
-    flex-shrink: 0;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
   }
-  .wof-gc::before {
-    content: '';
-    position: absolute;
-    inset: -3px;
-    border-radius: inherit;
-    background: conic-gradient(
-      from 0deg,
-      #a855f7, #ec4899, #f97316, #eab308,
-      #06b6d4, #6366f1, #a855f7
-    );
-    opacity: 0;
-    filter: blur(10px);
-    z-index: -1;
-    transition: opacity .35s ease;
-  }
-  .wof-gc:hover::before { opacity: .6; }
-
-  /* ── Inner card ── */
-  .wof-card{
-    width:220px;
-    background:#fff;border:1.5px solid #e8eef5;border-radius:16px;
-    padding:22px 18px 18px;text-align:center;cursor:default;
-    transition:transform .3s,box-shadow .3s,border-color .3s;
-    position:relative;overflow:hidden;
-  }
-  .wof-gc:hover .wof-card{
-    transform:translateY(-6px);
-    box-shadow:0 16px 36px rgba(15,35,71,.09);
-    border-color:transparent;
+  
+  .wof-inner { 
+    max-width: 1400px; 
+    margin: 0 auto; 
+    padding: 0 20px;
   }
 
-  .wof-avatar-wrap{position:relative;width:64px;height:64px;margin:0 auto 14px;}
-  .wof-avatar{
-    width:64px;height:64px;border-radius:50%;object-fit:cover;
-    border:2px solid #e8eef5;transition:border-color .3s;
+  .wof-head { text-align: center; margin-bottom: 60px; }
+  
+  .wof-stats { 
+      display: flex; justify-content: center; gap: clamp(30px, 6vw, 80px); 
+      margin-top: 40px; 
   }
-  .wof-gc:hover .wof-avatar{border-color:${G};}
-  .wof-badge{
-    position:absolute;bottom:0;right:0;width:20px;height:20px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;font-size:9px;
-    border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.12);
+  .wof-stat { text-align: center; position: relative; }
+  .wof-stat::after {
+      content: ''; position: absolute; right: -40px; top: 10px; bottom: 10px; width: 1px;
+      background: linear-gradient(to bottom, transparent, rgba(15,35,71,0.1), transparent);
   }
-
-  .wof-name{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:${N};margin-bottom:3px;}
-  .wof-course{font-size:11px;color:#94a3b8;font-weight:500;margin-bottom:5px;}
-  .wof-batch{
-    display:inline-block;background:#f1f5f9;color:#475569;
-    font-size:10px;font-weight:700;padding:2px 10px;border-radius:50px;
-    letter-spacing:.5px;margin-bottom:11px;
+  .wof-stat:last-child::after { display: none; }
+  
+  .wof-stat-num { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      font-size: clamp(24px, 3.5vw, 44px); font-weight: 800; color: ${N}; 
+      line-height: 1; margin-bottom: 5px;
   }
-  .wof-company{
-    display:inline-flex;align-items:center;gap:6px;
-    padding:6px 14px;border-radius:50px;font-size:12px;font-weight:700;color:#fff;
-  }
-  .wof-role{font-size:11px;color:#94a3b8;margin-top:5px;font-weight:500;}
-  .wof-pkg{
-    margin-top:7px;font-size:11.5px;color:${G};font-weight:700;
-    display:flex;align-items:center;justify-content:center;gap:4px;
+  .wof-stat-lbl { 
+      font-size: 11px; color: #64748b; letter-spacing: 2px; text-transform: uppercase; 
+      font-weight: 700; 
   }
 
-  .wof-foot{text-align:center;padding:8px 20px 0;}
-  .wof-foot-badge{
-    display:inline-flex;align-items:center;gap:8px;
-    background:#fff;border:1.5px solid #e2e8f0;color:#64748b;
-    padding:8px 20px;border-radius:50px;font-size:12px;font-weight:600;
-    box-shadow:0 2px 8px rgba(0,0,0,.04);
+  /* Marquee Mask */
+  .wof-mask {
+    width: 100%; overflow: hidden;
+    mask: linear-gradient(90deg, transparent 0%, #fff 5%, #fff 95%, transparent 100%);
+    -webkit-mask: linear-gradient(90deg, transparent 0%, #fff 10%, #fff 90%, transparent 100%);
+    padding: 40px 0;
   }
-  .wof-foot-badge b{color:${N};font-weight:800;}
-  .wof-empty{text-align:center;padding:48px 20px;color:#94a3b8;}
+  .wof-track {
+    display: flex; width: max-content; gap: 30px;
+    animation: wof-scroll 50s linear infinite; will-change: transform;
+  }
+  .wof-track:hover { animation-play-state: paused; }
+  @keyframes wof-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-33.3333%); } }
 
-  @media(max-width:768px){
-    .wof-root{padding:52px 0 40px;}
-    .wof-card{width:192px;padding:18px 14px 15px;}
-    .wof-stats{gap:20px;}
+  /* Premium Card Design */
+  .wof-card {
+    width: 280px;
+    background: #fff; border: 1px solid #f1f5f9; border-radius: 28px;
+    padding: 35px 25px 25px; text-align: center;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative; 
+    box-shadow: 0 10px 30px rgba(15,35,71,0.04);
   }
-  @media(max-width:480px){
-    .wof-card{width:175px;}
-    .wof-stats{gap:14px;}
-    .wof-stat-num{font-size:18px;}
+  .wof-card:hover {
+    transform: translateY(-15px);
+    box-shadow: 0 40px 70px rgba(15,35,71,0.12);
+    border-color: ${G}30;
   }
+
+  .wof-avatar-wrap { position: relative; width: 85px; height: 85px; margin: 0 auto 20px; }
+  .wof-avatar {
+    width: 85px; height: 85px; border-radius: 50%; object-fit: cover;
+    border: 3px solid #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    transition: all 0.5s;
+  }
+  .wof-card:hover .wof-avatar { transform: scale(1.1); border-color: ${G}; }
+  
+  .wof-badge {
+    position: absolute; top: 10px; right: 20px; font-size: 20px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); animation: wof-float 3s ease-in-out infinite;
+  }
+
+  @keyframes wof-float { 
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+  }
+
+  .wof-name { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      font-size: 18px; font-weight: 800; color: ${N}; margin-bottom: 5px; 
+  }
+  .wof-course { font-size: 12px; color: #64748b; margin-bottom: 8px; font-weight: 500; }
+  
+  .wof-company-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 50px; font-size: 13px; font-weight: 800;
+    color: #fff; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 8px 20px -5px rgba(0,0,0,0.2);
+  }
+
+  .wof-role { font-size: 11.5px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  
+  .wof-pkg-pill {
+    position: absolute; top: 20px; left: 20px;
+    background: #fffbeb; color: ${G}; font-size: 10px; font-weight: 900;
+    padding: 4px 10px; border-radius: 50px; border: 1px solid ${G}30;
+  }
+
+  .wof-foot { text-align: center; margin-top: 40px; }
+  .wof-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 12px 28px; background: ${N}; color: #fff; border-radius: 50px;
+      font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.3s;
+  }
+  .wof-btn:hover { background: ${G}; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(244,160,35,0.3); }
+
+  @media(max-width: 768px) {
+    .wof-stat::after { display: none; }
+    .wof-stats { gap: 30px; }
+    .wof-card { width: 240px; }
+  }
+
+  [data-theme="dark"] .wof-root { background: #0b1121; }
+  [data-theme="dark"] .wof-card { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08); }
+  [data-theme="dark"] .wof-name { color: #fff; }
+  [data-theme="dark"] .wof-stat-num { color: #fff; }
 `;
 
 const WofCard = memo(({ p }) => {
   const color    = getColor(p.company || '');
   const fallback = `${import.meta.env.BASE_URL || '/'}images/college_photo.webp`;
   return (
-    <div className="wof-gc">
-      <div className="wof-card">
-        <div className="wof-avatar-wrap">
-          <img
-            src={p.imageUrl || fallback} alt={p.name || 'Alumni'}
-            className="wof-avatar" loading="lazy" decoding="async"
-            onError={e => { e.currentTarget.src = fallback; }}
-          />
-          <div className="wof-badge" style={{ background: color }}>💼</div>
-        </div>
-        <div className="wof-name">{p.name}</div>
-        {p.course  && <div className="wof-course">{p.course}</div>}
-        <div className="wof-batch">Batch {p.year || '—'}</div>
-        <div className="wof-company" style={{ background: color }}>
-          <span style={{ width:6,height:6,borderRadius:'50%',background:'rgba(255,255,255,.65)',flexShrink:0,display:'inline-block' }} />
-          {p.company || 'Industry'}
-        </div>
-        {p.role    && <div className="wof-role">{p.role}</div>}
-        {p.package && <div className="wof-pkg">💰 {p.package} LPA</div>}
+    <div className="wof-card">
+      <div className="wof-pkg-pill">{p.package || '—'} LPA</div>
+      <div className="wof-badge">🎓</div>
+      <div className="wof-avatar-wrap">
+        <img
+          src={p.imageUrl || fallback} alt={p.name || 'Alumni'}
+          className="wof-avatar" loading="lazy"
+          onError={e => { e.currentTarget.src = fallback; }}
+        />
       </div>
+      <div className="wof-name">{p.name}</div>
+      <div className="wof-course">{p.course || 'Graduate'}</div>
+      
+      <div className="wof-company-tag" style={{ background: color }}>
+        {p.company || 'Industry Leader'}
+      </div>
+      
+      <div className="wof-role">{p.role || 'Professional'}</div>
+      <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 10 }}>Batch of {p.year || '—'}</div>
     </div>
   );
 });
@@ -212,26 +200,14 @@ export default function PlacementsSection() {
     <section className="wof-root">
       <style>{S}</style>
       
-      {/* ✅ Outer Wrapper added to constrain everything centrally */}
       <div className="wof-inner">
-        
         <div className="wof-head">
-          {/* ✅ FIXED: "Plus Jakarta Sans" Uniform Premium Header */}
-          <div style={{ textAlign:'center', marginBottom:'clamp(20px,3vw,30px)' }}>
-            <div>
-              <div style={{ display:'inline-flex', alignItems:'center', gap:'8px', background:'rgba(15,35,71,.06)', border:'1px solid rgba(15,35,71,.12)', color: N, padding:'5px 16px', borderRadius:'20px', fontSize:'clamp(9px,.75vw,11px)', fontWeight:800, letterSpacing:'2px', textTransform:'uppercase', marginBottom:'12px' }}>
-                🏆 Proud Alumni
-              </div>
-            </div>
-            <h2 style={{ fontFamily:"'Plus Jakarta Sans', sans-serif", color: N, fontSize:'clamp(28px,5vw,50px)', fontWeight:800, margin:'0 0 14px', letterSpacing:'-1.5px', lineHeight:1.08 }}>
-              Wall of <span style={{ color: G }}>Fame</span>
-            </h2>
-            <p style={{ color:'#6b7280', fontSize:'clamp(13px,.95vw,15px)', maxWidth:'600px', lineHeight:1.65, margin:'0 auto' }}>
-              Hamare ho-nhaar students jo aaj leading companies mein kaam kar rahe hain
-            </p>
-          </div>
+          <div className="uni-label">🏆 Proud Alumni</div>
+          <h2 className="uni-h">Wall of <span>Fame</span></h2>
+          <p className="uni-sub">
+            Hamare ho-nhaar students jo aaj global industries mein apna parcham lehra rahe hain.
+          </p>
 
-          {/* Stats below header */}
           {placements.length > 0 && (
             <div className="wof-stats">
               <div className="wof-stat">
@@ -245,7 +221,7 @@ export default function PlacementsSection() {
               {maxPkg && (
                 <div className="wof-stat">
                   <div className="wof-stat-num">{maxPkg} LPA</div>
-                  <div className="wof-stat-lbl">Highest Pkg</div>
+                  <div className="wof-stat-lbl">Highest</div>
                 </div>
               )}
             </div>
@@ -253,10 +229,8 @@ export default function PlacementsSection() {
         </div>
 
         {placements.length === 0 ? (
-          <div className="wof-empty">
-            <div style={{ fontSize:40,marginBottom:12,opacity:.4 }}>🎓</div>
-            <div style={{ fontWeight:600,marginBottom:6,color:'#475569' }}>Alumni stories loading soon</div>
-            <div style={{ fontSize:13 }}>Admin Panel → Alumni Wall tab se data add karein</div>
+          <div style={{ textAlign:'center', color:'#94a3b8', padding:'60px 0' }}>
+            Alumni success stories are loading...
           </div>
         ) : (
           <div className="wof-mask">
@@ -266,13 +240,11 @@ export default function PlacementsSection() {
           </div>
         )}
 
-        {placements.length > 0 && (
-          <div className="wof-foot">
-            <div className="wof-foot-badge">
-              ✨ <b>{placements.length}</b> success stories — aur badh rahi hain
-            </div>
-          </div>
-        )}
+        <div className="wof-foot">
+            <Link to="/academics/placements" className="wof-btn">
+                View Detailed Records <span style={{ fontSize: 18 }}>→</span>
+            </Link>
+        </div>
       </div>
     </section>
   );

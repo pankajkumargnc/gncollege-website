@@ -157,10 +157,10 @@ const FacCard = ({ fac, color }) => {
       background: '#fff', borderRadius: 18, overflow: 'hidden',
       border: `1.5px solid ${isHod ? color + '40' : '#f1f5f9'}`,
       boxShadow: isHod ? `0 4px 20px ${color}1a` : '0 2px 12px rgba(15,35,71,.06)',
-      transition: 'transform .22s, box-shadow .22s',
+      transition: 'transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease',
     }}
       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = `0 14px 32px ${color}20`; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = isHod ? `0 4px 20px ${color}1a` : '0 2px 12px rgba(15,35,71,.06)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = isHod ? `0 4px 20px ${color}1a` : '0 2px 12px rgba(15,35,71,.06)'; }}
     >
       {/* Photo */}
       <div style={{ position: 'relative', paddingTop: '110%', background: `linear-gradient(160deg,${color}10,${color}05)`, overflow: 'hidden' }}>
@@ -313,7 +313,7 @@ const FacultySection = ({ keys = [], tabs, color }) => {
                     background: on ? `linear-gradient(135deg,${NAVY},#1a3a7c)` : 'transparent',
                     borderRadius: '8px 8px 0 0', marginBottom: -2,
                     borderBottom: '3px solid transparent',
-                    transition: 'all .18s',
+                    transition: 'all .25s ease', minHeight: '44px',
                   }}
                 >
                   <span style={{ fontSize: 16 }}>{tab.icon}</span>
@@ -399,12 +399,12 @@ function SingleDeptPage({ slug }) {
         *,*::before,*::after{box-sizing:border-box;}
         @keyframes dp-spin{to{transform:rotate(360deg)}}
 
-        .dp-hl{background:#fff;border:1.5px solid #f1f5f9;border-radius:16px;padding:22px 20px;height:100%;transition:all .22s;}
+        .dp-hl{background:#fff;border:1.5px solid #f1f5f9;border-radius:16px;padding:22px 20px;height:100%;transition:transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease;}
         .dp-hl:hover{border-color:${C}3a;box-shadow:0 10px 28px ${C}12;transform:translateY(-3px);}
 
         .dp-fac-card{background:#fff;border:1.5px solid #f1f5f9;border-radius:14px;padding:20px;
-          display:flex;gap:14px;align-items:flex-start;transition:all .2s;}
-        .dp-fac-card:hover{border-color:${C}38;box-shadow:0 6px 20px ${C}0e;}
+          display:flex;gap:14px;align-items:flex-start;transition:transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease;}
+        .dp-fac-card:hover{border-color:${C}38;box-shadow:0 6px 20px ${C}0e;transform:translateY(-2px);}
 
         .dp-rep{display:flex;align-items:center;gap:16px;background:#fff;border:1.5px solid #f1f5f9;
           border-radius:14px;padding:18px 20px;cursor:pointer;transition:all .2s;}
@@ -415,11 +415,12 @@ function SingleDeptPage({ slug }) {
         .dp-ach:hover{border-color:${C}38;}
 
         .dp-subj{display:flex;align-items:center;gap:11px;padding:11px 15px;
-          background:#fff;border:1.5px solid #f1f5f9;border-radius:10px;transition:all .18s;}
+          background:#fff;border:1.5px solid #f1f5f9;border-radius:10px;transition:background .25s ease, transform .25s cubic-bezier(.22,1,.36,1), border-color .25s ease;}
         .dp-subj:hover{border-color:${C}38;background:${C}06;transform:translateX(4px);}
 
-        .dp-sem{padding:8px 17px;border:1.5px solid #e2e8f0;border-radius:9px;background:#fff;
-          color:#64748b;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .18s;}
+        .dp-sem{padding:10px 17px;border:1.5px solid #e2e8f0;border-radius:9px;background:#fff;
+          color:#64748b;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .25s ease;
+          min-height:44px;display:inline-flex;align-items:center;justify-content:center;}
         .dp-sem:hover{border-color:${C};color:${C};}
         .dp-sem.on{background:linear-gradient(135deg,${NAVY},#1a3a7c);color:#fff;border-color:transparent;box-shadow:0 4px 14px ${C}28;}
 
@@ -441,7 +442,7 @@ function SingleDeptPage({ slug }) {
       `}</style>
 
       {/* ════ HERO ════════════════════════════════════════════════════ */}
-      <div style={{ background: meta.heroBg, borderBottom: `1px solid ${C}1a`, padding: '60px 20px 52px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: meta.heroBg, borderBottom: `1px solid ${C}1a`, padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px) clamp(44px,6vw,64px)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: -80, right: -70, width: 380, height: 380, borderRadius: '50%', background: `radial-gradient(circle,${C}16 0%,transparent 70%)`, pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: -50, left: '8%', width: 260, height: 260, borderRadius: '50%', background: 'radial-gradient(circle,rgba(244,160,35,.07) 0%,transparent 70%)', pointerEvents: 'none' }} />
 
@@ -489,13 +490,19 @@ function SingleDeptPage({ slug }) {
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <button
                   onClick={() => document.getElementById('faculty')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                  style={{ background: `linear-gradient(135deg,${NAVY},#1a3a7c)`, color: '#fff', padding: '11px 24px', borderRadius: 10, border: 'none', fontWeight: 700, fontSize: 13.5, boxShadow: `0 4px 16px ${NAVY}28`, display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer', fontFamily: 'inherit' }}>
+                  style={{ background: `linear-gradient(135deg,${NAVY},#1a3a7c)`, color: '#fff', padding: '11px 24px', borderRadius: 10, border: 'none', fontWeight: 700, fontSize: 13.5, boxShadow: `0 4px 16px ${NAVY}28`, display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer', fontFamily: 'inherit', minHeight: '44px', transition: 'transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s ease' }}
+                  onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+                >
                   👨‍🏫 Faculty Roster
                 </button>
                 {feeRows.length > 0 && (
                   <button
                     onClick={() => document.getElementById('fees')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                    style={{ background: '#fff', border: `1.5px solid ${C}`, color: C, padding: '11px 24px', borderRadius: 10, fontWeight: 700, fontSize: 13.5, display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer', fontFamily: 'inherit' }}>
+                    style={{ background: '#fff', border: `1.5px solid ${C}`, color: C, padding: '11px 24px', borderRadius: 10, fontWeight: 700, fontSize: 13.5, display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer', fontFamily: 'inherit', minHeight: '44px', transition: 'background 0.25s ease, color 0.25s ease' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = C; e.currentTarget.style.color = '#fff'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = C; }}
+                  >
                     💰 Fee Structure
                   </button>
                 )}
@@ -551,7 +558,7 @@ function SingleDeptPage({ slug }) {
 
         {/* ── ABOUT + VISION / MISSION ──────────────────────────── */}
         {(d.about || d.vision || d.mission) && (
-          <div style={{ padding: '64px 0 0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 40 }}>
+          <div style={{ padding: 'clamp(48px,6vw,64px) 0 0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 40 }}>
             {d.about && (
               <Fade>
                 <SectionLabel txt="About the Department" color={C} />
@@ -590,7 +597,7 @@ function SingleDeptPage({ slug }) {
 
         {/* ── HIGHLIGHTS ────────────────────────────────────────── */}
         {highlights.length > 0 && (
-          <div style={{ padding: '64px 0 0' }}>
+          <div style={{ padding: 'clamp(48px,6vw,64px) 0 0' }}>
             <SectionHead label="Highlights" title="Why Choose Us?" color={C} />
             <div className="dp-g3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
               {highlights.map((h, i) => (
@@ -608,7 +615,7 @@ function SingleDeptPage({ slug }) {
 
         {/* ── FACILITIES ────────────────────────────────────────── */}
         {facilities.length > 0 && (
-          <div style={{ padding: '64px 0 0' }}>
+          <div style={{ padding: 'clamp(48px,6vw,64px) 0 0' }}>
             <SectionHead label="Infrastructure" title="Labs & Facilities" color={C} />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 14 }}>
               {facilities.map((f, i) => (
@@ -631,7 +638,7 @@ function SingleDeptPage({ slug }) {
 
         {/* ── CURRICULUM ────────────────────────────────────────── */}
         {semKeys.length > 0 && (
-          <div id="curriculum" style={{ padding: '64px 0 0' }}>
+          <div id="curriculum" style={{ padding: 'clamp(48px,6vw,64px) 0 0' }}>
             <SectionHead label="Academic Curriculum" title="Semester-wise Subjects" color={C} />
             <Fade delay={0.06}>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 22 }}>
@@ -656,12 +663,12 @@ function SingleDeptPage({ slug }) {
         )}
 
         {/* ── FACULTY ───────────────────────────────────────────── */}
-        <div id="faculty" style={{ padding: '64px 0 0' }}>
+        <div id="faculty" style={{ padding: 'clamp(48px,6vw,64px) 0 0' }}>
           <FacultySection keys={facultyKeys} tabs={meta.tabs} color={C} />
         </div>
 
         {/* ── FEE STRUCTURE ─────────────────────────────────────── */}
-        <div id="fees" style={{ padding: '64px 0 0' }}>
+        <div id="fees" style={{ padding: 'clamp(48px,6vw,64px) 0 0' }}>
           <SectionHead label="Academic Fees" title="Fee Structure" color={C} />
           {feeRows.length === 0 ? (
             <Fade><EmptyBox icon="💰" msg="Fee structure abhi add nahi ki gayi" sub="Admin Panel → Departments → [Dept] → Fee Structure mein add karein" color={C} /></Fade>
@@ -698,7 +705,7 @@ function SingleDeptPage({ slug }) {
         </div>
 
         {/* ── PROGRAMME / ACTIVITY REPORTS ──────────────────────── */}
-        <div style={{ padding: '64px 0 0' }}>
+        <div style={{ padding: 'clamp(48px,6vw,64px) 0 0' }}>
           <SectionHead label="Reports & Documents" title="Programme & Activity Reports" color={C} />
           {reports.length === 0 ? (
             <Fade><EmptyBox icon="📋" msg="Koi report upload nahi ki gayi" sub="Admin Panel → Departments → [Dept] → Reports mein PDF link add karein" color={C} /></Fade>
@@ -729,7 +736,7 @@ function SingleDeptPage({ slug }) {
         </div>
 
         {/* ── ACHIEVEMENTS ──────────────────────────────────────── */}
-        <div style={{ padding: '64px 0 0' }}>
+        <div style={{ padding: 'clamp(48px,6vw,64px) 0 0' }}>
           <SectionHead label="Achievements" title="Department Milestones" color={C} />
           {achievements.length === 0 ? (
             <Fade><EmptyBox icon="🏆" msg="Achievements abhi add nahi ki gayi" sub="Admin Panel → Departments → [Dept] → Achievements mein add karein" color={C} /></Fade>
@@ -748,7 +755,7 @@ function SingleDeptPage({ slug }) {
         </div>
 
         {/* ── HOD MESSAGE ───────────────────────────────────────── */}
-        <div style={{ padding: '64px 0 80px' }}>
+        <div style={{ padding: 'clamp(48px,6vw,64px) 0 clamp(64px,8vw,80px)' }}>
           <SectionHead label="From the Head of Department" title="HOD's Message" color={C} />
           <Fade delay={0.08}>
             <div className="dp-g2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 24 }}>
@@ -843,7 +850,7 @@ function HubPage() {
       `}</style>
 
       {/* Hero banner */}
-      <div style={{ background: 'linear-gradient(145deg,#f0f9ff,#e0f2fe 40%,#fef9ec 100%)', borderBottom: '1px solid #e0f2fe', padding: '60px 20px 52px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: 'linear-gradient(145deg,#f0f9ff,#e0f2fe 40%,#fef9ec 100%)', borderBottom: '1px solid #e0f2fe', padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px) clamp(44px,6vw,64px)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: -80, right: -60, width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle,rgba(14,165,233,.1) 0%,transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative', zIndex: 1, textAlign: 'center' }}>
           <div style={{ fontSize: 12.5, color: '#94a3b8', marginBottom: 22, display: 'flex', gap: 6, justifyContent: 'center' }}>
@@ -864,7 +871,7 @@ function HubPage() {
       </div>
 
       {/* Cards */}
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '48px 20px 72px' }}>
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: 'clamp(40px,5vw,56px) clamp(16px,3vw,24px) clamp(56px,7vw,80px)' }}>
         {loading ? <Spin /> : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 18 }}>
             {cards.map((dept, i) => (

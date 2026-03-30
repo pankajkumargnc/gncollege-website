@@ -20,7 +20,7 @@ function Fade({ children, delay = 0, y = 20 }) {
 }
 
 const PageHeader = ({ title, subtitle, icon }) => (
-  <div style={{ background: NAVY, padding: '80px 20px 60px', textAlign: 'center', color: '#fff' }}>
+  <div style={{ background: NAVY, padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px) clamp(44px,6vw,60px)', textAlign: 'center', color: '#fff' }}>
     <Fade>
       <div style={{ fontSize: 48, marginBottom: 16 }}>{icon}</div>
       <h1 style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 900, margin: '0 0 16px', letterSpacing: '-0.5px' }}>{title}</h1>
@@ -137,7 +137,7 @@ export function FeeStructure() {
         <Fade>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 24, flexWrap: 'wrap' }}>
             {['UG', 'BCA', 'BBA'].map(t => (
-              <button key={t} onClick={() => setActiveTab(t)} style={{ padding: '12px 30px', borderRadius: 99, border: 'none', background: activeTab === t ? NAVY : '#fff', color: activeTab === t ? '#fff' : '#64748b', fontWeight: 800, fontSize: 15, cursor: 'pointer', boxShadow: activeTab === t ? `0 8px 20px ${NAVY}40` : '0 2px 10px rgba(0,0,0,0.05)', transition: '0.3s' }}>
+              <button key={t} onClick={() => setActiveTab(t)} style={{ padding: '12px 30px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 99, border: 'none', background: activeTab === t ? NAVY : '#fff', color: activeTab === t ? '#fff' : '#64748b', fontWeight: 800, fontSize: 15, cursor: 'pointer', boxShadow: activeTab === t ? `0 8px 20px ${NAVY}40` : '0 2px 10px rgba(0,0,0,0.05)', transition: '0.3s' }}>
                 {t === 'UG' ? 'UG Regular (8 Semesters)' : `${t} (Vocational)`}
               </button>
             ))}
@@ -252,7 +252,7 @@ export function AdmissionNotification() {
                     <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 8 }}>🗓️ {new Date(n.date).toLocaleDateString()}</div>
                   </div>
                   {n.link && (
-                    <a href={n.link} target="_blank" rel="noreferrer" style={{ background: `${NAVY}15`, color: NAVY, padding: '10px 20px', borderRadius: 10, textDecoration: 'none', fontWeight: 800, fontSize: 13, whiteSpace: 'nowrap' }}>View Details ↗</a>
+                    <a href={n.link} target="_blank" rel="noreferrer" style={{ background: `${NAVY}15`, color: NAVY, padding: '10px 20px', minHeight: 44, display: 'inline-flex', alignItems: 'center', borderRadius: 10, textDecoration: 'none', fontWeight: 800, fontSize: 13, whiteSpace: 'nowrap' }}>View Details ↗</a>
                   )}
                 </div>
               ))}

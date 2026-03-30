@@ -118,7 +118,8 @@ export default function GalleryPage({ gallery: galleryProp, headless }) {
           border:2px solid #e2e8f0; background:#fff;
           color:${N}; font-weight:700; font-size:13px;
           cursor:pointer; transition:all .2s;
-          font-family:inherit;
+          font-family:inherit; min-height: 44px;
+          display: inline-flex; align-items: center; justify-content: center;
         }
         .gal-filter:hover { border-color:${G}; transform:translateY(-2px); }
         .gal-filter.active {
@@ -144,7 +145,7 @@ export default function GalleryPage({ gallery: galleryProp, headless }) {
         .lb-close {
           position:fixed; top:20px; right:20px;
           background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
-          color:#fff; width:42px; height:42px; border-radius:50%; cursor:pointer;
+          color:#fff; width:44px; height:44px; border-radius:50%; cursor:pointer;
           font-size:18px; display:flex; align-items:center; justify-content:center;
         }
 
@@ -281,11 +282,11 @@ export default function GalleryPage({ gallery: galleryProp, headless }) {
       {light !== null && filtered[light] && createPortal(
         <div className="lb-ov" onClick={closeLB}>
           {/* Close */}
-          <button className="lb-close" onClick={closeLB}>✕</button>
+          <button className="lb-close" onClick={closeLB} aria-label="Close lightbox">✕</button>
 
           {/* Prev */}
           {filtered.length > 1 && (
-            <button className="lb-btn" style={{ left:20 }} onClick={e => { e.stopPropagation(); prevImg(); }}>‹</button>
+            <button className="lb-btn" style={{ left:20 }} onClick={e => { e.stopPropagation(); prevImg(); }} aria-label="Previous image">‹</button>
           )}
 
           {/* Image */}
@@ -308,7 +309,7 @@ export default function GalleryPage({ gallery: galleryProp, headless }) {
 
           {/* Next */}
           {filtered.length > 1 && (
-            <button className="lb-btn" style={{ right:20 }} onClick={e => { e.stopPropagation(); nextImg(); }}>›</button>
+            <button className="lb-btn" style={{ right:20 }} onClick={e => { e.stopPropagation(); nextImg(); }} aria-label="Next image">›</button>
           )}
         </div>,
         document.body

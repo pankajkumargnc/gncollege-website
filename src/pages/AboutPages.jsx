@@ -36,7 +36,7 @@ function OrgNode({ label, sub, variant = 'body', icon, minW = 160, delay = 0 }) 
         background: v.bg, color: v.color,
         border: `1.5px solid ${v.border}`, borderRadius: 10,
         boxShadow: v.shadow, textAlign: 'center', cursor: 'default',
-        transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
+        transition: 'transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s ease',
         transform: hov ? 'translateY(-3px) scale(1.03)' : 'none',
         animation: `orgFadeUp 0.5s ease ${delay}s both`,
         position: 'relative', overflow: 'hidden',
@@ -88,14 +88,14 @@ function PageHero({ title, subtitle, icon }) {
   return (
     <div style={{
       background: `linear-gradient(135deg, ${N} 0%, #1a3a7c 100%)`,
-      padding: '70px 20px 55px', textAlign: 'center', color: '#fff',
+      padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px) clamp(44px,6vw,64px)', textAlign: 'center', color: '#fff',
     }}>
-      {icon && <div style={{ fontSize: 48, marginBottom: 14 }}>{icon}</div>}
-      <h1 style={{ fontSize: 'clamp(28px, 4.5vw, 42px)', fontWeight: 900, margin: '0 0 12px', letterSpacing: '-0.5px' }}>
+      {icon && <div style={{ fontSize: 'clamp(36px,5vw,52px)', marginBottom: 14 }}>{icon}</div>}
+      <h1 style={{ fontSize: 'clamp(26px, 4.5vw, 42px)', fontWeight: 900, margin: '0 0 14px', letterSpacing: '-0.5px' }}>
         {title}
       </h1>
       {subtitle && (
-        <p style={{ color: '#cbd5e1', fontSize: 16, maxWidth: 600, margin: '0 auto', lineHeight: 1.6 }}>
+        <p style={{ color: '#cbd5e1', fontSize: 'clamp(14px,1.1vw,17px)', maxWidth: 620, margin: '0 auto', lineHeight: 1.65 }}>
           {subtitle}
         </p>
       )}
@@ -160,7 +160,7 @@ function DataMarker({ label }) {
 
 function PageLayout({ children }) {
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '50px 20px 80px' }}>
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: 'clamp(36px,5vw,56px) clamp(16px,3vw,24px) clamp(56px,7vw,88px)' }}>
       <div className="profile-layout">
         <main className="profile-main">{children}</main>
         <AboutSidebar />
@@ -222,7 +222,7 @@ function MeetingPDFList({ collectionName, accentColor, emptyText }) {
                         setSelectedPdf({ url: m.pdfUrl, title: m.title || 'Meeting Report' });
                       }
                     }}
-                    style={{ display:'inline-flex', alignItems:'center', gap:7, background:accentColor||N, color:'#fff', padding:'7px 16px', borderRadius:8, fontWeight:700, fontSize:13, textDecoration:'none' }}>
+                    style={{ display:'inline-flex', alignItems:'center', gap:7, background:accentColor||N, color:'#fff', padding:'10px 18px', borderRadius:10, fontWeight:700, fontSize:13, textDecoration:'none', minHeight:44, transition:'background .25s ease, transform .25s cubic-bezier(.22,1,.36,1)' }}>
                     📄 View Meeting PDF
                   </a>
                 </div>
@@ -294,7 +294,10 @@ export function VisionMission() {
                 { icon:'🌿', label:'Service to Society' },
                 { icon:'⚖️', label:'Integrity' },
               ].map((v, i) => (
-                <div key={i} style={{ textAlign:'center', padding:'20px 12px', background:'#f8fafc', borderRadius:14, border:'1.5px solid #e2e8f0' }}>
+                <div key={i} style={{ textAlign:'center', padding:'20px 12px', background:'#f8fafc', borderRadius:14, border:'1.5px solid #e2e8f0', transition:'transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease', cursor:'default' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(15,35,71,.1)'; e.currentTarget.style.borderColor = G; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
+                >
                   <div style={{ fontSize:32, marginBottom:8 }}>{v.icon}</div>
                   <div style={{ fontSize:13, fontWeight:700, color:N }}>{v.label}</div>
                 </div>
@@ -435,7 +438,9 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
               {pdfReportLink && (
                   <button 
                     onClick={() => setSelectedPdf({url: pdfReportLink, title: `${name} Report`})}
-                    style={{ background:G, color:N, padding:'8px 18px', border: 'none', borderRadius:8, fontWeight:800, fontSize:13, cursor:'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s' }}>
+                    style={{ background:G, color:N, padding:'10px 20px', border: 'none', borderRadius:10, fontWeight:800, fontSize:13, cursor:'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'transform 0.25s cubic-bezier(.22,1,.36,1), box-shadow 0.25s ease', minHeight:44 }}
+                    onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                    onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
                     📄 View Committee Report
                   </button>
               )}
@@ -745,9 +750,10 @@ export function AuditReport() {
                       style={{
                         display:'inline-flex', alignItems:'center', gap:7,
                         background:N, color:'#fff',
-                        padding:'9px 20px', borderRadius:9, border:'none',
+                        padding:'10px 20px', borderRadius:10, border:'none',
                         fontWeight:700, fontSize:13, cursor:'pointer',
-                        transition:'all .2s', flexShrink:0,
+                        transition:'background .25s ease, transform .25s cubic-bezier(.22,1,.36,1)', flexShrink:0,
+                        minHeight:44,
                       }}
                       onMouseEnter={e => e.currentTarget.style.background = G}
                       onMouseLeave={e => e.currentTarget.style.background = N}

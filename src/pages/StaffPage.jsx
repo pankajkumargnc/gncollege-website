@@ -121,7 +121,7 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
                       {staff.qual && <p style={{ margin: '0 0 8px', fontSize: 12, color: G, fontWeight: 700 }}>🎓 {staff.qual}</p>}
                       {staff.specialization && <p style={{ margin: '0 0 8px', fontSize: 12, color: '#94a3b8', lineHeight: 1.4 }}>{staff.specialization}</p>}
                       {staff.email && (
-                        <a href={`mailto:${staff.email}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: N, textDecoration: 'none', background: '#f0f4ff', borderRadius: 20, padding: '4px 12px', fontWeight: 600, marginTop: 4 }}>
+                        <a href={`mailto:${staff.email}`} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5, fontSize: 12, color: N, textDecoration: 'none', background: '#f0f4ff', borderRadius: 20, padding: '4px 12px', minHeight: 44, fontWeight: 600, marginTop: 4 }}>
                           ✉️ {staff.email}
                         </a>
                       )}

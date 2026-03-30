@@ -26,9 +26,8 @@ export default function Ticker({ items }) {
         .gnc-ticker-root {
           width: 100%;
           height: 40px;
-          /* Multi-Gradient Deep Navy Background */
-          background: radial-gradient(circle at 10% 10%, ${COLORS.navy} 0%, ${COLORS.navy}E0 40%, ${COLORS.navy}D0 70%, ${COLORS.navy} 100%),
-                      linear-gradient(90deg, ${COLORS.navy} 0%, ${COLORS.gold}30 100%);
+          /* Dark Navy Background */
+          background: #0a1832;
           color: #fff;
           font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
           display: flex;
@@ -36,8 +35,8 @@ export default function Ticker({ items }) {
           overflow: hidden;
           position: relative;
           z-index: 10;
-          border-bottom: 2px solid ${COLORS.gold}60;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+          border-bottom: 2px solid rgba(244,160,35,0.4);
+          box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         /* ── RED RIBBON BADGE (Screenshot Accurate) ── */
@@ -51,9 +50,9 @@ export default function Ticker({ items }) {
 
         .gnc-ribbon {
           height: 100%;
-          /* Deep Vibrant Red Gradient for Ribbon */
-          background: linear-gradient(to bottom, #ff1744 0%, #b71c1c 100%); 
-          color: #fff;
+          /* GNC Gold Gradient for Ribbon */
+          background: linear-gradient(to bottom, ${COLORS.gold} 0%, #d97706 100%); 
+          color: ${COLORS.navy};
           display: flex;
           align-items: center;
           padding: 0 30px 0 15px; /* Right side padding zyada di hai point ke liye */

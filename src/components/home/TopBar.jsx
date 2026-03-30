@@ -9,12 +9,10 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen }) => {
 
   return (
     <div style={{
-      background: `linear-gradient(90deg, rgba(6,14,28,0.95) 0%, rgba(10,24,50,0.95) 50%, rgba(6,14,28,0.95) 100%)`,
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      color: '#e2e8f0',
-      borderBottom: `1px solid rgba(244,160,35,0.25)`,
-      boxShadow: '0 4px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+      background: `linear-gradient(90deg, ${COLORS.navy} 0%, #17346b 50%, ${COLORS.navy} 100%)`,
+      color: '#ffffff',
+      borderBottom: `1px solid rgba(244,160,35,0.4)`,
+      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
       width: '100%',
       maxWidth: '100vw',
       overflow: 'hidden',
@@ -106,14 +104,14 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen }) => {
         }
         .tb-qbtn:hover::after { transform: rotate(45deg) translateX(100%); }
 
-        .tb-res { border-color: rgba(244,160,35,0.4); color: #f4a023; }
-        .tb-res:hover { background: rgba(244,160,35,0.15); color: #fff; box-shadow: 0 0 15px rgba(244,160,35,0.4); transform: translateY(-2px); }
+        .tb-res { border-color: rgba(255,255,255,0.3); color: #fff; }
+        .tb-res:hover { background: rgba(255,255,255,0.15); box-shadow: 0 0 10px rgba(255,255,255,0.3); transform: translateY(-2px); }
 
-        .tb-fee { border-color: rgba(16,185,129,0.4); color: #10b981; }
-        .tb-fee:hover { background: rgba(16,185,129,0.15); color: #fff; box-shadow: 0 0 15px rgba(16,185,129,0.4); transform: translateY(-2px); }
+        .tb-fee { border-color: rgba(255,255,255,0.3); color: #fff; }
+        .tb-fee:hover { background: rgba(255,255,255,0.15); box-shadow: 0 0 10px rgba(255,255,255,0.3); transform: translateY(-2px); }
 
-        .tb-adm { border-color: rgba(99,102,241,0.4); color: #818cf8; }
-        .tb-adm:hover { background: rgba(99,102,241,0.15); color: #fff; box-shadow: 0 0 15px rgba(99,102,241,0.4); transform: translateY(-2px); }
+        .tb-adm { border-color: rgba(244,160,35,0.6); color: #f4a023; }
+        .tb-adm:hover { background: rgba(244,160,35,0.15); color: #fff; box-shadow: 0 0 15px rgba(244,160,35,0.4); transform: translateY(-2px); }
 
         @media(max-width: 900px) { .tb-adm   { display: none; } }
         @media(max-width: 720px) { .tb-fee   { display: none; } }

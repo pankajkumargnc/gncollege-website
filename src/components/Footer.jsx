@@ -156,15 +156,15 @@ const Footer = memo(() => {
         .f-heading { font-size: 13px; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
         .f-heading::before { content: ''; width: 16px; height: 3px; background: ${G}; border-radius: 2px; }
         
-        .f-address-card { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 10px; margin-bottom: 8px; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
+        .f-address-card { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 10px; margin-bottom: 8px; transition: background 0.3s ease, border-color 0.3s ease, transform 0.25s cubic-bezier(.22,1,.36,1); display: flex; align-items: center; gap: 10px; min-height: 44px; }
         .f-address-card:hover { background: rgba(255,255,255,0.05); border-color: rgba(244,160,35,0.3); transform: translateX(4px); }
         .f-address-icon { font-size: 16px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); flex-shrink: 0; }
         .f-address-title { color: ${G}; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
         .f-address-text { color: rgba(255,255,255,0.8); font-size: 11px; line-height: 1.3; }
 
         /* 🔗 Links */
-        .f-link-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
-        .f-link { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; transition: all 0.3s; position: relative; }
+        .f-link-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+        .f-link { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; min-height: 40px; padding: 6px 0; transition: color 0.3s ease, transform 0.3s cubic-bezier(.22,1,.36,1); position: relative; }
         .f-link::before { content: '→'; position: absolute; left: 0; opacity: 0; color: ${G}; transform: translateX(-8px); transition: 0.3s; }
         .f-link:hover { color: #fff; transform: translateX(14px); }
         .f-link:hover::before { opacity: 1; transform: translateX(-12px); }
@@ -187,12 +187,12 @@ const Footer = memo(() => {
         
         .f-soc-btn { 
           position: relative;
-          width: 36px; height: 36px; 
-          border-radius: 10px; 
+          width: 44px; height: 44px; 
+          border-radius: 12px; 
           background: rgba(255,255,255,0.03); 
           border: 1px solid rgba(255,255,255,0.1); 
           display: flex; align-items: center; justify-content: center; 
-          color: #fff; font-size: 16px; text-decoration: none; 
+          color: #fff; font-size: 17px; text-decoration: none; 
           overflow: hidden;
           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
           animation: floatIcon 3s ease-in-out infinite;
@@ -342,8 +342,10 @@ const Footer = memo(() => {
             
             <Link to="/#/admin" style={{ 
               background: 'rgba(255,255,255,0.05)', color: '#fff', border: `1px solid rgba(255,255,255,0.1)`, 
-              padding: '8px 16px', borderRadius: '8px', fontSize: 11, fontWeight: 800, textDecoration: 'none', 
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: '0.3s' 
+              padding: '10px 18px', borderRadius: '10px', fontSize: 11.5, fontWeight: 800, textDecoration: 'none', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, 
+              transition: 'background 0.3s ease, color 0.2s ease, border-color 0.3s ease',
+              minHeight: '44px', letterSpacing: '0.3px',
             }}
               onMouseEnter={(e) => { e.currentTarget.style.background = G; e.currentTarget.style.color = '#000'; e.currentTarget.style.borderColor = G; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
