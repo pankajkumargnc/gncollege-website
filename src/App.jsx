@@ -149,30 +149,20 @@ const GreenCampus = LazyCampus("GreenCampus");
 
 // ── Page loader spinner ──────────────────────────────────────────────────────
 const PageLoader = () => (
-  <div
-    style={{
-      minHeight: "60vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      flexDirection: "column",
-      gap: 12,
-    }}
-  >
-    <div
-      style={{
-        width: 40,
-        height: 40,
-        border: `4px solid ${COLORS.gold}`,
-        borderTop: `4px solid ${COLORS.navy}`,
-        borderRadius: "50%",
-        animation: "spin 0.8s linear infinite",
-      }}
-    />
-    <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-    <span style={{ color: COLORS.navy, fontSize: 13, fontWeight: 600 }}>
-      Loading...
-    </span>
+  <div style={{ maxWidth: 1200, margin: '0 auto', padding: '60px 20px', display: 'flex', flexDirection: 'column', gap: '30px', minHeight: '60vh' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+      <div className="premium-skeleton" style={{ width: 250, height: 40, borderRadius: 8 }}></div>
+    </div>
+    
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+      {[...Array(6)].map((_, i) => (
+        <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <div className="premium-skeleton" style={{ width: '100%', height: 200, borderRadius: 12 }}></div>
+          <div className="premium-skeleton" style={{ width: '80%', height: 20, borderRadius: 6 }}></div>
+          <div className="premium-skeleton" style={{ width: '60%', height: 16, borderRadius: 6 }}></div>
+        </div>
+      ))}
+    </div>
   </div>
 );
 
@@ -197,9 +187,22 @@ export default function App() {
   const [events, setEvents] = useState([]);
   const [gallery, setGallery] = useState([]);
   const [faculties, setFaculties] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
   const [sliderSlides, setSliderSlides] = useState([]);
   const [navLinks, setNavLinks] = useState([]);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // ── Dark Mode ────────────────────────────────────────────────────────────
   const { isDark, toggle: toggleDark } = useDarkMode();
@@ -313,30 +316,42 @@ export default function App() {
       ["sliderSlides", setSliderSlides],
       ["updates", setUpdates],
     ];
-    const unsubs = cols.map(([col, setter]) => {
-      // ✅ Apply limits to large, constantly growing collections
-      let collectionQuery;
-      if (col === "gallery" || col === "events") {
-        collectionQuery = query(collection(db, col), limit(30));
-      } else {
-        collectionQuery = collection(db, col);
-      }
 
-      return onSnapshot(
-        collectionQuery,
-        (snap) => {
-          const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-          docs.sort(
-            (a, b) =>
-              (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0),
-          );
-          setter(docs);
-        },
-        (err) => console.error(`[${col}] fetching error:`, err),
-      );
-    });
-    return () => unsubs.forEach((u) => u());
+    const unsubs = [
+      ...cols.map(([col, setter]) => {
+        let collectionQuery;
+        if (col === "gallery" || col === "events") {
+          collectionQuery = query(collection(db, col), limit(30));
+        } else {
+          collectionQuery = collection(db, col);
+        }
+
+        return onSnapshot(
+          collectionQuery,
+          (snap) => {
+            const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+            docs.sort(
+              (a, b) =>
+                (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0),
+            );
+            setter(docs);
+          },
+          (err) => console.error(`[${col}] fetching error:`, err),
+        );
+      }),
+      onSnapshot(query(collection(db, "testimonials"), orderBy("createdAt", "desc")), snap =>
+        setTestimonials(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
+    ];
+    return () => unsubs.forEach((u) => u && u());
   }, []);
+
+  // ── Derived Counter Data ──
+  const counterData = useMemo(() => [
+    { label: "Students Enrolled", value: "4,000+", icon: "👨‍🎓", raw: 4000 },
+    { label: "Successful Alumni", value: "45,000+", icon: "🎓", raw: 45000 },
+    { label: "Expert Faculty", value: `${faculties.length}+`, icon: "👨‍🏫", raw: faculties.length },
+    { label: "Years of Legacy", value: `${new Date().getFullYear() - 1970}`, icon: "🏛️", raw: new Date().getFullYear() - 1970 },
+  ], [faculties.length]);
 
   // 🚀 SMART DEEP MERGE & HARDCODE INJECTION
   const baseNavLinks = useMemo(() => {
@@ -480,6 +495,31 @@ export default function App() {
         }}
       />
 
+      {/* ── Offline Status HUD ── */}
+      {!isOnline && (
+        <div style={{
+          position: 'fixed',
+          bottom: '24px',
+          left: '24px',
+          background: 'rgba(220, 38, 38, 0.95)',
+          color: '#fff',
+          padding: '8px 16px',
+          borderRadius: '50px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '13px',
+          fontWeight: 600,
+          boxShadow: '0 8px 32px rgba(220, 38, 38, 0.4)',
+          zIndex: 9999999,
+          backdropFilter: 'blur(10px)',
+          animation: 'slideUp 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
+        }}>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#fff', animation: 'pulseGlow 2s infinite' }} />
+          Offline Mode - Cached Data
+        </div>
+      )}
+
       {/* ── Universal Search Modal ── */}
       <UniversalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
@@ -510,6 +550,8 @@ export default function App() {
                   sliderSlides={sliderSlides}
                   events={events}
                   gallery={gallery}
+                  testimonials={testimonials}
+                  counterData={counterData}
                   updates={updates}
                 />
               </EB>

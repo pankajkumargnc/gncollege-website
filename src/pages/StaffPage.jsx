@@ -2,7 +2,7 @@
 // ✅ BUG FIX: f.type → f.staffType (AdminPanel 'staffType' save karta hai, 'type' nahi)
 // ✅ ENHANCED: Department grouping, qualification, email, specialization show hoti hai
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { COLORS } from '../styles/colors';
 
@@ -11,6 +11,7 @@ const G = COLORS.gold || '#f4a023';
 
 export default function StaffPage({ faculties }) {
   const { staffType } = useParams(); // 'teaching-staff' or 'non-teaching-staff'
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
@@ -19,7 +20,10 @@ export default function StaffPage({ faculties }) {
   const label      = isTeaching ? 'Teaching' : 'Non-Teaching';
 
   const filteredStaff = (faculties || []).filter(f =>
-    (f.staffType || 'Teaching') === label
+    (f.staffType || 'Teaching') === label &&
+    (f.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+     f.dept?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     f.desig?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   // Group by department
@@ -40,8 +44,34 @@ export default function StaffPage({ faculties }) {
           {label} Staff
         </h1>
         <p style={{ color: '#cbd5e1', fontSize: 15, margin: 0, textAlign: 'center' }}>
-          Guru Nanak College, Dhanbad — Total: {filteredStaff.length} members
+          Guru Nanak College, Dhanbad
         </p>
+
+        {/* ── Live Search Bar ── */}
+        <div style={{ maxWidth: 500, margin: '25px auto 0', position: 'relative' }}>
+          <span style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', opacity: 0.6 }}>🔍</span>
+          <input
+            type="text"
+            placeholder={`Search by Name, Department, or Designation...`}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '14px 20px 14px 45px',
+              borderRadius: '30px',
+              border: '2px solid rgba(255,255,255,0.2)',
+              background: 'rgba(255,255,255,0.1)',
+              color: '#fff',
+              fontSize: '15px',
+              fontFamily: "'Inter', sans-serif",
+              outline: 'none',
+              backdropFilter: 'blur(10px)',
+              transition: 'all 0.3s'
+            }}
+            onFocus={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; e.currentTarget.style.border = `2px solid ${G}`; }}
+            onBlur={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.border = '2px solid rgba(255,255,255,0.2)'; }}
+          />
+        </div>
       </div>
 
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '40px 20px' }}>

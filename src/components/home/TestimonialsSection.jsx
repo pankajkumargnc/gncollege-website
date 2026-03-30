@@ -28,9 +28,14 @@ const TESTIMONIALS = [
   }
 ];
 
-export default function TestimonialsSection() {
+export default function TestimonialsSection({ testimonials = [] }) {
   const sectionRef = useRef(null);
   const [inView, setInView] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Filter active and non-deleted ones. Fallback to static if empty.
+  const activeTestis = (testimonials || []).filter(t => t.active !== false);
+  const displayList = activeTestis.length > 0 ? activeTestis : TESTIMONIALS;
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -47,6 +52,15 @@ export default function TestimonialsSection() {
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  // Auto-rotate effect
+  useEffect(() => {
+    if (displayList.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % displayList.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [displayList.length]);
 
   return (
     <section 
@@ -65,159 +79,172 @@ export default function TestimonialsSection() {
         }
         .hp-testi-sec.visible { opacity: 1; transform: none; }
         
-        .hp-testi-sec::before {
-          content: '""';
-          position: absolute;
-          top: 0; left: 0; right: 0; height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(15,35,71,0.08), transparent);
-        }
-
         .hp-testi-inner {
-          max-width: 1300px;
+          max-width: 900px;
           margin: 0 auto;
+          text-align: center;
         }
 
-        .hp-testi-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-          gap: 24px;
+        .testi-slider-container {
+          position: relative;
+          height: 380px;
           margin-top: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .hp-testi-card {
+          position: absolute;
           background: #fff;
-          border-radius: 20px;
-          padding: 32px;
-          box-shadow: 0 4px 20px rgba(15, 35, 71, 0.04);
+          border-radius: 24px;
+          padding: clamp(30px, 5vw, 60px);
+          box-shadow: 0 20px 50px rgba(15, 35, 71, 0.08);
           border: 1px solid #edf2f7;
-          position: relative;
-          transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+          width: 100%;
+          opacity: 0;
+          transform: scale(0.9) translateY(20px);
+          transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+          pointer-events: none;
           display: flex;
           flex-direction: column;
+          align-items: center;
         }
 
-        .hp-testi-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 16px 40px rgba(15, 35, 71, 0.1);
+        .hp-testi-card.active {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+          pointer-events: auto;
+          z-index: 2;
         }
 
         .testi-quote-mark {
-          position: absolute;
-          top: 24px;
-          right: 30px;
-          font-size: 60px;
+          font-size: 80px;
           line-height: 1;
-          color: rgba(244, 160, 35, 0.15); /* Gold */
+          color: ${COLORS.gold}33;
           font-family: Georgia, serif;
-          pointer-events: none;
+          margin-bottom: -20px;
         }
 
         .testi-content {
-          font-size: 14.5px;
-          line-height: 1.7;
-          color: #475569;
-          margin-bottom: 24px;
+          font-size: clamp(16px, 2vw, 20px);
+          line-height: 1.6;
+          color: ${COLORS.navy};
+          margin-bottom: 32px;
           font-style: italic;
-          position: relative;
-          z-index: 1;
-          flex: 1;
+          font-weight: 600;
+          text-align: center;
         }
 
         .testi-author {
           display: flex;
+          flex-direction: column;
           align-items: center;
-          gap: 16px;
-          border-top: 1px solid #f1f5f9;
-          padding-top: 20px;
+          gap: 12px;
         }
 
-        .testi-avatar {
-          width: 50px;
-          height: 50px;
+        .testi-avatar-img {
+          width: 70px;
+          height: 70px;
           border-radius: 50%;
-          background: ${COLORS.navy};
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 24px;
-          flex-shrink: 0;
-          box-shadow: 0 4px 12px rgba(15, 35, 71, 0.2);
+          object-fit: cover;
+          border: 3px solid ${COLORS.gold};
+          box-shadow: 0 8px 20px rgba(244, 160, 35, 0.3);
         }
 
         .testi-name {
           font-family: 'Plus Jakarta Sans', sans-serif;
-          font-size: 15px;
+          font-size: 18px;
           font-weight: 800;
           color: ${COLORS.navy};
-          line-height: 1.2;
         }
 
         .testi-role {
-          font-size: 11.5px;
-          color: #64748b;
-          font-weight: 600;
-          margin-top: 4px;
-          letter-spacing: 0.3px;
+          font-size: 13px;
+          color: ${COLORS.gold};
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
         }
 
-        /* ── Dark Mode Overrides ── */
-        [data-theme="dark"] .hp-testi-sec {
-          background: #060e1c !important;
+        .testi-dots {
+          display: flex;
+          justify-content: center;
+          gap: 8px;
+          margin-top: 20px;
         }
-        [data-theme="dark"] .hp-testi-sec::before {
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+
+        .testi-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #cbd5e1;
+          cursor: pointer;
+          transition: all 0.3s;
         }
-        [data-theme="dark"] .hp-testi-card {
-          background: rgba(10, 22, 48, 0.95) !important;
-          border-color: rgba(255, 255, 255, 0.05) !important;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+
+        .testi-dot.active {
+          background: ${COLORS.gold};
+          width: 24px;
+          border-radius: 10px;
         }
-        [data-theme="dark"] .hp-testi-card:hover {
-          background: rgba(15, 35, 71, 0.98) !important;
-          box-shadow: 0 15px 45px rgba(0,0,0,0.7) !important;
+
+        [data-theme="dark"] .hp-testi-sec { background: #060e1c !important; }
+        [data-theme="dark"] .hp-testi-card { 
+          background: rgba(15, 35, 71, 0.4) !important; 
+          border-color: rgba(255,255,255,0.05) !important;
+          backdrop-filter: blur(10px);
         }
-        [data-theme="dark"] .testi-quote-mark { color: rgba(244, 160, 35, 0.2) !important; }
-        [data-theme="dark"] .testi-content { color: #cbd5e1 !important; }
-        [data-theme="dark"] .testi-author { border-top-color: rgba(255, 255, 255, 0.05) !important; }
-        [data-theme="dark"] .testi-name { color: #f1f5f9 !important; }
-        [data-theme="dark"] .testi-role { color: #94a3b8 !important; }
+        [data-theme="dark"] .testi-content { color: #f1f5f9 !important; }
+        [data-theme="dark"] .testi-name { color: #fff !important; }
       `}</style>
 
       <div className="hp-testi-inner">
-        <div className="uni-header">
+        <div className="uni-header" style={{ marginBottom: 0 }}>
           <div className="uni-label">💬 Voices of Excellence</div>
           <h2 className="uni-h">
-            Alumni <span>Testimonials</span>
+            Together we <span>Excel</span>
           </h2>
           <p className="uni-sub">
-            GNC parvarik sadasyon ki saflata aur unke anubhav padhein.
+            GNC students aur alumni ke prerak anubhav padhein.
           </p>
         </div>
 
-        <div className="hp-testi-grid">
-          {TESTIMONIALS.map((t, i) => (
+        <div className="testi-slider-container">
+          {displayList.map((t, i) => (
             <div 
-              key={i} 
-              className="hp-testi-card" 
-              style={{ 
-                transitionDelay: `${i * 0.1}s`,
-                opacity: inView ? 1 : 0, 
-                transform: inView ? 'none' : 'translateY(20px)' 
-              }}
+              key={t.id || i} 
+              className={`hp-testi-card ${currentIndex === i ? 'active' : ''}`}
             >
-              <div className="testi-quote-mark">"</div>
-              <div className="testi-content">{t.content}</div>
+              <div className="testi-quote-mark">“</div>
+              <div className="testi-content">“{t.content}”</div>
               <div className="testi-author">
-                <div className="testi-avatar">{t.avatar}</div>
+                <img 
+                  src={t.image || t.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=0f2347&color=f4a023`} 
+                  alt={t.name}
+                  className="testi-avatar-img"
+                  onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=0f2347&color=f4a023`; }}
+                />
                 <div>
                   <div className="testi-name">{t.name}</div>
-                  <div className="testi-role">{t.role}</div>
+                  <div className="testi-role">{t.role} {t.year ? `· ${t.year}` : ''}</div>
                 </div>
               </div>
             </div>
+          ))}
+        </div>
+
+        <div className="testi-dots">
+          {displayList.map((_, i) => (
+            <div 
+              key={i} 
+              className={`testi-dot ${currentIndex === i ? 'active' : ''}`}
+              onClick={() => setCurrentIndex(i)}
+            />
           ))}
         </div>
       </div>
     </section>
   );
 }
+

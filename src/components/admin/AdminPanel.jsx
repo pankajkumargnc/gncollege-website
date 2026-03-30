@@ -35,6 +35,7 @@ const ActivityTab       = lazy(() => import('./tabs/ActivityTab'));
 const BackupTab         = lazy(() => import('./tabs/BackupTab'));
 const SystemTestTab     = lazy(() => import('./tabs/SystemTestTab'));
 const MeetingPDFTab     = lazy(() => import('./tabs/MeetingPDFTab'));
+const TestimonialsTab   = lazy(() => import('./tabs/TestimonialsTab'));
 
 // Purane Admin Tabs (Jo aapne tabs folder mein move kiye hain)
 const AdminCampusTab    = lazy(() => import('./tabs/AdminCampusTab'));
@@ -81,6 +82,7 @@ const TABS = [
   { id:'announcements', icon:'📣', label:'News',             section:'' },
   { id:'documents',     icon:'📁', label:'Documents',        section:'' },
   { id:'events',        icon:'🏆', label:'Events',           section:'' },
+  { id:'testimonials',  icon:'💬', label:'Testimonials',      section:'' },
   { id:'youtube',       icon:'▶️', label:'YouTube',          section:'API & INTEGRATIONS' },
   { id:'drive',         icon:'☁️', label:'Drive Sync',       section:'' },
   { id:'settings',      icon:'⚙️', label:'Site Settings',    section:'SYSTEM' },
@@ -119,11 +121,13 @@ function AdminPanelInner({
   const [_placements,   set_placements]   = useState([]);
   const [_alerts,       set_alerts]       = useState([]);
   const [_sliderSlides, set_sliderSlides] = useState([]);
+  const [_testimonials, set_testimonials] = useState([]);
 
   useEffect(() => {
     const subs = [
       ['pdfReports', set_pdfReports], ['pages', set_pages],
-      ['placements', set_placements], ['alerts', set_alerts], ['sliderSlides', set_sliderSlides],
+      ['placements', set_placements], ['alerts', set_alerts], 
+      ['sliderSlides', set_sliderSlides], ['testimonials', set_testimonials],
     ].map(([col, setter]) => {
       try {
         return onSnapshot(query(collection(db, col)), snap => {
@@ -141,6 +145,7 @@ function AdminPanelInner({
   const placements   = placementsProp    || _placements;
   const alerts       = alertsProp        || _alerts;
   const sliderSlides = sliderSlidesProp  || _sliderSlides;
+  const testimonials = _testimonials;
   const notices      = noticesProp       || [];
   const announcements= announcementsProp || [];
   const events       = eventsProp        || [];
@@ -264,6 +269,7 @@ function AdminPanelInner({
       case 'announcements':return <AnnouncementsTab announcements={announcements} {...sharedProps} />;
       case 'documents':    return <DocumentsTab pdfReports={pdfReports} {...sharedProps} />;
       case 'events':       return <EventsTab events={events} {...sharedProps} />;
+      case 'testimonials': return <TestimonialsTab testimonials={testimonials} {...sharedProps} />;
       case 'youtube':      return <YouTubeTab {...sharedProps} />;
       case 'drive':        return <DriveTab {...sharedProps} />;
       case 'settings':     return <SettingsTab {...sharedProps} />;

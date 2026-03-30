@@ -717,6 +717,8 @@ const HomePage = ({
   sliderSlides,
   events,
   gallery,
+  testimonials,
+  counterData,
   updates,
 }) => {
   const [tab, setTab] = useState("All Moments");
@@ -941,13 +943,13 @@ const HomePage = ({
       <PlacementsSection />
       
       <div className="hp-sec-divider" />
-      <TestimonialsSection />
+      <TestimonialsSection testimonials={testimonials} />
       <div className="hp-sec-divider" />
 
       <section className="hp-cnt">
         <div className="hp-cnt-bg" />
         <div className="hp-cnt-grid">
-          {COUNTERS.map((c, i) => (
+          {counterData.map((c, i) => (
             <SA key={c.label} variant="rise" delay={`d${i + 1}`}>
               <div className="gc r16">
                 <div className="hp-cnt-box">

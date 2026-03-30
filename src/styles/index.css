@@ -914,4 +914,48 @@ p a, li a, td a { min-height: unset; min-width: unset; }
   img { max-width: 100% !important; page-break-inside: avoid; }
 }
 
-/* GNC-CONSOLIDATED-V11 */
+/* 🚀 PREMIUM SKELETON LOADER 🚀 */
+.premium-skeleton {
+  background: #e2e8f0;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .premium-skeleton {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.premium-skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: shimmer 1.5s infinite;
+}
+
+[data-theme='dark'] .premium-skeleton::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* GNC-CONSOLIDATED-V12 */

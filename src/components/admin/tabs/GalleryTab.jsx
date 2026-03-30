@@ -21,6 +21,8 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
   const [selected, setSelected] = useState([]);
   const [loading, setLoading]   = useState(false);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+  const [isBulk, setIsBulk]     = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const save = async e => {
     e.preventDefault(); setLoading(true);
@@ -48,6 +50,39 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
     setLoading(false);
   };
 
+  const handleBulkUpload = async (files) => {
+    if (!files.length) return;
+    setLoading(true); setProgress(0);
+    const key = window.GN_IMGBB_KEY;
+    if (!key) { toast.error('Settings tab mein ImgBB API Key add karein!'); setLoading(false); return; }
+
+    let count = 0;
+    for (const file of files) {
+      try {
+        const body = new FormData();
+        body.append('image', file);
+        const res  = await fetch(`https://api.imgbb.com/1/upload?key=${key}`, { method: 'POST', body });
+        const json = await res.json();
+        
+        if (json.success) {
+          await addDoc(collection(db, 'gallery'), {
+            title: file.name.split('.')[0],
+            cat: formData.cat || 'Campus',
+            year: formData.year || new Date().getFullYear().toString(),
+            image: json.data.url,
+            featured: false,
+            createdAt: serverTimestamp()
+          });
+          count++;
+          setProgress(Math.round((count / files.length) * 100));
+        }
+      } catch (err) { console.error('Upload error:', err); }
+    }
+    toast.success(`🎉 ${count} photos uploaded successfully!`);
+    logAct('add', `Bulk uploaded ${count} photos to ${formData.cat}`, 'gallery');
+    setLoading(false); setProgress(0); setIsBulk(false);
+  };
+
   // ✅ Filter logic: Agar 'All Moments' hai toh sab dikhao, warna matching category
   const albums = ['All Moments', ...ALBUM_TYPES];
   const filtered = (gallery || []).filter(g => {
@@ -59,48 +94,87 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
 
   return (
     <div className="fade-up">
-      <p className="asec">📸 Photo Gallery</p>
-      <p className="asub">College photos aur albums manage karein</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
+        <div>
+          <p className="asec">📸 Photo Gallery</p>
+          <p className="asub">College photos aur albums manage karein</p>
+        </div>
+        <button className="abtn abtn-navy" style={{ marginBottom: 20 }} onClick={() => setIsBulk(!isBulk)}>
+          {isBulk ? '⬅️ Single Upload' : '🚀 Bulk Upload'}
+        </button>
+      </div>
 
-      <div className="card-gold">
-        <div className="actitle">{editItem ? '✏️ Edit Photo' : '➕ Add Photo'}</div>
-        <form onSubmit={save}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
-            <div>
-              <label className="alabel">Caption / Title *</label>
-              <input className="ainp" value={formData.title || ''} onChange={e => setFormData(d => ({ ...d, title: e.target.value }))} required placeholder="Annual Day 2025" />
-            </div>
-            <div>
-              <label className="alabel">Album / Category</label>
-              <select className="ainp" value={formData.cat || 'Seminars'} onChange={e => setFormData(d => ({ ...d, cat: e.target.value }))}>
-                {ALBUM_TYPES.map(a => <option key={a} value={a}>{a}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="alabel">Year</label>
-              <input className="ainp" value={formData.year || ''} onChange={e => setFormData(d => ({ ...d, year: e.target.value }))} placeholder="2025" />
-            </div>
-            <div style={{ paddingTop: 22 }}>
-              <Toggle checked={!!formData.featured} onChange={() => setFormData(d => ({ ...d, featured: !d.featured }))} label="Featured Photo" color={GOLD} />
-            </div>
+      {isBulk ? (
+        <div className="card-navy pulse-hover" style={{ textAlign: 'center', padding: '40px 20px', border: `2px dashed ${NAVY}` }}
+          onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor = GOLD; }}
+          onDragLeave={e => { e.preventDefault(); e.currentTarget.style.borderColor = NAVY; }}
+          onDrop={e => { e.preventDefault(); handleBulkUpload(e.dataTransfer.files); }}>
+          
+          <div style={{ fontSize: 50, marginBottom: 16 }}>📂</div>
+          <h3 style={{ color: NAVY, fontWeight: 900, margin: '0 0 10px' }}>Bulk Image Dropzone</h3>
+          <p style={{ color: T.t3, fontSize: 13, marginBottom: 24 }}>
+            Multiple images ko yahan drag karein ya browse pe click karein.<br/>
+            Selected Category: <strong>{formData.cat}</strong>
+          </p>
+          
+          <input type="file" multiple accept="image/*" id="bulk-input" hidden onChange={e => handleBulkUpload(e.target.files)} />
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+            <label htmlFor="bulk-input" className="abtn abtn-navy">📁 Choose Images</label>
+            <select className="abtn abtn-outline" value={formData.cat} onChange={e => setFormData(d => ({ ...d, cat: e.target.value }))}>
+              {ALBUM_TYPES.map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
           </div>
 
-          <div style={{ marginBottom: 20 }}>
-            <MediaPicker label="Photo *" value={formData.image || ''} onChange={url => setFormData(d => ({ ...d, image: url }))} type="image" />
-          </div>
-
-          {formData.image && (
-            <div style={{ marginBottom: 16 }}>
-              <img src={formData.image} alt="preview" style={{ height: 120, objectFit: 'cover', borderRadius: 10, border: `1.5px solid ${T.b1}` }} />
+          {loading && (
+            <div style={{ marginTop: 24 }}>
+              <div style={{ height: 6, background: '#e2e8f0', borderRadius: 10, overflow: 'hidden', maxWidth: 300, margin: '0 auto 10px' }}>
+                <div style={{ width: `${progress}%`, height: '100%', background: GOLD, transition: 'width 0.3s' }} />
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: NAVY }}>Uploading... {progress}%</div>
             </div>
           )}
+        </div>
+      ) : (
+        <div className="card-gold">
+          <div className="actitle">{editItem ? '✏️ Edit Photo' : '➕ Add Photo'}</div>
+          <form onSubmit={save}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
+              <div>
+                <label className="alabel">Caption / Title *</label>
+                <input className="ainp" value={formData.title || ''} onChange={e => setFormData(d => ({ ...d, title: e.target.value }))} required placeholder="Annual Day 2025" />
+              </div>
+              <div>
+                <label className="alabel">Album / Category</label>
+                <select className="ainp" value={formData.cat || 'Seminars'} onChange={e => setFormData(d => ({ ...d, cat: e.target.value }))}>
+                  {ALBUM_TYPES.map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="alabel">Year</label>
+                <input className="ainp" value={formData.year || ''} onChange={e => setFormData(d => ({ ...d, year: e.target.value }))} placeholder="2025" />
+              </div>
+              <div style={{ paddingTop: 22 }}>
+                <Toggle checked={!!formData.featured} onChange={() => setFormData(d => ({ ...d, featured: !d.featured }))} label="Featured Photo" color={GOLD} />
+              </div>
+            </div>
 
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editItem ? 'Update' : 'Upload'}</button>
-            {editItem && <button type="button" className="abtn abtn-outline" onClick={() => { setEditItem(null); clearDraft(); }}>Cancel</button>}
-          </div>
-        </form>
-      </div>
+            <div style={{ marginBottom: 20 }}>
+              <MediaPicker label="Photo *" value={formData.image || ''} onChange={url => setFormData(d => ({ ...d, image: url }))} type="image" />
+            </div>
+
+            {formData.image && (
+              <div style={{ marginBottom: 16 }}>
+                <img src={formData.image} alt="preview" style={{ height: 120, objectFit: 'cover', borderRadius: 10, border: `1.5px solid ${T.b1}` }} />
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editItem ? 'Update' : 'Upload'}</button>
+              {editItem && <button type="button" className="abtn abtn-outline" onClick={() => { setEditItem(null); clearDraft(); }}>Cancel</button>}
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Album filter Tabs */}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
