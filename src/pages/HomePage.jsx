@@ -159,7 +159,7 @@ const ANIM_CSS = `
   .sa-d1{transition-delay:.08s;} .sa-d2{transition-delay:.16s;} .sa-d3{transition-delay:.24s;}
   .sa-d4{transition-delay:.32s;} .sa-d5{transition-delay:.40s;} .sa-d6{transition-delay:.48s;}
   .sa-slow{transition-duration:.9s;}
-  @media(max-width:600px){
+  @media(max-width: 480px){
     .sa{transition-duration:.45s;}
     .sa-d1,.sa-d2,.sa-d3,.sa-d4,.sa-d5,.sa-d6{transition-delay:0s;}
     .sa-up,.sa-down{transform:translateY(22px);}
@@ -224,7 +224,7 @@ const CSS = `
   .hp-qab-arr{margin-left:auto;font-size:18px;font-weight:700;transition:transform .2s;flex-shrink:0;}
   .hp-qab-item:hover .hp-qab-arr{transform:translateX(4px);}
   @media(max-width:768px){ .hp-qab-inner{grid-template-columns:repeat(2,1fr);} .hp-qab-item{padding:13px 16px;border-right:none;border-bottom:1px solid #f1f5f9;} .hp-qab-item:nth-child(odd){border-right:1px solid #f1f5f9;} .hp-qab-item:nth-last-child(-n+2){border-bottom:none;} }
-  @media(max-width:420px){ .hp-qab-inner{grid-template-columns:1fr;} .hp-qab-item{border-right:none !important;} .hp-qab-item:last-child{border-bottom:none;} }
+  @media(max-width: 480px){ .hp-qab-inner{grid-template-columns:1fr;} .hp-qab-item{border-right:none !important;} .hp-qab-item:last-child{border-bottom:none;} }
 
   /* ── Dark Mode Overrides for HP QAB ── */
   [data-theme="dark"] .hp-qab { background: rgba(10, 22, 48, 0.95) !important; border-bottom-color: rgba(255,255,255,0.05) !important; }

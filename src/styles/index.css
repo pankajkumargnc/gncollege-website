@@ -260,7 +260,7 @@ table {
   overflow-x: auto;
   display: block;
 }
-@media(min-width:768px) { table { display: table; } }
+@media(min-width: 768px) { table { display: table; } }
 
 /* ═══════════════════════════════════════
    2. PREMIUM SCROLLBAR

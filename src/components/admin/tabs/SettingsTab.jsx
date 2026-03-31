@@ -5,11 +5,11 @@ import { useState, useEffect } from 'react';
 import { db } from "../../../firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
-import { T, NAVY, GOLD, Toggle } from '../AdminShared';
+import { T, NAVY, GOLD, Toggle, useLocalDraft } from '../AdminShared';
 import MediaPicker from "../../MediaPicker";
 
 export default function SettingsTab({ logAct }) {
-  const [siteCfg, setSiteCfg] = useState({
+  const [siteCfg, setSiteCfg, clearDraft] = useLocalDraft('site_settings', {
     name: 'Guru Nanak College',
     tagline: 'Affiliated to B.B.M.K. University, Dhanbad',
     address: 'Bank More, Dhanbad — 826001, Jharkhand',
@@ -25,10 +25,7 @@ export default function SettingsTab({ logAct }) {
         if (s.exists()) {
           const d = s.data();
           setSiteCfg(prev => ({ ...prev, ...d }));
-          if (d.imgbbKey) {
-            setImgbbKey(d.imgbbKey);
-            window.GN_IMGBB_KEY = d.imgbbKey;
-          }
+          if (d.imgbbKey) window.GN_IMGBB_KEY = d.imgbbKey;
         }
       })
       .catch(() => {});
@@ -38,12 +35,11 @@ export default function SettingsTab({ logAct }) {
     e.preventDefault(); setSiteLoading(true);
     try {
       await setDoc(doc(db, 'settings', 'site'), { ...siteCfg, updatedAt: serverTimestamp() });
-      if (siteCfg.imgbbKey) {
-        setImgbbKey(siteCfg.imgbbKey);
-        window.GN_IMGBB_KEY = siteCfg.imgbbKey;
-      }
+      if (siteCfg.imgbbKey) window.GN_IMGBB_KEY = siteCfg.imgbbKey;
+      
       toast.success('Settings saved! 🎉');
       logAct?.('update', 'Site settings updated', 'settings');
+      clearDraft(); // ✅ Draft clear after save
     } catch (err) { toast.error(err.message); }
     setSiteLoading(false);
   };

@@ -103,7 +103,15 @@ const SEO_MAP = {
  */
 export function updateSEO(pathname, custom = {}) {
   const route = SEO_MAP[pathname] || {};
-  
+
+  // Dynamic Title Fallback for Unmapped Routes
+  if (!route.title && pathname !== '/' && pathname.length > 1) {
+    const segments = pathname.split('/').filter(Boolean);
+    const lastSegment = segments[segments.length - 1].replace(/-/g, ' ');
+    const fallbackTitle = lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1) + ' | ' + SITE_NAME;
+    custom.title = custom.title || fallbackTitle;
+  }
+
   const title = custom.title || route.title || `${SITE_NAME}`;
   const description = custom.description || route.description || DEFAULT_DESC;
   const image = custom.image || DEFAULT_IMAGE;
@@ -125,6 +133,9 @@ export function updateSEO(pathname, custom = {}) {
   setMeta('twitter:title', title);
   setMeta('twitter:description', description);
   setMeta('twitter:image', image);
+
+  // Dynamic BreadcrumbList JSON-LD Schema
+  setJsonLd(pathname);
 }
 
 function setMeta(name, content, attr = 'name') {
@@ -135,6 +146,44 @@ function setMeta(name, content, attr = 'name') {
     document.head.appendChild(el);
   }
   el.setAttribute('content', content);
+}
+
+function setJsonLd(pathname) {
+  const parts = pathname.split('/').filter(Boolean);
+  if (parts.length === 0) return;
+
+  const itemListElement = parts.map((part, index) => {
+    const urlPath = '/' + parts.slice(0, index + 1).join('/');
+    return {
+      "@type": "ListItem",
+      "position": index + 2, // 1 is reserved for Home
+      "name": part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' '),
+      "item": `${BASE_URL}/#${urlPath}`
+    };
+  });
+
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": `${BASE_URL}/#/`
+      },
+      ...itemListElement
+    ]
+  };
+
+  let el = document.getElementById('gnc-json-ld');
+  if (!el) {
+    el = document.createElement('script');
+    el.type = 'application/ld+json';
+    el.id = 'gnc-json-ld';
+    document.head.appendChild(el);
+  }
+  el.textContent = JSON.stringify(schema);
 }
 
 export default updateSEO;

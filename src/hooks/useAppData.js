@@ -73,10 +73,16 @@ export default function useAppData() {
           },
           (err) => console.error(`[${col}] fetching error:`, err),
         );
-      }),
-      onSnapshot(query(collection(db, "testimonials"), limit(20), orderBy("createdAt", "desc")), snap =>
-        setTestimonials(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
+      })
     ];
+
+    // Fetch static/rarely updated collections ONE TIME to save Firebase costs
+    import('firebase/firestore').then(({ getDocs }) => {
+      getDocs(query(collection(db, "testimonials"), limit(20), orderBy("createdAt", "desc")))
+        .then(snap => setTestimonials(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
+        .catch(err => console.error('Testimonials fetch error', err));
+    });
+
     return () => unsubs.forEach((u) => u && u());
   }, []);
 

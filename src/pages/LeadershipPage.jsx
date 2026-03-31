@@ -16,8 +16,8 @@ import { db } from '../firebase';
 const TYPE_CONFIG = {
   president: {
     icon: '🏛️',
-    color: '#0f2347',
-    accent: '#f4a023',
+    color: 'var(--navy)',
+    accent: 'var(--gold)',
     label: 'President',
     plural: 'Presidents',
     subtitle: 'Visionary leaders who shaped our institution',
@@ -299,7 +299,7 @@ const css = `
   }
 
   /* Responsive */
-  @media (max-width: 600px) {
+  @media (max-width: 480px) {
     .lp-timeline { padding-left: 28px; }
     .lp-timeline::before { left: 10px; }
     .lp-dot { left: -24px; }

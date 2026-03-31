@@ -48,16 +48,29 @@ export default function App() {
     };
   }, []);
 
-  // ── Admin auth ───────────────────────────────────────────────────────────
-  const [adminAuthed, setAdminAuthed] = useState(
-    () => sessionStorage.getItem("gnc_admin_auth") === "true",
-  );
-  const handleAdminLogin = () => {
-    sessionStorage.setItem("gnc_admin_auth", "true");
-    setAdminAuthed(true);
-  };
+  // ── 🔥 STRENGTHENED ADMIN AUTH ──────────────────────────────────────────
+  const [adminAuthed, setAdminAuthed] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  useEffect(() => {
+    let unsub;
+    import('firebase/auth').then(({ onAuthStateChanged }) => {
+      import('./firebase-auth').then(({ auth }) => {
+        unsub = onAuthStateChanged(auth, (user) => {
+          setAdminAuthed(!!user);
+          setIsInitializing(false);
+        });
+      });
+    }).catch(err => {
+      console.error("Auth sync error", err);
+      setIsInitializing(false);
+    });
+    return () => unsub && unsub();
+  }, []);
+
+  const handleAdminLogin = () => setAdminAuthed(true);
   const handleAdminLogout = () => {
-    sessionStorage.removeItem("gnc_admin_auth");
+    import('./firebase-auth').then(({ auth }) => auth.signOut());
     setAdminAuthed(false);
   };
 
@@ -187,6 +200,17 @@ export default function App() {
         : link,
     );
   }, [navLinks]);
+
+  if (isInitializing) {
+    return (
+      <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f4f7f9', zIndex: 999999 }}>
+        <div style={{ textAlign: 'center' }}>
+          <img src={import.meta.env.BASE_URL + 'images/logo.webp'} alt="GNC" width="40" style={{ animation: 'pulse 1.5s infinite ease-in-out' }} />
+          <style>{`@keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.05); } }`}</style>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

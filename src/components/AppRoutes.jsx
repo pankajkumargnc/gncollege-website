@@ -10,8 +10,16 @@ import AdminLogin from "./AdminLogin";
 const safeLazy = (importFunction) => {
   return lazy(() =>
     importFunction().catch((error) => {
-      if (error.message.includes("fetch") || error.message.includes("module")) {
-        window.location.reload();
+      const isNetworkError = error.message.includes("fetch") || error.message.includes("module");
+      if (isNetworkError) {
+        const reloadCount = parseInt(sessionStorage.getItem('gnc_lazy_reload') || '0', 10);
+        if (reloadCount < 2) {
+          sessionStorage.setItem('gnc_lazy_reload', (reloadCount + 1).toString());
+          window.location.reload();
+        } else {
+          sessionStorage.removeItem('gnc_lazy_reload');
+          console.error("Critical: Chunk failed to load after multiple retries.", error);
+        }
       }
       return Promise.reject(error);
     }),
