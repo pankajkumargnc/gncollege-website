@@ -18,14 +18,17 @@ function Fade({ children, delay = 0, y = 20 }) {
   return <div ref={ref} style={{ opacity: vis ? 1 : 0, transform: vis ? 'none' : `translateY(${y}px)`, transition: `all 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${delay}s` }}>{children}</div>;
 }
 
-const PageHeader = ({ title, subtitle, icon, theme = NAVY }) => (
-  <div style={{ background: theme, padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px) clamp(44px,6vw,60px)', textAlign: 'center', color: '#fff' }}>
+const PageHeader = ({ title, subtitle, icon }) => (
+  <header className="premium-hero">
+    <div className="kinetic-bg" />
     <Fade>
-      <div style={{ fontSize: 48, marginBottom: 16 }}>{icon}</div>
-      <h1 style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 900, margin: '0 0 16px', letterSpacing: '-0.5px' }}>{title}</h1>
-      <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 16, maxWidth: 600, margin: '0 auto', lineHeight: 1.6 }}>{subtitle}</p>
+      <div className="hero-content-wrapper">
+        {icon && <div className="hero-icon">{icon}</div>}
+        <h1>{title}</h1>
+        {subtitle && <p>{subtitle}</p>}
+      </div>
     </Fade>
-  </div>
+  </header>
 );
 
 export function NssPage() {
@@ -72,7 +75,7 @@ export function NccPage() {
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ background: '#fff', borderRadius: 24, overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
-            <img src="/images/college_photo.webp" alt="NCC Parade" style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: 300 }} />
+            <img src={`${import.meta.env.BASE_URL}images/HeroSlider/slide0.webp`} alt="NCC Parade" style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: 300 }} />
             <div style={{ padding: 40 }}>
               <div style={{ display: 'inline-block', background: '#dbeafe', color: '#1d4ed8', padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 800, letterSpacing: 1, marginBottom: 16 }}>GNC NCC WING</div>
               <h2 style={{ fontSize: 28, fontWeight: 900, color: NAVY, marginBottom: 16 }}>Building Future Leaders</h2>

@@ -86,19 +86,13 @@ function Fade({ children, delay = 0, y = 20 }) {
 
 function PageHero({ title, subtitle, icon }) {
   return (
-    <div style={{
-      background: `linear-gradient(135deg, ${N} 0%, #1a3a7c 100%)`,
-      padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px) clamp(44px,6vw,64px)', textAlign: 'center', color: '#fff',
-    }}>
-      {icon && <div style={{ fontSize: 'clamp(36px,5vw,52px)', marginBottom: 14 }}>{icon}</div>}
-      <h1 style={{ fontSize: 'clamp(26px, 4.5vw, 42px)', fontWeight: 900, margin: '0 0 14px', letterSpacing: '-0.5px' }}>
-        {title}
-      </h1>
-      {subtitle && (
-        <p style={{ color: '#cbd5e1', fontSize: 'clamp(14px,1.1vw,17px)', maxWidth: 620, margin: '0 auto', lineHeight: 1.65 }}>
-          {subtitle}
-        </p>
-      )}
+    <div className="premium-hero">
+      <div className="kinetic-bg" />
+      <div className="hero-content-wrapper">
+        {icon && <div className="hero-icon">{icon}</div>}
+        <h1>{title}</h1>
+        {subtitle && <p>{subtitle}</p>}
+      </div>
     </div>
   );
 }

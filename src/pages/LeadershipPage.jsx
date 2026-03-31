@@ -48,61 +48,6 @@ const css = `
 
   .lp-wrap * { box-sizing: border-box; }
 
-  /* Hero */
-  .lp-hero {
-    background: linear-gradient(135deg, #060e1c 0%, #0f2347 50%, #1a3a7c 100%);
-    padding: 64px 24px 56px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .lp-hero::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: radial-gradient(ellipse at 70% 50%, rgba(244,160,35,0.08) 0%, transparent 60%);
-    pointer-events: none;
-  }
-  .lp-hero-topbar {
-    position: absolute; top: 0; left: 0; right: 0; height: 4px;
-    background: linear-gradient(90deg, #f4a023, #ffd57e, #f4a023);
-  }
-  .lp-hero-icon {
-    font-size: 52px; margin-bottom: 16px; display: block;
-    filter: drop-shadow(0 4px 16px rgba(244,160,35,0.4));
-  }
-  .lp-hero h1 {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-size: clamp(1.6rem, 4vw, 2.4rem);
-    font-weight: 900;
-    color: #fff;
-    margin: 0 0 10px;
-    letter-spacing: -0.025em;
-    line-height: 1.2;
-  }
-  .lp-hero-sub {
-    color: rgba(255,255,255,0.6);
-    font-size: 0.95rem;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    margin: 0 0 24px;
-    text-align: center;
-  }
-  .lp-hero-line {
-    width: 56px; height: 3px; background: #f4a023;
-    border-radius: 2px; margin: 0 auto 24px;
-  }
-  .lp-hero-badge {
-    display: inline-block;
-    background: rgba(244,160,35,0.15);
-    border: 1px solid rgba(244,160,35,0.4);
-    color: #ffd57e;
-    padding: 5px 16px;
-    border-radius: 20px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  }
 
   /* View toggle */
   .lp-toggle-bar {
@@ -414,14 +359,14 @@ const LeadershipPage = ({ type = 'president', title }) => {
       <style>{css}</style>
 
       {/* Hero */}
-      <div className="lp-hero">
-        <div className="lp-hero-topbar" />
-        <span className="lp-hero-icon">{cfg.icon}</span>
-        <h1>{pageTitle}</h1>
-        <p className="lp-hero-sub">{cfg.subtitle}</p>
-        <div className="lp-hero-line" />
-        <span className="lp-hero-badge">Guru Nanak College, Dhanbad</span>
-      </div>
+      <header className="premium-hero">
+        <div className="kinetic-bg" />
+        <div className="hero-content-wrapper">
+          <span className="hero-icon">{cfg.icon}</span>
+          <h1>{pageTitle}</h1>
+          <p>{cfg.subtitle}</p>
+        </div>
+      </header>
 
       {/* Content */}
       <div className="lp-content">

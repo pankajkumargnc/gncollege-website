@@ -181,6 +181,7 @@ p, li, td, blockquote,
   font-family: 'Inter', sans-serif;
   line-height: 1.75;
   letter-spacing: 0.01em;
+  text-align: justify;
 }
 
 /* Monospace — admin/code areas */
@@ -435,14 +436,95 @@ p {
   line-height: 1.7; 
   max-width: 75ch;
   margin-bottom: var(--space-sm); 
+  text-align: justify;
 }
 p:last-child { margin-bottom: 0; }
 
 /* ═══════════════════════════════════════
+   5. PREMIUM HERO SYSTEM (Kinetic & Aligned)
+═══════════════════════════════════════ */
+.premium-hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  /* Reduced Height — Premium Dark Navy Base */
+  background: #020617 !important; 
+  padding: clamp(32px, 5vw, 54px) clamp(20px, 4vw, 32px) !important;
+  color: #ffffff !important;
+}
+
+.kinetic-bg {
+  position: absolute;
+  inset: 0;
+  /* 4-Color Mesh Gradient */
+  background: linear-gradient(-45deg, #0f2347, #1e3a8a, #0c1c38, #1e40af);
+  background-size: 400% 400%;
+  animation: gradientMotion 10s ease infinite;
+  z-index: 0;
+}
+
+.kinetic-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(244, 160, 35, 0.1) 0%, transparent 70%);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+@keyframes gradientMotion {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.hero-content-wrapper {
+  position: relative;
+  z-index: 10;
+  max-width: 800px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.premium-hero h1 {
+  color: #ffffff !important;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  margin-bottom: 1rem;
+  max-width: 15ch;
+  text-align: center !important;
+}
+
+.premium-hero p {
+  color: #e2e8f0 !important; /* High visibility light gray */
+  text-align: center !important; /* Center for hero subtitle */
+  max-width: 60ch;
+  margin-left: auto;
+  margin-right: auto;
+  font-weight: 500;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.premium-hero .hero-icon {
+  font-size: clamp(40px, 6vw, 60px);
+  margin-bottom: 20px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+}
+
+/* ═══════════════════════════════════════
    5. TEXT ALIGNMENT & GLOBAL HEADERS
 ═══════════════════════════════════════ */
-/* Body content — left (readable) */
-p, li, td, th { text-align: left; }
+/* Body content — justified for professional look */
+p, li, td, th {
+  text-align: justify;
+  text-justify: inter-word;
+}
 
 /* Notification cards — force left */
 .notif-card .rich-text-title,
@@ -686,7 +768,7 @@ h1, h2, h3,
   width:clamp(36px,5vw,50px); height:3px;
   background:var(--gold); border-radius:2px;
 }
-.footer-desc { line-height:1.65; margin-bottom:1.5rem; color:#94a3b8; text-align:left; }
+.footer-desc { line-height:1.65; margin-bottom:1.5rem; color:#94a3b8; text-align: justify; }
 .footer-links { list-style:none; padding:0; }
 .footer-links li { margin-bottom:clamp(6px,.8vw,12px); }
 .footer-links a { color:#cbd5e1; text-decoration:none; transition:color .25s ease, padding-left .25s ease; display:flex; align-items:center; gap:8px; }
@@ -1170,4 +1252,4 @@ img {
   transition: opacity .4s ease;
 }
 
-/* GNC-CONSOLIDATED-V13 */
+/* GNC-CONSOLIDATED-V13 */

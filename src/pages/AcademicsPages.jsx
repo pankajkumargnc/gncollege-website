@@ -32,13 +32,16 @@ function Fade({ children, delay = 0, y = 20 }) {
 
 /* ─── Shared Hero Header ─── */
 const PageHeader = ({ title, subtitle, icon }) => (
-  <div style={{ background: NAVY, padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px) clamp(44px,6vw,60px)', textAlign: 'center', color: '#fff' }}>
+  <header className="premium-hero">
+    <div className="kinetic-bg" />
     <Fade>
-      <div style={{ fontSize: 48, marginBottom: 16 }}>{icon}</div>
-      <h1 style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 900, margin: '0 0 16px', letterSpacing: '-0.5px' }}>{title}</h1>
-      <p style={{ color: '#cbd5e1', fontSize: 16, maxWidth: 600, margin: '0 auto', lineHeight: 1.6 }}>{subtitle}</p>
+      <div className="hero-content-wrapper">
+        {icon && <div className="hero-icon">{icon}</div>}
+        <h1>{title}</h1>
+        {subtitle && <p>{subtitle}</p>}
+      </div>
     </Fade>
-  </div>
+  </header>
 );
 
 /* ════════════════════════════════════════════════════════════

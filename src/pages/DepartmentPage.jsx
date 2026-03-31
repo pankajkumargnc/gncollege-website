@@ -163,22 +163,31 @@ const FacCard = ({ fac, color }) => {
       onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = isHod ? `0 4px 20px ${color}1a` : '0 2px 12px rgba(15,35,71,.06)'; }}
     >
       {/* Photo */}
-      <div style={{ position: 'relative', paddingTop: '110%', background: `linear-gradient(160deg,${color}10,${color}05)`, overflow: 'hidden' }}>
-        <img
-          src={err || !fac.imageUrl ? FALLBACK_IMG : fac.imageUrl}
-          alt={fac.name}
-          onError={() => setErr(true)}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
-        />
-        {isHod && (
-          <div style={{
-            position: 'absolute', top: 10, left: 10,
-            background: color, color: '#fff',
-            fontSize: 9, fontWeight: 800, padding: '3px 10px',
-            borderRadius: 20, letterSpacing: '.8px', textTransform: 'uppercase',
-            boxShadow: `0 3px 10px ${color}55`,
-          }}>HOD</div>
-        )}
+      <div style={{ padding: '16px 16px 0', background: `linear-gradient(160deg,${color}08,transparent)` }}>
+        <div style={{ 
+          position: 'relative', 
+          paddingTop: '100%', 
+          borderRadius: 14, 
+          overflow: 'hidden', 
+          border: `1.5px solid ${color}1a`,
+          boxShadow: `0 4px 12px rgba(15,35,71,.04)`
+        }}>
+          <img
+            src={err || !fac.imageUrl ? FALLBACK_IMG : fac.imageUrl}
+            alt={fac.name}
+            onError={() => setErr(true)}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
+          />
+          {isHod && (
+            <div style={{
+              position: 'absolute', top: 8, left: 8,
+              background: color, color: '#fff',
+              fontSize: 9, fontWeight: 800, padding: '2px 8px',
+              borderRadius: 20, letterSpacing: '.8px', textTransform: 'uppercase',
+              boxShadow: `0 3px 10px ${color}55`,
+            }}>HOD</div>
+          )}
+        </div>
       </div>
       {/* Info */}
       <div style={{ padding: '14px 16px 18px' }}>

@@ -136,9 +136,9 @@ export default function EventsPage({ headless }) {
 
       {/* ── HERO ── */}
       {!headless && (
-      <header className="profile-hero" style={{ backgroundImage:`url('https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=2070&auto=format&fit=crop')` }}>
-        <div className="hero-overlay" />
-        <div className="hero-content anim-fade-in">
+      <header className="premium-hero">
+        <div className="kinetic-bg" />
+        <div className="hero-content-wrapper">
           <h1 className="hero-title">🏛️ Campus Events</h1>
           <p className="hero-subtitle">Workshops, seminars, cultural fests aur khel-kud — saari activities ek jagah</p>
         </div>

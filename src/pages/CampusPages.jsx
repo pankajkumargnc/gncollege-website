@@ -73,10 +73,13 @@ function LiveGallery({ categoryId }) {
 export function CampusVisuals({ title, desc, categoryId }) {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
-      <div style={{ background: NAVY, padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px) clamp(44px,6vw,60px)', textAlign: 'center', color: '#fff' }}>
-        <Fade><h1 style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 800, margin: '0 0 16px' }}>{title}</h1></Fade>
-        <Fade delay={0.1}><p style={{ color: '#cbd5e1', fontSize: 16, maxWidth: 600, margin: '0 auto' }}>{desc}</p></Fade>
-      </div>
+      <header className="premium-hero">
+        <div className="kinetic-bg" />
+        <div className="hero-content-wrapper">
+          <Fade><h1>{title}</h1></Fade>
+          <Fade delay={0.1}><p>{desc}</p></Fade>
+        </div>
+      </header>
       <div style={{ maxWidth: 1200, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         {/* Yahan direct live photos aayengi */}
         <LiveGallery categoryId={categoryId} /> 
