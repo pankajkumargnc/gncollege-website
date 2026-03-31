@@ -3,15 +3,17 @@
 // Tables, headings, lists, blockquotes, images — sab premium dikhe
 // Admin ko kuch alag nahi karna — Jodit se normal content likho, yahan auto-styled
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import DOMPurify from 'dompurify';
 import { useParams } from 'react-router-dom';
 import PDFModal from './PDFModal'; 
-import GalleryPage from '../pages/GalleryPage';
-import EventsPage from '../pages/EventsPage';
-import StaffPage from '../pages/StaffPage';
+
+const GalleryPage = lazy(() => import('../pages/GalleryPage'));
+const EventsPage = lazy(() => import('../pages/EventsPage'));
+const StaffPage = lazy(() => import('../pages/StaffPage'));
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PREMIUM PROSE CSS — injected once, styles ALL Jodit HTML output
@@ -504,9 +506,11 @@ const Skeleton = () => (
 const ShortcodeRenderer = ({ code, gallery, events, faculties }) => {
   const [tag, val] = code.replace('[', '').replace(']', '').split(':');
   
-  if (tag === 'GALLERY') return <GalleryPage gallery={gallery} headless />;
-  if (tag === 'EVENTS')  return <EventsPage headless />; 
-  if (tag === 'STAFF')   return <StaffPage faculties={faculties} type={val === 'non-teaching' ? 'non-teaching-staff' : 'teaching-staff'} headless />;
+  const loadingBlock = <div style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Loading {tag} component...</div>;
+
+  if (tag === 'GALLERY') return <Suspense fallback={loadingBlock}><GalleryPage gallery={gallery} headless /></Suspense>;
+  if (tag === 'EVENTS')  return <Suspense fallback={loadingBlock}><EventsPage headless /></Suspense>; 
+  if (tag === 'STAFF')   return <Suspense fallback={loadingBlock}><StaffPage faculties={faculties} type={val === 'non-teaching' ? 'non-teaching-staff' : 'teaching-staff'} headless /></Suspense>;
   if (tag === 'TABLE')   return <div style={{ background: '#fff', padding: 20, borderRadius: 12, border: '1px dashed #ccc', textAlign: 'center', fontSize: 13 }}>[ Table Placeholder - Use Jodit Table Tool instead ]</div>;
 
   return <span style={{ color: 'red', fontWeight: 800 }}>{code}</span>;
