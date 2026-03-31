@@ -9,7 +9,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
   const [openL3, setOpenL3] = useState(null)
   const closeTimer = useRef(null)
 
-  const [isMobile,  setIsMobile]  = useState(window.innerWidth < 1024)
+  const [isMobile,  setIsMobile]  = useState(window.innerWidth < 1250)
   const [menuOpen,  setMenuOpen]  = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   // ── Dark mode detection (reads html[data-theme]) ──
@@ -19,8 +19,8 @@ export default function Navbar({ onAdminClick, navLinks }) {
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 1024)
-      if (window.innerWidth >= 1024) setMenuOpen(false)
+      setIsMobile(window.innerWidth < 1250)
+      if (window.innerWidth >= 1250) setMenuOpen(false)
     }
     function handleScroll() {
       setIsScrolled(window.scrollY > 40)
@@ -147,7 +147,7 @@ export default function Navbar({ onAdminClick, navLinks }) {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          gap: isMobile ? '8px' : 'clamp(10px, 1.5vw, 20px)'
+          gap: isMobile ? '8px' : '20px'
         }}>
 
           {/* ── LOGO & TITLE ── */}
@@ -304,17 +304,13 @@ export default function Navbar({ onAdminClick, navLinks }) {
                   }}>
                   <Link
                     to={getRoute(l0.href)}
-                    onClick={() => { 
-                      if (l0.label === 'Home') window.scrollTo(0, 0)
-                      if (isMobile) setMenuOpen(false)
-                    }}
+                    onClick={() => { if (l0.label === 'Home') window.scrollTo(0, 0) }}
                     className="nav-hover-link"
                     style={{
                       color: isDark ? '#e2e8f0' : COLORS.navy,
                       padding: isMobile ? '14px 0' : '16px 11px',
                       display: 'block',
-                      fontSize: isMobile ? 14 : 'clamp(12px, 0.9vw, 13.5px)', 
-                      fontWeight: 700,
+                      fontSize: 13.5, fontWeight: 700,
                       whiteSpace: 'nowrap',
                       textDecoration: 'none',
                       width: '100%',

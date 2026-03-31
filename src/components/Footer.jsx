@@ -126,7 +126,7 @@ const Footer = memo(() => {
         /* 🧊 True Glassmorphism Container */
         .f-glass-panel {
           position: relative;
-          max-width: var(--container-max, 1280px);
+          max-width: 1400px;
           margin: 0 auto;
           background: rgba(255, 255, 255, 0.03);
           backdrop-filter: blur(20px);
@@ -135,26 +135,14 @@ const Footer = memo(() => {
           border-left: 1px solid rgba(255, 255, 255, 0.05);
           border-right: 1px solid rgba(255, 255, 255, 0.05);
           border-radius: 24px 24px 0 0;
-          padding: 40px 40px 20px; 
+          padding: 25px 25px 15px; 
           box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
         }
 
         .f-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-          gap: 3rem;
-        }
-
-        @media(max-width: 1400px) {
-          .f-grid { grid-template-columns: 2fr 1.5fr 1fr 1.5fr; }
-        }
-        @media(max-width: 1100px) {
-          .f-grid { grid-template-columns: 1fr 1fr; }
-        }
-        @media(max-width: 650px) {
-          .f-grid { grid-template-columns: 1fr; gap: 40px; }
-          .f-glass-panel { padding: 30px 20px; }
-          .f-bottom { flex-direction: column; text-align: center; }
+          grid-template-columns: 2fr 1.5fr 1fr 1.5fr;
+          gap: clamp(15px, 2vw, 30px);
         }
 
         /* 🎓 Logo & Brand Styling */

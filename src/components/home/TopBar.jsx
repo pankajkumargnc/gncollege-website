@@ -1,5 +1,5 @@
 // src/components/home/TopBar.jsx
-// 🚀 COMPACT ULTRA PRO MAX EDITION - Liquid Fill & Floating Wave
+// 🚀 ULTRA-PREMIUM EDITION - Kinetic HUD & Liquid Fill Morphing
 import React from "react";
 import { COLORS } from '../../styles/colors';
 import { SOCIAL_LINKS } from '../../data/db';
@@ -8,273 +8,214 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen }) => {
   const whatsappLink = { id: 'whatsapp', label: 'W', href: 'https://wa.me/917903340991' };
 
   return (
-    <div style={{
-      background: `linear-gradient(90deg, ${COLORS.navy} 0%, #17346b 50%, ${COLORS.navy} 100%)`,
-      color: '#ffffff',
-      borderBottom: `1px solid rgba(244,160,35,0.4)`,
-      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
-      width: '100%',
-      maxWidth: '100vw',
-      overflow: 'hidden',
-      boxSizing: 'border-box',
-      position: 'relative',
-      zIndex: 100
-    }}>
-      {/* Animated Top Border Glow */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-        background: 'linear-gradient(90deg, transparent, rgba(244,160,35,0.8), transparent)',
-        animation: 'scanline 3s linear infinite'
-      }} />
-
+    <div className="premium-topbar">
       <style>{`
-        @keyframes scanline {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
+        @keyframes movingGradient {
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes shineFlow {
+          0%   { transform: translateX(-200%) skewX(-30deg); }
+          20%  { transform: translateX(300%) skewX(-30deg); }
+          100% { transform: translateX(300%) skewX(-30deg); }
+        }
+        @keyframes borderPulse {
+          0%, 100% { border-color: rgba(244,160,35,0.3); }
+          50%      { border-color: rgba(244,160,35,0.7); }
+        }
+
+        .premium-topbar {
+          background: linear-gradient(-45deg, #0f2347, #1e3a8a, #060e1c, #172554);
+          background-size: 400% 400%;
+          animation: movingGradient 15s ease infinite;
+          color: #ffffff;
+          border-bottom: 1.5px solid rgba(244,160,35,0.3);
+          width: 100%;
+          maxWidth: 100vw;
+          overflow: hidden;
+          position: relative;
+          z-index: 1000;
+          animation: borderPulse 4s infinite alternate;
+        }
+
+        .premium-topbar::after {
+          content: '';
+          position: absolute; top: 0; left: 0; width: 120px; height: 100%;
+          background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+          animation: shineFlow 7s infinite ease-in-out;
+          pointer-events: none;
         }
 
         .tb-wrap {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 6px clamp(12px, 2vw, 24px);
-          gap: 8px;
-          min-width: 0;
-          max-width: 1400px;
+          padding: 8px clamp(12px, 2.5vw, 32px);
+          max-width: 1536px;
           margin: 0 auto;
-          flex-wrap: nowrap;
         }
 
-        /* ── Left Contact Info ── */
+        /* ── Left Side: Contact ── */
         .tb-left {
           display: flex;
           align-items: center;
-          gap: clamp(12px, 2vw, 28px);
-          flex-shrink: 1;
-          min-width: 0;
-          overflow: hidden;
+          gap: clamp(14px, 2vw, 30px);
         }
         .tb-link {
           display: flex; align-items: center; gap: 8px;
-          text-decoration: none; color: #cbd5e1;
-          font-size: clamp(11px, 1vw, 13.5px);
-          font-weight: 600; white-space: nowrap;
-          transition: all .3s cubic-bezier(0.25, 0.8, 0.25, 1);
-          min-width: 0;
-          padding: 4px 8px;
-          border-radius: 6px;
+          text-decoration: none; color: rgba(255,255,255,0.8);
+          font-size: clamp(11px, 0.9vw, 13px);
+          font-weight: 700; white-space: nowrap;
+          transition: all 0.3s ease;
+          padding: 6px 10px;
+          border-radius: 8px;
+          background: rgba(255,255,255,0.03);
         }
         .tb-link:hover { 
-          color: #fff; 
-          background: rgba(255,255,255,0.05);
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+          color: #fff; background: rgba(255,255,255,0.08);
+          transform: translateY(-2px);
         }
-        .tb-email { display: flex; }
-        @media(max-width: 520px) { .tb-email { display: none; } }
+        .icon-glow {
+          color: ${COLORS.gold};
+          filter: drop-shadow(0 0 5px rgba(244,160,35,0.5));
+        }
 
-        /* ── Right Section ── */
-        .tb-right {
+        @media(max-width: 640px) { .tb-email { display: none; } }
+
+        /* ── Right Side Group ── */
+        .tb-right-group {
           display: flex;
           align-items: center;
-          gap: clamp(12px, 1.5vw, 16px);
-          flex-shrink: 0;
+          gap: clamp(12px, 2vw, 24px);
         }
 
-        /* ── Quick Link Buttons (Neon Glass) ── */
-        .tb-qlinks { display: flex; align-items: center; gap: 8px; }
-        .tb-qbtn {
-          display: inline-flex; align-items: center; gap: 6px;
-          font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px;
-          padding: 5px 12px; border-radius: 8px;
-          text-decoration: none; white-space: nowrap;
-          border: 1px solid; flex-shrink: 0;
-          background: rgba(255,255,255,0.03);
-          backdrop-filter: blur(5px);
+        /* ── HUD Buttons ── */
+        .tb-hud-btns {
+          display: flex;
+          align-items: center;
+          gap: 14px; 
+        }
+        .hud-btn {
+          display: inline-flex; align-items: center; justify-content: center;
+          width: clamp(80px, 9vw, 120px);
+          padding: 7px 0;
+          font-size: 10px; font-weight: 900; letter-spacing: 1px;
+          text-transform: uppercase; border-radius: 50px;
+          text-decoration: none; border: 1.5px solid rgba(255,255,255,0.2);
+          background: rgba(255,255,255,0.04);
           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          position: relative; overflow: hidden; z-index: 1;
+          color: #fff; text-align: center;
         }
-        
-        .tb-qbtn::after {
-          content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-          background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
-          transform: rotate(45deg) translateX(-100%);
-          transition: transform 0.6s ease;
-          z-index: -1;
+        .hud-btn:hover {
+          transform: translateY(-4px);
+          border-color: #fff;
+          background: rgba(255,255,255,0.15);
+          box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
-        .tb-qbtn:hover::after { transform: rotate(45deg) translateX(100%); }
-
-        .tb-res { border-color: rgba(255,255,255,0.3); color: #fff; }
-        .tb-res:hover { background: rgba(255,255,255,0.15); box-shadow: 0 0 10px rgba(255,255,255,0.3); transform: translateY(-2px); }
-
-        .tb-fee { border-color: rgba(255,255,255,0.3); color: #fff; }
-        .tb-fee:hover { background: rgba(255,255,255,0.15); box-shadow: 0 0 10px rgba(255,255,255,0.3); transform: translateY(-2px); }
-
-        .tb-adm { border-color: rgba(244,160,35,0.6); color: #f4a023; }
-        .tb-adm:hover { background: rgba(244,160,35,0.15); color: #fff; box-shadow: 0 0 15px rgba(244,160,35,0.4); transform: translateY(-2px); }
-
-        @media(max-width: 900px) { .tb-adm   { display: none; } }
-        @media(max-width: 720px) { .tb-fee   { display: none; } }
-        @media(max-width: 580px) { .tb-qlinks { display: none; } }
-
-        /* Divider */
-        .tb-div { width: 1px; height: 20px; background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.2), transparent); flex-shrink: 0; }
-        @media(max-width: 580px) { .tb-div { display: none; } }
-
-        /* 🚀 FLOATING WAVE & LIQUID FILL ICONS */
-        @keyframes tbFloat {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-4px); }
+        .hud-btn.gold-cta {
+          border-color: rgba(244,160,35,0.4);
+          color: ${COLORS.gold};
+        }
+        .hud-btn.gold-cta:hover {
+          background: ${COLORS.gold};
+          color: #000;
+          box-shadow: 0 0 25px rgba(244,160,35,0.45);
         }
 
-        .tb-soc-wrap { display: flex; gap: 8px; align-items: center; }
+        @media(max-width: 1024px) { .tb-hud-btns { display: none; } }
 
-        .tb-soc {
-          position: relative; overflow: hidden; z-index: 1;
-          width: clamp(26px, 3vw, 30px);
-          height: clamp(26px, 3vw, 30px);
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.12);
-          border-radius: 8px;
+        /* ── Social Icons Grid (Liquid Fill) ── */
+        .tb-socials { display: flex; gap: 9px; }
+        .soc-icon {
+          width: 32px; height: 32px;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 10px;
           display: flex; align-items: center; justify-content: center;
-          font-size: 13px; font-weight: 700; color: #cbd5e1;
-          text-decoration: none; flex-shrink: 0;
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          animation: tbFloat 3s ease-in-out infinite;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+          color: #f1f5f9; text-decoration: none; font-size: 14px;
+          position: relative; overflow: hidden;
+          transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
         }
-
-        /* Staggered Delay for Wave Effect */
-        .tb-soc-wrap a:nth-child(1) { animation-delay: 0s; }
-        .tb-soc-wrap a:nth-child(2) { animation-delay: 0.1s; }
-        .tb-soc-wrap a:nth-child(3) { animation-delay: 0.2s; }
-        .tb-soc-wrap a:nth-child(4) { animation-delay: 0.3s; }
-        .tb-soc-wrap a:nth-child(5) { animation-delay: 0.4s; }
-
-        /* Liquid Fill Element */
-        .tb-soc::before {
-          content: ''; position: absolute; 
-          bottom: -100%; left: 0; width: 100%; height: 100%;
-          background: linear-gradient(180deg, #f4a023, #d97706); /* Default Gold */
-          transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: -1;
+        .soc-icon::before {
+          content: ''; position: absolute; top: 100%; left: 0;
+          width: 100%; height: 100%; transition: 0.4s; z-index: -1;
           border-radius: 50% 50% 0 0;
         }
+        .soc-icon:hover { transform: translateY(-6px); border-color: transparent; color: #fff; }
+        .soc-icon:hover::before { top: 0; border-radius: 0; }
+        
+        /* Brand Colors */
+        .soc-icon.fb:hover::before { background: linear-gradient(to top, #1877f2, #0866ff); }
+        .soc-icon.x:hover::before { background: linear-gradient(to top, #000000, #333333); }
+        .soc-icon.yt:hover::before { background: linear-gradient(to top, #ff0000, #ff4d4d); }
+        .soc-icon.li:hover::before { background: linear-gradient(to top, #0a66c2, #0077b5); }
+        .soc-icon.wa:hover::before { background: linear-gradient(to top, #25d366, #128c7e); }
 
-        /* Liquid Hover Trigger */
-        .tb-soc:hover::before { bottom: 0; border-radius: 0; }
-        .tb-soc:hover { 
-          transform: translateY(-5px) scale(1.15) !important; 
-          animation: none; 
-          color: #fff; border-color: transparent;
+        @media(max-width: 480px) { .tb-socials { display: none; } }
+
+        /* ── Dark Mode HUD ── */
+        .tb-dark-btn {
+          width: 38px; height: 38px;
+          background: rgba(255,255,255,0.08);
+          border: 1.5px solid rgba(244,160,35,0.3);
+          border-radius: 12px;
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer; color: #fff; font-size: 16px;
+          transition: all 0.4s ease;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-
-        /* Brand Colors for Liquid Fill & Glow */
-        .tb-soc.x::before { background: linear-gradient(180deg, #ffffff, #94a3b8); }
-        .tb-soc.x:hover { color: #000; box-shadow: 0 8px 20px rgba(255,255,255,0.4); }
-
-        .tb-soc.yt::before { background: linear-gradient(180deg, #ff0000, #cc0000); }
-        .tb-soc.yt:hover { box-shadow: 0 8px 20px rgba(255,0,0,0.5); }
-
-        .tb-soc.fb::before { background: linear-gradient(180deg, #1877f2, #0b50b3); }
-        .tb-soc.fb:hover { box-shadow: 0 8px 20px rgba(24,119,242,0.5); }
-
-        .tb-soc.li::before { background: linear-gradient(180deg, #0a66c2, #074c94); }
-        .tb-soc.li:hover { box-shadow: 0 8px 20px rgba(10,102,194,0.5); }
-
-        .tb-soc.wa::before { background: linear-gradient(180deg, #25d366, #128c7e); }
-        .tb-soc.wa:hover { box-shadow: 0 8px 20px rgba(37,211,102,0.5); }
+        .tb-dark-btn:hover {
+          transform: rotate(20deg) scale(1.15);
+          background: ${COLORS.gold};
+          color: #000;
+          box-shadow: 0 0 20px rgba(244,160,35,0.4);
+        }
       `}</style>
 
       <div className="tb-wrap">
-        {/* ── Left: Phone + Email ── */}
+        {/* LEFT: PHONE + EMAIL */}
         <div className="tb-left">
           <a href="tel:+917903340991" className="tb-link">
-            <span style={{ color: COLORS.gold, fontSize: 13, filter: 'drop-shadow(0 0 8px rgba(244,160,35,0.6))' }}>📞</span>
-            <span>+91-7903340991</span>
+            <span className="icon-glow">📞</span> <span>+91-7903340991</span>
           </a>
           <a href="mailto:principal@gncollege.org" className="tb-link tb-email">
-            <span style={{ color: COLORS.gold, fontSize: 13, filter: 'drop-shadow(0 0 8px rgba(244,160,35,0.6))' }}>✉️</span>
-            <span>principal@gncollege.org</span>
+            <span className="icon-glow">✉️</span> <span>principal@gncollege.org</span>
           </a>
         </div>
 
-        {/* ── Right: Quick Links + Divider + Social ── */}
-        <div className="tb-right">
-
-          {/* Quick links */}
-          <div className="tb-qlinks">
-            <a href="https://bbmkuniv.in/login"
-               target="_blank" rel="noopener noreferrer"
-               className="tb-qbtn tb-res">
-               📊 Results
-            </a>
-            <a href="https://cimsstudentnewui.mastersofterp.in/"
-               target="_blank" rel="noopener noreferrer"
-               className="tb-qbtn tb-fee">
-               💳 Fee Payment
-            </a>
-            <a href="https://jharkhanduniversities.nic.in/"
-               target="_blank" rel="noopener noreferrer"
-               className="tb-qbtn tb-adm">
-               🎓 Apply Online
-            </a>
+        {/* RIGHT GROUP */}
+        <div className="tb-right-group">
+          {/* HUD BUTTONS */}
+          <div className="tb-hud-btns">
+            <a href="https://bbmkuniv.in/login" target="_blank" rel="noopener noreferrer" className="hud-btn">📊 Results</a>
+            <a href="https://cimsstudentnewui.mastersofterp.in/" target="_blank" rel="noopener noreferrer" className="hud-btn">💳 Pay Fees</a>
+            <a href="https://jharkhanduniversities.nic.in/" target="_blank" rel="noopener noreferrer" className="hud-btn gold-cta">🎓 Admission</a>
           </div>
 
-          <div className="tb-div" />
-          {onToggleDark && (
-            <button
-              onClick={onToggleDark}
-              style={{
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: 8,
-                width: 32,
-                height: 32,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                fontSize: 15,
-                transition: 'all .3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                flexShrink: 0,
-                color: '#fff',
-                boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.15) rotate(10deg)'; e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1) rotate(0deg)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
-              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            >
-              {isDark ? '☀️' : '🌙'}
-            </button>
-          )}
-
-          <div className="tb-div" />
-
-          {/* Social icons with Floating Wave & Liquid Fill */}
-          <div className="tb-soc-wrap">
+          {/* SOCIAL ICONS (INDIVIDUAL BRAND COLORS) */}
+          <div className="tb-socials">
             {SOCIAL_LINKS.map(s => {
-              let icon = s.label;
-              let cls  = '';
-              if (s.id === 'twitter')  { icon = '𝕏'; cls = 'x'; }
-              if (s.id === 'youtube')  { icon = '▶'; cls = 'yt'; }
-              if (s.id === 'facebook') { cls = 'fb'; }
-              if (s.id === 'linkedin') { cls = 'li'; }
+              let icon = (s.id === 'twitter' ? '𝕏' : (s.id === 'youtube' ? '▶' : s.label));
+              let cls = (s.id === 'twitter' ? 'x' : (s.id === 'youtube' ? 'yt' : (s.id === 'facebook' ? 'fb' : (s.id === 'linkedin' ? 'li' : ''))));
               return (
-                <a key={s.id} href={s.href}
-                   target="_blank" rel="noopener noreferrer"
-                   className={`tb-soc ${cls}`}
-                   aria-label={s.id}>
+                <a key={s.id} href={s.href} target="_blank" rel="noopener noreferrer" 
+                   className={`soc-icon ${cls}`} aria-label={s.id}>
                   <span style={{ position: 'relative', zIndex: 2 }}>{icon}</span>
                 </a>
               );
             })}
-            <a href={whatsappLink.href}
-               target="_blank" rel="noopener noreferrer"
-               className="tb-soc wa"
-               aria-label="whatsapp">
+            <a href={whatsappLink.href} target="_blank" rel="noopener noreferrer" className="soc-icon wa">
               <span style={{ position: 'relative', zIndex: 2 }}>W</span>
             </a>
           </div>
+
+          {/* DARK TOGGLE (TRUE RIGHT) */}
+          {onToggleDark && (
+            <button onClick={onToggleDark} className="tb-dark-btn" title="Toggle Surface Mode">
+              {isDark ? '☀️' : '🌙'}
+            </button>
+          )}
         </div>
       </div>
     </div>

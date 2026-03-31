@@ -64,7 +64,7 @@ const CSS = `
   .hf-sec-sub{ color:#64748b; font-size:clamp(14px,1vw,16px); max-width:580px; line-height:1.7; margin:0 auto; }
 
   /* ═══════════════════════════
-     GRID SYSTEM — AUTO-FIT
+     ULTRA PRO MAX DEPARTMENTS
   ═══════════════════════════ */
   .hf-dept-sec {
     padding: clamp(60px, 10vw, 130px) clamp(16px, 4vw, 40px);
@@ -73,14 +73,14 @@ const CSS = `
   
   .hf-dept-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
-    max-width: 1400px; margin: 0 auto;
+    grid-template-columns: repeat(5, 1fr);
+    gap: clamp(16px, 2.2vw, 30px);
+    max-width: 1440px; margin: 0 auto;
   }
 
   .hf-dc {
     position: relative; border-radius: 24px; overflow: hidden;
-    height: clamp(220px, 20vw, 280px);
+    height: clamp(190px, 18vw, 260px);
     background: #0f172a;
     cursor: pointer; text-decoration: none; display: flex; flex-direction: column;
     transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
@@ -104,7 +104,7 @@ const CSS = `
   }
 
   .gc:hover .hf-dc {
-    transform: translateY(-8px) scale(1.01);
+    transform: translateY(-8px) scale(1.02);
     box-shadow: 0 25px 50px -15px rgba(0,0,0,0.45);
     border-color: rgba(255,255,255,0.22);
   }
@@ -150,6 +150,10 @@ const CSS = `
     letter-spacing: -0.6px;
   }
 
+  .hf-dc-desc {
+    display: none;
+  }
+
   .hf-dc-btn {
     display: flex; align-items: center; gap: 8px;
     font-size: 11px; font-weight: 900; color: #fff;
@@ -167,23 +171,15 @@ const CSS = `
     transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
     box-shadow: 0 5px 15px rgba(15,35,71,0.03);
     display: flex; flex-direction: column; align-items: center; gap: 15px;
-    height: 100%;
   }
   .hf-fc-icon { font-size: 44px; transition: transform 0.4s; }
   .hf-fc-name { font-size: 12px; font-weight: 800; color: ${N}; text-transform: uppercase; letter-spacing: 1px; }
   .gc:hover .hf-fc { transform: translateY(-12px); box-shadow: 0 25px 50px -12px rgba(15,35,71,0.12); border-color: ${G}; }
   .gc:hover .hf-fc-icon { transform: scale(1.3) rotate(-10deg); }
 
-  .hf-fac-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 1.5rem;
-    max-width: 1300px; margin: 0 auto;
-  }
-
-  @media(max-width: 600px) {
-    .hf-dc { height: 400px; }
-  }
+  @media(max-width: 1250px){ .hf-dept-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media(max-width: 900px){ .hf-dept-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media(max-width: 550px){ .hf-dept-grid { grid-template-columns: 1fr; } .hf-dc { height: 420px; } }
 `;
 
 const SA2 = ({ children, variant='up', d='', tag:Tag='div', style={}, className='' }) => {
@@ -209,6 +205,7 @@ const DeptCard = ({ dept, delay }) => {
           <div className="hf-dc-content">
             <div className="hf-dc-icon-box">{dept.icon}</div>
             <h3 className="hf-dc-name">{dept.full}</h3>
+            <p className="hf-dc-desc">{dept.desc}</p>
             <div className="hf-dc-btn">Explore Course</div>
           </div>
         </Link>
@@ -250,7 +247,7 @@ export default function HomeFeatures() {
               <p className="hf-sec-sub">Holistic development ke liye modern infrastructure aur best facilities.</p>
             </div>
           </SA2>
-          <div className="hf-fac-grid">
+          <div style={{ display:'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 20 }}>
             {(facilities || []).map((ft, i) => (
               <div key={i} className="gc r30">
                 <div className="hf-fc">

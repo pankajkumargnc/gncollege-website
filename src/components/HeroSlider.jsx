@@ -70,14 +70,9 @@ const HeroSlider = ({ slides = [] }) => {
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600&display=swap');
         
         .parallax-hs {
-          width: 100%; 
-          height: clamp(450px, 80vh, 800px); /* Responsive height */
+          width: 100%; height: clamp(380px, 70vh, 580px);
           position: relative; overflow: hidden; background: #071124;
           perspective: 1000px;
-        }
-
-        @media(max-width: 600px) {
-          .parallax-hs { height: auto; min-height: 400px; }
         }
 
         .phs-slide {
@@ -93,7 +88,7 @@ const HeroSlider = ({ slides = [] }) => {
         }
         .phs-img {
           width: 100%; height: 100%; object-fit: cover;
-          filter: brightness(0.65) contrast(1.1);
+          filter: brightness(0.7) contrast(1.05);
           transform: scale(1.1); transition: transform 10s linear;
         }
         .cur .phs-img { transform: scale(1); }
@@ -101,50 +96,56 @@ const HeroSlider = ({ slides = [] }) => {
         /* ── OVERLAYS ── */
         .phs-overlay {
           position: absolute; inset: 0;
-          background: linear-gradient(to right, rgba(15,35,71,0.8) 0%, rgba(15,35,71,0.2) 50%, transparent 100%),
-                      linear-gradient(to top, rgba(15,35,71,0.6) 0%, transparent 40%);
+          background: linear-gradient(to right, rgba(15,35,71,0.7) 0%, rgba(15,35,71,0.1) 60%, transparent 100%),
+                      linear-gradient(to top, rgba(15,35,71,0.5) 0%, transparent 50%);
           z-index: 2;
         }
 
         /* ── CONTENT LAYER (GLASSMORPHISM) ── */
         .phs-content {
-          position: absolute; bottom: 6%; left: clamp(15px, 6vw, 100px);
-          max-width: min(780px, 85%); z-index: 10;
+          position: absolute; bottom: 10%; left: clamp(15px, 6vw, 100px);
+          width: fit-content; max-width: 90%; z-index: 10;
           transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         }
         
         .phs-glass {
-          background: rgba(255, 255, 255, 0.04);
-          border-radius: 16px;
-          box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-          backdrop-filter: blur(2.7px);
-          -webkit-backdrop-filter: blur(2.7px);
-          border: 1px solid rgba(255, 255, 255, 0.33);
-          border-left: 6px solid #f4a023; /* Consistent with GNC Branding */
-          padding: clamp(15px, 2.5vw, 30px);
-          transform-origin: left; animation: phsPopIn 1.2s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 20px;
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-left: 6px solid #f4a023;
+          padding: clamp(15px, 2.5vw, 35px);
+          display: inline-block; width: 100%;
+          animation: phsPopIn 1.2s cubic-bezier(0.19, 1, 0.22, 1) forwards;
         }
 
         .phs-badge {
           display: inline-block; background: #f4a023; color: #0f2347;
-          padding: 5px 14px; border-radius: 6px; font-size: 11px; font-weight: 800;
-          text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px;
+          padding: 5px 14px; border-radius: 6px; font-size: clamp(9px, 0.7vw, 11px); font-weight: 800;
+          text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;
           animation: phsFadeUp 0.8s 0.3s both;
         }
         .phs-title {
           font-family: 'Plus Jakarta Sans', sans-serif;
-          font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: #fff;
-          line-height: 1.1; margin: 0 0 15px; letter-spacing: -1.5px;
+          font-size: clamp(20px, 3.5vw, 42px); font-weight: 900; color: #fff;
+          line-height: 1.1; margin: 0 0 12px; letter-spacing: -1.2px;
           animation: phsFadeUp 0.8s 0.4s both;
-          text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+          text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+          white-space: nowrap;
         }
         .phs-sub {
           font-family: 'Inter', sans-serif;
-          font-size: clamp(1rem, 1.8vw, 1.3rem); color: rgba(255,255,255,0.9);
-          max-width: 650px; line-height: 1.6; margin: 0;
+          font-size: clamp(12px, 1vw, 16px); color: rgba(255,255,255,0.9);
+          line-height: 1.5; margin: 0;
           animation: phsFadeUp 0.8s 0.5s both;
-          display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-          text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+          white-space: nowrap;
+          text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        @media(max-width: 900px) {
+          .phs-title, .phs-sub { white-space: normal; }
+          .phs-content { width: 90%; }
         }
 
         @keyframes phsFadeUp {
@@ -175,10 +176,10 @@ const HeroSlider = ({ slides = [] }) => {
         .phs-btn:hover { background: #f4a023; color: #0f2347; transform: scale(1.1); border-color: #f4a023; }
 
         @media(max-width: 768px) {
-          .parallax-hs { height: 500px; }
-          .phs-content { bottom: 60px; left: 0; width: 100%; max-width: 100%; }
-          .phs-glass { border-radius: 0; padding: 25px 20px; border-right: none; }
-          .phs-nav { right: 20px; bottom: 20px; }
+          .parallax-hs { height: 380px; }
+          .phs-content { bottom: 40px; left: 0; width: 100%; max-width: 100%; }
+          .phs-glass { border-radius: 0; padding: 20px 15px; border-right: none; }
+          .phs-nav { right: 15px; bottom: 15px; }
           .phs-arrows { display: none; }
         }
       `}</style>

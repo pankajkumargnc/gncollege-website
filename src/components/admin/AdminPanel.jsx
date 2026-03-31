@@ -38,6 +38,7 @@ const MeetingPDFTab     = lazy(() => import('./tabs/MeetingPDFTab'));
 const TestimonialsTab   = lazy(() => import('./tabs/TestimonialsTab'));
 
 // Purane Admin Tabs (Jo aapne tabs folder mein move kiye hain)
+const AdminNeuralStudioTab = lazy(() => import('./tabs/AdminNeuralStudioTab'));
 const AdminCampusTab    = lazy(() => import('./tabs/AdminCampusTab'));
 const AdminLeadershipTab= lazy(() => import('./tabs/AdminLeadershipTab'));
 const AdminDepartmentTab= lazy(() => import('./tabs/AdminDepartmentTab'));
@@ -80,6 +81,7 @@ const TABS = [
   { id:'gallery',       icon:'📸', label:'Gallery',          section:'' },
   { id:'notices',       icon:'📢', label:'Notices',          section:'' },
   { id:'announcements', icon:'📣', label:'News',             section:'' },
+  { id:'neural_studio', icon:'🧠', label:'Neural AI Studio', section:'AI CORE v3.0' },
   { id:'documents',     icon:'📁', label:'Documents',        section:'' },
   { id:'events',        icon:'🏆', label:'Events',           section:'' },
   { id:'testimonials',  icon:'💬', label:'Testimonials',      section:'' },
@@ -269,6 +271,7 @@ function AdminPanelInner({
       case 'gallery':      return <GalleryTab gallery={gallery} {...sharedProps} />;
       case 'notices':      return <NoticesTab notices={notices} {...sharedProps} />;
       case 'announcements':return <AnnouncementsTab announcements={announcements} {...sharedProps} />;
+      case 'neural_studio':return <AdminNeuralStudioTab {...sharedProps} />;
       case 'documents':    return <DocumentsTab pdfReports={pdfReports} {...sharedProps} />;
       case 'events':       return <EventsTab events={events} {...sharedProps} />;
       case 'testimonials': return <TestimonialsTab testimonials={testimonials} {...sharedProps} />;
