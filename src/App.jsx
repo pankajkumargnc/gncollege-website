@@ -533,13 +533,15 @@ export default function App() {
       {!isAdminRoute && (
         <>
           <AlertBanner />
-          <TopBar isDark={isDark} onToggleDark={toggleDark} onSearchOpen={() => setSearchOpen(true)} />
-          <ErrorBoundary>
-            <Suspense fallback={<div style={{ height: 40 }} />}>
-              <Ticker items={notices} />
-            </Suspense>
-          </ErrorBoundary>
-          <Navbar onAdminClick={handleOpenAdminTab} navLinks={baseNavLinks} />
+          <div className="container">
+            <TopBar isDark={isDark} onToggleDark={toggleDark} onSearchOpen={() => setSearchOpen(true)} />
+            <ErrorBoundary>
+              <Suspense fallback={<div style={{ height: 40 }} />}>
+                <Ticker items={notices} />
+              </Suspense>
+            </ErrorBoundary>
+            <Navbar onAdminClick={handleOpenAdminTab} navLinks={baseNavLinks} />
+          </div>
           <Breadcrumbs />
           <QuickActionNav />
         </>

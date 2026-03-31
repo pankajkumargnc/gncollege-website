@@ -70,9 +70,14 @@ const HeroSlider = ({ slides = [] }) => {
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600&display=swap');
         
         .parallax-hs {
-          width: 100%; height: clamp(400px, 70vh, 700px);
+          width: 100%; 
+          height: clamp(450px, 80vh, 800px); /* Responsive height */
           position: relative; overflow: hidden; background: #071124;
           perspective: 1000px;
+        }
+
+        @media(max-width: 600px) {
+          .parallax-hs { height: auto; min-height: 400px; }
         }
 
         .phs-slide {
@@ -128,15 +133,15 @@ const HeroSlider = ({ slides = [] }) => {
         }
         .phs-title {
           font-family: 'Plus Jakarta Sans', sans-serif;
-          font-size: clamp(28px, 5vw, 56px); font-weight: 800; color: #fff;
+          font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: #fff;
           line-height: 1.1; margin: 0 0 15px; letter-spacing: -1.5px;
           animation: phsFadeUp 0.8s 0.4s both;
           text-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
         .phs-sub {
           font-family: 'Inter', sans-serif;
-          font-size: clamp(14px, 1.5vw, 18px); color: rgba(255,255,255,0.9);
-          max-width: 600px; line-height: 1.6; margin: 0;
+          font-size: clamp(1rem, 1.8vw, 1.3rem); color: rgba(255,255,255,0.9);
+          max-width: 650px; line-height: 1.6; margin: 0;
           animation: phsFadeUp 0.8s 0.5s both;
           display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
           text-shadow: 0 2px 8px rgba(0,0,0,0.5);
