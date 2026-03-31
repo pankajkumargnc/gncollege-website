@@ -457,8 +457,10 @@ export default function Navbar({ onAdminClick, navLinks }) {
             ))}
 
             {/* Admin Button */}
-            <button
-              onClick={onAdminClick}
+            <Link
+              to="/admin"
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="Open Admin Panel"
               style={{
                 flexShrink: 0,
@@ -476,12 +478,13 @@ export default function Navbar({ onAdminClick, navLinks }) {
                 justifyContent: 'center', gap: '6px',
                 transition: 'transform 0.25s cubic-bezier(.22,1,.36,1), box-shadow 0.25s ease',
                 letterSpacing: '0.3px',
+                textDecoration: 'none'
               }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(244,160,35,0.4)' }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(244,160,35,0.3)' }}
             >
               <span style={{ fontSize: 16 }}>⚙️</span> Admin Login
-            </button>
+            </Link>
           </div>
         </div>
       </nav>
