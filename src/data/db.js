@@ -4,13 +4,13 @@
 export const GALLERY_CATEGORIES = ['All Events', 'Campus', 'Recent Programs', 'Cultural Activity', 'NSS Programs', 'Departments']
 // ✅ FIX: Added 'Campus' — was missing; caused 3 gallery items to vanish when any filter was applied
 
-export const PDF_CATEGORIES  = ['NAAC', 'Annual Report', 'IQAC', 'Regulations', 'Examination', 'General']
-export const MENU_SECTIONS   = ['About Us', 'Campus', 'Academics', 'Admission', 'Activity', 'NAAC', 'Publication', 'Gallery']
+export const PDF_CATEGORIES = ['NAAC', 'Annual Report', 'IQAC', 'Regulations', 'Examination', 'General']
+export const MENU_SECTIONS = ['About Us', 'Campus', 'Academics', 'Admission', 'Activity', 'NAAC', 'Publication', 'Gallery']
 
 export const SOCIAL_LINKS = [
-  { id: 'facebook', label: 'f',  href: 'https://facebook.com/gnc.dhanbad' }, // ✅ Update with real URLs
-  { id: 'twitter',  label: 't',  href: 'https://twitter.com/' },
-  { id: 'youtube',  label: 'y',  href: 'https://youtube.com/' },
+  { id: 'facebook', label: 'f', href: 'https://facebook.com/gnc.dhanbad' }, // ✅ Update with real URLs
+  { id: 'twitter', label: 't', href: 'https://twitter.com/' },
+  { id: 'youtube', label: 'y', href: 'https://youtube.com/' },
   { id: 'linkedin', label: 'in', href: 'https://linkedin.com/' },
 ]
 
@@ -30,47 +30,47 @@ export const initialAnnouncements = [
 ]
 
 export const initialEvents = [
-  { id: 1, month: 'OCT', day: '2',  title: 'Gandhi Ji Jayanti Celebration', desc: 'On 2nd October 2024, Guru Nanak College and NSS unit celebrated the 155th birth anniversary of Mahatma Gandhi.', color: '#e74c3c', img: '🎉' },
-  { id: 2, month: 'OCT', day: '1',  title: 'Swachh Raho, Swasth Raho', desc: 'On 01.10.2024, NSS unit organized a cleanliness awareness rally across the campus.', color: '#27ae60', img: '🌿' },
+  { id: 1, month: 'OCT', day: '2', title: 'Gandhi Ji Jayanti Celebration', desc: 'On 2nd October 2024, Guru Nanak College and NSS unit celebrated the 155th birth anniversary of Mahatma Gandhi.', color: '#e74c3c', img: '🎉' },
+  { id: 2, month: 'OCT', day: '1', title: 'Swachh Raho, Swasth Raho', desc: 'On 01.10.2024, NSS unit organized a cleanliness awareness rally across the campus.', color: '#27ae60', img: '🌿' },
   { id: 3, month: 'JUL', day: '11', title: 'Induction Programme for New Students', desc: 'On 11 July 2024, induction programme was held for newly enrolled students of Commerce department.', color: '#3498db', img: '🎓' },
   { id: 4, month: 'AUG', day: '29', title: 'National Sports Day Programme', desc: 'On 29 August 2024, National Sports Day was celebrated in memory of Major Dhyan Chand.', color: '#9b59b6', img: '🏅' },
 ]
 
 export const initialGallery = [
-  { id: 1, title: 'College Building',  category: 'Campus',           emoji: '🏫' },
-  { id: 2, title: 'Annual Function',   category: 'Cultural Activity', emoji: '🎭' },
-  { id: 3, title: 'NSS Camp',          category: 'NSS Programs',      emoji: '🌿' },
-  { id: 4, title: 'Sports Day',        category: 'Recent Programs',   emoji: '⚽' },
-  { id: 5, title: 'Library',           category: 'Campus',            emoji: '📚' },
-  { id: 6, title: 'Computer Lab',      category: 'Departments',       emoji: '💻' },
-  { id: 7, title: 'Seminar Hall',      category: 'Campus',            emoji: '🎤' },
-  { id: 8, title: 'Cultural Program',  category: 'Cultural Activity', emoji: '🎵' },
+  { id: 1, title: 'College Building', category: 'Campus', emoji: '🏫' },
+  { id: 2, title: 'Annual Function', category: 'Cultural Activity', emoji: '🎭' },
+  { id: 3, title: 'NSS Camp', category: 'NSS Programs', emoji: '🌿' },
+  { id: 4, title: 'Sports Day', category: 'Recent Programs', emoji: '⚽' },
+  { id: 5, title: 'Library', category: 'Campus', emoji: '📚' },
+  { id: 6, title: 'Computer Lab', category: 'Departments', emoji: '💻' },
+  { id: 7, title: 'Seminar Hall', category: 'Campus', emoji: '🎤' },
+  { id: 8, title: 'Cultural Program', category: 'Cultural Activity', emoji: '🎵' },
 ]
 
 export const initialPDFReports = [
   { id: 1, title: 'NAAC Self Study Report 2023', date: '2023-12-01', category: 'NAAC' },
-  { id: 2, title: 'Annual Report 2022-23',        date: '2023-09-15', category: 'Annual Report' },
-  { id: 3, title: 'IQAC Report 2022-23',          date: '2023-08-20', category: 'IQAC' },
-  { id: 4, title: 'UG Regulation (FYUGP)',        date: '2023-07-01', category: 'Regulations' },
+  { id: 2, title: 'Annual Report 2022-23', date: '2023-09-15', category: 'Annual Report' },
+  { id: 3, title: 'IQAC Report 2022-23', date: '2023-08-20', category: 'IQAC' },
+  { id: 4, title: 'UG Regulation (FYUGP)', date: '2023-07-01', category: 'Regulations' },
 ]
 
 // ✅ Single source of truth for departments (used in HomeFeatures + elsewhere)
 export const departments = [
-  { name: 'Department of Commerce',        emoji: '💼', icon: '💰', symbol: '📒', desc: 'Expertise in Finance, Accounts, and Trade.',                color: '#3498db' },
-  { name: 'Humanities & Social Science',   emoji: '📖', icon: '🎨', symbol: '🎭', desc: 'Exploring Humanity, Culture, and Social Science.',          color: '#e74c3c' },
-  { name: 'Computer Science (BCA)',        emoji: '💻', icon: '💻', symbol: '展开', desc: 'Bachelor of Computer Applications - Future of IT.',       color: '#27ae60' },
+  { name: 'Department of Commerce', emoji: '💼', icon: '💰', symbol: '📒', desc: 'Expertise in Finance, Accounts, and Trade.', color: '#3498db' },
+  { name: 'Humanities & Social Science', emoji: '📖', icon: '🎨', symbol: '🎭', desc: 'Exploring Humanity, Culture, and Social Science.', color: '#e74c3c' },
+  { name: 'Computer Science (BCA)', emoji: '💻', icon: '💻', symbol: '展开', desc: 'Bachelor of Computer Applications - Future of IT.', color: '#27ae60' },
   { name: 'Business Administration (BBA)', emoji: '📊', icon: '📈', symbol: '📊', desc: 'Bachelor of Business Administration - Master the Market.', color: '#9b59b6' },
 ]
 
 export const facilities = [
-  { name: 'Class Rooms',        emoji: '🏫' }, { name: 'Computer Lab',   emoji: '💻' },
-  { name: 'Library',            emoji: '📚' }, { name: 'Seminar Hall',   emoji: '🎤' },
-  { name: 'Auditorium',         emoji: '🎭' }, { name: 'Playground',     emoji: '⚽' },
-  { name: 'Badminton Court',    emoji: '🏸' }, { name: 'Gymnasium',      emoji: '🏋️' },
+  { name: 'Class Rooms', emoji: '🏫' }, { name: 'Computer Lab', emoji: '💻' },
+  { name: 'Library', emoji: '📚' }, { name: 'Seminar Hall', emoji: '🎤' },
+  { name: 'Auditorium', emoji: '🎭' }, { name: 'Playground', emoji: '⚽' },
+  { name: 'Badminton Court', emoji: '🏸' }, { name: 'Gymnasium', emoji: '🏋️' },
   { name: 'Digital Classrooms', emoji: '📱' }, { name: 'Cultural Dept.', emoji: '🎵' },
-  { name: 'Washroom (B)',       emoji: '🚿' }, { name: 'Washroom (G)',   emoji: '🚿' },
-  { name: 'Water Purifier',     emoji: '💧' }, { name: 'Canteen',        emoji: '🍽️' },
-  { name: 'Girls Common Room',  emoji: '👩' }, { name: 'Online Lecture', emoji: '📡' },
+  { name: 'Washroom (B)', emoji: '🚿' }, { name: 'Washroom (G)', emoji: '🚿' },
+  { name: 'Water Purifier', emoji: '💧' }, { name: 'Canteen', emoji: '🍽️' },
+  { name: 'Girls Common Room', emoji: '👩' }, { name: 'Online Lecture', emoji: '📡' },
 ]
 
 export const navLinks = [
@@ -85,31 +85,31 @@ export const navLinks = [
       {
         label: 'College Management',
         sub: [
-          { label: 'Principal',   href: '/about-us/college-management/principal' },
-          { label: 'Organogram',  href: '/about-us/college-management/organogram' },
-          { label: 'Presidents',  href: '/about-us/college-management/presidents' },
+          { label: 'Principal', href: '/about-us/college-management/principal' },
+          { label: 'Organogram', href: '/about-us/college-management/organogram' },
+          { label: 'Presidents', href: '/about-us/college-management/presidents' },
           { label: 'Secretaries', href: '/about-us/college-management/secretaries' },
         ]
       },
       {
         label: 'College Staff',
         sub: [
-          { label: 'Teaching Staff',     href: '/about-us/college-staff/teaching-staff' },
+          { label: 'Teaching Staff', href: '/about-us/college-staff/teaching-staff' },
           { label: 'Non-Teaching Staff', href: '/about-us/college-staff/non-teaching-staff' },
         ]
       },
       {
         label: 'Various Committees',
         sub: [
-          { label: 'Placement',    href: '/about-us/various-committees/placement' },
-          { label: "Women's Cell",  href: '/about-us/various-committees/womens-cell' },
-          { label: 'Grievance',    href: '/about-us/various-committees/grievance' },
+          { label: 'Placement', href: '/about-us/various-committees/placement' },
+          { label: "Women's Cell", href: '/about-us/various-committees/womens-cell' },
+          { label: 'Grievance', href: '/about-us/various-committees/grievance' },
           { label: 'Anti Ragging', href: '/about-us/various-committees/anti-ragging' },
-          { label: 'SC/ST',        href: '/about-us/various-committees/sc-st' },
-          { label: 'OBC',          href: '/about-us/various-committees/obc' },
-          { label: 'ICC',          href: '/about-us/various-committees/icc' },
-          { label: 'Minority',     href: '/about-us/various-committees/minority' },
-          { label: 'RUSA',         href: '/about-us/various-committees/rusa' },
+          { label: 'SC/ST', href: '/about-us/various-committees/sc-st' },
+          { label: 'OBC', href: '/about-us/various-committees/obc' },
+          { label: 'ICC', href: '/about-us/various-committees/icc' },
+          { label: 'Minority', href: '/about-us/various-committees/minority' },
+          { label: 'RUSA', href: '/about-us/various-committees/rusa' },
         ]
       },
       {
@@ -145,17 +145,17 @@ export const navLinks = [
       {
         label: 'Departments',
         sub: [
-          { label: 'BCA',             href: '/academics/departments/bca' },
-          { label: 'BBA',             href: '/academics/departments/bba' },
-          { label: 'Commerce',        href: '/academics/departments/commerce' },
-          { label: 'Social Science',  href: '/academics/departments/social-science' },
-          { label: 'Humanities',      href: '/academics/departments/humanities' },
+          { label: 'BCA', href: '/academics/departments/bca' },
+          { label: 'BBA', href: '/academics/departments/bba' },
+          { label: 'Commerce', href: '/academics/departments/commerce' },
+          { label: 'Social Science', href: '/academics/departments/social-science' },
+          { label: 'Humanities', href: '/academics/departments/humanities' },
         ]
       },
-      { label: 'Course Offered',    href: '/academics/course-offered' },
-      { label: 'Academic Calendar',  href: '/academics/academic-calendar' },
-      { label: 'Syllabus',           href: '/syllabus' },
-      { label: 'IQAC',              href: '/academics/iqac' },
+      { label: 'Course Offered', href: '/academics/course-offered' },
+      { label: 'Academic Calendar', href: '/academics/academic-calendar' },
+      { label: 'Syllabus', href: '/syllabus' },
+      { label: 'IQAC', href: '/academics/iqac' },
     ]
   },
   {
@@ -165,14 +165,14 @@ export const navLinks = [
       {
         label: 'Notification',
         sub: [
-          { label: 'Latest',        href: '/admission/notification/latest' },
+          { label: 'Latest', href: '/admission/notification/latest' },
           { label: 'Upcoming News', href: '/admission/notification/upcoming' },
         ]
       },
-      { label: 'Fee Structure',       href: '/admission/fee-structure' },
-      { label: 'Admission Rule',      href: '/admission/rule' },
-      { label: 'Document Required',   href: '/admission/document-required' },
-      { label: 'Intake Capacity',   href: '/admission/intake-capacity' },
+      { label: 'Fee Structure', href: '/admission/fee-structure' },
+      { label: 'Admission Rule', href: '/admission/rule' },
+      { label: 'Document Required', href: '/admission/document-required' },
+      { label: 'Intake Capacity', href: '/admission/intake-capacity' },
     ]
   },
   {
@@ -190,11 +190,11 @@ export const navLinks = [
         label: 'SSR 1st Cycle',
         sub: [
           { label: 'Cycle 1 Documents', href: '/naac/ssr-1st-cycle/cycle-1-documents' },
-          { label: 'Peer Team Report',  href: '/naac/ssr-1st-cycle/peer-team-report' },
+          { label: 'Peer Team Report', href: '/naac/ssr-1st-cycle/peer-team-report' },
         ]
       },
-      { label: 'AQAR',             href: '/naac/aqar' },
-      { label: 'NIRF',             href: '/naac/nirf' },
+      { label: 'AQAR', href: '/naac/aqar' },
+      { label: 'NIRF', href: '/naac/nirf' },
       { label: 'Perspective Plan', href: '/naac/perspective-plan' },
     ]
   },
@@ -202,14 +202,14 @@ export const navLinks = [
     label: 'Activity',
     href: '/',
     sub: [
-      { label: 'NSS',         href: '/activity/nss' },
-      { label: 'NCC',         href: '/activity/ncc' },
-      { label: 'Workshop',    href: '/activity/workshop' },
+      { label: 'NSS', href: '/activity/nss' },
+      { label: 'NCC', href: '/activity/ncc' },
+      { label: 'Workshop', href: '/activity/workshop' },
       { label: 'Game & Sports', href: '/activity/games-sports' },
       {
         label: 'Collaboration',
         sub: [
-          { label: 'Rotaract Club',    href: '/activity/collaboration/rotaract-club' },
+          { label: 'Rotaract Club', href: '/activity/collaboration/rotaract-club' },
           { label: 'Sadbhavana Diwas', href: '/activity/collaboration/sadbhavana-diwas' },
         ]
       },
@@ -227,7 +227,7 @@ export const navLinks = [
         ]
       },
       { label: 'College Library', href: '/publication/college-library' },
-      { label: 'E-Magazine',      href: '/publication/e-magazine' },
+      { label: 'E-Magazine', href: '/publication/e-magazine' },
       {
         label: 'SSS Report',
         sub: [
@@ -244,23 +244,23 @@ export const navLinks = [
       {
         label: 'Campus Visuals',
         sub: [
-          { label: 'Bhuda',               href: '/campus/visuals/bhuda' },
-          { label: 'Bank More',           href: '/campus/visuals/bank-more' },
+          { label: 'Bhuda', href: '/campus/visuals/bhuda' },
+          { label: 'Bank More', href: '/campus/visuals/bank-more' },
           { label: 'Vocational Building', href: '/campus/visuals/vocational-building' },
         ]
       },
       { label: 'Infrastructure', href: '/campus/infrastructure' },
-      { label: 'Classroom',      href: '/campus/classroom' },
-      { label: 'ICT Rooms',      href: '/campus/ict-rooms' },
-      { label: 'Green Campus',   href: '/campus/green-campus' },
+      { label: 'Classroom', href: '/campus/classroom' },
+      { label: 'ICT Rooms', href: '/campus/ict-rooms' },
+      { label: 'Green Campus', href: '/campus/green-campus' },
     ]
   },
   {
     label: 'Gallery',
     href: '/gallery',
     sub: [
-      { label: 'Photo Gallery',  href: '/gallery/photos' },
-      { label: 'Video Gallery',  href: '/gallery/videos' },
+      { label: 'Photo Gallery', href: '/gallery/photos' },
+      { label: 'Video Gallery', href: '/gallery/videos' },
     ]
   },
   { label: 'Contact Us', href: '/contact' },
