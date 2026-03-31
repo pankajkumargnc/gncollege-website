@@ -70,11 +70,16 @@ export default function Breadcrumbs() {
   if (pathnames.length === 0 || location.pathname.startsWith('/admin')) return null;
 
   return (
-    <div style={{
-      width: '100%',
-      background: '#fff',
-      borderBottom: '1px solid #e2e8f0',
-    }}>
+    <nav 
+      aria-label="Breadcrumb"
+      itemScope 
+      itemType="https://schema.org/BreadcrumbList"
+      style={{
+        width: '100%',
+        background: '#fff',
+        borderBottom: '1px solid #e2e8f0',
+      }}
+    >
       <div style={{
         maxWidth: '1400px', 
         margin: '0 auto',
@@ -87,17 +92,29 @@ export default function Breadcrumbs() {
       }}>
         
         {/* Home Link */}
-        <Link to="/" style={{
-          display: 'flex',
-          alignItems: 'center',
-          color: COLORS.navy,
-          textDecoration: 'none',
-          fontWeight: 700,
-          gap: '5px'
-        }}>
-          <span style={{ fontSize: '15px', display: 'flex', alignItems: 'center' }}>🏠</span>
-          <span style={{ display: 'flex', alignItems: 'center', paddingTop: '1px' }}>Home</span>
-        </Link>
+        <span 
+          itemProp="itemListElement" 
+          itemScope 
+          itemType="https://schema.org/ListItem"
+          style={{ display: 'flex', alignItems: 'center' }}
+        >
+          <Link 
+            itemProp="item" 
+            to="/" 
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              color: COLORS.navy,
+              textDecoration: 'none',
+              fontWeight: 700,
+              gap: '5px'
+            }}
+          >
+            <span style={{ fontSize: '15px', display: 'flex', alignItems: 'center' }}>🏠</span>
+            <span itemProp="name" style={{ display: 'flex', alignItems: 'center', paddingTop: '1px' }}>Home</span>
+          </Link>
+          <meta itemProp="position" content="1" />
+        </span>
 
         {/* Dynamic Breadcrumb Path */}
         {pathnames.map((value, index) => {
@@ -121,37 +138,51 @@ export default function Breadcrumbs() {
                 ›
               </span>
               
-              {/* Text */}
-              {isLast ? (
-                <span style={{
-                  color: COLORS.gold,
-                  fontWeight: 800,
-                  display: 'flex',
-                  alignItems: 'center',
-                  paddingTop: '1px'
-                }}>
-                  {formatName(value)}
-                </span>
-              ) : (
-                <Link to={finalTo} style={{
-                  color: COLORS.navy,
-                  textDecoration: 'none',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  paddingTop: '1px',
-                  transition: 'color 0.2s'
-                }}
-                onMouseEnter={e => e.target.style.color = COLORS.gold}
-                onMouseLeave={e => e.target.style.color = COLORS.navy}
-                >
-                  {formatName(value)}
-                </Link>
-              )}
+              {/* ListItem */}
+              <span 
+                itemProp="itemListElement" 
+                itemScope 
+                itemType="https://schema.org/ListItem"
+                style={{ display: 'flex', alignItems: 'center' }}
+              >
+                {isLast ? (
+                  <span 
+                    itemProp="name"
+                    style={{
+                      color: COLORS.gold,
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      paddingTop: '1px'
+                    }}
+                  >
+                    {formatName(value)}
+                  </span>
+                ) : (
+                  <Link 
+                    itemProp="item"
+                    to={finalTo} 
+                    style={{
+                      color: COLORS.navy,
+                      textDecoration: 'none',
+                      fontWeight: 600,
+                      display: 'flex',
+                      alignItems: 'center',
+                      paddingTop: '1px',
+                      transition: 'color 0.2s'
+                    }}
+                    onMouseEnter={e => e.target.style.color = COLORS.gold}
+                    onMouseLeave={e => e.target.style.color = COLORS.navy}
+                  >
+                    <span itemProp="name">{formatName(value)}</span>
+                  </Link>
+                )}
+                <meta itemProp="position" content={index + 2} />
+              </span>
             </React.Fragment>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }

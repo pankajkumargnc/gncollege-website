@@ -93,7 +93,44 @@ body {
   --z-modal:     600;
   --z-toast:     700;
   --z-splash:    800;
+
+  /* Breakpoint Scale — 4-tier system */
+  --bp-xs:      320px;  /* Ultra-small phones */
+  --bp-sm:      480px;  /* Standard phones */
+  --bp-md:      768px;  /* Tablets */
+  --bp-lg:      1024px; /* Small laptops / Large tablets */
+  --bp-xl:      1280px; /* Desktops */
 }
+
+/* 🚀 UNIVERSAL LAYOUT UTILITIES ── To replace repetitive inline styles ── */
+.uni-section-container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+.uni-glass-card {
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition);
+}
+
+.uni-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.uni-heading-lg {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: var(--space-md);
+}
+
 
 /* ─────────────────────────────────────────────────────────────
    DARK MODE OVERRIDES (Mapped strictly via [data-theme="dark"])

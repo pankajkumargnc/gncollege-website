@@ -11,7 +11,7 @@
 ```
 Project:    GNC College Website
 Owner:      Pankaj Kumar (sole developer)
-College:    Guru Nanak College, Dhanbad, Jharkhand
+College:    Guru Nanak College, Dhanbad, Jharkhand (Est. 1970)
 Repo:       https://github.com/pankajkumargnc/gncollege-website
 Live URL:   https://pankajkumargnc.github.io/gncollege-website
 Stack:      React 18 + Firebase 12 + Vite 7 + PWA
