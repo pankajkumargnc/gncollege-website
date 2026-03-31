@@ -141,15 +141,8 @@ function AboutSidebar() {
 }
 
 function DataMarker({ label }) {
-  return (
-    <div style={{
-      margin: '16px 0', padding: '10px 16px',
-      background: '#fffbeb', border: '1.5px dashed #f59e0b',
-      borderRadius: 10, color: '#92400e', fontSize: 13, fontWeight: 700,
-    }}>
-      ✏️ DATA YAHAN DALEIN: {label}
-    </div>
-  );
+  // HIDDEN FOR PRODUCTION
+  return null;
 }
 
 function PageLayout({ children }) {
@@ -320,13 +313,12 @@ export function PrincipalMessage() {
               <div style={{ textAlign:'center', flexShrink:0 }}>
                 <DataMarker label="Principal ki photo ka path — src mein dalein" />
                 <div style={{ width:180, height:180, borderRadius:'50%', border:`6px solid ${G}`, boxShadow:'0 10px 30px rgba(15,35,71,0.2)', overflow:'hidden', margin:'0 auto', background:'#f1f5f9', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <span style={{ fontSize:72 }}>👨‍💼</span>
+                  <img src={`${import.meta.env.BASE_URL}images/principal.webp`} alt="Principal" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<span style=\"font-size:72px\">👨‍💼</span>'; }} />
                 </div>
-                <DataMarker label="Principal ka naam, qualification, experience" />
-                <div style={{ marginTop:14, fontWeight:800, fontSize:18, color:N }}>Prof. [Principal Name]</div>
-                <div style={{ fontSize:13, color:'#64748b', marginTop:4 }}>Principal</div>
+                <div style={{ marginTop:14, fontWeight:800, fontSize:18, color:N }}>Sanjay Prasad</div>
+                <div style={{ fontSize:13, color:'#64748b', marginTop:4 }}>Secretary</div>
                 <div style={{ fontSize:13, color:'#64748b' }}>Guru Nanak College, Dhanbad</div>
-                <div style={{ fontSize:12, color:'#94a3b8', marginTop:4 }}>[M.A., Ph.D.]</div>
+
               </div>
               <div style={{ flex:1, minWidth:260 }}>
                 <div style={{ borderLeft:`5px solid ${G}`, paddingLeft:24, marginBottom:24 }}>

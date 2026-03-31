@@ -142,6 +142,13 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen }) => {
         .soc-icon:hover { transform: translateY(-6px); border-color: transparent; color: #fff; }
         .soc-icon:hover::before { top: 0; border-radius: 0; }
         
+        /* ── Individual Brand Colors ── */
+        .soc-icon.fb:hover::before { background: #1877F2; }
+        .soc-icon.x:hover::before  { background: #000000; }
+        .soc-icon.li:hover::before { background: #0A66C2; }
+        .soc-icon.yt:hover::before { background: #FF0000; }
+        .soc-icon.wa:hover::before { background: #25D366; }
+        
         @media(max-width: 768px) {
           .tb-wrap { flex-direction: column; gap: 12px; padding: 10px 15px; }
           .tb-right-group { width: 100%; justify-content: center; }

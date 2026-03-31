@@ -211,7 +211,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                   whiteSpace: 'nowrap',
                   textAlign: 'left',
                 }}>
-                  A Sikh Minority Degree College Established &amp; Managed by Gurudwara Prabhandhak Committee, Dhanbad.
+                  A Sikh Minority Degree College Established &amp; Managed by Gurudwara Prabandhak Committee, Dhanbad.
                 </p>
               )}
 
@@ -270,7 +270,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
             backdropFilter: isMobile && isScrolled ? 'blur(16px)' : 'none',
             
             padding: isMobile ? '10px 20px 20px' : 0,
-            gap: isMobile ? 10 : 0,
+            gap: isMobile ? 10 : '5px',
             boxShadow: isMobile && menuOpen ? '0 10px 20px rgba(0,0,0,.15)' : 'none',
             maxHeight: isMobile ? '80vh' : 'auto',
             overflowY: isMobile ? 'auto' : 'visible',
@@ -280,6 +280,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
             marginRight: isMobile ? '0' : '10px',
             borderTop: isMobile && menuOpen ? '1px solid #eee' : 'none',
             zIndex: 250,
+            flexWrap: isMobile ? 'nowrap' : 'wrap'
           }}>
             {(navLinks || []).map(l0 => (
               <div key={l0.label}
@@ -308,9 +309,10 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                     className="nav-hover-link"
                     style={{
                       color: isDark ? '#e2e8f0' : COLORS.navy,
-                      padding: isMobile ? '14px 0' : '16px 11px',
+                      padding: isMobile ? '14px 0' : '12px 6px',
                       display: 'block',
-                      fontSize: 13.5, fontWeight: 700,
+                      fontSize: 'clamp(12px, 1vw, 13.5px)', 
+                      fontWeight: 700,
                       whiteSpace: 'nowrap',
                       textDecoration: 'none',
                       width: '100%',

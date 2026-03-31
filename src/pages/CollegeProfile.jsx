@@ -73,13 +73,13 @@ const CollegeProfile = () => {
             <h2 className="section-heading">About the College</h2>
           <div className="heading-underline"></div>
           <p className="rich-text-content">
-            Initially the college got affiliated to the Ranchi University – Ranchi since 1970 the year it was stared. But with the passage of time, Binod Bihari Mahto Koylanchal University, Dhanbad came into existence in 2017; and the affiliation of the college got transferred to this new University in 2017.
+            Initially the college got affiliated to the Ranchi University – Ranchi since 1970 the year it was started. But with the passage of time, Binod Bihari Mahto Koylanchal University, Dhanbad came into existence in 2017; and the affiliation of the college got transferred to this new University in 2017.
           </p>
           <p className="rich-text-content mt-4">
             At present, the college has got permanent affiliation with Binod Bihari Mahto Koylanchal University, Dhanbad in the faculties of Humanities, Social Sciences, commerce and such vocational courses as Bachelor of Computer Applications. The college has got “Deficit Grant College Status” by the government of Jharkhand. Also the college is registered u/s 2F and 12B of the UGC Act.
           </p>
           <p className="rich-text-content mt-4">
-            The main aim and objective behind sponsoring this college was to impart value - based teaching to the young men and women of Dhanbad. The college attaches great importance to moral teaching. The college does not merely offer teaching in such subject as would enable young students to earn their bread and butter, but it also emphasizes grooming them into worthy (morally sound) citizens.
+            The main aim and objective behind sponsoring this college was to impart value-based teaching to the young men and women of Dhanbad. The college attaches great importance to moral teaching. The college does not merely offer teaching in such subjects as would enable young students to earn their bread and butter, but it also emphasizes grooming them into worthy (morally sound) citizens.
           </p>
           </div>
 
@@ -90,14 +90,14 @@ const CollegeProfile = () => {
           
           <div className="grid-2-col gap-6">
              <div className="campus-box">
-                <h3 style={{fontSize: '1.5rem', color: 'var(--primary-navy)', fontWeight: '700', marginBottom: '10px'}}>1. Bank More Campus (Girls Wing)</h3>
+                <h3 style={{fontSize: 'var(--h3)', color: 'var(--navy)', fontWeight: '700', marginBottom: '10px'}}>1. Bank More Campus (Girls Wing)</h3>
                 <p className="rich-text-content">
                   The women’s wing of the College was started in the year 2000 in the Bank More Campus of the College in the morning hours. As an exclusive centre of teaching for girls, this wing has earned high reputation among stakeholders during the last few years. In the Women’s wing also, teaching is imparted for B.A./B.Com. (Hons/General) Course.
                 </p>
              </div>
 
              <div className="campus-box">
-                <h3 style={{fontSize: '1.5rem', color: 'var(--primary-navy)', fontWeight: '700', marginBottom: '10px'}}>2. Bhuda Campus (Boys Wing)</h3>
+                <h3 style={{fontSize: 'var(--h3)', color: 'var(--navy)', fontWeight: '700', marginBottom: '10px'}}>2. Bhuda Campus (Boys Wing)</h3>
                 <p className="rich-text-content">
                   The main building – the Boys’ wing of the College is situated at Bhuda. The main building is spaciously designed in an airy surrounding quite suitable for the environment of an academic institution. The present campus has been so planned as to cater to the needs of the students for a long time.
                 </p>
