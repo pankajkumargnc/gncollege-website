@@ -1,9 +1,9 @@
 // src/components/Navbar.jsx
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, memo } from 'react'
 import { Link } from 'react-router-dom'
 import { COLORS } from '../styles/colors'
 
-export default function Navbar({ onAdminClick, navLinks }) {
+const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
   const [openL1, setOpenL1] = useState(null)
   const [openL2, setOpenL2] = useState(null)
   const [openL3, setOpenL3] = useState(null)
@@ -490,4 +490,6 @@ export default function Navbar({ onAdminClick, navLinks }) {
       </nav>
     </>
   )
-}
+});
+
+export default Navbar;

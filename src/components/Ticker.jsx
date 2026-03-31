@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { COLORS } from '../styles/colors';
 
-export default function Ticker({ items }) {
+const Ticker = memo(function Ticker({ items }) {
   // Original Logic: Agar items nahi hain toh kuch render mat karo
   if (!items || items.length === 0) return null;
 
@@ -215,4 +215,6 @@ export default function Ticker({ items }) {
       </ul>
     </div>
   );
-}
+});
+
+export default Ticker;

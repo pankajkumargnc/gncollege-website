@@ -1,6 +1,7 @@
 // src/components/home/NotificationSection.jsx
 import { useRef, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import { COLORS } from '../../styles/colors';
 import PDFModal from '../PDFModal';
 import { useDriveDocs } from '../../hooks/useDriveDocs';
@@ -249,7 +250,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
                         <span className="ns-type-badge">{n.type || 'Notice'}</span>
                       </div>
                       <div className="ns-title">
-                        <div dangerouslySetInnerHTML={{ __html: n.text }} />
+                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(n.text || '') }} />
                         {isNew && <span style={{ color: '#ef4444', fontWeight: 900 }}>[NEW]</span>}
                       </div>
                       {n.link && <a href={n.link} target="_blank" rel="noreferrer" className="ns-link">View Document →</a>}
@@ -279,7 +280,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
                         <span className="ns-type-badge" style={{ color: '#e11d48' }}>{n.type || 'News'}</span>
                       </div>
                       <div className="ns-title">
-                        <div dangerouslySetInnerHTML={{ __html: n.text || n.title }} />
+                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(n.text || n.title || '') }} />
                         {isNew && <span style={{ color: '#ef4444', fontWeight: 900 }}>[NEW]</span>}
                       </div>
                       {n.link && <a href={n.link} target="_blank" rel="noreferrer" className="ns-link">Read Story →</a>}

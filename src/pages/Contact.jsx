@@ -78,7 +78,7 @@ export default function Contact() {
         .header-title span { color:${COLORS.gold}; }
         .header-sub { font-size:16px; color:#cbd5e1; margin:15px auto 0; max-width:600px; animation:fadeInUp .6s ease-out .2s forwards; opacity:0; line-height:1.6; }
 
-        .campus-container { max-width:1200px; margin:-120px auto 40px; padding:0 20px; display:grid; grid-template-columns:repeat(auto-fit,minmax(400px,1fr)); gap:40px; position:relative; z-index:10; }
+        .campus-container { max-width:1200px; margin:-120px auto 40px; padding:0 20px; display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%, 400px),1fr)); gap:40px; position:relative; z-index:10; }
         .campus-card { background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 15px 40px rgba(0,0,0,0.07); border:1px solid #e2e8f0; transition:all .4s ease; opacity:0; animation:fadeInUp .8s ease-out forwards; display:flex; flex-direction:column; }
         .campus-card:hover { transform:translateY(-10px); box-shadow:0 25px 50px rgba(15,35,71,.12); border-color:${COLORS.gold}; }
         .card-1 { animation-delay:.3s; } .card-2 { animation-delay:.5s; }

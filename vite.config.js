@@ -22,6 +22,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
+          // React core — rarely changes, long-term cached
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
           // Firebase
           "firebase-app"  : ["firebase/app"],
           "firebase-auth" : ["firebase/auth"],

@@ -146,7 +146,7 @@ export function FeeStructure() {
             ))}
           </div>
 
-          <div style={{ background: '#fff', borderRadius: 24, padding: '30px 40px', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', overflowX: 'auto' }}>
+          <div style={{ background: '#fff', borderRadius: 24, padding: '30px 40px', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
             
             {activeTab === 'UG' && (
               <>

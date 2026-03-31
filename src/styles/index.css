@@ -82,6 +82,17 @@ body {
   --shadow-lg: 0 8px 32px rgba(15,35,71,.1);
   --shadow-xl: 0 16px 48px rgba(15,35,71,.14);
   --shadow-gold: 0 4px 18px rgba(244,160,35,.3);
+
+  /* Z-Index Scale — Standardized layers for new components */
+  --z-base:      1;
+  --z-sidebar:   100;
+  --z-sticky:    200;
+  --z-navbar:    300;
+  --z-dropdown:  400;
+  --z-overlay:   500;
+  --z-modal:     600;
+  --z-toast:     700;
+  --z-splash:    800;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -574,35 +585,7 @@ h1, h2, h3,
 [data-theme="dark"] .uni-h { color: #fff !important; }
 [data-theme="dark"] .uni-sub { color: #94a3b8 !important; }
 
-.uni-label {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(15, 35, 71, 0.05); border: 1px solid rgba(15, 35, 71, 0.12);
-    color: var(--navy); padding: 6px 18px; border-radius: 50px;
-    font-size: clamp(10px, 0.8vw, 12px); font-weight: 800; letter-spacing: 2.5px;
-    text-transform: uppercase; margin-bottom: 14px;
-    transition: all 0.25s ease;
-}
-.uni-label:hover { background: rgba(15, 35, 71, 0.1); transform: translateY(-1px); }
-.uni-h {
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
-    font-size: clamp(32px, 5vw, 54px) !important;
-    font-weight: 800 !important;
-    color: var(--navy) !important;
-    line-height: 1.1 !important;
-    letter-spacing: -1.5px !important;
-    margin: 0 0 16px !important;
-    text-align: center !important;
-}
-.uni-h span { color: var(--gold) !important; }
-.uni-sub {
-    color: #64748b !important; font-size: clamp(14px, 1vw, 16px) !important;
-    max-width: 580px !important; line-height: 1.7 !important;
-    margin: 0 auto !important; text-align: center !important;
-}
 
-[data-theme="dark"] .uni-label { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); color: #fff; }
-[data-theme="dark"] .uni-h { color: #fff !important; }
-[data-theme="dark"] .uni-sub { color: #94a3b8 !important; }
 
 /* ═══════════════════════════════════════
    6. ANIMATIONS

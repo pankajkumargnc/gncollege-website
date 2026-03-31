@@ -1,10 +1,10 @@
 // src/components/AlertBanner.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { collection, query, onSnapshot, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 
-export default function AlertBanner() {
+const AlertBanner = memo(function AlertBanner() {
   const [alerts, setAlerts] = useState([]);
   const [dismissed, setDismissed] = useState(() => {
     try { return JSON.parse(sessionStorage.getItem('gnc_dismissed_alerts') || '[]'); }
@@ -82,4 +82,6 @@ export default function AlertBanner() {
       )}
     </>
   );
-}
+});
+
+export default AlertBanner;
