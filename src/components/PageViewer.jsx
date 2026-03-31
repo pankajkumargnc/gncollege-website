@@ -9,9 +9,11 @@ import { db } from '../firebase';
 import DOMPurify from 'dompurify';
 import { useParams } from 'react-router-dom';
 import PDFModal from './PDFModal'; 
-import GalleryPage from '../pages/GalleryPage';
-import EventsPage from '../pages/EventsPage';
-import StaffPage from '../pages/StaffPage';
+
+// ── Lazy load sub-pages used in shortcodes to avoid circular/dual-import warnings ──
+const GalleryPage = React.lazy(() => import('../pages/GalleryPage'));
+const EventsPage  = React.lazy(() => import('../pages/EventsPage'));
+const StaffPage   = React.lazy(() => import('../pages/StaffPage'));
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PREMIUM PROSE CSS — injected once, styles ALL Jodit HTML output
@@ -504,9 +506,9 @@ const Skeleton = () => (
 const ShortcodeRenderer = ({ code, gallery, events, faculties }) => {
   const [tag, val] = code.replace('[', '').replace(']', '').split(':');
   
-  if (tag === 'GALLERY') return <GalleryPage gallery={gallery} headless />;
-  if (tag === 'EVENTS')  return <EventsPage headless />; 
-  if (tag === 'STAFF')   return <StaffPage faculties={faculties} type={val === 'non-teaching' ? 'non-teaching-staff' : 'teaching-staff'} headless />;
+  if (tag === 'GALLERY') return <React.Suspense fallback={<div style={{padding:20}}>Loading Gallery...</div>}><GalleryPage gallery={gallery} headless /></React.Suspense>;
+  if (tag === 'EVENTS')  return <React.Suspense fallback={<div style={{padding:20}}>Loading Events...</div>}><EventsPage headless /></React.Suspense>; 
+  if (tag === 'STAFF')   return <React.Suspense fallback={<div style={{padding:20}}>Loading Staff...</div>}><StaffPage faculties={faculties} type={val === 'non-teaching' ? 'non-teaching-staff' : 'teaching-staff'} headless /></React.Suspense>;
   if (tag === 'TABLE')   return <div style={{ background: '#fff', padding: 20, borderRadius: 12, border: '1px dashed #ccc', textAlign: 'center', fontSize: 13 }}>[ Table Placeholder - Use Jodit Table Tool instead ]</div>;
 
   return <span style={{ color: 'red', fontWeight: 800 }}>{code}</span>;
