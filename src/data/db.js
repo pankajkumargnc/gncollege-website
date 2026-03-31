@@ -79,30 +79,16 @@ export const navLinks = [
     label: 'About Us',
     href: '/',
     sub: [
-      { label: 'College Profile', href: '/about-us/college-profile' },
-      { label: 'Vision & Mission', href: '/about-us/vision-mission' },
       { label: 'Principal Message', href: '/about-us/principal-message' },
+      { label: 'Vision & Mission', href: '/about-us/vision-mission' },
+      { label: 'College Profile', href: '/about-us/college-profile' },
       {
         label: 'College Management',
         sub: [
+          { label: 'Principal',   href: '/about-us/college-management/principal' },
           { label: 'Organogram',  href: '/about-us/college-management/organogram' },
           { label: 'Presidents',  href: '/about-us/college-management/presidents' },
           { label: 'Secretaries', href: '/about-us/college-management/secretaries' },
-          { label: 'Principal',   href: '/about-us/college-management/principal' },
-        ]
-      },
-      {
-        label: 'Various Committees',
-        sub: [
-          { label: "Women's Cell",  href: '/about-us/various-committees/womens-cell' },
-          { label: 'Anti Ragging', href: '/about-us/various-committees/anti-ragging' },
-          { label: 'SC/ST',        href: '/about-us/various-committees/sc-st' },
-          { label: 'OBC',          href: '/about-us/various-committees/obc' },
-          { label: 'Grievance',    href: '/about-us/various-committees/grievance' },
-          { label: 'ICC',          href: '/about-us/various-committees/icc' },
-          { label: 'Minority',     href: '/about-us/various-committees/minority' },
-          { label: 'Placement',    href: '/about-us/various-committees/placement' },
-          { label: 'RUSA',         href: '/about-us/various-committees/rusa' },
         ]
       },
       {
@@ -113,14 +99,28 @@ export const navLinks = [
         ]
       },
       {
+        label: 'Various Committees',
+        sub: [
+          { label: 'Placement',    href: '/about-us/various-committees/placement' },
+          { label: "Women's Cell",  href: '/about-us/various-committees/womens-cell' },
+          { label: 'Grievance',    href: '/about-us/various-committees/grievance' },
+          { label: 'Anti Ragging', href: '/about-us/various-committees/anti-ragging' },
+          { label: 'SC/ST',        href: '/about-us/various-committees/sc-st' },
+          { label: 'OBC',          href: '/about-us/various-committees/obc' },
+          { label: 'ICC',          href: '/about-us/various-committees/icc' },
+          { label: 'Minority',     href: '/about-us/various-committees/minority' },
+          { label: 'RUSA',         href: '/about-us/various-committees/rusa' },
+        ]
+      },
+      {
         label: 'Regulations',
         sub: [
           {
             label: 'B.B.M.K. University Dhanbad',
             sub: [
-              { label: 'UG Regulation (CBCS)', href: '/about-us/regulations/bbmku-ug' },
-              { label: 'UG Circular (Eligibility 2020-23)', href: '/about-us/regulations/bbmku-circular' },
               { label: 'FYUGP (NEP-2020)', href: '/about-us/regulations/fyugp-nep' },
+              { label: 'UG Circular (Eligibility 2020-23)', href: '/about-us/regulations/bbmku-circular' },
+              { label: 'UG Regulation (CBCS)', href: '/about-us/regulations/bbmku-ug' },
             ]
           },
           { label: 'College Affiliation Paper B.B.M.K.U.', href: '/about-us/regulations/college-affiliation' },
@@ -128,12 +128,111 @@ export const navLinks = [
           {
             label: 'V.B.U. Hazaribag',
             sub: [
-              { label: 'UG Regulation 2015', href: '/about-us/regulations/vbu-ug' },
               { label: 'BCA Regulation', href: '/about-us/regulations/vbu-bca' },
+              { label: 'UG Regulation 2015', href: '/about-us/regulations/vbu-ug' },
             ]
           },
           { label: 'ByeLaws', href: '/about-us/regulations/college-byelaws' },
           { label: 'Minority Exemption', href: '/about-us/regulations/minority-exemption' },
+        ]
+      },
+    ]
+  },
+  {
+    label: 'Academics',
+    href: '/',
+    sub: [
+      {
+        label: 'Departments',
+        sub: [
+          { label: 'BCA',             href: '/academics/departments/bca' },
+          { label: 'BBA',             href: '/academics/departments/bba' },
+          { label: 'Commerce',        href: '/academics/departments/commerce' },
+          { label: 'Social Science',  href: '/academics/departments/social-science' },
+          { label: 'Humanities',      href: '/academics/departments/humanities' },
+        ]
+      },
+      { label: 'Course Offered',    href: '/academics/course-offered' },
+      { label: 'Academic Calendar',  href: '/academics/academic-calendar' },
+      { label: 'Syllabus',           href: '/syllabus' },
+      { label: 'IQAC',              href: '/academics/iqac' },
+    ]
+  },
+  {
+    label: 'Admission',
+    href: '/',
+    sub: [
+      {
+        label: 'Notification',
+        sub: [
+          { label: 'Latest',        href: '/admission/notification/latest' },
+          { label: 'Upcoming News', href: '/admission/notification/upcoming' },
+        ]
+      },
+      { label: 'Fee Structure',       href: '/admission/fee-structure' },
+      { label: 'Admission Rule',      href: '/admission/rule' },
+      { label: 'Document Required',   href: '/admission/document-required' },
+      { label: 'Intake Capacity',   href: '/admission/intake-capacity' },
+    ]
+  },
+  {
+    label: 'NAAC',
+    href: '/',
+    sub: [
+      {
+        label: 'SSR 2nd Cycle',
+        sub: [
+          { label: 'Cycle 2 Documents', href: '/naac/ssr-2nd-cycle/cycle-2-documents' },
+          { label: 'Executive Summary', href: '/naac/ssr-2nd-cycle/executive-summary' },
+        ]
+      },
+      {
+        label: 'SSR 1st Cycle',
+        sub: [
+          { label: 'Cycle 1 Documents', href: '/naac/ssr-1st-cycle/cycle-1-documents' },
+          { label: 'Peer Team Report',  href: '/naac/ssr-1st-cycle/peer-team-report' },
+        ]
+      },
+      { label: 'AQAR',             href: '/naac/aqar' },
+      { label: 'NIRF',             href: '/naac/nirf' },
+      { label: 'Perspective Plan', href: '/naac/perspective-plan' },
+    ]
+  },
+  {
+    label: 'Activity',
+    href: '/',
+    sub: [
+      { label: 'NSS',         href: '/activity/nss' },
+      { label: 'NCC',         href: '/activity/ncc' },
+      { label: 'Workshop',    href: '/activity/workshop' },
+      { label: 'Game & Sports', href: '/activity/games-sports' },
+      {
+        label: 'Collaboration',
+        sub: [
+          { label: 'Rotaract Club',    href: '/activity/collaboration/rotaract-club' },
+          { label: 'Sadbhavana Diwas', href: '/activity/collaboration/sadbhavana-diwas' },
+        ]
+      },
+    ]
+  },
+  {
+    label: 'Publication',
+    href: '/',
+    sub: [
+      {
+        label: 'Examination Results',
+        sub: [
+          { label: 'Result 2024', href: '/publication/examination-results/2024' },
+          { label: 'Result 2023', href: '/publication/examination-results/2023' },
+        ]
+      },
+      { label: 'College Library', href: '/publication/college-library' },
+      { label: 'E-Magazine',      href: '/publication/e-magazine' },
+      {
+        label: 'SSS Report',
+        sub: [
+          { label: 'Report 2023-24', href: '/publication/sss-report/2023-24' },
+          { label: 'Report 2022-23', href: '/publication/sss-report/2022-23' },
         ]
       },
     ]
@@ -156,106 +255,6 @@ export const navLinks = [
       { label: 'Green Campus',   href: '/campus/green-campus' },
     ]
   },
-  {
-    label: 'Academics',
-    href: '/',
-    sub: [
-      { label: 'IQAC',              href: '/academics/iqac' },
-      { label: 'Course Offered',    href: '/academics/course-offered' },
-      {
-        label: 'Departments',
-        sub: [
-          { label: 'Humanities',      href: '/academics/departments/humanities' },
-          { label: 'Social Science',  href: '/academics/departments/social-science' },
-          { label: 'Commerce',        href: '/academics/departments/commerce' },
-          { label: 'BCA',             href: '/academics/departments/bca' },
-          { label: 'BBA',             href: '/academics/departments/bba' },
-        ]
-      },
-      { label: 'Syllabus',           href: '/syllabus' },
-      { label: 'Academic Calendar',  href: '/academics/academic-calendar' },
-    ]
-  },
-  {
-    label: 'Admission',
-    href: '/',
-    sub: [
-      { label: 'Admission Rule',      href: '/admission/rule' },
-      { label: 'Document Required',   href: '/admission/document-required' },
-      { label: 'Fee Structure',       href: '/admission/fee-structure' },
-      {
-        label: 'Notification',
-        sub: [
-          { label: 'Latest',        href: '/admission/notification/latest' },
-          { label: 'Upcoming News', href: '/admission/notification/upcoming' },
-        ]
-      },
-      { label: 'Intake Capacity',   href: '/admission/intake-capacity' },
-    ]
-  },
-  {
-    label: 'Activity',
-    href: '/',
-    sub: [
-      { label: 'NSS',         href: '/activity/nss' },
-      { label: 'NCC',         href: '/activity/ncc' },
-      { label: 'Workshop',    href: '/activity/workshop' },
-      { label: 'Game & Sports', href: '/activity/games-sports' },
-      {
-        label: 'Collaboration',
-        sub: [
-          { label: 'Rotaract Club',    href: '/activity/collaboration/rotaract-club' },
-          { label: 'Sadbhavana Diwas', href: '/activity/collaboration/sadbhavana-diwas' },
-        ]
-      },
-    ]
-  },
-  {
-    label: 'NAAC',
-    href: '/',
-    sub: [
-      {
-        label: 'SSR 1st Cycle',
-        sub: [
-          { label: 'Cycle 1 Documents', href: '/naac/ssr-1st-cycle/cycle-1-documents' },
-          { label: 'Peer Team Report',  href: '/naac/ssr-1st-cycle/peer-team-report' },
-        ]
-      },
-      {
-        label: 'SSR 2nd Cycle',
-        sub: [
-          { label: 'Cycle 2 Documents', href: '/naac/ssr-2nd-cycle/cycle-2-documents' },
-          { label: 'Executive Summary', href: '/naac/ssr-2nd-cycle/executive-summary' },
-        ]
-      },
-      { label: 'AQAR',             href: '/naac/aqar' },
-      { label: 'NIRF',             href: '/naac/nirf' },
-      { label: 'Perspective Plan', href: '/naac/perspective-plan' },
-    ]
-  },
-  {
-    label: 'Publication',
-    href: '/',
-    sub: [
-      { label: 'College Library', href: '/publication/college-library' },
-      { label: 'E-Magazine',      href: '/publication/e-magazine' },
-      {
-        label: 'Examination Results',
-        sub: [
-          { label: 'Result 2024', href: '/publication/examination-results/2024' },
-          { label: 'Result 2023', href: '/publication/examination-results/2023' },
-        ]
-      },
-      {
-        label: 'SSS Report',
-        sub: [
-          { label: 'Report 2023-24', href: '/publication/sss-report/2023-24' },
-          { label: 'Report 2022-23', href: '/publication/sss-report/2022-23' },
-        ]
-      },
-    ]
-  },
-  // Gallery with sub-menu — Photo Gallery and Video Gallery
   {
     label: 'Gallery',
     href: '/gallery',
