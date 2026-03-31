@@ -1,7 +1,4 @@
-// src/components/home/TopBar.jsx
-// 🚀 ULTRA-PREMIUM EDITION - Kinetic HUD & Liquid Fill Morphing
 import React from "react";
-import { COLORS } from '../../styles/colors';
 import { SOCIAL_LINKS } from '../../data/db';
 
 const TopBar = ({ isDark, onToggleDark, onSearchOpen }) => {
@@ -77,7 +74,7 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen }) => {
           transform: translateY(-2px);
         }
         .icon-glow {
-          color: ${COLORS.gold};
+          color: #f4a023;
           filter: drop-shadow(0 0 5px rgba(244,160,35,0.5));
         }
 
@@ -115,10 +112,10 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen }) => {
         }
         .hud-btn.gold-cta {
           border-color: rgba(244,160,35,0.4);
-          color: ${COLORS.gold};
+          color: #f4a023;
         }
         .hud-btn.gold-cta:hover {
-          background: ${COLORS.gold};
+          background: #f4a023;
           color: #000;
           box-shadow: 0 0 25px rgba(244,160,35,0.45);
         }
@@ -145,14 +142,20 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen }) => {
         .soc-icon:hover { transform: translateY(-6px); border-color: transparent; color: #fff; }
         .soc-icon:hover::before { top: 0; border-radius: 0; }
         
-        /* Brand Colors */
-        .soc-icon.fb:hover::before { background: linear-gradient(to top, #1877f2, #0866ff); }
-        .soc-icon.x:hover::before { background: linear-gradient(to top, #000000, #333333); }
-        .soc-icon.yt:hover::before { background: linear-gradient(to top, #ff0000, #ff4d4d); }
-        .soc-icon.li:hover::before { background: linear-gradient(to top, #0a66c2, #0077b5); }
-        .soc-icon.wa:hover::before { background: linear-gradient(to top, #25d366, #128c7e); }
+        @media(max-width: 768px) {
+          .tb-wrap { flex-direction: column; gap: 12px; padding: 10px 15px; }
+          .tb-right-group { width: 100%; justify-content: center; }
+          .tb-left { width: 100%; justify-content: center; }
+          .tb-hud-btns { gap: 8px; }
+          .hud-btn { width: auto; padding: 6px 12px; font-size: 9px; }
+        }
 
-        @media(max-width: 480px) { .tb-socials { display: none; } }
+        @media(max-width: 480px) {
+          .tb-email { display: none; }
+          .tb-socials { gap: 6px; }
+          .soc-icon { width: 28px; height: 28px; font-size: 11px; }
+          .tb-hud-btns { display: none; } /* On very small phones, we hide HUD for clarity */
+        }
 
         /* ── Dark Mode HUD ── */
         .tb-dark-btn {
@@ -167,7 +170,7 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen }) => {
         }
         .tb-dark-btn:hover {
           transform: rotate(20deg) scale(1.15);
-          background: ${COLORS.gold};
+          background: #f4a023;
           color: #000;
           box-shadow: 0 0 20px rgba(244,160,35,0.4);
         }

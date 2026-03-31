@@ -158,29 +158,33 @@ const HeroSlider = ({ slides = [] }) => {
           position: absolute; bottom: 40px; right: 40px;
           display: flex; align-items: center; gap: 20px; z-index: 20;
         }
-        .phs-dots { display: flex; gap: 10px; }
+        .phs-dots { display: flex; gap: 8px; }
         .phs-dot {
-          width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2);
-          cursor: pointer; transition: all 0.4s; border: none; padding: 0;
+          width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.3);
+          cursor: pointer; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); border: none; padding: 0;
         }
-        .phs-dot.active { width: 40px; border-radius: 10px; background: #f4a023; box-shadow: 0 0 15px rgba(244,160,35,0.5); }
+        .phs-dot.active { width: 18px; border-radius: 4px; background: #f4a023; box-shadow: 0 0 10px rgba(244,160,35,0.4); }
 
-        .phs-arrows { display: flex; gap: 10px; }
+        .phs-arrows { display: flex; gap: 8px; }
         .phs-btn {
-          width: 50px; height: 50px; border-radius: 50%;
-          background: rgba(255,255,255,0.05); color: #fff;
-          border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
+          width: 40px; height: 40px; border-radius: 50%;
+          background: rgba(255,255,255,0.04); color: #fff;
+          border: 1px solid rgba(255,255,255,0.08); cursor: pointer;
           transition: all 0.3s; display: flex; align-items: center; justify-content: center;
-          backdrop-filter: blur(10px);
+          backdrop-filter: blur(8px); font-size: 14px;
         }
         .phs-btn:hover { background: #f4a023; color: #0f2347; transform: scale(1.1); border-color: #f4a023; }
 
         @media(max-width: 768px) {
-          .parallax-hs { height: 380px; }
-          .phs-content { bottom: 40px; left: 0; width: 100%; max-width: 100%; }
-          .phs-glass { border-radius: 0; padding: 20px 15px; border-right: none; }
-          .phs-nav { right: 15px; bottom: 15px; }
-          .phs-arrows { display: none; }
+          .parallax-hs { height: 320px; }
+          .phs-content { bottom: 0; left: 0; width: 100%; max-width: 100%; border-radius: 0; z-index: 100; }
+          .phs-glass { border-radius: 0; padding: 18px 15px; border-left: none; border-top: 3px solid #f4a023; background: rgba(15,35,71,0.88); backdrop-filter: blur(15px); }
+          .phs-title { font-size: 18px; width: 100%; white-space: normal; line-height: 1.2; text-align: center; margin-bottom: 6px; letter-spacing: -0.5px; }
+          .phs-sub { font-size: 12px; text-align: center; line-height: 1.35; opacity: 0.8; margin-top: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+          .phs-badge { display: none; }
+          .phs-nav { width: 100%; right: 0; bottom: 8px; display: flex; justify-content: flex-end; padding-right: 15px; }
+          .phs-arrows { display: flex; gap: 6px; }
+          .phs-btn { width: 32px; height: 32px; font-size: 11px; }
         }
       `}</style>
 
@@ -219,14 +223,9 @@ const HeroSlider = ({ slides = [] }) => {
       })}
 
       <div className="phs-nav">
-        <div className="phs-dots">
-          {displaySlides.map((_, i) => (
-            <button key={i} className={`phs-dot ${i===cur ? 'active':''}`} onClick={() => setCur(i)} />
-          ))}
-        </div>
         <div className="phs-arrows">
-          <button className="phs-btn" onClick={prev}>←</button>
-          <button className="phs-btn" onClick={next}>→</button>
+          <button className="phs-btn" aria-label="Previous Slide" onClick={prev}>←</button>
+          <button className="phs-btn" aria-label="Next Slide" onClick={next}>→</button>
         </div>
       </div>
     </div>
