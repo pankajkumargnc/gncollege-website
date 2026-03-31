@@ -1,5 +1,5 @@
 // src/pages/HomePage.jsx
-import { useState, useEffect, useCallback, useRef, memo } from "react";
+import { useState, useEffect, useCallback, useRef, memo, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
@@ -742,7 +742,14 @@ const HomePage = ({
     isNew: new Date() - new Date(doc.rawDate) < 7 * 24 * 60 * 60 * 1000,
   }));
 
-  const finalNotices = liveDriveNotices.length > 0 ? liveDriveNotices : notices;
+  const finalNotices = useMemo(() => {
+    const combined = [...liveDriveNotices, ...(notices || [])];
+    return combined.sort((a, b) => {
+      const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.date || a.createdAt || Date.now()).getTime();
+      const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.date || b.createdAt || Date.now()).getTime();
+      return bTime - aTime;
+    });
+  }, [liveDriveNotices, notices]);
   const allGal = gallery || [];
   const filtered =
     tab === "All Moments"

@@ -1,13 +1,6 @@
 // ═══════════════════════════════════════════════════════════════════════
-//  AdminDepartmentTab.jsx  v2 — 100% FREE (No Firebase Storage)
-//  Images  → ImgBB (free lifetime hosting)
-//  PDFs    → Google Drive public link / local public/ folder
-//  Photos  → PC se upload (ImgBB) ya public/images/ ya paste URL
-//
-//  INTEGRATION: (same as before)
-//  1. src/components/AdminDepartmentTab.jsx
-//  3. TABS array:  { id: 'departments', icon: '🏛️', label: 'Departments', section: '' }
-//  4. Render:      {tab === 'departments' && <Suspense ...><AdminDepartmentTab /></Suspense>}
+//  AdminDepartmentTab.jsx  v3.1 — Ultra Premium Edition
+//  Refined UX with full field synchronization and enhanced save states
 // ═══════════════════════════════════════════════════════════════════════
 
 import { useState, useEffect, useRef } from 'react';
@@ -18,168 +11,109 @@ import toast from 'react-hot-toast';
 
 /* ─── colours ──────────────────────────────────────────────────────────── */
 const NAVY = '#0f2347';
-const C    = '#0ea5e9';
-const GOLD = '#f4a023';
+const BLUE = '#0ea5e9';
+const PURP = '#8b5cf6';
+const RED  = '#ef4444';
+const GOLD = '#f59e0b';
 
-/* ─── departments ──────────────────────────────────────────────────────── */
+/* ─── data structures ─────────────────────────────────────────────────── */
 const DEPTS = [
-  { slug: 'bca',           label: 'BCA',           icon: '💻', color: '#0ea5e9' },
-  { slug: 'bba',           label: 'BBA',           icon: '📊', color: '#f59e0b' },
+  { slug: 'bca',           label: 'BCA',           icon: '💻', color: BLUE },
+  { slug: 'bba',           label: 'BBA',           icon: '📊', color: GOLD },
   { slug: 'commerce',      label: 'Commerce',      icon: '🏦', color: '#10b981' },
-  { slug: 'humanities',    label: 'Humanities',    icon: '📚', color: '#8b5cf6' },
-  { slug: 'social-science',label: 'Social Science',icon: '🌍', color: '#ef4444' },
+  { slug: 'humanities',    label: 'Humanities (F)', icon: '📚', color: PURP },
+  { slug: 'hindi',         label: 'Hindi',         icon: '📖', color: PURP },
+  { slug: 'english',       label: 'English',       icon: '📝', color: PURP },
+  { slug: 'social-science',label: 'Social Science (F)',icon: '🌍', color: RED },
+  { slug: 'history',       label: 'History',       icon: '🏛️', color: RED },
+  { slug: 'political-science', label: 'Pol. Science', icon: '⚖️', color: RED },
+  { slug: 'economics',     label: 'Economics',     icon: '📈', color: RED },
+  { slug: 'psychology',    label: 'Psychology',    icon: '🧠', color: RED },
 ];
 
-/* ─── helpers ───────────────────────────────────────────────────────────── */
+const STREAMS = [
+  { id: 'none', label: 'Standalone' },
+  { id: 'humanities', label: 'Humanities' },
+  { id: 'social-science', label: 'Social Science' },
+];
+
+/* ─── UI components ───────────────────────────────────────────────────── */
 const uuid = () => Math.random().toString(36).slice(2, 10);
 
-const INP = {
-  width: '100%', padding: '10px 14px', border: '1.5px solid #e2e8f0',
-  borderRadius: 9, fontSize: 13.5, fontFamily: 'inherit', color: '#334155',
-  background: '#fff', outline: 'none', boxSizing: 'border-box',
+const INP_BASE = {
+  width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0',
+  borderRadius: 12, fontSize: 13.5, fontFamily: "'Plus Jakarta Sans',sans-serif", color: '#1e293b',
+  background: '#fff', outline: 'none', transition: 'all .2s ease',
 };
-const TEA = { ...INP, resize: 'vertical', minHeight: 80 };
 
-const Input = ({ label, ...p }) => (
-  <div style={{ marginBottom: 16 }}>
-    {label && <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 6, letterSpacing: '.3px' }}>{label}</div>}
-    <input style={INP} {...p} name="field" />
+const SmartInput = ({ label, ...p }) => (
+  <div style={{ marginBottom: 18 }}>
+    {label && <label style={{ fontSize: 11.5, fontWeight: 800, color: '#64748b', marginBottom: 7, display: 'block', textTransform: 'uppercase', letterSpacing: '.8px' }}>{label}</label>}
+    <input style={INP_BASE} {...p} onFocus={e => e.target.style.borderColor = BLUE} onBlur={e => e.target.style.borderColor = '#e2e8f0'} />
   </div>
 );
-const Textarea = ({ label, ...p }) => (
-  <div style={{ marginBottom: 16 }}>
-    {label && <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 6 }}>{label}</div>}
-    <textarea style={TEA} {...p} />
+
+const SmartArea = ({ label, ...p }) => (
+  <div style={{ marginBottom: 18 }}>
+    {label && <label style={{ fontSize: 11.5, fontWeight: 800, color: '#64748b', marginBottom: 7, display: 'block', textTransform: 'uppercase', letterSpacing: '.8px' }}>{label}</label>}
+    <textarea style={{ ...INP_BASE, resize: 'vertical', minHeight: 100 }} {...p} onFocus={e => e.target.style.borderColor = BLUE} onBlur={e => e.target.style.borderColor = '#e2e8f0'} />
   </div>
 );
-const SubHead = ({ txt }) => (
-  <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY, margin: '24px 0 14px', paddingBottom: 8, borderBottom: '2px solid #f1f5f9' }}>
-    {txt}
-  </div>
-);
-const Card = ({ children, style = {} }) => (
-  <div style={{ background: '#fff', border: '1.5px solid #f1f5f9', borderRadius: 14, padding: 20, marginBottom: 16, ...style }}>
+
+const GlassCard = ({ children, title, icon }) => (
+  <div style={{ background: '#fff', border: '1.5px solid #f1f5f9', borderRadius: 24, padding: '28px', marginBottom: 24, boxShadow: '0 4px 6px rgba(15,35,71,.02)' }}>
+    {title && (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, paddingBottom: 16, borderBottom: '1.5px solid #f8fafc' }}>
+        <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg,#f8fafc,#f1f5f9)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>{icon}</div>
+        <div style={{ fontWeight: 800, fontSize: 16, color: NAVY }}>{title}</div>
+      </div>
+    )}
     {children}
   </div>
 );
 
-/* ═══════════════════════════════════════════════════════════════════════
-   INLINE DIALOG — window.prompt ka safe replacement
-═══════════════════════════════════════════════════════════════════════ */
-function InlinePrompt({ prompt, placeholder = '', onConfirm, onCancel }) {
-  const [val, setVal] = useState('');
-  const ref = useRef();
-  useEffect(() => { ref.current?.focus(); }, []);
+const PdfList = ({ reports = [], onUpdate, color = BLUE }) => {
+  const [adding, setAdding] = useState(false);
+  const [form, setForm] = useState({ title: '', year: '2024', pdfUrl: '' });
+
   return (
-    <div style={{ background: '#fffbeb', border: `1.5px solid ${GOLD}`, borderRadius: 12, padding: '14px 16px', marginBottom: 12 }}>
-      <div style={{ fontSize: 12.5, fontWeight: 700, color: NAVY, marginBottom: 8 }}>{prompt}</div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <input
-          ref={ref}
-          style={{ ...INP, flex: 1, padding: '8px 12px', fontSize: 13 }}
-          placeholder={placeholder}
-          value={val}
-          onChange={e => setVal(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && val.trim()) onConfirm(val.trim()); if (e.key === 'Escape') onCancel(); }}
-        />
-        <button onClick={() => val.trim() && onConfirm(val.trim())}
-          style={{ background: NAVY, color: '#fff', border: 'none', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontWeight: 700, fontSize: 12, fontFamily: 'inherit' }}>
-          ✓ Add
-        </button>
-        <button onClick={onCancel}
-          style={{ background: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: 8, padding: '8px 12px', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>
-          ✕
-        </button>
-      </div>
+    <div>
+      {reports.map((r, i) => (
+        <div key={r.id || i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 14, background: '#f8fafc', borderRadius: 16, marginBottom: 10, border: '1px solid #f1f5f9' }}>
+           <div style={{ width: 40, height: 40, borderRadius: 10, background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>📄</div>
+           <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 14, color: NAVY }}>{r.title}</div>
+              <div style={{ fontSize: 11, color: '#94a3b8' }}>{r.year} • <a href={r.pdfUrl} target="_blank" rel="noreferrer" style={{ color }}>View PDF</a></div>
+           </div>
+           <button onClick={() => onUpdate(reports.filter((_, j) => j !== i))} style={{ background: 'none', border: 'none', color: RED, cursor: 'pointer', fontWeight: 900 }}>✕</button>
+        </div>
+      ))}
+      {adding ? (
+        <div style={{ background: '#f8fafc', padding: 20, borderRadius: 20, border: `2px dashed ${color}33` }}>
+           <SmartInput label="Report Title" value={form.title} placeholder="e.g. Annual Activity Report 2024" onChange={e => setForm({...form, title: e.target.value})} />
+           <SmartInput label="Report Year" value={form.year} placeholder="2024" onChange={e => setForm({...form, year: e.target.value})} />
+           <MediaPicker label="PDF Path / URL (Google Drive / public path)" value={form.pdfUrl} onChange={u => setForm({...form, pdfUrl: u})} type="pdf" compact />
+           <div style={{ display: 'flex', gap: 10, marginTop: 15 }}>
+              <button onClick={() => { onUpdate([...reports, { ...form, id: uuid() }]); setAdding(false); setForm({title:'', year:'2024', pdfUrl:''}); }} style={{ background: BLUE, color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 10, fontWeight: 700, cursor: 'pointer' }}>Add Report</button>
+              <button onClick={() => setAdding(false)} style={{ background: '#f1f5f9', color: '#64748b', border: 'none', padding: '10px 20px', borderRadius: 10, fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
+           </div>
+        </div>
+      ) : <button onClick={() => setAdding(true)} className="add-dot-btn">+ Add Activity Report (PDF)</button>}
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   PDF REPORT MANAGER — 100% Free (No Firebase Storage)
-   Uses MediaPicker — paste Google Drive link ya public/ folder path
-═══════════════════════════════════════════════════════════════════════ */
-const PdfManager = ({ reports = [], onUpdate, color = C }) => {
-  const [adding,   setAdding]   = useState(false);
-  const [title,    setTitle]    = useState('');
-  const [year,     setYear]     = useState(new Date().getFullYear().toString());
-  const [pdfUrl,   setPdfUrl]   = useState('');
-
-  const addReport = () => {
-    if (!title.trim() || !pdfUrl.trim()) return;
-    onUpdate([...reports, { id: uuid(), title: title.trim(), year, pdfUrl: pdfUrl.trim() }]);
-    setTitle(''); setYear(new Date().getFullYear().toString()); setPdfUrl(''); setAdding(false);
-  };
-
-  return (
-    <div>
-      {/* Existing reports */}
-      {reports.map((rep, i) => (
-        <div key={rep.id || i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 16px', background: '#f8fafc', borderRadius: 10, marginBottom: 8, border: '1px solid #f1f5f9' }}>
-          <span style={{ fontSize: 20 }}>📄</span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 700, fontSize: 13, color: NAVY }}>{rep.title}</div>
-            <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>{rep.year} — <a href={rep.pdfUrl} target="_blank" rel="noreferrer" style={{ color, textDecoration: 'none' }}>Preview ↗</a></div>
-          </div>
-          <button onClick={() => onUpdate(reports.filter((_, j) => j !== i))}
-            style={{ background: '#fee2e2', border: 'none', color: '#ef4444', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', fontSize: 12, fontWeight: 800 }}>✕
-          </button>
-        </div>
-      ))}
-
-      {/* Add form */}
-      {adding ? (
-        <div style={{ background: '#f8fafc', border: `1.5px solid ${color}33`, borderRadius: 12, padding: '16px 16px 12px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 90px', gap: 10, marginBottom: 12 }}>
-            <Input label="Report Title" value={title} onChange={e => setTitle(e.target.value)} placeholder="Annual Activity Report 2024" />
-            <Input label="Year" value={year} onChange={e => setYear(e.target.value)} placeholder="2024" />
-          </div>
-          <MediaPicker
-            label="PDF File (Google Drive link ya public/pdfs/ path)"
-            value={pdfUrl}
-            onChange={setPdfUrl}
-            type="pdf"
-            driveFolderId={import.meta.env.VITE_DRIVE_DOCUMENT_FOLDER}
-            compact={true}
-          />
-          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-            <button onClick={addReport} disabled={!title.trim() || !pdfUrl.trim()}
-              style={{ background: !title.trim() || !pdfUrl.trim() ? '#94a3b8' : color, color: '#fff', border: 'none', borderRadius: 9, padding: '9px 20px', cursor: !title.trim() || !pdfUrl.trim() ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit' }}>
-              ✓ Add Report
-            </button>
-            <button onClick={() => { setAdding(false); setTitle(''); setPdfUrl(''); }}
-              style={{ background: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: 9, padding: '9px 16px', cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit' }}>
-              Cancel
-            </button>
-          </div>
-        </div>
-      ) : (
-        <button onClick={() => setAdding(true)}
-          style={{ width: '100%', padding: '9px 16px', border: '1.5px dashed #cbd5e1', background: 'transparent', color: '#64748b', borderRadius: 9, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 600, transition: 'all .16s' }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = color; e.currentTarget.style.color = color; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.color = '#64748b'; }}>
-          + Add Report / PDF
-        </button>
-      )}
-    </div>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════════════════════
-   MAIN COMPONENT
-═══════════════════════════════════════════════════════════════════════ */
+   MAIN ADMIN WORKSTATION
+   ═══════════════════════════════════════════════════════════════════════ */
 export default function AdminDepartmentTab() {
   const [activeDept, setActiveDept] = useState('bca');
+  const [activeTab,  setActiveTab]  = useState('general'); // general | academics | features | faculty | finance
   const [data,       setData]       = useState({});
+  const [loading,    setLoading]    = useState(true);
   const [saving,     setSaving]     = useState(false);
   const [saved,      setSaved]      = useState(false);
-  const [loading,    setLoading]    = useState(true);
-  const savedTimerRef               = useRef(null);
 
-  // cleanup
-  useEffect(() => () => { if (savedTimerRef.current) clearTimeout(savedTimerRef.current); }, []);
-
-  // Load from Firestore
   useEffect(() => {
     setLoading(true);
     const unsub = onSnapshot(doc(db, 'departments', activeDept), snap => {
@@ -189,291 +123,240 @@ export default function AdminDepartmentTab() {
     return () => unsub();
   }, [activeDept]);
 
-  const set    = (key, val) => setData(p => ({ ...p, [key]: val }));
-  const setHod = (k, v)    => setData(p => ({ ...p, hod: { ...(p.hod || {}), [k]: v } }));
+  const set    = (k, v) => setData(p => ({ ...p, [k]: v }));
+  const setHod = (k, v) => setData(p => ({ ...p, hod: { ...(p.hod||{}), [k]: v } }));
 
-  const save = async () => {
+  const saveData = async () => {
     setSaving(true);
     try {
       await setDoc(doc(db, 'departments', activeDept), { ...data, updatedAt: serverTimestamp() }, { merge: true });
+      toast.success('✨ Updated successfully!');
       setSaved(true);
-      toast.success('✅ Department saved!');
-      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
-      savedTimerRef.current = setTimeout(() => setSaved(false), 2500);
-    } catch (e) { toast.error('Save failed: ' + e.message); }
+      setTimeout(() => setSaved(false), 3000);
+    } catch (e) { 
+      toast.error('Sync Error: ' + e.message); 
+    }
     setSaving(false);
   };
 
-  // List helpers
-  const addAch  = () => set('achievements', [...(data.achievements || []), '']);
-  const addFee  = () => set('feeStructure', [...(data.feeStructure || []), { category: '', amount: '', note: '' }]);
-  const addHl   = () => set('highlights',   [...(data.highlights   || []), { icon: '⭐', title: '', desc: '' }]);
-  const addFac  = () => set('facilities',   [...(data.facilities   || []), { icon: '🔬', name: '', desc: '' }]);
-  const addStat = () => set('stats',        [...(data.stats        || []), { icon: '', value: '', label: '', sub: '' }]);
-
-  // Inline dialog state for Sem + Subject
-  const [semPrompt,  setSemPrompt]  = useState(false);
-  const [subjPrompt, setSubjPrompt] = useState(null); // sem key or null
-
-  const addSem  = (name) => { set('curriculum', { ...(data.curriculum || {}), [name]: [] }); setSemPrompt(false); };
-  const addSubj = (sem, subj) => {
-    const cur = { ...(data.curriculum || {}) };
-    cur[sem] = [...(cur[sem] || []), subj];
-    set('curriculum', cur);
-    setSubjPrompt(null);
-  };
-  const delSubj = (sem, i) => {
-    const cur = { ...(data.curriculum || {}) };
-    cur[sem] = cur[sem].filter((_, j) => j !== i);
-    set('curriculum', cur);
-  };
-  const delSem = (sem) => {
-    const cur = { ...(data.curriculum || {}) };
-    delete cur[sem];
-    set('curriculum', cur);
-  };
-
-  const deptInfo = DEPTS.find(d => d.slug === activeDept);
-  const C_dept   = deptInfo?.color || C;
+  const info = DEPTS.find(d => d.slug === activeDept);
+  const C = info?.color || BLUE;
 
   return (
-    <div style={{ fontFamily: "'DM Sans','Plus Jakarta Sans',sans-serif", maxWidth: 1100 }}>
+    <div style={{ display: 'flex', gap: 32, fontFamily: "'Plus Jakarta Sans','DM Sans',sans-serif", color: '#1e293b' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
-        *,*::before,*::after{box-sizing:border-box;}
-        .adt-dtab{padding:10px 18px;border:1.5px solid #e2e8f0;border-radius:10px;background:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .16s;color:#64748b;}
-        .adt-dtab:hover{border-color:${NAVY};color:${NAVY};}
-        .adt-dtab.on{color:#fff;border-color:transparent;}
-        .adt-del{background:#fee2e2;border:none;color:#ef4444;width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:800;flex-shrink:0;}
-        .adt-add{padding:8px 16px;border:1.5px dashed #cbd5e1;background:transparent;color:#64748b;border-radius:9px;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;transition:all .16s;width:100%;}
-        .adt-add:hover{border-color:${C};color:${C};}
+        .pbtn{background:${BLUE};color:#fff;border:none;padding:12px 28px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer;transition:all .2s;box-shadow:0 10px 20px ${BLUE}22;}
+        .pbtn:hover{transform:translateY(-2px);box-shadow:0 12px 24px ${BLUE}33;}
+        .pbtn.saved{background:#10b981;box-shadow:0 10px 20px rgba(16,185,129,0.22);}
+        .add-dot-btn{width:100%;padding:14px;border:2px dashed #e2e8f0;background:transparent;border-radius:16px;color:#94a3b8;font-weight:700;font-size:12.5px;cursor:pointer;transition:all .2s;}
+        .add-dot-btn:hover{border-color:${BLUE};color:${BLUE};background:#f0f9ff;}
+        .aside-btn{width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;border:none;background:transparent;border-radius:14px;cursor:pointer;text-align:left;transition:all .2s;color:#64748b;}
+        .aside-btn:hover{background:#f1f5f9;color:${NAVY};}
+        .aside-btn.on{background:#fff;box-shadow:0 10px 25px rgba(0,0,0,0.06);color:${BLUE};font-weight:800;border:1.5px solid ${BLUE}1a;}
+        .tab-btn{padding:10px 18px;border:none;background:transparent;font-weight:700;font-size:13.5px;color:#94a3b8;cursor:pointer;position:relative;transition:all .2s;}
+        .tab-btn.on{color:${NAVY};}
+        .tab-btn.on::after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:24px;height:4px;background:${BLUE};border-radius:10px;}
+        .mini-del{width:32px;height:32px;border-radius:10px;background:#fee2e2;color:${RED};border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:900;}
+        .glass-sel{background:#fff;border:1.5px solid #e2e8f0;padding:12px 14px;border-radius:12px;font-family:inherit;font-weight:600;width:100%;outline:none;}
       `}</style>
-
-      {/* Page header */}
-      <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontWeight: 900, fontSize: 22, color: NAVY, margin: '0 0 4px' }}>🏛️ Department Management</h2>
-        <p style={{ color: '#94a3b8', fontSize: 13, margin: 0 }}>
-          Saara department data yahan se manage karo — website pe automatically update hoga
-          <span style={{ marginLeft: 10, background: '#d1fae5', color: '#065f46', padding: '2px 9px', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
-            100% Free — No Storage Cost
-          </span>
-        </p>
+      
+      {/* 🏛️ LEFT SIDEBAR */}
+      <div style={{ width: 230, flexShrink: 0, position: 'sticky', top: 20, alignSelf: 'flex-start' }}>
+        <h4 style={{ fontSize: 10, fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 20, paddingLeft: 8 }}>Department Nodes</h4>
+        {STREAMS.map(s => {
+          const sDepts = DEPTS.filter(d => {
+             if (s.id === 'none') return !['humanities','social-science','hindi','english','history','political-science','economics','psychology'].includes(d.slug);
+             if (s.id === 'humanities') return ['humanities','hindi','english'].includes(d.slug);
+             if (s.id === 'social-science') return ['social-science', 'history', 'political-science', 'economics', 'psychology'].includes(d.slug);
+             return false;
+          });
+          return (
+            <div key={s.id} style={{ marginBottom: 24 }}>
+               <div style={{ fontSize: 11, fontWeight: 800, color: '#cbd5e1', marginBottom: 10, paddingLeft: 12 }}>{s.label}</div>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                  {sDepts.map(d => (
+                    <button key={d.slug} onClick={() => setActiveDept(d.slug)} className={`aside-btn${activeDept === d.slug ? ' on' : ''}`}>
+                       <span style={{ fontSize: 18 }}>{d.icon}</span>
+                       <span style={{ fontSize: 13.5 }}>{d.label}</span>
+                    </button>
+                  ))}
+               </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Dept selector */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 28 }}>
-        {DEPTS.map(d => (
-          <button key={d.slug} className={`adt-dtab${activeDept === d.slug ? ' on' : ''}`}
-            style={activeDept === d.slug ? { background: d.color } : {}}
-            onClick={() => setActiveDept(d.slug)}
-          >
-            {d.icon} {d.label}
-          </button>
-        ))}
-      </div>
-
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>Loading {deptInfo?.label} data...</div>
-      ) : (
-        <>
-          {/* ─── BASIC INFO ────────────────────────────────────────────── */}
-          <Card>
-            <SubHead txt={`${deptInfo?.icon} Basic Information — ${deptInfo?.label}`} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 20px' }}>
-              <Input label="Full Department Name" value={data.fullName || ''} onChange={e => set('fullName', e.target.value)} placeholder="e.g. Bachelor of Computer Applications" />
-              <Input label="Short Name / Code" value={data.short || ''} onChange={e => set('short', e.target.value)} placeholder="e.g. BCA" />
-            </div>
-            <Input label="Tagline (one line)" value={data.tagline || ''} onChange={e => set('tagline', e.target.value)} placeholder="e.g. Code. Create. Conquer." />
-            <Textarea label="About the Department" rows={4} value={data.about || ''} onChange={e => set('about', e.target.value)} placeholder="Department ke baare mein 3-4 lines..." />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 20px' }}>
-              <Textarea label="Vision" rows={3} value={data.vision || ''} onChange={e => set('vision', e.target.value)} placeholder="Department vision..." />
-              <Textarea label="Mission" rows={3} value={data.mission || ''} onChange={e => set('mission', e.target.value)} placeholder="Department mission..." />
-            </div>
-          </Card>
-
-          {/* ─── HOD INFORMATION ────────────────────────────────────────── */}
-          <Card>
-            <SubHead txt="👨‍🏫 Head of Department (HOD) Info" />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 20px' }}>
-              <Input label="HOD Full Name" value={data.hod?.name || ''} onChange={e => setHod('name', e.target.value)} placeholder="Prof. Name" />
-              <Input label="Designation" value={data.hod?.desig || ''} onChange={e => setHod('desig', e.target.value)} placeholder="Head of Department, BCA" />
-              <Input label="Qualification" value={data.hod?.qual || ''} onChange={e => setHod('qual', e.target.value)} placeholder="M.Sc. (CS), Ph.D." />
-              <Input label="Email" type="email" value={data.hod?.email || ''} onChange={e => setHod('email', e.target.value)} placeholder="hod.bca@gncollege.org" />
-              <Input label="Phone" value={data.hod?.phone || ''} onChange={e => setHod('phone', e.target.value)} placeholder="+91 XXXXX XXXXX" />
-            </div>
-
-            {/* ✅ HOD Photo — MediaPicker (ImgBB upload / public/ / URL) */}
-            <MediaPicker
-              label="HOD Photo"
-              value={data.hod?.imageUrl || ''}
-              onChange={url => setHod('imageUrl', url)}
-              type="image"
-              driveFolderId={import.meta.env.VITE_DRIVE_IMAGES_FOLDER}
-              compact={true}
-            />
-
-            <Textarea label="HOD Message (shown on page as quote)" rows={4} value={data.hod?.message || ''} onChange={e => setHod('message', e.target.value)} placeholder="Welcome message from HOD..." />
-          </Card>
-
-          {/* ─── STATS ──────────────────────────────────────────────────── */}
-          <Card>
-            <SubHead txt="📊 Key Stats (Hero card pe dikhte hain)" />
-            {(data.stats || []).map((s, i) => (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 1fr 1fr auto', gap: 10, alignItems: 'flex-start', marginBottom: 10 }}>
-                <Input label={i === 0 ? 'Icon' : ''} value={s.icon} onChange={e => { const a = [...data.stats]; a[i] = { ...a[i], icon: e.target.value }; set('stats', a); }} placeholder="📅" />
-                <Input label={i === 0 ? 'Value' : ''} value={s.value} onChange={e => { const a = [...data.stats]; a[i] = { ...a[i], value: e.target.value }; set('stats', a); }} placeholder="3 Years" />
-                <Input label={i === 0 ? 'Label' : ''} value={s.label} onChange={e => { const a = [...data.stats]; a[i] = { ...a[i], label: e.target.value }; set('stats', a); }} placeholder="Duration" />
-                <Input label={i === 0 ? 'Sub-text' : ''} value={s.sub || ''} onChange={e => { const a = [...data.stats]; a[i] = { ...a[i], sub: e.target.value }; set('stats', a); }} placeholder="6 Semesters" />
-                <button className="adt-del" style={{ marginTop: i === 0 ? 24 : 0 }} onClick={() => set('stats', data.stats.filter((_, j) => j !== i))}>✕</button>
+      {/* 🚀 MAIN PANEL */}
+      <div style={{ flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32, background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(10px)', padding: '16px 24px', borderRadius: 24, border: '1.5px solid #fff', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 10px 30px rgba(0,0,0,0.03)' }}>
+           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{ width: 48, height: 48, borderRadius: 16, background: `${C}1a`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26 }}>{info.icon}</div>
+              <div>
+                 <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: NAVY }}>{info.label} Console</h2>
+                 <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>Real-time synchronization active</div>
               </div>
-            ))}
-            <button className="adt-add" onClick={addStat}>+ Add Stat</button>
-          </Card>
+           </div>
+           <button onClick={saveData} disabled={saving} className={`pbtn ${saved ? 'saved' : ''}`} style={{ minWidth: 180 }}>
+              {saving ? '⏳ Syncing...' : saved ? '✅ Saved Successfully' : '💾 Save Content'}
+           </button>
+        </div>
 
-          {/* ─── HIGHLIGHTS ─────────────────────────────────────────────── */}
-          <Card>
-            <SubHead txt="⭐ Programme Highlights (Why Choose Us)" />
-            {(data.highlights || []).map((h, i) => (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 2fr auto', gap: 10, alignItems: 'flex-start', marginBottom: 10 }}>
-                <Input label={i === 0 ? 'Icon' : ''} value={h.icon} onChange={e => { const a = [...data.highlights]; a[i] = { ...a[i], icon: e.target.value }; set('highlights', a); }} placeholder="💻" />
-                <Input label={i === 0 ? 'Title' : ''} value={h.title} onChange={e => { const a = [...data.highlights]; a[i] = { ...a[i], title: e.target.value }; set('highlights', a); }} placeholder="Modern Labs" />
-                <Input label={i === 0 ? 'Description' : ''} value={h.desc} onChange={e => { const a = [...data.highlights]; a[i] = { ...a[i], desc: e.target.value }; set('highlights', a); }} placeholder="60+ high-end systems..." />
-                <button className="adt-del" style={{ marginTop: i === 0 ? 24 : 0 }} onClick={() => set('highlights', data.highlights.filter((_, j) => j !== i))}>✕</button>
-              </div>
-            ))}
-            <button className="adt-add" onClick={addHl}>+ Add Highlight</button>
-          </Card>
+        <div style={{ display: 'flex', gap: 16, marginBottom: 32, overflowX: 'auto', paddingBottom: 10 }}>
+           {[
+             { id: 'general', label: 'Primary Info', icon: '📝' },
+             { id: 'academics', label: 'Curriculum', icon: '📖' },
+             { id: 'features', label: 'High-Impact Data', icon: '💎' },
+             { id: 'faculty', label: 'Leadership', icon: '👨‍🏫' },
+             { id: 'finance', label: 'Financials', icon: '💰' }
+           ].map(t => (
+             <button key={t.id} onClick={() => setActiveTab(t.id)} className={`tab-btn${activeTab === t.id ? ' on' : ''}`}>
+                <span style={{ marginRight: 6 }}>{t.icon}</span> {t.label}
+             </button>
+           ))}
+        </div>
 
-          {/* ─── FACILITIES ─────────────────────────────────────────────── */}
-          <Card>
-            <SubHead txt="🔬 Labs & Facilities" />
-            {(data.facilities || []).map((f, i) => (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 2fr auto', gap: 10, alignItems: 'flex-start', marginBottom: 10 }}>
-                <Input label={i === 0 ? 'Icon' : ''} value={f.icon} onChange={e => { const a = [...data.facilities]; a[i] = { ...a[i], icon: e.target.value }; set('facilities', a); }} placeholder="🖥️" />
-                <Input label={i === 0 ? 'Name' : ''} value={f.name} onChange={e => { const a = [...data.facilities]; a[i] = { ...a[i], name: e.target.value }; set('facilities', a); }} placeholder="Computer Lab" />
-                <Input label={i === 0 ? 'Description' : ''} value={f.desc} onChange={e => { const a = [...data.facilities]; a[i] = { ...a[i], desc: e.target.value }; set('facilities', a); }} placeholder="60 workstations, Wi-Fi..." />
-                <button className="adt-del" style={{ marginTop: i === 0 ? 24 : 0 }} onClick={() => set('facilities', data.facilities.filter((_, j) => j !== i))}>✕</button>
-              </div>
-            ))}
-            <button className="adt-add" onClick={addFac}>+ Add Facility</button>
-          </Card>
-
-          {/* ─── CURRICULUM ─────────────────────────────────────────────── */}
-          <Card>
-            <SubHead txt="📖 Curriculum (Semester-wise)" />
-            {semPrompt && (
-              <InlinePrompt
-                prompt="Semester ka naam likhein:"
-                placeholder="Semester I"
-                onConfirm={addSem}
-                onCancel={() => setSemPrompt(false)}
-              />
-            )}
-            {Object.entries(data.curriculum || {}).map(([sem, subjects]) => (
-              <div key={sem} style={{ marginBottom: 20, background: '#f8fafc', borderRadius: 12, padding: '14px 16px', border: '1px solid #f1f5f9' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                  <div style={{ fontWeight: 800, color: NAVY, fontSize: 13.5 }}>{sem}</div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => setSubjPrompt(sem)}
-                      style={{ background: C_dept, border: 'none', color: '#fff', padding: '4px 12px', borderRadius: 7, cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>
-                      + Subject
-                    </button>
-                    <button onClick={() => delSem(sem)}
-                      style={{ background: '#fee2e2', border: 'none', color: '#ef4444', padding: '4px 10px', borderRadius: 7, cursor: 'pointer', fontSize: 12 }}>
-                      Delete Sem
-                    </button>
+        {loading ? <div style={{ textAlign: 'center', padding: 80, fontSize: 14, fontWeight: 800, color: '#cbd5e1' }}>Mounting Workspace...</div> : (
+          <div className="fade-in">
+             {activeTab === 'general' && (
+               <GlassCard title="Core Identity & Navigation" icon="🏢">
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                     <SmartInput label="Full Academic Title" value={data.fullName || ''} onChange={e => set('fullName', e.target.value)} placeholder="e.g. Bachelor of Computer Applications" />
+                     <SmartInput label="Department Code" value={data.short || ''} onChange={e => set('short', e.target.value)} placeholder="e.g. BCA" />
                   </div>
-                </div>
-                {subjPrompt === sem && (
-                  <div style={{ marginBottom: 10 }}>
-                    <InlinePrompt
-                      prompt={`${sem} mein subject add karein:`}
-                      placeholder="e.g. Data Structures"
-                      onConfirm={subj => addSubj(sem, subj)}
-                      onCancel={() => setSubjPrompt(null)}
-                    />
+                  <div style={{ marginBottom: 20 }}>
+                     <label style={{ fontSize: 11.5, fontWeight: 800, color: '#64748b', marginBottom: 8, display: 'block' }}>FACULTY / STREAM PARENT</label>
+                     <select className="glass-sel" value={data.parentStream || 'none'} onChange={e => set('parentStream', e.target.value)}>
+                        {STREAMS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                     </select>
                   </div>
-                )}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 8 }}>
-                  {(subjects || []).map((s, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <input style={{ ...INP, flex: 1, padding: '7px 12px', fontSize: 13 }} value={s}
-                        onChange={e => {
-                          const c = { ...(data.curriculum || {}) };
-                          c[sem] = c[sem].map((x, j) => j === i ? e.target.value : x);
-                          set('curriculum', c);
+                  <SmartInput label="Marketing Tagline" value={data.tagline || ''} onChange={e => set('tagline', e.target.value)} placeholder="e.g. Code the Future. Innovate the World." />
+                  <SmartArea label="Department Abstract (About)" value={data.about || ''} onChange={e => set('about', e.target.value)} placeholder="Enter a comprehensive overview of the department..." />
+                  <div style={{ marginTop: 30, paddingTop: 30, borderTop: '1.5px solid #f1f5f9' }}>
+                     <h5 style={{ fontWeight: 800, color: NAVY, marginBottom: 15, fontSize: 13 }}>📋 ACTIVITY REPORTS & DOCUMENTS</h5>
+                     <PdfList reports={data.programReports || []} onUpdate={v => set('programReports', v)} color={C} />
+                  </div>
+               </GlassCard>
+             )}
+
+             {activeTab === 'academics' && (
+               <>
+                 <GlassCard title="Mission-Critical Vision" icon="🎯">
+                    <SmartArea label="Strategic Vision" value={data.vision || ''} onChange={e => set('vision', e.target.value)} placeholder="Define the long-term vision for the department..." />
+                    <SmartArea label="Academic Mission" value={data.mission || ''} onChange={e => set('mission', e.target.value)} placeholder="Outline the core mission and academic goals..." />
+                 </GlassCard>
+                 <GlassCard title="Subject Grid / Curriculum" icon="📚">
+                    <div style={{ fontSize: 12, color: '#64748b', marginBottom: 20 }}>Manage semesters and their respective subjects. These appear in nested study plans on the website.</div>
+                    {Object.entries(data.curriculum || {}).map(([sem, subjects]) => (
+                      <div key={sem} style={{ background: '#f8fafc', padding: 24, borderRadius: 24, border: '1.5px solid #f1f5f9', marginBottom: 18 }}>
+                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                            <div style={{ fontWeight: 900, fontSize: 15, color: NAVY, letterSpacing: '-0.3px' }}>{sem}</div>
+                            <button onClick={() => { const n = {...(data.curriculum||{})}; delete n[sem]; set('curriculum', n); }} className="mini-del">✕</button>
+                         </div>
+                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 12 }}>
+                            {subjects.map((s, i) => (
+                              <div key={i} style={{ display: 'flex', gap: 10 }}>
+                                 <input style={{ ...INP_BASE, padding: '10px 14px', fontSize: 13 }} value={s} placeholder={`Subject ${i+1}`} onChange={e => {
+                                    const n = {...(data.curriculum||{})}; n[sem][i] = e.target.value; set('curriculum', n);
+                                 }} />
+                                 <button onClick={() => { const n = {...(data.curriculum||{})}; n[sem] = n[sem].filter((_,j) => j !== i); set('curriculum', n); }} className="mini-del">-</button>
+                              </div>
+                            ))}
+                            <button onClick={() => { const n = {...(data.curriculum||{})}; n[sem] = [...n[sem], '']; set('curriculum', n); }} className="add-dot-btn" style={{ padding: 10 }}>+ Add Subject</button>
+                         </div>
+                      </div>
+                    ))}
+                    <button onClick={() => { const s = window.prompt('Semester Name (e.g. Semester 1):'); if(s) set('curriculum', {...(data.curriculum||{}), [s]: []}); }} className="add-dot-btn">+ Add Semester Group</button>
+                 </GlassCard>
+               </>
+             )}
+
+             {activeTab === 'features' && (
+               <>
+                 <GlassCard title="Real-time Performance Metrics (Hero Stats)" icon="📈">
+                    { (data.stats || []).map((s, i) => (
+                      <div key={i} style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr 1fr auto', gap: 12, marginBottom: 14, alignItems: 'end' }}>
+                         <SmartInput label="Icon" value={s.icon} onChange={e => { const n = [...data.stats]; n[i].icon = e.target.value; set('stats', n); }} placeholder="e.g. 🎓" />
+                         <SmartInput label="Value" value={s.value} onChange={e => { const n = [...data.stats]; n[i].value = e.target.value; set('stats', n); }} placeholder="e.g. 100%" />
+                         <SmartInput label="Label" value={s.label} onChange={e => { const n = [...data.stats]; n[i].label = e.target.value; set('stats', n); }} placeholder="e.g. Placements" />
+                         <SmartInput label="Sub" value={s.sub || ''} onChange={e => { const n = [...data.stats]; n[i].sub = e.target.value; set('stats', n); }} placeholder="Optional info" />
+                         <button onClick={() => set('stats', data.stats.filter((_,j) => j !== i))} className="mini-del" style={{ marginBottom: 18 }}>✕</button>
+                      </div>
+                    ))}
+                    <button onClick={() => set('stats', [...(data.stats||[]), { icon: '📊', value: '', label: '' }])} className="add-dot-btn">+ Add High-Level Stat</button>
+                 </GlassCard>
+
+                 <GlassCard title="Programme Highlights" icon="💎">
+                    { (data.highlights || []).map((h, i) => (
+                      <div key={i} style={{ display: 'grid', gridTemplateColumns: '80px 1fr 2fr auto', gap: 12, marginBottom: 14, alignItems: 'end' }}>
+                         <SmartInput label="Icon" value={h.icon} onChange={e => { const n = [...data.highlights]; n[i].icon = e.target.value; set('highlights', n); }} placeholder="⭐" />
+                         <SmartInput label="Title" value={h.title} onChange={e => { const n = [...data.highlights]; n[i].title = e.target.value; set('highlights', n); }} placeholder="e.g. AICTE Approved" />
+                         <SmartInput label="Detail" value={h.desc} onChange={e => { const n = [...data.highlights]; n[i].desc = e.target.value; set('highlights', n); }} placeholder="Brief description..." />
+                         <button onClick={() => set('highlights', data.highlights.filter((_,j) => j !== i))} className="mini-del" style={{ marginBottom: 18 }}>✕</button>
+                      </div>
+                    ))}
+                    <button onClick={() => set('highlights', [...(data.highlights||[]), { icon: '⭐', title: '', desc: '' }])} className="add-dot-btn">+ Add Program Highlight</button>
+                 </GlassCard>
+
+                 <GlassCard title="Infrastructure & Specialized Labs" icon="🏗️">
+                    { (data.facilities || []).map((f, i) => (
+                      <div key={i} style={{ display: 'grid', gridTemplateColumns: '80px 1fr 2fr auto', gap: 12, marginBottom: 14, alignItems: 'end' }}>
+                         <SmartInput label="Icon" value={f.icon} onChange={e => { const n = [...data.facilities]; n[i].icon = e.target.value; set('facilities', n); }} placeholder="🖥️" />
+                         <SmartInput label="Name" value={f.name} onChange={e => { const n = [...data.facilities]; n[i].name = e.target.value; set('facilities', n); }} placeholder="e.g. Advanced IT Lab" />
+                         <SmartInput label="Description" value={f.desc} onChange={e => { const n = [...data.facilities]; n[i].desc = e.target.value; set('facilities', n); }} placeholder="Details about infrastructure..." />
+                         <button onClick={() => set('facilities', data.facilities.filter((_,j) => j !== i))} className="mini-del" style={{ marginBottom: 18 }}>✕</button>
+                      </div>
+                    ))}
+                    <button onClick={() => set('facilities', [...(data.facilities||[]), { icon: '🔬', name: '', desc: '' }])} className="add-dot-btn">+ Add Facility / Lab</button>
+                 </GlassCard>
+
+                 <GlassCard title="Notable Achievements" icon="🏆">
+                    { (data.achievements || []).map((a, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 14, marginBottom: 12, alignItems: 'center' }}>
+                        <div style={{ fontWeight: 800, color: '#cbd5e1', fontSize: 13 }}>#{i+1}</div>
+                        <input style={INP_BASE} value={a} placeholder="e.g. 100% University Result in 2023" onChange={e => { 
+                           const n = [...data.achievements]; n[i] = e.target.value; set('achievements', n); 
                         }} />
-                      <button className="adt-del" style={{ width: 26, height: 26 }} onClick={() => delSubj(sem, i)}>✕</button>
+                        <button onClick={() => set('achievements', data.achievements.filter((_,j) => j !== i))} className="mini-del">✕</button>
+                      </div>
+                    ))}
+                    <button onClick={() => set('achievements', [...(data.achievements||[]), ''])} className="add-dot-btn">+ Add Milestone / Achievement</button>
+                 </GlassCard>
+               </>
+             )}
+
+             {activeTab === 'faculty' && (
+               <GlassCard title="Leadership at the Helm" icon="👨‍🔬">
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                     <SmartInput label="HOD Name" value={data.hod?.name || ''} onChange={e => setHod('name', e.target.value)} placeholder="Prof. Name" />
+                     <SmartInput label="HOD Title" value={data.hod?.desig || ''} onChange={e => setHod('desig', e.target.value)} placeholder="e.g. Head of Department, BCA" />
+                     <SmartInput label="Qualifications" value={data.hod?.qual || ''} onChange={e => setHod('qual', e.target.value)} placeholder="e.g. M.Sc, Ph.D." />
+                     <SmartInput label="Direct Email" value={data.hod?.email || ''} onChange={e => setHod('email', e.target.value)} placeholder="hod@gncollege.org" />
+                     <SmartInput label="Contact Phone" value={data.hod?.phone || ''} onChange={e => setHod('phone', e.target.value)} placeholder="+91 XXXXX XXXXX" />
+                  </div>
+                  <div style={{ marginBottom: 24 }}>
+                     <MediaPicker label="Profile Image Link / Upload" value={data.hod?.imageUrl || ''} onChange={u => setHod('imageUrl', u)} type="image" compact />
+                  </div>
+                  <SmartArea label="Head of Department's Message" value={data.hod?.message || ''} onChange={e => setHod('message', e.target.value)} placeholder="Welcome message to students..." />
+               </GlassCard>
+             )}
+
+             {activeTab === 'finance' && (
+               <GlassCard title="Financial Investment Overview" icon="💹">
+                  <div style={{ fontSize: 12, color: '#64748b', marginBottom: 20 }}>Categorize educational costs. These will be automatically summed up on the website.</div>
+                  { (data.feeStructure || []).map((f, i) => (
+                    <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr 2fr auto', gap: 12, marginBottom: 14, alignItems: 'end' }}>
+                       <SmartInput label="Expense Category" value={f.category} onChange={e => { const n = [...data.feeStructure]; n[i].category = e.target.value; set('feeStructure', n); }} placeholder="e.g. Tuition Fee" />
+                       <SmartInput label="Amount (₹)" type="number" value={f.amount} onChange={e => { const n = [...data.feeStructure]; n[i].amount = e.target.value; set('feeStructure', n); }} placeholder="15000" />
+                       <SmartInput label="Frequency / Note" value={f.note || ''} onChange={e => { const n = [...data.feeStructure]; n[i].note = e.target.value; set('feeStructure', n); }} placeholder="e.g. Per Semester" />
+                       <button onClick={() => set('feeStructure', data.feeStructure.filter((_,j) => j !== i))} className="mini-del" style={{ marginBottom: 18 }}>✕</button>
                     </div>
                   ))}
-                </div>
-              </div>
-            ))}
-            <button className="adt-add" onClick={() => setSemPrompt(true)}>+ Add Semester</button>
-          </Card>
-
-          {/* ─── FEE STRUCTURE ──────────────────────────────────────────── */}
-          <Card>
-            <SubHead txt="💰 Fee Structure" />
-            {(data.feeStructure || []).map((f, i) => (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr auto', gap: 10, alignItems: 'flex-start', marginBottom: 10 }}>
-                <Input label={i === 0 ? 'Fee Category' : ''} value={f.category} onChange={e => { const a = [...data.feeStructure]; a[i] = { ...a[i], category: e.target.value }; set('feeStructure', a); }} placeholder="Tuition Fee" />
-                <Input label={i === 0 ? 'Amount (₹)' : ''} type="number" value={f.amount} onChange={e => { const a = [...data.feeStructure]; a[i] = { ...a[i], amount: e.target.value }; set('feeStructure', a); }} placeholder="15000" />
-                <Input label={i === 0 ? 'Note / Remark' : ''} value={f.note || ''} onChange={e => { const a = [...data.feeStructure]; a[i] = { ...a[i], note: e.target.value }; set('feeStructure', a); }} placeholder="Per semester" />
-                <button className="adt-del" style={{ marginTop: i === 0 ? 24 : 0 }} onClick={() => set('feeStructure', data.feeStructure.filter((_, j) => j !== i))}>✕</button>
-              </div>
-            ))}
-            <button className="adt-add" onClick={addFee}>+ Add Fee Row</button>
-          </Card>
-
-          {/* ─── PROGRAMME / ACTIVITY REPORTS (PDF) ────────────────────── */}
-          <Card>
-            <SubHead txt="📋 Programme & Activity Reports (PDF)" />
-            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 9, padding: '10px 14px', marginBottom: 16, fontSize: 12.5, color: '#166534' }}>
-              ✅ <strong>100% FREE</strong> — Google Drive ka public link paste karo ya <code style={{ background: '#dcfce7', padding: '1px 5px', borderRadius: 3 }}>public/pdfs/</code> mein PDF rakh ke path use karo. Firebase Storage ki zaroorat nahi!
-            </div>
-            <PdfManager
-              reports={data.programReports || []}
-              onUpdate={v => set('programReports', v)}
-              color={C_dept}
-            />
-          </Card>
-
-          {/* ─── ACHIEVEMENTS ───────────────────────────────────────────── */}
-          <Card>
-            <SubHead txt="🏆 Achievements & Milestones" />
-            {(data.achievements || []).map((a, i) => (
-              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}>
-                <span style={{ color: '#94a3b8', fontSize: 14, flexShrink: 0 }}>#{i + 1}</span>
-                <input style={{ ...INP, flex: 1 }} value={a}
-                  onChange={e => { const arr = [...data.achievements]; arr[i] = e.target.value; set('achievements', arr); }}
-                  placeholder="e.g. 100+ students placed in IT companies since 2020" />
-                <button className="adt-del" onClick={() => set('achievements', data.achievements.filter((_, j) => j !== i))}>✕</button>
-              </div>
-            ))}
-            <button className="adt-add" onClick={addAch}>+ Add Achievement</button>
-          </Card>
-
-          {/* ─── SAVE BUTTON ────────────────────────────────────────────── */}
-          <div style={{ position: 'sticky', bottom: 0, background: '#f8fafc', padding: '16px 0', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 16, zIndex: 10 }}>
-            <button onClick={save} disabled={saving}
-              style={{
-                background: saving ? '#94a3b8' : `linear-gradient(135deg,${NAVY},#1a3a7c)`,
-                color: '#fff', border: 'none', padding: '12px 32px',
-                borderRadius: 11, cursor: saving ? 'not-allowed' : 'pointer',
-                fontWeight: 800, fontSize: 14, fontFamily: 'inherit',
-                boxShadow: saving ? 'none' : '0 4px 16px rgba(15,35,71,.25)',
-              }}>
-              {saving ? '⏳ Saving...' : `💾 Save ${deptInfo?.label} Data`}
-            </button>
-            {saved && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#d1fae5', color: '#065f46', padding: '9px 18px', borderRadius: 10, fontSize: 13, fontWeight: 700 }}>
-                ✅ Saved! Website pe live ho gaya.
-              </div>
-            )}
+                  <button onClick={() => set('feeStructure', [...(data.feeStructure||[]), { category: '', amount: '', note: '' }])} className="add-dot-btn">+ Add Fee Entry</button>
+               </GlassCard>
+             )}
           </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 }

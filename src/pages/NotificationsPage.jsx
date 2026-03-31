@@ -5,12 +5,18 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { COLORS } from '../styles/colors';
 import PDFModal from '../components/PDFModal';
 import PremiumPagination from '../components/PremiumPagination';
-import { useDriveDocs } from '../hooks/useDriveDocs'; // ✅ Drive Hook Import
+import { useDriveDocs } from '../hooks/useDriveDocs';
+import useAppData from '../hooks/useAppData';
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const ITEMS_PER_PAGE = 15;
 
-const getTS = ts => ts?.toDate ? ts.toDate() : new Date(ts || Date.now());
+const getTS = ts => {
+  if (!ts) return new Date();
+  if (ts.toDate) return ts.toDate();
+  const d = new Date(ts);
+  return isNaN(d.getTime()) ? new Date() : d;
+};
 
 export default function NotificationsPage() {
   const [selYear,  setSelYear]  = useState('All');
@@ -22,21 +28,31 @@ export default function NotificationsPage() {
   const navy = COLORS.navy || '#0B1F4E';
   const gold = COLORS.gold || '#C9A227';
 
-  // ✅ Fetching Notices directly from Google Drive
+  // Fetch Firestore Notices
+  const { notices: fbNotices } = useAppData();
+
+  // Fetch Drive Notices
   const NOTICE_FOLDER_ID = import.meta.env.VITE_DRIVE_NOTICE_FOLDER;
   const { docs: driveNotices, loading, error } = useDriveDocs(NOTICE_FOLDER_ID);
 
-  // Mapping Drive Data to match existing UI logic
+  // Merge & Sort both data sources
   const notices = useMemo(() => {
-    return driveNotices.map(doc => ({
+    const drNotices = driveNotices.map(doc => ({
       id: doc.id,
       text: doc.name, 
-      createdAt: { toDate: () => new Date(doc.rawDate) }, // Firebase jaisa object taaki logic break na ho
+      createdAt: { toDate: () => new Date(doc.rawDate || Date.now()) },
       link: doc.previewUrl,
       type: 'General',
-      isNew: (new Date() - new Date(doc.rawDate)) < 7 * 24 * 60 * 60 * 1000 // 7 din tak "NEW" badge dikhega
+      isNew: (new Date() - new Date(doc.rawDate || Date.now())) < 7 * 24 * 60 * 60 * 1000 
     }));
-  }, [driveNotices]);
+    
+    // Combine and sort by date descending
+    return [...drNotices, ...(fbNotices || [])].sort((a, b) => {
+      const aTime = getTS(a.createdAt).getTime();
+      const bTime = getTS(b.createdAt).getTime();
+      return bTime - aTime;
+    });
+  }, [driveNotices, fbNotices]);
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 

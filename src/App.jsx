@@ -190,7 +190,7 @@ export default function App() {
 
   return (
     <>
-      <Toaster position="bottom-right" />
+      <Toaster position="bottom-right" containerStyle={{ zIndex: 9999999 }} />
       <UniversalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
       
       {!isAdminRoute && (

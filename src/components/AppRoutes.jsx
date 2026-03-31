@@ -1,7 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ErrorBoundary from "./ErrorBoundary";
-import { PageViewerStandalone } from "./PageViewer";
 import HomePage from "../pages/HomePage";
 import Contact from "../pages/Contact";
 import VideoLibrary from '../pages/VideoLibrary';
@@ -188,6 +187,7 @@ export default function AppRoutes({
             <Route path="/academics/course-offered" element={<R el={<CourseOffered />} />} />
             <Route path="/academics/departments" element={<R el={<DepartmentPage />} />} />
             <Route path="/academics/departments/:deptSlug" element={<R el={<DepartmentPage />} />} />
+            <Route path="/academics/departments/:deptSlug/:subSlug" element={<R el={<DepartmentPage />} />} />
             <Route path="/syllabus" element={<R el={<Syllabus />} />} />
             <Route path="/academics/academic-calendar" element={<R el={<AcademicCalendar />} />} />
 
