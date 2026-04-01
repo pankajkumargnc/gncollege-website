@@ -133,17 +133,17 @@ const CollegeProfile = () => {
               <ul className="quick-links">
                 {[
                   { label: 'Principal Message', path: '/about-us/principal-message' },
+                  { label: 'Governing Body', path: '/about-us/governing-body' },
+                  { label: 'Latest Notifications', path: '/admission/notification/latest' },
                   { label: 'Admission Rules', path: '/admission/rule' },
                   { label: 'Fee Structure', path: '/admission/fee-structure' },
-                  { label: 'Departments', path: '/academics/course-offered' },
-                  { label: 'NSS', path: '/activity/nss' },
-                  { label: 'NCC', path: '/activity/ncc' },
-                  { label: 'Sports', path: '/activity/games-sports' },
-                  { label: 'Workshop', path: '/activity/workshop' },
-                  { label: 'Syllabus', path: '/syllabus' },
+                  { label: 'Academic Departments', path: '/academics/departments' },
+                  { label: 'Career & Placements', path: '/academics/placements' },
+                  { label: 'NSS & NCC Units', path: '/activity/nss' },
+                  { label: 'Sports & Games', path: '/activity/games-sports' },
+                  { label: 'Course Syllabus', path: '/syllabus' },
                   { label: 'Academic Calendar', path: '/academics/academic-calendar' },
                   { label: 'Photo Gallery', path: '/gallery' },
-                  { label: 'Contact Us', path: '/contact' }
                 ].map((link, i) => (
                   <li key={i} className="quick-link-item">
                     <Link to={link.path} className="quick-link" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>

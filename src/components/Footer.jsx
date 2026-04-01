@@ -318,6 +318,7 @@ const Footer = memo(() => {
             <ul className="f-link-list">
               {[ 
                 {name: "About College", href: "/about-us/college-profile"}, 
+                {name: "Academic Departments", href: "/academics/departments"},
                 {name: "Academic Courses", href: "/academics/course-offered"}, 
                 {name: "Admission 2024", href: "/admission/notification/latest"}, 
                 {name: "Campus Events", href: "/events"}, 

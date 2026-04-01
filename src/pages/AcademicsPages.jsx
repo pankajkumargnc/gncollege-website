@@ -328,3 +328,133 @@ export function AcademicCalendar() {
     </div>
   );
 }
+
+/* ════════════════════════════════════════════════════════════
+   5. PLACEMENTS PAGE (Detailed Records)
+════════════════════════════════════════════════════════════ */
+export function PlacementsPage() {
+    const [placements, setPlacements] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState('');
+    const [deptFilter, setDeptFilter] = useState('All');
+
+    useEffect(() => {
+        const q = query(collection(db, 'placements'), orderBy('createdAt', 'desc'));
+        const unsub = onSnapshot(q, snap => {
+            setPlacements(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+            setLoading(false);
+        }, () => setLoading(false));
+        return () => unsub();
+    }, []);
+
+    const filtered = placements.filter(p => {
+        const matchesSearch = (p.name || '').toLowerCase().includes(search.toLowerCase()) || 
+                              (p.company || '').toLowerCase().includes(search.toLowerCase());
+        const matchesDept = deptFilter === 'All' || p.department === deptFilter;
+        return matchesSearch && matchesDept;
+    });
+
+    const depts = ['All', ...new Set(placements.map(p => p.department).filter(Boolean))];
+
+    const NAVY = COLORS?.navy || '#0f2347';
+    const GOLD = COLORS?.gold || '#f4a023';
+
+    return (
+        <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+            <PageHeader 
+                title="Placements & Wall of Fame" 
+                subtitle="Celebrating the success of our students who have been placed in leading industries and organizations." 
+                icon="🚀" 
+            />
+
+            <div style={{ maxWidth: 1200, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+                {/* Search & Filter Bar */}
+                <Fade>
+                    <div style={{ background: '#fff', padding: '24px', borderRadius: 20, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', marginBottom: 30, display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center' }}>
+                        <div style={{ flex: 1, minWidth: 280 }}>
+                            <input 
+                                type="text" 
+                                placeholder="🔍 Search by student name or company..." 
+                                value={search} 
+                                onChange={e => setSearch(e.target.value)} 
+                                style={{ width: '100%', padding: '14px 18px', borderRadius: 12, border: '1.5px solid #e2e8f0', fontSize: 15, outline: 'none', background: '#f8fafc', color: NAVY, fontWeight: 600, boxSizing: 'border-box' }} 
+                            />
+                        </div>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            {depts.map(d => (
+                                <button 
+                                    key={d} 
+                                    onClick={() => setDeptFilter(d)}
+                                    style={{ 
+                                        padding: '10px 18px', borderRadius: 10, border: 'none', 
+                                        background: deptFilter === d ? NAVY : '#fff', 
+                                        color: deptFilter === d ? '#fff' : '#64748b',
+                                        fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s',
+                                        boxShadow: deptFilter === d ? `0 4px 12px ${NAVY}40` : '0 2px 4px rgba(0,0,0,0.05)',
+                                        minHeight: 40
+                                    }}>
+                                    {d}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </Fade>
+
+                {loading ? (
+                    <div style={{ textAlign: 'center', padding: '100px 0' }}>
+                        <div className="premium-loader" />
+                        <p style={{ marginTop: 20, color: '#64748b', fontWeight: 600 }}>Loading placement records...</p>
+                    </div>
+                ) : filtered.length === 0 ? (
+                    <Fade>
+                        <div style={{ textAlign: 'center', padding: '100px 20px', background: '#fff', borderRadius: 24, border: '2px dashed #e2e8f0' }}>
+                            <div style={{ fontSize: 60, marginBottom: 20 }}>🎓</div>
+                            <h3 style={{ fontSize: 24, fontWeight: 800, color: NAVY }}>No Records Found</h3>
+                            <p style={{ color: '#64748b', maxWidth: 400, margin: '10px auto' }}>Koi bhi student record hamare search criteria se match nahi hua.</p>
+                        </div>
+                    </Fade>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
+                        {filtered.map((p, i) => (
+                            <Fade key={p.id} delay={i * 0.05}>
+                                <div style={{ background: '#fff', borderRadius: 24, padding: 28, border: '1px solid #e2e8f0', height: '100%', position: 'relative', transition: 'all 0.3s cubic-bezier(.22,1,.36,1)', textAlign: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.boxShadow = '0 20px 40px rgba(15,35,71,0.08)'; e.currentTarget.style.borderColor = GOLD + '40'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#e2e8f0'; }}>
+                                    
+                                    {p.package && (
+                                        <div style={{ position: 'absolute', top: 20, left: 20, background: '#fffbeb', color: GOLD, fontSize: 11, fontWeight: 900, padding: '4px 12px', borderRadius: 50, border: `1.5px solid ${GOLD}20`, boxShadow: '0 4px 10px rgba(244,160,35,0.1)' }}>
+                                            💰 {p.package} LPA
+                                        </div>
+                                    )}
+
+                                    <div style={{ width: 100, height: 100, borderRadius: '50%', margin: '10px auto 20px', border: `4px solid ${GOLD}15`, padding: 4, background: '#fff' }}>
+                                        {p.photo ? (
+                                            <img src={p.photo} alt={p.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                                        ) : (
+                                            <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>🎓</div>
+                                        )}
+                                    </div>
+
+                                    <h3 style={{ fontSize: 18, fontWeight: 800, color: NAVY, margin: '0 0 4px' }}>{p.name}</h3>
+                                    <div style={{ fontSize: 13, color: GOLD, fontWeight: 800, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>{p.company}</div>
+                                    
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
+                                        <div style={{ fontSize: 13, color: '#64748b', fontWeight: 600 }}>{p.role}</div>
+                                        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                                            <span style={{ fontSize: 11, background: '#f1f5f9', color: '#475569', padding: '4px 10px', borderRadius: 6, fontWeight: 700 }}>{p.department}</span>
+                                            {p.batch && <span style={{ fontSize: 11, background: '#f1f5f9', color: '#475569', padding: '4px 10px', borderRadius: 6, fontWeight: 700 }}>Batch {p.batch}</span>}
+                                        </div>
+                                    </div>
+
+                                    {p.testimonial && (
+                                        <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid #f1f5f9', fontStyle: 'italic', color: '#64748b', fontSize: 13, lineHeight: 1.6 }}>
+                                            "{p.testimonial.length > 100 ? p.testimonial.substring(0, 100) + '...' : p.testimonial}"
+                                        </div>
+                                    )}
+                                </div>
+                            </Fade>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}

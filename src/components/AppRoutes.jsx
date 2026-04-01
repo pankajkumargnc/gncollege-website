@@ -70,6 +70,7 @@ const IqacPage = LazyAcademics("IqacPage");
 const CourseOffered = LazyAcademics("CourseOffered");
 const Syllabus = LazyAcademics("Syllabus");
 const AcademicCalendar = LazyAcademics("AcademicCalendar");
+const PlacementsPage = LazyAcademics("PlacementsPage");
 
 const AdmissionRule = LazyAdmission("AdmissionRule");
 const DocumentRequired = LazyAdmission("DocumentRequired");
@@ -198,6 +199,7 @@ export default function AppRoutes({
             <Route path="/academics/departments/:deptSlug/:subSlug" element={<R el={<DepartmentPage />} />} />
             <Route path="/syllabus" element={<R el={<Syllabus />} />} />
             <Route path="/academics/academic-calendar" element={<R el={<AcademicCalendar />} />} />
+            <Route path="/academics/placements" element={<R el={<PlacementsPage />} />} />
 
             {/* Admission */}
             <Route path="/admission/rule" element={<R el={<AdmissionRule />} />} />

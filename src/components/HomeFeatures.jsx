@@ -234,6 +234,21 @@ export default function HomeFeatures() {
               <DeptCard key={dept.slug} dept={dept} delay={Math.min(i+1,5)} />
             ))}
           </div>
+
+          <div style={{ display:'flex', justifyContent:'center', marginTop: '48px' }}>
+            <SA2 variant="up" delay="d5">
+              <Link to="/academics/departments" className="arr-link" style={{ 
+                display:'inline-flex', alignItems:'center', gap:10, 
+                background: N, color:'#fff', padding:'14px 36px', borderRadius:50, 
+                fontSize: 14, fontWeight: 800, textDecoration: 'none',
+                boxShadow: `0 8px 24px rgba(15,35,71,0.3)`, transition: 'all 0.3s cubic-bezier(.22,1,.36,1)' 
+              }}
+              onMouseEnter={e=>{e.currentTarget.style.background=G;e.currentTarget.style.color=N;e.currentTarget.style.boxShadow=`0 12px 32px rgba(244,160,35,0.4)`;}}
+              onMouseLeave={e=>{e.currentTarget.style.background=N;e.currentTarget.style.color='#fff';e.currentTarget.style.boxShadow=`0 8px 24px rgba(15,35,71,0.3)`;}}>
+                🏛️ View All Departments <span className="arr" style={{ fontSize: 18 }}>›</span>
+              </Link>
+            </SA2>
+          </div>
         </div>
       </section>
 

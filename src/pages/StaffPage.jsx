@@ -38,17 +38,18 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
 
-      {/* Hero */}
+      {/* Premium Hero */}
       {!headless && (
-      <div style={{ background: `linear-gradient(135deg, ${N} 0%, #1a3a7c 100%)`, padding: '70px 20px 50px', textAlign: 'center', color: '#fff' }}>
-        <div style={{ fontSize: 48, marginBottom: 14 }}>{isTeaching ? '🎓' : '🏢'}</div>
-        <h1 style={{ fontSize: 'clamp(28px,5vw,42px)', fontWeight: 900, margin: '0 0 12px', letterSpacing: '-0.5px' }}>
-          {label} Staff
-        </h1>
-        <p style={{ color: '#cbd5e1', fontSize: 15, margin: 0, textAlign: 'center' }}>
-          Guru Nanak College, Dhanbad
-        </p>
-      </div>
+        <div className="premium-hero">
+          <div className="kinetic-bg" />
+          <div className="hero-content-wrapper">
+            <div className="hero-icon">{isTeaching ? '👨‍🏫' : '👥'}</div>
+            <h1 className="anim-fade-in">{label} Staff</h1>
+            <p className="anim-slide-up">
+              Hon'ble members of the {label.toLowerCase()} fraternity dedicated to academic excellence at Guru Nanak College, Dhanbad
+            </p>
+          </div>
+        </div>
       )}
 
       {/* ── Content ── */}
@@ -64,17 +65,17 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
               width: '100%',
               padding: '14px 20px 14px 45px',
               borderRadius: '30px',
-              border: '2px solid rgba(255,255,255,0.2)',
-              background: 'rgba(255,255,255,0.1)',
-              color: '#fff',
+              border: '1.5px solid #e2e8f0',
+              background: '#fff',
+              color: N,
               fontSize: '15px',
               fontFamily: "'Inter', sans-serif",
               outline: 'none',
-              backdropFilter: 'blur(10px)',
+              boxShadow: '0 10px 30px rgba(15,35,71,0.05)',
               transition: 'all 0.3s'
             }}
-            onFocus={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; e.currentTarget.style.border = `2px solid ${G}`; }}
-            onBlur={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.border = '2px solid rgba(255,255,255,0.2)'; }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = G; e.currentTarget.style.boxShadow = `0 10px 40px ${N}15`; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(15,35,71,0.05)'; }}
           />
         </div>
       </div>

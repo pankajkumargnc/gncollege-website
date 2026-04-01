@@ -48,12 +48,18 @@ const GALLERY_TABS = [
   "NSS Programs",
 ];
 const LINKS_DATA = [
-  { name: "NAAC", url: "https://naac.gov.in", icon: "🏅" },
-  { name: "UGC", url: "https://ugc.ac.in", icon: "📜" },
-  { name: "INFLIBNET", url: "https://inflibnet.ac.in", icon: "📚" },
-  { name: "NDL INDIA", url: "https://ndl.gov.in", icon: "🔬" },
-  { name: "SWAYAM", url: "https://swayam.gov.in", icon: "🌐" },
   { name: "BBMK UNIV.", url: "https://bbmku.ac.in", icon: "🏛️" },
+  { name: "CHANCELLOR PORTAL", url: "https://jharkhanduniversities.nic.in", icon: "🎓" },
+  { name: "E-KALYAN", url: "https://ekalyan.cgg.gov.in", icon: "💎" },
+  { name: "DIGILOCKER", url: "https://www.digilocker.gov.in", icon: "🔓" },
+  { name: "UGC INDIA", url: "https://ugc.ac.in", icon: "📜" },
+  { name: "NAAC", url: "https://naac.gov.in", icon: "🏅" },
+  { name: "NSP PORTAL", url: "https://scholarships.gov.in", icon: "💳" },
+  { name: "SWAYAM", url: "https://swayam.gov.in", icon: "🌐" },
+  { name: "NDL INDIA", url: "https://ndl.gov.in", icon: "🔬" },
+  { name: "INFLIBNET", url: "https://inflibnet.ac.in", icon: "📚" },
+  { name: "NCTE", url: "https://ncte.gov.in", icon: "👨‍🏫" },
+  { name: "AISHE", url: "https://aishe.gov.in", icon: "📊" },
 ];
 const COUNTERS = [
   { label: "Students Enrolled", value: "4,000+", icon: "👨‍🎓" },

@@ -156,6 +156,7 @@ export const navLinks = [
       { label: 'Academic Calendar', href: '/academics/academic-calendar' },
       { label: 'Syllabus', href: '/syllabus' },
       { label: 'IQAC', href: '/academics/iqac' },
+      { label: 'Placements', href: '/academics/placements' },
     ]
   },
   {
