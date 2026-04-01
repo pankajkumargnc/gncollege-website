@@ -4,3 +4,6 @@ dist
 .env.local
 .DS_Store
 *.log
+old-project-key.json
+new-project-key.json
+migrate.js
