@@ -118,8 +118,8 @@ export default function TestimonialsTab({ testimonials, logAct, getSectionLog })
               <div style={{ fontSize: 12, color: T.t3, marginTop: 2, display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{t.content}</div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="abtn abtn-sm abtn-outline" onClick={() => { setEditItem(t); setFormData(t); window.scrollTo({top:0, behavior:'smooth'}); }}>✏️</button>
-              <button className="abtn abtn-sm abtn-red" onClick={() => del(t.id, t.name)}>🗑️</button>
+              <button className="abtn abtn-sm abtn-outline" onClick={() => { setEditItem(t); setFormData(t); window.scrollTo({top:0, behavior:'smooth'}); }} aria-label="Edit testimonial">✏️</button>
+              <button className="abtn abtn-sm abtn-red" onClick={() => del(t.id, t.name)} aria-label="Delete testimonial">🗑️</button>
             </div>
           </div>
         ))}

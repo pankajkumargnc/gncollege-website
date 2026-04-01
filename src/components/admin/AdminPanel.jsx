@@ -213,6 +213,17 @@ function AdminPanelInner({
     return () => window.removeEventListener('resize', fn);
   }, []);
 
+  // ── PWA Push Notification Permission ────────────────────────────────────
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      // Delay slightly to avoid blocking initial render
+      const timer = setTimeout(() => {
+        Notification.requestPermission().catch(() => {});
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   // ── Global search ─────────────────────────────────────────────────────────
   const dSearch = useDebounce(globalSearch, 250);
   const allItems = useMemo(() => [
@@ -438,14 +449,14 @@ function AdminPanelInner({
       <div className="adm-main">
         {/* Mobile top bar */}
         <div className="adm-mobile-top">
-          <button onClick={()=>setSideOpen(true)} style={{ background:'none', border:'none', fontSize:22, cursor:'pointer', color:NAVY }}>☰</button>
+          <button onClick={()=>setSideOpen(true)} style={{ background:'none', border:'none', fontSize:22, cursor:'pointer', color:NAVY }} aria-label="Open navigation menu">☰</button>
           <span style={{ fontWeight:900, color:NAVY, fontSize:14 }}>GNC Admin Panel</span>
           <div style={{ width: 44 }} />
         </div>
 
         {/* Top bar */}
         <div className="adm-topbar">
-          {!isMobile && <button onClick={()=>setSideCollapsed(c=>!c)} style={{ background:'none', border:'none', fontSize:18, cursor:'pointer', color:T.t3, flexShrink:0 }}>☰</button>}
+          {!isMobile && <button onClick={()=>setSideCollapsed(c=>!c)} style={{ background:'none', border:'none', fontSize:18, cursor:'pointer', color:T.t3, flexShrink:0 }} aria-label="Toggle sidebar">☰</button>}
           
           <div className="top-search" style={{ position:'relative' }}>
             <input placeholder="Search everything... (Ctrl+K)" value={globalSearch} onChange={(e)=>setGlobalSearch(e.target.value)} />

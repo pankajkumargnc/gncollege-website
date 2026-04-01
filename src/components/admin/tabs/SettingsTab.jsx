@@ -16,7 +16,7 @@ export default function SettingsTab({ logAct }) {
     phone: '', email: '',
     facebook: '', twitter: '', youtube: '', linkedin: '',
     footerText: '', maintenanceMode: false, imgbbKey: '',
-  });
+  }, ['email', 'phone', 'imgbbKey']); // 🔐 These PII fields won't be saved to localStorage
   const [siteLoading, setSiteLoading] = useState(false);
 
   useEffect(() => {

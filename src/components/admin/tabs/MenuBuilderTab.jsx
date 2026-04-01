@@ -222,15 +222,15 @@ export default function MenuBuilderTab({ logAct }) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       {/* Reorder Arrows */}
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <button onClick={() => handleMove(topItem, 'up')} disabled={idx===0} style={{ border:'none', background:'none', cursor:idx===0?'not-allowed':'pointer', opacity:idx===0?0.3:1, fontSize:12, padding:0 }}>▲</button>
-                        <button onClick={() => handleMove(topItem, 'down')} disabled={idx===arr.length-1} style={{ border:'none', background:'none', cursor:idx===arr.length-1?'not-allowed':'pointer', opacity:idx===arr.length-1?0.3:1, fontSize:12, padding:0 }}>▼</button>
+                        <button onClick={() => handleMove(topItem, 'up')} disabled={idx===0} style={{ border:'none', background:'none', cursor:idx===0?'not-allowed':'pointer', opacity:idx===0?0.3:1, fontSize:12, padding:0 }} aria-label="Move up">▲</button>
+                        <button onClick={() => handleMove(topItem, 'down')} disabled={idx===arr.length-1} style={{ border:'none', background:'none', cursor:idx===arr.length-1?'not-allowed':'pointer', opacity:idx===arr.length-1?0.3:1, fontSize:12, padding:0 }} aria-label="Move down">▼</button>
                       </div>
                       <span style={{ fontWeight: 800, color: NAVY, fontSize: 14 }}>{topItem.icon} {topItem.label}</span>
                       {topItem.isExternal && <span style={{ fontSize: 10, background: '#fee2e2', color: '#b91c1c', padding: '2px 6px', borderRadius: 4, fontWeight: 800 }}>↗ EXT</span>}
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <button onClick={() => handleEdit(topItem)} style={{ background: '#e2e8f0', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 4, fontSize: 12 }}>✏️ Edit</button>
-                      <button onClick={() => handleDelete(topItem.id, topItem.label)} style={{ background: '#fee2e2', color: '#b91c1c', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 4, fontSize: 12 }}>🗑️</button>
+                      <button onClick={() => handleDelete(topItem.id, topItem.label)} style={{ background: '#fee2e2', color: '#b91c1c', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 4, fontSize: 12 }} aria-label="Delete menu item">🗑️</button>
                     </div>
                   </div>
 
@@ -243,14 +243,14 @@ export default function MenuBuilderTab({ logAct }) {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', padding: '8px 12px', borderRadius: 8, border: `1px solid #e2e8f0` }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                            <button onClick={() => handleMove(subItem, 'up')} disabled={sIdx===0} style={{ border:'none', background:'none', cursor:sIdx===0?'not-allowed':'pointer', opacity:sIdx===0?0.3:1, fontSize:10, padding:0 }}>▲</button>
-                            <button onClick={() => handleMove(subItem, 'down')} disabled={sIdx===sArr.length-1} style={{ border:'none', background:'none', cursor:sIdx===sArr.length-1?'not-allowed':'pointer', opacity:sIdx===sArr.length-1?0.3:1, fontSize:10, padding:0 }}>▼</button>
+                            <button onClick={() => handleMove(subItem, 'up')} disabled={sIdx===0} style={{ border:'none', background:'none', cursor:sIdx===0?'not-allowed':'pointer', opacity:sIdx===0?0.3:1, fontSize:10, padding:0 }} aria-label="Move sub-item up">▲</button>
+                            <button onClick={() => handleMove(subItem, 'down')} disabled={sIdx===sArr.length-1} style={{ border:'none', background:'none', cursor:sIdx===sArr.length-1?'not-allowed':'pointer', opacity:sIdx===sArr.length-1?0.3:1, fontSize:10, padding:0 }} aria-label="Move sub-item down">▼</button>
                           </div>
                           <span style={{ fontWeight: 600, color: '#334155', fontSize: 13 }}>{subItem.icon} {subItem.label}</span>
                         </div>
                         <div style={{ display: 'flex', gap: 6 }}>
-                          <button onClick={() => handleEdit(subItem)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }}>✏️</button>
-                          <button onClick={() => handleDelete(subItem.id, subItem.label)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }}>🗑️</button>
+                          <button onClick={() => handleEdit(subItem)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }} aria-label="Edit sub-item">✏️</button>
+                          <button onClick={() => handleDelete(subItem.id, subItem.label)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }} aria-label="Delete sub-item">🗑️</button>
                         </div>
                       </div>
 
@@ -262,14 +262,14 @@ export default function MenuBuilderTab({ logAct }) {
                           
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                              <button onClick={() => handleMove(subSubItem, 'up')} disabled={ssIdx===0} style={{ border:'none', background:'none', cursor:ssIdx===0?'not-allowed':'pointer', opacity:ssIdx===0?0.3:1, fontSize:9, padding:0 }}>▲</button>
-                              <button onClick={() => handleMove(subSubItem, 'down')} disabled={ssIdx===ssArr.length-1} style={{ border:'none', background:'none', cursor:ssIdx===ssArr.length-1?'not-allowed':'pointer', opacity:ssIdx===ssArr.length-1?0.3:1, fontSize:9, padding:0 }}>▼</button>
+                              <button onClick={() => handleMove(subSubItem, 'up')} disabled={ssIdx===0} style={{ border:'none', background:'none', cursor:ssIdx===0?'not-allowed':'pointer', opacity:ssIdx===0?0.3:1, fontSize:9, padding:0 }} aria-label="Move item up">▲</button>
+                              <button onClick={() => handleMove(subSubItem, 'down')} disabled={ssIdx===ssArr.length-1} style={{ border:'none', background:'none', cursor:ssIdx===ssArr.length-1?'not-allowed':'pointer', opacity:ssIdx===ssArr.length-1?0.3:1, fontSize:9, padding:0 }} aria-label="Move item down">▼</button>
                             </div>
                             <span style={{ fontWeight: 500, color: '#64748b', fontSize: 12 }}>{subSubItem.icon} {subSubItem.label}</span>
                           </div>
                           <div style={{ display: 'flex', gap: 6 }}>
-                            <button onClick={() => handleEdit(subSubItem)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12 }}>✏️</button>
-                            <button onClick={() => handleDelete(subSubItem.id, subSubItem.label)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12 }}>🗑️</button>
+                            <button onClick={() => handleEdit(subSubItem)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12 }} aria-label="Edit item">✏️</button>
+                            <button onClick={() => handleDelete(subSubItem.id, subSubItem.label)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12 }} aria-label="Delete item">🗑️</button>
                           </div>
                         </div>
                       ))}

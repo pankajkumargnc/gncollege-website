@@ -124,7 +124,7 @@ export default function PlacementsTab({ placements, logAct, getSectionLog, softD
                 setFormData({ name: p.name||'', company: p.company||'', role: p.role||'', department: p.department||'B.A.', batch: p.batch||'', package: p.package||'', photo: p.photo||'', testimonial: p.testimonial||'' });
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}>✏️</button>
-              <button className="abtn abtn-red abtn-sm" onClick={() => softDelete('placements', p.id, p, p.name)}>🗑️</button>
+              <button className="abtn abtn-red abtn-sm" onClick={() => softDelete('placements', p.id, p, p.name)} aria-label="Delete placement">🗑️</button>
             </div>
           </div>
         ))}

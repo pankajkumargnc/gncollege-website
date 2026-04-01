@@ -176,8 +176,8 @@ export default function QuickPublishTab({ logAct }) {
               {item.text || item.title}
             </div>
             <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-              <button type="button" onClick={() => onEdit(item)} style={{ background: '#fff', border: '1px solid #e2e8f0', cursor: 'pointer', fontSize: 12, padding: '4px 8px', borderRadius: 6, transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.borderColor = accent} onMouseLeave={e => e.currentTarget.style.borderColor = '#e2e8f0'}>✏️</button>
-              <button type="button" onClick={() => onDel(col, item.id, item.text || item.title)} style={{ background: '#fff', border: '1px solid #e2e8f0', cursor: 'pointer', fontSize: 12, padding: '4px 8px', borderRadius: 6, transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.borderColor = '#ef4444'} onMouseLeave={e => e.currentTarget.style.borderColor = '#e2e8f0'}>🗑️</button>
+              <button type="button" onClick={() => onEdit(item)} style={{ background: '#fff', border: '1px solid #e2e8f0', cursor: 'pointer', fontSize: 12, padding: '4px 8px', borderRadius: 6, transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.borderColor = accent} onMouseLeave={e => e.currentTarget.style.borderColor = '#e2e8f0'} aria-label="Edit item">✏️</button>
+              <button type="button" onClick={() => onDel(col, item.id, item.text || item.title)} style={{ background: '#fff', border: '1px solid #e2e8f0', cursor: 'pointer', fontSize: 12, padding: '4px 8px', borderRadius: 6, transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.borderColor = '#ef4444'} onMouseLeave={e => e.currentTarget.style.borderColor = '#e2e8f0'} aria-label="Delete item">🗑️</button>
             </div>
           </div>
         ))}
@@ -324,7 +324,7 @@ export default function QuickPublishTab({ logAct }) {
             {notData.img && (
               <div style={{ position:'relative', borderRadius:12, overflow:'hidden', border:'2px solid #3b82f6' }}>
                 <img src={notData.img} style={{ width:'100%', height:100, objectFit:'cover' }} />
-                <button type="button" onClick={() => setNotData({...notData, img:''})} style={{ position:'absolute', top:4, right:4, background:'red', color:'#fff', border:'none', borderRadius:4, fontSize:10, cursor:'pointer' }}>✕ Remove Banner</button>
+                <button type="button" onClick={() => setNotData({...notData, img:''})} style={{ position:'absolute', top:4, right:4, background:'red', color:'#fff', border:'none', borderRadius:4, fontSize:10, cursor:'pointer' }} aria-label="Remove banner image">✕ Remove Banner</button>
               </div>
             )}
             <div style={{ display: 'flex', gap: 10 }}>
@@ -348,7 +348,7 @@ export default function QuickPublishTab({ logAct }) {
             {newsData.img && (
               <div style={{ position:'relative', borderRadius:12, overflow:'hidden', border:'2px solid #8b5cf6' }}>
                 <img src={newsData.img} style={{ width:'100%', height:100, objectFit:'cover' }} />
-                <button type="button" onClick={() => setNewsData({...newsData, img:''})} style={{ position:'absolute', top:4, right:4, background:'red', color:'#fff', border:'none', borderRadius:4, fontSize:10, cursor:'pointer' }}>✕ Remove Banner</button>
+                <button type="button" onClick={() => setNewsData({...newsData, img:''})} style={{ position:'absolute', top:4, right:4, background:'red', color:'#fff', border:'none', borderRadius:4, fontSize:10, cursor:'pointer' }} aria-label="Remove banner image">✕ Remove Banner</button>
               </div>
             )}
             <div style={{ display: 'flex', gap: 10 }}>
@@ -379,7 +379,7 @@ export default function QuickPublishTab({ logAct }) {
             {evtData.img && (
               <div style={{ position:'relative', borderRadius:12, overflow:'hidden', border:'2px solid #10b981', marginTop:8 }}>
                 <img src={evtData.img} style={{ width:'100%', height:80, objectFit:'cover' }} />
-                <button type="button" onClick={() => setEvtData({...evtData, img:''})} style={{ position:'absolute', top:4, right:4, background:'red', color:'#fff', border:'none', borderRadius:4, fontSize:10, cursor:'pointer' }}>✕ Remove Banner</button>
+                <button type="button" onClick={() => setEvtData({...evtData, img:''})} style={{ position:'absolute', top:4, right:4, background:'red', color:'#fff', border:'none', borderRadius:4, fontSize:10, cursor:'pointer' }} aria-label="Remove banner image">✕ Remove Banner</button>
               </div>
             )}
             <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>

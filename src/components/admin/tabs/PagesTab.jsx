@@ -426,7 +426,7 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
                   <div style={{ display: 'flex', gap: 8 }}>
                     <a href={`${import.meta.env.BASE_URL}#/p/${page.slug}`} target="_blank" rel="noreferrer" className="abtn abtn-outline abtn-sm" style={{ textDecoration: 'none' }}>👁️ View</a>
                     <button className="abtn abtn-navy abtn-sm" onClick={() => startEdit(page)}>✏️ Edit</button>
-                    <button className="abtn abtn-red abtn-sm" onClick={() => handleDeletePage(page)}>🗑️</button>
+                    <button className="abtn abtn-red abtn-sm" onClick={() => handleDeletePage(page)} aria-label="Delete page">🗑️</button>
                   </div>
                 </div>
               );
