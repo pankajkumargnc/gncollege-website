@@ -31,6 +31,7 @@ export default defineConfig({
           "firebase-store": ["firebase/storage"],
           // Editor (lazy — only admin needs it)
           "jodit": ["jodit-react"],
+          "pdf-viewer": ["react-pdf", "pdfjs-dist"],
         },
         // Asset naming for long-term caching
         assetFileNames : "assets/[name]-[hash][extname]",

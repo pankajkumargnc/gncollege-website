@@ -77,14 +77,20 @@ Introduce yourself briefly and ask how you can help the user today with their ac
       
       const lowerInput = userMsg.toLowerCase();
       
-      if (lowerInput.includes('admission')) {
+      if (lowerInput.includes('admission') || lowerInput.includes('apply')) {
         botResponse = "Sat Sri Akal! 🎓 For admission inquiries, please apply through the official **Chancellor Portal**. You can find the direct link here: [Apply Online](https://jharkhanduniversities.nic.in/).";
-      } else if (lowerInput.includes('fee')) {
+      } else if (lowerInput.includes('fee') || lowerInput.includes('payment')) {
         botResponse = "Hello! 💳 You can pay your fees securely online through our **CIMS Student ERP** link. Here it is: [Fee Payment](https://cimsstudentnewui.mastersofterp.in/).";
-      } else if (lowerInput.includes('result')) {
+      } else if (lowerInput.includes('result') || lowerInput.includes('marks')) {
         botResponse = "Welcome! 📚 To check your latest exam results, please visit the official **BBMKU Result portal** here: [Results](https://bbmkuniv.in/login).";
-      } else if (lowerInput.includes('contact') || lowerInput.includes('phone')) {
+      } else if (lowerInput.includes('contact') || lowerInput.includes('phone') || lowerInput.includes('email')) {
         botResponse = "You can contact our Admin Office at **+91 79033 40991** or email **principal@gncollege.org**. How else can I assist your academic journey today? 🏫";
+      } else if (lowerInput.includes('syllabus') || lowerInput.includes('subjects')) {
+        botResponse = "You can find the latest syllabus in the **Academics** section of our website. Check the top menu for 'Syllabus'. 📖";
+      } else if (lowerInput.includes('scholarship') || lowerInput.includes('ekalyan')) {
+        botResponse = "For information regarding Scholarships like e-Kalyan or Minority benefits, please visit our **Scholarships & Financial Aid** page under the 'More' menu. 💰";
+      } else if (lowerInput.includes('hostel') || lowerInput.includes('accommodation')) {
+        botResponse = "Currently, Guru Nanak College does not offer on-campus hostel facilities. However, there are many private PG options available near the Bank More and Bhuda campuses. 🏘️";
       } else if (lowerInput.includes('hello') || lowerInput.includes('hi') || lowerInput.includes('sat sri akal')) {
         botResponse = "Sat Sri Akal! 🙏 Welcome to Guru Nanak College, Dhanbad. I am the GNC Assistant. How can I assist you today with your academic journey?";
       } else if (lowerInput.includes('joke') || lowerInput.includes('weather') || lowerInput.includes('movie')) {

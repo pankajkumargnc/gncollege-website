@@ -274,6 +274,112 @@ export default function Contact() {
           )}
         </section>
       </div>
+
+      {/* Contact Form Powered by Web3Forms */}
+      <div className="profile-container" style={{ marginTop:40, marginBottom:80 }}>
+        <section className="glass-panel profile-section anim-slide-up" style={{ animationDelay:'.4s' }}>
+          <h2 className="section-heading" style={{ textAlign:'center' }}>Send Us a Message</h2>
+          <div className="heading-underline" style={{ margin:'0 auto 30px' }} />
+          
+          <form 
+            className="contact-form" 
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const btn = e.target.querySelector('button[type="submit"]');
+              const originalText = btn.innerHTML;
+              btn.innerHTML = 'Sending...';
+              btn.disabled = true;
+              
+              const formData = new FormData(e.target);
+              // REPLACE THIS WITH ACTUAL WEB3FORMS KEY
+              formData.append("access_key", "YOUR_WEB3FORMS_ACCESS_KEY_HERE");
+              
+              try {
+                const res = await fetch("https://api.web3forms.com/submit", {
+                  method: "POST",
+                  body: formData
+                });
+                if (res.ok) {
+                  alert("Message sent successfully! We will get back to you soon.");
+                  e.target.reset();
+                } else {
+                  alert("Something went wrong. Please try again.");
+                }
+              } catch (err) {
+                alert("Network error. Please try again.");
+              } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+              }
+            }}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '20px' }}>
+              <input type="text" name="name" placeholder="Your Full Name" required className="form-input" />
+              <input type="email" name="email" placeholder="Your Email Address" required className="form-input" />
+            </div>
+            <input type="text" name="subject" placeholder="Subject" required className="form-input" style={{ marginBottom: '20px', width: '100%' }} />
+            <textarea name="message" placeholder="Type your message here..." required rows="5" className="form-input" style={{ marginBottom: '20px', width: '100%', resize: 'vertical' }}></textarea>
+            
+            <button type="submit" className="form-submit-btn">Send Message 🚀</button>
+          </form>
+
+          <style>{`
+            .form-input {
+              padding: 14px 18px;
+              border-radius: 12px;
+              border: 1px solid #e2e8f0;
+              background: #f8fafc;
+              font-family: inherit;
+              font-size: 15px;
+              color: ${COLORS.navy};
+              transition: all 0.3s;
+              outline: none;
+            }
+            .form-input:focus {
+              border-color: ${COLORS.gold};
+              background: #fff;
+              box-shadow: 0 0 0 3px rgba(244,160,35,0.15);
+            }
+            .form-submit-btn {
+              background: linear-gradient(135deg, ${COLORS.navy}, #1a365d);
+              color: white;
+              border: none;
+              padding: 14px 30px;
+              border-radius: 12px;
+              font-size: 16px;
+              font-weight: 700;
+              cursor: pointer;
+              transition: all 0.3s;
+              display: block;
+              margin: 0 auto;
+              min-width: 200px;
+            }
+            .form-submit-btn:hover:not(:disabled) {
+              transform: translateY(-2px);
+              box-shadow: 0 10px 20px rgba(15,35,71,0.2);
+              background: ${COLORS.gold};
+              color: ${COLORS.navyDark || '#000'};
+            }
+            .form-submit-btn:disabled {
+              opacity: 0.7;
+              cursor: not-allowed;
+            }
+            
+            [data-theme="dark"] .form-input {
+              background: rgba(15,35,71,0.4) !important;
+              border-color: rgba(255,255,255,0.1) !important;
+              color: #f1f5f9 !important;
+            }
+            [data-theme="dark"] .form-input:focus {
+              border-color: ${COLORS.gold} !important;
+              background: rgba(15,35,71,0.8) !important;
+            }
+            [data-theme="dark"] .form-submit-btn {
+              box-shadow: 0 8px 20px rgba(0,0,0,0.4) !important;
+            }
+          `}</style>
+        </section>
+      </div>
     </div>
   );
 }
