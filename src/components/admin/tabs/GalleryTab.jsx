@@ -5,6 +5,7 @@ import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/fi
 import toast from 'react-hot-toast';
 import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, useLocalDraft, Toggle, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
+import { clearCache } from '../../../utils/cachedFetch';
 
 // ✅ FIXED: Exact categories required for HomePage
 const ALBUM_TYPES = ['Seminars', 'Cultural Fest', 'Guest Visit', 'Campus', 'Departments', 'NSS Programs'];
@@ -39,10 +40,10 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
 
       if (editItem) {
         await updateDoc(doc(db, 'gallery', editItem.id), { ...payload, updatedAt: serverTimestamp() });
-        toast.success('Photo updated!');
+        toast.success('Photo updated!'); clearCache('gallery');
       } else {
         await addDoc(collection(db, 'gallery'), { ...payload, createdAt: serverTimestamp() });
-        toast.success('📸 Photo added!');
+        toast.success('📸 Photo added!'); clearCache('gallery');
       }
       logAct(editItem ? 'update' : 'add', `Gallery: ${formData.title}`, 'gallery');
       setEditItem(null); clearDraft();
@@ -78,7 +79,7 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
         }
       } catch (err) { console.error('Upload error:', err); }
     }
-    toast.success(`🎉 ${count} photos uploaded successfully!`);
+    toast.success(`🎉 ${count} photos uploaded successfully!`); clearCache('gallery');
     logAct('add', `Bulk uploaded ${count} photos to ${formData.cat}`, 'gallery');
     setLoading(false); setProgress(0); setIsBulk(false);
   };
@@ -198,7 +199,7 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
       </div>
 
       <SectionSearch value={search} onChange={setSearch} placeholder="Search photos..." />
-      <BulkBar count={selected.length} onDelete={() => { bulkDelete('gallery', selected); setSelected([]); }} onClear={() => setSelected([])} />
+      <BulkBar count={selected.length} onDelete={() => { bulkDelete('gallery', selected); setSelected([]); clearCache('gallery'); }} onClear={() => setSelected([])} />
 
       <div className="card">
         <div className="actitle">Gallery ({filtered.length})</div>
@@ -217,7 +218,7 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
                   <button className="abtn abtn-xs" style={{ background: 'rgba(255,255,255,.9)', padding: '3px 7px' }}
                     onClick={e => { e.stopPropagation(); setEditItem(g); setFormData({ title: g.title||'', cat: g.cat || g.album || 'Seminars', year: g.year||'', image: g.image||'', featured: !!g.featured }); window.scrollTo({top:0,behavior:'smooth'}); }}>✏️</button>
                   <button className="abtn abtn-xs" style={{ background: 'rgba(239,68,68,.9)', color: 'white', padding: '3px 7px' }}
-                    onClick={e => { e.stopPropagation(); softDelete('gallery', g.id, g, g.title); }}>🗑️</button>
+                    onClick={e => { e.stopPropagation(); softDelete('gallery', g.id, g, g.title); clearCache('gallery'); }}>🗑️</button>
                 </div>
                 {selected.includes(g.id) && (
                   <div style={{ position: 'absolute', top: 6, left: 6, width: 22, height: 22, borderRadius: 6, background: NAVY, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 13, fontWeight: 900 }}>✓</div>

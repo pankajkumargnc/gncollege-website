@@ -11,6 +11,7 @@ import MediaPicker from '../../MediaPicker';
 import {
   T, NAVY, GOLD, BG, useLocalDraft, SectionSearch, BulkBar, MiniLog,
 } from '../AdminShared';
+import { clearCache } from '../../../utils/cachedFetch';
 
 const CATEGORIES = [
   'Academic', 'Admission', 'Result', 'Syllabus',
@@ -46,12 +47,12 @@ export default function DocumentsTab({
         await updateDoc(doc(db, 'pdfReports', editItem.id), {
           ...formData, updatedAt: serverTimestamp(),
         });
-        toast.success('Document updated!');
+        toast.success('Document updated!'); clearCache('pdfReports');
       } else {
         await addDoc(collection(db, 'pdfReports'), {
           ...formData, createdAt: serverTimestamp(),
         });
-        toast.success('📁 Document uploaded!');
+        toast.success('📁 Document uploaded!'); clearCache('pdfReports');
       }
       logAct(editItem ? 'update' : 'add', `Doc: ${formData.title}`, 'pdfReports');
       setEditItem(null);
@@ -151,7 +152,7 @@ export default function DocumentsTab({
       <SectionSearch value={search} onChange={setSearch} placeholder="Search documents..." />
       <BulkBar
         count={selected.length}
-        onDelete={() => { bulkDelete('pdfReports', selected); setSelected([]); }}
+        onDelete={() => { bulkDelete('pdfReports', selected); setSelected([]); clearCache('pdfReports'); }}
         onClear={() => setSelected([])}
       />
 
@@ -195,7 +196,7 @@ export default function DocumentsTab({
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}>✏️</button>
               <button className="abtn abtn-red abtn-sm"
-                onClick={() => softDelete('pdfReports', d.id, d, d.title)}>🗑️</button>
+                onClick={() => { softDelete('pdfReports', d.id, d, d.title); clearCache('pdfReports'); }}>🗑️</button>
             </div>
           </div>
         ))}

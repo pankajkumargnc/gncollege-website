@@ -1,0 +1,60 @@
+/* src/styles/print.css — Print-optimized stylesheet for GNC College */
+@media print {
+  /* Hide non-printable elements */
+  .navbar, .footer, .back-to-top, .whatsapp-button,
+  .ai-chatbot, .quick-action-nav, .ticker-container,
+  .hero-slider, .premium-ticker, .alert-banner,
+  .quick-access-sidebar, .universal-search,
+  [data-noprint], button, video, iframe,
+  .mini-youtube-player {
+    display: none !important;
+  }
+
+  /* Reset backgrounds & colors for readability */
+  body, * {
+    color: #000 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Readable typography */
+  body {
+    font-size: 12pt !important;
+    line-height: 1.5 !important;
+    font-family: 'Georgia', 'Times New Roman', serif !important;
+  }
+
+  h1, h2, h3, h4 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  img { max-width: 100% !important; }
+
+  a { text-decoration: underline; }
+  a[href]:after { content: " (" attr(href) ")"; font-size: 9pt; color: #555; }
+  a[href^="#"]:after, a[href^="javascript"]:after { content: ""; }
+
+  /* Page margins */
+  @page {
+    margin: 2cm;
+    size: A4;
+  }
+
+  /* College branding header for print */
+  .print-header {
+    display: block !important;
+    text-align: center;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10pt;
+    margin-bottom: 20pt;
+  }
+
+  /* Avoid widows/orphans */
+  p, li { orphans: 3; widows: 3; }
+
+  /* Table breaks */
+  table { page-break-inside: avoid; }
+  tr { page-break-inside: avoid; }
+}

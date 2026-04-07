@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { HashRouter as Router } from 'react-router-dom'
 import AppWrapper from './AppWrapper'
 import './styles/index.css'
+import './styles/print.css'
 
 // ── Root-level Error Boundary — poori app crash hone se bachata hai ──────────
 class RootErrorBoundary extends React.Component {

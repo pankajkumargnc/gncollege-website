@@ -82,7 +82,44 @@ body {
   --shadow-lg: 0 8px 32px rgba(15,35,71,.1);
   --shadow-xl: 0 16px 48px rgba(15,35,71,.14);
   --shadow-gold: 0 4px 18px rgba(244,160,35,.3);
+}
 
+/* ══ Commandment 6 — Global Focus States (A11y) ══ */
+*:focus-visible {
+  outline: 2px solid var(--gold) !important;
+  outline-offset: 3px !important;
+  border-radius: 4px;
+}
+
+/* Inputs get a subtler focus ring */
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--navy) !important;
+  box-shadow: 0 0 0 3px rgba(15,35,71,.08) !important;
+  outline: none;
+}
+
+/* Skip nav link */
+.skip-link:focus {
+  position: fixed !important;
+  top: 10px !important;
+  left: 10px !important;
+  z-index: 99999 !important;
+  background: var(--navy);
+  color: var(--gold);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+/* ══ Commandment 2 — Global Button Cursor ══ */
+button, [role="button"], .clickable {
+  cursor: pointer;
+}
+
+:root {
   /* Z-Index Scale — Standardized layers for new components */
   --z-base:      1;
   --z-sidebar:   100;
@@ -1273,3 +1310,37 @@ img {
 }
 
 /* GNC-CONSOLIDATED-V13 */
+
+/* ── LazyImg Shimmer Animation ── */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Skeleton Loader ── */
+.premium-skeleton {
+  background: linear-gradient(110deg, #f0f0f0 25%, #e0e0e0 37%, #f0f0f0 63%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+[data-theme="dark"] .premium-skeleton {
+  background: linear-gradient(110deg, #1a2744 25%, #0f2347 37%, #1a2744 63%);
+  background-size: 200% 100%;
+}
+
+/* ── Skeleton Shimmer (Component-level) ── */
+@keyframes gnc-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ══ Print CSS — Commandment: Clean printable pages ══ */
+@media print {
+  .navbar, .footer, .hp-watermark, .whatsapp-btn,
+  .back-to-top, .ai-chatbot, .ticker-wrap, .premium-ticker,
+  .skip-link, .hp-qab, .fb-connect-bar { display: none !important; }
+  body { background: #fff !important; color: #000 !important; }
+  .premium-hero, .contact-header { background: #0f2347 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  a[href]::after { content: " (" attr(href) ")"; font-size: 0.8em; color: #666; }
+}

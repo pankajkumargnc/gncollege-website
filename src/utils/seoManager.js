@@ -2,7 +2,7 @@
 // ✍️ @SEO_Agent — Route-based SEO meta tag management
 
 const SITE_NAME = 'Guru Nanak College, Dhanbad';
-const BASE_URL = 'https://pankajkumargnc.github.io/gncollege-website';
+const BASE_URL = 'https://gnc-college-web.web.app';
 const DEFAULT_IMAGE = `${BASE_URL}/images/gncollege-social-preview.webp`;
 const DEFAULT_DESC = 'Guru Nanak College Dhanbad — NAAC accredited Sikh Minority Degree College affiliated to B.B.M.K. University, Jharkhand. Offering B.A., B.Com., BCA, BBA courses.';
 
@@ -93,6 +93,14 @@ const SEO_MAP = {
   '/admin': {
     title: 'Admin Panel | Guru Nanak College',
     description: 'Administrative panel for managing college website content.',
+  },
+  '/about-us/sikh-heritage': {
+    title: 'Sikh Heritage | Guru Nanak College Dhanbad',
+    description: 'Learn about the Sikh heritage, Guru Nanak Dev Ji\'s teachings, and the cultural foundation of Guru Nanak College, Dhanbad.',
+  },
+  '/scholarships': {
+    title: 'Scholarships & Financial Aid | Guru Nanak College Dhanbad',
+    description: 'Complete guide to scholarships for SC/ST/OBC/Minority students — NSP, Jharkhand E-Kalyan, SGPC, and college merit scholarships.',
   },
 };
 

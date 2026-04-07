@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react";
 // GNC College — Optimized Vite Config v7
 // ✅ v7: Added pdfjs-dist worker support (fixes "fake worker" crash)
 export default defineConfig({
-  base: "/gncollege-website/",
+  base: "/",
   plugins: [react()],
 
   build: {

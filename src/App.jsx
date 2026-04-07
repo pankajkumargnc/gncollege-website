@@ -29,7 +29,7 @@ export default function App() {
   const location = useLocation();
   
   // ── Custom Hooks ──
-  const { isDark } = useDarkMode();
+  const { isDark, toggle: toggleDark } = useDarkMode();
   const data = useAppData();
   const { 
     updates, notices, announcements, events, gallery, 
@@ -220,7 +220,7 @@ export default function App() {
       {!isAdminRoute && (
         <div style={{ position: 'relative', zIndex: 1000 }}>
           <AlertBanner />
-          <TopBar />
+          <TopBar isDark={isDark} onToggleDark={toggleDark} />
           <Ticker items={notices} />
           <Navbar navLinks={baseNavLinks} />
           <Breadcrumbs />

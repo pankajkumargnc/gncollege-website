@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /_sysTest
+
+Sitemap: https://gnc-college-web.web.app/sitemap.xml
+
+# Guru Nanak College, Dhanbad — Official Website
+# https://gnc-college-web.web.app

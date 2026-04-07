@@ -82,6 +82,7 @@ export const navLinks = [
       { label: 'Principal Message', href: '/about-us/principal-message' },
       { label: 'Vision & Mission', href: '/about-us/vision-mission' },
       { label: 'College Profile', href: '/about-us/college-profile' },
+      { label: 'Sikh Heritage', href: '/about-us/sikh-heritage' },
       {
         label: 'College Management',
         sub: [
@@ -262,6 +263,18 @@ export const navLinks = [
     sub: [
       { label: 'Photo Gallery', href: '/gallery/photos' },
       { label: 'Video Gallery', href: '/gallery/videos' },
+    ]
+  },
+  {
+    label: 'More',
+    href: '/',
+    sub: [
+      { label: 'Scholarships & Financial Aid', href: '/scholarships' },
+      { label: 'Notice Board', href: '/notifications' },
+      { label: 'Events', href: '/events' },
+      { label: 'Latest News', href: '/news' },
+      { label: 'Documents', href: '/documents' },
+      { label: 'Video Gallery', href: '/video-gallery' },
     ]
   },
   { label: 'Contact Us', href: '/contact' },

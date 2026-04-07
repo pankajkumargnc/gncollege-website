@@ -5,6 +5,7 @@ import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/fi
 import toast from 'react-hot-toast';
 import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, WHITE, useLocalDraft, Toggle, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
+import { clearCache } from '../../../utils/cachedFetch';
 
 const DEPTS       = ['Botany','Chemistry','Commerce','Computer Science','Economics','Education','English','Geography','Hindi','History','Mathematics','Philosophy','Physics','Political Science','Sociology','Zoology','Library','Physical Education','Other'];
 const DESIGNATIONS = ['Professor','Associate Professor','Assistant Professor','Guest Lecturer','Lab Assistant','Librarian','Clerk','Peon','Other'];
@@ -27,10 +28,10 @@ export default function FacultyTab({ faculties, logAct, getSectionLog, softDelet
       const payload = { ...formData, order: Number(formData.order) || 0 };
       if (editItem) {
         await updateDoc(doc(db, 'faculties', editItem.id), { ...payload, updatedAt: serverTimestamp() });
-        toast.success('Staff updated!');
+        toast.success('Staff updated!'); clearCache('faculties');
       } else {
         await addDoc(collection(db, 'faculties'), { ...payload, createdAt: serverTimestamp() });
-        toast.success('👨‍🏫 Staff added!');
+        toast.success('👨‍🏫 Staff added!'); clearCache('faculties');
       }
       logAct(editItem ? 'update' : 'add', `Staff: ${formData.name} (${formData.department})`, 'faculties');
       setEditItem(null); clearDraft();
@@ -74,7 +75,7 @@ export default function FacultyTab({ faculties, logAct, getSectionLog, softDelet
               setFormData({ name: f.name||'', designation: f.designation||'Assistant Professor', department: f.department||'English', qualification: f.qualification||'', photo: f.photo||'', email: f.email||'', phone: f.phone||'', staffType: f.staffType||'Teaching', order: f.order||0 });
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}>✏️</button>
-            <button className="abtn abtn-red abtn-sm" onClick={() => softDelete('faculties', f.id, f, f.name)}>🗑️</button>
+            <button className="abtn abtn-red abtn-sm" onClick={() => { softDelete('faculties', f.id, f, f.name); clearCache('faculties'); }}>🗑️</button>
           </div>
         </div>
       ))}
@@ -163,7 +164,7 @@ export default function FacultyTab({ faculties, logAct, getSectionLog, softDelet
       </div>
 
       <SectionSearch value={search} onChange={setSearch} placeholder="Search staff..." />
-      <BulkBar count={selected.length} onDelete={() => { bulkDelete('faculties', selected); setSelected([]); }} onClear={() => setSelected([])} />
+      <BulkBar count={selected.length} onDelete={() => { bulkDelete('faculties', selected); setSelected([]); clearCache('faculties'); }} onClear={() => setSelected([])} />
 
       <div className="card">
         <div className="actitle">Staff ({filtered.length})</div>

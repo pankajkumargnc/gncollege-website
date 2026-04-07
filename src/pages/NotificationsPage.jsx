@@ -113,7 +113,7 @@ export default function NotificationsPage() {
       <header style={{ position: 'relative', padding: '100px 20px 80px', background: `url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop') center/cover`, borderBottom: '1px solid #e2e8f0' }}>
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to right, ${navy}f2, ${navy}cc)` }} />
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '1000px', margin: '0 auto' }}>
-          <h1 style={{ color: '#fff', fontSize: '48px', fontWeight: 900, margin: '0 0 15px', letterSpacing: '-1px' }}>Notice Board</h1>
+          <h1 style={{ color: '#fff', fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 900, margin: '0 0 15px', letterSpacing: '-1px' }}>Notice Board</h1>
           <p style={{ color: '#cbd5e1', fontSize: '18px', maxWidth: '600px', margin: 0, lineHeight: 1.6 }}>Official announcements & circulars directly from our Cloud Drive.</p>
         </div>
       </header>
@@ -146,11 +146,33 @@ export default function NotificationsPage() {
         )}
 
         {loading ? <div style={{ textAlign: 'center', padding: '40px', color: '#64748b', fontWeight: 700 }}>⏳ Syncing with Google Drive...</div> : 
-         filtered.length === 0 ? <div style={{ textAlign: 'center', padding: '60px', border: '2px dashed #cbd5e1', borderRadius: '16px', color: '#64748b' }}>No notices match your filter.</div> : (
+         filtered.length === 0 ? (
+           <div style={{ textAlign: 'center', padding: 'clamp(40px,6vw,64px) 20px', color: '#94a3b8' }}>
+             <div style={{ fontSize: 'clamp(40px,8vw,56px)', marginBottom: 16 }}>📭</div>
+             <h3 style={{ color: '#0f2347', fontWeight: 800, marginBottom: 8, fontSize: 'clamp(16px,2.5vw,20px)' }}>
+               Koi Notice Nahi Mili
+             </h3>
+             <p style={{ fontSize: 'clamp(13px,1.8vw,15px)', marginBottom: 24, lineHeight: 1.7, maxWidth: 400, margin: '0 auto 24px' }}>
+               {search
+                 ? `"${search}" ke liye koi result nahi. Search clear karein.`
+                 : 'Abhi tak koi notice publish nahi hua hai.'}
+             </p>
+             {search && (
+               <button onClick={() => setSearch('')}
+                 style={{ background: '#0f2347', color: '#f4a023', border: 'none', padding: '10px 24px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, minHeight: 44, fontSize: 'clamp(13px,1.5vw,15px)' }}>
+                 Clear Search
+               </button>
+             )}
+           </div>
+         ) : (
           <>
           {Object.entries(grouped).map(([monthYear, items]) => (
             <div key={monthYear} style={{ marginBottom: '40px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 900, color: navy, borderBottom: '2px solid #e2e8f0', paddingBottom: '10px', marginBottom: '20px' }}>📅 {monthYear}</h3>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: 12, margin: 'clamp(20px,3vw,32px) 0 clamp(12px,2vw,20px)' }}>
+                <span style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+                <span style={{ background: '#fff', color: '#0f2347', fontWeight: 800, fontSize: 12, padding: '4px 12px', borderRadius: 20, border: '1.5px solid #e2e8f0', whiteSpace: 'nowrap', letterSpacing: 0.3 }}>{monthYear}</span>
+                <span style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+              </h3>
               {items.map(n => {
                 const d = getTS(n.createdAt);
                 return (

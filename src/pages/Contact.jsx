@@ -74,9 +74,9 @@ export default function Contact() {
           background: linear-gradient(135deg, ${COLORS.navy} 0%, #0a1832 100%);
           color: white; padding: 80px 20px 140px; text-align: center; position: relative;
         }
-        .header-title { font-size:46px; font-weight:900; margin:0; letter-spacing:-1px; animation:fadeInUp .6s ease-out forwards; }
+        .header-title { font-size:clamp(28px, 5vw, 46px); font-weight:900; margin:0; letter-spacing:-1px; animation:fadeInUp .6s ease-out forwards; }
         .header-title span { color:${COLORS.gold}; }
-        .header-sub { font-size:16px; color:#cbd5e1; margin:15px auto 0; max-width:600px; animation:fadeInUp .6s ease-out .2s forwards; opacity:0; line-height:1.6; }
+        .header-sub { font-size:clamp(14px, 1.8vw, 16px); color:#cbd5e1; margin:15px auto 0; max-width:600px; animation:fadeInUp .6s ease-out .2s forwards; opacity:0; line-height:1.6; }
 
         .campus-container { max-width:1200px; margin:-120px auto 40px; padding:0 20px; display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%, 400px),1fr)); gap:40px; position:relative; z-index:10; }
         .campus-card { background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 15px 40px rgba(0,0,0,0.07); border:1px solid #e2e8f0; transition:all .4s ease; opacity:0; animation:fadeInUp .8s ease-out forwards; display:flex; flex-direction:column; }
@@ -231,7 +231,31 @@ export default function Contact() {
           <div className="heading-underline" style={{ margin:'0 auto 30px' }} />
 
           {loading ? (
-            <div style={{ textAlign:'center', padding:'40px', color:'#64748b', fontWeight:700 }}>Loading directory...</div>
+            <div className="directory-grid">
+              {Array(6).fill(0).map((_, i) => (
+                <div key={i} className="directory-card" style={{ opacity: 0.7 }}>
+                  <div style={{
+                    width: 50, height: 50, borderRadius: '50%', flexShrink: 0,
+                    background: 'linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%)',
+                    backgroundSize: '200% 100%', animation: 'gnc-shimmer 1.4s ease-in-out infinite',
+                  }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ height: 10, borderRadius: 5, width: '60%', marginBottom: 8,
+                      background: 'linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%)',
+                      backgroundSize: '200% 100%', animation: 'gnc-shimmer 1.4s ease-in-out infinite',
+                    }} />
+                    <div style={{ height: 14, borderRadius: 7, width: '80%', marginBottom: 8,
+                      background: 'linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%)',
+                      backgroundSize: '200% 100%', animation: 'gnc-shimmer 1.4s ease-in-out infinite',
+                    }} />
+                    <div style={{ height: 10, borderRadius: 5, width: '50%',
+                      background: 'linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%)',
+                      backgroundSize: '200% 100%', animation: 'gnc-shimmer 1.4s ease-in-out infinite',
+                    }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="directory-grid">
               {directory.map(person => (

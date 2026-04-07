@@ -41,6 +41,8 @@ const AdminPanel = safeLazy(() => import("./admin/AdminPanel"));
 const EmbeddedPDFPage = safeLazy(() => import("../pages/EmbeddedPDFPage"));
 const NotFoundPage = safeLazy(() => import("../pages/NotFoundPage"));
 const RegulationsPage = safeLazy(() => import("../pages/RegulationsPage"));
+const SikhHeritagePage = safeLazy(() => import("../pages/SikhHeritagePage"));
+const ScholarshipsPage = safeLazy(() => import("../pages/ScholarshipsPage"));
 
 // ── Named export lazy helpers ────────────────────────────────────────────────
 const LazyAbout = (n) => safeLazy(() => import("../pages/AboutPages").then((m) => ({ default: m[n] })));
@@ -155,6 +157,7 @@ export default function AppRoutes({
             <Route path="/about-us/principal-message" element={<R el={<PrincipalMessage />} />} />
             <Route path="/about-us/governing-body" element={<R el={<GoverningBody />} />} />
             <Route path="/about-us/staff-council" element={<R el={<StaffCouncil />} />} />
+            <Route path="/about-us/sikh-heritage" element={<R el={<SikhHeritagePage />} />} />
             <Route path="/about-us/college-management/organogram" element={<R el={<Organogram />} />} />
             <Route path="/about-us/college-management/presidents" element={<R el={<LeadershipPage type="president" title="Presidents Over the Years" />} />} />
             <Route path="/about-us/college-management/secretaries" element={<R el={<LeadershipPage type="secretary" title="Secretaries Over the Years" />} />} />
@@ -246,6 +249,7 @@ export default function AppRoutes({
             <Route path="/notifications" element={<R el={<NotificationsPage />} />} />
             <Route path="/documents" element={<R el={<DocumentsPage />} />} />
             <Route path="/events" element={<R el={<EventsPage />} />} />
+            <Route path="/scholarships" element={<R el={<ScholarshipsPage />} />} />
 
             <Route path="/p/:slug" element={<R el={<PageViewer gallery={gallery} events={events} faculties={faculties} />} />} />
             <Route path="*" element={<R el={<NotFoundPage />} />} />

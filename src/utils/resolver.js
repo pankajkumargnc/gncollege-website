@@ -1,7 +1,7 @@
 // src/utils/resolver.js — Universal Image Resolver
 // ⚙️ @Backend_Agent — Resolves image URLs from multiple sources
 
-const BASE = import.meta.env.BASE_URL || '/gncollege-website/';
+const BASE = import.meta.env.BASE_URL || '/';
 
 /**
  * Convert Google Drive share links to direct lh3.googleusercontent URLs

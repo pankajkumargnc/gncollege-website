@@ -9,6 +9,7 @@ import {
 import toast from 'react-hot-toast';
 import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, useLocalDraft, Toggle, MiniLog } from '../AdminShared';
+import { clearCache } from '../../../utils/cachedFetch';
 
 export default function SliderTab({ sliderSlides, logAct, getSectionLog, softDelete }) {
   const [editItem, setEditItem] = useState(null);
@@ -36,12 +37,12 @@ export default function SliderTab({ sliderSlides, logAct, getSectionLog, softDel
         await updateDoc(doc(db, 'sliderSlides', editItem.id), {
           ...payload, updatedAt: serverTimestamp(),
         });
-        toast.success('Slide updated!');
+        toast.success('Slide updated!'); clearCache('sliderSlides');
       } else {
         await addDoc(collection(db, 'sliderSlides'), {
           ...payload, createdAt: serverTimestamp(),
         });
-        toast.success('🖼️ Slide added!');
+        toast.success('🖼️ Slide added!'); clearCache('sliderSlides');
       }
       logAct(editItem ? 'update' : 'add', `Slider: ${formData.title}`, 'sliderSlides');
       setEditItem(null);
@@ -54,7 +55,7 @@ export default function SliderTab({ sliderSlides, logAct, getSectionLog, softDel
 
   const toggleActive = async (slide) => {
     await updateDoc(doc(db, 'sliderSlides', slide.id), { isActive: !slide.isActive });
-    toast.success(slide.isActive ? 'Slide hidden' : '🖼️ Slide visible!');
+    toast.success(slide.isActive ? 'Slide hidden' : '🖼️ Slide visible!'); clearCache('sliderSlides');
     logAct('update', `Slide ${slide.isActive ? 'hidden' : 'shown'}: ${slide.title}`, 'sliderSlides');
   };
 
@@ -179,7 +180,7 @@ export default function SliderTab({ sliderSlides, logAct, getSectionLog, softDel
                     ✏️ Edit
                   </button>
                   <button className="abtn abtn-red abtn-sm"
-                    onClick={() => softDelete('sliderSlides', s.id, s, s.title || 'Slide')}>
+                    onClick={() => { softDelete('sliderSlides', s.id, s, s.title || 'Slide'); clearCache('sliderSlides'); }}>
                     🗑️
                   </button>
                 </div>

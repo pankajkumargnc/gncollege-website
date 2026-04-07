@@ -1,93 +1,83 @@
+// src/hooks/useAppData.js — FIXED + CACHED VERSION
 import { useState, useEffect } from 'react';
-import { collection, query, onSnapshot, orderBy, limit } from 'firebase/firestore';
+import { collection, query, onSnapshot, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getCached, setCache } from '../utils/cachedFetch';
 
 export default function useAppData() {
-  const [updates, setUpdates] = useState([]);
-  const [notices, setNotices] = useState([]);
+  const [updates, setUpdates]             = useState([]);
+  const [notices, setNotices]             = useState([]);
   const [announcements, setAnnouncements] = useState([]);
-  const [events, setEvents] = useState([]);
-  const [gallery, setGallery] = useState([]);
-  const [faculties, setFaculties] = useState([]);
-  const [testimonials, setTestimonials] = useState([]);
-  const [sliderSlides, setSliderSlides] = useState([]);
-  const [navLinks, setNavLinks] = useState([]);
-  const [pdfReports, setPdfReports] = useState([]);
+  const [events, setEvents]               = useState([]);
+  const [gallery, setGallery]             = useState([]);
+  const [faculties, setFaculties]         = useState([]);
+  const [testimonials, setTestimonials]   = useState([]);
+  const [sliderSlides, setSliderSlides]   = useState([]);
+  const [navLinks, setNavLinks]           = useState([]);
+  const [pdfReports, setPdfReports]       = useState([]);
 
-  // 1. Navigation Menu Builder
+  // Navigation — always live
   useEffect(() => {
-    const qNav = query(collection(db, "navigation"), orderBy("order", "asc"));
-    const unsubNav = onSnapshot(qNav, (snap) => {
-      const flatMenus = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-      const buildNavTree = (parentId) => {
-        const children = flatMenus.filter(
-          (m) => (m.parentId || null) === (parentId || null),
-        );
-        if (children.length === 0) return null;
-        return children.map((child) => ({
-          label: child.label,
-          href: child.href,
-          sub: buildNavTree(child.id),
-        }));
+    const qNav = query(collection(db, 'navigation'), orderBy('order', 'asc'));
+    const unsub = onSnapshot(qNav, snap => {
+      const flat = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const buildTree = pid => {
+        const children = flat.filter(m => (m.parentId || null) === (pid || null));
+        if (!children.length) return null;
+        return children.map(c => ({ label: c.label, href: c.href, sub: buildTree(c.id) }));
       };
-
-      setNavLinks(buildNavTree(null) || []);
+      setNavLinks(buildTree(null) || []);
     });
-    return () => unsubNav();
+    return () => unsub();
   }, []);
 
-  // 2. Standard Content Collections
+  // Live + Cached collections
   useEffect(() => {
-    const cols = [
-      ["notices", setNotices],
-      ["announcements", setAnnouncements],
-      ["events", setEvents],
-      ["gallery", setGallery],
-      ["faculties", setFaculties],
-      ["sliderSlides", setSliderSlides],
-      ["updates", setUpdates],
-      ["reports", setPdfReports],
+    const liveCols = [
+      ['notices',       setNotices],
+      ['announcements', setAnnouncements],
+      ['events',        setEvents],
+      ['updates',       setUpdates],
     ];
-
-    const unsubs = [
-      ...cols.map(([col, setter]) => {
-        let collectionQuery;
-        if (col === "gallery" || col === "events" || col === "reports") {
-          collectionQuery = query(collection(db, col), limit(30));
-        } else if (["notices", "announcements", "faculties", "updates"].includes(col)) {
-          collectionQuery = query(collection(db, col), limit(50));
-        } else {
-          collectionQuery = collection(db, col);
-        }
-
-        return onSnapshot(
-          collectionQuery,
-          (snap) => {
-            const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-            docs.sort(
-              (a, b) =>
-                (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0),
-            );
-            setter(docs);
-          },
-          (err) => console.error(`[${col}] fetching error:`, err),
-        );
-      })
-    ];
-
-    // Fetch static/rarely updated collections ONE TIME to save Firebase costs
-    import('firebase/firestore').then(({ getDocs }) => {
-      getDocs(query(collection(db, "testimonials"), limit(20), orderBy("createdAt", "desc")))
-        .then(snap => setTestimonials(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
-        .catch(err => console.error('Testimonials fetch error', err));
+    const unsubs = liveCols.map(([col, setter]) => {
+      try {
+        return onSnapshot(query(collection(db, col), limit(50)), snap => {
+          const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          docs.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+          setter(docs);
+        }, err => console.error(`[${col}]`, err));
+      } catch { return () => {}; }
     });
 
-    return () => unsubs.forEach((u) => u && u());
+    const staticCols = [
+      ['gallery',      setGallery],
+      ['faculties',    setFaculties],
+      ['sliderSlides', setSliderSlides],
+      ['pdfReports',   setPdfReports],
+    ];
+    staticCols.forEach(([col, setter]) => {
+      const cached = getCached(col);
+      if (cached) { setter(cached); return; }
+      getDocs(query(collection(db, col), limit(100)))
+        .then(snap => {
+          const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          docs.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+          setter(docs); setCache(col, docs);
+        }).catch(err => console.error(`[${col}] cache error`, err));
+    });
+
+    const ct = getCached('testimonials');
+    if (ct) { setTestimonials(ct); }
+    else {
+      getDocs(query(collection(db, 'testimonials'), limit(20), orderBy('createdAt', 'desc')))
+        .then(snap => {
+          const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          setTestimonials(docs); setCache('testimonials', docs);
+        }).catch(console.error);
+    }
+
+    return () => unsubs.forEach(u => u && u());
   }, []);
 
-  return {
-    updates, notices, announcements, events, gallery, 
-    faculties, testimonials, sliderSlides, navLinks, pdfReports
-  };
+  return { updates, notices, announcements, events, gallery, faculties, testimonials, sliderSlides, navLinks, pdfReports };
 }
