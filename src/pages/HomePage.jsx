@@ -8,6 +8,7 @@ import { SOCIAL_LINKS } from "../data/db";
 import { useDriveDocs } from "../hooks/useDriveDocs";
 
 import HeroSlider from "../components/HeroSlider";
+import Ticker from "../components/Ticker";
 import HomeFeatures from "../components/HomeFeatures";
 import NotificationSection from "../components/home/NotificationSection";
 import PlacementsSection from "../components/home/PlacementsSection";

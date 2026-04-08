@@ -136,6 +136,15 @@ export function updateSEO(pathname, custom = {}) {
   setMeta('og:description', description, 'property');
   setMeta('og:url', url, 'property');
   setMeta('og:image', image, 'property');
+
+  // Canonical Tag (Automated)
+  let canonical = document.querySelector('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement('link');
+    canonical.setAttribute('rel', 'canonical');
+    document.head.appendChild(canonical);
+  }
+  canonical.setAttribute('href', url);
   
   // Twitter Card
   setMeta('twitter:title', title);

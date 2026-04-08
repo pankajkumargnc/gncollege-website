@@ -552,27 +552,33 @@ const PageViewer = ({ path, content, title, gallery, events, faculties }) => {
       const q = query(collection(db, 'pages'), orderBy('createdAt', 'desc'));
       const unsubPage = onSnapshot(q, snap => {
         const pages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        // Try to match by slug directly or full path
         const found = pages.find(p => p.slug === slug || p.slug === `/p/${slug}` || p.path === `/p/${slug}`);
-        setPage(found || null);
+        
+        if (found) {
+          // 🛡️ Sanitize once on fetch
+          const sanitized = DOMPurify.sanitize(wrapTablesForMobile(found.content));
+          setPage({ ...found, sanitizedContent: sanitized });
+        } else {
+          setPage(null);
+        }
         setLoading(false);
-      }, () => setLoading(false));
+      }, (err) => {
+        console.error("[Backend] Page fetch error:", err);
+        setLoading(false);
+      });
       unsubs.push(unsubPage);
 
       // Fetch site data if missing
-      if (!gallery || gallery.length === 0) {
-        unsubs.push(onSnapshot(collection(db, 'gallery'), s => setSiteData(prev => ({ ...prev, gallery: s.docs.map(d => ({ id: d.id, ...d.data() })) }))));
-      }
-      if (!events || events.length === 0) {
-        unsubs.push(onSnapshot(collection(db, 'events'), s => setSiteData(prev => ({ ...prev, events: s.docs.map(d => ({ id: d.id, ...d.data() })) }))));
-      }
-      if (!faculties || faculties.length === 0) {
-        unsubs.push(onSnapshot(collection(db, 'faculty'), s => setSiteData(prev => ({ ...prev, faculties: s.docs.map(d => ({ id: d.id, ...d.data() })) }))));
-      }
+      const dataCols = [['gallery', 'gallery'], ['events', 'events'], ['faculty', 'faculties']];
+      dataCols.forEach(([col, stateKey]) => {
+        unsubs.push(onSnapshot(collection(db, col), s => {
+          setSiteData(prev => ({ ...prev, [stateKey]: s.docs.map(d => ({ id: d.id, ...d.data() })) }));
+        }));
+      });
     }
 
     return () => unsubs.forEach(u => u && u());
-  }, [slug, content, gallery, events, faculties]);
+  }, [slug, content]);
 
   if (loading) return (
     <div style={{ minHeight: '60vh', background: '#f8fafc' }}>
@@ -588,7 +594,11 @@ const PageViewer = ({ path, content, title, gallery, events, faculties }) => {
       <PageHero title={page?.title || title || 'Page'} />
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 24px 80px' }}>
         <div className="gnc-prose" onClick={handleContentClick}>
-           {renderWithShortcodes(page?.content, siteData)}
+           {page?.sanitizedContent ? (
+             <div dangerouslySetInnerHTML={{ __html: page.sanitizedContent }} />
+           ) : (
+             renderWithShortcodes(page?.content, siteData)
+           )}
         </div>
       </div>
 

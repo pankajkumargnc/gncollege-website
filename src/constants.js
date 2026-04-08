@@ -37,10 +37,10 @@ export const COLLEGE = {
 
   // Social — real URLs yahan daalo
   SOCIAL: {
-    FACEBOOK:  'https://facebook.com/',   // TODO: real URL
-    TWITTER:   'https://twitter.com/',    // TODO: real URL
-    INSTAGRAM: 'https://instagram.com/', // TODO: real URL
-    YOUTUBE:   'https://youtube.com/',   // TODO: real URL
+    FACEBOOK:  'https://www.facebook.com/gnc.bhuda',
+    TWITTER:   'https://twitter.com/GNCDhanbad',
+    INSTAGRAM: 'https://www.instagram.com/guru_nanak_college_dhanbad/',
+    YOUTUBE:   'https://www.youtube.com/@GuruNanakCollegeDhanbad',
   },
 };
 
