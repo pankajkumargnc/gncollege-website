@@ -67,8 +67,6 @@ const HeroSlider = ({ slides = [] }) => {
       onMouseLeave={handleMouseLeave}
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600&display=swap');
-        
         .parallax-hs {
           width: 100%; height: clamp(380px, 70vh, 580px);
           position: relative; overflow: hidden; background: #071124;
@@ -132,7 +130,6 @@ const HeroSlider = ({ slides = [] }) => {
           line-height: 1.1; margin: 0 0 12px; letter-spacing: -1.2px;
           animation: phsFadeUp 0.8s 0.4s both;
           text-shadow: 0 10px 30px rgba(0,0,0,0.5);
-          white-space: nowrap;
         }
         .phs-sub {
           font-family: 'Inter', sans-serif;

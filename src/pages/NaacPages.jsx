@@ -88,7 +88,7 @@ function NaacDocumentList({ categoryKey, emptyMsg = "Documents will be available
 export function SsrCyclePage({ cycle = 1 }) {
   const title = `SSR ${cycle}${cycle === 1 ? 'st' : 'nd'} Cycle`;
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title={title} subtitle={`Complete Self Study Report and Peer Team documents for NAAC Accreditation Cycle ${cycle}.`} icon={cycle === 1 ? "🥇" : "🥈"} />
       <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <NaacDocumentList categoryKey={`cycle-${cycle}`} emptyMsg={`SSR Cycle ${cycle} documents are being processed.`} />
@@ -100,7 +100,7 @@ export function SsrCyclePage({ cycle = 1 }) {
 /* 2. AQAR */
 export function AqarPage() {
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="AQAR Reports" subtitle="Annual Quality Assurance Reports submitted to NAAC by the IQAC cell of the college." icon="📊" />
       <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}><NaacDocumentList categoryKey="aqar" emptyMsg="Annual Quality Assurance Reports will appear here." /></div>
     </div>
@@ -110,7 +110,7 @@ export function AqarPage() {
 /* 3. NIRF */
 export function NirfPage() {
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="NIRF Rankings" subtitle="Data submitted for the National Institutional Ranking Framework (Ministry of Education)." icon="🏛️" />
       <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}><NaacDocumentList categoryKey="nirf" emptyMsg="NIRF participation data and reports will be updated here." /></div>
     </div>
@@ -120,7 +120,7 @@ export function NirfPage() {
 /* 4. PERSPECTIVE PLAN */
 export function PerspectivePlan() {
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="Perspective Plan" subtitle="The strategic roadmap and future vision of Guru Nanak College for academic and infrastructure growth." icon="🗺️" />
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>

@@ -1,16 +1,13 @@
  //src/pages/Contact.jsx
 // ✅ FIREBASE CONNECTED — settings/contact + contactDirectory collection
-//
-// AdminPanel mein ye 2 cheezein manage hoti hain:
-//   1. Firestore → settings/contact → { bhuda:{phone,email,address}, bankMore:{phone,email,address} }
-//   2. Firestore → contactDirectory collection → { title, name, phone, icon, order }
-//
-// AdminPanel mein "Contact Settings" tab add karo (neeche structure diya hai)
+// ✅ UUPM Compliant: Labels, inline validation, toast feedback, free form submission
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { doc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
+import toast from 'react-hot-toast';
+import { Send, MapPin, Phone, Mail, User, AtSign, FileText, MessageSquare } from 'lucide-react';
 
 // ── Default fallback — jab tak Firebase se data na aaye ────────────────────
 const DEFAULT_CONTACT = {
@@ -26,6 +23,133 @@ const DEFAULT_DIRECTORY = [
   { id:'5', title:"Member, Anti-Ragging Squad",          name:"Prof. [Name Here]", phone:"+91 XXXXX XXXXX", icon:"🛑", order:5 },
   { id:'6', title:"P.A. to Principal",                   name:"Mr. [Name Here]",   phone:"+91 XXXXX XXXXX", icon:"📝", order:6 },
 ];
+
+// ── Contact Form with Labels, Validation, Toast ─────────────────────
+function ContactForm() {
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [sending, setSending] = useState(false);
+  const formRef = useRef(null);
+
+  const validate = (name, value) => {
+    switch(name) {
+      case 'name': return value.trim().length < 2 ? 'Please enter your full name' : '';
+      case 'email': return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'Please enter a valid email' : '';
+      case 'subject': return value.trim().length < 3 ? 'Subject must be at least 3 characters' : '';
+      case 'message': return value.trim().length < 10 ? 'Message must be at least 10 characters' : '';
+      default: return '';
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched(t => ({ ...t, [name]: true }));
+    setErrors(err => ({ ...err, [name]: validate(name, value) }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const form = formRef.current;
+    const data = new FormData(form);
+    
+    // Validate all fields
+    const newErrors = {};
+    let hasError = false;
+    for (const [name, value] of data.entries()) {
+      const err = validate(name, value);
+      if (err) { newErrors[name] = err; hasError = true; }
+    }
+    setErrors(newErrors);
+    setTouched({ name: true, email: true, subject: true, message: true });
+
+    if (hasError) {
+      // Focus first invalid field
+      const firstErrorField = Object.keys(newErrors)[0];
+      form.querySelector(`[name="${firstErrorField}"]`)?.focus();
+      toast.error('Please fix the errors before submitting');
+      return;
+    }
+
+    setSending(true);
+
+    try {
+      // Free submission via FormSubmit.co — no API key, no signup, free forever
+      const res = await fetch('https://formsubmit.co/ajax/info@gncollege.org', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          name: data.get('name'),
+          email: data.get('email'),
+          subject: data.get('subject'),
+          message: data.get('message'),
+          _subject: `📬 GNC Website: ${data.get('subject')}`,
+        }),
+      });
+
+      if (res.ok) {
+        toast.success('Message sent successfully! We will get back to you soon.', { duration: 5000 });
+        form.reset();
+        setErrors({});
+        setTouched({});
+      } else {
+        toast.error('Something went wrong. Please try again.', { duration: 4000 });
+      }
+    } catch {
+      toast.error('Network error. Please check your connection and try again.', { duration: 4000 });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const fieldClass = (name) => `form-input${touched[name] && errors[name] ? ' error' : ''}${touched[name] && !errors[name] ? ' valid' : ''}`;
+
+  return (
+    <form className="contact-form" ref={formRef} onSubmit={handleSubmit} noValidate>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+        <div className="form-field">
+          <label htmlFor="cf-name" className="form-label required-mark">
+            <User size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6 }} />
+            Full Name
+          </label>
+          <input id="cf-name" type="text" name="name" placeholder="Enter your full name" required className={fieldClass('name')} onBlur={handleBlur} autoComplete="name" />
+          {touched.name && errors.name && <div className="form-error" role="alert"><span>⚠</span> {errors.name}</div>}
+        </div>
+        <div className="form-field">
+          <label htmlFor="cf-email" className="form-label required-mark">
+            <AtSign size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6 }} />
+            Email Address
+          </label>
+          <input id="cf-email" type="email" name="email" placeholder="you@example.com" required className={fieldClass('email')} onBlur={handleBlur} autoComplete="email" />
+          {touched.email && errors.email && <div className="form-error" role="alert"><span>⚠</span> {errors.email}</div>}
+        </div>
+      </div>
+      <div className="form-field">
+        <label htmlFor="cf-subject" className="form-label required-mark">
+          <FileText size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6 }} />
+          Subject
+        </label>
+        <input id="cf-subject" type="text" name="subject" placeholder="What is your inquiry about?" required className={fieldClass('subject')} onBlur={handleBlur} />
+        {touched.subject && errors.subject && <div className="form-error" role="alert"><span>⚠</span> {errors.subject}</div>}
+      </div>
+      <div className="form-field">
+        <label htmlFor="cf-message" className="form-label required-mark">
+          <MessageSquare size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6 }} />
+          Message
+        </label>
+        <textarea id="cf-message" name="message" placeholder="Type your message here..." required rows="5" className={fieldClass('message')} onBlur={handleBlur} style={{ resize: 'vertical' }}></textarea>
+        {touched.message && errors.message && <div className="form-error" role="alert"><span>⚠</span> {errors.message}</div>}
+      </div>
+      
+      <button type="submit" className="form-submit-btn" disabled={sending}>
+        {sending ? (
+          <><span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }}></span> Sending...</>
+        ) : (
+          <><Send size={16} /> Send Message</>
+        )}
+      </button>
+    </form>
+  );
+}
 
 export default function Contact() {
   const [contactInfo, setContactInfo] = useState(DEFAULT_CONTACT);
@@ -275,56 +399,16 @@ export default function Contact() {
         </section>
       </div>
 
-      {/* Contact Form Powered by Web3Forms */}
+      {/* Contact Form — Free submission via FormSubmit.co (no API key needed) */}
       <div className="profile-container" style={{ marginTop:40, marginBottom:80 }}>
         <section className="glass-panel profile-section anim-slide-up" style={{ animationDelay:'.4s' }}>
           <h2 className="section-heading" style={{ textAlign:'center' }}>Send Us a Message</h2>
           <div className="heading-underline" style={{ margin:'0 auto 30px' }} />
           
-          <form 
-            className="contact-form" 
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const btn = e.target.querySelector('button[type="submit"]');
-              const originalText = btn.innerHTML;
-              btn.innerHTML = 'Sending...';
-              btn.disabled = true;
-              
-              const formData = new FormData(e.target);
-              // REPLACE THIS WITH ACTUAL WEB3FORMS KEY
-              formData.append("access_key", "YOUR_WEB3FORMS_ACCESS_KEY_HERE");
-              
-              try {
-                const res = await fetch("https://api.web3forms.com/submit", {
-                  method: "POST",
-                  body: formData
-                });
-                if (res.ok) {
-                  alert("Message sent successfully! We will get back to you soon.");
-                  e.target.reset();
-                } else {
-                  alert("Something went wrong. Please try again.");
-                }
-              } catch (err) {
-                alert("Network error. Please try again.");
-              } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-              }
-            }}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '20px' }}>
-              <input type="text" name="name" placeholder="Your Full Name" required className="form-input" />
-              <input type="email" name="email" placeholder="Your Email Address" required className="form-input" />
-            </div>
-            <input type="text" name="subject" placeholder="Subject" required className="form-input" style={{ marginBottom: '20px', width: '100%' }} />
-            <textarea name="message" placeholder="Type your message here..." required rows="5" className="form-input" style={{ marginBottom: '20px', width: '100%', resize: 'vertical' }}></textarea>
-            
-            <button type="submit" className="form-submit-btn">Send Message 🚀</button>
-          </form>
+          <ContactForm />
 
           <style>{`
-            .form-input {
+            .contact-form .form-input {
               padding: 14px 18px;
               border-radius: 12px;
               border: 1px solid #e2e8f0;
@@ -334,8 +418,9 @@ export default function Contact() {
               color: ${COLORS.navy};
               transition: all 0.3s;
               outline: none;
+              width: 100%;
             }
-            .form-input:focus {
+            .contact-form .form-input:focus {
               border-color: ${COLORS.gold};
               background: #fff;
               box-shadow: 0 0 0 3px rgba(244,160,35,0.15);
@@ -350,9 +435,13 @@ export default function Contact() {
               font-weight: 700;
               cursor: pointer;
               transition: all 0.3s;
-              display: block;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
               margin: 0 auto;
               min-width: 200px;
+              min-height: 48px;
             }
             .form-submit-btn:hover:not(:disabled) {
               transform: translateY(-2px);
@@ -365,12 +454,12 @@ export default function Contact() {
               cursor: not-allowed;
             }
             
-            [data-theme="dark"] .form-input {
+            [data-theme="dark"] .contact-form .form-input {
               background: rgba(15,35,71,0.4) !important;
               border-color: rgba(255,255,255,0.1) !important;
               color: #f1f5f9 !important;
             }
-            [data-theme="dark"] .form-input:focus {
+            [data-theme="dark"] .contact-form .form-input:focus {
               border-color: ${COLORS.gold} !important;
               background: rgba(15,35,71,0.8) !important;
             }

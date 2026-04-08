@@ -45,7 +45,7 @@ export function AdmissionRule() {
   ];
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="Admission Procedure" subtitle="Complete step-by-step guide for UG and Vocational admission under NEP 2020." icon="📝" />
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -87,7 +87,7 @@ export function DocumentRequired() {
   ];
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="Documents Required" subtitle="Bring these documents during physical verification at the campus." icon="📂" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -134,7 +134,7 @@ export function FeeStructure() {
   ];
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="Fee Structure" subtitle="Detailed semester-wise fee breakdown for 4-Year FYUGP (8 Semesters), BCA, and BBA." icon="💳" />
       <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -236,7 +236,7 @@ export function AdmissionNotification() {
   }, []);
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="Admission Notifications" subtitle="Latest updates, merit lists, and announcements regarding admissions." icon="📢" />
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -280,7 +280,7 @@ export function IntakeCapacity() {
   ];
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="Intake Capacity" subtitle="Subject-wise maximum seat availability for the current academic session." icon="🪑" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>

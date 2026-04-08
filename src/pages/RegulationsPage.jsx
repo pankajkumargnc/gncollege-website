@@ -16,7 +16,7 @@ export default function RegulationsPage() {
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   return (
-    <div style={{ minHeight:'100vh', background:'#f8fafc', fontFamily:"'DM Sans', sans-serif" }}>
+    <div style={{ minHeight:'100dvh', background:'#f8fafc', fontFamily:"'DM Sans', sans-serif" }}>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
 
       {/* Hero */}

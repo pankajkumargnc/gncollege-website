@@ -135,7 +135,8 @@ export default function DocumentsPage() {
               <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'center', marginBottom:16 }}>
                 <div style={{ flex:1, minWidth:200, position:'relative' }}>
                   <span style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', opacity:.4, fontSize:16, pointerEvents:'none' }}>🔍</span>
-                  <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Document search karo..."
+                  <label htmlFor="doc-search" className="sr-only">Search documents</label>
+                  <input id="doc-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Document search karo..."
                     style={{ width:'100%', padding:'10px 14px 10px 38px', border:'2px solid #e2e8f0', borderRadius:10, fontSize:14, fontFamily:'inherit', background:'#f8fafc', outline:'none', boxSizing:'border-box', transition:'border-color .2s' }}
                     onFocus={e => e.target.style.borderColor=gold}
                     onBlur={e  => e.target.style.borderColor='#e2e8f0'} />

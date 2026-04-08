@@ -89,7 +89,7 @@ export default function NotificationsPage() {
   }, [paginated]);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fff', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ minHeight: '100dvh', background: '#fff', fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         .filter-container { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; margin-bottom: 40px; box-shadow: 0 10px 40px -10px rgba(15,23,42,0.05); }
         .search-wrapper { position: relative; flex: 1; }
@@ -123,7 +123,8 @@ export default function NotificationsPage() {
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
             <div className="search-wrapper">
               <span className="search-icon">🔍</span>
-              <input className="premium-input" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search notices by title or keyword..." />
+              <label htmlFor="notice-search" className="sr-only">Search notices by title or keyword</label>
+              <input id="notice-search" className="premium-input" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search notices by title or keyword..." />
             </div>
             {(selYear!=='All'||selMonth!=='All'||search) && (
               <button className="clear-btn" onClick={() => { setSelYear('All'); setSelMonth('All'); setSearch(''); }}>✕ Clear All</button>

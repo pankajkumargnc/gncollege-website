@@ -341,7 +341,7 @@ const Footer = memo(() => {
             <h4 className="f-heading">Location Map</h4>
             <DualCampusMap />
             
-            <Link to="/#/admin" style={{ 
+            <Link to="/admin" target="_blank" rel="noopener noreferrer" style={{ 
               background: 'rgba(255,255,255,0.05)', color: '#fff', border: `1px solid rgba(255,255,255,0.1)`, 
               padding: '10px 18px', borderRadius: '10px', fontSize: 11.5, fontWeight: 800, textDecoration: 'none', 
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, 
@@ -351,7 +351,10 @@ const Footer = memo(() => {
               onMouseEnter={(e) => { e.currentTarget.style.background = G; e.currentTarget.style.color = '#000'; e.currentTarget.style.borderColor = G; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
             >
-              🔒 Admin Access Portal
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              Admin Access Portal
             </Link>
           </SA>
 

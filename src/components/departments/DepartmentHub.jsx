@@ -34,7 +34,7 @@ export const DepartmentHub = ({ DEPT_META }) => {
   }, []);
 
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans','DM Sans',sans-serif", background: '#f8fafc', minHeight: '100vh', overflowX: 'hidden' }}>
+    <div style={{ fontFamily: "'Plus Jakarta Sans','DM Sans',sans-serif", background: '#f8fafc', minHeight: '100dvh', overflowX: 'hidden' }}>
       <style>{`
         .hub-grid {
           display: flex;

@@ -5,19 +5,20 @@
 // ✅ Mobile scroll pe hide, visible area mein stay
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { User, GraduationCap, Building2, Medal, BookOpen, Camera, Phone } from 'lucide-react';
 import { COLORS } from '../styles/colors';
 
 const N = COLORS.navy || '#0f2347';
 const G = COLORS.gold || '#f4a023';
 
 const ACTIONS = [
-  { label:'Principal Message', icon:'👨‍🏫', href:'#/about-us/principal-message' },
-  { label:'Admission Rules',   icon:'🎓',  href:'#/admission/rule'              },
-  { label:'Departments',       icon:'🏛️',  href:'#/academics/course-offered'    },
-  { label:'NSS / NCC',         icon:'🎖️',  href:'#/activity/nss'               },
-  { label:'Syllabus',          icon:'📚',  href:'#/syllabus'                    },
-  { label:'Photo Gallery',     icon:'📸',  href:'#/gallery'                     },
-  { label:'Contact Us',        icon:'📞',  href:'#/contact'                     },
+  { label:'Principal Message', icon: <User size={20} />, href:'#/about-us/principal-message' },
+  { label:'Admission Rules',   icon: <GraduationCap size={20} />, href:'#/admission/rule' },
+  { label:'Departments',       icon: <Building2 size={20} />, href:'#/academics/course-offered' },
+  { label:'NSS / NCC',         icon: <Medal size={20} />, href:'#/activity/nss' },
+  { label:'Syllabus',          icon: <BookOpen size={20} />, href:'#/syllabus' },
+  { label:'Photo Gallery',     icon: <Camera size={20} />, href:'#/gallery' },
+  { label:'Contact Us',        icon: <Phone size={20} />, href:'#/contact' },
 ];
 
 export default function QuickActionNav() {

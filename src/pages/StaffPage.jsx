@@ -69,7 +69,7 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
   }, {}), [filteredStaff]);
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
 
       {/* Premium Hero */}
       {!headless && (
@@ -88,10 +88,12 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
       {/* ── Search ── */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: headless ? '0' : '40px 20px' }}>
         <div style={{ maxWidth: 500, margin: '25px auto 0', position: 'relative' }}>
+          <label htmlFor="staff-search" className="sr-only">Search staff by name, department, or designation</label>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} aria-hidden="true">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
           <input
+            id="staff-search"
             type="text"
             placeholder={`Search by Name, Department, or Designation...`}
             value={searchTerm}

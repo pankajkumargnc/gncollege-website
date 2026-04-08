@@ -65,7 +65,7 @@ export function IqacPage() {
   }, []);
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="Internal Quality Assurance Cell" subtitle="Ensuring and enhancing the academic and administrative performance of the institution." icon="📈" />
       
       <div style={{ maxWidth: 1200, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
@@ -139,7 +139,7 @@ export function CourseOffered() {
   };
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="Courses Offered (NEP 2022)" subtitle="Four Year Undergraduate Programme (FYUGP) with Multiple Entry & Exit Options." icon="🎓" />
       
       <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
@@ -206,13 +206,14 @@ export function Syllabus() {
   ];
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="Syllabus Database" subtitle="Download official FYUGP and CBCS syllabi for all departments." icon="📚" />
       
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ background: '#fff', padding: 20, borderRadius: 20, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', marginBottom: 30 }}>
-            <input type="text" placeholder="🔍 Search subject or semester... (e.g., BCA Sem 1)" value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%', padding: '16px 20px', borderRadius: 12, border: '1.5px solid #e2e8f0', fontSize: 16, outline: 'none', background: '#f8fafc', color: NAVY, fontWeight: 600, boxSizing: 'border-box' }} />
+            <label htmlFor="syllabus-search" className="sr-only">Search syllabus by subject or semester</label>
+            <input id="syllabus-search" type="text" placeholder="🔍 Search subject or semester... (e.g., BCA Sem 1)" value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%', padding: '16px 20px', borderRadius: 12, border: '1.5px solid #e2e8f0', fontSize: 16, outline: 'none', background: '#f8fafc', color: NAVY, fontWeight: 600, boxSizing: 'border-box' }} />
             
             <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
               {filterOptions.map(f => (
@@ -293,7 +294,7 @@ export function AcademicCalendar() {
   ];
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="Academic Calendar" subtitle="Key dates, examination schedules, and holidays for the current session." icon="🗓️" />
       
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
@@ -360,7 +361,7 @@ export function PlacementsPage() {
     const GOLD = COLORS?.gold || '#f4a023';
 
     return (
-        <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+        <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
             <PageHeader 
                 title="Placements & Wall of Fame" 
                 subtitle="Celebrating the success of our students who have been placed in leading industries and organizations." 
@@ -372,7 +373,9 @@ export function PlacementsPage() {
                 <Fade>
                     <div style={{ background: '#fff', padding: '24px', borderRadius: 20, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', marginBottom: 30, display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center' }}>
                         <div style={{ flex: 1, minWidth: 280 }}>
+                            <label htmlFor="placement-search" className="sr-only">Search by student name or company</label>
                             <input 
+                                id="placement-search"
                                 type="text" 
                                 placeholder="🔍 Search by student name or company..." 
                                 value={search} 

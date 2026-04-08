@@ -37,7 +37,7 @@ export default function EmbeddedPDFPage({ title, subtitle, pdfUrl }) {
         .epdf-root {
           position: relative;
           background: #030914; 
-          min-height: 100vh;
+          min-height: 100dvh;
           padding-bottom: 60px;
           font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
           overflow: hidden;
@@ -205,7 +205,7 @@ export default function EmbeddedPDFPage({ title, subtitle, pdfUrl }) {
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         
         .epdf-iframe-wrap:fullscreen {
-          height: 100vh;
+          height: 100dvh;
           border-radius: 0;
         }
       `}</style>

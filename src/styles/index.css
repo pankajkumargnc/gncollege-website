@@ -726,7 +726,7 @@ h1, h2, h3,
 /* ═══════════════════════════════════════
    9. COLLEGE PROFILE PAGE
 ═══════════════════════════════════════ */
-.profile-page-wrapper { width:100%; min-height:100vh; padding-bottom:4rem; }
+.profile-page-wrapper { width:100%; min-height:100dvh; padding-bottom:4rem; }
 
 .profile-hero {
   position:relative;

@@ -483,7 +483,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
     }
 
     @media (max-width: 480px) {
-      .gnc-wrap { width: 100vw; height: 100vh; border-radius: 0; max-height: 100vh; border: none; }
+      .gnc-wrap { width: 100vw; height: 100dvh; border-radius: 0; max-height: 100dvh; border: none; }
       .gnc-left { display: none; }
       .gnc-right { padding: 32px 22px 28px; justify-content: flex-start; padding-top: 52px; }
       .gnc-close { top: 14px; right: 14px; }
@@ -608,10 +608,11 @@ export default function AdminLogin({ onSuccess, onClose }) {
 
             {/* Username */}
             <div className="gnc-field">
-              <div className="gnc-field-label"><span>Username</span></div>
+              <label htmlFor="admin-username" className="gnc-field-label"><span>Username</span></label>
               <div className={`gnc-input-wrap ${focusU ? 'focused' : ''}`}>
-                <span className="gnc-input-icon">👤</span>
+                <span className="gnc-input-icon" aria-hidden="true">👤</span>
                 <input
+                  id="admin-username"
                   className="gnc-input"
                   type="text"
                   placeholder="Enter your username"
@@ -629,15 +630,16 @@ export default function AdminLogin({ onSuccess, onClose }) {
 
             {/* Password */}
             <div className="gnc-field">
-              <div className="gnc-field-label">
+              <label htmlFor="admin-password" className="gnc-field-label">
                 <span>Password</span>
                 {capsLock && (
                   <span className="gnc-caps">⇪ Caps Lock ON</span>
                 )}
-              </div>
+              </label>
               <div className={`gnc-input-wrap ${focusP ? 'focused' : ''}`}>
-                <span className="gnc-input-icon">🔑</span>
+                <span className="gnc-input-icon" aria-hidden="true">🔑</span>
                 <input
+                  id="admin-password"
                   className="gnc-input"
                   type={showPass ? 'text' : 'password'}
                   placeholder="Enter your password"

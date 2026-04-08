@@ -109,7 +109,7 @@ export default function NotFoundPage() {
 
   return (
     <div style={{
-      minHeight: '100vh', position: 'relative', overflow: 'hidden',
+      minHeight: '100dvh', position: 'relative', overflow: 'hidden',
       background: `radial-gradient(ellipse at 20% 50%, #0a1628 0%, ${NAVY} 40%, #060e1c 100%)`,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontFamily: "'Inter','Plus Jakarta Sans',sans-serif",

@@ -277,7 +277,7 @@ function SingleDeptPage({ slug, subSlug }) {
   const activeSem = semTab || (Object.keys(d.curriculum || {})[0]);
 
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: '#f8fafc', minHeight: '100vh', color: '#334155' }}>
+    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: '#f8fafc', minHeight: '100dvh', color: '#334155' }}>
       <style>{`
         .dp-hl{background:#fff;border:1.5px solid #f1f5f9;border-radius:16px;padding:22px 20px;height:100%;transition:all .3s cubic-bezier(.22,1,.36,1);}
         .dp-hl:hover{border-color:${C}3a;box-shadow:0 10px 28px ${C}12;transform:translateY(-3px);}

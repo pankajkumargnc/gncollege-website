@@ -126,7 +126,7 @@ export default function VideoGallery() {
   if (!hasApiKey && hasVideoIds) {
     const channel = ytConfig?.channelName || 'GNC College Official';
     return (
-      <div style={{ background:'#f8fafc', minHeight:'100vh', fontFamily:'"Amazon Ember","Inter",sans-serif' }}>
+      <div style={{ background:'#f8fafc', minHeight:'100dvh', fontFamily:'"Amazon Ember","Inter",sans-serif' }}>
         <style>{`
           .gc{position:relative;z-index:0;display:block;}
           .gc::before{content:'';position:absolute;inset:-3px;border-radius:inherit;background:conic-gradient(from 0deg,#a855f7,#ec4899,#f97316,#eab308,#06b6d4,#6366f1,#a855f7);opacity:0;filter:blur(10px);z-index:-1;transition:opacity .35s ease;}
@@ -212,7 +212,7 @@ export default function VideoGallery() {
   // ── NO VIDEOS AT ALL ──────────────────────────────────────────────────────
   if (!hasApiKey && !hasVideoIds) {
     return (
-      <div style={{ background:'#f8fafc', minHeight:'100vh', fontFamily:'"Amazon Ember","Inter",sans-serif' }}>
+      <div style={{ background:'#f8fafc', minHeight:'100dvh', fontFamily:'"Amazon Ember","Inter",sans-serif' }}>
         {/* Hero */}
         <div style={{ background:`linear-gradient(135deg,${N} 0%,#1a3a7c 100%)`, padding:'70px 20px 60px', textAlign:'center', position:'relative', overflow:'hidden' }}>
           <div style={{ position:'absolute', top:0, left:0, right:0, height:4, background:G }} />

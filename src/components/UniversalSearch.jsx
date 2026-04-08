@@ -1,6 +1,7 @@
 // src/components/UniversalSearch.jsx — Premium AI-Powered Command Palette
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Home, School, GraduationCap, Building2, Camera, Bell, FileText, Search, Sparkles } from 'lucide-react';
 import { COLORS } from '../styles/colors';
 
 const N = COLORS.navy;
@@ -23,11 +24,11 @@ export default function UniversalSearch({
   const flatResults = useMemo(() => {
     const items = [
       // 1. Static Core Pages
-      { title: 'Home', path: '/', icon: '🏠', cat: 'Navigation' },
-      { title: 'About GNC', path: '/about-us/college-profile', icon: '🏫', cat: 'Navigation' },
-      { title: 'Admissions', path: '/admission/rule', icon: '🎓', cat: 'Navigation' },
-      { title: 'Departments', path: '/academics/departments', icon: '🏛️', cat: 'Navigation' },
-      { title: 'Photo Gallery', path: '/gallery/photos', icon: '📸', cat: 'Navigation' },
+      { title: 'Home', path: '/', icon: <Home size={22} strokeWidth={1.5}/>, cat: 'Navigation' },
+      { title: 'About GNC', path: '/about-us/college-profile', icon: <School size={22} strokeWidth={1.5}/>, cat: 'Navigation' },
+      { title: 'Admissions', path: '/admission/rule', icon: <GraduationCap size={22} strokeWidth={1.5}/>, cat: 'Navigation' },
+      { title: 'Departments', path: '/academics/departments', icon: <Building2 size={22} strokeWidth={1.5}/>, cat: 'Navigation' },
+      { title: 'Photo Gallery', path: '/gallery/photos', icon: <Camera size={22} strokeWidth={1.5}/>, cat: 'Navigation' },
       
       // 2. Dynamic Faculties
       ...(faculties || []).map(f => ({
@@ -43,7 +44,7 @@ export default function UniversalSearch({
         title: n.text,
         sub: n.date,
         path: n.link || '/notifications',
-        icon: '🔔',
+        icon: <Bell size={22} strokeWidth={1.5}/>,
         cat: 'Latest Notices'
       })),
 
@@ -52,7 +53,7 @@ export default function UniversalSearch({
         title: p.title,
         sub: 'Institutional Page',
         path: `/p/${p.slug}`,
-        icon: '📄',
+        icon: <FileText size={22} strokeWidth={1.5}/>,
         cat: 'Institutional Content'
       })),
 
@@ -161,7 +162,7 @@ export default function UniversalSearch({
 
       <div className="us-modal" onClick={e => e.stopPropagation()}>
         <div className="us-head">
-          <span style={{ fontSize: 24 }}>✨</span>
+          <Sparkles size={24} color={G} />
           <input 
             ref={inputRef}
             className="us-input"
@@ -178,7 +179,7 @@ export default function UniversalSearch({
         <div className="us-body" ref={listRef}>
           {flatResults.length === 0 ? (
             <div style={{ padding: 80, textAlign: 'center' }}>
-              <div style={{ fontSize: 50, marginBottom: 15, filter: 'grayscale(1)' }}>🔍</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 15 }}><Search size={48} strokeWidth={1.5} color="#cbd5e1" /></div>
               <div style={{ fontWeight: 900, color: '#94a3b8', fontSize: 18 }}>No matching results</div>
               <div style={{ color: '#cbd5e1', fontSize: 13, marginTop: 5 }}>Try searching for a different keyword</div>
             </div>
@@ -197,8 +198,8 @@ export default function UniversalSearch({
                       onClick={() => handleSelect(item)}
                       onMouseEnter={() => setActiveIndex(currentIndex)}
                     >
-                      <div className="us-img-box">
-                        {item.img ? <img src={item.img} className="us-img" alt="" /> : (item.icon || '📄')}
+                      <div className="us-img-box" style={{ color: COLORS.navy }}>
+                        {item.img ? <img src={item.img} className="us-img" alt="" /> : (item.icon || <FileText size={22} strokeWidth={1.5}/>)}
                       </div>
                       <div className="us-info">
                         <div className="us-title">{item.title}</div>
@@ -215,7 +216,7 @@ export default function UniversalSearch({
 
         <div className="us-foot">
           <div className="us-meta">
-            <span>✨ GNC Intelligent Search</span>
+            <span style={{display:'flex', alignItems:'center', gap:'5px'}}><Sparkles size={14} color={G}/> GNC Intelligent Search</span>
             <span style={{ opacity: 0.3 }}>|</span>
             <span>{flatResults.length} records matched</span>
           </div>

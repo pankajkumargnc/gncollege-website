@@ -35,7 +35,7 @@ export function NssPage() {
   const [previewPdf, setPreviewPdf] = useState(null); // ✅ MODAL PDF STATE
   const stats = [{ num: '500+', label: 'Active Volunteers', icon: '🙋‍♂️' }, { num: '50+', label: 'Blood Units Donated', icon: '🩸' }, { num: '20+', label: 'Adopted Villages', icon: '🏡' }, { num: '1000+', label: 'Trees Planted', icon: '🌳' }];
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="National Service Scheme (NSS)" subtitle='Motto: "Not Me But You". Developing student personality through community service.' icon="🤝" />
       <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -70,7 +70,7 @@ export function NssPage() {
 export function NccPage() {
   const [previewPdf, setPreviewPdf] = useState(null); // ✅ MODAL PDF STATE
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="National Cadet Corps (NCC)" subtitle='Motto: "Unity and Discipline". Shaping the youth into patriotic and disciplined citizens.' icon="🎖️" theme="#1e3a8a" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -97,7 +97,7 @@ export function WorkshopPage() {
   const [previewPdf, setPreviewPdf] = useState(null); // ✅ MODAL PDF STATE
   const workshops = [{ title: 'Intellectual Property Rights (IPR)', dept: 'IQAC Cell', date: 'October 2023' }, { title: 'New Education Policy (NEP 2020) Seminar', dept: 'Education Dept', date: 'August 2023' }, { title: 'Cyber Security & Ethical Hacking', dept: 'BCA Department', date: 'July 2023' }, { title: 'Financial Literacy for Youth', dept: 'Commerce Dept', date: 'May 2023' }];
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="Workshops & Seminars" subtitle="Bridging the gap between academia and industry through expert sessions." icon="🎤" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -120,7 +120,7 @@ export function WorkshopPage() {
 export function SportsPage() {
   const [previewPdf, setPreviewPdf] = useState(null); // ✅ MODAL PDF STATE
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="Games & Sports" subtitle="Promoting physical fitness, teamwork, and sportsmanship among students." icon="🏆" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -152,7 +152,7 @@ export function SportsPage() {
 export function RotaractClub() {
   const [previewPdf, setPreviewPdf] = useState(null); // ✅ MODAL PDF STATE
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="Rotaract Club" subtitle='Motto: "Fellowship Through Service". A global movement of young leaders.' icon="⚙️" theme="#d91b5c" />
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -175,7 +175,7 @@ export function RotaractClub() {
 export function SadbhavanaDiwas() {
   const [previewPdf, setPreviewPdf] = useState(null); // ✅ MODAL PDF STATE
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title="Sadbhavana Diwas" subtitle="Promoting National Integration, Peace, and Communal Harmony." icon="🕊️" theme="#059669" />
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>

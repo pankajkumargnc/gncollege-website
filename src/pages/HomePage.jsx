@@ -786,7 +786,7 @@ const HomePage = ({
   return (
     <div
       className="hp-root"
-      style={{ background: "#f8fafc", minHeight: "100vh", overflowX: "hidden" }}
+      style={{ background: "#f8fafc", minHeight: "100dvh", overflowX: "hidden" }}
     >
       <style>{ANIM_CSS + CSS}</style>
       <div className="hp-watermark" />

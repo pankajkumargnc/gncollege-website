@@ -21,7 +21,7 @@ class RootErrorBoundary extends React.Component {
       return (
         <div style={{
           display: 'flex', flexDirection: 'column', alignItems: 'center',
-          justifyContent: 'center', minHeight: '100vh',
+          justifyContent: 'center', minHeight: '100dvh',
           background: '#0f2347', color: '#fff', fontFamily: 'sans-serif',
           padding: '24px', textAlign: 'center',
         }}>

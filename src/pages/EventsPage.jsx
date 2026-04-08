@@ -8,19 +8,20 @@ import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import PDFModal from '../components/PDFModal';
 import PremiumPagination from '../components/PremiumPagination';
+import { Hammer, Mic, Theater, Trophy, Handshake, Medal, BookOpen } from 'lucide-react';
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const EVENT_TYPES  = ['All','WORKSHOP','SEMINAR','CULTURAL','SPORTS','NSS','NCC','ACADEMIC'];
 const ITEMS_PER_PAGE = 12;
 
 const TYPE_META = {
-  WORKSHOP: { icon:'🛠️', grad:'linear-gradient(135deg,#667eea,#764ba2)', light:'#FAF5FF', text:'#44337a', border:'#E9D8FD', color:'#805ad5' },
-  SEMINAR:  { icon:'🎤', grad:'linear-gradient(135deg,#f093fb,#f5576c)', light:'#FFF5F5', text:'#742a2a', border:'#FEB2B2', color:'#e53e3e' },
-  CULTURAL: { icon:'🎭', grad:'linear-gradient(135deg,#4facfe,#00f2fe)', light:'#EBF8FF', text:'#1a365d', border:'#BED0FF', color:'#3182ce' },
-  SPORTS:   { icon:'🏆', grad:'linear-gradient(135deg,#43e97b,#38f9d7)', light:'#F0FFF4', text:'#1c4532', border:'#9AE6B4', color:'#38a169' },
-  NSS:      { icon:'🤝', grad:'linear-gradient(135deg,#fa709a,#fee140)', light:'#FFFBEB', text:'#744210', border:'#FAF089', color:'#d69e2e' },
-  NCC:      { icon:'🎖️', grad:'linear-gradient(135deg,#a18cd1,#fbc2eb)', light:'#FAF5FF', text:'#44337a', border:'#E9D8FD', color:'#805ad5' },
-  ACADEMIC: { icon:'📚', grad:'linear-gradient(135deg,#a18cd1,#fbc2eb)', light:'#FAF5FF', text:'#44337a', border:'#E9D8FD', color:'#805ad5' },
+  WORKSHOP: { icon: <Hammer size={18}/>, grad:'linear-gradient(135deg,#667eea,#764ba2)', light:'#FAF5FF', text:'#44337a', border:'#E9D8FD', color:'#805ad5' },
+  SEMINAR:  { icon: <Mic size={18}/>, grad:'linear-gradient(135deg,#f093fb,#f5576c)', light:'#FFF5F5', text:'#742a2a', border:'#FEB2B2', color:'#e53e3e' },
+  CULTURAL: { icon: <Theater size={18}/>, grad:'linear-gradient(135deg,#4facfe,#00f2fe)', light:'#EBF8FF', text:'#1a365d', border:'#BED0FF', color:'#3182ce' },
+  SPORTS:   { icon: <Trophy size={18}/>, grad:'linear-gradient(135deg,#43e97b,#38f9d7)', light:'#F0FFF4', text:'#1c4532', border:'#9AE6B4', color:'#38a169' },
+  NSS:      { icon: <Handshake size={18}/>, grad:'linear-gradient(135deg,#fa709a,#fee140)', light:'#FFFBEB', text:'#744210', border:'#FAF089', color:'#d69e2e' },
+  NCC:      { icon: <Medal size={18}/>, grad:'linear-gradient(135deg,#a18cd1,#fbc2eb)', light:'#FAF5FF', text:'#44337a', border:'#E9D8FD', color:'#805ad5' },
+  ACADEMIC: { icon: <BookOpen size={18}/>, grad:'linear-gradient(135deg,#a18cd1,#fbc2eb)', light:'#FAF5FF', text:'#44337a', border:'#E9D8FD', color:'#805ad5' },
 };
 
 const getTS = ts => ts?.toDate ? ts.toDate() : new Date(ts || Date.now());
@@ -183,7 +184,8 @@ export default function EventsPage({ headless }) {
             <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'center' }}>
               <div style={{ flex:1, minWidth:200, position:'relative' }}>
                 <span style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', opacity:.4, fontSize:16, pointerEvents:'none' }}>🔍</span>
-                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Event search karo..."
+                <label htmlFor="event-search" className="sr-only">Search events</label>
+                <input id="event-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Event search karo..."
                   style={{ width:'100%', padding:'10px 14px 10px 38px', border:'2px solid #e2e8f0', borderRadius:10, fontSize:14, fontFamily:'inherit', background:'#f8fafc', outline:'none', boxSizing:'border-box' }} />
               </div>
               <span style={{ background:'#f0f4ff', color:navy, borderRadius:20, padding:'5px 14px', fontSize:12.5, fontWeight:800 }}>

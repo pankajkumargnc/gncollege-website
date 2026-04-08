@@ -1,6 +1,6 @@
 // src/components/Navbar.jsx
 import React, { useState, useEffect, useRef, memo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { COLORS } from '../styles/colors'
 
 const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
@@ -39,6 +39,25 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
       observer.disconnect()
     }
   }, [])
+
+  // ── Active route detection ──
+  const location = useLocation()
+  const currentPath = location.pathname
+
+  // ── Body scroll lock when mobile menu is open ──
+  useEffect(() => {
+    if (isMobile && menuOpen) {
+      document.body.style.overflow = 'hidden'
+      document.body.style.touchAction = 'none'
+    } else {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
+  }, [isMobile, menuOpen])
 
   const toggleL1 = (label) => {
     if (openL1 === label) { setOpenL1(null); setOpenL2(null); setOpenL3(null) }
@@ -270,7 +289,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
             backdropFilter: isMobile && isScrolled ? 'blur(16px)' : 'none',
             
             padding: isMobile ? '10px 20px 20px' : 0,
-            gap: isMobile ? 10 : '5px',
+            gap: isMobile ? 10 : '6px',
             boxShadow: isMobile && menuOpen ? '0 10px 20px rgba(0,0,0,.15)' : 'none',
             maxHeight: isMobile ? '80vh' : 'auto',
             overflowY: isMobile ? 'auto' : 'visible',
@@ -280,7 +299,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
             marginRight: isMobile ? '0' : '10px',
             borderTop: isMobile && menuOpen ? '1px solid #eee' : 'none',
             zIndex: 250,
-            flexWrap: isMobile ? 'nowrap' : 'wrap'
+            flexWrap: 'nowrap'
           }}>
             {(navLinks || []).map(l0 => (
               <div key={l0.label}
@@ -306,23 +325,31 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                   <Link
                     to={getRoute(l0.href)}
                     onClick={() => { if (l0.label === 'Home') window.scrollTo(0, 0) }}
-                    className="nav-hover-link"
+                    className={`nav-hover-link${currentPath === getRoute(l0.href) ? ' nav-link-active' : ''}`}
                     style={{
                       color: isDark ? '#e2e8f0' : COLORS.navy,
                       padding: isMobile ? '14px 0' : '12px 6px',
-                      display: 'block',
-                      fontSize: 'clamp(12px, 1vw, 13.5px)', 
-                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      fontSize: 'clamp(11px, 0.9vw, 13.5px)', 
+                      fontWeight: 800,
                       whiteSpace: 'nowrap',
                       textDecoration: 'none',
                       width: '100%',
                       minHeight: '44px',
                       lineHeight: isMobile ? '16px' : 'normal',
+                      transition: 'color 0.2s',
                     }}>
-                    {l0.label === 'Home' ? '🏠 ' : ''}{l0.label}
+                    {l0.label === 'Home' && (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '5px'}}>
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                      </svg>
+                    )}
+                    {l0.label}
                   </Link>
                   {isMobile  && l0.sub && <span style={{ color: isDark ? '#94a3b8' : COLORS.navy, fontSize: 20 }}>{openL1 === l0.label ? '▴' : '▾'}</span>}
-                  {!isMobile && l0.sub && <span style={{ color: isDark ? '#94a3b8' : COLORS.navy, fontSize: 11, marginLeft: 2, marginRight: 8, marginTop: 2 }}>▾</span>}
+                  {!isMobile && l0.sub && <span style={{ color: isDark ? '#94a3b8' : COLORS.navy, fontSize: 13, marginLeft: 4, marginTop: 2 }}>▾</span>}
                 </div>
 
                 {/* ── L1 Dropdown ── */}
@@ -485,7 +512,12 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(244,160,35,0.4)' }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(244,160,35,0.3)' }}
             >
-              <span style={{ fontSize: 16 }}>⚙️</span> Admin Login
+              <span style={{ display: 'flex', alignItems: 'center' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+              </span> 
+              Admin Login
             </Link>
           </div>
         </div>
