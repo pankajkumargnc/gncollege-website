@@ -11,7 +11,6 @@ import HeroSlider from "../components/HeroSlider";
 import HomeFeatures from "../components/HomeFeatures";
 import NotificationSection from "../components/home/NotificationSection";
 import PlacementsSection from "../components/home/PlacementsSection";
-import Ticker from "../components/Ticker";
 import PremiumTicker from "../components/PremiumTicker";
 import PDFModal from "../components/PDFModal";
 import TestimonialsSection from "../components/home/TestimonialsSection";
