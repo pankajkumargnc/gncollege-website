@@ -10,13 +10,13 @@ import TopBar from "./components/home/TopBar";
 import Breadcrumbs from "./components/Breadcrumbs";
 import QuickActionNav from "./components/QuickActionNav";
 import AppRoutes from "./components/AppRoutes";
+import Ticker from "./components/Ticker";
 
 const WhatsAppButton = lazy(() => import("./components/WhatsAppButton"));
 const BackToTop = lazy(() => import("./components/BackToTop"));
 const AIChatbot = lazy(() => import("./components/AIChatbot"));
 const UniversalSearch = lazy(() => import("./components/UniversalSearch"));
 const AlertBanner = lazy(() => import("./components/AlertBanner"));
-const Ticker = lazy(() => import("./components/Ticker"));
 
 // ── Data & Styles ──
 import { navLinks as staticNavLinks } from "./data/db";
