@@ -5,33 +5,33 @@ import { updateSEO } from '../utils/seoManager';
 const HERITAGE_DATA = {
   hero: {
     title: 'Sikh Heritage',
-    subtitle: 'ਸਿੱਖ ਵਿਰਾਸਤ — Guru Nanak Dev Ji ka Sandesh aur College ki Parampara',
+    subtitle: 'ਸਿੱਖ ਵਿਰਾਸਤ — The Teachings of Guru Nanak Dev Ji and our College Legacy',
     bg: 'linear-gradient(135deg, #0f2347 0%, #1a3a6b 50%, #f4a023 100%)'
   },
   sections: [
     {
       title: 'ਵਾਹਿਗੁਰੂ — Guru Nanak Dev Ji',
       icon: '🙏',
-      content: 'Guru Nanak Dev Ji (1469–1539), Sikhism ke founder, ne equality, compassion, aur honest living ka sandesh diya. Unka philosophy — "Kirat Karo, Naam Japo, Vand Chhako" — aaj bhi college ke values ka base hai.',
+      content: 'Guru Nanak Dev Ji (1469–1539), the founder of Sikhism, spread the message of equality, compassion, and honest living. His philosophy — "Kirat Karo, Naam Japo, Vand Chhako" — remains the foundation of our institution\'s values.',
       image: null,
       highlight: true
     },
     {
       title: 'College ka Itihaas',
       icon: '🏛️',
-      content: 'Guru Nanak College ki sthapna 1970 mein Dhanbad ke Sikh community ne ki. Yeh ek Sikh Minority institution hai jo B.B.M.K. University (pehle VBU) se affiliated hai. College ka mission hai quality education provide karna regardless of caste, creed, ya religion.',
+      content: 'Guru Nanak College was established in 1970 by the Sikh community of Dhanbad. It is a Sikh Minority institution affiliated with B.B.M.K. University (formerly VBU). The college mission is to provide quality education to all, regardless of caste, creed, or religion.',
     },
     {
       title: 'Minority Status',
       icon: '📜',
-      content: 'College ko National Commission for Minority Educational Institutions (NCMEI) dwara Sikh Minority Institution ka status praapt hai. Yeh UGC Section 2(f) & 12(B) ke under recognized hai.',
+      content: 'The college is recognized as a Sikh Minority Institution by the National Commission for Minority Educational Institutions (NCMEI). It is further recognized under UGC Section 2(f) & 12(B).',
     },
     {
       title: 'Core Values — Sikh Principles',
       icon: '☬',
       content: null,
       values: [
-        { name: 'ਨਾਮ ਜਪੋ (Naam Japo)', desc: 'Spiritual awareness aur meditation — students mein moral values develop karna' },
+        { name: 'ਨਾਮ ਜਪੋ (Naam Japo)', desc: 'Spiritual awareness and meditation — fostering moral values among students' },
         { name: 'ਕਿਰਤ ਕਰੋ (Kirat Karo)', desc: 'Honest hard work — practical education aur skill development' },
         { name: 'ਵੰਡ ਛਕੋ (Vand Chhako)', desc: 'Sharing with others — community service aur social responsibility' },
         { name: 'ਸਰਬੱਤ ਦਾ ਭਲਾ (Sarbat Da Bhala)', desc: 'Welfare of all — inclusive education regardless of background' },
@@ -40,12 +40,12 @@ const HERITAGE_DATA = {
     {
       title: 'Gurudwara & Spiritual Life',
       icon: '🕌',
-      content: 'College campus mein Gurudwara Sahib hai jahan regular kirtan, ardaas, aur Gurpurb celebrations hote hain. Guru Nanak Jayanti, Baisakhi, aur Prakash Purbs college community ke liye special occasions hain.',
+      content: 'The college campus houses a Gurudwara Sahib where regular Kirtan, Ardaas, and Gurpurb celebrations are held. Guru Nanak Jayanti, Baisakhi, and Prakash Purbs are special occasions for the entire college community.',
     },
     {
       title: 'Langar & Community Service',
       icon: '🍲',
-      content: 'Sikh tradition of Langar (community kitchen) ko follow karte hue, college various occasions par free meals organize karta hai. NSS activities aur community outreach programs regular hote hain.',
+      content: 'Following the Sikh tradition of Langar (community kitchen), the college organizes free meals on various occasions. Regular NSS activities and community outreach programs are also conducted.',
     },
   ]
 };

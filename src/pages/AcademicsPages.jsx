@@ -413,7 +413,7 @@ export function PlacementsPage() {
                         <div style={{ textAlign: 'center', padding: '100px 20px', background: '#fff', borderRadius: 24, border: '2px dashed #e2e8f0' }}>
                             <div style={{ fontSize: 60, marginBottom: 20 }}>🎓</div>
                             <h3 style={{ fontSize: 24, fontWeight: 800, color: NAVY }}>No Records Found</h3>
-                            <p style={{ color: '#64748b', maxWidth: 400, margin: '10px auto' }}>Koi bhi student record hamare search criteria se match nahi hua.</p>
+                            <p style={{ color: '#64748b', maxWidth: 400, margin: '10px auto' }}>No student records found matching your search criteria.</p>
                         </div>
                     </Fade>
                 ) : (

@@ -186,7 +186,7 @@ export default function TestimonialsSection({ testimonials = [] }) {
         <div className="wof-head">
           <div className="uni-label">💬 Voices of GNC</div>
           <h2 className="uni-h">Students & <span>Alumni Experience</span></h2>
-          <p className="uni-sub">Unki kahani, unki zubaani — kaise GNC ne badli unki zindagi.</p>
+          <p className="uni-sub">Success stories in their own words — how GNC shaped their professional journey.</p>
         </div>
 
         <div className="ts-slider">

@@ -175,6 +175,7 @@ export const navLinks = [
       { label: 'Admission Rule', href: '/admission/rule' },
       { label: 'Document Required', href: '/admission/document-required' },
       { label: 'Intake Capacity', href: '/admission/intake-capacity' },
+      { label: 'Scholarships & Financial Aid', href: '/scholarships' },
     ]
   },
   {
@@ -263,18 +264,6 @@ export const navLinks = [
     sub: [
       { label: 'Photo Gallery', href: '/gallery/photos' },
       { label: 'Video Gallery', href: '/gallery/videos' },
-    ]
-  },
-  {
-    label: 'More',
-    href: '/',
-    sub: [
-      { label: 'Scholarships & Financial Aid', href: '/scholarships' },
-      { label: 'Notice Board', href: '/notifications' },
-      { label: 'Events', href: '/events' },
-      { label: 'Latest News', href: '/news' },
-      { label: 'Documents', href: '/documents' },
-      { label: 'Video Gallery', href: '/video-gallery' },
     ]
   },
   { label: 'Contact Us', href: '/contact' },

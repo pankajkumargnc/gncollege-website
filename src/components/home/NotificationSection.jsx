@@ -230,7 +230,7 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
         <div className="wof-head" style={{ marginBottom: 40 }}>
            <div className="uni-label">📢 Stay Updated</div>
            <h2 className="uni-h">Campus <span>Notices & News</span></h2>
-           <p className="uni-sub">Late-breaking news, announcements aur crucial notifications hamesha aapki pahunch mein.</p>
+           <p className="uni-sub">Late-breaking news, announcements, and crucial notifications, always at your fingertips.</p>
         </div>
 
         <div className="ns-grid">

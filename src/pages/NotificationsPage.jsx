@@ -150,14 +150,14 @@ export default function NotificationsPage() {
          filtered.length === 0 ? (
            <div style={{ textAlign: 'center', padding: 'clamp(40px,6vw,64px) 20px', color: '#94a3b8' }}>
              <div style={{ fontSize: 'clamp(40px,8vw,56px)', marginBottom: 16 }}>📭</div>
-             <h3 style={{ color: '#0f2347', fontWeight: 800, marginBottom: 8, fontSize: 'clamp(16px,2.5vw,20px)' }}>
-               Koi Notice Nahi Mili
-             </h3>
-             <p style={{ fontSize: 'clamp(13px,1.8vw,15px)', marginBottom: 24, lineHeight: 1.7, maxWidth: 400, margin: '0 auto 24px' }}>
-               {search
-                 ? `"${search}" ke liye koi result nahi. Search clear karein.`
-                 : 'Abhi tak koi notice publish nahi hua hai.'}
-             </p>
+               <h3 style={{ color: '#0f2347', fontWeight: 800, marginBottom: 8, fontSize: 'clamp(16px,2.5vw,20px)' }}>
+                No Notices Found
+               </h3>
+               <p style={{ fontSize: 'clamp(13px,1.8vw,15px)', marginBottom: 24, lineHeight: 1.7, maxWidth: 400, margin: '0 auto 24px' }}>
+                {search
+                  ? `No results found for "${search}". Please try a different keyword.`
+                  : 'No notices have been published yet.'}
+               </p>
              {search && (
                <button onClick={() => setSearch('')}
                  style={{ background: '#0f2347', color: '#f4a023', border: 'none', padding: '10px 24px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, minHeight: 44, fontSize: 'clamp(13px,1.5vw,15px)' }}>

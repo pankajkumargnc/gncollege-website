@@ -205,7 +205,7 @@ export default function PlacementsSection() {
           <div className="uni-label">🏆 Proud Alumni</div>
           <h2 className="uni-h">Wall of <span>Fame</span></h2>
           <p className="uni-sub">
-            Hamare ho-nhaar students jo aaj global industries mein apna parcham lehra rahe hain.
+            The pride of our institution — our alumni making their mark across global industries.
           </p>
 
           {placements.length > 0 && (

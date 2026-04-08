@@ -485,40 +485,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
               </div>
             ))}
 
-            {/* Admin Button */}
-            <Link
-              to="/admin"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Open Admin Panel"
-              style={{
-                flexShrink: 0,
-                background: COLORS.gold, color: '#000',
-                border: 'none', padding: '10px 20px',
-                borderRadius: 8, cursor: 'pointer',
-                fontSize: 12.5, fontWeight: 800,
-                marginLeft: isMobile ? 0 : 10,
-                marginTop: isMobile ? 12 : 0,
-                width: isMobile ? '100%' : 'auto',
-                minHeight: '44px',
-                boxShadow: '0 4px 15px rgba(244,160,35,0.3)',
-                whiteSpace: 'nowrap',
-                display: 'flex', alignItems: 'center',
-                justifyContent: 'center', gap: '6px',
-                transition: 'transform 0.25s cubic-bezier(.22,1,.36,1), box-shadow 0.25s ease',
-                letterSpacing: '0.3px',
-                textDecoration: 'none'
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(244,160,35,0.4)' }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(244,160,35,0.3)' }}
-            >
-              <span style={{ display: 'flex', alignItems: 'center' }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                </svg>
-              </span> 
-              Admin Login
-            </Link>
+            {/* Admin Portal is now located in the Footer */}
           </div>
         </div>
       </nav>

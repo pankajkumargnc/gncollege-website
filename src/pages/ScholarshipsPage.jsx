@@ -72,11 +72,11 @@ const SCHOLARSHIPS = [
 ];
 
 const STEPS = [
-  { step: 1, title: 'Check Eligibility', desc: 'NSP portal ya college office mein apni eligibility verify karein', icon: '✅' },
-  { step: 2, title: 'Gather Documents', desc: 'Caste/income certificate, Aadhaar, marksheet, bank passbook', icon: '📋' },
-  { step: 3, title: 'Apply Online', desc: 'NSP portal (scholarships.gov.in) par registration karein', icon: '💻' },
-  { step: 4, title: 'Institute Verification', desc: 'College office se application verify karwayein', icon: '🏫' },
-  { step: 5, title: 'DBT Transfer', desc: 'Approval ke baad paisa directly bank account mein', icon: '💰' },
+  { step: 1, title: 'Check Eligibility', desc: 'Verify your eligibility on the NSP portal or consult the college administrative office.', icon: '✅' },
+  { step: 2, title: 'Gather Documents', desc: 'Prepare your Caste/Income certificate, Aadhaar card, marksheets, and bank passbook.', icon: '📋' },
+  { step: 3, title: 'Apply Online', desc: 'Register yourself on the official NSP portal (scholarships.gov.in).', icon: '💻' },
+  { step: 4, title: 'Institute Verification', desc: 'Submit your online application number to the college office for verification.', icon: '🏫' },
+  { step: 5, title: 'DBT Transfer', desc: 'The scholarship amount is credited to your bank account after final government approval.', icon: '💰' },
 ];
 
 export default function ScholarshipsPage() {
@@ -119,7 +119,7 @@ export default function ScholarshipsPage() {
             fontSize: 'clamp(0.85rem, 1.8vw, 1.05rem)',
             color: 'rgba(255,255,255,0.7)', maxWidth: 560, margin: '0 auto', lineHeight: 1.6
           }}>
-            Guru Nanak College Dhanbad — SC/ST/OBC/Minority students ke liye available scholarships aur financial support
+            Available scholarships and financial support for SC/ST/OBC and Minority students at Guru Nanak College, Dhanbad.
           </p>
         </div>
       </section>
@@ -234,7 +234,7 @@ export default function ScholarshipsPage() {
             🏫 Scholarship Helpdesk
           </h3>
           <p style={{ color: '#475569', fontSize: 'clamp(0.85rem, 1.5vw, 0.95rem)', lineHeight: 1.7, marginBottom: 16 }}>
-            Agar aapko kisi bhi scholarship ke bare mein madad chahiye, toh college office mein milein ya call karein.
+            For any assistance regarding scholarship applications, eligibility criteria, or documentation, please contact the college scholarships helpdesk.
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="tel:+913262301234" className="sch-help-btn" style={{

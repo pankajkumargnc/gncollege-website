@@ -124,7 +124,7 @@ const DEFAULT_CONTENT = {
   hindi: {
     fullName: 'Department of Hindi', 
     tagline: 'Hindi: Sahitya, Sanskriti aur Shaurya.',
-    about: 'Hindi vibhaag ke madhyam se hum hindi sahitya, kavita aur bhartiya sanskriti ko yuva pichee tak pahunchate hain. Humara dhyan bhasha ki shuddhta aur sahitya ki gahrai par hai.',
+    about: 'Through the Department of Hindi, we take Hindi literature, poetry, and Indian culture to the younger generation. Our focus is on the purity of the language and the depth of its literature.',
     vision: 'Hindi bhasha aur sahitya ka vishv-star par prachar aur prasar.',
     mission: 'Vidhyarthiyon mein hindi sahitya ke prati ruchi aur critical research ki bhavna ko jagrit karna.',
     stats: [
