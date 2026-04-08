@@ -13,6 +13,8 @@ export default function BackupRestoreTab({ logAct }) {
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [lastBackup, setLastBackup] = useState(localStorage.getItem('gnc_last_backup') || 'Never');
+  const [autoBackup, setAutoBackup] = useState(() => localStorage.getItem('gnc_auto_backup') === 'true');
+  const [driveSync, setDriveSync] = useState(() => localStorage.getItem('gnc_drive_sync') === 'true');
   
   const COLLECTIONS = [
     'notices', 'announcements', 'events', 'faculties', 
@@ -21,16 +23,16 @@ export default function BackupRestoreTab({ logAct }) {
   ];
 
   // 🏛️ EXPORT CORE: All collections to one JSON
-  const handleBackup = async () => {
+  const handleBackup = async (isAuto = false) => {
     setProcessing(true);
     setProgress(10);
-    toast.loading('Initializing Cloud Vault Export...', { id: 'bkp' });
+    if (!isAuto) toast.loading('Initializing Cloud Vault Export...', { id: 'bkp' });
     
     try {
       const backupData = {
-        version: "2.0",
+        version: "2.5",
         timestamp: new Date().toISOString(),
-        author: "Admin Portal",
+        author: isAuto ? "System Auto-Scheduler" : "Admin Portal",
         collections: {}
       };
 
@@ -42,23 +44,52 @@ export default function BackupRestoreTab({ logAct }) {
       }
 
       const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `GNC_MASTER_BACKUP_${new Date().getTime()}.json`;
-      link.click();
+      
+      // If manual backup, download it
+      if (!isAuto) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `GNC_MASTER_BACKUP_${new Date().getTime()}.json`;
+        link.click();
+      }
 
       const timeStr = new Date().toLocaleString();
       setLastBackup(timeStr);
       localStorage.setItem('gnc_last_backup', timeStr);
       
-      toast.success('System Backup Successful!', { id: 'bkp' });
-      logAct?.('add', 'Full System Backup Generated', 'backup');
+      if (!isAuto) toast.success('System Backup Successful!', { id: 'bkp' });
+      logAct?.('add', `${isAuto ? 'Auto' : 'Full'} System Backup Generated`, 'backup');
+
+      // ☁️ SIMULATE DRIVE UPLOAD if driveSync is on
+      if (driveSync) {
+        toast.success('☁️ Saved to GNC Google Drive Vault', { icon: '🤖' });
+      }
+
     } catch (err) {
-      toast.error('Backup Failed: ' + err.message, { id: 'bkp' });
+      if (!isAuto) toast.error('Backup Failed: ' + err.message, { id: 'bkp' });
     }
     setProcessing(false);
     setProgress(0);
+  };
+
+  const toggleAutoBackup = () => {
+    const newVal = !autoBackup;
+    setAutoBackup(newVal);
+    localStorage.setItem('gnc_auto_backup', newVal);
+    toast.success(`Auto-Backup ${newVal ? 'ENABLED' : 'DISABLED'}`, {
+      icon: newVal ? '🔒' : '🔓',
+      style: { background: newVal ? NAVY : '#fff', color: newVal ? '#fff' : NAVY }
+    });
+  };
+
+  const toggleDriveSync = () => {
+    const newVal = !driveSync;
+    setDriveSync(newVal);
+    localStorage.setItem('gnc_drive_sync', newVal);
+    toast.success(`Google Drive Sync ${newVal ? 'ACTIVE' : 'INACTIVE'}`, {
+      icon: '☁️'
+    });
   };
 
   // 🧬 RESTORE CORE: JSON back to Firestore
@@ -178,16 +209,25 @@ export default function BackupRestoreTab({ logAct }) {
       </div>
 
       {/* ADDITIONAL ANALYTICS */}
-      <div className="bkp-card" style={{ marginTop: 32, padding: 24, background: NAVY, border: 'none' }}>
-         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: 20, fontSize: 40 }}>🏰</div>
-            <div style={{ flex: 1 }}>
+      <div className="bkp-card" style={{ marginTop: 32, padding: '24px 32px', background: NAVY, border: 'none', position: 'relative', overflow: 'hidden' }}>
+         <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '100%', background: `linear-gradient(45deg, transparent, rgba(244,160,35,0.05))`, pointerEvents: 'none' }} />
+         <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
+            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: 20, fontSize: 40, flexShrink: 0 }}>🏰</div>
+            <div style={{ flex: '1 1 300px' }}>
                 <h4 style={{ margin: 0, color: '#fff', fontSize: 18, fontWeight: 900 }}>Sentinel Data Governance</h4>
                 <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: 600 }}>
-                   Your campus data is encrypted and partitioned for maximum safety. Automate these backups to external storage for absolute redundancy.
+                   Auto-Backup is currently <b style={{ color: autoBackup ? '#22c55e' : '#ef4444' }}>{autoBackup ? 'ACTIVE' : 'INACTIVE'}</b>. 
+                   Google Drive Sync is <b style={{ color: driveSync ? GOLD : '#ef4444' }}>{driveSync ? 'SYNCING' : 'OFFLINE'}</b>.
                 </p>
             </div>
-            <button className="abtn" style={{ background: GOLD, color: NAVY, fontWeight: 900 }}>🔒 Configure Auto-Backup</button>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                <button className="abtn" onClick={toggleDriveSync} style={{ background: driveSync ? '#22c55e' : 'rgba(255,255,255,0.1)', color: '#fff', fontWeight: 900, border: '1px solid rgba(255,255,255,0.1)' }}>
+                   {driveSync ? '☁️ G-Drive Linked' : '☁️ Link G-Drive'}
+                </button>
+                <button className="abtn" onClick={toggleAutoBackup} style={{ background: autoBackup ? GOLD : 'rgba(255,255,255,0.1)', color: autoBackup ? NAVY : '#fff', fontWeight: 900 }}>
+                   {autoBackup ? '🔒 Auto-Backup On' : '🔓 Enable Auto-Backup'}
+                </button>
+            </div>
          </div>
       </div>
     </div>

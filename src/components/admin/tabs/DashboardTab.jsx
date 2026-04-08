@@ -4,20 +4,20 @@ import toast from 'react-hot-toast';
 export default function DashboardTab({ notices, events, faculties, placements, pdfReports, alerts, gallery, pages, actLog, onNavigate }) {
   return (
     <div className="fade-up">
-      <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h2 style={{ margin: 0, color: NAVY, fontSize: 28, fontWeight: 900, letterSpacing: '-1px' }}>📊 Global Dashboard</h2>
-          <p style={{ margin: '4px 0 0', color: T.t3, fontSize: 15, fontWeight: 600 }}>Real-time website ecosystem metrics aur campus activity summary.</p>
+      <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+        <div style={{ flex: '1 1 300px' }}>
+          <h2 style={{ margin: 0, color: NAVY, fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 900, letterSpacing: '-1px' }}>📊 Global Dashboard</h2>
+          <p style={{ margin: '4px 0 0', color: T.t3, fontSize: 14, fontWeight: 600 }}>Real-time website ecosystem metrics aur campus activity summary.</p>
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-            <button className="abtn abtn-navy" style={{ borderRadius: 12, height: 42, background: NAVY, color: '#fff', border: 'none' }} onClick={() => toast.success('Gathering news... PDF Newsletter generating!')}>
+        <div style={{ display: 'flex', gap: 12, width: '100%', maxWidth: 'none', justifyContent: 'flex-start' }}>
+            <button className="abtn abtn-navy" style={{ borderRadius: 12, height: 42, background: NAVY, color: '#fff', border: 'none', width: 'auto', flex: 1, maxWidth: 300, fontSize: 13 }} onClick={() => toast.success('Gathering news... PDF Newsletter generating!')}>
                 🗞️ Generate Monthly Newsletter
             </button>
         </div>
       </div>
 
       {/* 🏙️ OVERVIEW STATS (Ultra Pro Max Grid) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 20, marginBottom: 40 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 16, marginBottom: 40 }}>
         <StatCard icon="📢" label="Notices"     count={(notices||[]).length}                             color={GOLD}    onClick={() => onNavigate('notices')} />
         <StatCard icon="🏆" label="Events"      count={(events||[]).length}                              color={NAVY}    onClick={() => onNavigate('events')} />
         <StatCard icon="👨‍🏫" label="Faculty"    count={(faculties||[]).length}                           color={T.blue}  sub={`${(faculties||[]).filter(f=>f.staffType==='Non-Teaching').length} non-teaching`} onClick={() => onNavigate('faculty')} />
@@ -28,7 +28,7 @@ export default function DashboardTab({ notices, events, faculties, placements, p
         <StatCard icon="📄" label="Pages"       count={(pages||[]).length}                               color={T.cyan}  onClick={() => onNavigate('pages')} />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
         
         {/* 🗺️ REAL-TIME VISITOR LIVE-MAP (Simulated Ultra Pro) */}
         <div className="card" style={{ padding: 24, border: `1.5px solid #f1f5f9`, background: '#fff', overflow: 'hidden' }}>

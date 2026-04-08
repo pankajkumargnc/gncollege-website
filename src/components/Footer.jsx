@@ -1,5 +1,4 @@
-// src/components/Footer.jsx — ULTRA PRO MAX (Fixed Animated Social Icons)
-
+// src/components/Footer.jsx — HYPER-ULTIMA REFINED (Compact + Gold Moving BG + Pinlink + Gmail + Logo Side Title)
 import { useState, useEffect, memo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { doc, onSnapshot } from 'firebase/firestore';
@@ -10,368 +9,267 @@ import { SOCIAL_LINKS } from '../data/db';
 const N = COLORS?.navy || '#0f2347';
 const G = COLORS?.gold || '#f4a023';
 
-// 🎬 Smart Scroll Animation Hook
-function useIntersectAnim(threshold = 0.1) {
+const StarField = () => {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    let mouse = { x: -100, y: -100 };
+    const resize = () => {
+      canvas.width = canvas.parentElement.offsetWidth;
+      canvas.height = canvas.parentElement.offsetHeight;
+      initStars();
+    };
+    const initStars = () => {
+      stars = [];
+      const count = Math.floor(canvas.width / 15);
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 1.5,
+          color: Math.random() > 0.8 ? G : '#fff',
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3
+        });
+      }
+    };
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        s.x += s.vx; s.y += s.vy;
+        if (s.x < 0 || s.x > canvas.width) s.vx *= -1;
+        if (s.y < 0 || s.y > canvas.height) s.vy *= -1;
+        const dx = mouse.x - s.x;
+        const dy = mouse.y - s.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) { s.x -= dx / 50; s.y -= dy / 50; }
+        ctx.beginPath();ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        ctx.fillStyle = s.color; ctx.fill();
+      });
+      requestAnimationFrame(animate);
+    };
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    });
+    window.addEventListener('resize', resize); resize(); animate();
+    return () => window.removeEventListener('resize', resize);
+  }, []);
+  return <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, opacity: 0.3, pointerEvents: 'none' }} />;
+};
+
+const SA = ({ children, variant = 'up', delay = '', style = {}, className = '' }) => {
   const ref = useRef(null);
   const [vis, setVis] = useState(false);
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setVis(true); obs.unobserve(el); }
-    }, { threshold });
-    obs.observe(el);
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVis(true); }, { threshold: 0.1 });
+    if (el) obs.observe(el);
     return () => obs.disconnect();
-  }, [threshold]);
-  return [ref, vis];
-}
-
-// 🌀 Animation Wrapper
-const SA = ({ children, variant = 'up', delay = '', style = {}, className = '' }) => {
-  const [ref, vis] = useIntersectAnim();
-  return (
-    <div
-      ref={ref}
-      className={`sa sa-${variant}${delay ? ` sa-${delay}` : ''}${vis ? ' visible' : ''}${className ? ' ' + className : ''}`}
-      style={style}
-    >
-      {children}
-    </div>
-  );
+  }, []);
+  return <div ref={ref} className={`sa sa-${variant}${delay ? ` sa-${delay}` : ''}${vis ? ' visible' : ''}${className ? ' ' + className : ''}`} style={style}>{children}</div>;
 };
 
-// 🗺️ Premium Glass Map
-const DualCampusMap = () => (
-  <div className="glass-map-wrapper">
-    <div className="map-glow"></div>
-    <iframe
-      title="GNC Dual Campus Map"
-      className="g-map-frame"
-      loading="lazy"
-      allowFullScreen
-      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d116833.9730352447!2d86.35338166046033!3d23.780635391515366!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f6a74b0fb59bb3%3A0xc3dfbb016c905ed4!2sDhanbad%2C%20Jharkhand!5e0!3m2!1sen!2sin!4v1711532163901!5m2!1sen!2sin"
-    />
-    <div className="map-badge">🗺️ Campus Locator</div>
-  </div>
-);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ✅ Removed external dependency, Footer is now self-sufficient!
 const Footer = memo(() => {
   const [firebaseSocials, setFirebaseSocials] = useState(null);
+  const [time, setTime] = useState(new Date());
 
   useEffect(() => {
-    return onSnapshot(doc(db, 'settings', 'socialLinks'), snap => {
+    const ticker = setInterval(() => setTime(new Date()), 1000);
+    const unsub = onSnapshot(doc(db, 'settings', 'socialLinks'), snap => {
       if (snap.exists() && snap.data().links) setFirebaseSocials(snap.data().links);
     });
+    return () => { clearInterval(ticker); unsub(); };
   }, []);
 
-  // ✅ Fallback Database if nothing is found
-  const FALLBACK_SOCIALS = [
-    { id: 'facebook', label: 'Facebook', href: '#' },
-    { id: 'twitter', label: 'Twitter', href: '#' },
-    { id: 'instagram', label: 'Instagram', href: '#' },
-    { id: 'youtube', label: 'YouTube', href: '#' }
-  ];
-
-  // Logic to determine which links to show
-  const rawLinks = (firebaseSocials && firebaseSocials.length > 0) 
-                   ? firebaseSocials 
-                   : (SOCIAL_LINKS && SOCIAL_LINKS.length > 0 ? SOCIAL_LINKS : FALLBACK_SOCIALS);
-
-  // Auto-detect Icons logic
+  const rawLinks = firebaseSocials || SOCIAL_LINKS || [];
   const getIcon = (link) => {
     if (link.icon) return link.icon;
-    const id = link.id?.toLowerCase() || '';
+    const id = (link.id || '').toLowerCase();
     if (id.includes('twitter') || id.includes('x')) return '𝕏';
     if (id.includes('youtube')) return '▶';
     if (id.includes('facebook')) return 'f';
     if (id.includes('instagram')) return '📸';
-    if (id.includes('linkedin')) return 'in';
     return link.label?.charAt(0) || '🌐';
   };
 
   return (
-    <footer className="f-ultra-root">
+    <footer className="f-ultima-re">
       <style>{`
-        /* 🌌 Deep Premium Background */
-        .f-ultra-root {
-          position: relative;
-          background: #030914; 
-          color: #e2e8f0;
-          font-family: 'Plus Jakarta Sans', "Inter", sans-serif;
-          overflow: hidden;
-          padding-top: 25px; 
-          z-index: 10;
+        .f-ultima-re {
+          position: relative; background: #01040a; color: #fff;
+          font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden;
+          padding: 60px 0 0; z-index: 10;
         }
 
-        /* ✨ Animated Aura Blobs */
-        .aura-blob {
-          position: absolute;
-          border-radius: 50%;
-          filter: blur(90px);
-          opacity: 0.35;
-          z-index: -1;
-          animation: floatAura 15s ease-in-out infinite alternate;
+        /* 🏆 Moving Gold Hybrid Gradient Background */
+        .f-ultima-re::after {
+          content: ''; position: absolute; inset: 0;
+          background: linear-gradient(135deg, rgba(1,4,10,1) 0%, rgba(244,160,35,0.05) 50%, rgba(1,4,10,1) 100%);
+          background-size: 300% 300%; animation: gradientMove 10s ease infinite; z-index: -2;
         }
-        .aura-1 { background: ${G}; width: 350px; height: 350px; top: -50px; left: -50px; }
-        .aura-2 { background: ${N}; width: 500px; height: 500px; bottom: -150px; right: -50px; animation-delay: -5s; opacity: 0.5; }
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        @keyframes floatAura {
-          0% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(30px, 20px) scale(1.05); }
-          100% { transform: translate(-20px, 40px) scale(0.95); }
+        .f-ultima-re::before {
+          content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1.5px;
+          background: linear-gradient(90deg, transparent, ${G}, #fff, ${G}, transparent);
+          background-size: 200% auto; animation: glowMove 4s linear infinite; box-shadow: 0 0 15px ${G};
         }
+        @keyframes glowMove { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
 
-        /* 🧊 True Glassmorphism Container */
-        .f-glass-panel {
-          position: relative;
-          max-width: 1400px;
-          margin: 0 auto;
-          background: rgba(255, 255, 255, 0.03);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
-          border-left: 1px solid rgba(255, 255, 255, 0.05);
-          border-right: 1px solid rgba(255, 255, 255, 0.05);
-          border-radius: 24px 24px 0 0;
-          padding: 25px 25px 15px; 
-          box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+        .f-container { max-width: 1440px; margin: 0 auto; padding: 30px; position: relative; }
+
+        .f-reach-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 40px; }
+        .f-card-3d { perspective: 1000px; height: 100px; cursor: pointer; }
+        .f-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d; }
+        .f-card-3d:hover .f-card-inner { transform: rotateX(180deg); }
+        .f-card-front, .f-card-back {
+          position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+          background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 16px; padding: 15px; display: flex; align-items: center; gap: 12px; backdrop-filter: blur(10px);
         }
-
-        .f-grid {
-          display: grid;
-          grid-template-columns: 2fr 1.5fr 1fr 1.5fr;
-          gap: clamp(15px, 2vw, 30px);
+        .f-card-back { 
+           transform: rotateX(180deg); background: ${G}; border-color: ${G};
+           justify-content: center; font-weight: 900; color: #000; font-size: 13px; text-decoration: none;
+           display: flex; align-items: center; gap: 5px;
         }
+        .f-card-icon { font-size: 28px; }
+        .f-card-info b { display: block; color: ${G}; font-size: 11px; text-transform: uppercase; margin-bottom: 2px; }
+        .f-card-info span { font-size: 13px; color: rgba(255,255,255,0.9); }
 
-        /* 🎓 Logo & Brand Styling */
-        .f-brand-logo { width: 50px; height: 50px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); transition: transform 0.5s; }
-        .f-brand-logo:hover { transform: rotateY(180deg); }
-        .f-brand-title { font-size: 18px; font-weight: 900; color: #fff; line-height: 1.15; letter-spacing: -0.5px; }
-        .f-brand-title span { background: linear-gradient(90deg, ${G}, #fde68a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .f-brand-desc { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.5; font-weight: 500; margin-bottom: 12px; }
+        .f-sitemap { display: grid; grid-template-columns: 2fr repeat(3, 1fr) 1.5fr; gap: 30px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 40px; }
+        .f-brand-side { display: flex; flex-direction: column; }
+        .f-brand-header { display: flex; align-items: center; gap: 15px; margin-bottom: 12px; }
+        .f-brand-header h2 { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; margin: 0; background: linear-gradient(90deg, #fff, ${G}); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .f-brand-side p { font-size: 12.5px; color: rgba(255,255,255,0.5); line-height: 1.5; margin-bottom: 25px; }
 
-        /* 📍 Contact / Addresses */
-        .f-heading { font-size: 13px; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-        .f-heading::before { content: ''; width: 16px; height: 3px; background: ${G}; border-radius: 2px; }
-        
-        .f-address-card { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 10px; margin-bottom: 8px; transition: background 0.3s ease, border-color 0.3s ease, transform 0.25s cubic-bezier(.22,1,.36,1); display: flex; align-items: center; gap: 10px; min-height: 44px; }
-        .f-address-card:hover { background: rgba(255,255,255,0.05); border-color: rgba(244,160,35,0.3); transform: translateX(4px); }
-        .f-address-icon { font-size: 16px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); flex-shrink: 0; }
-        .f-address-title { color: ${G}; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
-        .f-address-text { color: rgba(255,255,255,0.8); font-size: 11px; line-height: 1.3; }
+        .f-col h4 { font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: ${G}; margin-bottom: 20px; }
+        .f-links { list-style: none; padding: 0; margin: 0; }
+        .f-links li { margin-bottom: 10px; }
+        .f-links a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13px; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .f-links a:hover { color: #fff; transform: translateX(8px); }
 
-        /* 🔗 Links */
-        .f-link-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
-        .f-link { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; min-height: 40px; padding: 6px 0; transition: color 0.3s ease, transform 0.3s cubic-bezier(.22,1,.36,1); position: relative; }
-        .f-link::before { content: '→'; position: absolute; left: 0; opacity: 0; color: ${G}; transform: translateX(-8px); transition: 0.3s; }
-        .f-link:hover { color: #fff; transform: translateX(14px); }
-        .f-link:hover::before { opacity: 1; transform: translateX(-12px); }
-
-        /* 🗺️ Glass Map Styling */
-        .glass-map-wrapper { position: relative; width: 100%; height: 140px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-        .map-glow { position: absolute; inset: 0; background: ${G}; opacity: 0; transition: 0.4s; z-index: 1; pointer-events: none; mix-blend-mode: overlay; }
-        .glass-map-wrapper:hover .map-glow { opacity: 0.3; }
-        .g-map-frame { width: 100%; height: 100%; border: none; filter: grayscale(80%) invert(100%) contrast(120%); transition: 0.5s; }
-        .glass-map-wrapper:hover .g-map-frame { filter: grayscale(20%) invert(90%); }
-        .map-badge { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 9px; font-weight: 800; border: 1px solid rgba(255,255,255,0.1); z-index: 2; pointer-events: none; }
-
-        /* 🚀 ULTRA PRO MAX ANIMATED SOCIAL ICONS */
-        @keyframes floatIcon {
+        /* 🏀 Bouncing Social Icons */
+        @keyframes socialBounce {
           0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-6px); }
+          50% { transform: translateY(-8px); }
         }
+        .f-soc-hub { display: flex; gap: 12px; }
+        .f-soc-btn {
+          width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center;
+          color: #fff; font-size: 18px; transition: 0.4s; text-decoration: none;
+          animation: socialBounce 3s ease-in-out infinite;
+        }
+        .f-soc-btn:nth-child(2) { animation-delay: 0.2s; }
+        .f-soc-btn:nth-child(3) { animation-delay: 0.4s; }
+        .f-soc-btn:nth-child(4) { animation-delay: 0.6s; }
+        .f-soc-btn:nth-child(5) { animation-delay: 0.8s; }
+        .f-soc-btn:hover { animation-play-state: paused; transform: scale(1.15); border-color: ${G}; color: #000; background: ${G}; box-shadow: 0 10px 25px ${G}55; }
+
+        .f-hud-ultima { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 10px 25px; border-radius: 100px; margin-top: 40px; backdrop-filter: blur(15px); }
+        .hud-left { display: flex; gap: 20px; align-items: center; }
+        .hud-status { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #22c55e; }
+        .pulse { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 10px #22c55e; animation: p 1.5s infinite; }
+        @keyframes p { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
         
-        .f-socials { display: flex; gap: 12px; flex-wrap: wrap; padding-top: 5px; }
-        
-        .f-soc-btn { 
-          position: relative;
-          width: 44px; height: 44px; 
-          border-radius: 12px; 
-          background: rgba(255,255,255,0.03); 
-          border: 1px solid rgba(255,255,255,0.1); 
-          display: flex; align-items: center; justify-content: center; 
-          color: #fff; font-size: 17px; text-decoration: none; 
-          overflow: hidden;
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-          animation: floatIcon 3s ease-in-out infinite;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-          z-index: 1;
-        }
+        .f-final-line { display: flex; justify-content: space-between; align-items: center; padding-top: 20px; font-size: 11.5px; color: rgba(255,255,255,0.35); }
+        .f-dev-pill { background: #000; border: 1px solid rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 50px; color: rgba(255,255,255,0.5); }
 
-        /* Staggered Floating Wave Delay */
-        .f-socials a:nth-child(1) { animation-delay: 0s; }
-        .f-socials a:nth-child(2) { animation-delay: 0.2s; }
-        .f-socials a:nth-child(3) { animation-delay: 0.4s; }
-        .f-socials a:nth-child(4) { animation-delay: 0.6s; }
-        .f-socials a:nth-child(5) { animation-delay: 0.8s; }
-
-        /* Liquid Fill Effect on Hover */
-        .f-soc-btn::before {
-          content: ''; position: absolute; 
-          bottom: -100%; left: 0; width: 100%; height: 100%;
-          background: linear-gradient(180deg, ${G}, #f59e0b); 
-          transition: all 0.4s ease; z-index: -1;
-          border-radius: 50% 50% 0 0;
-        }
-
-        .f-soc-btn:hover::before { 
-          bottom: 0; 
-          border-radius: 0;
-        }
-
-        .f-soc-btn:hover { 
-          color: #000; 
-          transform: translateY(-8px) scale(1.15) rotate(10deg) !important; 
-          border-color: ${G}; 
-          animation: none; 
-          box-shadow: 0 10px 25px rgba(244,160,35,0.5); 
-        }
-
-        /* © Bottom Bar */
-        .f-bottom { margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .f-copy { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 500; }
-        .f-dev { font-size: 11px; color: rgba(255,255,255,0.4); background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
-
-        /* Animations */
-        .sa { opacity: 0; transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
-        .sa-up { transform: translateY(20px); }
+        .sa { opacity: 0; transition: 1s cubic-bezier(0.22, 1, 0.36, 1); }
+        .sa-up { transform: translateY(40px); }
         .sa.visible { opacity: 1; transform: none; }
-        .sa-d1 { transition-delay: 0.1s; } .sa-d2 { transition-delay: 0.15s; } .sa-d3 { transition-delay: 0.2s; }
 
-        @media(max-width: 1100px) { .f-grid { grid-template-columns: 1fr 1fr; } }
-        @media(max-width: 600px) { .f-grid { grid-template-columns: 1fr; gap: 25px; } .f-glass-panel { padding: 25px 20px 15px; } .f-bottom { flex-direction: column; text-align: center; } }
+        @media (max-width: 1200px) { .f-sitemap { grid-template-columns: 2fr repeat(2, 1fr) 1.5fr; } .f-reach-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .f-sitemap { grid-template-columns: 1fr 1fr; } .f-reach-grid { grid-template-columns: 1fr; } .f-final-line { flex-direction: column; gap: 15px; text-align: center; } }
       `}</style>
-
-      {/* 🌌 Animated Background Aura */}
-      <div className="aura-blob aura-1"></div>
-      <div className="aura-blob aura-2"></div>
-
-      {/* 🧊 Glass Container */}
-      <div className="f-glass-panel">
-        <div className="f-grid">
-          
-          {/* COL 1: Brand & Logo */}
-          <SA variant="up">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-              <img src={`${import.meta.env.BASE_URL}images/logo.webp`} alt="GNC Logo" className="f-brand-logo" />
-              <h2 className="f-brand-title" style={{ margin: 0 }}>Guru Nanak College,<br/><span>Dhanbad</span></h2>
+      <StarField />
+      <div className="f-container">
+        <div className="f-reach-grid">
+          <SA variant="up" className="f-card-3d">
+            <div className="f-card-inner">
+              <div className="f-card-front"><span className="f-card-icon">📍</span><div className="f-card-info"><b>Bhuda Campus</b><span>Rani Road, Barmasiya</span></div></div>
+              <a href="https://www.google.com/maps/search/?api=1&query=Guru+Nanak+College+Bhuda+Campus+Dhanbad" target="_blank" rel="noopener noreferrer" className="f-card-back">📌 OPEN PINPOINT MAP</a>
             </div>
-            
-            <p className="f-brand-desc">
-              A Sikh Minority Degree College Established & Managed by Gurudwara Prabhandhak Committee, Dhanbad. Fostering excellence since 1970.
-            </p>
-            
-            {/* 🚀 ANIMATED SOCIAL ICONS */}
-            <div className="f-socials">
-              {rawLinks.map(link => (
-                <a key={link.id} href={link.href} target="_blank" rel="noopener noreferrer" className="f-soc-btn" title={link.label}>
-                  <span style={{ position: 'relative', zIndex: 2, fontWeight: 'bold' }}>
-                    {getIcon(link)}
-                  </span>
-                </a>
+          </SA>
+          <SA variant="up" className="f-card-3d" delay="sa-d1">
+            <div className="f-card-inner">
+              <div className="f-card-front"><span className="f-card-icon">🏢</span><div className="f-card-info"><b>Bank More Campus</b><span>Main Road, Dhanbad</span></div></div>
+              <a href="https://www.google.com/maps/search/?api=1&query=Guru+Nanak+College+Bank+More+Campus+Dhanbad" target="_blank" rel="noopener noreferrer" className="f-card-back">📌 OPEN PINPOINT MAP</a>
+            </div>
+          </SA>
+          <SA variant="up" className="f-card-3d" delay="sa-d2">
+            <div className="f-card-inner">
+              <div className="f-card-front"><span className="f-card-icon">📧</span><div className="f-card-info"><b>Official Email</b><span>principal@gncollege.org</span></div></div>
+              <a href="https://mail.google.com/mail/?view=cm&fs=1&to=principal@gncollege.org" target="_blank" rel="noopener noreferrer" className="f-card-back">✉️ OPEN IN GMAIL</a>
+            </div>
+          </SA>
+        </div>
+
+        <div className="f-sitemap">
+          <SA variant="up" className="f-brand-side">
+            <div className="f-brand-header">
+              <img src={`${import.meta.env.BASE_URL}images/logo.webp`} width="55" alt="GNC" />
+              <h2>Guru Nanak College</h2>
+            </div>
+            <p>NAAC Accredited degree college committed to providing quality education with social values since 1970.</p>
+            <div className="f-soc-hub">
+              {rawLinks.map(l => (
+                <a key={l.id} href={l.href} target="_blank" rel="noopener noreferrer" className="f-soc-btn">{getIcon(l)}</a>
               ))}
             </div>
           </SA>
-
-          {/* COL 2: Contact Info */}
-          <SA variant="up" delay="d1">
-            <h4 className="f-heading">Get In Touch</h4>
-            
-            <div className="f-address-card">
-              <div className="f-address-icon">🏢</div>
-              <div>
-                <div className="f-address-title">Bank More Campus</div>
-                <div className="f-address-text">Bank More, Dhanbad - 826001</div>
-              </div>
-            </div>
-
-            <div className="f-address-card">
-              <div className="f-address-icon">🏫</div>
-              <div>
-                <div className="f-address-title">Bhuda Campus</div>
-                <div className="f-address-text">Rani Road, Barmasiya - 826001</div>
-              </div>
-            </div>
-
-            <div className="f-address-card">
-              <div className="f-address-icon">📞</div>
-              <div>
-                <div className="f-address-title">Contact No.</div>
-                <div className="f-address-text">+91 79033 40991</div>
-              </div>
-            </div>
-
-            <div className="f-address-card">
-              <div className="f-address-icon">✉️</div>
-              <div>
-                <div className="f-address-title">Email Address</div>
-                <div className="f-address-text" style={{ wordBreak: 'break-all' }}>principal@gncollege.org</div>
-              </div>
-            </div>
-          </SA>
-
-          {/* COL 3: Quick Links */}
-          <SA variant="up" delay="d2">
-            <h4 className="f-heading">Quick Links</h4>
-            <ul className="f-link-list">
-              {[ 
-                {name: "About College", href: "/about-us/college-profile"}, 
-                {name: "Academic Departments", href: "/academics/departments"},
-                {name: "Academic Courses", href: "/academics/course-offered"}, 
-                {name: "Admission 2024", href: "/admission/notification/latest"}, 
-                {name: "Campus Events", href: "/events"}, 
-                {name: "Photo Gallery", href: "/gallery"},
-                {name: "BBMKU Portal", href: "https://bbmku.ac.in/", external: true} 
-              ].map(link => (
-                <li key={link.name}>
-                  {link.external ? (
-                    <a href={link.href} target="_blank" rel="noopener noreferrer" className="f-link">{link.name}</a>
-                  ) : (
-                    <Link to={link.href} className="f-link">{link.name}</Link>
-                  )}
-                </li>
-              ))}
+          <SA variant="up" delay="sa-d1" className="f-col">
+            <h4>Institution</h4>
+            <ul className="f-links">
+              <li><Link to="/about-us/college-profile">College Profile</Link></li>
+              <li><Link to="/about-us/sikh-heritage">Sikh Heritage</Link></li>
+              <li><Link to="/naac/aqar">AQAR 2024</Link></li>
+              <li><Link to="/p/contact-directory">Directory</Link></li>
             </ul>
           </SA>
-
-          {/* COL 4: Map & Admin */}
-          <SA variant="up" delay="d3" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <h4 className="f-heading">Location Map</h4>
-            <DualCampusMap />
-            
-            <Link to="/admin" target="_blank" rel="noopener noreferrer" style={{ 
-              background: 'rgba(255,255,255,0.05)', color: '#fff', border: `1px solid rgba(255,255,255,0.1)`, 
-              padding: '10px 18px', borderRadius: '10px', fontSize: 11.5, fontWeight: 800, textDecoration: 'none', 
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, 
-              transition: 'background 0.3s ease, color 0.2s ease, border-color 0.3s ease',
-              minHeight: '44px', letterSpacing: '0.3px',
-            }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = G; e.currentTarget.style.color = '#000'; e.currentTarget.style.borderColor = G; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              </svg>
-              Admin Access Portal
-            </Link>
+          <SA variant="up" delay="sa-d2" className="f-col">
+            <h4>Students</h4>
+            <ul className="f-links">
+              <li><Link to="/scholarships">Scholarships</Link></li>
+              <li><Link to="/admission/fee-structure">Fee Structure</Link></li>
+              <li><Link to="/academics/placements">Placements</Link></li>
+              <li><Link to="/notifications">Notices</Link></li>
+            </ul>
           </SA>
-
+          <SA variant="up" delay="sa-d3" className="f-col">
+            <h4>Resource</h4>
+            <ul className="f-links">
+              <li><Link to="/publication/college-library">E-Library</Link></li>
+              <li><Link to="/publication/e-magazine">Magazine</Link></li>
+              <li><Link to="/syllabus">Syllabus</Link></li>
+              <li><Link to="/contact">Support</Link></li>
+            </ul>
+          </SA>
+          <SA variant="up" delay="sa-d3" className="f-col" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <h4>Command</h4>
+            <a href="/#/admin" target="_blank" rel="noopener noreferrer" style={{ background: G, color: '#000', padding: '10px', borderRadius: 10, textAlign: 'center', fontWeight: 900, textDecoration: 'none', fontSize: 12 }}>ADMIN PORTAL</a>
+            <div style={{ padding: 12, background: 'rgba(255,255,255,0.02)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.05)', fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>
+              <b>💡 Tip:</b> Press <b>Ctrl + K</b> to search anything.
+            </div>
+          </SA>
         </div>
 
-        {/* © Bottom Bar */}
-        <div className="f-bottom">
-          <div className="f-copy">
-            © {new Date().getFullYear()} <strong>Guru Nanak College, Dhanbad.</strong> All Rights Reserved.
-            <span style={{ margin: '0 8px', color: 'rgba(255,255,255,0.2)' }}>|</span>
-            Sikh Minority Degree College
+        <SA variant="up" className="f-hud-ultima">
+          <div className="hud-left">
+            <div className="hud-status"><div className="pulse"></div> GNC SERVER: ONLINE</div>
+            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, fontWeight: 700 }}>⏲️ {time.toLocaleTimeString('en-IN', { hour12: true })}</div>
           </div>
-          <div className="f-dev">
-            Design & Developed dynamically with <span style={{ color: '#ef4444' }}>❤️</span> By Pankaj Kumar
-          </div>
+          <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: 0.5, color: G }}>ESTD: 1970 | DHANBAD</div>
+        </SA>
+        <div className="f-final-line">
+          <div>© {new Date().getFullYear()} <b>Guru Nanak College.</b> All rights reserved.</div>
+          <div className="f-dev-pill">⚡ <b>React + Firebase</b> | Dev: <b>Pankaj Kumar</b></div>
         </div>
-
       </div>
     </footer>
   );

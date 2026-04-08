@@ -241,18 +241,18 @@ export default function QuickPublishTab({ logAct }) {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 24, position: 'relative', zIndex: 10 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, position: 'relative', zIndex: 10 }}>
         
         {/* 🤖 AI CREATION CORE (Top Section) */}
-        <div className="qp-card" style={{ background: '#f1f5f9', gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: `1.5px solid ${NAVY}15` }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-                <div style={{ fontSize: 42, animation: 'spin 4s linear infinite', filter: `drop-shadow(0 0 10px ${GOLD}88)` }}>✨</div>
+        <div className="qp-card" style={{ background: '#f1f5f9', gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: `1.5px solid ${NAVY}15`, flexWrap: 'wrap', gap: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20, flex: '1 1 300px' }}>
+                <div style={{ fontSize: 'clamp(32px, 8vw, 42px)', animation: 'spin 4s linear infinite', filter: `drop-shadow(0 0 10px ${GOLD}88)` }}>✨</div>
                 <div>
-                    <h3 style={{ margin: 0, color: NAVY, fontWeight: 900, fontSize: 20 }}>AI Content Suite</h3>
-                    <p style={{ margin: 0, fontSize: 13, color: T.t3, fontWeight: 600 }}>Create custom banners, news posters, and social media assets via natural language.</p>
+                    <h3 style={{ margin: 0, color: NAVY, fontWeight: 900, fontSize: 'clamp(16px, 4vw, 20px)' }}>AI Content Suite</h3>
+                    <p style={{ margin: 0, fontSize: 13, color: T.t3, fontWeight: 600 }}>Create custom banners, news posters, and social media assets.</p>
                 </div>
             </div>
-            <button className="qp-btn-pub" onClick={() => setIsAiModalOpen(true)} style={{ background: NAVY, minWidth: 200 }}>
+            <button className="qp-btn-pub" onClick={() => setIsAiModalOpen(true)} style={{ background: NAVY, minWidth: 200, width: '100%', flex: '1 1 200px' }}>
                 🚀 Open Neural AI Studio
             </button>
         </div>
@@ -262,24 +262,24 @@ export default function QuickPublishTab({ logAct }) {
         <div style={{ position:'fixed', inset:0, background:'rgba(15,35,71,.8)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100002, backdropFilter:'blur(12px)' }} onClick={()=>setIsAiModalOpen(false)}>
           <div style={{ background:WHITE, borderRadius:24, width:680, maxWidth:'90vw', boxShadow:'0 30px 60px rgba(0,0,0,.4)', padding:0, overflow:'hidden', animation: 'fade-up 0.3s ease-out' }} onClick={e=>e.stopPropagation()}>
             {/* Header */}
-            <div style={{ background:`linear-gradient(135deg, ${NAVY}, #0a1b38)`, padding:'24px 32px', color:'#fff', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <div style={{ background:`linear-gradient(135deg, ${NAVY}, #0a1b38)`, padding:'20px', color:'#fff', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                 <div>
-                    <h2 style={{ margin:0, fontSize:22, fontWeight:900, letterSpacing:'-0.5px' }}>🧠 Neural AI Studio</h2>
-                    <p style={{ margin:0, fontSize:12, color:GOLD, fontWeight:800, textTransform:'uppercase', opacity:0.8 }}>GNC Semantic Engine v3.0</p>
+                    <h2 style={{ margin:0, fontSize: 'clamp(16px, 5vw, 22px)', fontWeight:900, letterSpacing:'-0.5px' }}>🧠 Neural AI Studio</h2>
+                    <p style={{ margin:0, fontSize:10, color:GOLD, fontWeight:800, textTransform:'uppercase', opacity:0.8 }}>GNC Semantic Engine v3.0</p>
                 </div>
-                <div style={{ fontSize:32 }}>🧬</div>
+                <div style={{ fontSize: 'clamp(24px, 6vw, 32px)' }}>🧬</div>
             </div>
 
             {/* Body */}
-            <div style={{ padding:32 }}>
-                <div style={{ marginBottom:24 }}>
-                    <label style={{ display:'block', fontSize:13, fontWeight:800, color:NAVY, marginBottom:10, textTransform:'uppercase' }}> Describe your Banner / Poster</label>
+            <div style={{ padding:'20px' }}>
+                <div style={{ marginBottom:20 }}>
+                    <label style={{ display:'block', fontSize:11, fontWeight:800, color:NAVY, marginBottom:8, textTransform:'uppercase' }}> Describe your Banner / Poster</label>
                     <textarea 
                         className="ainp" rows={3} 
-                        style={{ borderRadius:16, border: '1.5px solid #f1f5f9', background: '#f8fafc', width:'100%', padding:16, boxSizing:'border-box', fontSize:14 }} 
+                        style={{ borderRadius:16, border: '1.5px solid #f1f5f9', background: '#f8fafc', width:'100%', padding:12, boxSizing:'border-box', fontSize:14 }} 
                         value={aiPrompt} 
                         onChange={e => setAiPrompt(e.target.value)} 
-                        placeholder="e.g. Annual Sports Day 2024 with a trophy and stadium background..." 
+                        placeholder="e.g. Annual Sports Day 2024..." 
                     />
                 </div>
 
@@ -292,8 +292,8 @@ export default function QuickPublishTab({ logAct }) {
                     </button>
                 ) : (
                     <div className="fade-in">
-                        <div style={{ position:'relative', borderRadius:16, overflow:'hidden', border:`2px solid ${GOLD}`, boxShadow:'0 10px 20px rgba(0,0,0,0.1)', marginBottom:20 }}>
-                            <img src={aiResult} style={{ width:'100%', height:280, objectFit:'cover' }} />
+                        <div style={{ position:'relative', borderRadius:16, overflow:'hidden', border:`2px solid ${GOLD}`, boxShadow:'0 10px 20px rgba(0,0,0,0.1)', marginBottom:16 }}>
+                            <img src={aiResult} style={{ width:'100%', height: 'clamp(180px, 40vw, 280px)', objectFit:'cover' }} />
                             <div style={{ position:'absolute', top:12, right:12, background:GOLD, color:NAVY, padding:'6px 12px', borderRadius:8, fontSize:10, fontWeight:900 }}>AI PREVIEW</div>
                         </div>
                         <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:12 }}>
@@ -307,9 +307,9 @@ export default function QuickPublishTab({ logAct }) {
             </div>
 
             {/* Footer */}
-            <div style={{ padding:'16px 32px', borderTop:'1px solid #f1f5f9', display:'flex', justifyContent:'space-between', alignItems:'center', background:'#f8fafc' }}>
-                <span style={{ fontSize:11, color:T.t4, fontWeight:700 }}>Powered by OpenAI DALL-E & Midjourney APIs (Simulated)</span>
-                <button style={{ background:'transparent', border:'none', color:NAVY, fontWeight:800, cursor:'pointer' }} onClick={()=>setIsAiModalOpen(false)}>Close</button>
+            <div style={{ padding:'12px 20px', borderTop:'1px solid #f1f5f9', display:'flex', flexWrap: 'wrap', justifyContent:'space-between', alignItems:'center', background:'#f8fafc', gap: 10 }}>
+                <span style={{ fontSize:9, color:T.t4, fontWeight:700 }}>Powered by OpenAI DALL-E (Simulated)</span>
+                <button style={{ background:'transparent', border:'none', color:NAVY, fontWeight:800, cursor:'pointer', fontSize: 13 }} onClick={()=>setIsAiModalOpen(false)}>Close</button>
             </div>
           </div>
         </div>

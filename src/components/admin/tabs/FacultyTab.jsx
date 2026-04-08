@@ -61,15 +61,15 @@ export default function FacultyTab({ faculties, logAct, getSectionLog, softDelet
             ? <img src={f.photo} alt={f.name} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
             : <div style={{ width: 44, height: 44, borderRadius: '50%', background: `${NAVY}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>👨‍🏫</div>
           }
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 800, color: NAVY, fontSize: 14 }}>{f.name}</div>
-            <div style={{ fontSize: 12.5, color: T.t2 }}>{f.designation}</div>
+          <div style={{ flex: 1, minWidth: '150px' }}>
+            <div style={{ fontWeight: 800, color: NAVY, fontSize: 'clamp(13px, 4vw, 14px)' }}>{f.name}</div>
+            <div style={{ fontSize: 12, color: T.t2 }}>{f.designation}</div>
             <div style={{ display: 'flex', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
-              <span className="abadge" style={{ background: BG, color: T.t2 }}>{f.department}</span>
-              {f.qualification && <span className="abadge" style={{ background: BG, color: T.t3 }}>{f.qualification}</span>}
+              <span className="abadge" style={{ background: BG, color: T.t2, fontSize: 10 }}>{f.department}</span>
+              {f.qualification && <span className="abadge" style={{ background: BG, color: T.t3, fontSize: 10 }}>{f.qualification}</span>}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
             <button className="abtn abtn-outline abtn-sm" onClick={() => {
               setEditItem(f);
               setFormData({ name: f.name||'', designation: f.designation||'Assistant Professor', department: f.department||'English', qualification: f.qualification||'', photo: f.photo||'', email: f.email||'', phone: f.phone||'', staffType: f.staffType||'Teaching', order: f.order||0 });
@@ -143,22 +143,24 @@ export default function FacultyTab({ faculties, logAct, getSectionLog, softDelet
             />
           </div>
 
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editItem ? 'Update' : 'Add'}</button>
-            {editItem && <button type="button" className="abtn abtn-outline" onClick={() => { setEditItem(null); clearDraft(); }}>Cancel</button>}
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button type="submit" className="abtn abtn-gold" style={{ flex: '1 1 120px', justifyContent: 'center' }} disabled={loading}>🚀 {editItem ? 'Update' : 'Add'}</button>
+            {editItem && <button type="button" className="abtn abtn-outline" style={{ flex: '1 1 120px', justifyContent: 'center' }} onClick={() => { setEditItem(null); clearDraft(); }}>Cancel</button>}
           </div>
         </form>
       </div>
 
       {/* Filters */}
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16, alignItems: 'center' }}>
-        {['All','Teaching','Non-Teaching'].map(t => (
-          <button key={t} onClick={() => setTypeFilter(t)} className="abtn abtn-sm"
-            style={{ background: typeFilter === t ? NAVY : WHITE, color: typeFilter === t ? WHITE : T.t2, border: `1.5px solid ${typeFilter === t ? NAVY : T.b1}` }}>
-            {t}
-          </button>
-        ))}
-        <select className="ainp" style={{ width: 'auto', fontSize: 12, padding: '6px 10px' }} value={deptFilter} onChange={e => setDeptFilter(e.target.value)}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {['All','Teaching','Non-Teaching'].map(t => (
+            <button key={t} onClick={() => setTypeFilter(t)} className="abtn abtn-xs"
+              style={{ background: typeFilter === t ? NAVY : WHITE, color: typeFilter === t ? WHITE : T.t2, border: `1.5px solid ${typeFilter === t ? NAVY : T.b1}`, height: 32 }}>
+              {t}
+            </button>
+          ))}
+        </div>
+        <select className="ainp" style={{ width: 'auto', minWidth: 150, fontSize: 12, padding: '4px 10px', height: 32 }} value={deptFilter} onChange={e => setDeptFilter(e.target.value)}>
           {depts.map(d => <option key={d}>{d}</option>)}
         </select>
       </div>

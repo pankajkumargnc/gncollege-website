@@ -267,10 +267,84 @@ export const GCSS = `
   100% { box-shadow: 0 4px 15px rgba(239,68,68,0.3); }
 }
 .pulse-red-soft { animation: pulse-red-soft 2s infinite ease-in-out; }
+/* 📱 UNIVERSAL MOBILE RESPONSIVE OVERRIDES (Global Fix) */
 @media(max-width:1024px) {
-  .adm-side { position:fixed !important; z-index:10001; transform:translateX(-100%); transition:transform .3s ease; }
+  .adm-side { 
+    position:fixed !important; z-index:10001; 
+    transform:translateX(-100%); transition:transform .3s cubic-bezier(0.4, 0, 0.2, 1); 
+    box-shadow: 20px 0 50px rgba(0,0,0,0.2);
+  }
   .adm-side.open { transform:translateX(0); }
-  .adm-mobile-top { display:flex; background:${WHITE}; padding:14px 18px; align-items:center; justify-content:space-between; border-bottom:1px solid ${T.b1}; position:sticky; top:0; z-index:100; }
-  .adm-content { padding:16px !important; }
+  .adm-mobile-top { 
+    display:flex; background:${WHITE}; padding:14px 18px; 
+    align-items:center; justify-content:space-between; 
+    border-bottom:1px solid ${T.b1}; position:sticky; top:0; z-index:100; 
+  }
+  .adm-topbar { display:none; } /* Hide desktop topbar on mobile */
+  .adm-content { 
+    padding:16px 12px !important; 
+    overflow-y: auto !important; 
+    -webkit-overflow-scrolling: touch !important;
+    height: auto !important;
+    display: block !important;
+  }
+  .adm-main {
+    height: calc(100dvh - 54px) !important; /* height minus mobile topbar */
+    overflow-y: auto !important;
+  }
+  .adm-content > div > [style*="display: grid"],
+  .adm-content > div > [style*="display:grid"] {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  
+  /* Fix cards with fixed width or large minmax */
+  .card, .card-gold, .card-navy {
+    padding: 20px 16px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  /* Fix Grid columns in forms or summaries */
+  [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Dashboard specific fix: small stat cards still 2 per row */
+  .adm-content > div > [style*="auto-fill, minmax(140px, 1fr)"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Buttons & Flex Groups */
+  [style*="display: flex"], [style*="display:flex"] {
+    flex-wrap: wrap !important;
+  }
+
+  /* Forms padding fix */
+  form div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* Large text and summaries */
+  .asec { font-size: 20px !important; }
+  .actitle { font-size: 15px !important; padding-bottom: 12px !important; }
+  
+  /* Tables / Rows (arow) */
+  .arow {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding: 16px !important;
+  }
+  .arow > div[style*="display: flex"] {
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+  .arow > div:last-child {
+    width: 100% !important;
+    justify-content: flex-end !important;
+    border-top: 1px solid ${T.b1};
+    padding-top: 10px;
+  }
 }
 `;
