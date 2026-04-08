@@ -1,21 +1,22 @@
 // src/App.jsx — REFACTORED VERSION
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, Suspense, lazy } from "react";
 import { useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 // ── Components ──
-import WhatsAppButton from "./components/WhatsAppButton";
-import BackToTop from "./components/BackToTop";
-import AIChatbot from "./components/AIChatbot";
-import UniversalSearch from "./components/UniversalSearch";
-import AlertBanner from "./components/AlertBanner";
-import Ticker from "./components/Ticker";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import TopBar from "./components/home/TopBar";
 import Breadcrumbs from "./components/Breadcrumbs";
 import QuickActionNav from "./components/QuickActionNav";
 import AppRoutes from "./components/AppRoutes";
+
+const WhatsAppButton = lazy(() => import("./components/WhatsAppButton"));
+const BackToTop = lazy(() => import("./components/BackToTop"));
+const AIChatbot = lazy(() => import("./components/AIChatbot"));
+const UniversalSearch = lazy(() => import("./components/UniversalSearch"));
+const AlertBanner = lazy(() => import("./components/AlertBanner"));
+const Ticker = lazy(() => import("./components/Ticker"));
 
 // ── Data & Styles ──
 import { navLinks as staticNavLinks } from "./data/db";
@@ -215,13 +216,19 @@ export default function App() {
   return (
     <>
       <Toaster position="bottom-right" containerStyle={{ zIndex: 9999999 }} />
-      <UniversalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      <Suspense fallback={null}>
+        <UniversalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      </Suspense>
       
       {!isAdminRoute && (
         <div style={{ position: 'relative', zIndex: 1000 }}>
-          <AlertBanner />
+          <Suspense fallback={null}>
+            <AlertBanner />
+          </Suspense>
           <TopBar isDark={isDark} onToggleDark={toggleDark} />
-          <Ticker items={notices} />
+          <Suspense fallback={null}>
+            <Ticker items={notices} />
+          </Suspense>
           <Navbar navLinks={baseNavLinks} />
           <Breadcrumbs />
           <QuickActionNav />
@@ -241,9 +248,11 @@ export default function App() {
       {!isAdminRoute && (
         <>
           <Footer dynamicSocialLinks={baseNavLinks} />
-          <WhatsAppButton />
-          <AIChatbot />
-          <BackToTop />
+          <Suspense fallback={null}>
+            <WhatsAppButton />
+            <AIChatbot />
+            <BackToTop />
+          </Suspense>
         </>
       )}
     </>

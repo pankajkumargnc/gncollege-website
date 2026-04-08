@@ -5,6 +5,7 @@ import HomePage from "../pages/HomePage";
 import Contact from "../pages/Contact";
 import VideoLibrary from '../pages/VideoLibrary';
 import AdminLogin from "./AdminLogin";
+import { Newspaper, ClipboardList, BarChart3, BookOpen } from "lucide-react";
 
 // ── 🛡️ SMART LAZY LOADER ─────────────────────────────────────────────────────
 const safeLazy = (importFunction) => {
@@ -232,11 +233,11 @@ export default function AppRoutes({
 
             {/* Publication */}
             <Route path="/publication/college-library" element={<R el={<LibraryPage />} />} />
-            <Route path="/publication/e-magazine" element={<R el={<PublicationPage type="magazine" title="E-Magazine" subtitle="College ki digital publications" icon="📰" keyword="magazine" />} />} />
-            <Route path="/publication/examination-results/2024" element={<R el={<PublicationPage type="result" title="Exam Results 2024" subtitle="Academic year 2023-24 ke results" icon="📋" keyword="result-2024" />} />} />
-            <Route path="/publication/examination-results/2023" element={<R el={<PublicationPage type="result" title="Exam Results 2023" subtitle="Academic year 2022-23 ke results" icon="📋" keyword="result-2023" />} />} />
-            <Route path="/publication/sss-report/2023-24" element={<R el={<PublicationPage type="sss" title="SSS Report 2023-24" subtitle="Student Satisfaction Survey" icon="📊" keyword="sss-2023-24" />} />} />
-            <Route path="/publication/sss-report/2022-23" element={<R el={<PublicationPage type="sss" title="SSS Report 2022-23" subtitle="Student Satisfaction Survey" icon="📊" keyword="sss-2022-23" />} />} />
+            <Route path="/publication/e-magazine" element={<R el={<PublicationPage type="magazine" title="E-Magazine" subtitle="College ki digital publications" icon={<Newspaper size={40} />} keyword="magazine" />} />} />
+            <Route path="/publication/examination-results/2024" element={<R el={<PublicationPage type="result" title="Exam Results 2024" subtitle="Academic year 2023-24 ke results" icon={<ClipboardList size={40} />} keyword="result-2024" />} />} />
+            <Route path="/publication/examination-results/2023" element={<R el={<PublicationPage type="result" title="Exam Results 2023" subtitle="Academic year 2022-23 ke results" icon={<ClipboardList size={40} />} keyword="result-2023" />} />} />
+            <Route path="/publication/sss-report/2023-24" element={<R el={<PublicationPage type="sss" title="SSS Report 2023-24" subtitle="Student Satisfaction Survey" icon={<BarChart3 size={40} />} keyword="sss-2023-24" />} />} />
+            <Route path="/publication/sss-report/2022-23" element={<R el={<PublicationPage type="sss" title="SSS Report 2022-23" subtitle="Student Satisfaction Survey" icon={<BarChart3 size={40} />} keyword="sss-2022-23" />} />} />
 
             {/* Gallery / News */}
             <Route path="/gallery" element={<R el={<GalleryPage gallery={gallery} />} />} />
