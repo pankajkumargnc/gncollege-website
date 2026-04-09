@@ -188,11 +188,7 @@ export default function GalleryPage({ gallery: galleryProp, headless }) {
         <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(rgba(244,160,35,.07) 1px, transparent 1px)', backgroundSize:'28px 28px', pointerEvents:'none' }} />
         <div style={{ position:'absolute', top:0, left:0, right:0, height:4, background:G }} />
         <div style={{ position:'relative', zIndex:1 }}>
-          <nav style={{ display:'flex', alignItems:'center', gap:8, justifyContent:'center', marginBottom:16, fontSize:13, fontWeight:600 }}>
-            <Link to="/" style={{ color:'rgba(255,255,255,.5)', textDecoration:'none' }}>🏠 Home</Link>
-            <span style={{ color:'rgba(255,255,255,.3)' }}>›</span>
-            <span style={{ color:G }}>Photo Gallery</span>
-          </nav>
+
           <h1 style={{ color:'#fff', fontSize:'clamp(28px,5vw,48px)', fontWeight:900, margin:'0 0 12px', letterSpacing:'-1px' }}>
             📸 Photo Gallery
           </h1>

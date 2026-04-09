@@ -208,6 +208,7 @@ const ANIM_CSS = `
   .uni-sub{
     color:#64748b;font-size:clamp(14px,1vw,16px);
     max-width:580px;line-height:1.7;margin:0 auto;
+    text-align: center;
   }
 `;
 
@@ -630,7 +631,7 @@ function YouTubeSection() {
             label="🎬 Campus Video Highlights"
             title1="Campus Video"
             title2="Highlights"
-            sub={`Official ${channel} channel se latest videos`}
+            sub={`Latest highlights from the official ${channel} YouTube channel`}
           />
         </SA>
         <div className="hp-yt-grid">
@@ -683,9 +684,9 @@ function YouTubeSection() {
                         <div className="hp-yt-ph">
                           <div className="hp-yt-ph-icon">▶️</div>
                           <div className="hp-yt-ph-txt">
-                            Admin Panel → YouTube tab mein
+                            Please configure your API Key and Channel ID
                             <br />
-                            API Key aur Channel ID add karein
+                            in the Admin Panel → YouTube tab
                           </div>
                         </div>
                       </div>
@@ -894,7 +895,7 @@ const HomePage = ({
               label="🌟 Campus Life"
               title1="Recent Events &"
               title2="Happenings"
-              sub="Seminars, workshops aur campus activities ki ek jhalak"
+              sub="A glimpse into the latest seminars, workshops, and campus activities"
             />
           </SA>
           {recentEv.length > 0 ? (
@@ -927,7 +928,7 @@ const HomePage = ({
                     textAlign: "center",
                   }}
                 >
-                  Admin Panel → Events se data add karein
+                  Please add event data via the Admin Panel → Events tab
                 </p>
               </div>
             </SA>
@@ -990,7 +991,7 @@ const HomePage = ({
               label="🔗 Quick Access"
               title1="Important External"
               title2="Links"
-              sub="Official education and government portals ka quick access"
+              sub="Quick access to official education and government portals"
             />
           </SA>
           <div className="hp-links-grid">
@@ -1020,7 +1021,7 @@ const HomePage = ({
               label="📸 Memories"
               title1="Photo"
               title2="Gallery"
-              sub="Academic excellence aur cultural heritage ki yadgar jhalak"
+              sub="Memorable highlights of academic excellence and cultural heritage"
             />
           </SA>
           <SA variant="fade" delay="d1">
@@ -1075,7 +1076,7 @@ const HomePage = ({
                     textAlign: "center",
                   }}
                 >
-                  Admin Panel → Gallery se photos upload karein
+                  Please upload photos via the Admin Panel → Gallery tab
                 </p>
               </SA>
             )}

@@ -61,7 +61,7 @@ const CSS = `
     color: ${N}; font-size: clamp(32px, 5vw, 54px); font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; margin: 0 0 16px;
   }
   .hf-sec-h span{color:${G};}
-  .hf-sec-sub{ color:#64748b; font-size:clamp(14px,1vw,16px); max-width:580px; line-height:1.7; margin:0 auto; }
+  .hf-sec-sub{ color:#64748b; font-size:clamp(14px,1vw,16px); max-width:580px; line-height:1.7; margin:0 auto; text-align: center; }
 
   /* ═══════════════════════════
      ULTRA PRO MAX DEPARTMENTS
@@ -226,7 +226,7 @@ export default function HomeFeatures() {
             <div className="hf-section-header">
               <div><div className="hf-sec-label">🏛️ Academic Excellence</div></div>
               <h2 className="hf-sec-h">Our Academic <span>Departments</span></h2>
-              <p className="hf-sec-sub">Expert faculty aur modern curriculum ke saath bright career banayein.</p>
+              <p className="hf-sec-sub">Build a bright career with our expert faculty and industry-aligned modern curriculum.</p>
             </div>
           </SA2>
           <div className="hf-dept-grid">
@@ -259,7 +259,7 @@ export default function HomeFeatures() {
             <div className="hf-section-header">
               <div><div className="hf-sec-label">⭐ Campus Life</div></div>
               <h2 className="hf-sec-h">Premium <span>Facilities</span></h2>
-              <p className="hf-sec-sub">Holistic development ke liye modern infrastructure aur best facilities.</p>
+              <p className="hf-sec-sub">State-of-the-art infrastructure and premium facilities dedicated to holistic student development.</p>
             </div>
           </SA2>
           <div style={{ display:'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 20 }}>

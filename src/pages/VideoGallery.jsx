@@ -143,11 +143,7 @@ export default function VideoGallery() {
           <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(rgba(244,160,35,.07) 1px,transparent 1px)', backgroundSize:'28px 28px', pointerEvents:'none' }} />
           <div style={{ position:'absolute', top:0, left:0, right:0, height:4, background:G }} />
           <div style={{ position:'relative', zIndex:1 }}>
-            <nav style={{ display:'flex', alignItems:'center', gap:8, justifyContent:'center', marginBottom:16, fontSize:13, fontWeight:600 }}>
-              <Link to="/" style={{ color:'rgba(255,255,255,.5)', textDecoration:'none' }}>🏠 Home</Link>
-              <span style={{ color:'rgba(255,255,255,.3)' }}>›</span>
-              <span style={{ color:G }}>Video Gallery</span>
-            </nav>
+
             <h1 style={{ color:'#fff', fontSize:'clamp(28px,5vw,48px)', fontWeight:900, margin:'0 0 12px', letterSpacing:'-1px' }}>🎬 Video Gallery</h1>
             <p style={{ color:'rgba(255,255,255,.65)', fontSize:15, maxWidth:520, margin:'0 auto 24px' }}>
               Latest campus videos from the official {channel} channel
@@ -216,11 +212,7 @@ export default function VideoGallery() {
         {/* Hero */}
         <div style={{ background:`linear-gradient(135deg,${N} 0%,#1a3a7c 100%)`, padding:'70px 20px 60px', textAlign:'center', position:'relative', overflow:'hidden' }}>
           <div style={{ position:'absolute', top:0, left:0, right:0, height:4, background:G }} />
-          <nav style={{ display:'flex', alignItems:'center', gap:8, justifyContent:'center', marginBottom:16, fontSize:13, fontWeight:600 }}>
-            <Link to="/" style={{ color:'rgba(255,255,255,.5)', textDecoration:'none' }}>🏠 Home</Link>
-            <span style={{ color:'rgba(255,255,255,.3)' }}>›</span>
-            <span style={{ color:G }}>Video Gallery</span>
-          </nav>
+
           <h1 style={{ color:'#fff', fontSize:'clamp(28px,5vw,48px)', fontWeight:900, margin:'0 0 12px' }}>🎬 Video Gallery</h1>
         </div>
         <div style={{ maxWidth:600, margin:'60px auto', padding:'0 20px', textAlign:'center' }}>
@@ -262,11 +254,7 @@ export default function VideoGallery() {
         <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(rgba(244,160,35,.07) 1px,transparent 1px)', backgroundSize:'28px 28px', pointerEvents:'none' }} />
         <div style={{ position:'absolute', top:0, left:0, right:0, height:4, background:G }} />
         <div style={{ position:'relative', zIndex:1 }}>
-          <nav style={{ display:'flex', alignItems:'center', gap:8, justifyContent:'center', marginBottom:16, fontSize:13, fontWeight:600 }}>
-            <Link to="/" style={{ color:'rgba(255,255,255,.5)', textDecoration:'none' }}>🏠 Home</Link>
-            <span style={{ color:'rgba(255,255,255,.3)' }}>›</span>
-            <span style={{ color:G }}>Video Gallery</span>
-          </nav>
+
           <h1 style={{ color:'#fff', fontSize:'clamp(28px,5vw,48px)', fontWeight:900, margin:'0 0 12px' }}>🎬 Video Gallery</h1>
           <p style={{ color:'rgba(255,255,255,.65)', fontSize:15, maxWidth:520, margin:'0 auto 24px' }}>
             Follow latest college events, seminars, and cultural programs

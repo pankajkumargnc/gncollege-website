@@ -58,20 +58,17 @@ export default function App() {
 
   // ✅ PWA: New Notice Push Simulator (Students only)
   useEffect(() => {
-    if (isAdminRoute || !notices?.length) return;
+    if (isAdminRoute || !notices?.length || !("Notification" in window) || Notification.permission !== "granted") return;
     
-    // Check if we have a "newest" notice that hasn't been notified
     const newest = notices[0];
     if (newest && newest.isNew) {
       const lastNotified = localStorage.getItem('gnc_last_notified');
       if (lastNotified !== newest.id) {
-         if ("Notification" in window && Notification.permission === "granted") {
-           new Notification("📢 New College Notice", {
-             body: newest.text?.substring(0, 100),
-             icon: `${import.meta.env.BASE_URL}images/logo.webp`
-           });
-           localStorage.setItem('gnc_last_notified', newest.id);
-         }
+        new Notification("📢 New College Notice", {
+          body: newest.text?.substring(0, 100),
+          icon: `${import.meta.env.BASE_URL}images/logo.webp`
+        });
+        localStorage.setItem('gnc_last_notified', newest.id);
       }
     }
   }, [notices, isAdminRoute]);
@@ -116,32 +113,31 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeys);
   }, []);
 
-  // ── SEO Manager ──
+  // ── SEO & Analytics ──
   useEffect(() => {
     updateSEO(location.pathname);
     
-    // ✅ FIREBASE ANALYTICS LOGGING
-    import("./firebase").then(({ logEvent, analytics }) => {
-      if (analytics) {
-        logEvent(analytics, 'page_view', {
-          page_path: location.pathname,
-          page_title: document.title
-        });
-        
-        // Log custom visit to Firestore for Dashboard Graph
-        import("./firebase").then(({ db }) => {
-          import("firebase/firestore").then(({ collection, addDoc, serverTimestamp }) => {
-            addDoc(collection(db, "site_traffic"), {
-              path: location.pathname,
-              timestamp: serverTimestamp(),
-              userAgent: navigator.userAgent
-            }).catch(() => {});
-          });
-        });
-      }
-    });
-
-  }, [location.pathname]);
+    // ✅ Log visit to Firestore for Dashboard Graph
+    // Moved to a more stable structure to avoid Dispatcher errors
+    const recordVisit = async () => {
+       try {
+         const { db } = await import("./firebase");
+         const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+         
+         await addDoc(collection(db, "site_traffic"), {
+           path: location.pathname,
+           timestamp: serverTimestamp(),
+           userAgent: navigator.userAgent
+         });
+       } catch (err) {
+         // Silently fail if blocked or offline
+       }
+    };
+    
+    if (!isAdminRoute) {
+        recordVisit();
+    }
+  }, [location.pathname, isAdminRoute]);
 
   // ── Derived Data ──
   const counterData = useMemo(() => [
