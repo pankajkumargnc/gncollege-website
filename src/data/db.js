@@ -14,6 +14,7 @@ export const SOCIAL_LINKS = [
   { id: 'linkedin', label: 'in', href: 'https://linkedin.com/' },
 ]
 
+/* 
 export const initialNotices = [
   { id: 1, text: 'Notice regarding Admission B.A/B.Com./BCA/BBA Session 2024-2028', date: '2024-11-01', isNew: true },
   { id: 2, text: 'FIRST MERIT LIST ALL SUBJECTS PHASE-V 2024', date: '2024-10-28', isNew: true },
@@ -53,6 +54,7 @@ export const initialPDFReports = [
   { id: 3, title: 'IQAC Report 2022-23', date: '2023-08-20', category: 'IQAC' },
   { id: 4, title: 'UG Regulation (FYUGP)', date: '2023-07-01', category: 'Regulations' },
 ]
+*/
 
 // ✅ Single source of truth for departments (used in HomeFeatures + elsewhere)
 export const departments = [

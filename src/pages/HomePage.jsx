@@ -791,7 +791,6 @@ const HomePage = ({
       <style>{ANIM_CSS + CSS}</style>
       <div className="hp-watermark" />
       <HeroSlider slides={sliderSlides} />
-      <Ticker />
       <PremiumTicker items={updates?.length > 0 ? updates : TICKER_ITEMS} />
       <QuickActionBar />
       <NotificationSection
