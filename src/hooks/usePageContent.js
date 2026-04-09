@@ -8,8 +8,9 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import DOMPurify from 'dompurify';
 
-// ── In-memory cache to prevent re-fetching on component re-mount ──
+// ── Global Listener Cache (Share one Firebase listener across multiple components) ──
 const contentCache = {};
+const listeners = {};
 
 /**
  * usePageContent — Fetches structured content from Firestore pageContent collection
@@ -31,45 +32,58 @@ export default function usePageContent(slug) {
       return;
     }
 
-    // If cached, use it immediately (still subscribe for live updates)
     if (contentCache[slug]) {
       setContent(contentCache[slug]);
       setLoading(false);
     }
 
-    const docRef = doc(db, 'pageContent', slug);
-    const unsub = onSnapshot(
-      docRef,
-      (snap) => {
+    // Register callback for this hook instance
+    const updateCallback = (data) => {
+      setContent(data);
+      setLoading(false);
+    };
+
+    if (!listeners[slug]) {
+      listeners[slug] = { callbacks: new Set(), unsub: null };
+      
+      const docRef = doc(db, 'pageContent', slug);
+      listeners[slug].unsub = onSnapshot(docRef, (snap) => {
+        let newData = null;
         if (snap.exists()) {
           const data = { id: snap.id, ...snap.data() };
-          
-          // 🛡️ Sanitize all HTML content in sections
           if (data.sections && Array.isArray(data.sections)) {
             data.sections = data.sections.map(section => ({
               ...section,
-              content: typeof section.content === 'string'
-                ? DOMPurify.sanitize(section.content)
-                : section.content
+              content: typeof section.content === 'string' ? DOMPurify.sanitize(section.content) : section.content
             }));
           }
-
-          contentCache[slug] = data;
-          setContent(data);
-        } else {
-          // Document doesn't exist — page will use hardcoded fallback
-          setContent(null);
+          newData = data;
         }
-        setLoading(false);
-      },
-      (err) => {
+        contentCache[slug] = newData;
+        // Notify all hooked components
+        listeners[slug].callbacks.forEach(cb => cb(newData));
+      }, (err) => {
         console.warn(`[usePageContent] Error fetching "${slug}":`, err.message);
-        setContent(null);
-        setLoading(false);
-      }
-    );
+        contentCache[slug] = null;
+        listeners[slug].callbacks.forEach(cb => cb(null));
+      });
+    }
 
-    return () => unsub();
+    // Add this component's callback
+    listeners[slug].callbacks.add(updateCallback);
+
+    return () => {
+      if (listeners[slug]) {
+        listeners[slug].callbacks.delete(updateCallback);
+        // Clean up Firebase listener if no components are using it
+        if (listeners[slug].callbacks.size === 0) {
+          if (typeof listeners[slug].unsub === 'function') {
+            listeners[slug].unsub();
+          }
+          delete listeners[slug];
+        }
+      }
+    };
   }, [slug]);
 
   /**

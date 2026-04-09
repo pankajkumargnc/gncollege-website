@@ -33,15 +33,29 @@ function Fade({ children, delay = 0, y = 20 }) {
 /* ─── NAYA: LIVE GALLERY COMPONENT (Fetches from Firebase) ─── */
 function LiveGallery({ categoryId }) {
   const [photos, setPhotos] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     const unsub = onSnapshot(doc(db, 'campus_gallery', categoryId), snap => {
-      if(snap.exists()) setPhotos(snap.data().photos || []);
+      if(snap.exists()) {
+        setPhotos(snap.data().photos || []);
+      } else {
+        setPhotos([]);
+      }
+      setLoading(false);
     });
     return () => unsub();
   }, [categoryId]);
 
-  if (photos.length === 0) return null; // Agar photo nahi hai toh hide rahega
+  if (!loading && photos.length === 0) return null; // Sirf tab hide hoga jab truly emtpy ho
+
+  const shimmer = {
+    background: '#f1f5f9',
+    backgroundImage: 'linear-gradient(to right, #f1f5f9 0%, #e2e8f0 20%, #f1f5f9 40%, #f1f5f9 100%)',
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: '800px 100%', 
+    animation: 'shimmer 1.5s infinite linear'
+  };
 
   return (
     <div style={{ marginTop: 40 }}>
@@ -50,19 +64,31 @@ function LiveGallery({ categoryId }) {
           📸 LIVE GALLERY
         </div>
       </Fade>
+      <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
-        {photos.map((p, i) => (
-          <Fade key={p.id} delay={i * 0.1}>
-            <div style={{ borderRadius: 16, overflow: 'hidden', boxShadow: '0 10px 30px rgba(15,35,71,0.06)', border: '1px solid #f1f5f9', background: '#fff', transition: 'transform 0.3s' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-6px)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
-              <img src={p.url} alt={p.caption} style={{ width: '100%', height: 220, objectFit: 'cover' }} />
-              {p.caption && p.caption !== 'Campus View' && (
-                <div style={{ padding: '14px 18px', fontSize: 13.5, fontWeight: 700, color: NAVY, borderTop: '1px solid #f1f5f9' }}>
-                  {p.caption}
-                </div>
-              )}
+        {loading ? (
+          [1, 2, 3].map((n) => (
+            <div key={n} style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid #f1f5f9', background: '#fff' }}>
+              <div style={{ width: '100%', height: 220, ...shimmer }} />
+              <div style={{ padding: '14px 18px', borderTop: '1px solid #f1f5f9' }}>
+                <div style={{ height: 16, width: '60%', borderRadius: 4, ...shimmer }} />
+              </div>
             </div>
-          </Fade>
-        ))}
+          ))
+        ) : (
+          photos.map((p, i) => (
+            <Fade key={p.id} delay={i * 0.1}>
+              <div style={{ borderRadius: 16, overflow: 'hidden', boxShadow: '0 10px 30px rgba(15,35,71,0.06)', border: '1px solid #f1f5f9', background: '#fff', transition: 'transform 0.3s' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-6px)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
+                <img src={p.url} alt={p.caption} style={{ width: '100%', height: 220, objectFit: 'cover' }} />
+                {p.caption && p.caption !== 'Campus View' && (
+                  <div style={{ padding: '14px 18px', fontSize: 13.5, fontWeight: 700, color: NAVY, borderTop: '1px solid #f1f5f9' }}>
+                    {p.caption}
+                  </div>
+                )}
+              </div>
+            </Fade>
+          ))
+        )}
       </div>
     </div>
   );

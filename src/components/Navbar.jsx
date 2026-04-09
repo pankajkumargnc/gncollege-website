@@ -78,6 +78,31 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
     return href
   }
 
+  const isItemActive = (item) => {
+    const route = getRoute(item.href);
+    
+    // Explicit match for Home or other paths
+    if (route === currentPath && currentPath !== '#') {
+      // Prevent parent categories with empty or '/' hrefs from lighting up on the Home route
+      if (currentPath === '/' && item.label !== 'Home' && item.sub) {
+        // Skip
+      } else {
+        return true;
+      }
+    }
+
+    if (item.sub) {
+      return item.sub.some(sub1 => {
+        if (getRoute(sub1.href) === currentPath && currentPath !== '#') return true;
+        if (sub1.sub) {
+          return sub1.sub.some(sub2 => getRoute(sub2.href) === currentPath && currentPath !== '#');
+        }
+        return false;
+      });
+    }
+    return false;
+  };
+
   return (
     <>
       {/* Spacer to prevent content jump when navbar becomes fixed */}
@@ -289,7 +314,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
             backdropFilter: isMobile && isScrolled ? 'blur(16px)' : 'none',
             
             padding: isMobile ? '10px 20px 20px' : 0,
-            gap: isMobile ? 10 : '6px',
+            gap: isMobile ? 10 : '14px',
             boxShadow: isMobile && menuOpen ? '0 10px 20px rgba(0,0,0,.15)' : 'none',
             maxHeight: isMobile ? '80vh' : 'auto',
             overflowY: isMobile ? 'auto' : 'visible',
@@ -325,13 +350,13 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                   <Link
                     to={getRoute(l0.href)}
                     onClick={() => { if (l0.label === 'Home') window.scrollTo(0, 0) }}
-                    className={`nav-hover-link${currentPath === getRoute(l0.href) ? ' nav-link-active' : ''}`}
+                    className={`nav-hover-link${isItemActive(l0) ? ' nav-link-active' : ''}`}
                     style={{
-                      color: isDark ? '#e2e8f0' : COLORS.navy,
+                      color: isItemActive(l0) ? COLORS.gold : (isDark ? '#e2e8f0' : COLORS.navy),
                       padding: isMobile ? '14px 0' : '12px 6px',
                       display: 'flex',
                       alignItems: 'center',
-                      fontSize: 'clamp(11px, 0.9vw, 13.5px)', 
+                      fontSize: 'clamp(12px, 1vw, 14.5px)', 
                       fontWeight: 800,
                       whiteSpace: 'nowrap',
                       textDecoration: 'none',
@@ -348,8 +373,8 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                     )}
                     {l0.label}
                   </Link>
-                  {isMobile  && l0.sub && <span style={{ color: isDark ? '#94a3b8' : COLORS.navy, fontSize: 20 }}>{openL1 === l0.label ? '▴' : '▾'}</span>}
-                  {!isMobile && l0.sub && <span style={{ color: isDark ? '#94a3b8' : COLORS.navy, fontSize: 13, marginLeft: 4, marginTop: 2 }}>▾</span>}
+                  {isMobile  && l0.sub && <span style={{ color: isItemActive(l0) ? COLORS.gold : (isDark ? '#94a3b8' : COLORS.navy), fontSize: 20 }}>{openL1 === l0.label ? '▴' : '▾'}</span>}
+                  {!isMobile && l0.sub && <span style={{ color: isItemActive(l0) ? COLORS.gold : (isDark ? '#94a3b8' : COLORS.navy), fontSize: 13, marginLeft: 4, marginTop: 2 }}>▾</span>}
                 </div>
 
                 {/* ── L1 Dropdown ── */}

@@ -77,7 +77,7 @@ export const navLinks = [
   { label: 'Home', href: '/' },
   {
     label: 'About Us',
-    href: '/',
+    href: '#',
     sub: [
       { label: 'Principal Message', href: '/about-us/principal-message' },
       { label: 'Vision & Mission', href: '/about-us/vision-mission' },
@@ -141,7 +141,7 @@ export const navLinks = [
   },
   {
     label: 'Academics',
-    href: '/',
+    href: '#',
     sub: [
       {
         label: 'Departments',
@@ -162,7 +162,7 @@ export const navLinks = [
   },
   {
     label: 'Admission',
-    href: '/',
+    href: '#',
     sub: [
       {
         label: 'Notification',
@@ -180,7 +180,7 @@ export const navLinks = [
   },
   {
     label: 'NAAC',
-    href: '/',
+    href: '#',
     sub: [
       {
         label: 'SSR 2nd Cycle',
@@ -203,7 +203,7 @@ export const navLinks = [
   },
   {
     label: 'Activity',
-    href: '/',
+    href: '#',
     sub: [
       { label: 'NSS', href: '/activity/nss' },
       { label: 'NCC', href: '/activity/ncc' },
@@ -220,7 +220,7 @@ export const navLinks = [
   },
   {
     label: 'Publication',
-    href: '/',
+    href: '#',
     sub: [
       {
         label: 'Examination Results',
@@ -242,7 +242,7 @@ export const navLinks = [
   },
   {
     label: 'Campus',
-    href: '/',
+    href: '#',
     sub: [
       {
         label: 'Campus Visuals',

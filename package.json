@@ -13,7 +13,8 @@
     "predeploy": "npm run build",
     "deploy": "npm run build && npx firebase-tools deploy --only hosting",
     "deploy:github": "npm run build:github && npx gh-pages -d dist",
-    "deploy:all": "npm run deploy && npm run deploy:github"
+    "deploy:all": "npm run deploy && npm run deploy:github",
+    "backup": "node scripts/backupFirestore.js"
   },
   "dependencies": {
     "dompurify": "^3.3.3",
