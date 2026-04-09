@@ -186,36 +186,16 @@
         var done = false;
         function hide() {
           if (done) return; done = true;
-          splash.classList.add('hide');
-          setTimeout(function() { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 900);
+          if (splash && splash.classList) splash.classList.add('hide');
+          setTimeout(function() { if (splash && splash.parentNode) splash.parentNode.removeChild(splash); }, 900);
         }
         window.addEventListener('load', function() { setTimeout(hide, 300); });
         setTimeout(hide, 4000);
       })();
     </script>
 
-    <!-- ══ Service Worker ══ -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          var host = window.location.hostname;
-          var isValid = host === 'localhost' || host === '127.0.0.1' ||
-                        host.includes('gncollege') || host.includes('github') || host.includes('web.app') || host.includes('firebaseapp');
-          if (!isValid) return;
-          navigator.serviceWorker.register('./sw.js')
-            .then(function(reg) {
-              reg.addEventListener('updatefound', function() {
-                var nw = reg.installing;
-                nw.addEventListener('statechange', function() {
-                  if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-                    window.location.reload();
-                  }
-                });
-              });
-            }).catch(function() {});
-        });
-      }
-    </script>
+  </body>
+</html>
 
   </body>
 </html>

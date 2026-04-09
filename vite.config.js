@@ -1,11 +1,58 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { VitePWA } from "vite-plugin-pwa";
 
-// GNC College — Optimized Vite Config v7
-// ✅ v7: Added pdfjs-dist worker support (fixes "fake worker" crash)
+// GNC College — Optimized Vite Config v8 (PWA Enabled)
 export default defineConfig({
   base: "/",
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: "autoUpdate",
+      injectRegister: "auto",
+      manifest: {
+        name: "Guru Nanak College Dhanbad",
+        short_name: "GNC Dhanbad",
+        description: "Official website of Guru Nanak College, Dhanbad",
+        theme_color: "#0f2347",
+        background_color: "#0f2347",
+        display: "standalone",
+        start_url: "/",
+        icons: [
+          {
+            src: "images/logo.webp",
+            sizes: "192x192",
+            type: "image/webp",
+          },
+          {
+            src: "images/logo.webp",
+            sizes: "512x512",
+            type: "image/webp",
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,webp}"],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*/i,
+            handler: "NetworkOnly",
+          },
+          {
+            urlPattern: /^https:\/\/firebasestorage\.googleapis\.com\/.*/i,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "firebase-storage",
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+              },
+            },
+          },
+        ],
+      },
+    }),
+  ],
 
   build: {
     outDir: "dist",
@@ -32,6 +79,7 @@ export default defineConfig({
           // Editor (lazy — only admin needs it)
           "jodit": ["jodit-react"],
           "pdf-viewer": ["react-pdf", "pdfjs-dist"],
+          "charts": ["recharts"],
         },
         // Asset naming for long-term caching
         assetFileNames : "assets/[name]-[hash][extname]",

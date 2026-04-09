@@ -2,9 +2,9 @@
 // ✅ Auth HATA diya — ab sirf Firestore
 // ✅ Auth ke liye firebase-auth.js use karo (lazy loaded)
 
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps } from "firebase/app";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore } from "firebase/firestore";
-import { getApps } from "firebase/app";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 const {
   VITE_FIREBASE_API_KEY,
@@ -13,15 +13,8 @@ const {
   VITE_FIREBASE_STORAGE_BUCKET,
   VITE_FIREBASE_MESSAGING_SENDER_ID,
   VITE_FIREBASE_APP_ID,
+  VITE_FIREBASE_MEASUREMENT_ID,
 } = import.meta.env;
-
-if (!VITE_FIREBASE_API_KEY || !VITE_FIREBASE_PROJECT_ID) {
-  console.error(
-    '%c[GNC Firebase] ⚠️  .env file missing ya Firebase config nahi mili!\n' +
-    'Project root mein ".env" file banao aur Firebase credentials daalo.',
-    'color:#f4a023; font-weight:bold; font-size:13px;'
-  );
-}
 
 const firebaseConfig = {
   apiKey:            VITE_FIREBASE_API_KEY,
@@ -30,12 +23,16 @@ const firebaseConfig = {
   storageBucket:     VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId:             VITE_FIREBASE_APP_ID,
+  measurementId:     VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
 
+// ✅ Analytics
+export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+
 // ✅ Prevent "initializeFirestore() has already been called" error during HMR
-export const db = getApps().length > 0 
+export const db = getApps().length > 1 && getApps().some(a => a.name === '[DEFAULT]')
   ? getFirestore(app) 
   : initializeFirestore(app, {
       localCache: persistentLocalCache({
@@ -43,5 +40,4 @@ export const db = getApps().length > 0
       }),
     });
 
-// ⚠️  auth yahan export NAHI hoga
-// AdminLogin ke liye: import { auth } from './firebase-auth'
+export { logEvent };
