@@ -7,7 +7,7 @@ export default function DashboardTab({ notices, events, faculties, placements, p
       <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
         <div style={{ flex: '1 1 300px' }}>
           <h2 style={{ margin: 0, color: NAVY, fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 900, letterSpacing: '-1px' }}>📊 Global Dashboard</h2>
-          <p style={{ margin: '4px 0 0', color: T.t3, fontSize: 14, fontWeight: 600 }}>Real-time website ecosystem metrics aur campus activity summary.</p>
+          <p style={{ margin: '4px 0 0', color: T.t3, fontSize: 14, fontWeight: 600 }}>Real-time website ecosystem metrics and campus activity summary.</p>
         </div>
         <div style={{ display: 'flex', gap: 12, width: '100%', maxWidth: 'none', justifyContent: 'flex-start' }}>
             <button className="abtn abtn-navy" style={{ borderRadius: 12, height: 42, background: NAVY, color: '#fff', border: 'none', width: 'auto', flex: 1, maxWidth: 300, fontSize: 13 }} onClick={() => toast.success('Gathering news... PDF Newsletter generating!')}>

@@ -58,7 +58,7 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
 
     // ✅ Key Check
     if (!apiKey) {
-      toast.error('ImgBB API key missing! Admin → Site Settings → ImgBB API Key set karein.');
+      toast.error('ImgBB API key missing! Go to Admin \u2192 Site Settings \u2192 Set ImgBB API Key.');
       e.target.value = '';
       return;
     }
@@ -97,7 +97,7 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
         toast.error('Upload Failed: ' + (data.error?.message || 'Unknown error'));
       }
     } catch (error) {
-      toast.error('Network Error! Internet connection check karein.');
+      toast.error('Network Error! Please check your internet connection.');
     } finally {
       setUploading(false);
       setProg(0);
@@ -129,7 +129,7 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
           📸 Campus Gallery Manager
         </h2>
         <p style={{ color: '#94a3b8', fontSize: 13, margin: 0 }}>
-          Campus ki photos caption ke sath upload karein.
+          Upload campus photos with captions.
         </p>
         {/* ✅ Dynamic Warning */}
         {!apiKey && (

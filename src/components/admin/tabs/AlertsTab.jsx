@@ -46,7 +46,7 @@ export default function AlertsTab({ alerts, logAct, getSectionLog, softDelete, b
     <div className="fade-up">
       <div style={{ marginBottom: 32 }}>
         <h2 style={{ margin: 0, color: NAVY, fontSize: 28, fontWeight: 900, letterSpacing: '-1px' }}>🚨 Flash Alert Manager</h2>
-        <p style={{ margin: '4px 0 0', color: T.t3, fontSize: 15, fontWeight: 600 }}>Emergency scrolling banner aur site-wide notifications control centre.</p>
+        <p style={{ margin: '4px 0 0', color: T.t3, fontSize: 15, fontWeight: 600 }}>Emergency scrolling banner and site-wide notifications control center.</p>
       </div>
 
       <div className="card-gold" style={{ border: `1.5px solid ${GOLD}44`, boxShadow: `0 20px 40px ${GOLD}10` }}>

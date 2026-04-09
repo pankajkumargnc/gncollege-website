@@ -141,7 +141,7 @@ export default function EventsPage({ headless }) {
         <div className="kinetic-bg" />
         <div className="hero-content-wrapper">
           <h1 className="hero-title">🏛️ Campus Events</h1>
-          <p className="hero-subtitle">Workshops, seminars, cultural fests aur khel-kud — saari activities ek jagah</p>
+          <p className="hero-subtitle">Workshops, seminars, cultural fests, and sports — all activities in one place</p>
         </div>
       </header>
       )}
@@ -185,7 +185,7 @@ export default function EventsPage({ headless }) {
               <div style={{ flex:1, minWidth:200, position:'relative' }}>
                 <span style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', opacity:.4, fontSize:16, pointerEvents:'none' }}>🔍</span>
                 <label htmlFor="event-search" className="sr-only">Search events</label>
-                <input id="event-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Event search karo..."
+                <input id="event-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search events..."
                   style={{ width:'100%', padding:'10px 14px 10px 38px', border:'2px solid #e2e8f0', borderRadius:10, fontSize:14, fontFamily:'inherit', background:'#f8fafc', outline:'none', boxSizing:'border-box' }} />
               </div>
               <span style={{ background:'#f0f4ff', color:navy, borderRadius:20, padding:'5px 14px', fontSize:12.5, fontWeight:800 }}>
@@ -202,9 +202,9 @@ export default function EventsPage({ headless }) {
             <div style={{ width:80, height:4, background:`linear-gradient(90deg,${gold},#fde68a)`, borderRadius:2, marginBottom:35 }} />
 
             {loading ? (
-              <div style={{ textAlign:'center', padding:'60px 20px' }}>⏳ Events load ho rahe hain...</div>
+              <div style={{ textAlign:'center', padding:'60px 20px' }}>⏳ Loading events...</div>
             ) : filtered.length === 0 ? (
-              <div style={{ textAlign:'center', padding:'50px 20px', color:'#94a3b8', fontSize:15, fontWeight:600 }}>🎭 Koi event nahi mila</div>
+              <div style={{ textAlign:'center', padding:'50px 20px', color:'#94a3b8', fontSize:15, fontWeight:600 }}>🎭 No events found</div>
             ) : (
               <>
                 {Object.entries(grouped).map(([month, items]) => (

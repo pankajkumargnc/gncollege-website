@@ -63,8 +63,8 @@ export default function SliderTab({ sliderSlides, logAct, getSectionLog, softDel
 
   return (
     <div className="fade-up">
-      <p className="asec">🖼️ Hero Slider</p>
-      <p className="asub">Homepage ka main banner slider manage karein</p>
+      <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>🖼️ Hero Slider</p>
+      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage the main banner slider on the homepage.</p>
 
       <div className="card-gold">
         <div className="actitle">{editItem ? '✏️ Edit Slide' : '➕ Add Slide'}</div>
@@ -142,7 +142,7 @@ export default function SliderTab({ sliderSlides, logAct, getSectionLog, softDel
 
       <div className="card">
         <div className="actitle">
-          All Slides ({sorted.length}) <span style={{ fontSize: 12, color: T.t3, fontWeight: 600 }}>— order se arrange hain</span>
+          All Slides ({sorted.length}) <span style={{ fontSize: 12, color: T.t3, fontWeight: 600 }}>— arranged by order</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>
           {sorted.map((s, idx) => (
@@ -189,7 +189,7 @@ export default function SliderTab({ sliderSlides, logAct, getSectionLog, softDel
           ))}
         </div>
         {sorted.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '30px 0', color: T.t4 }}>Koi slide nahi hai</div>
+          <div style={{ textAlign: 'center', padding: '30px 0', color: T.t4 }}>No slides found</div>
         )}
       </div>
 

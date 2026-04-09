@@ -124,7 +124,7 @@ export default function ContactTab() {
       </button>
       {saved && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#d1fae5', color: '#065f46', padding: '8px 16px', borderRadius: 9, fontSize: 13, fontWeight: 700 }}>
-          ✅ Saved! Contact page auto-update ho gaya.
+          ✅ Saved! Contact page updated automatically.
         </div>
       )}
     </div>
@@ -138,7 +138,7 @@ export default function ContactTab() {
   return (
     <div className="fade-up" style={{ fontFamily: "'DM Sans','Plus Jakarta Sans',sans-serif", maxWidth: 1000 }}>
       <p className="asec">📞 Contact Settings</p>
-      <p className="asub">Campus addresses aur contact directory — Contact page pe auto-update hoga</p>
+      <p className="asub">Campus addresses and contact directory — will automatically update on the Contact page</p>
 
       {/* ── Campus Contact ── */}
       <div style={{ background: '#fff', border: '1.5px solid #f1f5f9', borderRadius: 14, padding: 20, marginBottom: 16 }}>
@@ -175,7 +175,7 @@ export default function ContactTab() {
         <SH txt="📋 Contact Directory (Officials list)" />
         <p style={{ fontSize: 12.5, color: '#94a3b8', margin: '0 0 16px' }}>
           Firebase path: <code style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: 4, fontSize: 11.5 }}>contactDirectory/{`{docId}`}</code>
-          &nbsp;— Contact page pe yahi list dikhti hai
+          &nbsp;— this list is displayed on the Contact page
         </p>
 
         {directory.map((entry, i) => (

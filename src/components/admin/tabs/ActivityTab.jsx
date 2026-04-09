@@ -4,8 +4,8 @@ import { T, NAVY, GOLD } from '../AdminShared';
 export default function ActivityTab({ actLog }) {
   return (
     <div className="fade-up">
-      <p className="asec">📋 Activity Log</p>
-      <p className="asub">Har admin action ka real-time log</p>
+      <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>📋 Activity Log</p>
+      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Real-time log of every administrator action.</p>
 
       <div className="card">
         <div className="actitle">
@@ -20,7 +20,7 @@ export default function ActivityTab({ actLog }) {
           <div style={{ textAlign: 'center', padding: '50px 0', color: T.t4 }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>📋</div>
             <div style={{ fontWeight: 700, marginBottom: 6, color: T.t2 }}>No activity yet</div>
-            <div style={{ fontSize: 13, color: T.t3 }}>Admin actions yahan show honge</div>
+            <div style={{ fontSize: 13, color: T.t3 }}>Admin actions will appear here</div>
           </div>
         )}
 

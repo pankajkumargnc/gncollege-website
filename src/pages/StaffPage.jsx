@@ -123,12 +123,12 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
           <div style={{ textAlign: 'center', padding: 'clamp(40px,6vw,64px) 20px', background: '#fff', borderRadius: 20, border: '2px dashed #e2e8f0' }}>
             <div style={{ fontSize: 'clamp(40px,8vw,52px)', marginBottom: 16 }}>👨‍🏫</div>
             <h3 style={{ color: N, fontWeight: 800, margin: '0 0 8px', fontSize: 'clamp(16px,2.5vw,20px)' }}>
-              Koi data nahi mila
+              No data found
             </h3>
             <p style={{ color: '#64748b', margin: '0 0 24px', fontSize: 'clamp(13px,1.8vw,15px)', lineHeight: 1.7, maxWidth: 400, marginLeft: 'auto', marginRight: 'auto' }}>
               {searchTerm
-                ? `"${searchTerm}" ke liye koi result nahi. Search clear karein.`
-                : `Admin Panel → Faculty & Staff → ${label} mein staff add karein`}
+                ? `No results found for "${searchTerm}". Please clear the search.`
+                : `Add staff via the Admin Panel → Faculty & Staff → ${label}`}
             </p>
             {searchTerm && (
               <button onClick={() => setSearchTerm('')}

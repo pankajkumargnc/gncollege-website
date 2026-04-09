@@ -84,8 +84,8 @@ export default function FacultyTab({ faculties, logAct, getSectionLog, softDelet
 
   return (
     <div className="fade-up">
-      <p className="asec">👨‍🏫 Faculty &amp; Staff</p>
-      <p className="asub">Teaching and non-teaching staff manage karein</p>
+      <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>👨‍🏫 Faculty &amp; Staff</p>
+      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage teaching and non-teaching staff.</p>
 
       <div className="card-gold">
         <div className="actitle">{editItem ? '✏️ Edit Staff' : '➕ Add Staff'}</div>
@@ -172,7 +172,7 @@ export default function FacultyTab({ faculties, logAct, getSectionLog, softDelet
         <div className="actitle">Staff ({filtered.length})</div>
         {renderList(teaching, 'Teaching Staff')}
         {renderList(nonTeaching, 'Non-Teaching Staff')}
-        {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '30px 0', color: T.t4 }}>Koi staff nahi mila</div>}
+        {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '30px 0', color: T.t4 }}>No staff found</div>}
       </div>
 
       <MiniLog logs={getSectionLog('faculties')} />

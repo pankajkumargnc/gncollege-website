@@ -17,7 +17,7 @@ const HERITAGE_DATA = {
       highlight: true
     },
     {
-      title: 'College ka Itihaas',
+      title: 'College History',
       icon: '🏛️',
       content: 'Guru Nanak College was established in 1970 by the Sikh community of Dhanbad. It is a Sikh Minority institution affiliated with B.B.M.K. University (formerly VBU). The college mission is to provide quality education to all, regardless of caste, creed, or religion.',
     },
@@ -32,8 +32,8 @@ const HERITAGE_DATA = {
       content: null,
       values: [
         { name: 'ਨਾਮ ਜਪੋ (Naam Japo)', desc: 'Spiritual awareness and meditation — fostering moral values among students' },
-        { name: 'ਕਿਰਤ ਕਰੋ (Kirat Karo)', desc: 'Honest hard work — practical education aur skill development' },
-        { name: 'ਵੰਡ ਛਕੋ (Vand Chhako)', desc: 'Sharing with others — community service aur social responsibility' },
+        { name: 'ਕਿਰਤ ਕਰੋ (Kirat Karo)', desc: 'Honest hard work — practical education and skill development' },
+        { name: 'ਵੰਡ ਛਕੋ (Vand Chhako)', desc: 'Sharing with others — community service and social responsibility' },
         { name: 'ਸਰਬੱਤ ਦਾ ਭਲਾ (Sarbat Da Bhala)', desc: 'Welfare of all — inclusive education regardless of background' },
       ]
     },

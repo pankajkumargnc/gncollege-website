@@ -73,7 +73,7 @@ export default function DocumentsTab({
   return (
     <div className="fade-up">
       <p className="asec">📁 Documents Archive</p>
-      <p className="asub">College PDFs, reports aur official documents manage karein</p>
+      <p className="asub">Manage college PDFs, reports, and official documents</p>
 
       <div className="card-gold">
         <div className="actitle">{editItem ? '✏️ Edit Document' : '➕ Upload Document'}</div>
@@ -201,7 +201,7 @@ export default function DocumentsTab({
           </div>
         ))}
         {filtered.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '30px 0', color: T.t4 }}>Koi document nahi mila</div>
+          <div style={{ textAlign: 'center', padding: '30px 0', color: T.t4 }}>No documents found</div>
         )}
       </div>
 

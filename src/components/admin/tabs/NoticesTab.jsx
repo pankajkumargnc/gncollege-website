@@ -30,8 +30,8 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
 
   return (
     <div className="fade-up">
-      <p className="asec">📢 Notice Board</p>
-      <p className="asub">Official notices publish aur manage karein</p>
+      <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>📢 Notice Board</p>
+      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Publish and manage official notices.</p>
 
       <div className="card-gold">
         <div className="actitle">{editNotice ? '✏️ Edit Notice' : '➕ Publish Notice'}</div>
@@ -49,7 +49,7 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
             </div>
             <div style={{ gridColumn: '1/-1' }}>
   <MediaPicker 
-    label="Link (Drive PDF ya URL)" 
+    label="Link (Drive PDF or URL)" 
     value={noticeData.link || ''} 
     onChange={url => setNoticeData(d => ({ ...d, link: url }))} 
     type="pdf" 
@@ -91,7 +91,7 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
             </div>
           </div>
         ))}
-        {filtered.length === 0 && <div style={{ textAlign:'center', padding:'30px 0', color: T.t4 }}>Koi notice nahi mila</div>}
+        {filtered.length === 0 && <div style={{ textAlign:'center', padding:'30px 0', color: T.t4 }}>No notices found</div>}
       </div>
       <MiniLog logs={getSectionLog('notices')} />
     </div>

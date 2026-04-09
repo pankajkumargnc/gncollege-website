@@ -148,7 +148,7 @@ export const BulkBar = ({ count, onDelete, onClear }) => count === 0 ? null : (
 
 export const joditCfg = {
   readonly: false,
-  placeholder: 'Content likhein…',
+  placeholder: 'Write content here...',
   height: 420, minHeight: 300, allowResizeY: true, allowResizeX: false,
   theme: 'default', toolbarAdaptive: false, toolbarSticky: true,
   showCharsCounter: false, showWordsCounter: false, showXPathInStatusbar: false,

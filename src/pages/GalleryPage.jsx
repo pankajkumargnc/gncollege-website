@@ -197,7 +197,7 @@ export default function GalleryPage({ gallery: galleryProp, headless }) {
             📸 Photo Gallery
           </h1>
           <p style={{ color:'rgba(255,255,255,.65)', fontSize:15, maxWidth:520, margin:'0 auto 24px' }}>
-            Campus life, events, achievements aur college ke yaadgar pal
+            Memorable moments of campus life, events, and achievements
           </p>
           {/* Stats */}
           <div style={{ display:'flex', justifyContent:'center', gap:24, flexWrap:'wrap' }}>
@@ -239,7 +239,7 @@ export default function GalleryPage({ gallery: galleryProp, headless }) {
         {loading && (
           <div style={{ textAlign:'center', padding:'60px 20px' }}>
             <div style={{ width:44, height:44, border:`4px solid ${G}`, borderTop:'4px solid transparent', borderRadius:'50%', animation:'spin .8s linear infinite', margin:'0 auto 14px' }} />
-            <p style={{ color:'#94a3b8', fontWeight:600 }}>Gallery load ho rahi hai...</p>
+            <p style={{ color:'#94a3b8', fontWeight:600 }}>Loading gallery...</p>
             <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
           </div>
         )}
@@ -290,12 +290,12 @@ export default function GalleryPage({ gallery: galleryProp, headless }) {
           <div style={{ textAlign:'center', background:'#fff', padding:'60px 20px', borderRadius:16, border:'1px dashed #e2e8f0', maxWidth:500, margin:'0 auto' }}>
             <div style={{ fontSize:48, marginBottom:14 }}>📸</div>
             <h3 style={{ color:N, margin:'0 0 8px', fontWeight:800 }}>
-              {filter === 'All Moments' ? 'Gallery Empty' : `${filter} mein koi photo nahi`}
+              {filter === 'All Moments' ? 'Gallery Empty' : `No photos found in ${filter}`}
             </h3>
             <p style={{ color:'#94a3b8', fontSize:13 }}>
               {filter === 'All Moments'
-                ? 'Admin Panel → Gallery tab se photos upload karein'
-                : 'Doosri category select karein ya Admin Panel se photos add karein'
+                ? 'Upload photos via the Gallery tab in the Admin Panel'
+                : 'Select another category or add photos via the Admin Panel'
               }
             </p>
             {filter !== 'All Moments' && (

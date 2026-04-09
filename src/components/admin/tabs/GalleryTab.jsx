@@ -55,7 +55,7 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
     if (!files.length) return;
     setLoading(true); setProgress(0);
     const key = window.GN_IMGBB_KEY;
-    if (!key) { toast.error('Settings tab mein ImgBB API Key add karein!'); setLoading(false); return; }
+    if (!key) { toast.error('Add ImgBB API Key in the Settings tab!'); setLoading(false); return; }
 
     let count = 0;
     for (const file of files) {
@@ -97,8 +97,8 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
     <div className="fade-up">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
         <div>
-          <p className="asec">📸 Photo Gallery</p>
-          <p className="asub">College photos aur albums manage karein</p>
+          <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>📸 Photo Gallery</p>
+          <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage college photos and albums.</p>
         </div>
         <button className="abtn abtn-navy" style={{ marginBottom: 20 }} onClick={() => setIsBulk(!isBulk)}>
           {isBulk ? '⬅️ Single Upload' : '🚀 Bulk Upload'}
@@ -114,7 +114,7 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
           <div style={{ fontSize: 50, marginBottom: 16 }}>📂</div>
           <h3 style={{ color: NAVY, fontWeight: 900, margin: '0 0 10px' }}>Bulk Image Dropzone</h3>
           <p style={{ color: T.t3, fontSize: 13, marginBottom: 24 }}>
-            Multiple images ko yahan drag karein ya browse pe click karein.<br/>
+            Drag multiple images here or click to browse.<br/>
             Selected Category: <strong>{formData.cat}</strong>
           </p>
           
@@ -247,7 +247,7 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
           ))
         )}
 
-        {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '30px 0', color: T.t4 }}>Koi photo nahi mila</div>}
+        {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '30px 0', color: T.t4 }}>No photos found</div>}
       </div>
 
       <MiniLog logs={getSectionLog('gallery')} />

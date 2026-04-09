@@ -168,7 +168,7 @@ export default function NotFoundPage() {
           marginBottom: 32,
         }}>
           <div style={{ fontSize: 'clamp(16px,2.5vw,20px)', fontWeight: 700, color: '#f1f5f9', marginBottom: 12, lineHeight: 1.5 }}>
-            Yeh page exist nahi karta
+            This page does not exist
           </div>
           <div style={{ fontSize: 'clamp(13px,1.5vw,15px)', color: 'rgba(255,255,255,0.45)', lineHeight: 1.8, marginBottom: 28 }}>
             The page you're looking for may have been moved, deleted, or the URL might be incorrect.

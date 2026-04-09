@@ -55,8 +55,8 @@ export default function SettingsTab({ logAct }) {
 
   return (
     <div className="fade-up">
-      <p className="asec">⚙️ Site Settings</p>
-      <p className="asub">College info, social links, maintenance mode</p>
+      <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>⚙️ Site Settings</p>
+      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage college information, social links, and system status.</p>
 
       <form onSubmit={saveSite}>
 
@@ -111,12 +111,12 @@ export default function SettingsTab({ logAct }) {
             borderRadius: 10, padding: '10px 14px', margin: '12px 20px',
             fontSize: 12.5, color: '#92400e', lineHeight: 1.7
           }}>
-            <strong>ImgBB Free API Key kaise banayein:</strong><br />
-            1. <a href="https://imgbb.com/signup" target="_blank" rel="noreferrer"
-              style={{ color: '#b45309' }}>imgbb.com/signup</a> pe Free account banayein<br />
-            2. <a href="https://api.imgbb.com/" target="_blank" rel="noreferrer"
-              style={{ color: '#b45309' }}>api.imgbb.com</a> → apni API key copy karein<br />
-            3. Neeche paste karein aur Save karein — Lifetime Free, no credit card!
+            <strong>How to create a Free ImgBB API Key:</strong><br />
+            1. Create a free account at <a href="https://imgbb.com/signup" target="_blank" rel="noreferrer"
+              style={{ color: '#b45309' }}>imgbb.com/signup</a><br />
+            2. Go to <a href="https://api.imgbb.com/" target="_blank" rel="noreferrer"
+              style={{ color: '#b45309' }}>api.imgbb.com</a> and copy your API key<br />
+            3. Paste it below and Save — Lifetime Free, no credit card required!
           </div>
           <div className="settings-row">
             <label className="alabel" style={{ minWidth: 140, margin: 0 }}>ImgBB API Key</label>
@@ -130,7 +130,7 @@ export default function SettingsTab({ logAct }) {
               fontSize: 12, color: '#065f46', background: '#d1fae5',
               padding: '6px 12px 6px 20px', display: 'inline-flex', alignItems: 'center', gap: 6
             }}>
-              ✅ ImgBB key set — saare upload tabs pe kaam karega
+              \u2705 ImgBB key set \u2014 will work on all upload tabs
             </div>
           )}
         </div>

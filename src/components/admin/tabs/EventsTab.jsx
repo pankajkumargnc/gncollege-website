@@ -106,10 +106,8 @@ export default function EventsTab({
 
   return (
     <div className="fade-up">
-      <p className="asec">🏆 Events Manager</p>
-      <p className="asub">
-        Campus events, competitions aur seminars manage karein
-      </p>
+      <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>🏆 Events Manager</p>
+      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage campus events, competitions, and seminars.</p>
 
       <div className="card-gold">
         <div className="actitle">
@@ -233,7 +231,7 @@ export default function EventsTab({
                   onChange={(e) =>
                     setFormData((d) => ({ ...d, description: e.target.value }))
                   }
-                  placeholder="Event ke baare mein detail..."
+                  placeholder="Event details..."
                 />
               </div>
               <div style={{ marginBottom: 20 }}>
@@ -450,7 +448,7 @@ export default function EventsTab({
         ))}
         {displayedEvents.length === 0 && (
           <div style={{ textAlign: "center", padding: "30px 0", color: T.t4 }}>
-            Iss category mein koi event nahi mila
+            No events found in this category
           </div>
         )}
       </div>

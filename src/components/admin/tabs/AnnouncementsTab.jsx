@@ -41,7 +41,7 @@ export default function AnnouncementsTab({ announcements, logAct, getSectionLog,
   return (
     <div className="fade-up">
       <p className="asec">📣 News &amp; Announcements</p>
-      <p className="asub">College news aur announcements publish karein</p>
+      <p className="asub">Publish college news and announcements</p>
 
       <div className="card-gold">
         <div className="actitle">{editItem ? '✏️ Edit News' : '➕ Publish News'}</div>
@@ -68,7 +68,7 @@ export default function AnnouncementsTab({ announcements, logAct, getSectionLog,
 
             <div style={{ gridColumn: '1/-1' }}>
               <MediaPicker
-                label="Link (PDF ya URL — optional)"
+                label="Link (PDF or URL — optional)"
                 value={formData.link || ''}
                 onChange={url => setFormData(d => ({ ...d, link: url }))}
                 type="pdf" compact
@@ -120,7 +120,7 @@ export default function AnnouncementsTab({ announcements, logAct, getSectionLog,
             </div>
           </div>
         ))}
-        {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '30px 0', color: T.t4 }}>Koi news nahi mili</div>}
+        {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '30px 0', color: T.t4 }}>No news found</div>}
       </div>
 
       <MiniLog logs={getSectionLog('announcements')} />

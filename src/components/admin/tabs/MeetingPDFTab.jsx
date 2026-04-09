@@ -49,7 +49,7 @@ export default function MeetingPDFTab({
   const save = async e => {
     e.preventDefault();
     if (!form.title || !form.date || !form.pdfUrl) {
-      toast.error('Title, Date aur PDF Link zaroori hai!');
+      toast.error('Title, Date, and PDF Link are required!');
       return;
     }
     setLoading(true);
@@ -79,7 +79,7 @@ export default function MeetingPDFTab({
   };
 
   const remove = async (id, name) => {
-    if (!window.confirm(`"${name}" delete karein?`)) return;
+    if (!window.confirm(`Delete "${name}"?`)) return;
     await deleteDoc(doc(db, collectionName, id));
     toast.success('Deleted!');
     logAct?.('delete', `Deleted: ${name}`, collectionName);
@@ -133,12 +133,12 @@ export default function MeetingPDFTab({
               />
             </div>
             <div style={{ gridColumn: 'span 2' }}>
-              <label className="alabel">PDF Link * (Google Drive ya Direct URL)</label>
+              <label className="alabel">PDF Link * (Google Drive or Direct URL)</label>
               <input
                 className="ainp"
                 value={form.pdfUrl}
                 onChange={e => setForm(f => ({ ...f, pdfUrl: e.target.value }))}
-                placeholder="https://drive.google.com/file/d/... ya direct PDF URL"
+                placeholder="https://drive.google.com/file/d/... or direct PDF URL"
                 required
               />
               {form.pdfUrl && (
@@ -186,8 +186,8 @@ export default function MeetingPDFTab({
 
       {/* ── Info Banner ── */}
       <div style={{ background: '#fffbeb', border: '1.5px solid #f59e0b', borderRadius: 12, padding: '12px 18px', marginBottom: 20, fontSize: 13, color: '#92400e' }}>
-        💡 <strong>Kaise use karein:</strong> Har meeting ka PDF Google Drive mein upload karein → Share → Anyone with link → Copy link paste karein yahan.
-        Ye meetings automatically <code style={{ background: '#fef3c7', padding: '1px 4px', borderRadius: 4 }}>{publicPath}</code> page pe show honge.
+        💡 <strong>How to use:</strong> Upload the meeting PDF to Google Drive → Share → Anyone with link → Paste the link here.
+        These meetings will automatically show on the <code style={{ background: '#fef3c7', padding: '1px 4px', borderRadius: 4 }}>{publicPath}</code> page.
       </div>
 
       {/* ── List ── */}
@@ -202,8 +202,8 @@ export default function MeetingPDFTab({
         {filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>{icon}</div>
-            <div style={{ fontWeight: 700, marginBottom: 8 }}>Koi meeting nahi mili</div>
-            <div style={{ fontSize: 13 }}>{search ? 'Search clear karein' : 'Upar form se pehli meeting add karein'}</div>
+            <div style={{ fontWeight: 700, marginBottom: 8 }}>No meetings found</div>
+            <div style={{ fontSize: 13 }}>{search ? 'Clear search' : 'Add your first meeting using the form above'}</div>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

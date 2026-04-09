@@ -32,8 +32,8 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
 
   const applyTemplate = (t) => {
     let content = '';
-    if (t === 'notice') content = `<div class="premium-notice-card"><h2>📢 Important Notice</h2><p>Priya chhatron, yahan notice ka content likhein...</p><ul><li>Point 1</li><li>Point 2</li></ul><p><b>Adesh anusar,</b><br/>Principal</p></div>`;
-    if (t === 'event') content = `<section class="event-report"><h1>🏆 Event Report: [Title]</h1><p>Date: ${new Date().toLocaleDateString()}</p><div class="event-grid"><img src="PLACEHOLDER" alt="Event" /><div><h3>Key Highlights:</h3><p>Event ka poora vivaran yahan likhein...</p></div></div>[GALLERY:all]</section>`;
+    if (t === 'notice') content = `<div class="premium-notice-card"><h2>📢 Important Notice</h2><p>Dear students, please enter the notice content here...</p><ul><li>Point 1</li><li>Point 2</li></ul><p><b>By order,</b><br/>Principal</p></div>`;
+    if (t === 'event') content = `<section class="event-report"><h1>🏆 Event Report: [Title]</h1><p>Date: ${new Date().toLocaleDateString()}</p><div class="event-grid"><img src="PLACEHOLDER" alt="Event" /><div><h3>Key Highlights:</h3><p>Enter the full event report here...</p></div></div>[GALLERY:all]</section>`;
     if (t === 'iqac') content = `<div class="iqac-page"><h1>📄 IQAC Meeting Minutes</h1><div class="iqac-meta"><span>Date: ${new Date().toLocaleDateString()}</span></div><table class="premium-table"><tr><th>S.No</th><th>Agenda</th><th>Decision Taken</th></tr><tr><td>1</td><td>Budget Approval</td><td>Approved</td></tr></table></div>`;
     
     setFormData({ ...formData, content, template: t });
@@ -60,7 +60,7 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
 
   const save = async (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.slug) return toast.error("Title aur Slug (URL) zaroori hai!");
+    if (!formData.title || !formData.slug) return toast.error("Title and Slug (URL) are required!");
     
     setLoading(true);
     try {
@@ -143,7 +143,7 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
 
   // 🗑️ ENHANCED DELETE: Also removes associated Navbar links
   const handleDeletePage = async (page) => {
-    if (!window.confirm(`Kya aap "${page.title}" ko delete karna chahte hain? Isse Navbar se link bhi hat jayega.`)) return;
+    if (!window.confirm(`Are you sure you want to delete "${page.title}"? This will also remove the link from the Navbar.`)) return;
     try {
       const navRef = collection(db, 'navigation');
       const navSnap = await getDocs(navRef);
@@ -435,7 +435,7 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
               <div style={{ textAlign: 'center', padding: '40px 0', color: T.t4 }}>
                 <div style={{ fontSize: 40, marginBottom: 10 }}>📭</div>
                 <h3 style={{ margin: '0 0 5px', color: NAVY }}>No Pages Found</h3>
-                <p style={{ margin: 0, fontSize: 13 }}>'Create New Page' tab par jaakar apna pehla page banayein.</p>
+                <p style={{ margin: 0, fontSize: 13 }}>Go to the 'Create New Page' tab to build your first page.</p>
               </div>
             )}
           </div>

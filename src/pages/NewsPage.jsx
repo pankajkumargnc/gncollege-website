@@ -102,7 +102,7 @@ export default function NewsPage() {
         <div className="hero-overlay" />
         <div className="hero-content anim-fade-in">
           <h1 className="hero-title">📣 News & Updates</h1>
-          <p className="hero-subtitle">College ke latest achievements, academic news aur recent updates yahan dekhein</p>
+          <p className="hero-subtitle">Check out the latest college achievements, academic news, and recent updates</p>
         </div>
       </header>
 
@@ -131,7 +131,7 @@ export default function NewsPage() {
               <div style={{ flex:1, minWidth:200, position:'relative' }}>
                 <span style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', opacity:.4, fontSize:16, pointerEvents:'none' }}>🔍</span>
                 <label htmlFor="news-search" className="sr-only">Search news</label>
-                <input id="news-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="News search karo..."
+                <input id="news-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search news..."
                   style={{ width:'100%', padding:'10px 14px 10px 38px', border:'2px solid #e2e8f0', borderRadius:10, fontSize:14, fontFamily:'inherit', background:'#f8fafc', outline:'none', boxSizing:'border-box', transition:'border-color .2s' }}
                   onFocus={e => e.target.style.borderColor = gold}
                   onBlur={e  => e.target.style.borderColor = '#e2e8f0'} />
@@ -174,13 +174,13 @@ export default function NewsPage() {
             {loading ? (
               <div style={{ textAlign:'center', padding:'60px 20px' }}>
                 <div style={{ width:40, height:40, border:`4px solid ${gold}`, borderTop:'4px solid transparent', borderRadius:'50%', animation:'spin .8s linear infinite', margin:'0 auto 14px' }} />
-                <p style={{ color:'#718096', fontWeight:600 }}>News load ho rahi hain...</p>
+                <p style={{ color:'#718096', fontWeight:600 }}>Loading news...</p>
               </div>
             ) : filtered.length === 0 ? (
               <div style={{ textAlign:'center', padding:'50px 20px' }}>
                 <div style={{ fontSize:44, marginBottom:10 }}>🔍</div>
-                <h3 style={{ color:navy, fontWeight:800, margin:'0 0 6px' }}>Koi news nahi mili</h3>
-                <p style={{ color:'#718096', fontSize:13.5 }}>Filter ya search change karo</p>
+                <h3 style={{ color:navy, fontWeight:800, margin:'0 0 6px' }}>No news found</h3>
+                <p style={{ color:'#718096', fontSize:13.5 }}>Try changing the filter or search term</p>
               </div>
             ) : view === 'list' ? (
               Object.entries(grouped).map(([monthYear, items]) => (

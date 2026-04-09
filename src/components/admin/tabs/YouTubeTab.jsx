@@ -43,8 +43,8 @@ export default function YouTubeTab({ logAct }) {
 
   return (
     <div className="fade-up">
-      <p className="asec">▶️ YouTube Manager</p>
-      <p className="asub">Auto-fetch latest videos → /video-gallery page</p>
+      <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>▶️ YouTube Manager</p>
+      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Auto-fetch latest videos for the video gallery.</p>
 
       <div className="card-navy">
         <div className="actitle">🔑 YouTube API Configuration</div>
@@ -57,8 +57,8 @@ export default function YouTubeTab({ logAct }) {
           <div style={{ fontWeight: 800, color: NAVY, marginBottom: 8 }}>📋 3 Steps Setup:</div>
           <ol style={{ margin: 0, padding: '0 0 0 18px', fontSize: 13, color: T.t2, lineHeight: 2 }}>
             <li>Google Cloud Console → Enable <strong>YouTube Data API v3</strong></li>
-            <li>Credentials → Create API Key → Copy karo</li>
-            <li>YouTube Channel ID copy karo (URL se: youtube.com/channel/<strong>UCxxxxxx</strong>)</li>
+            <li>Credentials → Create API Key → Copy it</li>
+            <li>Copy your YouTube Channel ID (from URL: youtube.com/channel/<strong>UCxxxxxx</strong>)</li>
           </ol>
         </div>
 
@@ -78,15 +78,15 @@ export default function YouTubeTab({ logAct }) {
             </div>
             <div style={{ gridColumn: '1/-1' }}>
               <label className="alabel">
-                Manual Video IDs (optional — API key ke bina bhi kaam karega)
+                Manual Video IDs (optional — works without API key)
               </label>
               <textarea className="ainp" rows={3}
                 value={ytCfg.videoIds || ''}
                 onChange={e => setYtCfg(d => ({ ...d, videoIds: e.target.value }))}
-                placeholder={"dQw4w9WgXcQ\nabc123xyz\n...ek line mein ek Video ID"}
+                placeholder={"dQw4w9WgXcQ\nabc123xyz\n...one Video ID per line"}
               />
               <p style={{ fontSize: 11, color: '#94a3b8', margin: '4px 0 0' }}>
-                💡 YouTube video URL mein <code>watch?v=</code> ke baad wala ID copy karo. Homepage pe yahi videos dikhenge.
+                💡 Copy the ID found after <code>watch?v=</code> in a YouTube URL. These videos will show on the Homepage.
               </p>
             </div>
             <div>

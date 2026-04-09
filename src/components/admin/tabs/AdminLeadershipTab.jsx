@@ -523,7 +523,7 @@ const AdminLeadershipTab = () => {
                   driveFolderId={import.meta.env.VITE_DRIVE_IMAGES_FOLDER}
                   compact={true}
                 />
-                <p style={S.tip}>Google Drive se select karein ya direct link paste karein</p>
+                <p style={S.tip}>Select from Google Drive or paste a direct link</p>
               </div>
 
               {/* Note / Achievement */}

@@ -39,8 +39,8 @@ export default function PlacementsTab({ placements, logAct, getSectionLog, softD
 
   return (
     <div className="fade-up">
-      <p className="asec">🎓 Alumni Wall</p>
-      <p className="asub">Placed students aur alumni success stories manage karein</p>
+      <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>🎓 Alumni Wall</p>
+      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage placed students and alumni success stories.</p>
 
       <div className="card-gold">
         <div className="actitle">{editItem ? '✏️ Edit Alumni' : '➕ Add Alumni'}</div>
@@ -76,7 +76,7 @@ export default function PlacementsTab({ placements, logAct, getSectionLog, softD
 
           <div style={{ marginBottom: 14 }}>
             <label className="alabel">Testimonial / Quote</label>
-            <textarea className="ainp" rows={2} value={formData.testimonial || ''} onChange={e => setFormData(d => ({ ...d, testimonial: e.target.value }))} placeholder="GNC ne meri life badal di..." />
+            <textarea className="ainp" rows={2} value={formData.testimonial || ''} onChange={e => setFormData(d => ({ ...d, testimonial: e.target.value }))} placeholder="E.g. GNC changed my life..." />
           </div>
 
           <div style={{ marginBottom: 20 }}>
@@ -128,7 +128,7 @@ export default function PlacementsTab({ placements, logAct, getSectionLog, softD
             </div>
           </div>
         ))}
-        {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '30px 0', color: T.t4 }}>Koi alumni nahi mila</div>}
+        {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '30px 0', color: T.t4 }}>No alumni found</div>}
       </div>
 
       <MiniLog logs={getSectionLog('placements')} />

@@ -150,7 +150,7 @@ export default function VideoGallery() {
             </nav>
             <h1 style={{ color:'#fff', fontSize:'clamp(28px,5vw,48px)', fontWeight:900, margin:'0 0 12px', letterSpacing:'-1px' }}>🎬 Video Gallery</h1>
             <p style={{ color:'rgba(255,255,255,.65)', fontSize:15, maxWidth:520, margin:'0 auto 24px' }}>
-              Official {channel} channel ke latest campus videos
+              Latest campus videos from the official {channel} channel
             </p>
             <div style={{ display:'inline-block', background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.15)', borderRadius:10, padding:'10px 22px' }}>
               <div style={{ fontSize:22, fontWeight:900, color:G, lineHeight:1 }}>{videoIds.length}</div>
@@ -197,7 +197,7 @@ export default function VideoGallery() {
           {ytConfig?.channelId && (
             <div style={{ textAlign:'center', marginTop:48 }}>
               <p style={{ color:'#94a3b8', fontSize:13, marginBottom:16 }}>
-                Admin Panel → YouTube Settings → API Key add karke full video details unlock karein
+                Unlock full video details by adding an API Key in Admin Panel → YouTube Settings
               </p>
               <a href={`https://youtube.com/channel/${ytConfig.channelId}`} target="_blank" rel="noreferrer"
                 style={{ display:'inline-flex', alignItems:'center', gap:10, background:'#ff0000', color:'#fff', padding:'13px 30px', borderRadius:50, fontWeight:900, fontSize:14, textDecoration:'none', boxShadow:'0 6px 20px rgba(255,0,0,.35)' }}>
@@ -227,7 +227,7 @@ export default function VideoGallery() {
           <div style={{ background:'#fff', borderRadius:20, padding:'48px 32px', boxShadow:'0 8px 30px rgba(15,35,71,.07)', border:'1px solid #e2e8f0' }}>
             <div style={{ fontSize:60, marginBottom:16 }}>📺</div>
             <h2 style={{ color:N, fontWeight:900, margin:'0 0 8px' }}>Videos Coming Soon</h2>
-            <p style={{ color:'#64748b', fontSize:14, marginBottom:24 }}>Admin Panel → YouTube Manager tab se videos add karein</p>
+            <p style={{ color: '#64748b', fontSize: 14, marginBottom: 24 }}>Add videos via the YouTube Manager tab in the Admin Panel</p>
             <Link to="/" style={{ display:'inline-block', background:N, color:'#fff', padding:'11px 28px', borderRadius:8, fontWeight:700, textDecoration:'none', fontSize:14 }}>
               ← Back to Home
             </Link>
@@ -269,7 +269,7 @@ export default function VideoGallery() {
           </nav>
           <h1 style={{ color:'#fff', fontSize:'clamp(28px,5vw,48px)', fontWeight:900, margin:'0 0 12px' }}>🎬 Video Gallery</h1>
           <p style={{ color:'rgba(255,255,255,.65)', fontSize:15, maxWidth:520, margin:'0 auto 24px' }}>
-            College ke latest events, seminars aur cultural programs
+            Follow latest college events, seminars, and cultural programs
           </p>
           <div style={{ display:'flex', gap:14, flexWrap:'wrap', justifyContent:'center' }}>
             {[
@@ -290,7 +290,7 @@ export default function VideoGallery() {
         {loading && (
           <div style={{ textAlign:'center', padding:'80px 20px' }}>
             <div style={{ width:48, height:48, border:`4px solid ${G}`, borderTop:'4px solid transparent', borderRadius:'50%', animation:'spin .8s linear infinite', margin:'0 auto 16px' }} />
-            <p style={{ color:'#718096', fontWeight:600 }}>YouTube se videos fetch ho rahi hain...</p>
+            <p style={{ color:'#718096', fontWeight:600 }}>Fetching videos from YouTube...</p>
           </div>
         )}
 
@@ -382,7 +382,7 @@ export default function VideoGallery() {
             {filtered.length === 0 && (
               <div style={{ textAlign:'center', padding:'50px', color:'#a0aec0' }}>
                 <div style={{ fontSize:44, marginBottom:10 }}>🎬</div>
-                <p style={{ fontWeight:600 }}>Is category mein koi video nahi</p>
+                <p style={{ fontWeight:600 }}>No videos found in this category</p>
               </div>
             )}
 
