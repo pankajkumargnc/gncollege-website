@@ -1,8 +1,9 @@
 // src/pages/CampusPages.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase'; // Firebase import zaroori hai
+import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
+import usePageContent from '../hooks/usePageContent';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -92,19 +93,20 @@ export function CampusVisuals({ title, desc, categoryId }) {
    2. INFRASTRUCTURE 
 ════════════════════════════════════════════════════════════ */
 export function Infrastructure() {
-  const boxes = [
+  const { content, getList } = usePageContent('infrastructure');
+  const boxes = getList('facilities', [
     { title: 'Central Library', icon: '📚', span: 2, bg: '#fff', color: NAVY, desc: 'Over 50,000 books and digital journals.' },
     { title: 'Science Labs', icon: '🔬', span: 1, bg: `${NAVY}0a`, color: NAVY, desc: 'State-of-the-art equipments.' },
     { title: 'Auditorium', icon: '🎭', span: 1, bg: `${GOLD}15`, color: '#b45309', desc: '500+ seating capacity.' },
     { title: 'Sports Ground', icon: '⚽', span: 2, bg: '#fff', color: NAVY, desc: 'Vast playground for outdoor sports.' }
-  ];
+  ]);
 
   return (
     <div style={{ background: '#f8fafc', padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', fontFamily: "'DM Sans', sans-serif" }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <Fade>
           <div style={{ color: GOLD, fontWeight: 700, letterSpacing: 2, marginBottom: 8 }}>OVERVIEW</div>
-          <h1 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, color: NAVY, marginBottom: 40 }}>World-Class Infrastructure</h1>
+          <h1 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, color: NAVY, marginBottom: 40 }}>{content?.title || 'World-Class Infrastructure'}</h1>
         </Fade>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24, marginBottom: 60 }}>
           {boxes.map((b, i) => (
@@ -128,6 +130,9 @@ export function Infrastructure() {
    3. CLASSROOMS
 ════════════════════════════════════════════════════════════ */
 export function Classrooms() {
+  const { content, getList, getText } = usePageContent('classrooms');
+  const features = getList('features', ['Spacious & Well-Ventilated', 'Ergonomic Seating', 'Interactive Smart Boards']);
+  const descText = getText('desc', 'Comfortable, well-ventilated, and equipped with smart tech.');
   return (
     <div style={{ background: '#fff', padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', fontFamily: "'DM Sans', sans-serif" }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -139,10 +144,10 @@ export function Classrooms() {
           </Fade>
           <Fade delay={0.2}>
             <div style={{ background: `${GOLD}15`, padding: '8px 16px', borderRadius: 20, color: '#b45309', fontWeight: 700, display: 'inline-block', marginBottom: 16, fontSize: 13 }}>MODERN LEARNING</div>
-            <h2 style={{ fontSize: 'clamp(28px, 4vw, 38px)', fontWeight: 800, color: NAVY, margin: '0 0 24px', lineHeight: 1.2 }}>Smart Classrooms</h2>
-            <p style={{ color: '#64748b', fontSize: 16, lineHeight: 1.8, marginBottom: 24 }}>Comfortable, well-ventilated, and equipped with smart tech.</p>
+            <h2 style={{ fontSize: 'clamp(28px, 4vw, 38px)', fontWeight: 800, color: NAVY, margin: '0 0 24px', lineHeight: 1.2 }}>{content?.title || 'Smart Classrooms'}</h2>
+            <p style={{ color: '#64748b', fontSize: 16, lineHeight: 1.8, marginBottom: 24 }} dangerouslySetInnerHTML={{ __html: descText }} />
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {['Spacious & Well-Ventilated', 'Ergonomic Seating', 'Interactive Smart Boards'].map((item, i) => (
+              {features.map((item, i) => (
                 <li key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 15, fontWeight: 600, color: NAVY }}>
                   <span style={{ background: '#d1fae5', color: '#059669', width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>✓</span>
                   {item}
@@ -161,12 +166,13 @@ export function Classrooms() {
    4. ICT ROOMS
 ════════════════════════════════════════════════════════════ */
 export function IctRooms() {
+  const { content, getText } = usePageContent('ict-rooms');
   return (
     <div style={{ background: NAVY, padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', color: '#fff', fontFamily: "'DM Sans', sans-serif", minHeight: '100dvh' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 60 }}>
-          <Fade><h2 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, margin: '0 0 16px' }}>ICT & Computer Labs</h2></Fade>
-          <Fade delay={0.1}><p style={{ color: '#94a3b8', fontSize: 16, maxWidth: 600, margin: '0 auto', lineHeight: 1.7 }}>Empowering students with high-end workstations.</p></Fade>
+          <Fade><h2 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, margin: '0 0 16px' }}>{content?.title || 'ICT & Computer Labs'}</h2></Fade>
+          <Fade delay={0.1}><p style={{ color: '#94a3b8', fontSize: 16, maxWidth: 600, margin: '0 auto', lineHeight: 1.7 }}>{content?.subtitle || 'Empowering students with high-end workstations.'}</p></Fade>
         </div>
         <LiveGallery categoryId="ict-rooms" />
       </div>
@@ -178,13 +184,14 @@ export function IctRooms() {
    5. GREEN CAMPUS
 ════════════════════════════════════════════════════════════ */
 export function GreenCampus() {
+  const { content } = usePageContent('green-campus');
   return (
     <div style={{ background: 'linear-gradient(145deg, #f0fdf4 0%, #ffffff 100%)', padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', fontFamily: "'DM Sans', sans-serif", minHeight: '100dvh' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 60 }}>
           <Fade>
             <div style={{ fontSize: 48, marginBottom: 16 }}>🌿</div>
-            <h2 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, color: '#064e3b', margin: '0 0 16px' }}>Our Green Initiatives</h2>
+            <h2 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, color: '#064e3b', margin: '0 0 16px' }}>{content?.title || 'Our Green Initiatives'}</h2>
           </Fade>
         </div>
         <LiveGallery categoryId="green-campus" />

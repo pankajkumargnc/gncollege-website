@@ -5,6 +5,7 @@ import { collection, query, orderBy, onSnapshot, where } from 'firebase/firestor
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import PDFModal from '../components/PDFModal'; // ✅ PDF Modal Import
+import usePageContent from '../hooks/usePageContent'; // ✅ CMS Content Hook
 import '../styles/index.css';
 
 const N = COLORS.navy || '#0f2347';
@@ -236,9 +237,23 @@ function MeetingPDFList({ collectionName, accentColor, emptyText }) {
 ═══════════════════════════════════════════════════════════════ */
 export function VisionMission() {
   useScrollTop();
+  const { content, getText, getList } = usePageContent('vision-mission');
+
+  // ── CMS content with hardcoded fallbacks ──
+  const visionText = getText('vision', 'To be a premier institution of higher learning that nurtures leaders of tomorrow — intellectually competent, ethically grounded, and socially responsible — drawing inspiration from the teachings of Guru Nanak Devji.');
+  const missionText = getText('mission', 'To provide quality and inclusive higher education to all sections of society, with special focus on the underprivileged, empowering students through academic excellence, skill development, and value-based learning.');
+  const coreValues = getList('core-values', [
+    { icon:'🕊️', label:'Peace & Harmony' },
+    { icon:'🎓', label:'Academic Excellence' },
+    { icon:'🤝', label:'Inclusivity' },
+    { icon:'💡', label:'Innovation' },
+    { icon:'🌿', label:'Service to Society' },
+    { icon:'⚖️', label:'Integrity' },
+  ]);
+
   return (
     <div>
-      <PageHero title="Vision & Mission" subtitle="Our guiding principles and future aspirations" icon="🌟" />
+      <PageHero title={content?.title || "Vision & Mission"} subtitle={content?.subtitle || "Our guiding principles and future aspirations"} icon="🌟" />
       <PageLayout>
         <Fade>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))', gap:24, marginBottom:32 }}>
@@ -247,11 +262,7 @@ export function VisionMission() {
               <div style={{ padding:32 }}>
                 <div style={{ fontSize:42, marginBottom:14 }}>🎯</div>
                 <h2 style={{ color:N, fontSize:22, fontWeight:800, marginBottom:16 }}>Our Vision</h2>
-                <p style={{ color:'#475569', lineHeight:1.8, fontSize:15 }}>
-                  To be a premier institution of higher learning that nurtures leaders of tomorrow —
-                  intellectually competent, ethically grounded, and socially responsible — drawing
-                  inspiration from the teachings of Guru Nanak Devji.
-                </p>
+                <div style={{ color:'#475569', lineHeight:1.8, fontSize:15 }} dangerouslySetInnerHTML={{ __html: visionText }} />
               </div>
             </div>
             <div style={{ background:'#fff', borderRadius:20, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', overflow:'hidden' }}>
@@ -259,11 +270,7 @@ export function VisionMission() {
               <div style={{ padding:32 }}>
                 <div style={{ fontSize:42, marginBottom:14 }}>📌</div>
                 <h2 style={{ color:N, fontSize:22, fontWeight:800, marginBottom:16 }}>Our Mission</h2>
-                <p style={{ color:'#475569', lineHeight:1.8, fontSize:15 }}>
-                  To provide quality and inclusive higher education to all sections of society, with
-                  special focus on the underprivileged, empowering students through academic excellence,
-                  skill development, and value-based learning.
-                </p>
+                <div style={{ color:'#475569', lineHeight:1.8, fontSize:15 }} dangerouslySetInnerHTML={{ __html: missionText }} />
               </div>
             </div>
           </div>
@@ -273,14 +280,7 @@ export function VisionMission() {
             <h2 className="section-heading">Core Values</h2>
             <div className="heading-underline" />
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))', gap:16, marginTop:24 }}>
-              {[
-                { icon:'🕊️', label:'Peace & Harmony' },
-                { icon:'🎓', label:'Academic Excellence' },
-                { icon:'🤝', label:'Inclusivity' },
-                { icon:'💡', label:'Innovation' },
-                { icon:'🌿', label:'Service to Society' },
-                { icon:'⚖️', label:'Integrity' },
-              ].map((v, i) => (
+              {coreValues.map((v, i) => (
                 <div key={i} style={{ textAlign:'center', padding:'20px 12px', background:'#f8fafc', borderRadius:14, border:'1.5px solid #e2e8f0', transition:'transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease', cursor:'default' }}
                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(15,35,71,.1)'; e.currentTarget.style.borderColor = G; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
@@ -303,9 +303,17 @@ export function VisionMission() {
 ═══════════════════════════════════════════════════════════════ */
 export function PrincipalMessage() {
   useScrollTop();
+  const { content, getText, getSection } = usePageContent('principal-message');
+
+  // ── CMS content with hardcoded fallbacks ──
+  let pInfo = { name: 'Sanjay Prasad', designation: 'Secretary', institution: 'Guru Nanak College, Dhanbad', photo: 'images/principal.webp', quote: 'Education is not merely the acquisition of knowledge, but the transformation of character and the cultivation of a purposeful life.' };
+  try { const raw = getSection('principal-info'); if (raw?.content) { const parsed = JSON.parse(raw.content); pInfo = { ...pInfo, ...parsed }; } } catch {}
+
+  const messageHtml = getText('message', '<p>Dear Students and Parents, it gives me immense pleasure to welcome you to Guru Nanak College, Dhanbad — an institution that has been nurturing young minds for over five decades.</p><p>Our college stands as a beacon of quality education in Jharkhand, offering a rich blend of academic rigour, co-curricular activities, and personal development.</p><p>I invite you to be part of our vibrant community and assure you of our complete support at every step of your academic journey.</p>');
+
   return (
     <div>
-      <PageHero title="Principal's Message" subtitle="A word from our Principal to students and parents" icon="🎓" />
+      <PageHero title={content?.title || "Principal's Message"} subtitle={content?.subtitle || "A word from our Principal to students and parents"} icon="🎓" />
       <PageLayout>
         <Fade>
           <div style={{ background:'#fff', borderRadius:20, padding:40, boxShadow:'0 8px 30px rgba(0,0,0,0.07)' }}>
@@ -313,37 +321,23 @@ export function PrincipalMessage() {
               <div style={{ textAlign:'center', flexShrink:0 }}>
                 <DataMarker label="Principal ki photo ka path — src mein dalein" />
                 <div style={{ width:180, height:180, borderRadius:'50%', border:`6px solid ${G}`, boxShadow:'0 10px 30px rgba(15,35,71,0.2)', overflow:'hidden', margin:'0 auto', background:'#f1f5f9', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <img src={`${import.meta.env.BASE_URL}images/principal.webp`} alt="Principal" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<span style=\"font-size:72px\">👨‍💼</span>'; }} />
+                  <img src={`${import.meta.env.BASE_URL}${pInfo.photo}`} alt="Principal" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<span style=\"font-size:72px\">👨‍💼</span>'; }} />
                 </div>
-                <div style={{ marginTop:14, fontWeight:800, fontSize:18, color:N }}>Sanjay Prasad</div>
-                <div style={{ fontSize:13, color:'#64748b', marginTop:4 }}>Secretary</div>
-                <div style={{ fontSize:13, color:'#64748b' }}>Guru Nanak College, Dhanbad</div>
-
+                <div style={{ marginTop:14, fontWeight:800, fontSize:18, color:N }}>{pInfo.name}</div>
+                <div style={{ fontSize:13, color:'#64748b', marginTop:4 }}>{pInfo.designation}</div>
+                <div style={{ fontSize:13, color:'#64748b' }}>{pInfo.institution}</div>
               </div>
               <div style={{ flex:1, minWidth:260 }}>
                 <div style={{ borderLeft:`5px solid ${G}`, paddingLeft:24, marginBottom:24 }}>
                   <p style={{ fontSize:20, fontStyle:'italic', color:N, fontWeight:700, lineHeight:1.6 }}>
-                    "Education is not merely the acquisition of knowledge, but the transformation of
-                    character and the cultivation of a purposeful life."
+                    "{pInfo.quote}"
                   </p>
                 </div>
               </div>
             </div>
             <h2 className="section-heading">Message to Students & Parents</h2>
             <div className="heading-underline" />
-            <DataMarker label="Principal ka poora sandesh — 3-4 paragraphs" />
-            <p className="rich-text-content">
-              Dear Students and Parents, it gives me immense pleasure to welcome you to Guru Nanak College,
-              Dhanbad — an institution that has been nurturing young minds for over five decades.
-            </p>
-            <p className="rich-text-content mt-4">
-              Our college stands as a beacon of quality education in Jharkhand, offering a rich blend of
-              academic rigour, co-curricular activities, and personal development.
-            </p>
-            <p className="rich-text-content mt-4">
-              I invite you to be part of our vibrant community and assure you of our complete support at
-              every step of your academic journey.
-            </p>
+            <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: messageHtml }} />
           </div>
         </Fade>
       </PageLayout>
@@ -400,7 +394,17 @@ export function Organogram() {
 /* ═══════════════════════════════════════════════════════════════
    4. COMMITTEE PAGE
 ═══════════════════════════════════════════════════════════════ */
-export function CommitteePage({ name, desc, icon, purpose = [], responsibilities = [], pdfReportLink }) {
+export function CommitteePage({ name, desc, icon, purpose = [], responsibilities = [], pdfReportLink, slug }) {
+  // ── CMS Content Hook — slug is derived from name if not provided ──
+  const committeeSlug = slug || name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const { content, getList, getTable, getText } = usePageContent(committeeSlug);
+
+  // ── CMS data with prop fallbacks ──
+  const purposeList = getList('purpose', purpose);
+  const respList = getList('responsibilities', responsibilities);
+  let chairInfo = { name: '✏️ [Chairperson Name]', designation: '✏️ [Designation, Department]' };
+  try { const raw = getText('chairperson'); if (raw) { const parsed = JSON.parse(raw); chairInfo = { ...chairInfo, ...parsed }; } } catch {}
+  const membersData = getTable('members', null);
   useScrollTop();
   const [selectedPdf, setSelectedPdf] = useState(null); // ✅ PDF Modal State
   return (
@@ -415,8 +419,8 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
                 <div>
                   <div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase', letterSpacing:1 }}>Chairperson / Convener</div>
                   <DataMarker label={`${name} ke Chairperson ka naam aur designation`} />
-                  <div style={{ fontSize:18, fontWeight:800 }}>✏️ [Chairperson Name]</div>
-                  <div style={{ fontSize:13, color:'#cbd5e1', marginTop:4 }}>✏️ [Designation, Department]</div>
+                  <div style={{ fontSize:18, fontWeight:800 }}>{chairInfo.name}</div>
+                  <div style={{ fontSize:13, color:'#cbd5e1', marginTop:4 }}>{chairInfo.designation}</div>
                 </div>
               </div>
               
@@ -433,24 +437,24 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
             </div>
           </div>
         </Fade>
-        {purpose.length > 0 && (
+        {purposeList.length > 0 && (
           <Fade delay={0.1}>
             <div style={{ background:'#fff', borderRadius:20, padding:32, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:20 }}>
               <h2 className="section-heading">Purpose</h2>
               <div className="heading-underline" />
               <ul style={{ marginTop:12, paddingLeft:20 }}>
-                {purpose.map((p, i) => <li key={i} style={{ marginBottom:8, color:'#475569', lineHeight:1.7 }}>{p}</li>)}
+                {purposeList.map((p, i) => <li key={i} style={{ marginBottom:8, color:'#475569', lineHeight:1.7 }}>{p}</li>)}
               </ul>
             </div>
           </Fade>
         )}
-        {responsibilities.length > 0 && (
+        {respList.length > 0 && (
           <Fade delay={0.15}>
             <div style={{ background:'#fff', borderRadius:20, padding:32, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:20 }}>
               <h2 className="section-heading">Key Responsibilities</h2>
               <div className="heading-underline" />
               <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(250px,1fr))', gap:12, marginTop:16 }}>
-                {responsibilities.map((r, i) => (
+                {respList.map((r, i) => (
                   <div key={i} style={{ padding:'12px 16px', background:'#f8fafc', borderRadius:10, borderLeft:`4px solid ${G}`, fontSize:14, color:'#334155' }}>{r}</div>
                 ))}
               </div>
@@ -466,23 +470,21 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
               <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
                 <thead>
                   <tr style={{ background:N, color:'#fff' }}>
-                    {['S.No.','Name','Designation','Department','Role'].map(h=>(
+                    {(membersData?.headers || ['S.No.','Name','Designation','Department','Role']).map(h=>(
                       <th key={h} style={{ padding:'12px 16px', textAlign:'left', fontWeight:700 }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {[1,2,3,4,5].map((_,i)=>(
+                  {(membersData?.rows || [[1,'✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Chairperson'],[2,'✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Member Secretary'],[3,'✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Member'],[4,'✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Member'],[5,'✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Member']]).map((row,i)=>(
                     <tr key={i} style={{ background:i%2===0?'#f8fafc':'#fff', borderBottom:'1px solid #e2e8f0' }}>
-                      <td style={{ padding:'11px 16px', color:'#64748b' }}>{i+1}</td>
-                      <td style={{ padding:'11px 16px', fontWeight:600, color:'#94a3b8' }}>✏️ [Name]</td>
-                      <td style={{ padding:'11px 16px', color:'#94a3b8' }}>✏️ [Designation]</td>
-                      <td style={{ padding:'11px 16px', color:'#94a3b8' }}>✏️ [Dept]</td>
-                      <td style={{ padding:'11px 16px' }}>
-                        <span style={{ background:i===0?'#fef3c7':'#f1f5f9', color:i===0?'#92400e':'#475569', padding:'3px 10px', borderRadius:6, fontSize:12, fontWeight:700 }}>
-                          {i===0?'Chairperson':i===1?'Member Secretary':'Member'}
-                        </span>
-                      </td>
+                      {row.map((cell, ci) => (
+                        <td key={ci} style={{ padding:'11px 16px', fontWeight: ci===1 ? 600 : 400, color: ci===0 ? '#64748b' : ci<4 ? (String(cell).includes('✏️') ? '#94a3b8' : N) : 'inherit' }}>
+                          {ci === row.length - 1 ? (
+                            <span style={{ background: String(cell).includes('Chairperson')?'#fef3c7': String(cell).includes('Secretary')?'#dcfce7':'#f1f5f9', color: String(cell).includes('Chairperson')?'#92400e': String(cell).includes('Secretary')?'#166534':'#475569', padding:'3px 10px', borderRadius:6, fontSize:12, fontWeight:700 }}>{cell}</span>
+                          ) : cell}
+                        </td>
+                      ))}
                     </tr>
                   ))}
                 </tbody>
@@ -502,15 +504,15 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
   );
 }
 
-export function WomensCell()    { return <CommitteePage name="Women's Cell" icon="👩‍💼" desc="Dedicated to the safety, empowerment, and welfare of female students and staff at GNC." purpose={["Ensure a safe and harassment-free environment for women on campus.","Conduct awareness programs on women's rights and legal provisions.","Provide counselling and support to female students in need."]} responsibilities={["Monitor campus safety for women","Handle complaints related to women's issues","Organize gender sensitization workshops","Coordinate with ICC for harassment cases"]}/>; }
-export function AntiRagging()   { return <CommitteePage name="Anti-Ragging Committee" icon="🚫" desc="Committed to maintaining a 100% ragging-free campus in compliance with UGC & Supreme Court guidelines." purpose={["Prevent and prohibit ragging in all forms on campus.","Create awareness among students about legal consequences of ragging.","Investigate complaints and take strict action against offenders."]} responsibilities={["Display anti-ragging notices","Collect anti-ragging affidavits","Investigate complaints promptly","Coordinate with police if required","Conduct orientation programs"]}/>; }
-export function ScStCell()      { return <CommitteePage name="SC/ST Cell" icon="🤝" desc="A dedicated welfare and support centre for Scheduled Caste and Scheduled Tribe students." purpose={["Ensure equal educational opportunities for SC/ST students.","Guide students about government scholarships and reservations.","Resolve academic and social issues faced by SC/ST students."]} responsibilities={["Facilitate scholarship applications","Address grievances of SC/ST students","Organize awareness camps","Maintain data of SC/ST enrollment","Liaison with government welfare departments"]}/>; }
-export function ObcCell()       { return <CommitteePage name="OBC Cell" icon="📚" desc="Supporting students from Other Backward Classes with their academic and welfare needs." purpose={["Facilitate awareness of OBC reservations and government schemes.","Guide OBC students for scholarship applications.","Provide academic and career counselling."]} responsibilities={["Scholarship guidance for OBC students","Address academic grievances","Facilitate income/caste certificate help","Organize career awareness programs"]}/>; }
-export function GrievanceCell() { return <CommitteePage name="Grievance Redressal Cell" icon="⚖️" desc="An official platform for students and staff to raise and resolve their academic and administrative grievances." purpose={["Provide a fair and transparent mechanism for addressing grievances.","Ensure prompt redressal of student and staff complaints.","Maintain a record of grievances and their resolution."]} responsibilities={["Receive and register grievances","Investigate complaints within stipulated time","Maintain grievance register","Submit reports to Principal","Ensure confidentiality and impartiality"]}/>; }
-export function IccCell()       { return <CommitteePage name="Internal Complaints Committee (ICC)" icon="🛡️" desc="Constituted under Sexual Harassment of Women at Workplace Act, 2013." purpose={["Prevent, prohibit, and redress sexual harassment complaints.","Conduct sensitization programs for students and staff.","Ensure impartial inquiry and fair resolution of complaints."]} responsibilities={["Receive complaints of sexual harassment","Conduct inquiry within 90 days","Maintain confidentiality of complainant","Submit annual report to District Officer","Organize prevention workshops"]}/>; }
-export function MinorityCell()  { return <CommitteePage name="Minority Cell" icon="🌙" desc="A welfare cell to support and guide students from minority communities in their academic journey." purpose={["Guide minority students about government scholarships and schemes.","Create an inclusive environment for minority students.","Address specific academic and personal issues."]} responsibilities={["Pre-matric and post-matric scholarship guidance","Address minority student grievances","Organize awareness programs","Maintain enrollment data"]}/>; }
-export function PlacementCell() { return <CommitteePage name="Placement Cell" icon="💼" desc="Bridging students with career opportunities through training, internships, and campus placements." purpose={["Facilitate campus placements and internship opportunities.","Organize skill development and career guidance programs.","Maintain industry-academia partnerships."]} responsibilities={["Coordinate with companies for campus drives","Organize mock interviews and GD sessions","Maintain placement records","Career counselling for final year students","Organize job fairs"]}/>; }
-export function RusaCell()      { return <CommitteePage name="RUSA Cell" icon="🏛️" desc="Rashtriya Uchchatar Shiksha Abhiyan — implementing central schemes for quality improvement in higher education." purpose={["Implement RUSA-funded projects and infrastructure development.","Ensure compliance with RUSA guidelines and reporting requirements."]} responsibilities={["Coordinate RUSA grant utilization","Maintain RUSA project documentation","Submit utilization certificates","Monitor RUSA-funded activities","Liaison with State Higher Education Council"]}/>; }
+export function WomensCell()    { return <CommitteePage slug="womens-cell" name="Women's Cell" icon="👩‍💼" desc="Dedicated to the safety, empowerment, and welfare of female students and staff at GNC." purpose={["Ensure a safe and harassment-free environment for women on campus.","Conduct awareness programs on women's rights and legal provisions.","Provide counselling and support to female students in need."]} responsibilities={["Monitor campus safety for women","Handle complaints related to women's issues","Organize gender sensitization workshops","Coordinate with ICC for harassment cases"]}/>; }
+export function AntiRagging()   { return <CommitteePage slug="anti-ragging" name="Anti-Ragging Committee" icon="🚫" desc="Committed to maintaining a 100% ragging-free campus in compliance with UGC & Supreme Court guidelines." purpose={["Prevent and prohibit ragging in all forms on campus.","Create awareness among students about legal consequences of ragging.","Investigate complaints and take strict action against offenders."]} responsibilities={["Display anti-ragging notices","Collect anti-ragging affidavits","Investigate complaints promptly","Coordinate with police if required","Conduct orientation programs"]}/>; }
+export function ScStCell()      { return <CommitteePage slug="sc-st" name="SC/ST Cell" icon="🤝" desc="A dedicated welfare and support centre for Scheduled Caste and Scheduled Tribe students." purpose={["Ensure equal educational opportunities for SC/ST students.","Guide students about government scholarships and reservations.","Resolve academic and social issues faced by SC/ST students."]} responsibilities={["Facilitate scholarship applications","Address grievances of SC/ST students","Organize awareness camps","Maintain data of SC/ST enrollment","Liaison with government welfare departments"]}/>; }
+export function ObcCell()       { return <CommitteePage slug="obc" name="OBC Cell" icon="📚" desc="Supporting students from Other Backward Classes with their academic and welfare needs." purpose={["Facilitate awareness of OBC reservations and government schemes.","Guide OBC students for scholarship applications.","Provide academic and career counselling."]} responsibilities={["Scholarship guidance for OBC students","Address academic grievances","Facilitate income/caste certificate help","Organize career awareness programs"]}/>; }
+export function GrievanceCell() { return <CommitteePage slug="grievance" name="Grievance Redressal Cell" icon="⚖️" desc="An official platform for students and staff to raise and resolve their academic and administrative grievances." purpose={["Provide a fair and transparent mechanism for addressing grievances.","Ensure prompt redressal of student and staff complaints.","Maintain a record of grievances and their resolution."]} responsibilities={["Receive and register grievances","Investigate complaints within stipulated time","Maintain grievance register","Submit reports to Principal","Ensure confidentiality and impartiality"]}/>; }
+export function IccCell()       { return <CommitteePage slug="icc" name="Internal Complaints Committee (ICC)" icon="🛡️" desc="Constituted under Sexual Harassment of Women at Workplace Act, 2013." purpose={["Prevent, prohibit, and redress sexual harassment complaints.","Conduct sensitization programs for students and staff.","Ensure impartial inquiry and fair resolution of complaints."]} responsibilities={["Receive complaints of sexual harassment","Conduct inquiry within 90 days","Maintain confidentiality of complainant","Submit annual report to District Officer","Organize prevention workshops"]}/>; }
+export function MinorityCell()  { return <CommitteePage slug="minority" name="Minority Cell" icon="🌙" desc="A welfare cell to support and guide students from minority communities in their academic journey." purpose={["Guide minority students about government scholarships and schemes.","Create an inclusive environment for minority students.","Address specific academic and personal issues."]} responsibilities={["Pre-matric and post-matric scholarship guidance","Address minority student grievances","Organize awareness programs","Maintain enrollment data"]}/>; }
+export function PlacementCell() { return <CommitteePage slug="placement" name="Placement Cell" icon="💼" desc="Bridging students with career opportunities through training, internships, and campus placements." purpose={["Facilitate campus placements and internship opportunities.","Organize skill development and career guidance programs.","Maintain industry-academia partnerships."]} responsibilities={["Coordinate with companies for campus drives","Organize mock interviews and GD sessions","Maintain placement records","Career counselling for final year students","Organize job fairs"]}/>; }
+export function RusaCell()      { return <CommitteePage slug="rusa" name="RUSA Cell" icon="🏛️" desc="Rashtriya Uchchatar Shiksha Abhiyan — implementing central schemes for quality improvement in higher education." purpose={["Implement RUSA-funded projects and infrastructure development.","Ensure compliance with RUSA guidelines and reporting requirements."]} responsibilities={["Coordinate RUSA grant utilization","Maintain RUSA project documentation","Submit utilization certificates","Monitor RUSA-funded activities","Liaison with State Higher Education Council"]}/>; }
 
 
 /* ═══════════════════════════════════════════════════════════════
@@ -518,6 +520,14 @@ export function RusaCell()      { return <CommitteePage name="RUSA Cell" icon="�
 ═══════════════════════════════════════════════════════════════ */
 export function GoverningBody() {
   useScrollTop();
+  const { content, getText, getTable } = usePageContent('governing-body');
+
+  // ── CMS data with fallbacks ──
+  const aboutText = getText('about-gb', '<p>The Governing Body of Guru Nanak College, Dhanbad is the supreme authority responsible for the overall management, policy decisions, and financial matters of the college. It is constituted as per UGC guidelines and the regulations of Binod Bihari Mahto Koylanchal University (BBMKU), Dhanbad.</p>');
+  let gbStats = { session: '✏️ [Session Year]', totalMembers: '✏️ [Number]', chairperson: '✏️ [Name]' };
+  try { const raw = getText('gb-stats'); if (raw) gbStats = { ...gbStats, ...JSON.parse(raw) }; } catch {}
+  const membersData = getTable('gb-members', null);
+
   return (
     <div>
       <PageHero title="Governing Body" subtitle="The apex decision-making body of Guru Nanak College, Dhanbad" icon="🏛️" />
@@ -526,17 +536,12 @@ export function GoverningBody() {
           <div style={{ background:'#fff', borderRadius:20, padding:36, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:24 }}>
             <h2 className="section-heading">About the Governing Body</h2>
             <div className="heading-underline" />
-            <p className="rich-text-content">
-              The Governing Body of Guru Nanak College, Dhanbad is the supreme authority responsible for
-              the overall management, policy decisions, and financial matters of the college. It is
-              constituted as per UGC guidelines and the regulations of Binod Bihari Mahto Koylanchal
-              University (BBMKU), Dhanbad.
-            </p>
+            <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: aboutText }} />
             <DataMarker label="Current session, total members, chairperson naam — niche stats box mein dalein" />
             <div style={{ marginTop:20, padding:'16px 24px', background:`linear-gradient(135deg,${N},#1a3a7c)`, borderRadius:12, color:'#fff', display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}>
-              <div><div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase' }}>Current Session</div><div style={{ fontWeight:800, fontSize:18 }}>✏️ [Session Year]</div></div>
-              <div><div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase' }}>Total Members</div><div style={{ fontWeight:800, fontSize:18 }}>✏️ [Number]</div></div>
-              <div><div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase' }}>Chairperson</div><div style={{ fontWeight:800, fontSize:18 }}>✏️ [Name]</div></div>
+              <div><div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase' }}>Current Session</div><div style={{ fontWeight:800, fontSize:18 }}>{gbStats.session}</div></div>
+              <div><div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase' }}>Total Members</div><div style={{ fontWeight:800, fontSize:18 }}>{gbStats.totalMembers}</div></div>
+              <div><div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase' }}>Chairperson</div><div style={{ fontWeight:800, fontSize:18 }}>{gbStats.chairperson}</div></div>
             </div>
           </div>
         </Fade>
@@ -549,28 +554,28 @@ export function GoverningBody() {
               <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
                 <thead>
                   <tr style={{ background:N, color:'#fff' }}>
-                    {['S.No.','Name','Designation','Category','Role in GB'].map(h=>(
+                    {(membersData?.headers || ['S.No.','Name','Designation','Category','Role in GB']).map(h=>(
                       <th key={h} style={{ padding:'12px 16px', textAlign:'left', fontWeight:700 }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    {name:'✏️ [Name]',desig:'President, GPC',    cat:'Management Nominee',role:'Chairperson'},
-                    {name:'✏️ [Name]',desig:'Secretary, GPC',    cat:'Management Nominee',role:'Member'},
-                    {name:'✏️ [Name]',desig:'Principal, GNC',    cat:'Ex-officio',         role:'Member Secretary'},
-                    {name:'✏️ [Name]',desig:'✏️ [Designation]', cat:'Management Nominee',role:'Member'},
-                    {name:'✏️ [Name]',desig:'✏️ [Designation]', cat:'UGC Nominee',         role:'Member'},
-                    {name:'✏️ [Name]',desig:'✏️ [Designation]', cat:'University Nominee',  role:'Member'},
-                    {name:'✏️ [Name]',desig:'✏️ [Designation]', cat:'Teaching Staff Rep.', role:'Member'},
-                    {name:'✏️ [Name]',desig:'✏️ [Designation]', cat:'Non-Teaching Rep.',   role:'Member'},
-                  ].map((r,i)=>(
+                  {(membersData?.rows || [
+                    ['1','✏️ [Name]','President, GPC','Management Nominee','Chairperson'],
+                    ['2','✏️ [Name]','Secretary, GPC','Management Nominee','Member'],
+                    ['3','✏️ [Name]','Principal, GNC','Ex-officio','Member Secretary'],
+                    ['4','✏️ [Name]','✏️ [Designation]','Management Nominee','Member'],
+                    ['5','✏️ [Name]','✏️ [Designation]','UGC Nominee','Member'],
+                    ['6','✏️ [Name]','✏️ [Designation]','University Nominee','Member'],
+                    ['7','✏️ [Name]','✏️ [Designation]','Teaching Staff Rep.','Member'],
+                    ['8','✏️ [Name]','✏️ [Designation]','Non-Teaching Rep.','Member'],
+                  ]).map((row,i)=>(
                     <tr key={i} style={{ background:i%2===0?'#f8fafc':'#fff', borderBottom:'1px solid #e2e8f0' }}>
-                      <td style={{ padding:'11px 16px', color:'#64748b' }}>{i+1}</td>
-                      <td style={{ padding:'11px 16px', fontWeight:700, color:N }}>{r.name}</td>
-                      <td style={{ padding:'11px 16px', color:'#475569' }}>{r.desig}</td>
-                      <td style={{ padding:'11px 16px', fontSize:12 }}><span style={{ background:'#e0f2fe', color:'#0369a1', padding:'3px 8px', borderRadius:5, fontWeight:600 }}>{r.cat}</span></td>
-                      <td style={{ padding:'11px 16px' }}><span style={{ background:r.role==='Chairperson'?'#fef3c7':r.role==='Member Secretary'?'#dcfce7':'#f1f5f9', color:r.role==='Chairperson'?'#92400e':r.role==='Member Secretary'?'#166534':'#475569', padding:'3px 10px', borderRadius:6, fontSize:12, fontWeight:700 }}>{r.role}</span></td>
+                      <td style={{ padding:'11px 16px', color:'#64748b' }}>{row[0]}</td>
+                      <td style={{ padding:'11px 16px', fontWeight:700, color:N }}>{row[1]}</td>
+                      <td style={{ padding:'11px 16px', color:'#475569' }}>{row[2]}</td>
+                      <td style={{ padding:'11px 16px', fontSize:12 }}><span style={{ background:'#e0f2fe', color:'#0369a1', padding:'3px 8px', borderRadius:5, fontWeight:600 }}>{row[3]}</span></td>
+                      <td style={{ padding:'11px 16px' }}><span style={{ background:String(row[4]).includes('Chairperson')?'#fef3c7':String(row[4]).includes('Secretary')?'#dcfce7':'#f1f5f9', color:String(row[4]).includes('Chairperson')?'#92400e':String(row[4]).includes('Secretary')?'#166534':'#475569', padding:'3px 10px', borderRadius:6, fontSize:12, fontWeight:700 }}>{row[4]}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -599,19 +604,21 @@ export function GoverningBody() {
 ═══════════════════════════════════════════════════════════════ */
 export function StaffCouncil() {
   useScrollTop();
+  const { content, getText, getTable, getList } = usePageContent('staff-council');
+
+  const aboutText = getText('about-sc', '<p>The Staff Council of Guru Nanak College, Dhanbad is a representative body of the teaching and non-teaching staff. It serves as an advisory body to the Principal on academic and administrative matters, and acts as a platform for raising and resolving staff concerns.</p>');
+  const scMembers = getTable('sc-members', null);
+  const scFunctions = getList('sc-functions', ['Academic planning and curriculum discussions','Implementation of university and UGC guidelines','Student welfare and discipline matters','Organizing college events and programs','Grievance redressal of staff members','Annual academic calendar preparation']);
+
   return (
     <div>
-      <PageHero title="Staff Council" subtitle="The collective voice of teaching and non-teaching staff at GNC" icon="👨‍🏫" />
+      <PageHero title={content?.title || "Staff Council"} subtitle={content?.subtitle || "The collective voice of teaching and non-teaching staff at GNC"} icon="👨‍🏫" />
       <PageLayout>
         <Fade>
           <div style={{ background:'#fff', borderRadius:20, padding:36, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:24 }}>
             <h2 className="section-heading">About Staff Council</h2>
             <div className="heading-underline" />
-            <p className="rich-text-content">
-              The Staff Council of Guru Nanak College, Dhanbad is a representative body of the teaching
-              and non-teaching staff. It serves as an advisory body to the Principal on academic and
-              administrative matters, and acts as a platform for raising and resolving staff concerns.
-            </p>
+            <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: aboutText }} />
           </div>
         </Fade>
         <Fade delay={0.1}>
@@ -623,27 +630,27 @@ export function StaffCouncil() {
               <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
                 <thead>
                   <tr style={{ background:N, color:'#fff' }}>
-                    {['S.No.','Name','Designation','Department','Role'].map(h=>(
+                    {(scMembers?.headers || ['S.No.','Name','Designation','Department','Role']).map(h=>(
                       <th key={h} style={{ padding:'12px 16px', textAlign:'left', fontWeight:700 }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    {desig:'Principal',        dept:'Administration',role:'President / Chairman'},
-                    {desig:'✏️ [Designation]', dept:'✏️ [Dept]',     role:'Secretary'},
-                    {desig:'✏️ [Designation]', dept:'✏️ [Dept]',     role:'Joint Secretary'},
-                    {desig:'✏️ [Designation]', dept:'✏️ [Dept]',     role:'Member'},
-                    {desig:'✏️ [Designation]', dept:'✏️ [Dept]',     role:'Member'},
-                    {desig:'✏️ [Designation]', dept:'✏️ [Dept]',     role:'Member'},
-                    {desig:'✏️ [Designation]', dept:'✏️ [Dept]',     role:'Non-Teaching Rep.'},
-                  ].map((r,i)=>(
+                  {(scMembers?.rows || [
+                    ['1','Principal','Principal','Administration','President / Chairman'],
+                    ['2','✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Secretary'],
+                    ['3','✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Joint Secretary'],
+                    ['4','✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Member'],
+                    ['5','✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Member'],
+                    ['6','✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Member'],
+                    ['7','✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Non-Teaching Rep.'],
+                  ]).map((row,i)=>(
                     <tr key={i} style={{ background:i%2===0?'#f8fafc':'#fff', borderBottom:'1px solid #e2e8f0' }}>
-                      <td style={{ padding:'11px 16px', color:'#64748b' }}>{i+1}</td>
-                      <td style={{ padding:'11px 16px', fontWeight:700, color:N }}>✏️ [Name]</td>
-                      <td style={{ padding:'11px 16px', color:'#475569' }}>{r.desig}</td>
-                      <td style={{ padding:'11px 16px', color:'#64748b', fontSize:13 }}>{r.dept}</td>
-                      <td style={{ padding:'11px 16px' }}><span style={{ background:r.role.includes('President')?'#fef3c7':r.role==='Secretary'?'#dcfce7':'#f1f5f9', color:r.role.includes('President')?'#92400e':r.role==='Secretary'?'#166534':'#475569', padding:'3px 10px', borderRadius:6, fontSize:12, fontWeight:700 }}>{r.role}</span></td>
+                      <td style={{ padding:'11px 16px', color:'#64748b' }}>{row[0]}</td>
+                      <td style={{ padding:'11px 16px', fontWeight:700, color:N }}>{row[1]}</td>
+                      <td style={{ padding:'11px 16px', color:'#475569' }}>{row[2]}</td>
+                      <td style={{ padding:'11px 16px', color:'#64748b', fontSize:13 }}>{row[3]}</td>
+                      <td style={{ padding:'11px 16px' }}><span style={{ background:String(row[4]).includes('President')?'#fef3c7':String(row[4])==='Secretary'?'#dcfce7':'#f1f5f9', color:String(row[4]).includes('President')?'#92400e':String(row[4])==='Secretary'?'#166534':'#475569', padding:'3px 10px', borderRadius:6, fontSize:12, fontWeight:700 }}>{row[4]}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -652,7 +659,7 @@ export function StaffCouncil() {
             <div style={{ marginTop:24, padding:20, background:'#f8fafc', borderRadius:12, border:'1px solid #e2e8f0' }}>
               <h4 style={{ color:N, fontWeight:800, marginBottom:12, fontSize:16 }}>Key Functions</h4>
               <ul style={{ paddingLeft:20, margin:0 }}>
-                {['Academic planning and curriculum discussions','Implementation of university and UGC guidelines','Student welfare and discipline matters','Organizing college events and programs','Grievance redressal of staff members','Annual academic calendar preparation'].map((f,i)=>(
+                {scFunctions.map((f,i)=>(
                   <li key={i} style={{ color:'#475569', lineHeight:1.8, marginBottom:4 }}>{f}</li>
                 ))}
               </ul>

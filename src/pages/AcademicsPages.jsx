@@ -4,6 +4,7 @@ import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import PDFModal from '../components/PDFModal'; // ✅ PDF Modal Import
+import usePageContent from '../hooks/usePageContent';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -129,26 +130,39 @@ export function IqacPage() {
 ════════════════════════════════════════════════════════════ */
 export function CourseOffered() {
   const [activeTab, setActiveTab] = useState('BCA');
+  const { content, getList, getText } = usePageContent('course-offered');
   
-  const courses = {
+  const nepTimeline = getList('nep-timeline', [
+    { t: '1 Year', d: 'UG Certificate' }, { t: '2 Years', d: 'UG Diploma' }, 
+    { t: '3 Years', d: 'Bachelor Degree' }, { t: '4 Years', d: 'Bachelor with Honours / Research' }
+  ]);
+  
+  let courses = {
     'BCA': ['BCA (Computer Application)'],
     'BBA': ['BBA (Business Administration)'],
     'Commerce': ['Accounting & Finance', 'Marketing', 'Human Resource'],
     'Humanities': ['Hindi', 'English'],
     'Social Science': ['History', 'Political Science', 'Psychology', 'Economics']
   };
+  
+  try {
+    const coursesStr = getText('courses', '');
+    if (coursesStr && coursesStr.startsWith('{')) {
+      courses = JSON.parse(coursesStr);
+    }
+  } catch (e) { console.error('Error parsing courses JSON', e); }
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
-      <PageHeader title="Courses Offered (NEP 2022)" subtitle="Four Year Undergraduate Programme (FYUGP) with Multiple Entry & Exit Options." icon="🎓" />
+      <PageHeader title={content?.title || "Courses Offered (NEP 2022)"} subtitle={content?.subtitle || "Four Year Undergraduate Programme (FYUGP) with Multiple Entry & Exit Options."} icon="🎓" />
       
       <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ background: '#fff', borderRadius: 20, padding: '30px 40px', display: 'flex', flexWrap: 'wrap', gap: 30, justifyContent: 'space-between', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', marginBottom: 40 }}>
-            {[{t:'1 Year', d:'UG Certificate'}, {t:'2 Years', d:'UG Diploma'}, {t:'3 Years', d:'Bachelor Degree'}, {t:'4 Years', d:'Bachelor with Honours / Research'}].map((item, i) => (
+            {nepTimeline.map((item, i) => (
               <div key={i} style={{ textAlign: 'center', flex: '1 1 150px' }}>
-                <div style={{ fontSize: 24, fontWeight: 900, color: GOLD, marginBottom: 4 }}>{item.t}</div>
-                <div style={{ fontSize: 14, color: NAVY, fontWeight: 700 }}>{item.d}</div>
+                <div style={{ fontSize: 24, fontWeight: 900, color: GOLD, marginBottom: 4 }}>{item.t || item.duration}</div>
+                <div style={{ fontSize: 14, color: NAVY, fontWeight: 700 }}>{item.d || item.award}</div>
               </div>
             ))}
           </div>
@@ -164,7 +178,7 @@ export function CourseOffered() {
           </div>
 
           <div style={{ background: '#fff', borderRadius: 24, padding: 40, border: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 20 }}>
-            {courses[activeTab].map((subject, i) => (
+            {courses[activeTab] && courses[activeTab].map((subject, i) => (
               <div key={i} style={{ background: '#f8fafc', padding: 20, borderRadius: 16, border: '1.5px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 14 }}>
                 <div style={{ background: `${GOLD}20`, color: '#b45309', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>{i+1}</div>
                 <div style={{ fontWeight: 800, color: NAVY, fontSize: 16 }}>{subject}</div>
@@ -285,17 +299,18 @@ export function Syllabus() {
    4. ACADEMIC CALENDAR (Timeline)
 ════════════════════════════════════════════════════════════ */
 export function AcademicCalendar() {
-  const events = [
+  const { content, getList } = usePageContent('academic-calendar');
+  const events = getList('timeline', [
     { month: 'July - August', title: 'Admissions & Orientation', desc: 'Commencement of new academic session and induction for Semester 1.' },
     { month: 'September - October', title: 'Internal Mid-Semester Exams', desc: 'First assessment for all UG programs.' },
     { month: 'November', title: 'Youth Fest & Sports Meet', desc: 'Annual cultural and sports week.' },
     { month: 'December - January', title: 'University End-Semester Exams', desc: 'Final theory and practical examinations.' },
     { month: 'February - March', title: 'Even Semester Commences', desc: 'Classes resume for Semester 2, 4, and 6.' }
-  ];
+  ]);
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
-      <PageHeader title="Academic Calendar" subtitle="Key dates, examination schedules, and holidays for the current session." icon="🗓️" />
+      <PageHeader title={content?.title || "Academic Calendar"} subtitle={content?.subtitle || "Key dates, examination schedules, and holidays for the current session."} icon="🗓️" />
       
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>

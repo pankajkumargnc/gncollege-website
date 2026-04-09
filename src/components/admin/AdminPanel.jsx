@@ -36,6 +36,7 @@ const BackupRestoreTab  = lazy(() => import('./tabs/BackupRestoreTab'));
 const SystemTestTab     = lazy(() => import('./tabs/SystemTestTab'));
 const MeetingPDFTab     = lazy(() => import('./tabs/MeetingPDFTab'));
 const TestimonialsTab   = lazy(() => import('./tabs/TestimonialsTab'));
+const ContentManagerTab = lazy(() => import('./tabs/ContentManagerTab'));
 
 // Purane Admin Tabs (Jo aapne tabs folder mein move kiye hain)
 const AdminNeuralStudioTab = lazy(() => import('./tabs/AdminNeuralStudioTab'));
@@ -88,6 +89,7 @@ const TABS = [
   { id:'slider',        icon: <TabIcon path={<><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></>} />, label:'Hero Slider',     section:'' },
   { id:'menu_builder',  icon: <TabIcon path={<><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></>} />, label:'Menu Editor',      section:'' },
   { id:'pages',         icon: <TabIcon path={<><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></>} />, label:'Pages & SEO',      section:'' },
+  { id:'content_mgr',    icon: <TabIcon path={<><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></>} />, label:'Content Manager', section:'' },
   { id:'gallery',       icon: <TabIcon path={<><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></>} />, label:'Gallery',          section:'' },
   { id:'notices',       icon: <TabIcon path={<><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></>} />, label:'Notices',          section:'' },
   { id:'announcements', icon: <TabIcon path={<><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></>} />, label:'News',             section:'' },
@@ -297,6 +299,7 @@ function AdminPanelInner({
       case 'slider':       return <SliderTab sliderSlides={sliderSlides} {...sharedProps} />;
       case 'menu_builder': return <MenuBuilderTab navLinks={navLinks} {...sharedProps} />;
       case 'pages':        return <PagesTab pages={pages} {...sharedProps} />;
+      case 'content_mgr':  return <ContentManagerTab {...sharedProps} />;
       case 'gallery':      return <GalleryTab gallery={gallery} {...sharedProps} />;
       case 'notices':      return <NoticesTab notices={notices} {...sharedProps} />;
       case 'announcements':return <AnnouncementsTab announcements={announcements} {...sharedProps} />;

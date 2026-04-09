@@ -4,6 +4,7 @@ import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import DOMPurify from 'dompurify';
+import usePageContent from '../hooks/usePageContent';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -36,23 +37,23 @@ const PageHeader = ({ title, subtitle, icon }) => (
    1. ADMISSION RULE (Step-by-Step Flow)
 ════════════════════════════════════════════════════════════ */
 export function AdmissionRule() {
-  const steps = [
+  const { content, getList, getText } = usePageContent('admission-rule');
+  const importantRule = getText('important-rule', '<strong>Important Rule:</strong> Students attending less than 75% classes will not be eligible to fill up university examination forms. Violation of discipline may lead to removal.');
+  const steps = getList('steps', [
     { title: 'Apply via Chancellor Portal', desc: 'Desirous students must apply through the Chancellor Portal (https://jharkhanduniversities.nic.in/) under NEP-2020.', fee: 'Application Fee: Rs. 100/-' },
     { title: 'Merit List & Verification', desc: 'Selected students must visit respective campuses (Main/Bhuda/Bank More) with original documents for physical verification.', fee: 'Check Document Required Page' },
     { title: 'University Registration', desc: 'After verification, pay the BBMKU Registration Fee on Chancellor Portal again.', fee: 'JAC Board: Rs. 308/- | Others: Rs. 758/-' },
     { title: 'College Online Admission Form', desc: 'Register on www.gncollege.org or enrollonline.co.in. Upload Chancellor Portal fee receipt and marksheet.', fee: 'Wait for approval message' },
     { title: 'Final Fee Payment', desc: 'After approval, pay the college fee via Student Diary Cloud App or CIMS portal using Card/UPI/NetBanking.', fee: 'Online Payment Only' }
-  ];
+  ]);
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
-      <PageHeader title="Admission Procedure" subtitle="Complete step-by-step guide for UG and Vocational admission under NEP 2020." icon="📝" />
+      <PageHeader title={content?.title || "Admission Procedure"} subtitle={content?.subtitle || "Complete step-by-step guide for UG and Vocational admission under NEP 2020."} icon="📝" />
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ background: '#fff', padding: 40, borderRadius: 24, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)' }}>
-            <div style={{ background: '#fef2f2', borderLeft: `4px solid #ef4444`, padding: 16, borderRadius: '0 12px 12px 0', marginBottom: 30 }}>
-              <strong style={{ color: '#b91c1c' }}>Important Rule:</strong> <span style={{ color: '#ef4444' }}>Students attending less than 75% classes will not be eligible to fill up university examination forms. Violation of discipline may lead to removal.</span>
-            </div>
+            <div style={{ background: '#fef2f2', borderLeft: `4px solid #ef4444`, padding: 16, borderRadius: '0 12px 12px 0', marginBottom: 30 }} dangerouslySetInnerHTML={{ __html: importantRule }} />
             
             <div style={{ position: 'relative', paddingLeft: 24 }}>
               <div style={{ position: 'absolute', top: 10, bottom: 20, left: 9, width: 3, background: '#e2e8f0', borderRadius: 3 }} />
@@ -76,7 +77,8 @@ export function AdmissionRule() {
    2. DOCUMENTS REQUIRED (Checklist)
 ════════════════════════════════════════════════════════════ */
 export function DocumentRequired() {
-  const docs = [
+  const { content, getList } = usePageContent('document-required');
+  const docs = getList('documents', [
     { t: 'Chancellor Portal Form', d: 'Printed copy of the submitted application form.', type: 'Print' },
     { t: 'Application Fee Receipt', d: 'Proof of Rs. 100/- payment on Chancellor Portal.', type: 'Print' },
     { t: 'Original CLC/TC', d: 'Original copy will be kept by the college (keep photocopies for yourself).', type: 'Original' },
@@ -84,11 +86,11 @@ export function DocumentRequired() {
     { t: 'Admit Card', d: 'Self-attested photocopy of qualifying exam admit card.', type: 'Photocopy' },
     { t: 'Migration Certificate', d: 'Original or Downloaded from Digilocker (Required for non-JAC board).', type: 'Original' },
     { t: 'Caste Certificate', d: 'If applicable for reservation claims.', type: 'Photocopy' }
-  ];
+  ]);
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
-      <PageHeader title="Documents Required" subtitle="Bring these documents during physical verification at the campus." icon="📂" />
+      <PageHeader title={content?.title || "Documents Required"} subtitle={content?.subtitle || "Bring these documents during physical verification at the campus."} icon="📂" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
@@ -114,8 +116,9 @@ export function DocumentRequired() {
 ════════════════════════════════════════════════════════════ */
 export function FeeStructure() {
   const [activeTab, setActiveTab] = useState('UG');
+  const { content } = usePageContent('fee-structure');
 
-  // Exact data from PDF, updated for 8 Semesters (FYUGP)
+  // Exact data from PDF, updated for 8 Semesters (FYUGP) — GENUINE DATA, DO NOT MODIFY
   const ugFee = [
     { head: 'Tuition Fee', b1: '120', b2: '120', g1: '0', g2: '0' },
     { head: 'Admission fee', b1: '20', b2: '0', g1: '20', g2: '0' },
