@@ -6,8 +6,9 @@
 ![React](https://img.shields.io/badge/React-18.2-61DAFB?style=for-the-badge&logo=react)
 ![Firebase](https://img.shields.io/badge/Firebase-10.x-FFCA28?style=for-the-badge&logo=firebase)
 ![Vite](https://img.shields.io/badge/Vite-7.3-646CFF?style=for-the-badge&logo=vite)
+![Headless CMS](https://img.shields.io/badge/Headless_CMS-Firestore-FF3E00?style=for-the-badge)
 ![PWA Ready](https://img.shields.io/badge/PWA-Ready-5A0FC8?style=for-the-badge)
-![85-Phase Diagnostic](https://img.shields.io/badge/Audit-85--Phase-eab308?style=for-the-badge)
+![Ultra Pro Max Audit](https://img.shields.io/badge/Audit-Ultra_Pro_Max_v200.0-eab308?style=for-the-badge)
 
 **🎓 A NAAC Accredited Sikh Minority Degree College | Affiliated to B.B.M.K. University**  
 **📍 Bhuda Campus + Bank More Campus | Dhanbad, Jharkhand — 826001**
@@ -47,13 +48,13 @@ The **GNC Portral** is an ultra-modern, production-grade **React + Firebase + Vi
 
 | Aspect | Implementation Details |
 |--------|-----------------------|
-| 🔥 **Dynamic Data Hub** | Real-time synchronization via Firebase Cloud Firestore |
-| 🛡️ **Supreme Audit Engine** | Integrated 85-Phase Core Diagnostic System (v200.0) |
+| 🔥 **Headless CMS Engine** | Real-time structured data via `pageContent` & Jodit RTE |
+| 🛡️ **Zero-Deletion UI** | Intelligent components fallback to hardcoded JSX if CMS is missing |
 | 📂 **Encyclopedia Generator** | One-click 10-15 page professional HTML/A4 technical reports |
 | 📱 **Next-Gen PWA** | Fully installable, offline-capable progressive experience |
-| ☁️ **Universal Drive Sync** | Seamless MediaPicker integration with Google Drive (v3) |
-| 🎨 **Lumina Design System** | Glassmorphism, fluid typography (clamp), and CSS hardware-acceleration |
-| ⚡ **Performance Core** | React Code-splitting, Terser minification, and WebP compression |
+| ☁️ **Universal MediaPicker** | Seamless Drive (v3) URL transformations & cloud upload |
+| 🎨 **Lumina Design (UUPM)** | Glassmorphism, fluid typography (`clamp()`), Ultra Pro Max aesthetics |
+| ⚡ **Split-Core Logic** | React Code-splitting (Auth isolated from bundle), Terser, DOMPurify |
 
 ---
 
@@ -108,7 +109,7 @@ gncollege-website/
         ├── 📂 home/          ← TopBar, NotificationSection, Statistical Counters
         └── 📂 admin/
             ├── 📄 AdminPanel.jsx ← Central CMS Orchestrator
-            └── 📂 tabs/      ← 24+ Integrated Management Modules
+            └── 📂 tabs/      ← Content Manager, Pages, Sliders, PDF Reports (25+ Tabs)
 ```
 
 ---
@@ -116,11 +117,11 @@ gncollege-website/
 ## 🔐 Integrated CMS Modules (25+)
 
 The Admin Panel provides complete control over every pixel of the portal:
-*   **Dynamic Builder:** Create rich-text pages with custom slugs inside the `PagesTab`.
-*   **Drive Sync v3:** Sync documents and media files directly from Google Drive in one click.
-*   **Media Center:** High-speed uploader for Gallery, sliders, and alumni achievements.
-*   **Institutional Hub:** Manage Faculty, Departments, Leadership, and Staff rosters live.
-*   **System Diagnostics:** Run the 85-Phase Encyclopedia Audit directly from the HUD.
+*   **Structured Content Manager:** Edit page configurations (JSON + HTML) for 30+ pages directly via the HUD, with immediate website synchronization.
+*   **Dynamic Builder (`PagesTab`):** Create freeform custom pages using Shortcode integration.
+*   **Zero-Risk Database Sync:** Automated component fallbacks mean deleting a CMS entry safely rolls the UI back to original static layouts without crashing.
+*   **Auto Data Cleansing:** Deleting a page instantly triggers orphan-scanning across all Navbar nodes in the background.
+*   **Drive Sync v3:** Direct URL parsers convert raw Google Drive share links into production-ready embeds instantly.
 
 ---
 

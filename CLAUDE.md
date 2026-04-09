@@ -69,7 +69,18 @@ const safeLazy = (importFunction) => lazy(() =>
 - **STRICT RULE:** Any modification to the `handleDownloadReport` logic MUST NOT delete existing sections (Summary, Tech Stack, Features A-Z, Trace Table, etc.).
 - Unified Master Reports are cumulative and must include all technical details.
 
-### 6. Automated Navbar Sync
+### 6. `usePageContent` Headless CMS Hook (Critical Pattern)
+- We use a Headless CMS approach leveraging `pageContent` in Firestore.
+- **NEVER** delete existing hardcoded JSX text or arrays when implementing the hook.
+- Use the provided fallback helper methods:
+  ```jsx
+  const { content, getList, getText } = usePageContent('page-slug');
+  // ALWAYS provide the hardcoded JSX data as the second argument (fallback)
+  const items = getList('section-id', [{ genuine: "data" }]); 
+  ```
+- This ensures 100% backward compatibility if CMS data is wiped.
+
+### 7. Automated Navbar Sync
 ```jsx
 // PagesTab.jsx — Real-time background cleanup
 const triggerAutoCleanup = () => { setTimeout(handleCleanupNavbar, 2000); };
@@ -77,8 +88,8 @@ const triggerAutoCleanup = () => { setTimeout(handleCleanupNavbar, 2000); };
 - When a page is deleted/created, the system automatically orphan-scans the `menu` collection.
 - **DO NOT** remove these cleanup triggers.
 
-### 7. DOMPurify Sanitization
-- Every Firestore HTML string MUST pass through `DOMPurify.sanitize()` before being parsed by `html-react-parser`.
+### 8. DOMPurify Sanitization
+- Every Firestore HTML string MUST pass through `DOMPurify.sanitize()` before being parsed by `html-react-parser` or `dangerouslySetInnerHTML`.
 - **NEVER** bypass this sanitization layer.
 
 ---
