@@ -44,6 +44,19 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
   const location = useLocation()
   const currentPath = location.pathname
 
+  // ✅ Auto-close menu on real navigation (ignores hash-only changes like '#')
+  useEffect(() => {
+    if (menuOpen) {
+      setMenuOpen(false);
+      // We keep dropdown states for a smoother feel, 
+      // they'll reset when the user opens the menu again if needed,
+      // or we can reset them here if pathname definitively changed.
+      setOpenL1(null);
+      setOpenL2(null);
+      setOpenL3(null);
+    }
+  }, [location.pathname, location.search]);
+
   // ── Body scroll lock when mobile menu is open ──
   useEffect(() => {
     if (isMobile && menuOpen) {
