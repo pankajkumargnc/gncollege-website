@@ -21,6 +21,8 @@ const AlertBanner = lazy(() => import("./components/AlertBanner"));
 // ── Data & Styles ──
 import { navLinks as staticNavLinks } from "./data/db";
 import { updateSEO } from "./utils/seoManager";
+import { db } from "./firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import useDarkMode from "./hooks/useDarkMode";
 import useAppData from "./hooks/useAppData";
 
@@ -118,12 +120,8 @@ export default function App() {
     updateSEO(location.pathname);
     
     // ✅ Log visit to Firestore for Dashboard Graph
-    // Moved to a more stable structure to avoid Dispatcher errors
     const recordVisit = async () => {
        try {
-         const { db } = await import("./firebase");
-         const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
-         
          await addDoc(collection(db, "site_traffic"), {
            path: location.pathname,
            timestamp: serverTimestamp(),
