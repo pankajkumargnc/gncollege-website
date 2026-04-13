@@ -30,7 +30,6 @@ export default defineConfig({
             type: "image/png",
             purpose: "any",
           },
-          // ✅ iOS Specific PNG (Must be PNG for Safari)
           {
             src: "images/logo.png",
             sizes: "180x180",
@@ -41,7 +40,6 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg,webp,woff2}"],
-        // ✅ Fix for Firestore caching & Offline Fallback
         navigateFallback: "/index.html",
         runtimeCaching: [
           {
@@ -69,16 +67,13 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
-            if (id.includes("firebase")) return "firebase-core";
-            if (id.includes("lucide-react")) return "icons";
-            // ✅ Fix Circular Warning: Group React + Router together
-            if (
-              id.includes("react") ||
-              id.includes("react-dom") ||
-              id.includes("react-router-dom") ||
-              id.includes("@remix-run")
-            ) {
-              return "react-vendor";
+            if (id.includes("firebase")) return "firebase-db";
+            if (id.includes("jodit")) return "jodit-editor";
+            if (id.includes("recharts")) return "charts";
+            if (id.includes("pdfjs-dist")) return "pdf-viewer";
+            // Group all core React + Router together to avoid circularity
+            if (id.includes("react") || id.includes("router") || id.includes("@remix-run")) {
+              return "react-core";
             }
             return "vendor";
           }
