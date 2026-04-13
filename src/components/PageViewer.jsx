@@ -8,10 +8,10 @@ import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import DOMPurify from 'dompurify';
 import { useParams } from 'react-router-dom';
-import PDFModal from './PDFModal';
-import GalleryPage from '../pages/GalleryPage';
-import EventsPage from '../pages/EventsPage';
-import StaffPage from '../pages/StaffPage';
+const PDFModal = lazy(() => import('./PDFModal'));
+const GalleryPage = lazy(() => import('../pages/GalleryPage'));
+const EventsPage = lazy(() => import('../pages/EventsPage'));
+const StaffPage = lazy(() => import('../pages/StaffPage'));
 
 
 // ─────────────────────────────────────────────────────────────────────────────

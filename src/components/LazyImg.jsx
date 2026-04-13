@@ -1,6 +1,31 @@
 // src/components/LazyImg.jsx — Progressive Image with IntersectionObserver
 import { useState, useRef, useEffect, memo } from 'react';
 
+// ── Shared observer singleton ──────────────────────────────────────────────
+let _sharedObserver = null;
+const _callbacks = new WeakMap();
+
+function getSharedObserver() {
+  if (!_sharedObserver && typeof window !== 'undefined' && 'IntersectionObserver' in window) {
+    _sharedObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const cb = _callbacks.get(entry.target);
+            if (cb) {
+              cb();
+              _sharedObserver.unobserve(entry.target);
+              _callbacks.delete(entry.target);
+            }
+          }
+        });
+      },
+      { rootMargin: '200px' }
+    );
+  }
+  return _sharedObserver;
+}
+
 const LazyImg = memo(function LazyImg({ src, alt = '', className = '', style = {}, width, height, onClick }) {
   const [loaded, setLoaded] = useState(false);
   const [inView, setInView] = useState(false);
@@ -8,12 +33,21 @@ const LazyImg = memo(function LazyImg({ src, alt = '', className = '', style = {
 
   useEffect(() => {
     const el = imgRef.current;
-    if (!el || !('IntersectionObserver' in window)) { setInView(true); return; }
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setInView(true); obs.disconnect(); }
-    }, { rootMargin: '200px' });
-    obs.observe(el);
-    return () => obs.disconnect();
+    if (!el) return;
+
+    const observer = getSharedObserver();
+    if (!observer) {
+      setInView(true);
+      return;
+    }
+
+    _callbacks.set(el, () => setInView(true));
+    observer.observe(el);
+
+    return () => {
+      observer.unobserve(el);
+      _callbacks.delete(el);
+    };
   }, []);
 
   return (

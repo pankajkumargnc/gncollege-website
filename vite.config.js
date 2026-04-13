@@ -1,6 +1,20 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+const modulePreloadPlugin = {
+  name: "inject-modulepreload",
+  transformIndexHtml(html, ctx) {
+    if (!ctx?.bundle) return html;
+    const reactVendorChunk = Object.keys(ctx.bundle).find(
+      (k) => k.includes("vendor-react") && k.endsWith(".js")
+    );
+    if (!reactVendorChunk) return html;
+    const preloadTag = `  <link rel="modulepreload" href="/${reactVendorChunk}" crossorigin>\n`;
+    return html.replace("</head>", preloadTag + "</head>");
+  },
+};
+
+import viteImagemin from "vite-plugin-imagemin";
 
 export default defineConfig({
   base: "/",
@@ -9,6 +23,7 @@ export default defineConfig({
   },
 
   plugins: [
+    modulePreloadPlugin,
     react(),
     VitePWA({
       registerType: "autoUpdate",
@@ -23,39 +38,63 @@ export default defineConfig({
         start_url: "./index.html",
         icons: [
           {
+            src: "images/logo.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any maskable",
+          },
+          {
+            src: "images/logo.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+          {
             src: "images/logo_192.png",
             sizes: "192x192",
             type: "image/png",
-            purpose: "any",
           },
           {
             src: "images/logo_512.png",
             sizes: "512x512",
             type: "image/png",
-            purpose: "any",
-          },
-          {
-            src: "images/logo.png",
-            sizes: "180x180",
-            type: "image/png",
-            purpose: "apple-touch-icon",
           },
         ],
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg,webp,woff2}"],
         navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/api/],
+        offlineGoogleAnalytics: false,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*/i,
             handler: "NetworkFirst",
             options: {
               cacheName: "firestore-cache",
+              networkTimeoutSeconds: 3,
               expiration: { maxEntries: 50, maxAgeSeconds: 3600 },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/firebasestorage\.googleapis\.com\/.*/i,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "firebase-storage",
+              expiration: { maxEntries: 50, maxAgeSeconds: 2592000 },
             },
           },
         ],
       },
+    }),
+    viteImagemin({
+      gifsicle: { optimizationLevel: 7, interlaced: false },
+      optipng: { optimizationLevel: 5 },
+      mozjpeg: { quality: 78 },
+      pngquant: { quality: [0.7, 0.9], speed: 4 },
+      svgo: {
+        plugins: [{ name: "removeViewBox" }, { name: "removeEmptyAttrs", active: false }],
+      },
+      webp: { quality: 78 },
     }),
   ],
   server: {
