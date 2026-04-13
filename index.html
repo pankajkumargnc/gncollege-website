@@ -91,15 +91,9 @@
     <!-- ══ Performance — Preconnect ══ -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin />
-    <link rel="preconnect" href="https://firebase.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://www.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://generativelanguage.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://i.ibb.co" crossorigin />
-    <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
-    <link rel="dns-prefetch" href="https://firebase.googleapis.com" />
-    <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
-    <link rel="dns-prefetch" href="https://i.ibb.co" />
     <link rel="dns-prefetch" href="https://api.imgbb.com" />
     <link rel="dns-prefetch" href="https://drive.google.com" />
     <link rel="dns-prefetch" href="https://www.youtube.com" />
@@ -141,12 +135,22 @@
       .splash-text{margin-top:24px;font-size:clamp(11px,.85vw,14px);font-weight:800;color:#0f2347;letter-spacing:4px;text-transform:uppercase;animation:fadeInOut 1.5s infinite;will-change:opacity}
     </style>
 
-    <script type="module" crossorigin src="/gncollege-website/assets/index-C8wT3W_W.js"></script>
-    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/react-vendor-B9adZnTC.js">
-    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/pdf-viewer-y62_4TVF.js">
-    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/firebase-db-CkMbpyDi.js">
-    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/firebase-app-DRTYPBNP.js">
-    <link rel="stylesheet" crossorigin href="/gncollege-website/assets/index-CLI1Kiou.css">
+    <!-- Firebase preconnect -->
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.googleapis.com">
+    <link rel="dns-prefetch" href="https://securetoken.googleapis.com">
+    <link rel="preconnect" href="https://firebase.googleapis.com">
+    <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+    <script type="module" crossorigin src="/gncollege-website/assets/index-BRCG3ZjW.js"></script>
+    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-pdf-BB58vQ54.js">
+    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-jodit-dbxwbg3y.js">
+    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-react-w1wT62ca.js">
+    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-firebase-C2ZWxazh.js">
+    <link rel="stylesheet" crossorigin href="/gncollege-website/assets/vendor-jodit-vLJvXAYP.css">
+    <link rel="stylesheet" crossorigin href="/gncollege-website/assets/vendor-react-CBXYWCWZ.css">
+    <link rel="stylesheet" crossorigin href="/gncollege-website/assets/index-DId12ZM8.css">
   <link rel="manifest" href="/gncollege-website/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/gncollege-website/registerSW.js"></script></head>
   <body>
 
@@ -198,9 +202,6 @@
         setTimeout(hide, 4000);
       })();
     </script>
-
-  </body>
-</html>
 
   </body>
 </html>
