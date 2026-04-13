@@ -119,21 +119,18 @@ export default function App() {
   useEffect(() => {
     updateSEO(location.pathname);
     
-    // ✅ Log visit to Firestore for Dashboard Graph
-    const recordVisit = async () => {
-       try {
-         await addDoc(collection(db, "site_traffic"), {
-           path: location.pathname,
-           timestamp: serverTimestamp(),
-           userAgent: navigator.userAgent
-         });
-       } catch (err) {
-         // Silently fail if blocked or offline
-       }
-    };
-    
+    // ✅ Log visit to Firestore — debounced to avoid write-per-click
     if (!isAdminRoute) {
-        recordVisit();
+      const timer = setTimeout(async () => {
+        try {
+          await addDoc(collection(db, "site_traffic"), {
+            path: location.pathname,
+            timestamp: serverTimestamp(),
+            userAgent: navigator.userAgent,
+          });
+        } catch (_) {}
+      }, 2000); // Only write if user stays on this route for 2s
+      return () => clearTimeout(timer);
     }
   }, [location.pathname, isAdminRoute]);
 

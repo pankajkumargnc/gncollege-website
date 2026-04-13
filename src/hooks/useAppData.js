@@ -17,23 +17,40 @@ export default function useAppData() {
   const [navLinks, setNavLinks]           = useState([]);
   const [pdfReports, setPdfReports]       = useState([]);
 
-  // Navigation
+  // Navigation — cached, not live
   useEffect(() => {
-    const q = query(collection(db, "navigation"), orderBy("order", "asc"));
-    const unsub = onSnapshot(q, (snap) => {
-      const flat = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      const buildTree = (list, pid = null) => {
-        const mine = list.filter(m => (m.parentId || null) === pid);
-        if (!mine.length) return null;
-        return mine.map(m => ({
-          label: m.label,
-          href: m.href,
-          sub: buildTree(list, m.id)
-        }));
-      };
-      setNavLinks(buildTree(flat) || []);
+    const CACHE_KEY = 'gnc_nav_v1';
+    const CACHE_TS_KEY = 'gnc_nav_v1_ts';
+    const NAV_TTL = 30 * 60 * 1000; // 30 minutes
+
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      const ts = localStorage.getItem(CACHE_TS_KEY);
+      if (cached && ts && Date.now() - Number(ts) < NAV_TTL) {
+        setNavLinks(JSON.parse(cached));
+        return;
+      }
+    } catch (_) {}
+
+    const buildTree = (flat, pid = null) => {
+      const children = flat.filter(m => (m.parentId || null) === pid);
+      if (!children.length) return null;
+      return children.map(c => ({ label: c.label, href: c.href, sub: buildTree(flat, c.id) }));
+    };
+
+    import('firebase/firestore').then(({ getDocs, query, collection, orderBy }) => {
+      getDocs(query(collection(db, 'navigation'), orderBy('order', 'asc')))
+        .then(snap => {
+          const flat = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          const tree = buildTree(flat) || [];
+          setNavLinks(tree);
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(tree));
+            localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
+          } catch (_) {}
+        })
+        .catch(err => console.error('[Backend] navigation fetch error:', err));
     });
-    return () => unsub();
   }, []);
 
   // Live + Cached collections

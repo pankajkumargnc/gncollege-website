@@ -1,5 +1,5 @@
 // src/pages/HomePage.jsx
-import { useState, useEffect, useCallback, useRef, memo, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef, memo, useMemo, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
@@ -13,7 +13,7 @@ import HomeFeatures from "../components/HomeFeatures";
 import NotificationSection from "../components/home/NotificationSection";
 import PlacementsSection from "../components/home/PlacementsSection";
 import PremiumTicker from "../components/PremiumTicker";
-import PDFModal from "../components/PDFModal";
+const PDFModal = lazy(() => import("../components/PDFModal"));
 import TestimonialsSection from "../components/home/TestimonialsSection";
 import AdmissionTimeline from "../components/home/AdmissionTimeline";
 
@@ -1119,11 +1119,13 @@ const HomePage = ({
       <YouTubeSection />
 
       {selectedPdf && (
-        <PDFModal
-          url={selectedPdf.url}
-          title={selectedPdf.title}
-          onClose={() => setSelectedPdf(null)}
-        />
+        <Suspense fallback={null}>
+          <PDFModal
+            url={selectedPdf.url}
+            title={selectedPdf.title}
+            onClose={() => setSelectedPdf(null)}
+          />
+        </Suspense>
       )}
     </div>
   );

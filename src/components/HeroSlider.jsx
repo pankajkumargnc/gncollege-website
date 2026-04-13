@@ -24,6 +24,7 @@ const HeroSlider = ({ slides = [] }) => {
   const [loaded, setLoaded] = useState(new Set([0]));
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const rootRef = useRef(null);
+  const rafRef = useRef(null);
 
   const displaySlides = useMemo(() => {
     const list = (!slides || slides.length === 0) ? FALLBACK_SLIDES : slides;
@@ -44,14 +45,18 @@ const HeroSlider = ({ slides = [] }) => {
     setLoaded(prev => new Set([...prev, cur, (cur+1)%len, (cur-1+len)%len]));
   }, [cur, len]);
 
-  // 🖱️ 3D Parallax Effect on Mouse Move
-  const handleMouseMove = (e) => {
+  // 🖱️ 3D Parallax Effect on Mouse Move — throttled with rAF
+  const handleMouseMove = useCallback((e) => {
     if (!rootRef.current || window.innerWidth < 1024) return;
-    const { left, top, width, height } = rootRef.current.getBoundingClientRect();
-    const x = ((e.clientX - left) / width - 0.5) * 30; // Max 30px move
-    const y = ((e.clientY - top) / height - 0.5) * 20;
-    setOffset({ x, y });
-  };
+    if (rafRef.current) return; // skip if frame already pending
+    rafRef.current = requestAnimationFrame(() => {
+      const { left, top, width, height } = rootRef.current.getBoundingClientRect();
+      const x = ((e.clientX - left) / width - 0.5) * 30;
+      const y = ((e.clientY - top) / height - 0.5) * 20;
+      setOffset({ x, y });
+      rafRef.current = null;
+    });
+  }, []);
 
   const handleMouseLeave = () => {
     setPaused(false);

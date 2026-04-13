@@ -1,39 +1,62 @@
-// src/utils/cachedFetch.js — Cross-session caching for static Firestore collections
+// src/utils/cachedFetch.js — Smart Persistent Caching (localStorage)
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
 
-const TTL = {
-  gallery:      10 * 60 * 1000,
-  faculties:    15 * 60 * 1000,
-  sliderSlides: 15 * 60 * 1000,
-  pdfReports:   10 * 60 * 1000,
-  testimonials: 20 * 60 * 1000,
-};
+const CACHE_KEY_PREFIX = "gnc_coll_";
 
-export function getCached(colName) {
+// ✅ Compatibility helper for useAppData.js
+export function getCached(collectionName, ttl = 3600000) {
+  const cacheKey = `${CACHE_KEY_PREFIX}${collectionName}`;
+  const tsKey = `${cacheKey}_ts`;
   try {
-    const data = localStorage.getItem(`gnc_${colName}`);
-    const ts   = localStorage.getItem(`gnc_${colName}_ts`);
-    const ttl  = TTL[colName] || 5 * 60 * 1000;
-    if (data && ts && Date.now() - Number(ts) < ttl) return JSON.parse(data);
+    const cachedData = localStorage.getItem(cacheKey);
+    const cachedTs = localStorage.getItem(tsKey);
+    if (cachedData && cachedTs && Date.now() - Number(cachedTs) < ttl) {
+      return JSON.parse(cachedData);
+    }
   } catch (_) {}
   return null;
 }
 
-export function setCache(colName, data) {
+// ✅ Compatibility helper for useAppData.js
+export function setCache(collectionName, data) {
+  const cacheKey = `${CACHE_KEY_PREFIX}${collectionName}`;
+  const tsKey = `${cacheKey}_ts`;
   try {
-    localStorage.setItem(`gnc_${colName}`, JSON.stringify(data));
-    localStorage.setItem(`gnc_${colName}_ts`, String(Date.now()));
+    localStorage.setItem(cacheKey, JSON.stringify(data));
+    localStorage.setItem(tsKey, Date.now().toString());
+  } catch (e) {
+    localStorage.clear();
+    localStorage.setItem(cacheKey, JSON.stringify(data));
+    localStorage.setItem(tsKey, Date.now().toString());
+  }
+}
+
+// ✅ Compatibility helper for Admin Tabs
+export function clearCache(collectionName) {
+  const cacheKey = `${CACHE_KEY_PREFIX}${collectionName}`;
+  const tsKey = `${cacheKey}_ts`;
+  try {
+    localStorage.removeItem(cacheKey);
+    localStorage.removeItem(tsKey);
+    // Also clear the generic nav cache if any nav change happened
+    localStorage.removeItem('gnc_nav_v1');
+    localStorage.removeItem('gnc_nav_v1_ts');
   } catch (_) {}
 }
 
-export function clearCache(colName) {
-  try {
-    localStorage.removeItem(`gnc_${colName}`);
-    localStorage.removeItem(`gnc_${colName}_ts`);
-  } catch (_) {}
-}
+export async function cachedFetch(collectionName, ttl = 3600000) {
+  const cached = getCached(collectionName, ttl);
+  if (cached) return cached;
 
-export function clearAllCache() {
   try {
-    Object.keys(localStorage).filter(k => k.startsWith('gnc_')).forEach(k => localStorage.removeItem(k));
-  } catch (_) {}
+    const snap = await getDocs(collection(db, collectionName));
+    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setCache(collectionName, data);
+    return data;
+  } catch (error) {
+    console.error(`Fetch error [${collectionName}]:`, error);
+    const fallback = getCached(collectionName, Infinity);
+    return fallback || [];
+  }
 }
