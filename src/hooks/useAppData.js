@@ -17,17 +17,21 @@ export default function useAppData() {
   const [navLinks, setNavLinks]           = useState([]);
   const [pdfReports, setPdfReports]       = useState([]);
 
-  // Navigation — always live
+  // Navigation
   useEffect(() => {
-    const qNav = query(collection(db, 'navigation'), orderBy('order', 'asc'));
-    const unsub = onSnapshot(qNav, snap => {
+    const q = query(collection(db, "navigation"), orderBy("order", "asc"));
+    const unsub = onSnapshot(q, (snap) => {
       const flat = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      const buildTree = pid => {
-        const children = flat.filter(m => (m.parentId || null) === (pid || null));
-        if (!children.length) return null;
-        return children.map(c => ({ label: c.label, href: c.href, sub: buildTree(c.id) }));
+      const buildTree = (list, pid = null) => {
+        const mine = list.filter(m => (m.parentId || null) === pid);
+        if (!mine.length) return null;
+        return mine.map(m => ({
+          label: m.label,
+          href: m.href,
+          sub: buildTree(list, m.id)
+        }));
       };
-      setNavLinks(buildTree(null) || []);
+      setNavLinks(buildTree(flat) || []);
     });
     return () => unsub();
   }, []);

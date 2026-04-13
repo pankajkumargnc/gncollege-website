@@ -1,5 +1,4 @@
-// src/utils/cachedFetch.js — Session-based caching for static Firestore collections
-// Reduces Firebase reads by ~84% for repeat pageviews within same session
+// src/utils/cachedFetch.js — Cross-session caching for static Firestore collections
 
 const TTL = {
   gallery:      10 * 60 * 1000,
@@ -11,8 +10,8 @@ const TTL = {
 
 export function getCached(colName) {
   try {
-    const data = sessionStorage.getItem(`gnc_${colName}`);
-    const ts   = sessionStorage.getItem(`gnc_${colName}_ts`);
+    const data = localStorage.getItem(`gnc_${colName}`);
+    const ts   = localStorage.getItem(`gnc_${colName}_ts`);
     const ttl  = TTL[colName] || 5 * 60 * 1000;
     if (data && ts && Date.now() - Number(ts) < ttl) return JSON.parse(data);
   } catch (_) {}
@@ -21,20 +20,20 @@ export function getCached(colName) {
 
 export function setCache(colName, data) {
   try {
-    sessionStorage.setItem(`gnc_${colName}`, JSON.stringify(data));
-    sessionStorage.setItem(`gnc_${colName}_ts`, String(Date.now()));
+    localStorage.setItem(`gnc_${colName}`, JSON.stringify(data));
+    localStorage.setItem(`gnc_${colName}_ts`, String(Date.now()));
   } catch (_) {}
 }
 
 export function clearCache(colName) {
   try {
-    sessionStorage.removeItem(`gnc_${colName}`);
-    sessionStorage.removeItem(`gnc_${colName}_ts`);
+    localStorage.removeItem(`gnc_${colName}`);
+    localStorage.removeItem(`gnc_${colName}_ts`);
   } catch (_) {}
 }
 
 export function clearAllCache() {
   try {
-    Object.keys(sessionStorage).filter(k => k.startsWith('gnc_')).forEach(k => sessionStorage.removeItem(k));
+    Object.keys(localStorage).filter(k => k.startsWith('gnc_')).forEach(k => localStorage.removeItem(k));
   } catch (_) {}
 }
