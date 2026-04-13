@@ -1,7 +1,7 @@
 // src/pages/RegulationsPage.jsx
 // ✅ BUG FIX: VITE_DRIVE_REGULATION_FOLDER → VITE_DRIVE_REGULATIONS_FOLDER
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useDriveDocs } from '../hooks/useDriveDocs';
 import PDFModal from '../components/PDFModal';
 import { COLORS } from '../styles/colors';
@@ -102,7 +102,9 @@ export default function RegulationsPage() {
       </div>
 
       {selectedPdf && (
-        <PDFModal url={selectedPdf.url} title={selectedPdf.title} onClose={() => setSelectedPdf(null)} />
+        <Suspense fallback={null}>
+          <PDFModal url={selectedPdf.url} title={selectedPdf.title} onClose={() => setSelectedPdf(null)} />
+        </Suspense>
       )}
     </div>
   );

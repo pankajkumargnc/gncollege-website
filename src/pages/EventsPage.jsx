@@ -2,7 +2,7 @@
 // ✅ BUG FIX: READ REPORT link — undefined href fix, opens PDFModal properly
 // ✅ Pagination added, all existing features preserved
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
@@ -308,7 +308,11 @@ export default function EventsPage({ headless }) {
         </main>
       </div>
 
-      {previewPdf && <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />}
+      {previewPdf && (
+        <Suspense fallback={null}>
+          <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />
+        </Suspense>
+      )}
     </div>
   );
 }

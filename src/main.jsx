@@ -14,6 +14,7 @@ class RootErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, info) {
+    console.error('[RootErrorBoundary] caught error:', error, info);
   }
 
   render() {
@@ -52,11 +53,9 @@ class RootErrorBoundary extends React.Component {
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <RootErrorBoundary>
-      <Router>
-        <AppWrapper />
-      </Router>
-    </RootErrorBoundary>
-  </React.StrictMode>,
+  <RootErrorBoundary>
+    <Router>
+      <AppWrapper />
+    </Router>
+  </RootErrorBoundary>,
 )

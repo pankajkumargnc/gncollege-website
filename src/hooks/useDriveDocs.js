@@ -3,7 +3,7 @@
 // 🚀 New Features: Video streaming support & Deep Full-Text Search inside PDFs
 // Usage: const { docs, loading, error } = useDriveDocs(folderId, 'pdf', 'search_keyword')
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const BASE_URL = 'https://www.googleapis.com/drive/v3/files';
 

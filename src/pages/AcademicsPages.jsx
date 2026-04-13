@@ -1,9 +1,9 @@
 // src/pages/AcademicsPages.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
-import PDFModal from '../components/PDFModal'; // ✅ PDF Modal Import
+const PDFModal = lazy(() => import('../components/PDFModal')); // ✅ PDF Modal Import
 import usePageContent from '../hooks/usePageContent';
 
 const NAVY = COLORS?.navy || '#0f2347';
@@ -115,11 +115,13 @@ export function IqacPage() {
 
       {/* ✅ Modal Render */}
       {selectedPdf && (
-        <PDFModal 
-          url={selectedPdf.url} 
-          title={selectedPdf.title} 
-          onClose={() => setSelectedPdf(null)} 
-        />
+        <Suspense fallback={null}>
+          <PDFModal 
+            url={selectedPdf.url} 
+            title={selectedPdf.title} 
+            onClose={() => setSelectedPdf(null)} 
+          />
+        </Suspense>
       )}
     </div>
   );
@@ -285,11 +287,13 @@ export function Syllabus() {
 
       {/* ✅ Modal Render */}
       {selectedPdf && (
-        <PDFModal 
-          url={selectedPdf.url} 
-          title={selectedPdf.title} 
-          onClose={() => setSelectedPdf(null)} 
-        />
+        <Suspense fallback={null}>
+          <PDFModal 
+            url={selectedPdf.url} 
+            title={selectedPdf.title} 
+            onClose={() => setSelectedPdf(null)} 
+          />
+        </Suspense>
       )}
     </div>
   );

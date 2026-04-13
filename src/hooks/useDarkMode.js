@@ -1,7 +1,7 @@
 // src/hooks/useDarkMode.js — Dark Mode Hook
 // 🎨 @UI_Agent — Persistent dark mode with CSS custom property toggling
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 const STORAGE_KEY = 'gnc_dark_mode';
 

@@ -1,7 +1,7 @@
 // src/pages/NotificationsPage.jsx
 // 🚀 100% Synced with Google Drive Notice Folder
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { COLORS } from '../styles/colors';
 import PDFModal from '../components/PDFModal';
 import PremiumPagination from '../components/PremiumPagination';
@@ -210,7 +210,11 @@ export default function NotificationsPage() {
         )}
       </div>
 
-      {previewPdf && <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />}
+      {previewPdf && (
+        <Suspense fallback={null}>
+          <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />
+        </Suspense>
+      )}
     </div>
   );
 }

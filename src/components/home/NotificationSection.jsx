@@ -1,5 +1,5 @@
 // src/components/home/NotificationSection.jsx
-import { useRef, useEffect, useMemo, useState } from 'react';
+import React, { useRef, useEffect, useMemo, useState, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { COLORS } from '../../styles/colors';
@@ -330,11 +330,13 @@ const NotificationSection = ({ notices, announcements, pdfReports, upcomingEvent
       </div>
 
       {previewPdf && (
-        <PDFModal
-          url={previewPdf.url}
-          title={previewPdf.title}
-          onClose={() => setPreviewPdf(null)}
-        />
+        <Suspense fallback={null}>
+          <PDFModal
+            url={previewPdf.url}
+            title={previewPdf.title}
+            onClose={() => setPreviewPdf(null)}
+          />
+        </Suspense>
       )}
     </section>
   );

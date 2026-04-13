@@ -8,11 +8,10 @@ import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import DOMPurify from 'dompurify';
 import { useParams } from 'react-router-dom';
-import PDFModal from './PDFModal'; 
-
-const GalleryPage = lazy(() => import('../pages/GalleryPage'));
-const EventsPage = lazy(() => import('../pages/EventsPage'));
-const StaffPage = lazy(() => import('../pages/StaffPage'));
+import PDFModal from './PDFModal';
+import GalleryPage from '../pages/GalleryPage';
+import EventsPage from '../pages/EventsPage';
+import StaffPage from '../pages/StaffPage';
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -603,7 +602,11 @@ const PageViewer = ({ path, content, title, gallery, events, faculties }) => {
       </div>
 
       {/* ✅ PDF Modal Render */}
-      {pdfPreview && <PDFModal url={pdfPreview.url} title={pdfPreview.title} onClose={() => setPdfPreview(null)} />}
+      {pdfPreview && (
+        <Suspense fallback={null}>
+          <PDFModal url={pdfPreview.url} title={pdfPreview.title} onClose={() => setPdfPreview(null)} />
+        </Suspense>
+      )}
     </div>
   );
 };
@@ -661,7 +664,11 @@ export const PageViewerStandalone = () => {
       </div>
 
       {/* ✅ PDF Modal Render */}
-      {pdfPreview && <PDFModal url={pdfPreview.url} title={pdfPreview.title} onClose={() => setPdfPreview(null)} />}
+      {pdfPreview && (
+        <Suspense fallback={null}>
+          <PDFModal url={pdfPreview.url} title={pdfPreview.title} onClose={() => setPdfPreview(null)} />
+        </Suspense>
+      )}
     </div>
   );
 };

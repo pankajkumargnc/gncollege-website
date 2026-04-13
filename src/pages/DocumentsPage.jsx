@@ -1,8 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
-import PDFModal from '../components/PDFModal';
+const PDFModal = lazy(() => import('../components/PDFModal'));
 import PremiumPagination from '../components/PremiumPagination';
 
 const ITEMS_PER_PAGE = 15;
@@ -305,11 +305,13 @@ export default function DocumentsPage() {
         </div>
 
       {selectedPdf && (
-        <PDFModal 
-          url={selectedPdf.url} 
-          title={selectedPdf.title} 
-          onClose={() => setSelectedPdf(null)} 
-        />
+        <Suspense fallback={null}>
+          <PDFModal 
+            url={selectedPdf.url} 
+            title={selectedPdf.title} 
+            onClose={() => setSelectedPdf(null)} 
+          />
+        </Suspense>
       )}
     </div>
   );

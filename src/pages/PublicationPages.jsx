@@ -1,9 +1,9 @@
 // src/pages/PublicationPages.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
-import PDFModal from '../components/PDFModal'; // ✅ PDF Modal Import
+const PDFModal = lazy(() => import('../components/PDFModal')); // ✅ PDF Modal Import
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -68,7 +68,11 @@ function PublicationDocList({ keyword }) {
       </div>
 
       {/* ✅ Modal Render */}
-      {previewPdf && <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />}
+      {previewPdf && (
+        <Suspense fallback={null}>
+          <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />
+        </Suspense>
+      )}
     </>
   );
 }

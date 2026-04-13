@@ -3,7 +3,11 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
-  base: "./",
+  base: "/",
+  resolve: {
+    dedupe: ["react", "react-dom"],
+  },
+
   plugins: [
     react(),
     VitePWA({
@@ -67,27 +71,17 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
-            if (id.includes("firebase")) return "firebase-db";
-            if (id.includes("jodit")) return "jodit-editor";
-            if (id.includes("recharts")) return "charts";
-            if (id.includes("pdfjs-dist")) return "pdf-viewer";
-            // Group all core React + Router together to avoid circularity
-            if (id.includes("react") || id.includes("router") || id.includes("@remix-run")) {
-              return "react-core";
-            }
-            return "vendor";
+            if (id.includes("firebase")) return "vendor-firebase";
+            if (id.includes("react") || id.includes("react-dom") || id.includes("react-router")) return "vendor-react";
+            if (id.includes("jodit")) return "vendor-jodit";
+            if (id.includes("recharts") || id.includes("d3")) return "vendor-charts";
+            if (id.includes("pdfjs-dist") || id.includes("react-pdf")) return "vendor-pdf";
           }
         },
       },
     },
   },
   optimizeDeps: {
-    include: [
-      "react",
-      "react-dom",
-      "react-router-dom",
-      "pdfjs-dist/build/pdf.worker.min.mjs",
-    ],
     exclude: ["jodit-react"],
   },
 });

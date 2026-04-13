@@ -4,7 +4,7 @@
 //  Split into specialized components for better maintainability
 // ══════════════════════════════════════════════════════════════════
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -323,7 +323,11 @@ function SingleDeptPage({ slug, subSlug }) {
         >← Back to All Departments</Link>
       </div>
 
-      {previewPdf && <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />}
+      {previewPdf && (
+        <Suspense fallback={null}>
+          <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />
+        </Suspense>
+      )}
     </div>
   );
 }

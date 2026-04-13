@@ -1,5 +1,5 @@
 // src/hooks/useAppData.js — FIXED + CACHED VERSION
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { collection, query, onSnapshot, orderBy, limit, getDocs, where, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getCached, setCache } from '../utils/cachedFetch';
@@ -38,19 +38,22 @@ export default function useAppData() {
       return children.map(c => ({ label: c.label, href: c.href, sub: buildTree(flat, c.id) }));
     };
 
-    import('firebase/firestore').then(({ getDocs, query, collection, orderBy }) => {
-      getDocs(query(collection(db, 'navigation'), orderBy('order', 'asc')))
-        .then(snap => {
-          const flat = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          const tree = buildTree(flat) || [];
-          setNavLinks(tree);
-          try {
-            localStorage.setItem(CACHE_KEY, JSON.stringify(tree));
-            localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
-          } catch (_) {}
-        })
-        .catch(err => console.error('[Backend] navigation fetch error:', err));
-    });
+    if (!db) {
+      console.warn('[Backend] db not initialized in useAppData');
+      return;
+    }
+
+    getDocs(query(collection(db, 'navigation'), orderBy('order', 'asc')))
+      .then(snap => {
+        const flat = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const tree = buildTree(flat) || [];
+        setNavLinks(tree);
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(tree));
+          localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
+        } catch (_) {}
+      })
+      .catch(err => console.error('[Backend] navigation fetch error:', err));
   }, []);
 
   // Live + Cached collections

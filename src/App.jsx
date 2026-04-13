@@ -11,12 +11,11 @@ import Breadcrumbs from "./components/Breadcrumbs";
 import QuickActionNav from "./components/QuickActionNav";
 import AppRoutes from "./components/AppRoutes";
 import Ticker from "./components/Ticker";
-
-const WhatsAppButton = lazy(() => import("./components/WhatsAppButton"));
-const BackToTop = lazy(() => import("./components/BackToTop"));
-const AIChatbot = lazy(() => import("./components/AIChatbot"));
-const UniversalSearch = lazy(() => import("./components/UniversalSearch"));
-const AlertBanner = lazy(() => import("./components/AlertBanner"));
+import WhatsAppButton from "./components/WhatsAppButton";
+import BackToTop from "./components/BackToTop";
+import AIChatbot from "./components/AIChatbot";
+import UniversalSearch from "./components/UniversalSearch";
+import AlertBanner from "./components/AlertBanner";
 
 // ── Data & Styles ──
 import { navLinks as staticNavLinks } from "./data/db";
@@ -123,6 +122,7 @@ export default function App() {
     if (!isAdminRoute) {
       const timer = setTimeout(async () => {
         try {
+          if (!db) return;
           await addDoc(collection(db, "site_traffic"), {
             path: location.pathname,
             timestamp: serverTimestamp(),

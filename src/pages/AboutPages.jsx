@@ -1,5 +1,5 @@
 // src/pages/AboutPages.jsx
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { collection, query, orderBy, onSnapshot, where } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -221,11 +221,13 @@ function MeetingPDFList({ collectionName, accentColor, emptyText }) {
       </div>
 
       {selectedPdf && (
-        <PDFModal 
-          url={selectedPdf.url} 
-          title={selectedPdf.title} 
-          onClose={() => setSelectedPdf(null)} 
-        />
+        <Suspense fallback={null}>
+          <PDFModal 
+            url={selectedPdf.url} 
+            title={selectedPdf.title} 
+            onClose={() => setSelectedPdf(null)} 
+          />
+        </Suspense>
       )}
     </>
   );
@@ -380,11 +382,13 @@ export function Organogram() {
         </Fade>
       </PageLayout>
       {selectedPdf && (
-        <PDFModal 
-          url={selectedPdf.url} 
-          title={selectedPdf.title} 
-          onClose={() => setSelectedPdf(null)} 
-        />
+        <Suspense fallback={null}>
+          <PDFModal 
+            url={selectedPdf.url} 
+            title={selectedPdf.title} 
+            onClose={() => setSelectedPdf(null)} 
+          />
+        </Suspense>
       )}
     </div>
   );
@@ -494,11 +498,13 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
         </Fade>
       </PageLayout>
       {selectedPdf && (
-        <PDFModal 
-          url={selectedPdf.url} 
-          title={selectedPdf.title} 
-          onClose={() => setSelectedPdf(null)} 
-        />
+        <Suspense fallback={null}>
+          <PDFModal 
+            url={selectedPdf.url} 
+            title={selectedPdf.title} 
+            onClose={() => setSelectedPdf(null)} 
+          />
+        </Suspense>
       )}
     </div>
   );
@@ -766,11 +772,13 @@ export function AuditReport() {
       </PageLayout>
 
       {selectedPdf && (
-        <PDFModal
-          url={selectedPdf.url}
-          title={selectedPdf.title}
-          onClose={() => setSelectedPdf(null)}
-        />
+        <Suspense fallback={null}>
+          <PDFModal
+            url={selectedPdf.url}
+            title={selectedPdf.title}
+            onClose={() => setSelectedPdf(null)}
+          />
+        </Suspense>
       )}
     </div>
   );

@@ -26,18 +26,25 @@ const firebaseConfig = {
   measurementId:     VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
 // ✅ Analytics
 export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 
-// ✅ Prevent "initializeFirestore() has already been called" error during HMR
-export const db = getApps().length > 1 && getApps().some(a => a.name === '[DEFAULT]')
-  ? getFirestore(app) 
-  : initializeFirestore(app, {
-      localCache: persistentLocalCache({
-        tabManager: persistentMultipleTabManager(),
-      }),
-    });
+// ✅ Safe initialization of Firestore with offline persistence
+let dbInstance;
+try {
+  // Always try initializeFirst (with config) FIRST to ensure persistence
+  dbInstance = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager(),
+    }),
+  });
+} catch (e) {
+  // If already initialized during HMR, just get the instance
+  dbInstance = getFirestore(app);
+}
+
+export const db = dbInstance;
 
 export { logEvent };
