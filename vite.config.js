@@ -86,7 +86,7 @@ export default defineConfig({
         ],
       },
     }),
-    viteImagemin({
+    (viteImagemin.default || viteImagemin)({
       gifsicle: { optimizationLevel: 7, interlaced: false },
       optipng: { optimizationLevel: 5 },
       mozjpeg: { quality: 78 },
