@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, useLocalDraft, Toggle, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
 import { clearCache } from '../../../utils/cachedFetch';
+import { resolveUrl } from '../../../utils/resolver';
 
 // ✅ FIXED: Exact categories required for HomePage
 const ALBUM_TYPES = ['Seminars', 'Cultural Fest', 'Guest Visit', 'Campus', 'Departments', 'NSS Programs'];
@@ -209,7 +210,16 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
             {filtered.map(g => (
               <div key={g.id} style={{ borderRadius: 12, overflow: 'hidden', border: `2px solid ${selected.includes(g.id) ? NAVY : T.b1}`, position: 'relative', cursor: 'pointer' }}
                 onClick={() => setSelected(s => s.includes(g.id) ? s.filter(x => x !== g.id) : [...s, g.id])}>
-                <img src={g.image} alt={g.title} style={{ width: '100%', height: 120, objectFit: 'cover' }} />
+                <img 
+                  src={resolveUrl(g) || `${import.meta.env.BASE_URL}images/college_photo.webp`} 
+                  alt={g.title} 
+                  referrerPolicy="no-referrer"
+                  style={{ width: '100%', height: 120, objectFit: 'cover' }} 
+                  onError={(e) => {
+                    const fallback = `${import.meta.env.BASE_URL}images/college_photo.webp`;
+                    if (e.target.src !== fallback) e.target.src = fallback;
+                  }}
+                />
                 <div style={{ padding: '8px 10px', background: 'white' }}>
                   <div style={{ fontSize: 12, fontWeight: 700, color: NAVY, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.title}</div>
                   <div style={{ fontSize: 11, color: T.t3 }}>{g.cat || g.album} · {g.year}</div>
@@ -230,7 +240,16 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
           filtered.map(g => (
             <div key={g.id} className={`arow ${selected.includes(g.id) ? 'selected' : ''}`}>
               <input type="checkbox" checked={selected.includes(g.id)} onChange={() => setSelected(s => s.includes(g.id) ? s.filter(x => x !== g.id) : [...s, g.id])} style={{ accentColor: NAVY }} />
-              <img src={g.image} alt={g.title} style={{ width: 56, height: 44, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
+              <img 
+                src={resolveUrl(g) || `${import.meta.env.BASE_URL}images/college_photo.webp`} 
+                alt={g.title} 
+                referrerPolicy="no-referrer"
+                style={{ width: 56, height: 44, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} 
+                onError={(e) => {
+                  const fallback = `${import.meta.env.BASE_URL}images/college_photo.webp`;
+                  if (e.target.src !== fallback) e.target.src = fallback;
+                }}
+              />
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, color: NAVY, fontSize: 14 }}>{g.title}</div>
                 <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>

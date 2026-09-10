@@ -4,6 +4,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import usePageContent from '../hooks/usePageContent';
+import { resolveUrl } from '../utils/resolver';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -79,7 +80,16 @@ function LiveGallery({ categoryId }) {
           photos.map((p, i) => (
             <Fade key={p.id} delay={i * 0.1}>
               <div style={{ borderRadius: 16, overflow: 'hidden', boxShadow: '0 10px 30px rgba(15,35,71,0.06)', border: '1px solid #f1f5f9', background: '#fff', transition: 'transform 0.3s' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-6px)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
-                <img src={p.url} alt={p.caption} style={{ width: '100%', height: 220, objectFit: 'cover' }} />
+                <img 
+                  src={resolveUrl(p.url || p) || `${import.meta.env.BASE_URL}images/college_photo.webp`} 
+                  alt={p.caption || 'Campus photo'} 
+                  referrerPolicy="no-referrer"
+                  style={{ width: '100%', height: 220, objectFit: 'cover' }} 
+                  onError={(e) => {
+                    const fallback = `${import.meta.env.BASE_URL}images/college_photo.webp`;
+                    if (e.target.src !== fallback) e.target.src = fallback;
+                  }}
+                />
                 {p.caption && p.caption !== 'Campus View' && (
                   <div style={{ padding: '14px 18px', fontSize: 13.5, fontWeight: 700, color: NAVY, borderTop: '1px solid #f1f5f9' }}>
                     {p.caption}

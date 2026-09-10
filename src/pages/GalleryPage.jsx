@@ -12,8 +12,10 @@ import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import { createPortal } from 'react-dom';
 import PremiumPagination from '../components/PremiumPagination';
+import { resolveUrl } from '../utils/resolver';
 
 const ITEMS_PER_PAGE = 12;
+const FALLBACK_IMG = `${import.meta.env.BASE_URL}images/college_photo.webp`;
 
 const N = COLORS?.navy || '#0f2347';
 const G = COLORS?.gold || '#f4a023';
@@ -258,11 +260,15 @@ export default function GalleryPage({ gallery: galleryProp, headless }) {
               >
                 <div className="gal-img-item">
                   <img
-                    src={img.image || img.src}
+                    src={resolveUrl(img) || FALLBACK_IMG}
                     alt={img.title || img.cat || img.album || 'Gallery photo'}
                     className="gal-img"
                     loading="lazy"
                     decoding="async"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      if (e.target.src !== FALLBACK_IMG) e.target.src = FALLBACK_IMG;
+                    }}
                   />
                   <div className="gal-ov">
                     <div className="gal-cat">{img.cat || img.album || 'Gallery'}</div>
@@ -317,9 +323,13 @@ export default function GalleryPage({ gallery: galleryProp, headless }) {
           {/* Image */}
           <div onClick={e => e.stopPropagation()} style={{ textAlign:'center' }}>
             <img
-              src={filtered[light].image || filtered[light].src}
+              src={resolveUrl(filtered[light]) || FALLBACK_IMG}
               alt={filtered[light].title || 'Photo'}
               className="lb-img"
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                if (e.target.src !== FALLBACK_IMG) e.target.src = FALLBACK_IMG;
+              }}
             />
             {(filtered[light].title || filtered[light].cat || filtered[light].album) && (
               <div style={{ marginTop:14, color:'rgba(255,255,255,.8)', fontSize:14, fontWeight:600 }}>

@@ -1,5 +1,6 @@
 // src/components/HeroSlider.jsx — 3D Immersive Parallax Slider
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { resolveUrl } from '../utils/resolver';
 
 const FALLBACK_SLIDES = [
   { id:'f1', image:'images/slider_baisakhi.webp',      title:'BAISAKHI DI SHAAM Celebration',           subtitle:'Celebrating culture and traditions'                        },
@@ -11,11 +12,10 @@ const FALLBACK_SLIDES = [
 
 const resolveImage = (src) => {
   if (!src) return { webp: '', jpg: '' };
-  const isExternal = src.startsWith('http');
-  if (isExternal) return { webp: src, jpg: src };
-  const clean  = src.startsWith('/') ? src.slice(1) : src;
-  const base   = `${import.meta.env.BASE_URL}${clean}`;
-  return { webp: base.replace(/\.(jpg|jpeg|png)$/i, '.webp'), jpg: base };
+  const resolved = resolveUrl(src);
+  if (!resolved) return { webp: '', jpg: '' };
+  if (resolved.startsWith('http')) return { webp: resolved, jpg: resolved };
+  return { webp: resolved.replace(/\.(jpg|jpeg|png)$/i, '.webp'), jpg: resolved };
 };
 
 const HeroSlider = ({ slides = [] }) => {
@@ -203,7 +203,16 @@ const HeroSlider = ({ slides = [] }) => {
                 >
                   <picture>
                     <source srcSet={webp} type="image/webp" />
-                    <img src={jpg} alt="" className="phs-img" />
+                    <img 
+                      src={jpg} 
+                      alt={s.title || 'Slide'} 
+                      className="phs-img" 
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        const fallback = `${import.meta.env.BASE_URL}images/slider_baisakhi.webp`;
+                        if (e.target.src !== fallback) e.target.src = fallback;
+                      }}
+                    />
                   </picture>
                 </div>
                 <div className="phs-overlay" />

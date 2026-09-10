@@ -70,35 +70,54 @@ Your primary goal is to assist students, parents, and staff with accurate, struc
 Introduce yourself briefly and ask how you can help the user today with their academic journey at Guru Nanak College.
 `;
 
-    // Simulated smarter bot responses based on the SYSTEM_PROMPT guidelines
-    setTimeout(() => {
-      setIsTyping(false);
-      let botResponse = "Sat Sri Akal! 🙏 I am the GNC Assistant. Currently, the latest update regarding this hasn't been published. Please keep an eye on our **Notice Board**.";
-      
-      const lowerInput = userMsg.toLowerCase();
-      
-      if (lowerInput.includes('admission') || lowerInput.includes('apply')) {
-        botResponse = "Sat Sri Akal! 🎓 For admission inquiries, please apply through the official **Chancellor Portal**. You can find the direct link here: [Apply Online](https://jharkhanduniversities.nic.in/).";
-      } else if (lowerInput.includes('fee') || lowerInput.includes('payment')) {
-        botResponse = "Hello! 💳 You can pay your fees securely online through our **CIMS Student ERP** link. Here it is: [Fee Payment](https://cimsstudentnewui.mastersofterp.in/).";
-      } else if (lowerInput.includes('result') || lowerInput.includes('marks')) {
-        botResponse = "Welcome! 📚 To check your latest exam results, please visit the official **BBMKU Result portal** here: [Results](https://bbmkuniv.in/login).";
-      } else if (lowerInput.includes('contact') || lowerInput.includes('phone') || lowerInput.includes('email')) {
-        botResponse = "You can contact our Admin Office at **+91 79033 40991** or email **principal@gncollege.org**. How else can I assist your academic journey today? 🏫";
-      } else if (lowerInput.includes('syllabus') || lowerInput.includes('subjects')) {
-        botResponse = "You can find the latest syllabus in the **Academics** section of our website. Check the top menu for 'Syllabus'. 📖";
-      } else if (lowerInput.includes('scholarship') || lowerInput.includes('ekalyan')) {
-        botResponse = "For information regarding Scholarships like e-Kalyan or Minority benefits, please visit our **Scholarships & Financial Aid** page under the 'More' menu. 💰";
-      } else if (lowerInput.includes('hostel') || lowerInput.includes('accommodation')) {
-        botResponse = "Currently, Guru Nanak College does not offer on-campus hostel facilities. However, there are many private PG options available near the Bank More and Bhuda campuses. 🏘️";
-      } else if (lowerInput.includes('hello') || lowerInput.includes('hi') || lowerInput.includes('sat sri akal')) {
-        botResponse = "Sat Sri Akal! 🙏 Welcome to Guru Nanak College, Dhanbad. I am the GNC Assistant. How can I assist you today with your academic journey?";
-      } else if (lowerInput.includes('joke') || lowerInput.includes('weather') || lowerInput.includes('movie')) {
-        botResponse = "I am the academic assistant for Guru Nanak College. I can only help you with college admissions, notices, academics, and campus life. How can I assist you with these today? 📚";
-      }
+    const geminiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
 
-      setMessages(prev => [...prev, { text: botResponse, isBot: true }]);
-    }, 1500);
+    // Helper for fallback rule-based response
+    const getRuleResponse = () => {
+      const lowerInput = userMsg.toLowerCase();
+      if (lowerInput.includes('admission') || lowerInput.includes('apply')) {
+        return "Sat Sri Akal! 🎓 For admission inquiries, please apply through the official **Chancellor Portal**: [Apply Online](https://jharkhanduniversities.nic.in/).";
+      } else if (lowerInput.includes('fee') || lowerInput.includes('payment')) {
+        return "Hello! 💳 You can pay your fees securely online through our **CIMS Student ERP**: [Fee Payment](https://cimsstudentnewui.mastersofterp.in/).";
+      } else if (lowerInput.includes('result') || lowerInput.includes('marks')) {
+        return "Welcome! 📚 To check your latest exam results, please visit the official **BBMKU Result portal**: [Results](https://bbmkuniv.in/login).";
+      } else if (lowerInput.includes('contact') || lowerInput.includes('phone') || lowerInput.includes('email')) {
+        return "You can contact our Admin Office at **+91 79033 40991** or email **principal@gncollege.org**. 🏫";
+      } else if (lowerInput.includes('syllabus') || lowerInput.includes('subjects')) {
+        return "You can find the latest syllabus in the **Academics** section of our website. Check the top menu for 'Syllabus'. 📖";
+      } else if (lowerInput.includes('scholarship') || lowerInput.includes('ekalyan')) {
+        return "For information regarding Scholarships like e-Kalyan or Minority benefits, please visit our **Scholarships & Financial Aid** page. 💰";
+      } else if (lowerInput.includes('hello') || lowerInput.includes('hi') || lowerInput.includes('sat sri akal')) {
+        return "Sat Sri Akal! 🙏 Welcome to Guru Nanak College, Dhanbad. How can I assist you today with your academic journey?";
+      }
+      return "Sat Sri Akal! 🙏 I am the GNC Assistant. For official notifications and dates, please check the **Notice Board** or contact the college office.";
+    };
+
+    // If API key is present, try Gemini API
+    if (geminiKey) {
+      fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: `${SYSTEM_PROMPT}\n\nUser Question: ${userMsg}` }] }]
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        setIsTyping(false);
+        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        setMessages(prev => [...prev, { text: reply || getRuleResponse(), isBot: true }]);
+      })
+      .catch(() => {
+        setIsTyping(false);
+        setMessages(prev => [...prev, { text: getRuleResponse(), isBot: true }]);
+      });
+    } else {
+      setTimeout(() => {
+        setIsTyping(false);
+        setMessages(prev => [...prev, { text: getRuleResponse(), isBot: true }]);
+      }, 1000);
+    }
   };
 
   const bgModal = 'var(--glass-bg)';

@@ -5,6 +5,7 @@
 import React, { useState } from 'react';
 import { useDriveDocs } from '../hooks/useDriveDocs';
 import { COLORS } from '../styles/colors';
+import { resolveUrl } from '../utils/resolver';
 
 // 🛑 CRASH FIX: Preserving legacy exports so AdminPanel doesn't crash on import
 export let imgbbAPIKey = '';
@@ -31,6 +32,8 @@ export default function MediaPicker({
   const defaultTab = driveFolderId ? 'drive' : (isImage ? 'upload' : 'url');
   const [mode, setMode] = useState(defaultTab);
   const [tempUrl, setTempUrl] = useState(value || '');
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // ── ☁️ DRIVE ENGINE (Error-Safe) ──
   const { docs: driveFiles, loading: driveLoading, error: driveError } = useDriveDocs(
@@ -105,7 +108,7 @@ export default function MediaPicker({
                   return (
                     <div 
                       key={file.id} 
-                      onClick={() => onChange(file.previewUrl)}
+                      onClick={() => onChange(isImage ? (file.imageUrl || file.previewUrl) : file.previewUrl)}
                       style={isSelected ? S.fileItemActive : S.fileItem}
                       className="mp-file-item"
                     >
@@ -139,20 +142,61 @@ export default function MediaPicker({
           </div>
         )}
 
-        {/* ═════════ 3. UPLOAD MODE ═════════ */}
+        {/* ═════════ 3. UPLOAD MODE (Firebase Storage Enabled) ═════════ */}
         {mode === 'upload' && (
           <div style={S.panel}>
-             <p style={S.hint}>📤 For best results, use the Google Drive tab. Manual uploads require Firebase Storage setup.</p>
+             <p style={S.hint}>📤 Upload files directly to Cloud Storage or select from Google Drive.</p>
              <div style={S.dropZone}>
                 <div style={{ fontSize: '24px', marginBottom: '8px' }}>📂</div>
-                <div style={{ fontWeight: 700, color: NAVY }}>Click to select a file</div>
+                <div style={{ fontWeight: 700, color: NAVY }}>
+                  {uploading ? `Uploading... ${uploadProgress}%` : 'Click to select a file'}
+                </div>
                 <input 
                   type="file" 
                   accept={isImage ? "image/*" : (isPdf ? "application/pdf" : "*/*")}
                   style={S.hiddenFileInput}
-                  onChange={() => alert("File selected! (Connect Firebase Storage to upload)")}
+                  disabled={uploading}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setUploading(true);
+                    setUploadProgress(0);
+                    try {
+                      const { getStorage, ref, uploadBytesResumable, getDownloadURL } = await import('firebase/storage');
+                      const storage = getStorage();
+                      const subFolder = isPdf ? 'documents' : 'images';
+                      const fileRef = ref(storage, `${subFolder}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`);
+                      const uploadTask = uploadBytesResumable(fileRef, file);
+
+                      uploadTask.on('state_changed', 
+                        (snapshot) => {
+                          const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                          setUploadProgress(progress);
+                        }, 
+                        (error) => {
+                          console.error('Storage Upload Error:', error);
+                          alert('Upload failed: ' + error.message);
+                          setUploading(false);
+                        }, 
+                        async () => {
+                          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                          onChange(downloadURL);
+                          setUploading(false);
+                        }
+                      );
+                    } catch (err) {
+                      console.error('Storage init error:', err);
+                      alert('Could not initialize Firebase Storage: ' + err.message);
+                      setUploading(false);
+                    }
+                  }}
                 />
              </div>
+             {uploading && (
+               <div style={{ marginTop: 10, width: '100%', background: '#e2e8f0', borderRadius: 6, overflow: 'hidden', height: 6 }}>
+                 <div style={{ width: `${uploadProgress}%`, background: GOLD, height: '100%', transition: 'width 0.3s' }} />
+               </div>
+             )}
           </div>
         )}
 
@@ -176,6 +220,15 @@ export default function MediaPicker({
         <div style={S.previewWrap}>
           <div style={S.previewBox}>
             <div style={S.previewBadge}>SELECTED</div>
+            {isImage && (
+              <img 
+                src={resolveUrl(value)} 
+                alt="Selected" 
+                referrerPolicy="no-referrer"
+                style={{ width: 36, height: 36, borderRadius: 6, objectFit: 'cover', flexShrink: 0, border: '1px solid #cbd5e1' }}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            )}
             <a href={value} target="_blank" rel="noreferrer" style={S.previewLink} title={value}>
               {value}
             </a>

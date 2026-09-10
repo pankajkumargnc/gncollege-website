@@ -27,7 +27,7 @@ const DRIVE_CATEGORIES = [
   { 
     id: 'event_reports', 
     label: '🏆 Event Reports', 
-    folderId: import.meta.env.VITE_DRIVE_EVENT_REPORT_FOLDER, 
+    folderId: import.meta.env.VITE_DRIVE_EVENT_REPORTS_FOLDER, 
     dbCollection: 'eventReports',
     type: 'pdf'
   },
@@ -116,11 +116,25 @@ export default function DriveTab({ logAct }) {
   const handlePublish = async (file) => {
     setProcessingId(file.id);
     try {
+      const isImg = activeTab.type === 'image';
+      const apiKey = API_KEY;
+      const directApiUrl = isImg && apiKey 
+        ? `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${apiKey}`
+        : `https://lh3.googleusercontent.com/d/${file.id}=w1200`;
+      
+      const fileUrl = isImg ? directApiUrl : `https://drive.google.com/file/d/${file.id}/preview`;
+
       const publishData = {
-        title: file.name.replace('.pdf', ''), 
-        link: activeTab.type === 'pdf' ? `https://drive.google.com/file/d/${file.id}/preview` : file.thumbnailLink?.replace('=s220', '=s1000'),
+        title: file.name.replace(/\.[^/.]+$/, ''), 
+        link: fileUrl,
+        image: fileUrl, // For Gallery and Slider
+        url: fileUrl,   // For Campus visuals
+        src: fileUrl,
+        driveThumbnail: file.thumbnailLink || '',
+        cat: activeTab.id === 'slider' ? 'Slider' : 'Campus',
         date: new Date(file.createdTime).toISOString(),
         publishedAt: serverTimestamp(),
+        createdAt: serverTimestamp(),
         driveId: file.id,
         status: 'active'
       };
@@ -135,6 +149,46 @@ export default function DriveTab({ logAct }) {
       toast.error(`Publish failed: ${err.message}`);
     }
     setProcessingId(null);
+  };
+
+  // ── 2B. AUTO-REPAIR & SYNC ALL PUBLISHED LIVE IMAGES ──
+  const handleRepairLiveImages = async () => {
+    if (!API_KEY) {
+      toast.error('Google API Key missing in .env!');
+      return;
+    }
+    const tId = toast.loading('Fixing & syncing published images in Firestore...');
+    try {
+      let repaired = 0;
+      const targetCols = ['gallery', 'slider', 'sliderSlides'];
+      for (const colName of targetCols) {
+        const snap = await getDocs(collection(db, colName));
+        for (const docItem of snap.docs) {
+          const d = docItem.data();
+          const fileId = d.driveId || (docItem.id && /^[a-zA-Z0-9_-]{25,}$/.test(docItem.id) ? docItem.id : null);
+          if (fileId) {
+            const directUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
+            const needsFix = !d.image || !d.src || d.image.includes('lh3.googleusercontent.com') || d.link?.includes('drive-storage');
+            if (needsFix) {
+              await setDoc(doc(db, colName, docItem.id), {
+                ...d,
+                image: directUrl,
+                src: directUrl,
+                url: directUrl,
+                link: directUrl,
+                driveId: fileId,
+                repairedAt: serverTimestamp()
+              }, { merge: true });
+              repaired++;
+            }
+          }
+        }
+      }
+      toast.success(`🎉 Success! ${repaired} published images refreshed with reliable links!`, { id: tId });
+      fetchTabData();
+    } catch (err) {
+      toast.error(`Sync failed: ${err.message}`, { id: tId });
+    }
   };
 
   // ── 3. UNPUBLISH FROM LIVE WEBSITE ──
@@ -195,13 +249,20 @@ export default function DriveTab({ logAct }) {
       <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
         
         {/* Toolbar */}
-        <div style={{ padding: '16px 24px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ padding: '16px 24px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
           <div style={{ fontWeight: 800, color: NAVY, fontSize: '16px' }}>
             {activeTab.label} Files ({driveFiles.length})
           </div>
-          <button onClick={fetchTabData} style={{ background: '#fff', border: '1px solid #cbd5e1', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: 700, color: NAVY, boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }} title="Refresh List">
-            🔄 Refresh Drive
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {activeTab.type === 'image' && (
+              <button onClick={handleRepairLiveImages} style={{ background: '#fef3c7', border: '1px solid #f59e0b', padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: '#92400e' }} title="Scan and repair broken published image links">
+                ⚡ Fix All Live Images
+              </button>
+            )}
+            <button onClick={fetchTabData} style={{ background: '#fff', border: '1px solid #cbd5e1', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: 700, color: NAVY, boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }} title="Refresh List">
+              🔄 Refresh Drive
+            </button>
+          </div>
         </div>
 
         {/* Loading State */}
@@ -233,8 +294,23 @@ export default function DriveTab({ logAct }) {
                   
                   {/* File Icon / Thumbnail */}
                   <div style={{ width: '44px', height: '44px', borderRadius: '8px', overflow: 'hidden', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid #e2e8f0' }}>
-                    {activeTab.type === 'image' && file.thumbnailLink ? (
-                      <img src={file.thumbnailLink} alt="thumb" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {activeTab.type === 'image' ? (
+                      <img 
+                        src={API_KEY ? `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${API_KEY}` : (file.thumbnailLink || `https://lh3.googleusercontent.com/d/${file.id}=w200`)} 
+                        alt={file.name} 
+                        referrerPolicy="no-referrer"
+                        loading="lazy"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => {
+                          if (!e.target.dataset.triedFallback) {
+                            e.target.dataset.triedFallback = 'true';
+                            e.target.src = file.thumbnailLink || `https://lh3.googleusercontent.com/d/${file.id}=w200`;
+                          } else {
+                            e.target.style.display = 'none';
+                            if (e.target.parentElement) e.target.parentElement.innerHTML = '<span style="font-size:22px">🖼️</span>';
+                          }
+                        }}
+                      />
                     ) : (
                       <span style={{ fontSize: '24px' }}>📄</span>
                     )}

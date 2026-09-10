@@ -27,8 +27,8 @@ import {
 import toast from "react-hot-toast";
 import { T, NAVY, GOLD } from "../AdminShared";
 
-// ─── Google Gemini API Key (set in .env as VITE_GOOGLE_API_KEY) ───
-const GEMINI_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "";
+// ─── Google Gemini API Key (set in .env as VITE_GEMINI_API_KEY) ───
+const GEMINI_KEY = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY || "";
 
 // ─── Utility ───────────────────────────────────────────────────────
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));

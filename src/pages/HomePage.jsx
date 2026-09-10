@@ -8,6 +8,7 @@ import { SOCIAL_LINKS } from "../data/db";
 import { useDriveDocs } from "../hooks/useDriveDocs";
 
 import HeroSlider from "../components/HeroSlider";
+import { resolveUrl } from "../utils/resolver";
 import Ticker from "../components/Ticker";
 import HomeFeatures from "../components/HomeFeatures";
 import NotificationSection from "../components/home/NotificationSection";
@@ -458,10 +459,8 @@ const EventCard = memo(({ ev, onPdf }) => {
     }
   }
 
-  let imgSrc = ev.image || ev.imageUrl || getEventImg(ev.type?.toUpperCase());
-  if (imgSrc && imgSrc.startsWith("images/")) {
-    imgSrc = `${import.meta.env.BASE_URL}${imgSrc}`;
-  }
+  const fallbackImg = `${import.meta.env.BASE_URL}images/college_photo.webp`;
+  let imgSrc = resolveUrl(ev.image || ev.imageUrl || ev.link || getEventImg(ev.type?.toUpperCase()));
 
   return (
     <div className="gc r16" style={{ flexShrink: 0 }}>
@@ -475,11 +474,15 @@ const EventCard = memo(({ ev, onPdf }) => {
             <div style={{ fontSize: 10, fontWeight: 700 }}>{displayMonth}</div>
           </div>
           <img
-            src={imgSrc}
+            src={imgSrc || fallbackImg}
             alt={ev.title}
             className="hp-ev-img"
             loading="lazy"
             decoding="async"
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              if (e.target.src !== fallbackImg) e.target.src = fallbackImg;
+            }}
           />
         </div>
         <div className="hp-ev-info">
@@ -533,15 +536,22 @@ const GalItem = memo(({ img, index }) => {
     rootMargin: "0px 0px -40px 0px",
   });
   const delay = (index % 6) * 0.07;
+  const fallbackImg = `${import.meta.env.BASE_URL}images/college_photo.webp`;
+  const imgSrc = resolveUrl(img) || fallbackImg;
+
   return (
     <div className="gc r14" ref={ref} style={{ transitionDelay: `${delay}s` }}>
       <div className={`hp-gal-item sa sa-scale${vis ? " visible" : ""}`}>
         <img
-          src={img.image || img.src}
-          alt={img.title}
+          src={imgSrc}
+          alt={img.title || "Gallery photo"}
           className="hp-gal-img"
           loading="lazy"
           decoding="async"
+          referrerPolicy="no-referrer"
+          onError={(e) => {
+            if (e.target.src !== fallbackImg) e.target.src = fallbackImg;
+          }}
         />
         <div className="hp-gal-ov">
           <div className="hp-gal-cat">{img.cat || img.album || "Gallery"}</div>

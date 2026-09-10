@@ -62,21 +62,26 @@ export function useDriveDocs(folderId, fileType = 'any', searchQuery = '') {
         const data = await res.json();
         if (cancelled) return;
 
-        const files = (data.files || []).map(f => ({
-          id:         f.id,
-          name:       f.name.replace(/\.pdf$/i, '').trim(),
-          mimeType:   f.mimeType,
-          size:       formatSize(f.size),
-          date:       new Date(f.createdTime).toLocaleDateString('en-IN', {
-                        day: '2-digit', month: 'short', year: 'numeric'
-                      }),
-          previewUrl: `https://drive.google.com/file/d/${f.id}/preview`,
-          viewUrl:    `https://drive.google.com/file/d/${f.id}/view`,
-          
-          // 🎥 NAYA: Custom HTML5 Video Player ke liye direct API streaming link
-          streamUrl:  `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&key=${API_KEY}`,
-          downloadUrl: f.webContentLink
-        }));
+        const files = (data.files || []).map(f => {
+          const isImg = f.mimeType?.startsWith('image/');
+          const directImgUrl = `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&key=${API_KEY}`;
+          return {
+            id:         f.id,
+            name:       f.name.replace(/\.pdf$/i, '').trim(),
+            mimeType:   f.mimeType,
+            size:       formatSize(f.size),
+            date:       new Date(f.createdTime).toLocaleDateString('en-IN', {
+                          day: '2-digit', month: 'short', year: 'numeric'
+                        }),
+            previewUrl: isImg ? directImgUrl : `https://drive.google.com/file/d/${f.id}/preview`,
+            viewUrl:    `https://drive.google.com/file/d/${f.id}/view`,
+            imageUrl:   directImgUrl,
+            
+            // 🎥 NAYA: Custom HTML5 Video Player / Media ke liye direct API streaming link
+            streamUrl:  directImgUrl,
+            downloadUrl: f.webContentLink
+          };
+        });
 
         setDocs(files);
       } catch (err) {

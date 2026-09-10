@@ -93,24 +93,37 @@ export default function AdminLogin({ onSuccess, onClose }) {
     if (e.key === 'CapsLock') setCapsLock(e.getModifierState('CapsLock'));
   };
 
-  const handleLogin = e => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) { setError('Please fill in all fields.'); return; }
     setError(''); setLoading(true); setPhase('checking');
 
-    setTimeout(() => {
-      const validUser = import.meta.env.VITE_ADMIN_USERNAME || 'admin';
-      const validPass = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
-      if (username === validUser && password === validPass) {
+    const validUser = import.meta.env.VITE_ADMIN_USERNAME || 'admin';
+    const validPass = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
+    const emailToAuth = username.includes('@') ? username.trim() : 'pankajkumargnc@gmail.com';
+
+    try {
+      // Dynamic import of Firebase Auth
+      const { auth } = await import('../firebase-auth');
+      const { signInWithEmailAndPassword } = await import('firebase/auth');
+      
+      // Attempt authenticating with Firebase Auth so Firestore security rules pass
+      await signInWithEmailAndPassword(auth, emailToAuth, password.trim());
+      setPhase('success');
+      setTimeout(() => onSuccess(), 1000);
+    } catch (fbErr) {
+      console.warn('[AdminLogin] Firebase Auth check, trying local admin credentials:', fbErr.message);
+      // Fallback: If username & password match .env credentials
+      if ((username === validUser || username === 'pankajkumargnc@gmail.com') && password === validPass) {
         setPhase('success');
         setTimeout(() => onSuccess(), 1000);
       } else {
         setPhase('fail');
-        setError('Invalid credentials. Please try again.');
+        setError(fbErr.message?.includes('auth/') ? 'Authentication failed. Please verify credentials.' : 'Invalid credentials. Please try again.');
         setLoading(false);
         setTimeout(() => setPhase('idle'), 600);
       }
-    }, 1400);
+    }
   };
 
   // ── ✅ PURE GLASSMORPHISM CSS ────────────────────────────────────────────────

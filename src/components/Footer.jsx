@@ -1,5 +1,5 @@
 // src/components/Footer.jsx — HYPER-ULTIMA REFINED (Compact + Gold Moving BG + Pinlink + Gmail + Logo Side Title)
-import { useState, useEffect, memo, useRef } from 'react';
+import React, { useState, useEffect, memo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
