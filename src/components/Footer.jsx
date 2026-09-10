@@ -252,7 +252,7 @@ const Footer = memo(() => {
           </SA>
           <SA variant="up" delay="sa-d3" className="f-col" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <h4>Command</h4>
-            <Link to="/admin" target="_blank" rel="noopener noreferrer" style={{ background: G, color: '#000', padding: '10px', borderRadius: 10, textAlign: 'center', fontWeight: 900, textDecoration: 'none', fontSize: 12 }}>ADMIN PORTAL</Link>
+            <a href={`${import.meta.env.BASE_URL}#/admin`} target="_blank" rel="noopener noreferrer" style={{ background: G, color: '#000', padding: '10px', borderRadius: 10, textAlign: 'center', fontWeight: 900, textDecoration: 'none', fontSize: 12 }}>ADMIN PORTAL</a>
             <div style={{ padding: 12, background: 'rgba(255,255,255,0.02)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.05)', fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>
               <b>💡 Tip:</b> Press <b>Ctrl + K</b> to search anything.
             </div>
