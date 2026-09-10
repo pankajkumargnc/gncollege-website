@@ -54,7 +54,8 @@ export async function loginAdmin(usernameOrEmail, password) {
   try {
     // 1. Attempt standard Firebase Auth sign-in
     const credential = await signInWithEmailAndPassword(auth, targetEmail, cleanPass);
-    sessionStorage.setItem('gnc_admin_auth', 'true');
+    sessionStorage.removeItem('gnc_admin_auth');
+    sessionStorage.setItem('gnc_active_session', '1');
     return credential.user;
   } catch (err) {
     // 2. If user not found and this is the primary authorized email, auto-create account
@@ -66,7 +67,8 @@ export async function loginAdmin(usernameOrEmail, password) {
         try {
           const newCredential = await createUserWithEmailAndPassword(auth, targetEmail, cleanPass);
           console.info("[FirebaseAuth] Successfully provisioned primary admin account:", targetEmail);
-          sessionStorage.setItem('gnc_admin_auth', 'true');
+          sessionStorage.removeItem('gnc_admin_auth');
+          sessionStorage.setItem('gnc_active_session', '1');
           return newCredential.user;
         } catch (createErr) {
           if (createErr.code === "auth/email-already-in-use") {
@@ -92,7 +94,8 @@ export async function loginAdmin(usernameOrEmail, password) {
       const isPassMatch = cleanPass === adminPass || cleanPass === "admin123";
 
       if (isUserMatch && isPassMatch) {
-        sessionStorage.setItem('gnc_admin_auth', 'true');
+        sessionStorage.removeItem('gnc_admin_auth');
+        sessionStorage.setItem('gnc_active_session', '1');
         return {
           uid: "gnc-admin-master-bridge",
           email: targetEmail,

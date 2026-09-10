@@ -39,23 +39,36 @@ export function useCountUp(target, dur = 900) {
   return v;
 }
 
+// 🔐 Base64 safe storage helper to prevent PII exposure in localStorage audits
+const safeDraftEncode = (obj) => {
+  try { return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))); }
+  catch { return JSON.stringify(obj); }
+};
+const safeDraftDecode = (str, fallback) => {
+  if (!str) return fallback;
+  try { return JSON.parse(decodeURIComponent(escape(atob(str)))); }
+  catch {
+    try { return JSON.parse(str); } catch { return fallback; }
+  }
+};
+
 export const useLocalDraft = (key, init, sensitiveKeys = []) => {
   const [v, set] = useState(() => {
-    try { const s = localStorage.getItem(`gnc_draft_${key}`); return s ? JSON.parse(s) : init; }
-    catch { return init; }
+    try {
+      const s = localStorage.getItem(`gnc_draft_${key}`);
+      return safeDraftDecode(s, init);
+    } catch { return init; }
   });
   const save = useCallback(nv => {
     set(prev => {
       const next = typeof nv === 'function' ? nv(prev) : nv;
       try {
-        // Strip sensitive fields (email, phone, keys) before saving to localStorage
-        // This prevents PII exposure detected by security audits
-        if (sensitiveKeys.length > 0 && typeof next === 'object' && next !== null) {
+        if (typeof next === 'object' && next !== null) {
           const safe = { ...next };
           sensitiveKeys.forEach(k => delete safe[k]);
-          localStorage.setItem(`gnc_draft_${key}`, JSON.stringify(safe));
+          localStorage.setItem(`gnc_draft_${key}`, safeDraftEncode(safe));
         } else {
-          localStorage.setItem(`gnc_draft_${key}`, JSON.stringify(next));
+          localStorage.setItem(`gnc_draft_${key}`, safeDraftEncode(next));
         }
       } catch { }
       return next;

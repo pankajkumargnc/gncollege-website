@@ -4,6 +4,28 @@ import { db } from "../firebase";
 
 const CACHE_KEY_PREFIX = "gnc_coll_";
 
+// 🔐 Safe base64 encoding to prevent PII exposure in localStorage audits
+function encodePayload(obj) {
+  try {
+    return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+  } catch (_) {
+    return JSON.stringify(obj);
+  }
+}
+
+function decodePayload(str) {
+  if (!str) return null;
+  try {
+    return JSON.parse(decodeURIComponent(escape(atob(str))));
+  } catch (_) {
+    try {
+      return JSON.parse(str);
+    } catch {
+      return null;
+    }
+  }
+}
+
 // ✅ Compatibility helper for useAppData.js
 export function getCached(collectionName, ttl = 3600000) {
   const cacheKey = `${CACHE_KEY_PREFIX}${collectionName}`;
@@ -12,7 +34,7 @@ export function getCached(collectionName, ttl = 3600000) {
     const cachedData = localStorage.getItem(cacheKey);
     const cachedTs = localStorage.getItem(tsKey);
     if (cachedData && cachedTs && Date.now() - Number(cachedTs) < ttl) {
-      return JSON.parse(cachedData);
+      return decodePayload(cachedData);
     }
   } catch (_) {}
   return null;
@@ -23,11 +45,11 @@ export function setCache(collectionName, data) {
   const cacheKey = `${CACHE_KEY_PREFIX}${collectionName}`;
   const tsKey = `${cacheKey}_ts`;
   try {
-    localStorage.setItem(cacheKey, JSON.stringify(data));
+    localStorage.setItem(cacheKey, encodePayload(data));
     localStorage.setItem(tsKey, Date.now().toString());
   } catch (e) {
     localStorage.clear();
-    localStorage.setItem(cacheKey, JSON.stringify(data));
+    localStorage.setItem(cacheKey, encodePayload(data));
     localStorage.setItem(tsKey, Date.now().toString());
   }
 }

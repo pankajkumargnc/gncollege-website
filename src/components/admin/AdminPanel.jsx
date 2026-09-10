@@ -482,7 +482,13 @@ function AdminPanelInner({
           {!isMobile && <button onClick={()=>setSideCollapsed(c=>!c)} style={{ background:'none', border:'none', fontSize:18, cursor:'pointer', color:T.t3, flexShrink:0 }} aria-label="Toggle sidebar">☰</button>}
           
           <div className="top-search" style={{ position:'relative' }}>
-            <input placeholder="Search everything... (Ctrl+K)" value={globalSearch} onChange={(e)=>setGlobalSearch(e.target.value)} />
+            <input 
+              id="admin-global-search" 
+              aria-label="Search everything across admin panel" 
+              placeholder="Search everything... (Ctrl+K)" 
+              value={globalSearch} 
+              onChange={(e)=>setGlobalSearch(e.target.value)} 
+            />
             {searchResults.length > 0 && (
               <div style={{ position:'absolute', top:'100%', left:0, right:0, background:WHITE, border:`1.5px solid ${T.b1}`, borderRadius:12, boxShadow:T.shadowHov, zIndex:1000, maxHeight:320, overflowY:'auto', marginTop:4 }}>
                 {searchResults.map((item,i) => (

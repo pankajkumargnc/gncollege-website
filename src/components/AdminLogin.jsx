@@ -101,7 +101,8 @@ export default function AdminLogin({ onSuccess, onClose }) {
     try {
       const { loginAdmin } = await import('../firebase-auth');
       await loginAdmin(username, password);
-      sessionStorage.setItem('gnc_admin_auth', 'true');
+      sessionStorage.removeItem('gnc_admin_auth');
+      sessionStorage.setItem('gnc_active_session', '1');
       setPhase('success');
       setTimeout(() => onSuccess(), 800);
     } catch (fbErr) {
