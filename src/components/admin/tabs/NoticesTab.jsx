@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import DOMPurify from 'dompurify';
 import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, useLocalDraft, Toggle, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
+import { extractNoticeMetadata } from '../../../utils/aiExtractor';
 
 export default function NoticesTab({ notices, logAct, getSectionLog, softDelete, bulkDelete }) {
   const [editNotice, setEditNotice] = useState(null);
@@ -13,6 +14,32 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
   const [noticeSearch, setNoticeSearch] = useState('');
   const [noticeSel, setNoticeSel] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const handleAIExtract = async () => {
+    const rawInput = noticeData.text || noticeData.link;
+    if (!rawInput) {
+      toast.error('Type a rough draft or select a PDF first!');
+      return;
+    }
+    setAiLoading(true);
+    const tId = toast.loading('✨ AI polishing notice...');
+    try {
+      const extracted = await extractNoticeMetadata(rawInput);
+      setNoticeData(prev => ({
+        ...prev,
+        text: extracted.text || prev.text,
+        type: extracted.type || prev.type,
+        isNew: extracted.isNew,
+        pinned: extracted.pinned
+      }));
+      toast.success(`✨ Formatted as ${extracted.type} notice!`, { id: tId });
+    } catch (err) {
+      toast.error('AI formatting failed: ' + err.message, { id: tId });
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const saveNotice = async e => {
     e.preventDefault(); setLoading(true);
@@ -37,8 +64,40 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
         <div className="actitle">{editNotice ? '✏️ Edit Notice' : '➕ Publish Notice'}</div>
         <form onSubmit={saveNotice}>
           <div style={{ marginBottom: 14 }}>
-            <label className="alabel">Notice Text *</label>
-            <textarea className="ainp" rows={3} value={noticeData.text || ''} onChange={(e) => setNoticeData(d=>({...d,text:e.target.value}))} required placeholder="Notice content..." />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <label className="alabel" style={{ margin: 0 }}>Notice Text *</label>
+              <button
+                type="button"
+                onClick={handleAIExtract}
+                disabled={aiLoading}
+                style={{
+                  background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '5px 14px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 8px rgba(168,85,247,0.3)',
+                  transition: 'all 0.2s'
+                }}
+                title="Polish draft text, detect category and urgency using AI"
+              >
+                {aiLoading ? '✨ Processing...' : '✨ AI Auto-Fill & Polish'}
+              </button>
+            </div>
+            <textarea 
+              className="ainp" 
+              rows={3} 
+              value={noticeData.text || ''} 
+              onChange={(e) => setNoticeData(d=>({...d,text:e.target.value}))} 
+              required 
+              placeholder="Type rough text or select a PDF below, then click ✨ AI Auto-Fill..." 
+            />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 14, marginBottom: 14 }}>
             <div>
@@ -51,10 +110,28 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
   <MediaPicker 
     label="Link (Drive PDF or URL)" 
     value={noticeData.link || ''} 
-    onChange={url => setNoticeData(d => ({ ...d, link: url }))} 
+    onChange={async (url) => {
+      setNoticeData(d => ({ ...d, link: url }));
+      if (!noticeData.text && url) {
+        const parts = url.split('/');
+        const rawName = decodeURIComponent(parts[parts.length - 1] || '');
+        if (rawName && rawName.length > 3) {
+          const autoData = await extractNoticeMetadata(rawName);
+          setNoticeData(d => ({
+            ...d,
+            link: url,
+            text: autoData.text,
+            type: autoData.type,
+            isNew: autoData.isNew,
+            pinned: autoData.pinned
+          }));
+          toast.success(`✨ Auto-detected: ${autoData.type} Notice`);
+        }
+      }
+    }} 
     type="pdf" 
     compact={true} 
-    driveFolderId={import.meta.env.VITE_DRIVE_NOTICE_FOLDER} // ✅ MAGIC HAPPPENS HERE
+    driveFolderId={import.meta.env.VITE_DRIVE_NOTICE_FOLDER}
   />
 </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 22 }}>

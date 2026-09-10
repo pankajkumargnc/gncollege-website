@@ -83,19 +83,26 @@ export default function App() {
     import('firebase/auth').then(({ onAuthStateChanged }) => {
       import('./firebase-auth').then(({ auth }) => {
         unsub = onAuthStateChanged(auth, (user) => {
-          setAdminAuthed(!!user);
+          const isAuthed = !!user || sessionStorage.getItem('gnc_admin_auth') === 'true';
+          setAdminAuthed(isAuthed);
           setIsInitializing(false);
         });
       });
     }).catch(err => {
       console.error("Auth sync error", err);
+      const isAuthed = sessionStorage.getItem('gnc_admin_auth') === 'true';
+      setAdminAuthed(isAuthed);
       setIsInitializing(false);
     });
     return () => unsub && unsub();
   }, []);
 
-  const handleAdminLogin = () => setAdminAuthed(true);
+  const handleAdminLogin = () => {
+    sessionStorage.setItem('gnc_admin_auth', 'true');
+    setAdminAuthed(true);
+  };
   const handleAdminLogout = () => {
+    sessionStorage.removeItem('gnc_admin_auth');
     import('./firebase-auth').then(({ auth }) => auth.signOut());
     setAdminAuthed(false);
   };

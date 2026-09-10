@@ -4,7 +4,10 @@ service cloud.firestore {
 
     function isAuth() { return request.auth != null; }
     function isAdmin() {
-      return isAuth() && request.auth.token.email == "pankajkumargnc@gmail.com";
+      return isAuth() && (
+        request.auth.token.email in ["pankajkumargnc@gmail.com", "admin@gncollege.org", "principal@gncollege.org"] ||
+        request.auth.token.admin == true
+      );
     }
 
     match /notices/{docId}          { allow read: if true; allow write: if isAdmin(); }
