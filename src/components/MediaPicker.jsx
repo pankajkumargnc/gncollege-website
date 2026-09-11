@@ -112,8 +112,53 @@ export default function MediaPicker({
                       style={isSelected ? S.fileItemActive : S.fileItem}
                       className="mp-file-item"
                     >
-                      <div style={S.fileIcon}>
-                        {file.mimeType.includes('image') ? '🖼️' : '📄'}
+                      <div style={S.fileThumbWrap}>
+                        {file.mimeType?.startsWith('image/') ? (
+                          <>
+                            <img 
+                              src={file.thumbnailUrl || file.imageUrl || `https://lh3.googleusercontent.com/d/${file.id}=w200`} 
+                              alt={file.name}
+                              loading="lazy"
+                              referrerPolicy="no-referrer"
+                              style={S.fileThumbImg}
+                              onError={(e) => {
+                                if (!e.target.dataset.triedFallback) {
+                                  e.target.dataset.triedFallback = 'true';
+                                  e.target.src = `https://lh3.googleusercontent.com/d/${file.id}=w200`;
+                                } else {
+                                  e.target.style.display = 'none';
+                                  if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                                }
+                              }}
+                            />
+                            <div style={{ ...S.fileThumbFallback, display: 'none' }}>
+                              🖼️
+                            </div>
+                          </>
+                        ) : file.thumbnailUrl ? (
+                          <>
+                            <img 
+                              src={file.thumbnailUrl} 
+                              alt={file.name}
+                              loading="lazy"
+                              referrerPolicy="no-referrer"
+                              style={S.fileThumbImg}
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                              }}
+                            />
+                            <div style={S.fileThumbPdf}>
+                              <span style={{ fontSize: '18px' }}>📄</span>
+                              <span style={S.fileThumbPdfTag}>PDF</span>
+                            </div>
+                          </>
+                        ) : (
+                          <div style={S.fileThumbPdf}>
+                            <span style={{ fontSize: '18px' }}>📄</span>
+                            <span style={S.fileThumbPdfTag}>PDF</span>
+                          </div>
+                        )}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={S.fileName}>{file.name}</div>
@@ -220,7 +265,7 @@ export default function MediaPicker({
         <div style={S.previewWrap}>
           <div style={S.previewBox}>
             <div style={S.previewBadge}>SELECTED</div>
-            {isImage && (
+            {isImage && !String(value).toLowerCase().includes('.pdf') ? (
               <img 
                 src={resolveUrl(value)} 
                 alt="Selected" 
@@ -228,6 +273,11 @@ export default function MediaPicker({
                 style={{ width: 36, height: 36, borderRadius: 6, objectFit: 'cover', flexShrink: 0, border: '1px solid #cbd5e1' }}
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
+            ) : (
+              <div style={{ width: 36, height: 36, borderRadius: 6, background: '#fee2e2', color: '#dc2626', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid #fca5a5' }}>
+                <span style={{ fontSize: '14px', lineHeight: 1 }}>📄</span>
+                <span style={{ fontSize: '8px', fontWeight: 900, marginTop: 2 }}>PDF</span>
+              </div>
             )}
             <a href={value} target="_blank" rel="noreferrer" style={S.previewLink} title={value}>
               {value}
@@ -325,6 +375,25 @@ const S = {
     display: 'flex', alignItems: 'center', gap: '14px', padding: '14px', background: '#fffbeb',
     border: `2px solid ${GOLD}`, borderRadius: '10px', cursor: 'default',
     boxShadow: '0 8px 20px rgba(244,160,35,0.15)', transform: 'scale(1.01)', transition: 'all 0.2s'
+  },
+  fileThumbWrap: {
+    width: '46px', height: '46px', borderRadius: '8px', overflow: 'hidden',
+    background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    flexShrink: 0, border: '1px solid #e2e8f0', position: 'relative'
+  },
+  fileThumbImg: {
+    width: '100%', height: '100%', objectFit: 'cover', display: 'block'
+  },
+  fileThumbFallback: {
+    width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    background: '#f8fafc', fontSize: '20px'
+  },
+  fileThumbPdf: {
+    width: '100%', height: '100%', display: 'flex', flexDirection: 'column',
+    alignItems: 'center', justifyContent: 'center', background: '#fee2e2', color: '#dc2626'
+  },
+  fileThumbPdfTag: {
+    fontSize: '8px', fontWeight: 900, lineHeight: 1, marginTop: '2px', letterSpacing: '0.5px'
   },
   fileIcon: { fontSize: '26px', background: '#fff', padding: '8px', borderRadius: '8px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' },
   fileName: { fontSize: '14px', fontWeight: 800, color: NAVY, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },

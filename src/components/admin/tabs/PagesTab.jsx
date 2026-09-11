@@ -4,6 +4,7 @@ import { db } from "../../../firebase";
 import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, query, where, writeBatch } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { T, NAVY, GOLD, WHITE, useLocalDraft, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
+import { clearCache } from '../../../utils/cachedFetch';
 
 const JoditEditor = lazy(() => import('jodit-react'));
 
@@ -282,16 +283,15 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
             isExternal: false,
             createdAt: serverTimestamp()
           });
-
-          // Trigger instant cache-busting
-          localStorage.removeItem('gnc_nav_v1');
-          localStorage.removeItem('gnc_nav_v1_ts');
-          window.dispatchEvent(new CustomEvent('gnc_nav_updated'));
         }
 
         toast.success(formData.addToMenu ? '🚀 Page Created & Added to Navbar!' : '🚀 Page Created Successfully!');
         logAct?.('add', `Created Page: ${payload.title}`, 'pages');
       }
+      
+      // ⚡ Zero-Lag Instant Live Publishing Sync
+      clearCache('pages');
+      if (formData.addToMenu) clearCache('navigation');
       
       resetEditor();
       setActiveTab('manage'); 
@@ -327,6 +327,7 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
         status: newStatus,
         updatedAt: serverTimestamp()
       });
+      clearCache('pages');
       toast.success(`Page marked as ${newStatus.toUpperCase()}!`);
       logAct?.('update', `Toggled status to ${newStatus}: ${page.title}`, 'pages');
     } catch (err) {
@@ -356,13 +357,13 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
       softDelete('pages', page.id, page, page.title);
       triggerAutoCleanup();
       
-      // Clear cache
-      localStorage.removeItem('gnc_nav_v1');
-      localStorage.removeItem('gnc_nav_v1_ts');
-      window.dispatchEvent(new CustomEvent('gnc_nav_updated'));
+      // ⚡ Zero-Lag Instant Live Publishing Sync
+      clearCache('pages');
+      clearCache('navigation');
     } catch (err) {
       softDelete('pages', page.id, page, page.title);
       triggerAutoCleanup();
+      clearCache('pages');
     }
   };
 

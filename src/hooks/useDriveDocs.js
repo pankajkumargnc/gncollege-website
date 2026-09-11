@@ -50,8 +50,8 @@ export function useDriveDocs(folderId, fileType = 'any', searchQuery = '') {
 
         const q = encodeURIComponent(`'${folderId}' in parents${mimeFilter}${searchFilter} and trashed=false`);
         
-        // 3. API URL (webContentLink add kiya gaya hai direct download/stream ke liye)
-        const url = `${BASE_URL}?q=${q}&key=${API_KEY}&fields=files(id,name,mimeType,createdTime,size,webContentLink)&orderBy=createdTime desc&pageSize=100`;
+        // 3. API URL (Requesting thumbnailLink, webContentLink, and hasThumbnail)
+        const url = `${BASE_URL}?q=${q}&key=${API_KEY}&fields=files(id,name,mimeType,createdTime,size,webContentLink,thumbnailLink,hasThumbnail)&orderBy=createdTime desc&pageSize=100`;
 
         const res = await fetch(url);
         if (!res.ok) {
@@ -64,22 +64,30 @@ export function useDriveDocs(folderId, fileType = 'any', searchQuery = '') {
 
         const files = (data.files || []).map(f => {
           const isImg = f.mimeType?.startsWith('image/');
-          const directImgUrl = `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&key=${API_KEY}`;
+          const directImgUrl = API_KEY 
+            ? `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&key=${API_KEY}`
+            : `https://lh3.googleusercontent.com/d/${f.id}=w1200`;
+          
+          const thumbUrl = f.thumbnailLink 
+            || (isImg ? (API_KEY ? `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&key=${API_KEY}` : `https://lh3.googleusercontent.com/d/${f.id}=w220`) : null);
+
           return {
-            id:         f.id,
-            name:       f.name.replace(/\.pdf$/i, '').trim(),
-            mimeType:   f.mimeType,
-            size:       formatSize(f.size),
-            date:       new Date(f.createdTime).toLocaleDateString('en-IN', {
-                          day: '2-digit', month: 'short', year: 'numeric'
-                        }),
-            previewUrl: isImg ? directImgUrl : `https://drive.google.com/file/d/${f.id}/preview`,
-            viewUrl:    `https://drive.google.com/file/d/${f.id}/view`,
-            imageUrl:   directImgUrl,
+            id:           f.id,
+            name:         f.name.replace(/\.pdf$/i, '').trim(),
+            mimeType:     f.mimeType,
+            size:         formatSize(f.size),
+            date:         new Date(f.createdTime).toLocaleDateString('en-IN', {
+                            day: '2-digit', month: 'short', year: 'numeric'
+                          }),
+            previewUrl:   isImg ? directImgUrl : `https://drive.google.com/file/d/${f.id}/preview`,
+            viewUrl:      `https://drive.google.com/file/d/${f.id}/view`,
+            imageUrl:     directImgUrl,
+            thumbnailUrl: thumbUrl,
+            thumbnailLink: f.thumbnailLink || '',
             
             // 🎥 NAYA: Custom HTML5 Video Player / Media ke liye direct API streaming link
-            streamUrl:  directImgUrl,
-            downloadUrl: f.webContentLink
+            streamUrl:    directImgUrl,
+            downloadUrl:  f.webContentLink
           };
         });
 

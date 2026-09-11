@@ -4,6 +4,7 @@ import { db } from "../../../firebase";
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { T, NAVY, GOLD, WHITE } from '../AdminShared';
+import { clearCache } from '../../../utils/cachedFetch';
 
 // 🌐 Default Standard Website Routes (Comprehensive College Sitemap)
 const STANDARD_ROUTES = [
@@ -132,13 +133,9 @@ export default function MenuBuilderTab({ logAct }) {
     return () => { unsubMenu(); unsubPages(); };
   }, []);
 
-  // ⚡ Cache-Buster & Event Dispatcher
+  // ⚡ Cache-Buster & Global Live Synchronizer
   const triggerSync = () => {
-    try {
-      localStorage.removeItem('gnc_nav_v1');
-      localStorage.removeItem('gnc_nav_v1_ts');
-    } catch (_) {}
-    window.dispatchEvent(new CustomEvent('gnc_nav_updated'));
+    clearCache('navigation');
   };
 
   // 2. Save / Update Menu Item

@@ -6,6 +6,7 @@ import { db } from "../../../firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { T, NAVY, GOLD, Toggle, useLocalDraft } from '../AdminShared';
+import { clearCache } from '../../../utils/cachedFetch';
 import MediaPicker from "../../MediaPicker";
 
 export default function SettingsTab({ logAct }) {
@@ -37,7 +38,8 @@ export default function SettingsTab({ logAct }) {
       await setDoc(doc(db, 'settings', 'site'), { ...siteCfg, updatedAt: serverTimestamp() });
       if (siteCfg.imgbbKey) window.GN_IMGBB_KEY = siteCfg.imgbbKey;
       
-      toast.success('Settings saved! 🎉');
+      clearCache('site_settings');
+      toast.success('Settings saved & live synced! 🎉');
       logAct?.('update', 'Site settings updated', 'settings');
       clearDraft(); // ✅ Draft clear after save
     } catch (err) { toast.error(err.message); }

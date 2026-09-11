@@ -1,8 +1,10 @@
-// src/hooks/useAppData.js — FIXED + CACHED VERSION
-import React, { useState, useEffect } from 'react';
-import { collection, query, onSnapshot, orderBy, limit, getDocs, where, Timestamp } from 'firebase/firestore';
+// src/hooks/useAppData.js — Real-Time Reactive Architecture + Zero-Lag Sync
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { 
+  collection, query, onSnapshot, orderBy, limit, getDocs, doc 
+} from 'firebase/firestore';
 import { db } from '../firebase';
-import { getCached, setCache } from '../utils/cachedFetch';
+import { getCached, setCache, clearCache, SYNC_CHANNEL_NAME } from '../utils/cachedFetch';
 import DOMPurify from 'dompurify';
 
 export default function useAppData() {
@@ -16,9 +18,14 @@ export default function useAppData() {
   const [sliderSlides, setSliderSlides]   = useState([]);
   const [navLinks, setNavLinks]           = useState([]);
   const [pdfReports, setPdfReports]       = useState([]);
+  const [siteSettings, setSiteSettings]   = useState(null);
 
-  // Navigation — cached, but instant sync via gnc_nav_updated event
-  useEffect(() => {
+  const initialSyncHandled = useRef(false);
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 1. Navigation Tree Builder & Fetcher
+  // ─────────────────────────────────────────────────────────────────────────────
+  const fetchNavigation = useCallback((forceBust = false) => {
     const CACHE_KEY = 'gnc_nav_v1';
     const CACHE_TS_KEY = 'gnc_nav_v1_ts';
     const NAV_TTL = 30 * 60 * 1000; // 30 minutes
@@ -38,64 +45,98 @@ export default function useAppData() {
       }));
     };
 
-    const fetchNavigation = (forceBust = false) => {
-      if (!forceBust) {
-        try {
-          const cached = localStorage.getItem(CACHE_KEY);
-          const ts = localStorage.getItem(CACHE_TS_KEY);
-          if (cached && ts && Date.now() - Number(ts) < NAV_TTL) {
-            setNavLinks(JSON.parse(cached));
-            return;
-          }
-        } catch (_) {}
-      }
-
-      if (!db) return;
-
-      getDocs(query(collection(db, 'navigation'), orderBy('order', 'asc')))
-        .then(snap => {
-          const flat = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          const tree = buildTree(flat) || [];
-          setNavLinks(tree);
-          try {
-            localStorage.setItem(CACHE_KEY, JSON.stringify(tree));
-            localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
-          } catch (_) {}
-        })
-        .catch(err => console.error('[Backend] navigation fetch error:', err));
-    };
-
-    fetchNavigation();
-
-    // ⚡ Instant Cache-Busting Event from Admin MenuBuilder
-    const handleNavUpdated = () => {
+    if (!forceBust) {
       try {
-        localStorage.removeItem(CACHE_KEY);
-        localStorage.removeItem(CACHE_TS_KEY);
+        const cached = localStorage.getItem(CACHE_KEY);
+        const ts = localStorage.getItem(CACHE_TS_KEY);
+        if (cached && ts && Date.now() - Number(ts) < NAV_TTL) {
+          setNavLinks(JSON.parse(cached));
+          return;
+        }
       } catch (_) {}
-      fetchNavigation(true);
-    };
+    }
 
-    window.addEventListener('gnc_nav_updated', handleNavUpdated);
-    return () => window.removeEventListener('gnc_nav_updated', handleNavUpdated);
+    if (!db) return;
+
+    getDocs(query(collection(db, 'navigation'), orderBy('order', 'asc')))
+      .then(snap => {
+        const flat = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const tree = buildTree(flat) || [];
+        setNavLinks(tree);
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(tree));
+          localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
+        } catch (_) {}
+      })
+      .catch(err => console.error('[Backend] navigation fetch error:', err));
   }, []);
 
-  // Live + Cached collections
-  useEffect(() => {
-    const liveCols = [
-      ['notices',       setNotices, 40],
-      ['announcements', setAnnouncements, 20],
-      ['events',        setEvents, 30],
-      ['updates',       setUpdates, 15],
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 2. Fetch Cached Static Collections (Faculties & PDF Reports)
+  // ─────────────────────────────────────────────────────────────────────────────
+  const fetchStaticCollections = useCallback((forceBust = false) => {
+    if (!db) return;
+
+    const collectionsToFetch = [
+      ['faculties', setFaculties, 150],
+      ['pdfReports', setPdfReports, 60]
     ];
 
-    const unsubs = liveCols.map(([col, setter, max]) => {
+    collectionsToFetch.forEach(([col, setter, max]) => {
+      if (!forceBust) {
+        const cached = getCached(col);
+        if (cached && Array.isArray(cached) && cached.length > 0) {
+          setter(cached);
+          return;
+        }
+      }
+
+      const q = query(collection(db, col), limit(max));
+      getDocs(q)
+        .then(snap => {
+          const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          docs.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+          setter(docs);
+          setCache(col, docs);
+        })
+        .catch(err => console.error(`[Backend] Fetch error for ${col}:`, err));
+    });
+  }, []);
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 3. Initial Boot & Navigation Mount
+  // ─────────────────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    fetchNavigation(false);
+    fetchStaticCollections(false);
+  }, [fetchNavigation, fetchStaticCollections]);
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 4. Real-Time High-Velocity Collections (Snapshots with DOMPurify sanitization)
+  // ─────────────────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!db) return;
+
+    // Upgraded: Gallery, Hero Sliders, and Testimonials are now REAL-TIME!
+    const liveCols = [
+      ['notices',       setNotices,       40, 'createdAt', 'desc'],
+      ['announcements', setAnnouncements, 20, 'createdAt', 'desc'],
+      ['events',        setEvents,        30, 'createdAt', 'desc'],
+      ['updates',       setUpdates,       15, 'createdAt', 'desc'],
+      ['sliderSlides',  setSliderSlides,  15, 'order',     'asc'],
+      ['gallery',       setGallery,       80, 'createdAt', 'desc'],
+      ['testimonials',  setTestimonials,  25, 'createdAt', 'desc'],
+    ];
+
+    const unsubs = liveCols.map(([col, setter, max, sortField, sortDir]) => {
       try {
-        const q = query(
-          collection(db, col), 
-          orderBy('createdAt', 'desc'), 
-          limit(max)
-        );
+        let q;
+        if (sortField) {
+          q = query(collection(db, col), orderBy(sortField, sortDir || 'desc'), limit(max));
+        } else {
+          q = query(collection(db, col), limit(max));
+        }
+
         return onSnapshot(q, snap => {
           const docs = snap.docs.map(d => {
             const data = d.data();
@@ -105,50 +146,103 @@ export default function useAppData() {
             return { id: d.id, ...data };
           });
           setter(docs);
-        }, err => console.error(`[Backend] ${col} subscription failed:`, err));
-      } catch (err) { 
+        }, err => {
+          // If orderBy index is building or missing, fallback to unordered limit query
+          console.warn(`[Backend] ${col} subscription fallback query:`, err.message);
+          try {
+            return onSnapshot(query(collection(db, col), limit(max)), fallbackSnap => {
+              const docs = fallbackSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+              setter(docs);
+            });
+          } catch (_) {
+            return () => {};
+          }
+        });
+      } catch (err) {
         console.error(`[Backend] Error setting up ${col} listener:`, err);
-        return () => {}; 
+        return () => {};
       }
     });
 
-    const staticCols = [
-      ['gallery',      setGallery, 100],
-      ['faculties',    setFaculties, 150],
-      ['sliderSlides', setSliderSlides, 10],
-      ['pdfReports',   setPdfReports, 50],
-    ];
+    // ── Real-Time Site Settings Listener ──
+    const unsubSettings = onSnapshot(doc(db, 'settings', 'site'), snap => {
+      if (snap.exists()) {
+        setSiteSettings(snap.data());
+      }
+    }, () => {});
 
-    staticCols.forEach(([col, setter, max]) => {
-      const cached = getCached(col);
-      if (cached) { setter(cached); return; }
+    // ───────────────────────────────────────────────────────────────────────────
+    // 5. ⚡ Zero-Lag Remote Sync Listener (`settings/site_sync`)
+    // When ANY admin updates data on ANY computer, all clients worldwide react immediately!
+    // ───────────────────────────────────────────────────────────────────────────
+    const unsubSync = onSnapshot(doc(db, 'settings', 'site_sync'), snap => {
+      if (!snap.exists()) return;
       
-      const q = query(collection(db, col), limit(max));
-      getDocs(q)
-        .then(snap => {
-          const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          // Static collections normally don't need real-time, so we sort once
-          docs.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-          setter(docs); 
-          setCache(col, docs);
-        }).catch(err => console.error(`[Backend] static fetch error for ${col}:`, err));
-    });
+      // Skip the very first snapshot on load to prevent duplicate requests
+      if (!initialSyncHandled.current) {
+        initialSyncHandled.current = true;
+        return;
+      }
 
-    // Testimonials Specific logic
-    const ct = getCached('testimonials');
-    if (ct) { setTestimonials(ct); }
-    else {
-      getDocs(query(collection(db, 'testimonials'), limit(15), orderBy('createdAt', 'desc')))
-        .then(snap => {
-          const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          setTestimonials(docs); setCache('testimonials', docs);
-        }).catch(err => console.error("[Backend] Testimonials fetch error:", err));
-    }
+      const syncData = snap.data();
+      const updatedCol = syncData?.updatedCollection;
+
+      // Invalidate specific or all cached items
+      if (!updatedCol || updatedCol === 'all' || updatedCol === 'navigation' || updatedCol === 'pages') {
+        fetchNavigation(true);
+      }
+      if (!updatedCol || updatedCol === 'all' || updatedCol === 'faculties' || updatedCol === 'pdfReports') {
+        fetchStaticCollections(true);
+      }
+    }, () => {});
+
+    // ───────────────────────────────────────────────────────────────────────────
+    // 6. 📡 Same-Browser Cross-Tab Sync (BroadcastChannel + Local Window Events)
+    // ───────────────────────────────────────────────────────────────────────────
+    const handleSyncEvent = (event) => {
+      const col = event?.detail?.collection || event?.data?.collection;
+      if (!col || col === 'navigation' || col === 'pages') {
+        fetchNavigation(true);
+      }
+      if (!col || col === 'faculties' || col === 'pdfReports') {
+        fetchStaticCollections(true);
+      }
+    };
+
+    window.addEventListener('gnc_live_sync', handleSyncEvent);
+    window.addEventListener('gnc_nav_updated', () => fetchNavigation(true));
+
+    let channel = null;
+    try {
+      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        channel = new BroadcastChannel(SYNC_CHANNEL_NAME);
+        channel.onmessage = handleSyncEvent;
+      }
+    } catch (_) {}
 
     return () => {
       unsubs.forEach(u => u && u());
+      if (unsubSettings) unsubSettings();
+      if (unsubSync) unsubSync();
+      window.removeEventListener('gnc_live_sync', handleSyncEvent);
+      window.removeEventListener('gnc_nav_updated', () => fetchNavigation(true));
+      if (channel) channel.close();
     };
-  }, []);
+  }, [fetchNavigation, fetchStaticCollections]);
 
-  return { updates, notices, announcements, events, gallery, faculties, testimonials, sliderSlides, navLinks, pdfReports };
+  return { 
+    updates, 
+    notices, 
+    announcements, 
+    events, 
+    gallery, 
+    faculties, 
+    testimonials, 
+    sliderSlides, 
+    navLinks, 
+    pdfReports,
+    siteSettings,
+    refreshNavigation: () => fetchNavigation(true),
+    refreshStaticData: () => fetchStaticCollections(true)
+  };
 }

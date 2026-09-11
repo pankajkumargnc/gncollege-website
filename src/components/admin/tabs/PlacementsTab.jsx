@@ -5,6 +5,7 @@ import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/fi
 import toast from 'react-hot-toast';
 import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, useLocalDraft, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
+import { resolveUrl } from '../../../utils/resolver';
 
 const DEPTS = ['B.A.', 'B.Sc.', 'B.Com.', 'M.A.', 'M.Sc.', 'M.Com.', 'B.Ed.', 'Other'];
 
@@ -106,9 +107,16 @@ export default function PlacementsTab({ placements, logAct, getSectionLog, softD
           <div key={p.id} className={`arow ${selected.includes(p.id) ? 'selected' : ''}`}>
             <input type="checkbox" checked={selected.includes(p.id)} onChange={() => setSelected(s => s.includes(p.id) ? s.filter(x => x !== p.id) : [...s, p.id])} style={{ accentColor: NAVY }} />
             {p.photo
-              ? <img src={p.photo} alt={p.name} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-              : <div style={{ width: 44, height: 44, borderRadius: '50%', background: `${NAVY}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>🎓</div>
+              ? <img 
+                  src={resolveUrl(p.photo)} 
+                  alt={p.name} 
+                  referrerPolicy="no-referrer"
+                  onError={(e) => { e.target.style.display = 'none'; if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex'; }}
+                  style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} 
+                />
+              : null
             }
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: `${NAVY}15`, display: p.photo ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>🎓</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 800, color: NAVY, fontSize: 14 }}>{p.name}</div>
               <div style={{ fontSize: 13, color: T.t2 }}>{p.role}{p.company ? ` @ ${p.company}` : ''}</div>

@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, useLocalDraft, Toggle, MiniLog } from '../AdminShared';
 import { clearCache } from '../../../utils/cachedFetch';
+import { resolveUrl } from '../../../utils/resolver';
 
 export default function SliderTab({ sliderSlides, logAct, getSectionLog, softDelete }) {
   const [editItem, setEditItem] = useState(null);
@@ -109,7 +110,7 @@ export default function SliderTab({ sliderSlides, logAct, getSectionLog, softDel
 
           {formData.image && (
             <div style={{ marginBottom: 16, borderRadius: 12, overflow: 'hidden', border: `1.5px solid ${T.b1}`, position: 'relative' }}>
-              <img src={formData.image} alt="preview" style={{ width: '100%', maxHeight: 200, objectFit: 'cover' }} />
+              <img src={resolveUrl(formData.image)} alt="preview" style={{ width: '100%', maxHeight: 200, objectFit: 'cover' }} />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right,rgba(15,35,71,.6),transparent)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 20 }}>
                 {formData.title    && <div style={{ color: 'white', fontWeight: 900, fontSize: 18 }}>{formData.title}</div>}
                 {formData.subtitle && <div style={{ color: 'rgba(255,255,255,.8)', fontSize: 13 }}>{formData.subtitle}</div>}
@@ -149,7 +150,7 @@ export default function SliderTab({ sliderSlides, logAct, getSectionLog, softDel
             <div key={s.id} style={{ borderRadius: 14, overflow: 'hidden', border: `2px solid ${s.isActive ? GOLD : T.b1}`, opacity: s.isActive ? 1 : 0.5 }}>
               <div style={{ position: 'relative' }}>
                 {s.image ? (
-                  <img src={s.image} alt={s.title} style={{ width: '100%', height: 140, objectFit: 'cover' }} />
+                  <img src={resolveUrl(s.image)} alt={s.title} style={{ width: '100%', height: 140, objectFit: 'cover' }} />
                 ) : (
                   <div style={{ height: 140, background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>🖼️</div>
                 )}

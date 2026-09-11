@@ -5,6 +5,8 @@ import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from '
 import toast from 'react-hot-toast';
 import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, useLocalDraft, Toggle, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
+import { clearCache } from '../../../utils/cachedFetch';
+import { resolveUrl } from '../../../utils/resolver';
 
 const TYPES = ['Student', 'Alumni'];
 
@@ -32,11 +34,9 @@ export default function TestimonialsTab({ testimonials, logAct, getSectionLog })
 
       if (editItem) {
         await updateDoc(doc(db, 'testimonials', editItem.id), payload);
-        toast.success('Testimonial updated!');
-      } else {
-        await addDoc(collection(db, 'testimonials'), { ...payload, createdAt: serverTimestamp() });
-        toast.success('💬 Testimonial added!');
+        toast.success(editItem ? 'Testimonial updated!' : '💬 Testimonial added!');
       }
+      clearCache('testimonials');
       logAct(editItem ? 'update' : 'add', `Testimonial: ${formData.name}`, 'testimonials');
       setEditItem(null); clearDraft();
     } catch (err) { toast.error(err.message); }
@@ -47,6 +47,7 @@ export default function TestimonialsTab({ testimonials, logAct, getSectionLog })
     if (!window.confirm(`Delete testimonial from ${name}?`)) return;
     try {
       await deleteDoc(doc(db, 'testimonials', id));
+      clearCache('testimonials');
       toast.success('Deleted!');
       logAct('delete', `Testimonial: ${name}`, 'testimonials');
     } catch (err) { toast.error(err.message); }
@@ -112,7 +113,13 @@ export default function TestimonialsTab({ testimonials, logAct, getSectionLog })
         <div className="actitle">All Testimonials ({filtered.length})</div>
         {filtered.map(t => (
           <div key={t.id} className="arow">
-            <img src={t.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=0f2347&color=f4a023`} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${GOLD}` }} alt="" />
+            <img 
+              src={t.image ? resolveUrl(t.image) : `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=0f2347&color=f4a023`} 
+              referrerPolicy="no-referrer"
+              onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=0f2347&color=f4a023`; }}
+              style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${GOLD}` }} 
+              alt="" 
+            />
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 800, color: NAVY }}>{t.name} <span style={{ fontSize: 11, color: T.t4, marginLeft: 6 }}>{t.role}</span></div>
               <div style={{ fontSize: 12, color: T.t3, marginTop: 2, display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{t.content}</div>

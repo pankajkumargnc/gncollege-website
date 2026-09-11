@@ -1,8 +1,17 @@
-// src/utils/cachedFetch.js — Smart Persistent Caching (localStorage)
-import { collection, getDocs } from "firebase/firestore";
+// src/utils/cachedFetch.js — Smart Persistent Caching + Zero-Lag Real-Time Sync Engine
+import { collection, getDocs, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 
 const CACHE_KEY_PREFIX = "gnc_coll_";
+export const SYNC_CHANNEL_NAME = "gnc_live_sync";
+
+// 📡 Cross-Tab Synchronization Channel (0ms Latency across tabs/windows)
+let syncChannel = null;
+try {
+  if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+    syncChannel = new BroadcastChannel(SYNC_CHANNEL_NAME);
+  }
+} catch (_) {}
 
 // 🔐 Safe base64 encoding to prevent PII exposure in localStorage audits
 function encodePayload(obj) {
@@ -48,24 +57,64 @@ export function setCache(collectionName, data) {
     localStorage.setItem(cacheKey, encodePayload(data));
     localStorage.setItem(tsKey, Date.now().toString());
   } catch (e) {
-    localStorage.clear();
-    localStorage.setItem(cacheKey, encodePayload(data));
-    localStorage.setItem(tsKey, Date.now().toString());
+    try {
+      localStorage.clear();
+      localStorage.setItem(cacheKey, encodePayload(data));
+      localStorage.setItem(tsKey, Date.now().toString());
+    } catch (_) {}
   }
 }
 
-// ✅ Compatibility helper for Admin Tabs
-export function clearCache(collectionName) {
+// ⚡ Comprehensive Cache-Busting & Global Live Synchronization
+export function clearCache(collectionName, broadcastToRemote = true) {
   const cacheKey = `${CACHE_KEY_PREFIX}${collectionName}`;
   const tsKey = `${cacheKey}_ts`;
   try {
     localStorage.removeItem(cacheKey);
     localStorage.removeItem(tsKey);
-    // Also clear the generic nav cache if any nav change happened
-    localStorage.removeItem('gnc_nav_v1');
-    localStorage.removeItem('gnc_nav_v1_ts');
+    
+    // Clear navigation cache whenever navigation or pages are updated
+    if (!collectionName || collectionName === 'navigation' || collectionName === 'pages') {
+      localStorage.removeItem('gnc_nav_v1');
+      localStorage.removeItem('gnc_nav_v1_ts');
+    }
   } catch (_) {}
+
+  // 1. Local window events for same-tab hooks
+  if (typeof window !== "undefined") {
+    try {
+      window.dispatchEvent(new CustomEvent('gnc_live_sync', { detail: { collection: collectionName, timestamp: Date.now() } }));
+      if (collectionName === 'navigation' || collectionName === 'pages') {
+        window.dispatchEvent(new CustomEvent('gnc_nav_updated'));
+      }
+    } catch (_) {}
+  }
+
+  // 2. BroadcastChannel for instant cross-tab sync in the same browser (Admin <-> Live site tabs)
+  if (syncChannel) {
+    try {
+      syncChannel.postMessage({
+        type: 'INVALIDATE_CACHE',
+        collection: collectionName,
+        timestamp: Date.now()
+      });
+    } catch (_) {}
+  }
+
+  // 3. Global Remote Sync: Touch Firestore `settings/site_sync` doc so ALL visitors everywhere get notified
+  if (broadcastToRemote && db) {
+    try {
+      setDoc(doc(db, 'settings', 'site_sync'), {
+        updatedCollection: collectionName || 'all',
+        lastUpdated: serverTimestamp(),
+        epoch: Date.now()
+      }, { merge: true }).catch(() => {});
+    } catch (_) {}
+  }
 }
+
+// Alias for explicit clarity
+export const triggerGlobalSync = clearCache;
 
 export async function cachedFetch(collectionName, ttl = 3600000) {
   const cached = getCached(collectionName, ttl);

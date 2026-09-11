@@ -22,6 +22,7 @@ import {
   BulkBar,
   MiniLog,
 } from "../AdminShared";
+import { resolveUrl } from "../../../utils/resolver";
 
 const TYPES = [
   "Cultural",
@@ -390,8 +391,10 @@ export default function EventsTab({
             />
             {ev.image && (
               <img
-                src={ev.image}
+                src={resolveUrl(ev.image)}
                 alt=""
+                referrerPolicy="no-referrer"
+                onError={(e) => { e.target.style.display = 'none'; }}
                 style={{
                   width: 52,
                   height: 44,

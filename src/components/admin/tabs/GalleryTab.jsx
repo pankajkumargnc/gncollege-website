@@ -172,7 +172,7 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
 
             {formData.image && (
               <div style={{ marginBottom: 16 }}>
-                <img src={formData.image} alt="preview" style={{ height: 120, objectFit: 'cover', borderRadius: 10, border: `1.5px solid ${T.b1}` }} />
+                <img src={resolveUrl(formData.image)} alt="preview" style={{ height: 120, objectFit: 'cover', borderRadius: 10, border: `1.5px solid ${T.b1}` }} />
               </div>
             )}
 

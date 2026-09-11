@@ -1,7 +1,7 @@
 // src/components/admin/tabs/SystemTestTab.jsx
 // ═══════════════════════════════════════════════════════════════════════════════
-// 🚀 GNC SUPREME DIAGNOSTIC ENGINE v300.0
-// REAL 32-Phase Audit | AI Intelligence | Live Monitor | Security Scanner
+// 🚀 GNC SUPREME DIAGNOSTIC ENGINE v400.0
+// REAL 36-Phase Audit | web-vitals RUM | axe-core A11y | AI Intelligence
 // ─────────────────────────────────────────────────────────────────────────────
 // ⚠️  SETUP REQUIRED: Gemini AI features need a Google API key.
 //     In your project root, create/edit the .env file and add:
@@ -57,6 +57,9 @@ export default function SystemTestTab({ logAct }) {
   const [collectionStats, setCollectionStats] = useState({});
   const [storageQuota, setStorageQuota] = useState(null);
 
+  // ─── web-vitals RUM State ───────────────────────────────────────
+  const webVitalsRef = useRef({ lcp: null, cls: null, fcp: null, ttfb: null, inp: null });
+
   // ─── Refs ───────────────────────────────────────────────────────
   const sysRef = useRef(null);
   const fpsFrameRef = useRef(null);
@@ -88,6 +91,7 @@ export default function SystemTestTab({ logAct }) {
     startCollectionWatchers();
     startScheduler();
     readStorageQuota();
+    initWebVitals();
 
     return () => {
       cancelAnimationFrame(fpsFrameRef.current);
@@ -102,6 +106,20 @@ export default function SystemTestTab({ logAct }) {
         navigator.connection.removeEventListener("change", handleNetworkChange);
     };
   }, []);
+
+  // ─── web-vitals: Collect real metrics passively ─────────────────
+  const initWebVitals = async () => {
+    try {
+      const wv = await import("web-vitals");
+      wv.onLCP((m) => { webVitalsRef.current.lcp = m; });
+      wv.onCLS((m) => { webVitalsRef.current.cls = m; });
+      wv.onFCP((m) => { webVitalsRef.current.fcp = m; });
+      wv.onTTFB((m) => { webVitalsRef.current.ttfb = m; });
+      wv.onINP((m) => { webVitalsRef.current.inp = m; });
+    } catch (e) {
+      console.warn("[GNC Diag] web-vitals init skipped:", e.message);
+    }
+  };
 
   // ─── Tier 3: Live FPS Monitor ───────────────────────────────────
   const startFpsMonitor = () => {
@@ -210,7 +228,7 @@ export default function SystemTestTab({ logAct }) {
   };
 
   // ═══════════════════════════════════════════════════════════════
-  // MAIN AUDIT ENGINE — 32 REAL PHASES
+  // MAIN AUDIT ENGINE — 36 REAL PHASES
   // ═══════════════════════════════════════════════════════════════
   const runTest = async () => {
     setTestRunning(true);
@@ -225,8 +243,8 @@ export default function SystemTestTab({ logAct }) {
     let passed = 0,
       warnings = 0,
       failed = 0;
-    const scoresAcc = { functional: 0, security: 0, performance: 0, ai: 0 };
-    const totalPhases = 32;
+    const scoresAcc = { functional: 0, security: 0, performance: 0, accessibility: 0 };
+    const totalPhases = 36;
     const startTime = performance.now();
     const tempResults = [];
     const latencies = [];
@@ -274,8 +292,8 @@ export default function SystemTestTab({ logAct }) {
     };
 
     sysLogAdd("═══════════════════════════════════════════");
-    sysLogAdd("🚀 GNC SUPREME DIAGNOSTIC ENGINE v300.0");
-    sysLogAdd("   32-Phase Real Audit — Zero Fake Tests");
+    sysLogAdd("🚀 GNC SUPREME DIAGNOSTIC ENGINE v400.0");
+    sysLogAdd("   36-Phase Real Audit — web-vitals + axe-core");
     sysLogAdd("═══════════════════════════════════════════");
 
     // ── Warm-up: Prime Firestore connection to reduce cold-start latency ──
@@ -548,11 +566,22 @@ export default function SystemTestTab({ logAct }) {
     }, "Scans all loaded resources for HTTP (insecure) URLs on an HTTPS page.");
 
     // ──────────────────────────────────────────
-    // PERFORMANCE / CORE WEB VITALS (8 phases)
+    // PERFORMANCE / CORE WEB VITALS (10 phases)
+    // Uses Google's official web-vitals library
     // ──────────────────────────────────────────
-    sysLogAdd("\n── PERFORMANCE LAYER ──");
+    sysLogAdd("\n── PERFORMANCE LAYER (web-vitals RUM) ──");
 
-    await runPhase("Largest Contentful Paint (LCP)", "performance", async () => {
+    await runPhase("LCP — Largest Contentful Paint (web-vitals)", "performance", async () => {
+      const wv = webVitalsRef.current;
+      // If web-vitals captured LCP passively, use that
+      if (wv.lcp) {
+        const val = wv.lcp.value;
+        const rating = wv.lcp.rating; // "good" | "needs-improvement" | "poor"
+        if (rating === "good") return { msg: `LCP ${val.toFixed(0)}ms — Good (web-vitals: ${wv.lcp.navigationType})`, extra: { source: "web-vitals", entries: wv.lcp.entries?.length } };
+        if (rating === "needs-improvement") return { warn: true, msg: `LCP ${val.toFixed(0)}ms — Needs Improvement`, recommendation: "Optimize the largest image/hero element. Use <link rel='preload'> for critical assets. Consider lazy-loading below-fold images." };
+        return { error: true, msg: `LCP ${val.toFixed(0)}ms — Poor`, recommendation: "LCP is failing Core Web Vitals. Reduce server response time, optimize images with WebP/AVIF, and preload hero content." };
+      }
+      // Fallback: PerformanceObserver
       return new Promise((resolve) => {
         let lcp = null;
         const observer = new PerformanceObserver((list) => {
@@ -565,22 +594,29 @@ export default function SystemTestTab({ logAct }) {
         setTimeout(() => {
           observer.disconnect();
           if (!lcp) return resolve({ warn: true, msg: "LCP data not captured yet", recommendation: "LCP requires visible content. Run on a fully loaded page." });
-          // Dev server (Vite HMR, unbundled modules) inflates LCP — use relaxed thresholds
           const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
           if (isLocal) {
             if (lcp < 5000) return resolve({ msg: `LCP ${lcp.toFixed(0)}ms — Good (dev server, production will be faster)` });
             if (lcp < 8000) return resolve({ warn: true, msg: `LCP ${lcp.toFixed(0)}ms — Elevated on dev server`, recommendation: "Vite dev server adds HMR overhead. Production build will be significantly faster." });
-            return resolve({ error: true, msg: `LCP ${lcp.toFixed(0)}ms — Very slow even for dev`, recommendation: "LCP extremely high. Optimize largest image/hero element and check for render-blocking resources." });
+            return resolve({ error: true, msg: `LCP ${lcp.toFixed(0)}ms — Very slow even for dev`, recommendation: "LCP extremely high. Optimize largest image/hero element." });
           }
-          // Production thresholds (Google Core Web Vitals standard)
           if (lcp < 2500) return resolve({ msg: `LCP ${lcp.toFixed(0)}ms — Good` });
-          if (lcp < 4000) return resolve({ warn: true, msg: `LCP ${lcp.toFixed(0)}ms — Needs Improvement`, recommendation: "Optimize largest image or hero element. Use preload for critical assets." });
-          return resolve({ error: true, msg: `LCP ${lcp.toFixed(0)}ms — Poor`, recommendation: "LCP is failing Core Web Vitals. Reduce server response time and optimize critical rendering path." });
+          if (lcp < 4000) return resolve({ warn: true, msg: `LCP ${lcp.toFixed(0)}ms — Needs Improvement`, recommendation: "Optimize largest image or hero element." });
+          return resolve({ error: true, msg: `LCP ${lcp.toFixed(0)}ms — Poor`, recommendation: "LCP is failing. Reduce server response time and optimize critical rendering path." });
         }, 1500);
       });
-    }, "Measures Largest Contentful Paint — key Google ranking signal.");
+    }, "Uses Google's web-vitals library for Largest Contentful Paint — key ranking signal.");
 
-    await runPhase("Cumulative Layout Shift (CLS)", "performance", async () => {
+    await runPhase("CLS — Cumulative Layout Shift (web-vitals)", "performance", async () => {
+      const wv = webVitalsRef.current;
+      if (wv.cls) {
+        const val = wv.cls.value;
+        const rating = wv.cls.rating;
+        if (rating === "good") return { msg: `CLS ${val.toFixed(3)} — Excellent layout stability`, extra: { source: "web-vitals", entries: wv.cls.entries?.length } };
+        if (rating === "needs-improvement") return { warn: true, msg: `CLS ${val.toFixed(3)} — Needs Improvement`, recommendation: "Reserve space for images/ads with explicit width/height. Avoid dynamic content injection above the fold." };
+        return { error: true, msg: `CLS ${val.toFixed(3)} — Poor layout stability`, recommendation: "Major layout shifts detected. Audit all images without width/height and dynamically injected content." };
+      }
+      // Fallback
       return new Promise((resolve) => {
         let cls = 0;
         const observer = new PerformanceObserver((list) => {
@@ -594,11 +630,65 @@ export default function SystemTestTab({ logAct }) {
           observer.disconnect();
           const score = parseFloat(cls.toFixed(3));
           if (score < 0.1) return resolve({ msg: `CLS ${score} — Excellent layout stability (< 0.1)` });
-          if (score < 0.25) return resolve({ warn: true, msg: `CLS ${score} — Needs Improvement`, recommendation: "Reserve space for dynamic content (images, ads, async components) using explicit width/height." });
-          return resolve({ error: true, msg: `CLS ${score} — Poor layout stability`, recommendation: "Major layout shift issue. Audit dynamic content and font loading causing reflows." });
+          if (score < 0.25) return resolve({ warn: true, msg: `CLS ${score} — Needs Improvement`, recommendation: "Reserve space for dynamic content." });
+          return resolve({ error: true, msg: `CLS ${score} — Poor layout stability`, recommendation: "Major layout shift issue. Audit dynamic content and font loading." });
         }, 1200);
       });
-    }, "Measures Cumulative Layout Shift during active testing window.");
+    }, "Uses Google's web-vitals library for Cumulative Layout Shift.");
+
+    await runPhase("FCP — First Contentful Paint (web-vitals)", "performance", async () => {
+      const wv = webVitalsRef.current;
+      if (wv.fcp) {
+        const val = wv.fcp.value;
+        const rating = wv.fcp.rating;
+        if (rating === "good") return { msg: `FCP ${val.toFixed(0)}ms — Good`, extra: { source: "web-vitals" } };
+        if (rating === "needs-improvement") return { warn: true, msg: `FCP ${val.toFixed(0)}ms — Needs Improvement`, recommendation: "Reduce render-blocking CSS/JS. Inline critical CSS above the fold." };
+        return { error: true, msg: `FCP ${val.toFixed(0)}ms — Poor`, recommendation: "FCP too slow. Remove render-blocking resources, defer non-critical JS, and use font-display: swap." };
+      }
+      // Fallback to paint timing API
+      const paintEntries = performance.getEntriesByType("paint");
+      const fcpEntry = paintEntries.find(e => e.name === "first-contentful-paint");
+      if (fcpEntry) {
+        const ms = fcpEntry.startTime;
+        if (ms < 1800) return { msg: `FCP ${ms.toFixed(0)}ms — Good (Paint API)` };
+        if (ms < 3000) return { warn: true, msg: `FCP ${ms.toFixed(0)}ms — Needs Improvement`, recommendation: "Reduce render-blocking resources." };
+        return { error: true, msg: `FCP ${ms.toFixed(0)}ms — Poor`, recommendation: "FCP too slow. Critical rendering path needs optimization." };
+      }
+      return { warn: true, msg: "FCP data unavailable", recommendation: "Use Chrome for paint timing metrics." };
+    }, "First Contentful Paint — measures time until first text/image renders. Powered by web-vitals.");
+
+    await runPhase("TTFB — Time to First Byte (web-vitals)", "performance", async () => {
+      const wv = webVitalsRef.current;
+      if (wv.ttfb) {
+        const val = wv.ttfb.value;
+        const rating = wv.ttfb.rating;
+        if (rating === "good") return { msg: `TTFB ${val.toFixed(0)}ms — Good`, extra: { source: "web-vitals" } };
+        if (rating === "needs-improvement") return { warn: true, msg: `TTFB ${val.toFixed(0)}ms — Needs Improvement`, recommendation: "Server response is slow. Check hosting CDN and optimize server-side processing." };
+        return { error: true, msg: `TTFB ${val.toFixed(0)}ms — Poor`, recommendation: "TTFB critical. Use a CDN (Firebase Hosting auto-CDN), enable caching headers, and reduce server processing." };
+      }
+      // Fallback
+      const nav = performance.getEntriesByType("navigation")[0];
+      if (nav) {
+        const ttfb = nav.responseStart - nav.requestStart;
+        if (ttfb < 800) return { msg: `TTFB ${ttfb.toFixed(0)}ms — Good (Navigation API)` };
+        if (ttfb < 1800) return { warn: true, msg: `TTFB ${ttfb.toFixed(0)}ms — Needs Improvement`, recommendation: "Check server response time and CDN configuration." };
+        return { error: true, msg: `TTFB ${ttfb.toFixed(0)}ms — Poor`, recommendation: "Server response critically slow." };
+      }
+      return { warn: true, msg: "TTFB data unavailable", recommendation: "Use Chrome for navigation timing." };
+    }, "Time to First Byte — measures server response speed. Powered by web-vitals.");
+
+    await runPhase("INP — Interaction to Next Paint (web-vitals)", "performance", async () => {
+      const wv = webVitalsRef.current;
+      if (wv.inp) {
+        const val = wv.inp.value;
+        const rating = wv.inp.rating;
+        if (rating === "good") return { msg: `INP ${val.toFixed(0)}ms — Good responsiveness`, extra: { source: "web-vitals" } };
+        if (rating === "needs-improvement") return { warn: true, msg: `INP ${val.toFixed(0)}ms — Needs Improvement`, recommendation: "Some interactions are slow. Break up long tasks with requestIdleCallback or yield to main thread." };
+        return { error: true, msg: `INP ${val.toFixed(0)}ms — Poor`, recommendation: "Interactions are unresponsive. Audit event handlers for heavy computation. Use web workers for CPU-intensive operations." };
+      }
+      // INP only fires after user interactions — may not be available
+      return { msg: "INP pending — requires user interactions to measure (web-vitals listening)", extra: { note: "INP measures real user interactions. Interact with the page and re-run for data." } };
+    }, "Interaction to Next Paint — newest Core Web Vital replacing FID. Powered by web-vitals.");
 
     await runPhase("Resource Count & Efficiency", "performance", async () => {
       const resources = performance.getEntriesByType("resource");
@@ -614,7 +704,6 @@ export default function SystemTestTab({ logAct }) {
 
     await runPhase("Firebase Network Latency (P95)", "performance", async () => {
       const resources = performance.getEntriesByType("resource");
-      // Filter Firestore REST/RPC calls, excluding long-lived streaming channels (Listen/channel)
       const fbResources = resources.filter(r => 
         (r.name.includes("firestore") || r.name.includes("firebase")) &&
         !r.name.includes("Listen/channel") &&
@@ -676,36 +765,144 @@ export default function SystemTestTab({ logAct }) {
       return { error: true, msg: `${errCount} JS errors in session — High error rate`, recommendation: "Multiple runtime errors indicate unstable code. Review error boundaries and async error handling." };
     }, "Checks real-time JavaScript error count captured since page load.");
 
-    await runPhase("Clipboard API Availability", "performance", async () => {
-      if (!navigator.clipboard) return { warn: true, msg: "Clipboard API not available", recommendation: "Clipboard API requires HTTPS. Serve over HTTPS to enable copy-to-clipboard features." };
+    // ──────────────────────────────────────────
+    // ACCESSIBILITY (axe-core powered) — 6 phases
+    // ──────────────────────────────────────────
+    sysLogAdd("\n── ACCESSIBILITY LAYER (axe-core WCAG 2.1) ──");
+
+    await runPhase("axe-core Full WCAG 2.1 Audit", "accessibility", async () => {
       try {
-        await navigator.clipboard.readText();
-        return { msg: "Clipboard API fully accessible" };
+        const axe = await import("axe-core");
+        const results = await axe.default.run(document, {
+          runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "best-practice"] },
+          resultTypes: ["violations", "passes"],
+        });
+        const violations = results.violations || [];
+        const passes = results.passes || [];
+        const totalViolations = violations.reduce((sum, v) => sum + v.nodes.length, 0);
+        const critical = violations.filter(v => v.impact === "critical" || v.impact === "serious");
+        const criticalCount = critical.reduce((sum, v) => sum + v.nodes.length, 0);
+
+        if (totalViolations === 0) {
+          return { msg: `axe-core: 0 violations — ${passes.length} rules passed — WCAG 2.1 AA compliant`, extra: { passes: passes.length, engine: "axe-core" } };
+        }
+        if (criticalCount === 0 && totalViolations < 5) {
+          const topIssues = violations.slice(0, 2).map(v => `${v.id}: ${v.nodes.length} nodes`).join(", ");
+          return { warn: true, msg: `axe-core: ${totalViolations} minor violation(s) — ${passes.length} passed`, recommendation: `Fix: ${topIssues}. Details: ${violations[0]?.help || "Review axe report"}.`, extra: { violations: totalViolations, passes: passes.length } };
+        }
+        const topViolation = violations[0];
+        return {
+          error: true,
+          msg: `axe-core: ${totalViolations} violation(s) (${criticalCount} critical/serious) — ${passes.length} passed`,
+          recommendation: `Top issue: "${topViolation.id}" (${topViolation.impact}) — ${topViolation.help}. Fix ${topViolation.nodes.length} element(s). See: ${topViolation.helpUrl || "deque.com/axe"}`,
+          extra: { violations: totalViolations, critical: criticalCount, passes: passes.length, topRule: topViolation.id }
+        };
       } catch (e) {
-        if (e.name === "NotAllowedError") return { msg: "Clipboard API available (write-only — read blocked by browser permission)" };
-        return { warn: true, msg: "Clipboard API restricted", recommendation: "Request clipboard permission via Permissions API before clipboard operations." };
+        return { warn: true, msg: `axe-core audit skipped: ${e.message}`, recommendation: "Ensure axe-core is installed: npm install axe-core" };
       }
-    }, "Tests Clipboard API availability for copy-to-clipboard admin features.");
+    }, "Runs Deque's axe-core engine — the industry standard for automated accessibility testing (WCAG 2.1 AA).");
 
-    // ──────────────────────────────────────────
-    // BONUS: MY ADDITIONAL IDEAS (4 phases)
-    // ──────────────────────────────────────────
-    sysLogAdd("\n── BONUS DIAGNOSTICS (Pankaj Kumar's Extra Layer) ──");
-
-    await runPhase("Accessibility Quick Scan", "performance", async () => {
+    await runPhase("Image Alt Text Audit", "accessibility", async () => {
       const imgs = document.querySelectorAll("img");
       const missingAlt = Array.from(imgs).filter(img => !img.alt && !img.getAttribute("aria-hidden"));
+      const decorative = Array.from(imgs).filter(img => img.getAttribute("aria-hidden") === "true" || img.alt === "");
+      if (missingAlt.length === 0) return { msg: `All ${imgs.length} images have alt text (${decorative.length} decorative)` };
+      if (missingAlt.length < 3) return { warn: true, msg: `${missingAlt.length}/${imgs.length} images missing alt text`, recommendation: "Add descriptive alt text to all informational images. Use alt='' and aria-hidden for decorative images." };
+      return { error: true, msg: `${missingAlt.length}/${imgs.length} images missing alt text — WCAG 1.1.1 violation`, recommendation: `${missingAlt.length} images need alt text. Example: <img src="..." alt="Description of image">. This is a Level A WCAG requirement.` };
+    }, "Checks all images for missing alt text — WCAG 2.1 Success Criterion 1.1.1.");
+
+    await runPhase("ARIA Labels & Roles Audit", "accessibility", async () => {
       const buttons = document.querySelectorAll("button");
       const missingLabel = Array.from(buttons).filter(btn => !btn.textContent.trim() && !btn.getAttribute("aria-label"));
       const inputs = document.querySelectorAll("input, textarea, select");
-      const missingInputLabel = Array.from(inputs).filter(inp => !inp.getAttribute("aria-label") && !inp.getAttribute("id"));
-      const totalIssues = missingAlt.length + missingLabel.length + missingInputLabel.length;
-      if (totalIssues === 0) return { msg: `Accessibility OK — ${imgs.length} imgs, ${buttons.length} buttons, ${inputs.length} inputs scanned` };
-      if (totalIssues < 5) return { warn: true, msg: `${totalIssues} accessibility issue(s) — ${missingAlt.length} imgs without alt`, recommendation: "Add alt text to all images and aria-label to icon-only buttons." };
-      return { error: true, msg: `${totalIssues} accessibility violations`, recommendation: `${missingAlt.length} imgs missing alt, ${missingLabel.length} buttons missing label. Fix for WCAG 2.1 compliance.` };
-    }, "Scans the live DOM for missing alt text, ARIA labels, and form accessibility.");
+      const missingInputLabel = Array.from(inputs).filter(inp => !inp.getAttribute("aria-label") && !inp.getAttribute("id") && !inp.closest("label"));
+      const links = document.querySelectorAll("a");
+      const emptyLinks = Array.from(links).filter(a => !a.textContent.trim() && !a.getAttribute("aria-label"));
+      const totalIssues = missingLabel.length + missingInputLabel.length + emptyLinks.length;
+      if (totalIssues === 0) return { msg: `${buttons.length} buttons, ${inputs.length} inputs, ${links.length} links — all labeled` };
+      if (totalIssues < 5) return { warn: true, msg: `${totalIssues} ARIA labeling issue(s)`, recommendation: `Fix: ${missingLabel.length} buttons, ${missingInputLabel.length} inputs, ${emptyLinks.length} links need aria-label or visible text.` };
+      return { error: true, msg: `${totalIssues} ARIA/label violations — WCAG 4.1.2`, recommendation: "Add aria-label to all icon-only buttons and inputs without visible labels. Every interactive element must be identifiable." };
+    }, "Checks buttons, inputs, and links for proper ARIA labels and roles.");
 
-    await runPhase("Multi-tab Detection", "performance", async () => {
+    await runPhase("Color Contrast Check", "accessibility", async () => {
+      // Sample key elements for contrast ratio
+      const textElements = document.querySelectorAll("h1, h2, h3, p, span, button, a, label, td, th");
+      let lowContrastCount = 0;
+      let sampledCount = 0;
+      const maxSample = 50;
+      for (const el of textElements) {
+        if (sampledCount >= maxSample) break;
+        const style = window.getComputedStyle(el);
+        if (style.display === "none" || style.visibility === "hidden") continue;
+        const color = style.color;
+        const bgColor = style.backgroundColor;
+        if (!color || !bgColor || bgColor === "rgba(0, 0, 0, 0)" || bgColor === "transparent") continue;
+        sampledCount++;
+        // Parse RGB values and compute relative luminance
+        const parseRGB = (c) => {
+          const m = c.match(/\d+/g);
+          return m ? m.map(Number) : null;
+        };
+        const rgb1 = parseRGB(color);
+        const rgb2 = parseRGB(bgColor);
+        if (rgb1 && rgb2) {
+          const luminance = (rgb) => {
+            const [r, g, b] = rgb.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+          };
+          const l1 = luminance(rgb1);
+          const l2 = luminance(rgb2);
+          const ratio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+          const fontSize = parseFloat(style.fontSize);
+          const isBold = parseInt(style.fontWeight) >= 700;
+          const isLargeText = fontSize >= 18 || (fontSize >= 14 && isBold);
+          const minRatio = isLargeText ? 3 : 4.5;
+          if (ratio < minRatio) lowContrastCount++;
+        }
+      }
+      if (sampledCount === 0) return { warn: true, msg: "Could not sample text elements for contrast", recommendation: "Ensure text elements have explicit colors." };
+      if (lowContrastCount === 0) return { msg: `Contrast OK — ${sampledCount} elements sampled, all meet WCAG AA (4.5:1)` };
+      if (lowContrastCount < 3) return { warn: true, msg: `${lowContrastCount}/${sampledCount} elements have low contrast`, recommendation: "Increase text-to-background contrast ratio to at least 4.5:1 for normal text, 3:1 for large text." };
+      return { error: true, msg: `${lowContrastCount}/${sampledCount} elements fail WCAG AA contrast`, recommendation: "Significant contrast issues. Use a contrast checker tool and ensure all text meets WCAG 2.1 SC 1.4.3." };
+    }, "Samples page elements and computes WCAG 2.1 AA contrast ratios (4.5:1 normal, 3:1 large).");
+
+    await runPhase("Keyboard Navigation Check", "accessibility", async () => {
+      const focusables = document.querySelectorAll("button, a, input, select, textarea, [tabindex]");
+      const trapped = Array.from(focusables).filter(el => el.getAttribute("tabindex") === "-1" && el.tagName !== "DIV");
+      const noFocus = Array.from(focusables).filter(el => {
+        const style = window.getComputedStyle(el);
+        return style.outlineStyle === "none" && style.boxShadow === "none" && style.border === "none";
+      });
+      if (trapped.length === 0 && noFocus.length < 3) return { msg: `${focusables.length} focusable elements — keyboard navigation intact` };
+      if (trapped.length > 0) return { warn: true, msg: `${trapped.length} elements with tabIndex="-1" may trap keyboard users`, recommendation: "Ensure important interactive elements are keyboard accessible." };
+      return { warn: true, msg: `${noFocus.length} elements may have missing focus indicators`, recommendation: "Add visible :focus styles for keyboard accessibility compliance." };
+    }, "Checks focusable elements for keyboard traps and missing focus indicators.");
+
+    await runPhase("Heading Hierarchy & Landmarks", "accessibility", async () => {
+      const headings = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
+      const headingLevels = Array.from(headings).map(h => parseInt(h.tagName[1]));
+      const h1Count = headingLevels.filter(l => l === 1).length;
+      const landmarks = document.querySelectorAll("main, nav, header, footer, aside, [role='main'], [role='navigation']");
+      let skippedLevels = 0;
+      for (let i = 1; i < headingLevels.length; i++) {
+        if (headingLevels[i] > headingLevels[i - 1] + 1) skippedLevels++;
+      }
+      const issues = [];
+      if (h1Count === 0) issues.push("No <h1> found");
+      if (h1Count > 1) issues.push(`${h1Count} <h1> tags (should be 1)`);
+      if (skippedLevels > 0) issues.push(`${skippedLevels} skipped heading level(s)`);
+      if (landmarks.length === 0) issues.push("No landmarks (<main>, <nav>, etc.)");
+      if (issues.length === 0) return { msg: `Heading hierarchy OK — ${headings.length} headings, ${landmarks.length} landmarks` };
+      if (issues.length <= 2) return { warn: true, msg: issues.join("; "), recommendation: "Fix heading hierarchy for screen reader navigation. Use exactly one <h1> and don't skip levels (h2→h4)." };
+      return { error: true, msg: `${issues.length} structural issues: ${issues.join("; ")}`, recommendation: "Document structure needs work. Add landmarks, fix heading hierarchy. Critical for screen reader users." };
+    }, "Validates heading hierarchy (h1→h6 order) and HTML5 landmark regions.");
+
+    // ──────────────────────────────────────────
+    // BONUS DIAGNOSTICS (4 phases)
+    // ──────────────────────────────────────────
+    sysLogAdd("\n── BONUS DIAGNOSTICS ──");
+
+    await runPhase("Multi-tab Detection", "functional", async () => {
       return new Promise((resolve) => {
         try {
           const channel = new BroadcastChannel("gnc_tab_check");
@@ -724,19 +921,7 @@ export default function SystemTestTab({ logAct }) {
       });
     }, "Uses BroadcastChannel API to detect if admin panel is open in multiple tabs.");
 
-    await runPhase("Keyboard Navigation Check", "performance", async () => {
-      const focusables = document.querySelectorAll("button, a, input, select, textarea, [tabindex]");
-      const trapped = Array.from(focusables).filter(el => el.getAttribute("tabindex") === "-1" && el.tagName !== "DIV");
-      const noFocus = Array.from(focusables).filter(el => {
-        const style = window.getComputedStyle(el);
-        return style.outlineStyle === "none" && style.boxShadow === "none" && style.border === "none";
-      });
-      if (trapped.length === 0 && noFocus.length < 3) return { msg: `${focusables.length} focusable elements — keyboard navigation intact` };
-      if (trapped.length > 0) return { warn: true, msg: `${trapped.length} elements with tabIndex="-1" may trap keyboard users`, recommendation: "Ensure important interactive elements are keyboard accessible." };
-      return { warn: true, msg: `${noFocus.length} elements may have missing focus indicators`, recommendation: "Add visible :focus styles for keyboard accessibility compliance." };
-    }, "Checks focusable elements for keyboard traps and missing focus indicators.");
-
-    await runPhase("Notification API & PWA Push Readiness", "performance", async () => {
+    await runPhase("Notification API & PWA Push Readiness", "functional", async () => {
       if (!("Notification" in window)) return { warn: true, msg: "Notification API not available", recommendation: "Notification API not supported in this browser/context." };
       const perm = Notification.permission;
       if (perm === "granted") return { msg: "Push notifications: Permission granted — PWA push ready" };
@@ -744,13 +929,48 @@ export default function SystemTestTab({ logAct }) {
       return { warn: true, msg: "Push notifications: Permission denied by user", recommendation: "User has blocked notifications. Cannot send PWA push alerts without re-permission." };
     }, "Checks browser Notification API permission status for PWA push alerts.");
 
+    await runPhase("Clipboard API Availability", "functional", async () => {
+      if (!navigator.clipboard) return { warn: true, msg: "Clipboard API not available", recommendation: "Clipboard API requires HTTPS. Serve over HTTPS to enable copy-to-clipboard features." };
+      try {
+        await navigator.clipboard.readText();
+        return { msg: "Clipboard API fully accessible" };
+      } catch (e) {
+        if (e.name === "NotAllowedError") return { msg: "Clipboard API available (write-only — read blocked by browser permission)" };
+        return { warn: true, msg: "Clipboard API restricted", recommendation: "Request clipboard permission via Permissions API before clipboard operations." };
+      }
+    }, "Tests Clipboard API availability for copy-to-clipboard admin features.");
+
+    await runPhase("Long Task Detection", "functional", async () => {
+      return new Promise((resolve) => {
+        let longTasks = 0;
+        let longestTask = 0;
+        try {
+          const observer = new PerformanceObserver((list) => {
+            for (const entry of list.getEntries()) {
+              longTasks++;
+              longestTask = Math.max(longestTask, entry.duration);
+            }
+          });
+          observer.observe({ type: "longtask", buffered: true });
+          setTimeout(() => {
+            observer.disconnect();
+            if (longTasks === 0) return resolve({ msg: "No long tasks detected (>50ms) — main thread is clean" });
+            if (longTasks < 3) return resolve({ warn: true, msg: `${longTasks} long task(s) detected — longest: ${longestTask.toFixed(0)}ms`, recommendation: "Break up tasks >50ms using requestIdleCallback or setTimeout chunks to keep the main thread responsive." });
+            return resolve({ error: true, msg: `${longTasks} long tasks — longest: ${longestTask.toFixed(0)}ms — main thread congestion`, recommendation: "Critical: Too many long tasks blocking the main thread. Move heavy computation to Web Workers." });
+          }, 2000);
+        } catch (_) {
+          resolve({ warn: true, msg: "Long Task API not supported", recommendation: "Use Chrome for long task detection." });
+        }
+      });
+    }, "Detects tasks blocking the main thread for >50ms using PerformanceObserver Long Task API.");
+
     // ─── Final Calculations ────────────────────────────────────────
     const totalTime = ((performance.now() - startTime) / 1000).toFixed(2);
     setTestProgress(100);
     setTestRunning(false);
     setActivePhase("COMPLETE");
 
-    const catCounts = { functional: 8, security: 8, performance: 12 };
+    const catCounts = { functional: 10, security: 8, performance: 10, accessibility: 6 };
     const finalScore = Math.round(
       ((passed + warnings * 0.5) / tempResults.length) * 100
     );
@@ -759,6 +979,7 @@ export default function SystemTestTab({ logAct }) {
       Functional: Math.round((scoresAcc.functional / catCounts.functional) * 100),
       Security: Math.round((scoresAcc.security / catCounts.security) * 100),
       Performance: Math.round((scoresAcc.performance / catCounts.performance) * 100),
+      Accessibility: Math.round((scoresAcc.accessibility / catCounts.accessibility) * 100),
     };
 
     const finalAnalytics = {
@@ -797,29 +1018,43 @@ export default function SystemTestTab({ logAct }) {
     localStorage.setItem("gnc_audit_history", JSON.stringify(updatedHistory));
     setHistory(updatedHistory);
 
-    logAct?.("add", `GNC Diagnostic v300 — Score: ${finalScore}%`, "system_test");
+    logAct?.("add", `GNC Diagnostic v400 — Score: ${finalScore}%`, "system_test");
 
     sysLogAdd("\n═══════════════════════════════════════════");
     sysLogAdd(`✅ AUDIT COMPLETE — Score: ${finalScore}% | Time: ${totalTime}s`);
     sysLogAdd(`   Passed: ${passed} | Warned: ${warnings} | Failed: ${failed}`);
     sysLogAdd("═══════════════════════════════════════════");
 
-    // ─── Tier 2: Gemini AI Analysis ────────────────────────────────
+    // ─── Tier 2: Gemini AI Analysis (Enhanced) ─────────────────────
     if (isAiMode && GEMINI_KEY) {
       setAiLoading(true);
       setSummary("🧠 Gemini is analyzing results...");
       try {
-        const prompt = `You are a senior software architect reviewing a real diagnostic report for "${window.location.hostname}" — a Guru Nanak College website built with React + Firebase. These are REAL test results, not simulated.
+        const failedTests = tempResults.filter(r => r.status === "fail");
+        const warnTests = tempResults.filter(r => r.status === "warn");
+        const axeResult = tempResults.find(r => r.name.includes("axe-core"));
+        const webVitalsResults = tempResults.filter(r => r.name.includes("web-vitals"));
 
-Analyze and respond in 3-4 sentences. Be specific about numbers. Lead with the most critical finding. Point out what's genuinely good. Be direct and honest — no fluff.
+        const prompt = `You are a senior software architect reviewing a real diagnostic report for "${window.location.hostname}" — a Guru Nanak College website built with React + Vite + Firebase.
 
-Score: ${finalScore}%
-Passed: ${passed} | Warned: ${warnings} | Failed: ${failed}
-Time: ${totalTime}s
-${previousRun ? `Previous Score: ${previousRun.score}% (${regressionDiff?.diff > 0 ? "improved" : "regressed"} by ${Math.abs(regressionDiff?.diff || 0)}%)` : "First run — no previous data."}
+CRITICAL CONTEXT: These are REAL test results from REAL browser APIs (Google's web-vitals library, Deque's axe-core engine, live Firestore probes). Nothing is simulated.
 
-Results summary:
-${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).join("\n")}`;
+TASK: Provide a focused, actionable analysis in 4-5 sentences. Follow these rules:
+1. Lead with the most critical finding (failures > warnings > wins).
+2. For each failure, provide a SPECIFIC actionable fix (not generic advice).
+3. Reference actual test names and numbers from the data.
+4. If axe-core found violations, prioritize accessibility fixes.
+5. If Core Web Vitals (LCP/CLS/INP/FCP) are poor, recommend specific Vite/React optimizations.
+6. End with the single most impactful improvement they should make first.
+
+Score: ${finalScore}% | Passed: ${passed} | Warned: ${warnings} | Failed: ${failed} | Time: ${totalTime}s
+Categories: ${Object.entries(catScores).map(([k,v]) => `${k}: ${v}%`).join(" | ")}
+${previousRun ? `Previous Score: ${previousRun.score}% (${regressionDiff?.diff > 0 ? "improved" : "regressed"} by ${Math.abs(regressionDiff?.diff || 0)}%)` : "First run — no baseline."}
+
+${failedTests.length > 0 ? `FAILURES:\n${failedTests.map(r => `- ${r.name}: ${r.detail} → ${r.recommendation}`).join("\n")}` : "No failures."}
+${warnTests.length > 0 ? `WARNINGS:\n${warnTests.map(r => `- ${r.name}: ${r.detail}`).join("\n")}` : "No warnings."}
+${webVitalsResults.length > 0 ? `WEB VITALS:\n${webVitalsResults.map(r => `- ${r.detail}`).join("\n")}` : ""}
+${axeResult ? `ACCESSIBILITY (axe-core): ${axeResult.detail}` : ""}`;
 
         const aiRes = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`,
@@ -850,13 +1085,13 @@ ${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).joi
   };
 
   // ═══════════════════════════════════════════════════════════════
-  // TIER 5: RADAR CHART (SVG — no library)
+  // TIER 5: RADAR CHART (SVG — no library) — Now 4 axes
   // ═══════════════════════════════════════════════════════════════
   const RadarChart = ({ scores }) => {
     const axes = Object.keys(scores);
     const values = Object.values(scores);
-    const size = 140;
-    const cx = size / 2, cy = size / 2, r = 55;
+    const size = 160;
+    const cx = size / 2, cy = size / 2, r = 60;
     const points = axes.map((_, i) => {
       const angle = (2 * Math.PI * i) / axes.length - Math.PI / 2;
       const pct = values[i] / 100;
@@ -880,9 +1115,9 @@ ${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).joi
         <polygon points={polygon} fill={`${NAVY}30`} stroke={NAVY} strokeWidth="1.5" />
         {axes.map((label, i) => {
           const angle = (2 * Math.PI * i) / axes.length - Math.PI / 2;
-          const lx = cx + (r + 16) * Math.cos(angle);
-          const ly = cy + (r + 16) * Math.sin(angle);
-          return <text key={i} x={lx} y={ly} textAnchor="middle" dominantBaseline="central" style={{ fontSize: 8, fontWeight: 700, fill: NAVY }}>{label.slice(0, 4).toUpperCase()}</text>;
+          const lx = cx + (r + 18) * Math.cos(angle);
+          const ly = cy + (r + 18) * Math.sin(angle);
+          return <text key={i} x={lx} y={ly} textAnchor="middle" dominantBaseline="central" style={{ fontSize: 7, fontWeight: 700, fill: NAVY }}>{label.slice(0, 5).toUpperCase()}</text>;
         })}
         {points.map((p, i) => (
           <circle key={i} cx={p.x} cy={p.y} r={3} fill={GOLD} stroke={NAVY} strokeWidth="0.5" />
@@ -984,7 +1219,7 @@ ${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).joi
 <html>
 <head>
   <meta charset="UTF-8"/>
-  <title>GNC Supreme Diagnostic Report v300</title>
+  <title>GNC Supreme Diagnostic Report v400</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Fira+Code:wght@400;700&display=swap');
     *{box-sizing:border-box;margin:0;padding:0}
@@ -999,6 +1234,8 @@ ${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).joi
     .pass{color:#10b981;font-weight:900}.warn{color:#f59e0b;font-weight:900}.fail{color:#ef4444;font-weight:900}
     .stat{background:#f8fafc;padding:20px;border-radius:16px;border:1.5px solid #e2e8f0;margin-bottom:12px}
     .footer{position:absolute;bottom:20px;left:25mm;font-size:10px;color:#94a3b8;letter-spacing:1px}
+    .badge{display:inline-block;padding:4px 12px;border-radius:50px;font-size:10px;font-weight:900;margin-right:6px;margin-bottom:4px}
+    .badge-pass{background:#f0fdf4;color:#166534}.badge-warn{background:#fffbeb;color:#92400e}.badge-fail{background:#fef2f2;color:#991b1b}
     @media print{.page{margin:0;box-shadow:none;page-break-after:always}}
   </style>
 </head>
@@ -1008,8 +1245,8 @@ ${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).joi
       <div>
         <div style="font-size:12px;font-weight:900;color:#ffa500;letter-spacing:4px">TECHNICAL DIAGNOSTIC MANIFESTO</div>
         <h1>GURU NANAK COLLEGE</h1>
-        <div style="margin-top:8px;font-size:16px;font-weight:700;color:#64748b">GNC Supreme Diagnostic Engine v300.0</div>
-        <div style="margin-top:4px;font-size:13px;color:#94a3b8">Generated: ${new Date().toLocaleString()} | ${testResults.length} Real Tests</div>
+        <div style="margin-top:8px;font-size:16px;font-weight:700;color:#64748b">GNC Supreme Diagnostic Engine v400.0</div>
+        <div style="margin-top:4px;font-size:13px;color:#94a3b8">Generated: ${new Date().toLocaleString()} | ${testResults.length} Real Tests | Powered by web-vitals + axe-core</div>
       </div>
       <div class="score">${analytics.total}%</div>
     </div>
@@ -1021,7 +1258,15 @@ ${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).joi
       <div class="stat" style="text-align:center"><div style="font-size:30px;font-weight:950;color:#ef4444">${analytics.failed}</div><div style="font-size:11px;font-weight:700;color:#64748b">FAILED</div></div>
       <div class="stat" style="text-align:center"><div style="font-size:30px;font-weight:950;color:#01235b">${analytics.time}s</div><div style="font-size:11px;font-weight:700;color:#64748b">DURATION</div></div>
     </div>
-    <div class="footer">GNC Diagnostic v300.0 | Pankaj Kumar | Guru Nanak College, Dhanbad, Jharkhand</div>
+    <div class="sec" style="margin-top:30px">Technology Stack</div>
+    <div style="margin-top:10px">
+      <span class="badge badge-pass">web-vitals (Google)</span>
+      <span class="badge badge-pass">axe-core (Deque)</span>
+      <span class="badge badge-pass">PerformanceObserver API</span>
+      <span class="badge badge-pass">Gemini 2.0 Flash AI</span>
+      <span class="badge badge-pass">Firebase Probes</span>
+    </div>
+    <div class="footer">GNC Diagnostic v400.0 | Pankaj Kumar | Guru Nanak College, Dhanbad, Jharkhand</div>
   </div>
 
   <div class="page">
@@ -1048,7 +1293,7 @@ ${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).joi
         </tr>`).join("")}
       </tbody>
     </table>
-    <div class="footer">GNC Diagnostic v300.0 | All tests are real — no simulated results</div>
+    <div class="footer">GNC Diagnostic v400.0 | All tests are real — powered by web-vitals + axe-core</div>
   </div>
 
   <div class="page" style="text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:200mm">
@@ -1056,12 +1301,12 @@ ${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).joi
     <h1 style="border:none">PANKAJ KUMAR</h1>
     <div style="font-size:18px;font-weight:700;margin-top:10px">Lead Architect & Sole Developer</div>
     <div style="max-width:500px;margin:20px auto;font-style:italic;color:#64748b;font-size:14px">
-      "Every component, logic node, design token, and line of code in this application was handcrafted by the undersigned. This diagnostic report uses REAL measurements — not simulated results."
+      "Every component, logic node, design token, and line of code in this application was handcrafted by the undersigned. This diagnostic report uses REAL measurements from Google's web-vitals and Deque's axe-core — not simulated results."
     </div>
     <div style="margin-top:40px;font-size:13px;color:#94a3b8">
       GitHub: @pankajkumargnc | pankajkumargnc@gmail.com<br/>Guru Nanak College, Dhanbad, Jharkhand
     </div>
-    <div class="footer">AUTHENTICITY CERTIFICATE — GNC Supreme Diagnostic Engine v300.0</div>
+    <div class="footer">AUTHENTICITY CERTIFICATE — GNC Supreme Diagnostic Engine v400.0</div>
   </div>
 </body>
 </html>`;
@@ -1076,6 +1321,16 @@ ${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).joi
   // ═══════════════════════════════════════════════════════════════
   const fpsColor = liveFps === null ? "#94a3b8" : liveFps >= 55 ? "#10b981" : liveFps >= 30 ? GOLD : "#ef4444";
   const netColor = !networkQuality ? "#94a3b8" : networkQuality.type === "4G" ? "#10b981" : networkQuality.type === "3G" ? GOLD : "#ef4444";
+
+  const getCategoryIcon = (cat) => {
+    switch (cat) {
+      case "functional": return "⚙️";
+      case "security": return "🔒";
+      case "performance": return "⚡";
+      case "accessibility": return "♿";
+      default: return "🔬";
+    }
+  };
 
   // ═══════════════════════════════════════════════════════════════
   // RENDER
@@ -1101,13 +1356,23 @@ ${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).joi
         .ai-toggle{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
         .toggle-track{width:44px;height:24px;border-radius:12px;transition:background 0.3s;position:relative;flex-shrink:0}
         .toggle-thumb{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform 0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.2)}
+        .tech-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:50px;font-size:10px;font-weight:900;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+        .category-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+        .cat-btn{padding:8px 18px;border-radius:50px;border:1.5px solid #e2e8f0;background:#fff;font-size:11px;font-weight:900;cursor:pointer;transition:0.2s;text-transform:uppercase;letter-spacing:1px}
+        .cat-btn:hover,.cat-btn.active{background:${NAVY};color:#fff;border-color:${NAVY}}
       `}</style>
 
       {/* ─── HEADER HUD ─── */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 40, flexWrap: "wrap", gap: 20 }}>
         <div>
           <h2 style={{ margin: 0, color: NAVY, fontSize: 36, fontWeight: 950 }}>🔬 GNC Supreme Diagnostic Engine</h2>
-          <p style={{ margin: "8px 0 0", color: T.t3, fontSize: 16, fontWeight: 700 }}>32 Real Tests · AI Analysis · Live Monitor · Security Scanner</p>
+          <p style={{ margin: "8px 0 0", color: T.t3, fontSize: 16, fontWeight: 700 }}>36 Real Tests · web-vitals · axe-core · AI Analysis · Live Monitor</p>
+          <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+            <span className="tech-badge">📊 web-vitals (Google)</span>
+            <span className="tech-badge">♿ axe-core (Deque)</span>
+            <span className="tech-badge">🧠 Gemini 2.0 Flash</span>
+            <span className="tech-badge">🔥 Firebase Probes</span>
+          </div>
         </div>
         {analytics && (
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -1160,7 +1425,7 @@ ${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).joi
         <div className="sup-card">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
             <div style={{ fontWeight: 950, color: NAVY, fontSize: 13, textTransform: "uppercase", letterSpacing: 2 }}>
-              DIAGNOSTIC ENGINE v300 | {activePhase || "READY"}
+              DIAGNOSTIC ENGINE v400 | {activePhase || "READY"}
             </div>
             <label className="ai-toggle">
               <div className="toggle-track" style={{ background: isAiMode ? GOLD : "#e2e8f0" }} onClick={() => setIsAiMode(p => !p)}>
@@ -1173,7 +1438,8 @@ ${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).joi
           <div className="term-box adm-scroll" ref={sysRef}>
             {sysLog.length === 0 && (
               <div style={{ opacity: 0.3, fontSize: 13 }}>
-                Ready to run 32-phase real diagnostic audit...<br />
+                Ready to run 36-phase real diagnostic audit...<br />
+                Powered by web-vitals (Google) + axe-core (Deque)<br />
                 {!GEMINI_KEY && isAiMode && <span style={{ color: GOLD }}>⚠️  Add VITE_GOOGLE_API_KEY to .env for AI analysis</span>}
               </div>
             )}
@@ -1221,7 +1487,7 @@ ${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).joi
                   {Object.entries(analytics.scores).map(([k, v]) => (
                     <div key={k} style={{ marginBottom: 14 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, fontWeight: 950, color: T.t3, marginBottom: 4 }}>
-                        <span>{k.toUpperCase()}</span><span>{v}%</span>
+                        <span>{getCategoryIcon(k.toLowerCase())} {k.toUpperCase()}</span><span>{v}%</span>
                       </div>
                       <div style={{ height: 7, background: "#f1f5f9", borderRadius: 4 }}>
                         <div style={{ width: `${v}%`, height: "100%", background: v >= 80 ? "#10b981" : v >= 60 ? GOLD : "#ef4444", borderRadius: 4, transition: "width 1s" }} />
@@ -1259,7 +1525,7 @@ ${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).joi
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 10 }}>
                 <div>
                   <span style={{ background: r.status === "pass" ? "#10b981" : r.status === "warn" ? "#f59e0b" : "#ef4444", color: "#fff", padding: "5px 16px", borderRadius: 50, fontSize: 10, fontWeight: 950 }}>
-                    {r.category.toUpperCase()} | {r.status.toUpperCase()}
+                    {getCategoryIcon(r.category)} {r.category.toUpperCase()} | {r.status.toUpperCase()}
                   </span>
                   <h3 style={{ margin: "8px 0 0", fontSize: 22, color: NAVY, fontWeight: 950 }}>{r.name}</h3>
                 </div>

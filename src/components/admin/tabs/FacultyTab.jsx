@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, WHITE, useLocalDraft, Toggle, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
 import { clearCache } from '../../../utils/cachedFetch';
+import { resolveUrl } from '../../../utils/resolver';
 
 const DEPTS       = ['Botany','Chemistry','Commerce','Computer Science','Economics','Education','English','Geography','Hindi','History','Mathematics','Philosophy','Physics','Political Science','Sociology','Zoology','Library','Physical Education','Other'];
 const DESIGNATIONS = ['Professor','Associate Professor','Assistant Professor','Guest Lecturer','Lab Assistant','Librarian','Clerk','Peon','Other'];
@@ -58,9 +59,16 @@ export default function FacultyTab({ faculties, logAct, getSectionLog, softDelet
         <div key={f.id} className={`arow ${selected.includes(f.id) ? 'selected' : ''}`}>
           <input type="checkbox" checked={selected.includes(f.id)} onChange={() => setSelected(s => s.includes(f.id) ? s.filter(x => x !== f.id) : [...s, f.id])} style={{ accentColor: NAVY }} />
           {f.photo
-            ? <img src={f.photo} alt={f.name} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-            : <div style={{ width: 44, height: 44, borderRadius: '50%', background: `${NAVY}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>👨‍🏫</div>
+            ? <img 
+                src={resolveUrl(f.photo)} 
+                alt={f.name} 
+                referrerPolicy="no-referrer"
+                onError={(e) => { e.target.style.display = 'none'; if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex'; }}
+                style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} 
+              />
+            : null
           }
+          <div style={{ width: 44, height: 44, borderRadius: '50%', background: `${NAVY}15`, display: f.photo ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>👨‍🏫</div>
           <div style={{ flex: 1, minWidth: '150px' }}>
             <div style={{ fontWeight: 800, color: NAVY, fontSize: 'clamp(13px, 4vw, 14px)' }}>{f.name}</div>
             <div style={{ fontSize: 12, color: T.t2 }}>{f.designation}</div>

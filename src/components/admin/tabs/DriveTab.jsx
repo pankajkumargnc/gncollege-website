@@ -293,26 +293,52 @@ export default function DriveTab({ logAct }) {
                 }}>
                   
                   {/* File Icon / Thumbnail */}
-                  <div style={{ width: '44px', height: '44px', borderRadius: '8px', overflow: 'hidden', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid #e2e8f0' }}>
+                  <div style={{ width: '44px', height: '44px', borderRadius: '8px', overflow: 'hidden', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid #e2e8f0', position: 'relative' }}>
                     {activeTab.type === 'image' ? (
-                      <img 
-                        src={API_KEY ? `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${API_KEY}` : (file.thumbnailLink || `https://lh3.googleusercontent.com/d/${file.id}=w200`)} 
-                        alt={file.name} 
-                        referrerPolicy="no-referrer"
-                        loading="lazy"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        onError={(e) => {
-                          if (!e.target.dataset.triedFallback) {
-                            e.target.dataset.triedFallback = 'true';
-                            e.target.src = file.thumbnailLink || `https://lh3.googleusercontent.com/d/${file.id}=w200`;
-                          } else {
+                      <>
+                        <img 
+                          src={API_KEY ? `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${API_KEY}` : (file.thumbnailLink || `https://lh3.googleusercontent.com/d/${file.id}=w200`)} 
+                          alt={file.name} 
+                          referrerPolicy="no-referrer"
+                          loading="lazy"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          onError={(e) => {
+                            if (!e.target.dataset.triedFallback) {
+                              e.target.dataset.triedFallback = 'true';
+                              e.target.src = file.thumbnailLink || `https://lh3.googleusercontent.com/d/${file.id}=w200`;
+                            } else {
+                              e.target.style.display = 'none';
+                              if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                            }
+                          }}
+                        />
+                        <div style={{ display: 'none', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', background: '#f1f5f9', fontSize: '20px' }}>
+                          🖼️
+                        </div>
+                      </>
+                    ) : file.thumbnailLink ? (
+                      <>
+                        <img 
+                          src={file.thumbnailLink} 
+                          alt={file.name} 
+                          referrerPolicy="no-referrer"
+                          loading="lazy"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          onError={(e) => {
                             e.target.style.display = 'none';
-                            if (e.target.parentElement) e.target.parentElement.innerHTML = '<span style="font-size:22px">🖼️</span>';
-                          }
-                        }}
-                      />
+                            if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                        <div style={{ display: 'none', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', background: '#fee2e2', color: '#dc2626', flexDirection: 'column' }}>
+                          <span style={{ fontSize: '18px', lineHeight: 1 }}>📄</span>
+                          <span style={{ fontSize: '8px', fontWeight: 900, marginTop: 2 }}>PDF</span>
+                        </div>
+                      </>
                     ) : (
-                      <span style={{ fontSize: '24px' }}>📄</span>
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fee2e2', color: '#dc2626', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '18px', lineHeight: 1 }}>📄</span>
+                        <span style={{ fontSize: '8px', fontWeight: 900, marginTop: 2 }}>PDF</span>
+                      </div>
                     )}
                   </div>
 
