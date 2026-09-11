@@ -1001,20 +1001,33 @@ export default function SystemTestTab({ logAct }) {
     const finalAnalytics = {
       timestamp: new Date().toISOString(),
       score: finalScore,
+      total: finalScore,
       passed,
       warnings,
       failed,
+      time: totalTime,
       totalTime,
+      scores: catScores,
       categories: catScores,
+      radarData: catScores,
       results: tempResults,
     };
 
     setAnalytics(finalAnalytics);
 
+    const previousRun = JSON.parse(localStorage.getItem("gnc_audit_history") || "[]").slice(-1)[0];
+    if (previousRun) {
+      const prevScore = previousRun.score ?? previousRun.total ?? finalScore;
+      const diff = finalScore - prevScore;
+      setRegressionDiff({ diff, prev: prevScore, prevDate: previousRun.date });
+      if (diff < -15) toast.error(`⚠️ Regression: Score dropped ${Math.abs(diff)}% from last run!`);
+    }
+
     const historyEntry = {
       date: new Date().toLocaleDateString(),
       time: new Date().toLocaleTimeString(),
       score: finalScore,
+      total: finalScore,
     };
     const updatedHistory = [
       ...JSON.parse(localStorage.getItem("gnc_audit_history") || "[]"),
@@ -1496,13 +1509,13 @@ ${axeResult ? `Accessibility: ${axeResult.detail}` : ""}`;
               <div style={{ display: "flex", gap: 30, alignItems: "center", flexWrap: "wrap" }}>
                 <div style={{ position: "relative", width: 150, height: 150, borderRadius: "50%", border: `12px solid ${NAVY}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <div style={{ textAlign: "center" }}>
-                    <div style={{ fontSize: 42, fontWeight: 950, color: NAVY }}>{analytics.total}%</div>
+                    <div style={{ fontSize: 42, fontWeight: 950, color: NAVY }}>{analytics?.total ?? analytics?.score ?? 0}%</div>
                     <div style={{ fontSize: 10, fontWeight: 900, color: T.t3 }}>SCORE</div>
                   </div>
                 </div>
-                <RadarChart scores={analytics.scores} />
+                {analytics?.scores && <RadarChart scores={analytics.scores} />}
                 <div style={{ flex: 1, minWidth: 140 }}>
-                  {Object.entries(analytics.scores).map(([k, v]) => (
+                  {analytics?.scores && Object.entries(analytics.scores).map(([k, v]) => (
                     <div key={k} style={{ marginBottom: 14 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, fontWeight: 950, color: T.t3, marginBottom: 4 }}>
                         <span>{getCategoryIcon(k.toLowerCase())} {k.toUpperCase()}</span><span>{v}%</span>
