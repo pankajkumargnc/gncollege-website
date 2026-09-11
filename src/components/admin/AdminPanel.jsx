@@ -519,6 +519,7 @@ function AdminPanelInner({
                   borderRadius: 6, fontSize: 10, fontWeight: 700, padding: '3px 6px', cursor: 'pointer', outline: 'none'
                 }}
                 title="Switch Administrative Desk"
+                aria-label="Switch Administrative Desk"
               >
                 {Object.values(ADMIN_ROLES).map(r => (
                   <option key={r.id} value={r.id} style={{ background: '#0f2347', color: '#fff' }}>{r.name}</option>
@@ -619,6 +620,7 @@ function AdminPanelInner({
                 onChange={e => handleRoleChange(e.target.value)}
                 style={{ background: 'transparent', border: 'none', fontSize: 11.5, fontWeight: 800, cursor: 'pointer', color: NAVY, outline: 'none' }}
                 title="Switch Administrative Desk"
+                aria-label="Switch Administrative Desk"
               >
                 {Object.values(ADMIN_ROLES).map(r => (
                   <option key={r.id} value={r.id}>{r.name} ({r.badge})</option>
