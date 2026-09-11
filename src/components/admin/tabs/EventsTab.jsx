@@ -51,6 +51,8 @@ export default function EventsTab({
     image: "",
     reportLink: "",
     status: "recent",
+    publishDate: "",
+    expiryDate: "",
   });
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState([]);
@@ -66,6 +68,9 @@ export default function EventsTab({
         payload.image = "";
         payload.description = "";
       }
+      // Clean scheduling fields
+      if (!payload.publishDate) delete payload.publishDate;
+      if (!payload.expiryDate) delete payload.expiryDate;
       if (editItem) {
         await updateDoc(doc(db, "events", editItem.id), {
           ...payload,
@@ -90,6 +95,14 @@ export default function EventsTab({
       toast.error(err.message);
     }
     setLoading(false);
+  };
+
+  // ── Scheduling status helper ──
+  const getScheduleStatus = (ev) => {
+    const now = new Date();
+    if (ev.publishDate && new Date(ev.publishDate) > now) return { label: '🟡 Scheduled', bg: '#fefce8', color: '#d97706' };
+    if (ev.expiryDate && new Date(ev.expiryDate) < now) return { label: '🔴 Expired', bg: '#fee2e2', color: '#dc2626' };
+    return { label: '🟢 Live', bg: '#dcfce7', color: '#16a34a' };
   };
 
   const filtered = (events || []).filter(
@@ -261,6 +274,29 @@ export default function EventsTab({
             />
           </div>
 
+          {/* ── 📅 Content Scheduling ── */}
+          <div style={{ background: '#f8fafc', borderRadius: 12, padding: 16, marginBottom: 20, border: `1px solid ${T.b1}` }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: NAVY, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+              📅 Scheduling <span style={{ fontSize: 11, color: T.t4, fontWeight: 600 }}>(optional)</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14 }}>
+              <div>
+                <label className="alabel">Publish Date</label>
+                <input className="ainp" type="datetime-local" value={formData.publishDate || ''}
+                  onChange={(e) => setFormData((d) => ({ ...d, publishDate: e.target.value }))}
+                />
+                <div style={{ fontSize: 10, color: T.t4, marginTop: 4 }}>Leave empty to publish immediately</div>
+              </div>
+              <div>
+                <label className="alabel">Expiry Date</label>
+                <input className="ainp" type="datetime-local" value={formData.expiryDate || ''}
+                  onChange={(e) => setFormData((d) => ({ ...d, expiryDate: e.target.value }))}
+                />
+                <div style={{ fontSize: 10, color: T.t4, marginTop: 4 }}>Leave empty for no expiry</div>
+              </div>
+            </div>
+          </div>
+
           <div style={{ display: "flex", gap: 10 }}>
             <button type="submit" className="abtn abtn-gold" disabled={loading}>
               🚀 {editItem ? "Update" : "Publish"}
@@ -407,6 +443,9 @@ export default function EventsTab({
                     📍 {ev.venue}
                   </span>
                 )}
+                {(() => { const s = getScheduleStatus(ev); return <span className="abadge" style={{ background: s.bg, color: s.color, fontWeight: 800 }}>{s.label}</span>; })()}
+                {ev.publishDate && <span className="abadge" style={{ background: '#f0fdf4', color: T.t3, fontSize: 10 }}>📅 {new Date(ev.publishDate).toLocaleDateString('en-IN', {day:'2-digit', month:'short'})}</span>}
+                {ev.expiryDate && <span className="abadge" style={{ background: '#fefce8', color: '#d97706', fontSize: 10 }}>⏰ {new Date(ev.expiryDate).toLocaleDateString('en-IN', {day:'2-digit', month:'short'})}</span>}
               </div>
               <div style={{ fontWeight: 700, color: NAVY, fontSize: 14 }}>
                 {ev.title}
@@ -431,6 +470,8 @@ export default function EventsTab({
                     image: ev.image || "",
                     reportLink: ev.reportLink || ev.pdfLink || "",
                     status: ev.status || "recent",
+                    publishDate: ev.publishDate || "",
+                    expiryDate: ev.expiryDate || "",
                   });
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}

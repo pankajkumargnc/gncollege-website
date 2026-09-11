@@ -63,7 +63,12 @@ export default function NotificationsPage() {
 
   const filtered = useMemo(() => {
     setCurrentPage(1);
+    const now = new Date();
     return notices.filter(n => {
+      // ── Content Scheduling: hide scheduled/expired notices ──
+      if (n.publishDate && new Date(n.publishDate) > now) return false;
+      if (n.expiryDate && new Date(n.expiryDate) < now) return false;
+
       const d = getTS(n.createdAt);
       if (selYear  !== 'All' && d.getFullYear() !== Number(selYear))        return false;
       if (selMonth !== 'All' && MONTHS_SHORT[d.getMonth()] !== selMonth)    return false;

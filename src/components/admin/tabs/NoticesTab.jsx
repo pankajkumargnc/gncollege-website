@@ -10,7 +10,7 @@ import { extractNoticeMetadata } from '../../../utils/aiExtractor';
 
 export default function NoticesTab({ notices, logAct, getSectionLog, softDelete, bulkDelete }) {
   const [editNotice, setEditNotice] = useState(null);
-  const [noticeData, setNoticeData, clearNoticeDraft] = useLocalDraft('notice', { text: '', link: '', type: 'General', isNew: true, pinned: false });
+  const [noticeData, setNoticeData, clearNoticeDraft] = useLocalDraft('notice', { text: '', link: '', type: 'General', isNew: true, pinned: false, publishDate: '', expiryDate: '' });
   const [noticeSearch, setNoticeSearch] = useState('');
   const [noticeSel, setNoticeSel] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -44,13 +44,28 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
   const saveNotice = async e => {
     e.preventDefault(); setLoading(true);
     try {
-      if (editNotice) await updateDoc(doc(db, 'notices', editNotice.id), { ...noticeData, updatedAt: serverTimestamp() });
-      else await addDoc(collection(db, 'notices'), { ...noticeData, date: new Date().toISOString(), createdAt: serverTimestamp() });
+      const payload = { ...noticeData };
+      // Convert date strings to Firestore-friendly format
+      if (payload.publishDate) payload.publishDate = payload.publishDate;
+      else delete payload.publishDate;
+      if (payload.expiryDate) payload.expiryDate = payload.expiryDate;
+      else delete payload.expiryDate;
+
+      if (editNotice) await updateDoc(doc(db, 'notices', editNotice.id), { ...payload, updatedAt: serverTimestamp() });
+      else await addDoc(collection(db, 'notices'), { ...payload, date: new Date().toISOString(), createdAt: serverTimestamp() });
       toast.success('Notice published!');
       logAct(editNotice ? 'update' : 'add', `Notice: ${noticeData.text?.substring(0, 30)}`, 'notices');
       setEditNotice(null); clearNoticeDraft();
     } catch { }
     setLoading(false);
+  };
+
+  // ── Scheduling status helper ──
+  const getScheduleStatus = (n) => {
+    const now = new Date();
+    if (n.publishDate && new Date(n.publishDate) > now) return { label: '🟡 Scheduled', bg: '#fefce8', color: '#d97706' };
+    if (n.expiryDate && new Date(n.expiryDate) < now) return { label: '🔴 Expired', bg: '#fee2e2', color: '#dc2626' };
+    return { label: '🟢 Live', bg: '#dcfce7', color: '#16a34a' };
   };
 
   const filtered = (notices || []).filter(n => !noticeSearch || n.text?.toLowerCase().includes(noticeSearch.toLowerCase()));
@@ -139,6 +154,29 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
               <Toggle checked={!!noticeData.pinned} onChange={()=>setNoticeData(d=>({...d,pinned:!d.pinned}))} label="Pin to Top" color={NAVY} />
             </div>
           </div>
+
+          {/* ── 📅 Content Scheduling ── */}
+          <div style={{ background: '#f8fafc', borderRadius: 12, padding: 16, marginBottom: 14, border: `1px solid ${T.b1}` }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: NAVY, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+              📅 Scheduling <span style={{ fontSize: 11, color: T.t4, fontWeight: 600 }}>(optional)</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14 }}>
+              <div>
+                <label className="alabel">Publish Date</label>
+                <input className="ainp" type="datetime-local" value={noticeData.publishDate || ''}
+                  onChange={(e) => setNoticeData(d=>({...d, publishDate: e.target.value}))}
+                />
+                <div style={{ fontSize: 10, color: T.t4, marginTop: 4 }}>Leave empty to publish immediately</div>
+              </div>
+              <div>
+                <label className="alabel">Expiry Date</label>
+                <input className="ainp" type="datetime-local" value={noticeData.expiryDate || ''}
+                  onChange={(e) => setNoticeData(d=>({...d, expiryDate: e.target.value}))}
+                />
+                <div style={{ fontSize: 10, color: T.t4, marginTop: 4 }}>Leave empty for no expiry</div>
+              </div>
+            </div>
+          </div>
           <div style={{ display: 'flex', gap: 10 }}>
             <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editNotice?'Update':'Publish'}</button>
             {editNotice && <button type="button" className="abtn abtn-outline" onClick={()=>{setEditNotice(null);clearNoticeDraft();}}>Cancel</button>}
@@ -159,11 +197,14 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
                 {n.pinned && <span className="abadge" style={{ background: `${NAVY}15`, color: NAVY }}>📌 Pinned</span>}
                 {n.isNew && <span className="abadge" style={{ background: '#fee2e2', color: T.red }}>NEW</span>}
                 <span className="abadge" style={{ background: BG, color: T.t2 }}>{n.type}</span>
+                {(() => { const s = getScheduleStatus(n); return <span className="abadge" style={{ background: s.bg, color: s.color, fontWeight: 800 }}>{s.label}</span>; })()}
+                {n.publishDate && <span className="abadge" style={{ background: '#f0fdf4', color: T.t3, fontSize: 10 }}>📅 {new Date(n.publishDate).toLocaleDateString('en-IN', {day:'2-digit', month:'short'})}</span>}
+                {n.expiryDate && <span className="abadge" style={{ background: '#fef3c7', color: '#d97706', fontSize: 10 }}>⏰ {new Date(n.expiryDate).toLocaleDateString('en-IN', {day:'2-digit', month:'short'})}</span>}
               </div>
               <div style={{ fontWeight: 700, color: NAVY, fontSize: 14 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize((n.text||'').substring(0,100)) }} />
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="abtn abtn-outline abtn-sm" onClick={()=>{setEditNotice(n);setNoticeData({text:n.text||'',link:n.link||'',type:n.type||'General',isNew:!!n.isNew,pinned:!!n.pinned});window.scrollTo({top:0,behavior:'smooth'});}} aria-label="Edit notice">✏️</button>
+              <button className="abtn abtn-outline abtn-sm" onClick={()=>{setEditNotice(n);setNoticeData({text:n.text||'',link:n.link||'',type:n.type||'General',isNew:!!n.isNew,pinned:!!n.pinned,publishDate:n.publishDate||'',expiryDate:n.expiryDate||''});window.scrollTo({top:0,behavior:'smooth'});}} aria-label="Edit notice">✏️</button>
               <button className="abtn abtn-red abtn-sm" onClick={()=>softDelete('notices',n.id,n,(n.text||'').substring(0,30))} aria-label="Delete notice">🗑️</button>
             </div>
           </div>

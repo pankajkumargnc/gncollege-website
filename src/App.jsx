@@ -20,8 +20,7 @@ import AlertBanner from "./components/AlertBanner";
 // ── Data & Styles ──
 import { navLinks as staticNavLinks } from "./data/db";
 import { updateSEO } from "./utils/seoManager";
-import { db } from "./firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { trackPageView } from "./utils/analytics";
 import useDarkMode from "./hooks/useDarkMode";
 import useAppData from "./hooks/useAppData";
 
@@ -127,21 +126,10 @@ export default function App() {
   useEffect(() => {
     updateSEO(location.pathname);
     
-    // ✅ Log visit to Firestore — debounced to avoid write-per-click
-    if (!isAdminRoute) {
-      const timer = setTimeout(async () => {
-        try {
-          if (!db) return;
-          await addDoc(collection(db, "site_traffic"), {
-            path: location.pathname,
-            timestamp: serverTimestamp(),
-            userAgent: navigator.userAgent,
-          });
-        } catch (_) {}
-      }, 2000); // Only write if user stays on this route for 2s
-      return () => clearTimeout(timer);
-    }
-  }, [location.pathname, isAdminRoute]);
+    // ✅ Real analytics — deduplicated, no PII, device-aware
+    const cleanup = trackPageView(location.pathname);
+    return cleanup;
+  }, [location.pathname]);
 
   // ── Derived Data ──
   const counterData = useMemo(() => [

@@ -760,12 +760,20 @@ const HomePage = ({
   }));
 
   const finalNotices = useMemo(() => {
+    const now = new Date();
     const combined = [...liveDriveNotices, ...(notices || [])];
-    return combined.sort((a, b) => {
-      const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.date || a.createdAt || Date.now()).getTime();
-      const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.date || b.createdAt || Date.now()).getTime();
-      return bTime - aTime;
-    });
+    return combined
+      .filter(n => {
+        // Content Scheduling: hide scheduled/expired notices
+        if (n.publishDate && new Date(n.publishDate) > now) return false;
+        if (n.expiryDate && new Date(n.expiryDate) < now) return false;
+        return true;
+      })
+      .sort((a, b) => {
+        const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.date || a.createdAt || Date.now()).getTime();
+        const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.date || b.createdAt || Date.now()).getTime();
+        return bTime - aTime;
+      });
   }, [liveDriveNotices, notices]);
   const allGal = gallery || [];
   const filtered =
@@ -779,10 +787,16 @@ const HomePage = ({
     ? Array.from({ length: 8 - slicedGal.length })
     : [];
 
+  const scheduleFilter = (e) => {
+    const now = new Date();
+    if (e.publishDate && new Date(e.publishDate) > now) return false;
+    if (e.expiryDate && new Date(e.expiryDate) < now) return false;
+    return true;
+  };
   const recentEv = (events || [])
-    .filter((e) => e.status !== "upcoming")
+    .filter((e) => e.status !== "upcoming" && scheduleFilter(e))
     .slice(0, 6);
-  const upcomEv = (events || []).filter((e) => e.status === "upcoming");
+  const upcomEv = (events || []).filter((e) => e.status === "upcoming" && scheduleFilter(e));
   const evTriple = [...recentEv, ...recentEv, ...recentEv];
 
   const handlePdf = useCallback((ev) => {

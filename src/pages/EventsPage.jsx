@@ -80,7 +80,12 @@ export default function EventsPage({ headless }) {
 
   const filtered = useMemo(() => {
     setCurrentPage(1);
+    const now = new Date();
     return events.filter(e => {
+      // ── Content Scheduling: hide scheduled/expired events ──
+      if (e.publishDate && new Date(e.publishDate) > now) return false;
+      if (e.expiryDate && new Date(e.expiryDate) < now) return false;
+
       if (tab === 'upcoming' && e.status !== 'upcoming') return false;
       if (tab === 'past'     && e.status === 'upcoming') return false;
       if (selType  !== 'All' && e.type !== selType) return false;
