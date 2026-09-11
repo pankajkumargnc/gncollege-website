@@ -44,6 +44,83 @@ export default function QuickPublishTab({ logAct }) {
   const [updData, setUpdData] = useState({ id: null, text: '', link: '' });
   const [altData, setAltData] = useState({ id: null, text: '' });
 
+  // 🚀 Multi-Channel Broadcast States
+  const [mcTitle, setMcTitle] = useState('');
+  const [mcCategory, setMcCategory] = useState('EXAMINATION');
+  const [mcAudience, setMcAudience] = useState('All Students');
+  const [mcDetails, setMcDetails] = useState('');
+  const [mcNotice, setMcNotice] = useState(true);
+  const [mcAlert, setMcAlert] = useState(true);
+  const [mcTicker, setMcTicker] = useState(true);
+  const [mcPush, setMcPush] = useState(false);
+  const [mcGeneratedWhatsapp, setMcGeneratedWhatsapp] = useState('');
+  const [mcSending, setMcSending] = useState(false);
+
+  const handleMultiChannelDispatch = async (e) => {
+    e.preventDefault();
+    if (!mcTitle.trim() || !mcDetails.trim()) {
+      return toast.error('Please provide both Notice Title and Details!');
+    }
+    setMcSending(true);
+    const toastId = toast.loading('Broadcasting across selected college channels...');
+    try {
+      const now = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+      const fullText = `${mcTitle.trim()} — ${mcDetails.trim()}`;
+
+      // 1. Notice Board
+      if (mcNotice) {
+        await addDoc(collection(db, 'notices'), {
+          text: fullText,
+          type: mcCategory,
+          isNew: true,
+          link: '',
+          date: new Date().toISOString(),
+          createdAt: serverTimestamp()
+        });
+      }
+
+      // 2. Flash Breaking Alert
+      if (mcAlert) {
+        await addDoc(collection(db, 'alerts'), {
+          text: `🚨 [${mcCategory}] ${mcTitle.trim()}: ${mcDetails.trim()}`,
+          isActive: true,
+          type: 'urgent',
+          createdAt: serverTimestamp()
+        });
+      }
+
+      // 3. Homepage Live Ticker
+      if (mcTicker) {
+        await addDoc(collection(db, 'updates'), {
+          text: `📢 [${mcCategory}] ${mcTitle.trim()}`,
+          link: '/notifications',
+          createdAt: serverTimestamp()
+        });
+      }
+
+      // 4. Browser Push Notification
+      if (mcPush && 'Notification' in window) {
+        if (Notification.permission === 'granted') {
+          new Notification('Guru Nanak College Notice', {
+            body: mcTitle.trim(),
+            icon: 'images/logo.webp'
+          });
+        }
+      }
+
+      // 5. Formatted WhatsApp Broadcast
+      const waText = `🎓 *GURU NANAK COLLEGE, DHANBAD*\n📢 *OFFICIAL NOTICE* • ${mcCategory}\n─────────────────────────\n📌 *${mcTitle.trim()}*\n📅 *Date:* ${now}\n👥 *Target:* ${mcAudience}\n\n${mcDetails.trim()}\n\n🔗 *Official Portal:* https://gncollege.org\n─────────────────────────\n_Issued by Office of Administration, GNC Dhanbad_`;
+
+      setMcGeneratedWhatsapp(waText);
+      logAct?.('broadcast', `Multi-Channel Notice: ${mcTitle.trim()}`, 'quick');
+      toast.success('Multi-Channel Broadcast Live! 🚀', { id: toastId });
+    } catch (err) {
+      toast.error(err.message, { id: toastId });
+    } finally {
+      setMcSending(false);
+    }
+  };
+
   const handleAiGen = () => {
     if (!aiPrompt.trim()) return toast.error('Please describe what you want to generate!');
     setAiGenerating(true);
@@ -255,6 +332,179 @@ export default function QuickPublishTab({ logAct }) {
             <button className="qp-btn-pub" onClick={() => setIsAiModalOpen(true)} style={{ background: NAVY, minWidth: 200, width: '100%', flex: '1 1 200px' }}>
                 🚀 Open Neural AI Studio
             </button>
+        </div>
+
+        {/* 🚀 1-CLICK MULTI-CHANNEL BROADCAST HUB */}
+        <div className="qp-card" style={{
+          gridColumn: '1 / -1',
+          background: 'linear-gradient(135deg, #ffffff 0%, #fdfbf7 100%)',
+          border: `2px solid ${GOLD}40`,
+          boxShadow: '0 12px 36px rgba(15,35,71,0.08)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20, borderBottom: `1.5px solid rgba(15,35,71,0.06)`, paddingBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: NAVY, color: GOLD, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>
+                📢
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 900, color: GOLD, textTransform: 'uppercase', letterSpacing: 1 }}>Official Omnichannel Dispatcher</div>
+                <h3 style={{ margin: 0, color: NAVY, fontSize: 20, fontWeight: 900 }}>1-Click Multi-Channel Broadcast</h3>
+              </div>
+            </div>
+            <span style={{ fontSize: 11, background: `${GOLD}18`, color: '#d97706', padding: '4px 12px', borderRadius: 20, fontWeight: 800, border: `1px solid ${GOLD}40` }}>
+              ⚡ Syncs 5 Channels Simultaneously
+            </span>
+          </div>
+
+          <form onSubmit={handleMultiChannelDispatch}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 16 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: NAVY, marginBottom: 6, textTransform: 'uppercase' }}>
+                  📌 Notice / Announcement Title *
+                </label>
+                <input 
+                  type="text" 
+                  className="ainp" 
+                  required
+                  placeholder="e.g. UG Semester 4 Examination Schedule Released" 
+                  value={mcTitle} 
+                  onChange={e => setMcTitle(e.target.value)}
+                  style={{ width: '100%', borderRadius: 10, padding: '10px 14px', border: '1.5px solid #e2e8f0', fontSize: 13.5, fontWeight: 600, boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: NAVY, marginBottom: 6, textTransform: 'uppercase' }}>
+                  🏷️ Category
+                </label>
+                <select 
+                  className="ainp" 
+                  value={mcCategory} 
+                  onChange={e => setMcCategory(e.target.value)}
+                  style={{ width: '100%', borderRadius: 10, padding: '10px 14px', border: '1.5px solid #e2e8f0', fontSize: 13, fontWeight: 700, boxSizing: 'border-box' }}
+                >
+                  <option value="EXAMINATION">📝 EXAMINATION</option>
+                  <option value="ADMISSION">🎓 ADMISSION</option>
+                  <option value="HOLIDAY">🏖️ HOLIDAY / RECESS</option>
+                  <option value="SCHOLARSHIPS">💳 SCHOLARSHIPS & AID</option>
+                  <option value="CULTURAL">🎭 CULTURAL & EVENTS</option>
+                  <option value="PLACEMENT">💼 PLACEMENT / CAREERS</option>
+                  <option value="GENERAL">📢 GENERAL NOTICE</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: NAVY, marginBottom: 6, textTransform: 'uppercase' }}>
+                  👥 Target Audience
+                </label>
+                <select 
+                  className="ainp" 
+                  value={mcAudience} 
+                  onChange={e => setMcAudience(e.target.value)}
+                  style={{ width: '100%', borderRadius: 10, padding: '10px 14px', border: '1.5px solid #e2e8f0', fontSize: 13, fontWeight: 700, boxSizing: 'border-box' }}
+                >
+                  <option value="All Students & Staff">All Students & Staff</option>
+                  <option value="UG Semester 1-6 Students">UG Semester 1-6 Students</option>
+                  <option value="BCA & Vocational Wing">BCA & Vocational Wing</option>
+                  <option value="Girls Wing (Bank More Campus)">Girls Wing (Bank More Campus)</option>
+                  <option value="Faculty & Staff Members">Faculty & Staff Members</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: NAVY, marginBottom: 6, textTransform: 'uppercase' }}>
+                📄 Full Details / Instructions *
+              </label>
+              <textarea 
+                className="ainp" 
+                rows={3} 
+                required
+                placeholder="Enter complete notice details, dates, room numbers, or links for students..."
+                value={mcDetails} 
+                onChange={e => setMcDetails(e.target.value)}
+                style={{ width: '100%', borderRadius: 10, padding: '12px 14px', border: '1.5px solid #e2e8f0', fontSize: 13.5, boxSizing: 'border-box' }}
+              />
+            </div>
+
+            {/* CHANNEL TOGGLE CHIPS */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: NAVY, marginBottom: 8, textTransform: 'uppercase' }}>
+                📡 Select Dispatch Channels:
+              </div>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, background: mcNotice ? `${NAVY}10` : '#f8fafc', padding: '8px 14px', borderRadius: 10, border: `1.5px solid ${mcNotice ? NAVY : '#e2e8f0'}`, cursor: 'pointer', fontSize: 12.5, fontWeight: 700, color: NAVY }}>
+                  <input type="checkbox" checked={mcNotice} onChange={e => setMcNotice(e.target.checked)} />
+                  📌 College Notice Board
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, background: mcAlert ? '#fee2e2' : '#f8fafc', padding: '8px 14px', borderRadius: 10, border: `1.5px solid ${mcAlert ? '#ef4444' : '#e2e8f0'}`, cursor: 'pointer', fontSize: 12.5, fontWeight: 700, color: '#b91c1c' }}>
+                  <input type="checkbox" checked={mcAlert} onChange={e => setMcAlert(e.target.checked)} />
+                  ⚡ Flash Alert Banner
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, background: mcTicker ? `${GOLD}18` : '#f8fafc', padding: '8px 14px', borderRadius: 10, border: `1.5px solid ${mcTicker ? GOLD : '#e2e8f0'}`, cursor: 'pointer', fontSize: 12.5, fontWeight: 700, color: '#b45309' }}>
+                  <input type="checkbox" checked={mcTicker} onChange={e => setMcTicker(e.target.checked)} />
+                  📢 Homepage Live Ticker
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, background: mcPush ? '#dcfce7' : '#f8fafc', padding: '8px 14px', borderRadius: 10, border: `1.5px solid ${mcPush ? '#22c55e' : '#e2e8f0'}`, cursor: 'pointer', fontSize: 12.5, fontWeight: 700, color: '#15803d' }}>
+                  <input type="checkbox" checked={mcPush} onChange={e => setMcPush(e.target.checked)} />
+                  🔔 Browser Push Notification
+                </label>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+              <button 
+                type="submit" 
+                disabled={mcSending} 
+                className="qp-btn-pub"
+                style={{ background: NAVY, padding: '12px 28px', fontSize: 14, minWidth: 240 }}
+              >
+                {mcSending ? 'Broadcasting...' : '🚀 Broadcast Across Channels'}
+              </button>
+            </div>
+          </form>
+
+          {/* WHATSAPP BROADCAST PREVIEW & ACTION */}
+          {mcGeneratedWhatsapp && (
+            <div style={{
+              marginTop: 24,
+              background: '#f0fdf4',
+              border: '1.5px solid #86efac',
+              borderRadius: 16,
+              padding: '20px',
+              animation: 'fade-up 0.3s ease-out'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 20 }}>💬</span>
+                  <span style={{ fontWeight: 900, color: '#166534', fontSize: 14 }}>Official WhatsApp Broadcast Ready</span>
+                </div>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(mcGeneratedWhatsapp);
+                      toast.success('WhatsApp text copied to clipboard! 📋');
+                    }}
+                    style={{ background: '#15803d', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}
+                  >
+                    📋 Copy Text
+                  </button>
+                  <a 
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(mcGeneratedWhatsapp)}`}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{ background: '#25D366', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 800, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                  >
+                    📲 Open WhatsApp
+                  </a>
+                </div>
+              </div>
+              <pre style={{ margin: 0, background: '#ffffff', padding: '14px', borderRadius: 10, border: '1px solid #bbf7d0', fontSize: 12, lineHeight: 1.6, color: '#1e293b', whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
+                {mcGeneratedWhatsapp}
+              </pre>
+            </div>
+          )}
         </div>
 
       {/* 🔮 NEURAL AI STUDIO MODAL */}

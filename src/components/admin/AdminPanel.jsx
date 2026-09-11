@@ -122,6 +122,42 @@ const TabLoader = () => (
   </div>
 );
 
+// ── RBAC Administrative Roles Definition ──────────────────────────────────────
+export const ADMIN_ROLES = {
+  SUPER_ADMIN: {
+    id: 'SUPER_ADMIN',
+    name: '👑 Super Admin',
+    badge: 'FULL CORE',
+    desc: 'Unrestricted Access (Principal / IT Incharge)',
+    color: '#f4a023',
+    tabs: null // All 27 tabs
+  },
+  ACADEMIC_EXAM: {
+    id: 'ACADEMIC_EXAM',
+    name: '📝 Exam & Academic Desk',
+    badge: 'ACADEMICS',
+    desc: 'Notices, News, Documents, Departments, Meetings',
+    color: '#0284c7',
+    tabs: ['dashboard', 'quick', 'notices', 'announcements', 'documents', 'departments', 'gb_meetings', 'staff_council', 'alerts', 'activity']
+  },
+  CULTURAL_EVENTS: {
+    id: 'CULTURAL_EVENTS',
+    name: '🎭 Events & Cultural Desk',
+    badge: 'EVENTS',
+    desc: 'Events, Gallery, Campus, YouTube, Testimonials, Slider',
+    color: '#db2777',
+    tabs: ['dashboard', 'quick', 'events', 'gallery', 'campus', 'slider', 'youtube', 'testimonials', 'activity']
+  },
+  FACULTY_PLACEMENT: {
+    id: 'FACULTY_PLACEMENT',
+    name: '👨‍🏫 Faculty & Alumni Desk',
+    badge: 'FACULTY',
+    desc: 'Faculty Directory, Placements & Alumni Wall',
+    color: '#059669',
+    tabs: ['dashboard', 'quick', 'faculty', 'placements', 'content_mgr', 'testimonials', 'activity']
+  }
+};
+
 // ── Main AdminPanel Component ─────────────────────────────────────────────────
 function AdminPanelInner({
   onClose, notices: noticesProp, pages: pagesProp, events: eventsProp,
@@ -130,12 +166,37 @@ function AdminPanelInner({
   navLinks, faculties: facultiesProp, placements: placementsProp, alerts: alertsProp
 }) {
   const [tab, setTab] = useState('dashboard');
+  const [activeRole, setActiveRole] = useState(() => {
+    return sessionStorage.getItem('gnc_admin_role') || 'SUPER_ADMIN';
+  });
   const [sideOpen, setSideOpen] = useState(false);
   const [sideCollapsed, setSideCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024);
   const [globalSearch, setGlobalSearch] = useState('');
   const [showKeyHelp, setShowKeyHelp] = useState(false);
   const contentRef = useRef(null);
+
+  const handleRoleChange = (newRole) => {
+    setActiveRole(newRole);
+    sessionStorage.setItem('gnc_admin_role', newRole);
+    const rInfo = ADMIN_ROLES[newRole];
+    toast.success(`Role switched to: ${rInfo?.name || newRole}`, { icon: '🛡️' });
+  };
+
+  // Filter tabs according to RBAC Role
+  const visibleTabs = useMemo(() => {
+    const roleConfig = ADMIN_ROLES[activeRole];
+    if (!roleConfig || !roleConfig.tabs) return TABS;
+    return TABS.filter(t => roleConfig.tabs.includes(t.id));
+  }, [activeRole]);
+
+  // If current tab is outside active role's permission, redirect to dashboard
+  useEffect(() => {
+    const isAllowed = visibleTabs.some(t => t.id === tab);
+    if (!isAllowed) {
+      setTab('dashboard');
+    }
+  }, [visibleTabs, tab]);
 
   // ── Live data subscriptions ───────────────────────────────────────────────
   const [_pdfReports,   set_pdfReports]   = useState([]);
@@ -436,10 +497,41 @@ function AdminPanelInner({
           </div>
         </div>
 
+        {/* 🛡️ RBAC Role Indicator in Sidebar */}
+        {(!sideCollapsed || isMobile) && (
+          <div style={{ padding: '0 12px 10px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <div style={{ 
+              background: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: '6px 10px', 
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              border: '1px solid rgba(244,160,35,0.25)'
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', fontWeight: 800, textTransform: 'uppercase' }}>Active Desk</span>
+                <span style={{ fontSize: 11, fontWeight: 900, color: ADMIN_ROLES[activeRole]?.color || '#f4a023' }}>
+                  {ADMIN_ROLES[activeRole]?.name}
+                </span>
+              </div>
+              <select 
+                value={activeRole} 
+                onChange={e => handleRoleChange(e.target.value)}
+                style={{ 
+                  background: 'rgba(6,14,28,0.85)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: 6, fontSize: 10, fontWeight: 700, padding: '3px 6px', cursor: 'pointer', outline: 'none'
+                }}
+                title="Switch Administrative Desk"
+              >
+                {Object.values(ADMIN_ROLES).map(r => (
+                  <option key={r.id} value={r.id} style={{ background: '#0f2347', color: '#fff' }}>{r.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
         <div style={{ flex:1, overflowY:'auto', padding:'8px 0' }}>
           {(() => {
             let lastSec = '';
-            return TABS.map(t => {
+            return visibleTabs.map(t => {
               const showSec = t.section && t.section !== lastSec;
               if (t.section) lastSec = t.section;
               const badge = t.id === 'alerts' ? liveAlertCount : null;
@@ -503,6 +595,25 @@ function AdminPanelInner({
           </div>
 
           <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:10 }}>
+            {/* RBAC Top Bar Role Indicator / Switcher */}
+            <div style={{ 
+              display: 'flex', alignItems: 'center', gap: 6, 
+              background: 'rgba(15,35,71,0.04)', padding: '5px 10px', 
+              borderRadius: 8, border: `1px solid ${T.b1}` 
+            }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: ADMIN_ROLES[activeRole]?.color || NAVY }} />
+              <select 
+                value={activeRole} 
+                onChange={e => handleRoleChange(e.target.value)}
+                style={{ background: 'transparent', border: 'none', fontSize: 11.5, fontWeight: 800, cursor: 'pointer', color: NAVY, outline: 'none' }}
+                title="Switch Administrative Desk"
+              >
+                {Object.values(ADMIN_ROLES).map(r => (
+                  <option key={r.id} value={r.id}>{r.name} ({r.badge})</option>
+                ))}
+              </select>
+            </div>
+
             <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:12, color:T.t3, fontWeight:700 }}>
               <div className="glow" style={{ width:7, height:7, borderRadius:'50%' }} />
               <span style={{ color:T.green }}>Live</span>

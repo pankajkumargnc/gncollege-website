@@ -93,6 +93,8 @@ export default function AdminLogin({ onSuccess, onClose }) {
     if (e.key === 'CapsLock') setCapsLock(e.getModifierState('CapsLock'));
   };
 
+  const [loginRole, setLoginRole] = useState('SUPER_ADMIN');
+
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) { setError('Please fill in all fields.'); return; }
@@ -103,6 +105,7 @@ export default function AdminLogin({ onSuccess, onClose }) {
       await loginAdmin(username, password);
       sessionStorage.removeItem('gnc_admin_auth');
       sessionStorage.setItem('gnc_active_session', '1');
+      sessionStorage.setItem('gnc_admin_role', loginRole);
       setPhase('success');
       setTimeout(() => onSuccess(), 800);
     } catch (fbErr) {
@@ -662,6 +665,28 @@ export default function AdminLogin({ onSuccess, onClose }) {
                 >
                   {showPass ? '🙈' : '👁️'}
                 </button>
+              </div>
+            </div>
+
+            {/* Role / Department Selection */}
+            <div className="gnc-field">
+              <label htmlFor="admin-role-select" className="gnc-field-label">
+                <span>Administrative Desk</span>
+              </label>
+              <div className="gnc-input-wrap">
+                <span className="gnc-input-icon" aria-hidden="true">🛡️</span>
+                <select
+                  id="admin-role-select"
+                  className="gnc-input"
+                  value={loginRole}
+                  onChange={(e) => setLoginRole(e.target.value)}
+                  style={{ cursor: 'pointer', background: 'transparent', color: '#0f2347', fontWeight: 700 }}
+                >
+                  <option value="SUPER_ADMIN">👑 Super Admin (Full Unrestricted Access)</option>
+                  <option value="ACADEMIC_EXAM">📝 Exam & Academic Controller</option>
+                  <option value="CULTURAL_EVENTS">🎭 Events & Cultural Incharge</option>
+                  <option value="FACULTY_PLACEMENT">👨‍🏫 Faculty & Placement Desk</option>
+                </select>
               </div>
             </div>
 

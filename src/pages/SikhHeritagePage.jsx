@@ -1,173 +1,837 @@
-// src/pages/SikhHeritagePage.jsx — Sikh Heritage & History of Guru Nanak College
-import React, { useEffect } from 'react';
+// src/pages/SikhHeritagePage.jsx — Sikh Heritage, History & Minority Excellence
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { updateSEO } from '../utils/seoManager';
+import { COLORS } from '../styles/colors';
 
-const HERITAGE_DATA = {
-  hero: {
-    title: 'Sikh Heritage',
-    subtitle: 'ਸਿੱਖ ਵਿਰਾਸਤ — The Teachings of Guru Nanak Dev Ji and our College Legacy',
-    bg: 'linear-gradient(135deg, #0f2347 0%, #1a3a6b 50%, #f4a023 100%)'
-  },
-  sections: [
-    {
-      title: 'ਵਾਹਿਗੁਰੂ — Guru Nanak Dev Ji',
-      icon: '🙏',
-      content: 'Guru Nanak Dev Ji (1469–1539), the founder of Sikhism, spread the message of equality, compassion, and honest living. His philosophy — "Kirat Karo, Naam Japo, Vand Chhako" — remains the foundation of our institution\'s values.',
-      image: null,
-      highlight: true
-    },
-    {
-      title: 'College History',
-      icon: '🏛️',
-      content: 'Guru Nanak College was established in 1970 by the Sikh community of Dhanbad. It is a Sikh Minority institution affiliated with B.B.M.K. University (formerly VBU). The college mission is to provide quality education to all, regardless of caste, creed, or religion.',
-    },
-    {
-      title: 'Minority Status',
-      icon: '📜',
-      content: 'The college is recognized as a Sikh Minority Institution by the National Commission for Minority Educational Institutions (NCMEI). It is further recognized under UGC Section 2(f) & 12(B).',
-    },
-    {
-      title: 'Core Values — Sikh Principles',
-      icon: '☬',
-      content: null,
-      values: [
-        { name: 'ਨਾਮ ਜਪੋ (Naam Japo)', desc: 'Spiritual awareness and meditation — fostering moral values among students' },
-        { name: 'ਕਿਰਤ ਕਰੋ (Kirat Karo)', desc: 'Honest hard work — practical education and skill development' },
-        { name: 'ਵੰਡ ਛਕੋ (Vand Chhako)', desc: 'Sharing with others — community service and social responsibility' },
-        { name: 'ਸਰਬੱਤ ਦਾ ਭਲਾ (Sarbat Da Bhala)', desc: 'Welfare of all — inclusive education regardless of background' },
-      ]
-    },
-    {
-      title: 'Gurudwara & Spiritual Life',
-      icon: '🕌',
-      content: 'The college campus houses a Gurudwara Sahib where regular Kirtan, Ardaas, and Gurpurb celebrations are held. Guru Nanak Jayanti, Baisakhi, and Prakash Purbs are special occasions for the entire college community.',
-    },
-    {
-      title: 'Langar & Community Service',
-      icon: '🍲',
-      content: 'Following the Sikh tradition of Langar (community kitchen), the college organizes free meals on various occasions. Regular NSS activities and community outreach programs are also conducted.',
-    },
-  ]
-};
+const NAVY = COLORS.navy || '#0f2347';
+const GOLD = COLORS.gold || '#f4a023';
+
+// ── Web Audio Chime Generator (No external MP3 required) ──────────────────────
+function playHarmonicChime() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    
+    // Soothing meditative fundamental + harmonics (432Hz tuning)
+    const freqs = [432, 648, 864, 1296];
+    freqs.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = idx === 0 ? 'sine' : 'triangle';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      
+      const volume = idx === 0 ? 0.12 : 0.04 / (idx + 1);
+      gain.gain.setValueAtTime(0.001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(volume, ctx.currentTime + 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 3.2);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 3.3);
+    });
+  } catch (_) {}
+}
+
+const TABS = [
+  { id: 'philosophy', label: '☬ Eternal Principles', punjabi: 'ਸਿੱਖ ਸਿਧਾਂਤ', icon: '🙏' },
+  { id: 'history', label: '🏛️ Founder & Roots', punjabi: 'ਸਾਡਾ ਵਿਰਸਾ', icon: '📜' },
+  { id: 'minority', label: '⚖️ Minority Status & Rights', punjabi: 'ਘੱਟ ਗਿਣਤੀ ਦਰਜਾ', icon: '🏅' },
+  { id: 'spiritual', label: '🕌 Gurudwara & Sewa', punjabi: 'ਸੇਵਾ ਅਤੇ ਅਰਦਾਸ', icon: '🍲' },
+  { id: 'scholarships', label: '🎓 Scholarships & Welfare', punjabi: 'ਵਜ਼ੀਫ਼ੇ ਤੇ ਮਦਦ', icon: '💳' },
+];
 
 export default function SikhHeritagePage() {
+  const [activeTab, setActiveTab] = useState('philosophy');
+  const [isPlayingChime, setIsPlayingChime] = useState(false);
+
   useEffect(() => {
     updateSEO('/about-us/sikh-heritage', {
-      title: 'Sikh Heritage | Guru Nanak College Dhanbad',
-      description: 'Learn about the Sikh heritage, values, and traditions that form the foundation of Guru Nanak College, Dhanbad.'
+      title: 'Sikh Heritage & Minority Legacy | Guru Nanak College, Dhanbad',
+      description: 'Discover the rich Sikh heritage, philosophy of Guru Nanak Dev Ji, NCMEI minority institution status, and scholarship opportunities at Guru Nanak College, Dhanbad.'
     });
   }, []);
 
+  const handleChimeClick = () => {
+    setIsPlayingChime(true);
+    playHarmonicChime();
+    setTimeout(() => setIsPlayingChime(false), 3300);
+  };
+
   return (
-    <div className="profile-page-wrapper" style={{ minHeight: '80vh' }}>
+    <div className="sikh-heritage-hub" style={{ minHeight: '90vh', background: 'var(--bg, #f8fafc)' }}>
       <style>{`
-        .heritage-card { transition: transform 0.25s ease, box-shadow 0.25s ease; }
-        .heritage-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(15,35,71,0.12) !important; }
-        [data-theme="dark"] .heritage-card { background: rgba(10,22,48,0.85) !important; border-color: rgba(244,160,35,0.15) !important; }
-        [data-theme="dark"] .heritage-card h2 { color: #f1f5f9 !important; }
-        [data-theme="dark"] .heritage-card p { color: #94a3b8 !important; }
-        [data-theme="dark"] .heritage-val { background: rgba(15,35,71,0.6) !important; border-color: rgba(255,255,255,0.08) !important; }
-        [data-theme="dark"] .heritage-val div:first-child { color: #f1f5f9 !important; }
-        [data-theme="dark"] .heritage-quote { color: #cbd5e1 !important; }
+        /* ── Hero Banner Keyframes ── */
+        @keyframes khandaGlow {
+          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 16px rgba(244,160,35,0.45)); }
+          50% { transform: scale(1.05); filter: drop-shadow(0 0 28px rgba(244,160,35,0.75)); }
+        }
+        @keyframes floatSlow {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
+        }
+
+        .sh-hero {
+          background: linear-gradient(135deg, #060e1c 0%, #0f2347 45%, #1a3a6b 85%, #d97706 130%);
+          padding: clamp(60px, 8vw, 110px) 20px clamp(40px, 6vw, 70px);
+          color: #fff;
+          text-align: center;
+          position: relative;
+          overflow: hidden;
+          border-bottom: 3px solid #f4a023;
+        }
+        .sh-hero-pattern {
+          position: absolute; inset: 0; opacity: 0.05;
+          background-image: radial-gradient(#f4a023 1px, transparent 1px);
+          background-size: 28px 28px;
+          pointer-events: none;
+        }
+        .sh-khanda-emblem {
+          font-size: clamp(52px, 8vw, 76px);
+          display: inline-block;
+          color: #f4a023;
+          animation: khandaGlow 5s ease-in-out infinite;
+          margin-bottom: 12px;
+          user-select: none;
+        }
+        .sh-gurmukhi-lead {
+          font-family: serif, 'Plus Jakarta Sans', sans-serif;
+          color: #fbd38d;
+          font-size: clamp(16px, 2.2vw, 22px);
+          font-weight: 700;
+          letter-spacing: 0.5px;
+          margin-bottom: 10px;
+        }
+        .sh-title {
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          font-size: clamp(28px, 4.5vw, 50px);
+          font-weight: 900;
+          letter-spacing: -0.02em;
+          margin: 0 0 16px;
+          line-height: 1.15;
+        }
+        .sh-title span { color: #f4a023; }
+        .sh-subtitle {
+          max-width: 780px;
+          margin: 0 auto 24px;
+          font-size: clamp(14px, 1.2vw, 17px);
+          line-height: 1.7;
+          color: rgba(255,255,255,0.85);
+        }
+
+        /* ── Audio Contemplation Button ── */
+        .sh-chime-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          background: rgba(255,255,255,0.1);
+          border: 1.5px solid rgba(244,160,35,0.5);
+          color: #fff;
+          padding: 8px 20px;
+          border-radius: 50px;
+          font-size: 13px;
+          font-weight: 800;
+          cursor: pointer;
+          backdrop-filter: blur(8px);
+          transition: all 0.3s ease;
+        }
+        .sh-chime-btn:hover {
+          background: #f4a023;
+          color: #060e1c;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(244,160,35,0.4);
+        }
+        .sh-chime-btn.active {
+          animation: floatSlow 1.5s ease-in-out infinite;
+          border-color: #fff;
+          background: rgba(244,160,35,0.35);
+        }
+
+        /* ── Tabs Navigation ── */
+        .sh-nav-wrap {
+          max-width: 1200px;
+          margin: -28px auto 40px;
+          padding: 0 20px;
+          position: relative;
+          z-index: 10;
+        }
+        .sh-tabs-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: #ffffff;
+          padding: 10px;
+          border-radius: 18px;
+          box-shadow: 0 10px 30px rgba(15,35,71,0.08);
+          border: 1px solid #e2e8f0;
+          overflow-x: auto;
+          scrollbar-width: thin;
+        }
+        .sh-tab-btn {
+          flex: 1;
+          min-width: 180px;
+          padding: 12px 16px;
+          border-radius: 12px;
+          border: none;
+          background: transparent;
+          color: #475569;
+          cursor: pointer;
+          transition: all 0.25s ease;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        }
+        .sh-tab-btn:hover {
+          background: #f8fafc;
+          color: #0f2347;
+        }
+        .sh-tab-btn.active {
+          background: #0f2347;
+          color: #ffffff;
+          box-shadow: 0 4px 14px rgba(15,35,71,0.25);
+        }
+        .sh-tab-btn.active .sh-tab-punjabi {
+          color: #f4a023;
+        }
+        .sh-tab-label {
+          font-weight: 800;
+          font-size: 13.5px;
+          white-space: nowrap;
+        }
+        .sh-tab-punjabi {
+          font-size: 11px;
+          font-weight: 600;
+          color: #94a3b8;
+        }
+
+        /* ── Content Container & Cards ── */
+        .sh-main-container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 20px 70px;
+        }
+        .sh-card {
+          background: #ffffff;
+          border-radius: 20px;
+          border: 1.5px solid #edf2f7;
+          padding: clamp(24px, 4vw, 44px);
+          box-shadow: 0 6px 24px rgba(15,35,71,0.04);
+          transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .sh-card:hover {
+          box-shadow: 0 12px 36px rgba(15,35,71,0.08);
+        }
+
+        .sh-card-header {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 24px;
+          border-bottom: 1.5px solid #f1f5f9;
+          padding-bottom: 18px;
+        }
+        .sh-card-icon {
+          width: 52px; height: 52px;
+          border-radius: 14px;
+          background: linear-gradient(135deg, #0f2347, #1a3a6b);
+          color: #f4a023;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 26px;
+          flex-shrink: 0;
+        }
+        .sh-card-title {
+          margin: 0;
+          font-size: clamp(20px, 2.5vw, 26px);
+          font-weight: 900;
+          color: #0f2347;
+          letter-spacing: -0.02em;
+        }
+        .sh-card-subtitle {
+          margin: 3px 0 0;
+          color: #64748b;
+          font-size: 13.5px;
+          font-weight: 600;
+        }
+
+        /* ── Principle Pill Grids ── */
+        .sh-principles-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 20px;
+          margin-top: 24px;
+        }
+        .sh-principle-card {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 16px;
+          padding: 24px;
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s ease;
+        }
+        .sh-principle-card:hover {
+          transform: translateY(-4px);
+          background: #ffffff;
+          border-color: #f4a023;
+          box-shadow: 0 10px 25px rgba(244,160,35,0.12);
+        }
+        .sh-principle-card::before {
+          content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+          background: #f4a023;
+        }
+        .sh-principle-name {
+          font-size: 17px;
+          font-weight: 800;
+          color: #0f2347;
+          margin-bottom: 4px;
+        }
+        .sh-principle-punjabi {
+          font-size: 13px;
+          font-weight: 700;
+          color: #d97706;
+          margin-bottom: 12px;
+          font-family: serif;
+        }
+        .sh-principle-desc {
+          color: #475569;
+          font-size: 13.5px;
+          line-height: 1.7;
+          margin: 0;
+        }
+
+        /* ── Timeline ── */
+        .sh-timeline {
+          position: relative;
+          padding-left: 28px;
+          margin-top: 30px;
+        }
+        .sh-timeline::before {
+          content: ''; position: absolute; top: 0; bottom: 0; left: 8px; width: 2px;
+          background: #e2e8f0;
+        }
+        .sh-timeline-item {
+          position: relative;
+          margin-bottom: 28px;
+        }
+        .sh-timeline-dot {
+          position: absolute; left: -28px; top: 3px; width: 18px; height: 18px;
+          background: #f4a023; border: 3px solid #ffffff; border-radius: 50%;
+          box-shadow: 0 0 0 3px rgba(244,160,35,0.25);
+        }
+        .sh-timeline-year {
+          display: inline-block;
+          background: #0f2347;
+          color: #ffffff;
+          font-size: 11.5px;
+          font-weight: 800;
+          padding: 2px 10px;
+          border-radius: 20px;
+          margin-bottom: 6px;
+        }
+        .sh-timeline-title {
+          font-size: 16px;
+          font-weight: 800;
+          color: #0f2347;
+          margin: 0 0 6px;
+        }
+        .sh-timeline-desc {
+          color: #475569;
+          font-size: 13.5px;
+          line-height: 1.7;
+          margin: 0;
+        }
+
+        /* ── Badges & Quotas ── */
+        .sh-badge-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 16px;
+          margin: 24px 0;
+        }
+        .sh-stat-box {
+          background: linear-gradient(135deg, rgba(15,35,71,0.03), rgba(244,160,35,0.06));
+          border: 1px solid rgba(15,35,71,0.08);
+          border-radius: 14px;
+          padding: 20px;
+          text-align: center;
+        }
+        .sh-stat-val {
+          font-size: 28px;
+          font-weight: 900;
+          color: #0f2347;
+          margin-bottom: 4px;
+        }
+        .sh-stat-lbl {
+          font-size: 12.5px;
+          color: #64748b;
+          font-weight: 600;
+        }
+
+        /* ── Mool Mantar Golden Box ── */
+        .sh-mantar-box {
+          background: linear-gradient(135deg, #0a1730 0%, #0f2347 100%);
+          border: 1.5px solid #f4a023;
+          border-radius: 20px;
+          padding: clamp(26px, 4vw, 40px);
+          color: #fff;
+          text-align: center;
+          margin-top: 36px;
+          position: relative;
+          overflow: hidden;
+        }
+        .sh-mantar-box::after {
+          content: '☬';
+          position: absolute; right: 20px; bottom: -20px; font-size: 140px;
+          color: rgba(244,160,35,0.06); pointer-events: none;
+        }
+        .sh-mantar-gurmukhi {
+          font-family: serif;
+          font-size: clamp(20px, 2.8vw, 30px);
+          color: #fbd38d;
+          line-height: 1.6;
+          margin-bottom: 16px;
+          font-weight: 700;
+        }
+        .sh-mantar-trans {
+          font-size: 14px;
+          color: #cbd5e1;
+          font-style: italic;
+          max-width: 800px;
+          margin: 0 auto;
+          line-height: 1.8;
+        }
+
+        /* ── Dark Mode Parity ── */
+        [data-theme="dark"] .sh-tabs-row { background: #0b172e; border-color: rgba(255,255,255,0.08); }
+        [data-theme="dark"] .sh-tab-btn { color: #cbd5e1; }
+        [data-theme="dark"] .sh-tab-btn:hover { background: #132240; }
+        [data-theme="dark"] .sh-tab-btn.active { background: #f4a023; color: #060e1c; }
+        [data-theme="dark"] .sh-tab-btn.active .sh-tab-punjabi { color: #060e1c; }
+        [data-theme="dark"] .sh-card { background: #0b172e; border-color: rgba(255,255,255,0.08); }
+        [data-theme="dark"] .sh-card-title { color: #f1f5f9; }
+        [data-theme="dark"] .sh-card-header { border-bottom-color: rgba(255,255,255,0.06); }
+        [data-theme="dark"] .sh-principle-card { background: #081224; border-color: rgba(255,255,255,0.06); }
+        [data-theme="dark"] .sh-principle-name { color: #f1f5f9; }
+        [data-theme="dark"] .sh-principle-desc { color: #94a3b8; }
+        [data-theme="dark"] .sh-timeline-title { color: #f1f5f9; }
+        [data-theme="dark"] .sh-timeline-desc { color: #94a3b8; }
+        [data-theme="dark"] .sh-stat-box { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06); }
+        [data-theme="dark"] .sh-stat-val { color: #f4a023; }
+
+        @media(max-width: 768px) {
+          .sh-tabs-row { justify-content: flex-start; }
+          .sh-tab-btn { min-width: 150px; padding: 10px 12px; }
+        }
       `}</style>
-      {/* Hero Section */}
-      <section style={{
-        background: HERITAGE_DATA.hero.bg,
-        padding: 'clamp(60px, 10vw, 120px) 20px clamp(40px, 8vw, 80px)',
-        textAlign: 'center',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          position: 'absolute', inset: 0, opacity: 0.06,
-          backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ctext y=\'50\' x=\'50\' text-anchor=\'middle\' dominant-baseline=\'central\' font-size=\'60\'%3E☬%3C/text%3E%3C/svg%3E")',
-          backgroundSize: '120px', backgroundRepeat: 'repeat'
-        }} />
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 800, margin: '0 auto' }}>
-          <div style={{ fontSize: 'clamp(48px, 8vw, 72px)', marginBottom: 16 }}>☬</div>
-          <h1 style={{
-            fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
-            fontWeight: 900, color: '#fff', marginBottom: 12,
-            letterSpacing: '-0.02em'
-          }}>
-            {HERITAGE_DATA.hero.title}
+
+      {/* HERO SECTION */}
+      <section className="sh-hero">
+        <div className="sh-hero-pattern" />
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: 960, margin: '0 auto' }}>
+          <div className="sh-khanda-emblem">☬</div>
+          <div className="sh-gurmukhi-lead">ੴ ਸਤਿਗੁਰ ਪ੍ਰਸਾਦਿ • ਸਿੱਖ ਵਿਰਾਸਤ</div>
+          <h1 className="sh-title">
+            Sikh Heritage & <span>Minority Excellence</span>
           </h1>
-          <p style={{
-            fontSize: 'clamp(0.9rem, 2vw, 1.15rem)',
-            color: 'rgba(255,255,255,0.75)', maxWidth: 600, margin: '0 auto',
-            lineHeight: 1.7,
-          }}>
-            {HERITAGE_DATA.hero.subtitle}
+          <p className="sh-subtitle">
+            Founded in 1970 under the eternal light of Guru Nanak Dev Ji, Guru Nanak College, Dhanbad stands as 
+            Jharkhand's premier Sikh Minority Institution — championing inclusive higher education, academic rigor, 
+            and selfless community service (ਸੇਵਾ).
           </p>
+
+          <button 
+            onClick={handleChimeClick} 
+            className={`sh-chime-btn ${isPlayingChime ? 'active' : ''}`}
+            title="Listen to peaceful meditative chime"
+          >
+            <span>{isPlayingChime ? '🔔 Playing Harmonic Chime...' : '🔔 Contemplate (Divine Chime)'}</span>
+          </button>
         </div>
       </section>
 
-      {/* Content Sections */}
-      <section style={{ maxWidth: 960, margin: '0 auto', padding: 'clamp(30px, 5vw, 60px) 20px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(24px, 4vw, 40px)' }}>
-          {HERITAGE_DATA.sections.map((section, idx) => (
-            <article key={idx} className="heritage-card" style={{
-              background: section.highlight ? 'linear-gradient(135deg, #0f234708, #f4a02308)' : '#fff',
-              borderRadius: 16, padding: 'clamp(24px, 4vw, 36px)',
-              border: `1.5px solid ${section.highlight ? '#f4a023' : '#e2e8f0'}`,
-              boxShadow: '0 2px 12px rgba(15,35,71,0.04)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
-                <span style={{
-                  fontSize: 'clamp(28px, 4vw, 36px)',
-                  width: 56, height: 56,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: '#0f234710', borderRadius: 14,
-                }}>{section.icon}</span>
-                <h2 style={{
-                  fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)',
-                  fontWeight: 800, color: '#0f2347', margin: 0,
-                }}>{section.title}</h2>
-              </div>
-
-              {section.content && (
-                <p style={{
-                  fontSize: 'clamp(0.9rem, 1.8vw, 1rem)',
-                  color: '#475569', lineHeight: 1.8, margin: 0,
-                }}>{section.content}</p>
-              )}
-
-              {section.values && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginTop: 8 }}>
-                  {section.values.map((v, i) => (
-                    <div key={i} className="heritage-val" style={{
-                      background: '#f8fafc', borderRadius: 12, padding: '18px 20px',
-                      border: '1px solid #e2e8f0',
-                    }}>
-                      <div style={{ fontWeight: 800, color: '#0f2347', fontSize: 'clamp(0.9rem, 1.5vw, 1rem)', marginBottom: 6 }}>{v.name}</div>
-                      <div style={{ color: '#64748b', fontSize: 'clamp(0.8rem, 1.3vw, 0.9rem)', lineHeight: 1.6 }}>{v.desc}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </article>
+      {/* TABS NAVIGATION */}
+      <div className="sh-nav-wrap">
+        <div className="sh-tabs-row">
+          {TABS.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`sh-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+            >
+              <span className="sh-tab-label">{tab.label}</span>
+              <span className="sh-tab-punjabi">{tab.punjabi}</span>
+            </button>
           ))}
         </div>
+      </div>
 
-        {/* Quote */}
-        <blockquote style={{
-          margin: 'clamp(30px, 5vw, 50px) auto',
-          maxWidth: 700, textAlign: 'center', position: 'relative',
-          padding: '30px 20px',
-        }}>
-          <div style={{ fontSize: 40, color: '#f4a023', marginBottom: 10 }}>"</div>
-          <p className="heritage-quote" style={{
-            fontSize: 'clamp(1rem, 2vw, 1.2rem)',
-            fontStyle: 'italic', color: '#0f2347',
-            lineHeight: 1.8, fontWeight: 500,
-          }}>
-            ਨਾਨਕ ਨਾਮ ਚੜ੍ਹਦੀ ਕਲਾ, ਤੇਰੇ ਭਾਣੇ ਸਰਬੱਤ ਦਾ ਭਲਾ
-          </p>
-          <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: 8 }}>
-            — Ardaas (Sikh Prayer): "May all prosper by Thy Grace"
-          </p>
-        </blockquote>
-      </section>
+      {/* MAIN TAB CONTENT */}
+      <main className="sh-main-container">
+        {/* TAB 1: ETERNAL PRINCIPLES */}
+        {activeTab === 'philosophy' && (
+          <article className="sh-card">
+            <header className="sh-card-header">
+              <div className="sh-card-icon">☬</div>
+              <div>
+                <h2 className="sh-card-title">Foundational Sikh Principles</h2>
+                <div className="sh-card-subtitle">ਸਿੱਖ ਸਿਧਾਂਤ — Guiding every classroom, lecture hall, and laboratory</div>
+              </div>
+            </header>
+
+            <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.8, fontSize: 15, margin: '0 0 20px' }}>
+              The pedagogical philosophy of Guru Nanak College is anchored in the universal teachings of Sri Guru Nanak Dev Ji 
+              (1469–1539). These timeless tenets transcend religious boundaries, emphasizing truth, equality of all humanity, 
+              dignity of labor, and shared community welfare.
+            </p>
+
+            <div className="sh-principles-grid">
+              <div className="sh-principle-card">
+                <div className="sh-principle-name">Naam Japo</div>
+                <div className="sh-principle-punjabi">ਨਾਮ ਜਪੋ • Spiritual Awareness</div>
+                <p className="sh-principle-desc">
+                  Cultivating mental mindfulness, ethical integrity, and spiritual groundedness among students through regular contemplation and moral character building.
+                </p>
+              </div>
+
+              <div className="sh-principle-card">
+                <div className="sh-principle-name">Kirat Karo</div>
+                <div className="sh-principle-punjabi">ਕਿਰਤ ਕਰੋ • Honest Hard Work</div>
+                <p className="sh-principle-desc">
+                  Commitment to rigorous academic effort, technical skill acquisition, and honest professional careers without resorting to deceit or shortcut paths.
+                </p>
+              </div>
+
+              <div className="sh-principle-card">
+                <div className="sh-principle-name">Vand Chhako</div>
+                <div className="sh-principle-punjabi">ਵੰਡ ਛਕੋ • Selfless Sharing</div>
+                <p className="sh-principle-desc">
+                  Sharing fruits of knowledge, resources, and kindness with the marginalized. Embodied through college NSS drives, blood donation, and free Langar.
+                </p>
+              </div>
+
+              <div className="sh-principle-card">
+                <div className="sh-principle-name">Sarbat Da Bhala</div>
+                <div className="sh-principle-punjabi">ਸਰਬੱਤ ਦਾ ਭਲਾ • Welfare of All</div>
+                <p className="sh-principle-desc">
+                  Universal inclusivity. GNC welcomes students of every caste, creed, gender, and economic status, maintaining absolute non-discrimination on campus.
+                </p>
+              </div>
+
+              <div className="sh-principle-card">
+                <div className="sh-principle-name">Vidya Vichari</div>
+                <div className="sh-principle-punjabi">ਵਿਦਿਆ ਵੀਚਾਰੀ ਤਾਂ ਪਰਉਪਕਾਰੀ</div>
+                <p className="sh-principle-desc">
+                  "True education is that which makes a person an altruistic benefactor to others." This sacred hymn is the official academic motto of our institution.
+                </p>
+              </div>
+
+              <div className="sh-principle-card">
+                <div className="sh-principle-name">Deg Tegh Fateh</div>
+                <div className="sh-principle-punjabi">ਦੇਗ ਤੇਗ ਫ਼ਤਿਹ • Sustenance & Justice</div>
+                <p className="sh-principle-desc">
+                  Empowering youth with the ladle (Deg: nurturing the hungry) and the sword of wisdom (Tegh: defending righteousness and truth in public life).
+                </p>
+              </div>
+            </div>
+
+            {/* GOLDEN MOOL MANTAR CALLOUT */}
+            <div className="sh-mantar-box">
+              <div className="sh-mantar-gurmukhi">
+                ੴ ਸਤਿਨਾਮੁ ਕਰਤਾ ਪੁਰਖੁ ਨਿਰਭਉ ਨਿਰਵੈਰੁ ਅਕਾਲ ਮੂਰਤਿ ਅਜੂਨੀ ਸੈਭੰ ਗੁਰ ਪ੍ਰਸਾਦਿ ॥
+              </div>
+              <div className="sh-mantar-trans">
+                "One Universal Creator God. The Name Is Truth. Creative Being Personified. No Fear. No Hatred. 
+                Image Of The Undying, Beyond Birth, Self-Existent. By Guru's Grace." — Opening Hymn of Sri Guru Granth Sahib Ji
+              </div>
+            </div>
+          </article>
+        )}
+
+        {/* TAB 2: FOUNDER & ROOTS */}
+        {activeTab === 'history' && (
+          <article className="sh-card">
+            <header className="sh-card-header">
+              <div className="sh-card-icon">🏛️</div>
+              <div>
+                <h2 className="sh-card-title">Founding Fathers & Historical Odyssey</h2>
+                <div className="sh-card-subtitle">ਸਾਡਾ ਵਿਰਸਾ — From a bold community initiative in 1970 to a premier degree institution</div>
+              </div>
+            </header>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 30, alignItems: 'center' }}>
+              <div>
+                <h3 style={{ fontSize: 20, fontWeight: 800, color: '#0f2347', margin: '0 0 12px' }}>
+                  The Vision of Sardar Pritam Singh Sahni
+                </h3>
+                <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.8, fontSize: 14.5, textAlign: 'justify' }}>
+                  In the late 1960s, Dhanbad was burgeoning as the coal capital of India, yet higher education facilities for middle-class 
+                  and underprivileged families were scarce. Led by visionary philanthropist <strong>Sardar Pritam Singh Sahni</strong> alongside 
+                  esteemed leaders of the local Sikh Gurudwara Prabandhak Committee, the Sikh community resolved to establish an institution 
+                  of national stature.
+                </p>
+                <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.8, fontSize: 14.5, textAlign: 'justify' }}>
+                  Founded in 1970, Guru Nanak College began with a singular resolve: high-quality higher education accessible to everyone, 
+                  preserving ethical virtues while fostering contemporary scientific and commerce disciplines.
+                </p>
+              </div>
+
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(15,35,71,0.06), rgba(244,160,35,0.12))',
+                borderRadius: 18, padding: '26px', border: '1.5px solid rgba(244,160,35,0.3)'
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 900, color: '#d97706', textTransform: 'uppercase', letterSpacing: 1 }}>Official Recognition</div>
+                <h4 style={{ fontSize: 18, fontWeight: 900, color: '#0f2347', margin: '8px 0 14px' }}>University Grants Commission</h4>
+                <p style={{ color: '#475569', fontSize: 13.5, lineHeight: 1.7, margin: '0 0 14px' }}>
+                  The college was formally recognized under <strong>Section 2(f) & 12(B)</strong> of the UGC Act 1956 in 1972, rendering it eligible 
+                  for central grants, faculty development initiatives, and research funding.
+                </p>
+                <Link to="/about-us/regulations/ugc-certificate" style={{ color: '#0f2347', fontWeight: 800, fontSize: 13, textDecoration: 'none' }}>
+                  View UGC 2(f) & 12(B) Certificate →
+                </Link>
+              </div>
+            </div>
+
+            {/* TIMELINE */}
+            <div className="sh-timeline">
+              <div className="sh-timeline-item">
+                <div className="sh-timeline-dot" />
+                <span className="sh-timeline-year">1970</span>
+                <div className="sh-timeline-title">Establishment of Guru Nanak College</div>
+                <p className="sh-timeline-desc">Inaugurated by the Sikh community of Dhanbad under the patronage of Sardar Pritam Singh Sahni to empower local youth.</p>
+              </div>
+
+              <div className="sh-timeline-item">
+                <div className="sh-timeline-dot" />
+                <span className="sh-timeline-year">1972</span>
+                <div className="sh-timeline-title">UGC 2(f) & 12(B) Status</div>
+                <p className="sh-timeline-desc">Secured permanent UGC recognition, establishing academic credibility across Jharkhand and Bihar.</p>
+              </div>
+
+              <div className="sh-timeline-item">
+                <div className="sh-timeline-dot" />
+                <span className="sh-timeline-year">1992</span>
+                <div className="sh-timeline-title">Affiliation with Vinoba Bhave University (VBU)</div>
+                <p className="sh-timeline-desc">Transferred from Ranchi University to the newly chartered Vinoba Bhave University, Hazaribagh as a premier affiliated college.</p>
+              </div>
+
+              <div className="sh-timeline-item">
+                <div className="sh-timeline-dot" />
+                <span className="sh-timeline-year">2017</span>
+                <div className="sh-timeline-title">B.B.M. Koyalanchal University (BBMKU) Affiliation</div>
+                <p className="sh-timeline-desc">Became one of the cornerstone institutions of BBMKU Dhanbad upon the university’s establishment.</p>
+              </div>
+
+              <div className="sh-timeline-item">
+                <div className="sh-timeline-dot" />
+                <span className="sh-timeline-year">PRESENT DAY</span>
+                <div className="sh-timeline-title">56 Years of Unbroken Academic Legacy</div>
+                <p className="sh-timeline-desc">Over 4,000 enrolled students across two vibrant campuses: Bhuda Campus (Main & Boys Wing) and Bank More Campus (Girls & Vocational Wing).</p>
+              </div>
+            </div>
+          </article>
+        )}
+
+        {/* TAB 3: MINORITY STATUS & RIGHTS */}
+        {activeTab === 'minority' && (
+          <article className="sh-card">
+            <header className="sh-card-header">
+              <div className="sh-card-icon">⚖️</div>
+              <div>
+                <h2 className="sh-card-title">Sikh Minority Status & Legal Protections</h2>
+                <div className="sh-card-subtitle">ਘੱਟ ਗਿਣਤੀ ਦਰਜਾ — Recognized by NCMEI under Constitutional Article 30(1)</div>
+              </div>
+            </header>
+
+            <div className="sh-badge-grid">
+              <div className="sh-stat-box">
+                <div className="sh-stat-val">50%</div>
+                <div className="sh-stat-lbl">Minority Quota Provision</div>
+              </div>
+              <div className="sh-stat-box">
+                <div className="sh-stat-val">NCMEI</div>
+                <div className="sh-stat-lbl">Statutory Minority Certification</div>
+              </div>
+              <div className="sh-stat-box">
+                <div className="sh-stat-val">Art. 30(1)</div>
+                <div className="sh-stat-lbl">Constitutional Safeguard</div>
+              </div>
+              <div className="sh-stat-box">
+                <div className="sh-stat-val">NAAC</div>
+                <div className="sh-stat-lbl">Accredited Institution</div>
+              </div>
+            </div>
+
+            <h3 style={{ fontSize: 19, fontWeight: 800, color: '#0f2347', margin: '24px 0 12px' }}>
+              Constitutional Basis & Autonomous Administration
+            </h3>
+            <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.8, fontSize: 14.5, textAlign: 'justify' }}>
+              Guru Nanak College is formally recognized as a <strong>Religious Minority Educational Institution</strong> by the 
+              <strong> National Commission for Minority Educational Institutions (NCMEI)</strong>, a statutory body established by the 
+              Government of India under the NCMEI Act 2004.
+            </p>
+            <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.8, fontSize: 14.5, textAlign: 'justify' }}>
+              Under <strong>Article 30(1) of the Constitution of India</strong>, minority communities have the fundamental right to establish 
+              and administer educational institutions of their choice. This grants the Governing Body autonomous authority in faculty appointments, 
+              institutional governance, and strategic curriculum enhancement while strictly adhering to university academic schedules.
+            </p>
+
+            <div style={{
+              background: '#f8fafc', borderRadius: 16, padding: '24px', border: '1px solid #e2e8f0', marginTop: 24
+            }}>
+              <h4 style={{ fontSize: 16, fontWeight: 800, color: '#0f2347', margin: '0 0 10px' }}>
+                Minority Reservation & Admission Guidance
+              </h4>
+              <ul style={{ paddingLeft: 20, margin: 0, color: '#475569', fontSize: 14, lineHeight: 1.8 }}>
+                <li>Up to <strong>50% of total intake capacity</strong> across UG programs (BA, B.Sc, B.Com, BCA) is reserved for Sikh community candidates.</li>
+                <li>Unfilled minority quota seats are converted to the general merit pool in subsequent admission counseling rounds.</li>
+                <li>Minority candidates must upload their Minority Certificate / Community Declaration during Chancellor Portal registration.</li>
+              </ul>
+              
+              <div style={{ marginTop: 18, display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+                <Link to="/about-us/regulations/minority-exemption" style={{
+                  background: '#0f2347', color: '#fff', padding: '10px 18px', borderRadius: 10,
+                  fontSize: 13, fontWeight: 800, textDecoration: 'none'
+                }}>
+                  📜 View Minority Exemption Regulations
+                </Link>
+                <Link to="/about-us/various-committees/minority" style={{
+                  background: 'rgba(244,160,35,0.15)', color: '#d97706', border: '1px solid rgba(244,160,35,0.4)',
+                  padding: '10px 18px', borderRadius: 10, fontSize: 13, fontWeight: 800, textDecoration: 'none'
+                }}>
+                  Minority Cell Committee →
+                </Link>
+              </div>
+            </div>
+          </article>
+        )}
+
+        {/* TAB 4: GURUDWARA & SEWA */}
+        {activeTab === 'spiritual' && (
+          <article className="sh-card">
+            <header className="sh-card-header">
+              <div className="sh-card-icon">🕌</div>
+              <div>
+                <h2 className="sh-card-title">Gurudwara Sahib & Community Sewa</h2>
+                <div className="sh-card-subtitle">ਸੇਵਾ ਅਤੇ ਅਰਦਾਸ — Nurturing compassion, brotherhood, and selfless dedication</div>
+              </div>
+            </header>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
+              <div style={{ background: '#f8fafc', borderRadius: 16, padding: '24px', border: '1px solid #e2e8f0' }}>
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0f2347', margin: '0 0 10px' }}>
+                  Campus Gurudwara Sahib
+                </h3>
+                <p style={{ color: '#475569', fontSize: 14, lineHeight: 1.7 }}>
+                  The college campus features a serene Gurudwara Sahib serving as a spiritual oasis where daily Ardaas (prayer), 
+                  Kirtan recitations, and peaceful reflection take place. Students of all faiths are welcome to visit for contemplation and mental clarity.
+                </p>
+              </div>
+
+              <div style={{ background: '#f8fafc', borderRadius: 16, padding: '24px', border: '1px solid #e2e8f0' }}>
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0f2347', margin: '0 0 10px' }}>
+                  Langar Tradition (Free Community Kitchen)
+                </h3>
+                <p style={{ color: '#475569', fontSize: 14, lineHeight: 1.7 }}>
+                  Instituted by Guru Nanak Dev Ji to abolish caste distinctions, Langar is served during Prakash Purab, Baisakhi, 
+                  and College Foundation Day, where faculty, management, and students sit together on the floor as equals.
+                </p>
+              </div>
+
+              <div style={{ background: '#f8fafc', borderRadius: 16, padding: '24px', border: '1px solid #e2e8f0' }}>
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0f2347', margin: '0 0 10px' }}>
+                  Gurpurb & Cultural Celebrations
+                </h3>
+                <p style={{ color: '#475569', fontSize: 14, lineHeight: 1.7 }}>
+                  Annual celebrations honoring Sri Guru Nanak Dev Ji’s Prakash Parv, Baisakhi, and communal Sadbhavana Diwas, 
+                  featuring devotional music, poetic symposia, and academic debates on ethical philosophy.
+                </p>
+              </div>
+
+              <div style={{ background: '#f8fafc', borderRadius: 16, padding: '24px', border: '1px solid #e2e8f0' }}>
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0f2347', margin: '0 0 10px' }}>
+                  NSS & Community Outreach
+                </h3>
+                <p style={{ color: '#475569', fontSize: 14, lineHeight: 1.7 }}>
+                  Active National Service Scheme (NSS) units conducting disaster relief, cleanliness drives, blood donation camps, 
+                  and free tutorial support for underprivileged children in Dhanbad colliery settlements.
+                </p>
+              </div>
+            </div>
+          </article>
+        )}
+
+        {/* TAB 5: SCHOLARSHIPS & WELFARE */}
+        {activeTab === 'scholarships' && (
+          <article className="sh-card">
+            <header className="sh-card-header">
+              <div className="sh-card-icon">🎓</div>
+              <div>
+                <h2 className="sh-card-title">Minority & Merit Scholarships</h2>
+                <div className="sh-card-subtitle">ਵਜ਼ੀਫ਼ੇ ਤੇ ਮਦਦ — Ensuring no deserving student is denied higher education</div>
+              </div>
+            </header>
+
+            <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.8, fontSize: 15, margin: '0 0 24px' }}>
+              In accordance with Sikh philanthropic traditions and Government of India mandates, multiple scholarship schemes 
+              and fee relief policies are accessible to students enrolled at Guru Nanak College:
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              <div style={{ background: '#f8fafc', borderRadius: 16, padding: '20px 24px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f2347', margin: 0 }}>
+                    1. Post-Matric Scholarship Scheme for Minorities (MoMA)
+                  </h3>
+                  <span style={{ background: '#dbeafe', color: '#1e40af', padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 800 }}>Central Govt</span>
+                </div>
+                <p style={{ color: '#475569', fontSize: 13.5, lineHeight: 1.7, margin: '8px 0 10px' }}>
+                  Administered by Ministry of Minority Affairs (MoMA) via the National Scholarship Portal (NSP) for Sikh, Muslim, Christian, Jain, Buddhist, and Parsi students. Covers tuition fees and maintenance allowances.
+                </p>
+                <a href="https://scholarships.gov.in" target="_blank" rel="noopener noreferrer" style={{ color: '#0f2347', fontWeight: 800, fontSize: 12.5 }}>
+                  Apply on NSP Portal (scholarships.gov.in) →
+                </a>
+              </div>
+
+              <div style={{ background: '#f8fafc', borderRadius: 16, padding: '20px 24px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f2347', margin: 0 }}>
+                    2. Jharkhand E-Kalyan Welfare Scholarships
+                  </h3>
+                  <span style={{ background: '#fef3c7', color: '#92400e', padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 800 }}>State Govt</span>
+                </div>
+                <p style={{ color: '#475569', fontSize: 13.5, lineHeight: 1.7, margin: '8px 0 10px' }}>
+                  Welfare department financial assistance for SC, ST, OBC, and minority students domiciled in Jharkhand, with online institutional verification done right from the college desk.
+                </p>
+                <a href="https://ekalyan.cgg.gov.in" target="_blank" rel="noopener noreferrer" style={{ color: '#0f2347', fontWeight: 800, fontSize: 12.5 }}>
+                  Apply on E-Kalyan Portal →
+                </a>
+              </div>
+
+              <div style={{ background: '#f8fafc', borderRadius: 16, padding: '20px 24px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f2347', margin: 0 }}>
+                    3. College Management Fee Relief & Gurudwara Prabandhak Aid
+                  </h3>
+                  <span style={{ background: '#dcfce7', color: '#166534', padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 800 }}>Institutional</span>
+                </div>
+                <p style={{ color: '#475569', fontSize: 13.5, lineHeight: 1.7, margin: '8px 0 10px' }}>
+                  Direct tuition fee concessions provided by Guru Nanak College Management for economically disadvantaged students, orphaned scholars, and outstanding sports achievers.
+                </p>
+                <Link to="/scholarships" style={{ color: '#0f2347', fontWeight: 800, fontSize: 12.5 }}>
+                  Check College Scholarship Details →
+                </Link>
+              </div>
+            </div>
+          </article>
+        )}
+      </main>
     </div>
   );
 }

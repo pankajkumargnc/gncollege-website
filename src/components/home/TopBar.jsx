@@ -1,8 +1,47 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { SOCIAL_LINKS } from '../../data/db';
+
+const SIKH_DIVINE_QUOTES = [
+  {
+    gurmukhi: "ੴ ਸਤਿਨਾਮੁ ਕਰਤਾ ਪੁਰਖੁ ਨਿਰਭਉ ਨਿਰਵੈਰੁ",
+    english: "One Universal Creator God, The Name Is Truth, Creative Being Personified, Without Fear, Without Hatred",
+    author: "Mool Mantar — Guru Nanak Dev Ji"
+  },
+  {
+    gurmukhi: "ਵਿਦਿਆ ਵੀਚਾਰੀ ਤਾਂ ਪਰਉਪਕਾਰੀ ॥",
+    english: "Contemplate on knowledge and become a benefactor to humanity",
+    author: "Sri Guru Granth Sahib Ji (Ang 356)"
+  },
+  {
+    gurmukhi: "ਕਿਰਤ ਕਰੋ • ਨਾਮ ਜਪੋ • ਵੰਡ ਛਕੋ",
+    english: "Honest hard work, remembrance of the Divine, and selfless sharing with society",
+    author: "Three Pillars of Sikh Philosophy"
+  },
+  {
+    gurmukhi: "ਨਾਨਕ ਨਾਮ ਚੜ੍ਹਦੀ ਕਲਾ, ਤੇਰੇ ਭਾਣੇ ਸਰਬੱਤ ਦਾ ਭਲਾ ॥",
+    english: "May high spirits prevail, and by Thy Will, may peace and prosperity bless all mankind",
+    author: "Sikh Ardaas"
+  },
+  {
+    gurmukhi: "ਸਚਹੁ ਓਰੈ ਸਭੁ ਕੋ ਉਪਰਿ ਸਚੁ ਆਚਾਰੁ ॥",
+    english: "Truth is the highest virtue, but higher still is truthful living",
+    author: "Guru Nanak Dev Ji (Ang 62)"
+  }
+];
 
 const TopBar = ({ isDark, onToggleDark, onSearchOpen }) => {
   const whatsappLink = { id: 'whatsapp', label: 'W', href: 'https://wa.me/917903340991' };
+  const [quoteIndex, setQuoteIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setQuoteIndex(prev => (prev + 1) % SIKH_DIVINE_QUOTES.length);
+    }, 7500);
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentQuote = SIKH_DIVINE_QUOTES[quoteIndex];
 
   return (
     <div className="premium-topbar">
@@ -175,11 +214,99 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen }) => {
           transition: all 0.4s ease;
           box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-        .tb-dark-btn:hover {
-          transform: rotate(20deg) scale(1.15);
-          background: #f4a023;
-          color: #000;
-          box-shadow: 0 0 20px rgba(244,160,35,0.4);
+        /* ── Divine Quote Strip (Sikh Heritage) ── */
+        .tb-divine-strip {
+          background: rgba(6, 14, 28, 0.75);
+          border-top: 1px solid rgba(244,160,35,0.22);
+          backdrop-filter: blur(8px);
+          padding: 4px clamp(12px, 2.5vw, 32px);
+          font-size: clamp(11px, 0.85vw, 12.5px);
+          color: #e2e8f0;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          min-height: 32px;
+        }
+        .tb-divine-content {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          flex: 1;
+        }
+        .tb-divine-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          background: linear-gradient(135deg, rgba(244,160,35,0.25), rgba(244,160,35,0.1));
+          border: 1px solid rgba(244,160,35,0.45);
+          color: #f4a023;
+          padding: 2px 8px;
+          border-radius: 20px;
+          font-weight: 800;
+          font-size: 10px;
+          letter-spacing: 0.5px;
+          flex-shrink: 0;
+        }
+        .tb-divine-gurmukhi {
+          font-weight: 700;
+          color: #fbd38d;
+          font-family: serif, 'Plus Jakarta Sans';
+        }
+        .tb-divine-eng {
+          color: rgba(255,255,255,0.85);
+          font-style: italic;
+          display: inline;
+        }
+        .tb-divine-author {
+          color: #94a3b8;
+          font-size: 10.5px;
+          flex-shrink: 0;
+        }
+        .tb-divine-link {
+          color: #f4a023;
+          text-decoration: none;
+          font-weight: 800;
+          font-size: 11px;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          flex-shrink: 0;
+          transition: all 0.2s ease;
+          padding: 2px 6px;
+          border-radius: 4px;
+        }
+        .tb-divine-link:hover {
+          color: #fff;
+          background: rgba(244,160,35,0.2);
+          transform: translateX(2px);
+        }
+        .tb-divine-controls {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          flex-shrink: 0;
+        }
+        .tb-divine-nav {
+          background: transparent;
+          border: none;
+          color: #94a3b8;
+          cursor: pointer;
+          font-size: 11px;
+          padding: 2px 6px;
+          border-radius: 4px;
+          line-height: 1;
+        }
+        .tb-divine-nav:hover {
+          color: #f4a023;
+          background: rgba(255,255,255,0.08);
+        }
+        @media(max-width: 768px) {
+          .tb-divine-eng { display: none; }
+          .tb-divine-author { display: none; }
         }
       `}</style>
 
@@ -226,6 +353,36 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen }) => {
               {isDark ? '☀️' : '🌙'}
             </button>
           )}
+        </div>
+      </div>
+
+      {/* SIKH DIVINE WISDOM & HERITAGE RIBBON */}
+      <div className="tb-divine-strip">
+        <div className="tb-divine-content">
+          <span className="tb-divine-badge">☬ ਗੁਰਬਾਣੀ ਵਿਚਾਰ</span>
+          <span className="tb-divine-gurmukhi">{currentQuote.gurmukhi}</span>
+          <span className="tb-divine-eng">— "{currentQuote.english}"</span>
+          <span className="tb-divine-author">({currentQuote.author})</span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Link to="/about-us/sikh-heritage" className="tb-divine-link" title="Sikh Heritage & Minority Status">
+            <span>ਸਿੱਖ ਵਿਰਾਸਤ Heritage</span> <span>→</span>
+          </Link>
+          <div className="tb-divine-controls">
+            <button 
+              onClick={() => setQuoteIndex(prev => (prev - 1 + SIKH_DIVINE_QUOTES.length) % SIKH_DIVINE_QUOTES.length)}
+              className="tb-divine-nav" 
+              title="Previous Quote"
+              aria-label="Previous quote"
+            >‹</button>
+            <button 
+              onClick={() => setQuoteIndex(prev => (prev + 1) % SIKH_DIVINE_QUOTES.length)}
+              className="tb-divine-nav" 
+              title="Next Quote"
+              aria-label="Next quote"
+            >›</button>
+          </div>
         </div>
       </div>
     </div>
