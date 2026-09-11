@@ -1,7 +1,81 @@
-// src/components/Navbar.jsx
 import React, { useState, useEffect, useRef, memo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { COLORS } from '../styles/colors'
+
+const SPOTLIGHT_CARDS = {
+  'About Us': {
+    badge: '☬ SIKH MINORITY',
+    title: 'Heritage & 1970 Roots',
+    desc: 'Empowering coalfield youth for 56 years with UGC 2(f) & 12(B) status, NCMEI minority recognition, and constitutional autonomy.',
+    link: '/about-us/sikh-heritage',
+    btnText: 'Sikh Heritage Hub →',
+    icon: '☬'
+  },
+  'Academics': {
+    badge: '🎓 NEP-2020 & BBMKU',
+    title: 'Curriculum & Degrees',
+    desc: 'BA, B.Sc, B.Com honors degrees, premier BCA vocational IT wing, and updated university CBCS syllabi.',
+    link: '/academics/departments',
+    btnText: 'Explore Departments →',
+    icon: '📚'
+  },
+  'Admission': {
+    badge: '⚡ SESSION 2026',
+    title: 'Admissions & Quotas',
+    desc: 'Direct registration via Chancellor Portal. 50% Sikh Minority Quota reservations & fee concession assistance.',
+    link: '/admission/rule',
+    btnText: 'Admission Rules →',
+    icon: '🎓'
+  },
+  'Admissions': {
+    badge: '⚡ SESSION 2026',
+    title: 'Admissions & Quotas',
+    desc: 'Direct registration via Chancellor Portal. 50% Sikh Minority Quota reservations & fee concession assistance.',
+    link: '/admission/rule',
+    btnText: 'Admission Rules →',
+    icon: '🎓'
+  },
+  'Campus': {
+    badge: '🏛️ TWO CAMPUSES',
+    title: 'Bhuda & Bank More',
+    desc: 'Main Boys Wing at Bhuda & Vocational Girls Wing at Bank More with hi-tech science and computer labs.',
+    link: '/campus/infrastructure',
+    btnText: 'Campus Tour →',
+    icon: '🏛️'
+  },
+  'NAAC': {
+    badge: '🏅 QUALITY BENCHMARK',
+    title: 'NAAC Cycles & SSR',
+    desc: 'Complete transparency in institutional reporting: SSR Cycle 1 & 2, AQAR, NIRF, and IQAC perspective plan.',
+    link: '/naac/aqar',
+    btnText: 'View AQAR Reports →',
+    icon: '📜'
+  },
+  'Activity': {
+    badge: '🌟 CHARACTER & SERVICE',
+    title: 'NSS, NCC & Sports',
+    desc: 'Active student volunteer units delivering blood donation camps, disaster relief, and university sports champions.',
+    link: '/activity/nss',
+    btnText: 'NSS Activities →',
+    icon: '🏅'
+  },
+  'Publication': {
+    badge: '📰 RESEARCH & MEDIA',
+    title: 'Journals & Student Media',
+    desc: 'Annual college e-magazines, semester examination results, digital library resources, and Student Satisfaction Surveys.',
+    link: '/publication/e-magazine',
+    btnText: 'Read E-Magazine →',
+    icon: '📰'
+  },
+  'Gallery': {
+    badge: '📸 CAMPUS MOMENTS',
+    title: 'Life at Guru Nanak',
+    desc: 'High-definition photo archives and video coverage of Youth Festivals, Sports Meets, Prakash Purab, and Convocation.',
+    link: '/gallery/photos',
+    btnText: 'Browse Gallery →',
+    icon: '📸'
+  }
+};
 
 const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
   const [openL1, setOpenL1] = useState(null)
@@ -193,6 +267,43 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
           [data-theme="dark"] .nav-dropdown-item:hover {
             background: rgba(255,255,255,0.04);
           }
+          .mega-sub-link {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 6px;
+          }
+          .mega-sub-link:hover {
+            background: rgba(244,160,35,0.12) !important;
+            color: ${COLORS.gold} !important;
+            transform: translateX(4px);
+          }
+          [data-theme="dark"] .mega-sub-link:hover {
+            background: rgba(244,160,35,0.18) !important;
+            color: #fbbf24 !important;
+          }
+          @keyframes dropdownMegaPop {
+            0% {
+              opacity: 0;
+              transform: translate(-50%, -8px) scale(0.985);
+            }
+            100% {
+              opacity: 1;
+              transform: translate(-50%, 0) scale(1);
+            }
+          }
+          .mega-menu-container::-webkit-scrollbar {
+            width: 5px;
+          }
+          .mega-menu-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 4px;
+          }
+          .mega-menu-container::-webkit-scrollbar-thumb {
+            background: rgba(244, 160, 35, 0.4);
+            border-radius: 4px;
+          }
+          .mega-menu-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(244, 160, 35, 0.7);
+          }
         `}</style>
 
         {/* Main Container */}
@@ -339,9 +450,9 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
             zIndex: 250,
             flexWrap: 'nowrap'
           }}>
-            {(navLinks || []).map(l0 => (
+            {(navLinks || []).map((l0, l0Index) => (
               <div key={l0.label}
-                style={{ position: 'relative', width: isMobile ? '100%' : 'auto' }}
+                style={{ position: isMobile ? 'relative' : 'static', width: isMobile ? '100%' : 'auto' }}
                 onMouseEnter={() => {
                   if (closeTimer.current) clearTimeout(closeTimer.current)
                   if (!isMobile) setOpenL1(l0.label)
@@ -390,136 +501,552 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                   {!isMobile && l0.sub && <span style={{ color: isItemActive(l0) ? COLORS.gold : (isDark ? '#94a3b8' : COLORS.navy), fontSize: 13, marginLeft: 4, marginTop: 2 }}>▾</span>}
                 </div>
 
-                {/* ── L1 Dropdown ── */}
-                {l0.sub && openL1 === l0.label && (
-                  <div className="nav-dropdown-panel" style={{
-                    position: isMobile ? 'static' : 'absolute',
-                    top: '100%', left: 0,
-                    
-                    background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.95)',
-                    backdropFilter: isMobile ? 'none' : 'blur(20px)',
-                    WebkitBackdropFilter: isMobile ? 'none' : 'blur(20px)',
-                    border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.6)',
-                    
-                    minWidth: isMobile ? '100%' : 210,
-                    boxShadow: isMobile ? 'none' : '0 15px 35px rgba(0,0,0,.12)',
-                    borderTop: isMobile ? 'none' : '3px solid ' + COLORS.navy,
-                    borderRadius: isMobile ? 8 : '0 0 12px 12px',
-                    zIndex: 200, 
-                    padding: isMobile ? '5px 0' : '8px 0',
-                    animation: isMobile ? 'none' : 'dropdownFadeDown 0.25s ease-out forwards',
-                    transformOrigin: 'top center'
-                  }}>
-                    {l0.sub.map(l1 => (
-                      <div key={l1.label}
-                        style={{ position: 'relative' }}
-                        onMouseEnter={() => !isMobile && setOpenL2(l1.label)}
-                        onMouseLeave={() => !isMobile && setOpenL2(null)}
-                      >
-                        <div className="nav-dropdown-item"
-                          onClick={e => { if (isMobile && l1.sub) { e.stopPropagation(); toggleL2(l1.label) } }}
-                          style={{
-                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                            padding: isMobile ? '12px 16px' : '6px 16px',
-                            minHeight: isMobile ? '44px' : 'auto',
-                            borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
-                            cursor: isMobile && l1.sub ? 'pointer' : 'default',
-                          }}
-                        >
-                          <Link to={getRoute(l1.href)} className="nav-hover-link dropdown-link-text"
-                            style={{ fontSize: 13, fontWeight: 600, color: COLORS.navy, display: 'block', width: '100%', textDecoration: 'none' }}>
-                            {l1.label}
-                          </Link>
-                          {l1.sub && <span style={{ fontSize: 12, color: COLORS.gold, marginLeft: 8 }}>{isMobile ? (openL2 === l1.label ? '▴' : '▾') : '▶'}</span>}
-                        </div>
+                {/* ── L1 Dropdown or Mega-Menu ── */}
+                {l0.sub && openL1 === l0.label && (() => {
+                  const isMega = !isMobile && (SPOTLIGHT_CARDS[l0.label] || l0.sub.some(item => item.sub && item.sub.length > 0));
+                  const spotlight = SPOTLIGHT_CARDS[l0.label];
 
-                        {/* ── L2 Dropdown ── */}
-                        {l1.sub && openL2 === l1.label && (
-                          <div className="nav-dropdown-panel" style={{
-                            position: isMobile ? 'static' : 'absolute',
-                            top: 0, left: '100%',
-                            
-                            background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.95)',
-                            backdropFilter: isMobile ? 'none' : 'blur(20px)',
-                            WebkitBackdropFilter: isMobile ? 'none' : 'blur(20px)',
-                            border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.6)',
-                            
-                            minWidth: isMobile ? '100%' : 210,
-                            boxShadow: isMobile ? 'none' : '5px 5px 25px rgba(0,0,0,.12)',
-                            borderTop: isMobile ? 'none' : '3px solid ' + COLORS.gold,
-                            borderRadius: isMobile ? 4 : '0 12px 12px 12px',
-                            margin: isMobile ? '0 16px 10px' : 0,
-                            borderLeft: isMobile ? '2px solid ' + COLORS.gold : 'none',
-                            padding: isMobile ? '5px 0' : '8px 0',
-                            animation: isMobile ? 'none' : 'dropdownFadeSide 0.25s ease-out forwards',
-                            transformOrigin: 'left top'
+                  if (isMega) {
+                    const isAboutUs = l0.label === 'About Us';
+                    const directLinks = l0.sub.filter(item => !item.sub || item.sub.length === 0);
+                    const groupSections = l0.sub.filter(item => item.sub && item.sub.length > 0);
+
+                    // Perfectly calibrated container width based on menu complexity
+                    const megaWidth = isAboutUs
+                      ? 'min(1180px, 96vw)'
+                      : (groupSections.length <= 1 ? 'min(640px, 94vw)' : 'min(980px, 95vw)');
+
+                    return (
+                      <div className="nav-dropdown-panel mega-menu-container" style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        background: isDark ? 'rgba(8, 16, 32, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+                        backdropFilter: 'blur(25px)',
+                        WebkitBackdropFilter: 'blur(25px)',
+                        border: isDark ? '1px solid rgba(244,160,35,0.25)' : '1px solid rgba(15,35,71,0.08)',
+                        borderTop: `3px solid ${COLORS.gold}`,
+                        boxShadow: isDark
+                          ? '0 25px 60px rgba(0,0,0,0.85), 0 0 0 1px rgba(244,160,35,0.2)'
+                          : '0 25px 60px rgba(11,31,78,0.18), 0 0 0 1px rgba(11,31,78,0.06)',
+                        borderRadius: '0 0 16px 16px',
+                        zIndex: 300,
+                        padding: '22px 26px',
+                        width: megaWidth,
+                        maxHeight: 'calc(100vh - 120px)',
+                        overflowY: 'auto',
+                        animation: 'dropdownMegaPop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        display: 'flex',
+                        gap: '22px',
+                        boxSizing: 'border-box'
+                      }}>
+                        {/* ── About Us Dedicated 4-Column Balanced Grid ── */}
+                        {isAboutUs ? (
+                          <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(4, 1fr)',
+                            gap: '18px',
+                            flex: 1,
+                            minWidth: 0
                           }}>
-                            {l1.sub.map(l2 => (
-                              <div key={l2.label}
-                                style={{ position: 'relative' }}
-                                onMouseEnter={() => !isMobile && setOpenL3(l2.label)}
-                                onMouseLeave={() => !isMobile && setOpenL3(null)}
-                              >
-                                <div className="nav-dropdown-item"
-                                  onClick={e => { if (isMobile && l2.sub) { e.stopPropagation(); toggleL3(l2.label) } }}
+                            {/* Col 1: Overview & Sikh Heritage */}
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{
+                                fontSize: '11px', fontWeight: 800, letterSpacing: '0.6px',
+                                textTransform: 'uppercase', color: COLORS.gold, marginBottom: '10px',
+                                paddingBottom: '5px', borderBottom: '1.5px solid rgba(244,160,35,0.3)',
+                                display: 'flex', alignItems: 'center', gap: '5px'
+                              }}>
+                                <span>☬ Overview & Heritage</span>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                {/* Sikh Heritage Highlight Link */}
+                                <Link
+                                  to="/about-us/sikh-heritage"
+                                  className="mega-sub-link"
+                                  onClick={() => { setOpenL1(null); setOpenL2(null); setOpenL3(null); }}
                                   style={{
-                                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                    padding: isMobile ? '12px 16px' : '6px 16px',
-                                    minHeight: isMobile ? '44px' : 'auto',
-                                    borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
-                                    cursor: isMobile && l2.sub ? 'pointer' : 'default',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                    padding: '7px 9px', borderRadius: '7px', fontSize: '12px', fontWeight: 700,
+                                    background: isDark ? 'rgba(244,160,35,0.18)' : 'rgba(244,160,35,0.12)',
+                                    border: '1px solid rgba(244,160,35,0.4)', color: COLORS.gold,
+                                    textDecoration: 'none', marginBottom: '3px'
                                   }}
                                 >
-                                  <Link to={getRoute(l2.href)} className="nav-hover-link dropdown-link-text"
-                                    style={{ fontSize: 12.5, fontWeight: 600, color: '#444', display: 'block', width: '100%', textDecoration: 'none' }}>
-                                    {l2.label}
-                                  </Link>
-                                  {l2.sub && <span style={{ fontSize: 11, color: COLORS.gold, marginLeft: 8 }}>{isMobile ? (openL3 === l2.label ? '▴' : '▾') : '▶'}</span>}
-                                </div>
-
-                                {/* ── L3 Dropdown ── */}
-                                {l2.sub && openL3 === l2.label && (
-                                  <div className="nav-dropdown-panel" style={{
-                                    position: isMobile ? 'static' : 'absolute',
-                                    top: 0, left: '100%',
-                                    
-                                    background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.95)',
-                                    backdropFilter: isMobile ? 'none' : 'blur(20px)',
-                                    WebkitBackdropFilter: isMobile ? 'none' : 'blur(20px)',
-                                    border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.6)',
-                                    
-                                    minWidth: isMobile ? '100%' : 210,
-                                    boxShadow: isMobile ? 'none' : '5px 5px 25px rgba(0,0,0,.12)',
-                                    borderTop: isMobile ? 'none' : '3px solid ' + COLORS.navy,
-                                    borderRadius: isMobile ? 4 : '0 12px 12px 12px',
-                                    margin: isMobile ? '0 16px 10px' : 0,
-                                    borderLeft: isMobile ? '2px solid ' + COLORS.navy : 'none',
-                                    padding: isMobile ? '5px 0' : '8px 0',
-                                    animation: isMobile ? 'none' : 'dropdownFadeSide 0.25s ease-out forwards',
-                                    transformOrigin: 'left top'
+                                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span>☬</span>
+                                    <span>Sikh Heritage Hub</span>
+                                  </span>
+                                  <span style={{
+                                    fontSize: '9px', padding: '1px 5px', borderRadius: '4px',
+                                    background: COLORS.gold, color: '#060e1c', fontWeight: 800
                                   }}>
-                                    {l2.sub.map(l3 => (
-                                      <Link key={l3.label} to={getRoute(l3.href)} className="nav-hover-link nav-dropdown-item dropdown-link-text"
+                                    DIVINE
+                                  </span>
+                                </Link>
+                                {directLinks.filter(l => l.label !== 'Sikh Heritage').map(link => (
+                                  <Link
+                                    key={link.label}
+                                    to={getRoute(link.href)}
+                                    className="mega-sub-link"
+                                    onClick={() => { setOpenL1(null); setOpenL2(null); setOpenL3(null); }}
+                                    style={{
+                                      display: 'flex', alignItems: 'center', gap: '7px',
+                                      padding: '6px 8px', borderRadius: '6px', fontSize: '12px',
+                                      fontWeight: 600, color: isDark ? '#e2e8f0' : COLORS.navy,
+                                      textDecoration: 'none'
+                                    }}
+                                  >
+                                    <span style={{ color: COLORS.gold, fontSize: '10px' }}>▸</span>
+                                    <span>{link.label}</span>
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Col 2: Leadership & Staff */}
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{
+                                fontSize: '11px', fontWeight: 800, letterSpacing: '0.6px',
+                                textTransform: 'uppercase', color: COLORS.gold, marginBottom: '10px',
+                                paddingBottom: '5px', borderBottom: '1.5px solid rgba(244,160,35,0.3)',
+                                display: 'flex', alignItems: 'center', gap: '5px'
+                              }}>
+                                <span>🏛️ Governance & Staff</span>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                {groupSections.filter(g => g.label === 'College Management' || g.label === 'College Staff').flatMap(g => g.sub).map(item => (
+                                  <Link
+                                    key={item.label}
+                                    to={getRoute(item.href)}
+                                    className="mega-sub-link"
+                                    onClick={() => { setOpenL1(null); setOpenL2(null); setOpenL3(null); }}
+                                    style={{
+                                      display: 'flex', alignItems: 'center', gap: '7px',
+                                      padding: '5px 8px', borderRadius: '6px', fontSize: '12px',
+                                      fontWeight: 500, color: isDark ? '#e2e8f0' : '#1e293b',
+                                      textDecoration: 'none'
+                                    }}
+                                  >
+                                    <span style={{ color: isDark ? '#64748b' : '#94a3b8', fontSize: '8px' }}>•</span>
+                                    <span>{item.label}</span>
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Col 3: Statutory Committees */}
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{
+                                fontSize: '11px', fontWeight: 800, letterSpacing: '0.6px',
+                                textTransform: 'uppercase', color: COLORS.gold, marginBottom: '10px',
+                                paddingBottom: '5px', borderBottom: '1.5px solid rgba(244,160,35,0.3)',
+                                display: 'flex', alignItems: 'center', gap: '5px'
+                              }}>
+                                <span>⚖️ Committees (9)</span>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                {(groupSections.find(g => g.label === 'Various Committees')?.sub || []).map(item => (
+                                  <Link
+                                    key={item.label}
+                                    to={getRoute(item.href)}
+                                    className="mega-sub-link"
+                                    onClick={() => { setOpenL1(null); setOpenL2(null); setOpenL3(null); }}
+                                    style={{
+                                      display: 'flex', alignItems: 'center', gap: '6px',
+                                      padding: '4px 6px', borderRadius: '5px', fontSize: '11.5px',
+                                      fontWeight: 500, color: isDark ? '#cbd5e1' : '#334155',
+                                      textDecoration: 'none'
+                                    }}
+                                  >
+                                    <span style={{ color: COLORS.gold, fontSize: '8px' }}>•</span>
+                                    <span>{item.label}</span>
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Col 4: University Regulations */}
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{
+                                fontSize: '11px', fontWeight: 800, letterSpacing: '0.6px',
+                                textTransform: 'uppercase', color: COLORS.gold, marginBottom: '10px',
+                                paddingBottom: '5px', borderBottom: '1.5px solid rgba(244,160,35,0.3)',
+                                display: 'flex', alignItems: 'center', gap: '5px'
+                              }}>
+                                <span>📜 Regulations & Affiliation</span>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                {(groupSections.find(g => g.label === 'Regulations')?.sub || []).map(item => (
+                                  <React.Fragment key={item.label}>
+                                    {item.sub ? (
+                                      <div style={{ marginTop: '3px', marginBottom: '2px' }}>
+                                        <div style={{
+                                          fontSize: '10.5px', fontWeight: 700,
+                                          color: isDark ? '#94a3b8' : '#475569',
+                                          padding: '1px 6px', display: 'flex', alignItems: 'center', gap: '4px'
+                                        }}>
+                                          <span style={{ color: COLORS.gold, fontSize: '8px' }}>▾</span>
+                                          <span>{item.label}</span>
+                                        </div>
+                                        <div style={{
+                                          paddingLeft: '10px', display: 'flex', flexDirection: 'column', gap: '2px',
+                                          borderLeft: `1.5px solid ${isDark ? 'rgba(244,160,35,0.2)' : 'rgba(11,31,78,0.1)'}`,
+                                          marginLeft: '8px', marginTop: '2px'
+                                        }}>
+                                          {item.sub.map(l3 => (
+                                            <Link
+                                              key={l3.label}
+                                              to={getRoute(l3.href)}
+                                              className="mega-sub-link"
+                                              onClick={() => { setOpenL1(null); setOpenL2(null); setOpenL3(null); }}
+                                              style={{
+                                                display: 'block', padding: '3px 6px', borderRadius: '4px',
+                                                fontSize: '11px', color: isDark ? '#cbd5e1' : '#334155',
+                                                textDecoration: 'none'
+                                              }}
+                                            >
+                                              {l3.label}
+                                            </Link>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <Link
+                                        to={getRoute(item.href)}
+                                        className="mega-sub-link"
+                                        onClick={() => { setOpenL1(null); setOpenL2(null); setOpenL3(null); }}
                                         style={{
-                                          display: 'block', padding: '6px 16px',
-                                          fontSize: 12, color: '#555',
-                                          borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
-                                          textDecoration: 'none',
+                                          display: 'flex', alignItems: 'center', gap: '6px',
+                                          padding: '4px 6px', borderRadius: '5px', fontSize: '11.5px',
+                                          fontWeight: 500, color: isDark ? '#cbd5e1' : '#334155',
+                                          textDecoration: 'none'
                                         }}
                                       >
-                                        {l3.label}
+                                        <span style={{ color: isDark ? '#64748b' : '#94a3b8', fontSize: '8px' }}>•</span>
+                                        <span>{item.label}</span>
                                       </Link>
-                                    ))}
-                                  </div>
-                                )}
+                                    )}
+                                  </React.Fragment>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          /* ── Other Sections Multi-Column Grid ── */
+                          <div style={{
+                            display: 'flex',
+                            gap: '20px',
+                            flex: 1,
+                            minWidth: 0
+                          }}>
+                            {/* Direct Links Column */}
+                            {directLinks.length > 0 && (
+                              <div style={{ flex: 1, minWidth: 160 }}>
+                                <div style={{
+                                  fontSize: '11px', fontWeight: 800, letterSpacing: '0.6px',
+                                  textTransform: 'uppercase', color: COLORS.gold, marginBottom: '10px',
+                                  paddingBottom: '5px', borderBottom: '1.5px solid rgba(244,160,35,0.3)',
+                                  display: 'flex', alignItems: 'center', gap: '6px'
+                                }}>
+                                  <span>Overview & Highlights</span>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                  {directLinks.map(link => (
+                                    <Link
+                                      key={link.label}
+                                      to={getRoute(link.href)}
+                                      className="mega-sub-link"
+                                      onClick={() => { setOpenL1(null); setOpenL2(null); setOpenL3(null); }}
+                                      style={{
+                                        display: 'flex', alignItems: 'center', gap: '7px',
+                                        padding: '6px 8px', borderRadius: '6px', fontSize: '12px',
+                                        fontWeight: 600, color: isDark ? '#e2e8f0' : COLORS.navy,
+                                        textDecoration: 'none'
+                                      }}
+                                    >
+                                      <span style={{ color: COLORS.gold, fontSize: '10px' }}>▸</span>
+                                      <span>{link.label}</span>
+                                    </Link>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Group Sections */}
+                            {groupSections.map(grp => (
+                              <div key={grp.label} style={{ flex: 1, minWidth: 165 }}>
+                                <div style={{
+                                  fontSize: '11px', fontWeight: 800, letterSpacing: '0.6px',
+                                  textTransform: 'uppercase', color: COLORS.gold, marginBottom: '10px',
+                                  paddingBottom: '5px', borderBottom: '1.5px solid rgba(244,160,35,0.3)',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                                }}>
+                                  <span>{grp.label}</span>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                  {grp.sub.map(subItem => (
+                                    <React.Fragment key={subItem.label}>
+                                      {subItem.sub && subItem.sub.length > 0 ? (
+                                        <div style={{ marginTop: '4px', marginBottom: '4px' }}>
+                                          <div style={{
+                                            fontSize: '11px', fontWeight: 700,
+                                            color: isDark ? '#94a3b8' : '#475569',
+                                            padding: '2px 6px', display: 'flex', alignItems: 'center', gap: '5px'
+                                          }}>
+                                            <span style={{ color: COLORS.gold, fontSize: '8px' }}>▾</span>
+                                            <span>{subItem.label}</span>
+                                          </div>
+                                          <div style={{
+                                            paddingLeft: '10px', display: 'flex', flexDirection: 'column', gap: '2px',
+                                            borderLeft: `1.5px solid ${isDark ? 'rgba(244,160,35,0.2)' : 'rgba(11,31,78,0.1)'}`,
+                                            marginLeft: '8px', marginTop: '2px'
+                                          }}>
+                                            {subItem.sub.map(l3 => (
+                                              <Link
+                                                key={l3.label}
+                                                to={getRoute(l3.href)}
+                                                className="mega-sub-link"
+                                                onClick={() => { setOpenL1(null); setOpenL2(null); setOpenL3(null); }}
+                                                style={{
+                                                  display: 'block', padding: '3px 6px', borderRadius: '4px',
+                                                  fontSize: '11px', color: isDark ? '#cbd5e1' : '#334155',
+                                                  textDecoration: 'none'
+                                                }}
+                                              >
+                                                {l3.label}
+                                              </Link>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <Link
+                                          to={getRoute(subItem.href)}
+                                          className="mega-sub-link"
+                                          onClick={() => { setOpenL1(null); setOpenL2(null); setOpenL3(null); }}
+                                          style={{
+                                            display: 'flex', alignItems: 'center', gap: '7px',
+                                            padding: '5px 8px', borderRadius: '6px', fontSize: '12px',
+                                            fontWeight: 500, color: isDark ? '#e2e8f0' : '#1e293b',
+                                            textDecoration: 'none'
+                                          }}
+                                        >
+                                          <span style={{ color: isDark ? '#64748b' : '#94a3b8', fontSize: '8px' }}>•</span>
+                                          <span>{subItem.label}</span>
+                                        </Link>
+                                      )}
+                                    </React.Fragment>
+                                  ))}
+                                </div>
                               </div>
                             ))}
                           </div>
                         )}
+
+                        {/* ── Spotlight Card Column ── */}
+                        {spotlight && (
+                          <div style={{
+                            width: 235,
+                            flexShrink: 0,
+                            background: isDark
+                              ? 'linear-gradient(145deg, #111d38 0%, #080f1e 100%)'
+                              : 'linear-gradient(145deg, #0b1f4e 0%, #060e1c 100%)',
+                            borderRadius: '12px',
+                            padding: '18px',
+                            color: '#fff',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            boxShadow: '0 8px 24px rgba(11,31,78,0.28)',
+                            border: '1px solid rgba(244,160,35,0.3)'
+                          }}>
+                            <div style={{
+                              position: 'absolute', right: '-10px', bottom: '-15px',
+                              fontSize: '85px', opacity: 0.12, pointerEvents: 'none', userSelect: 'none'
+                            }}>
+                              {spotlight.icon || '☬'}
+                            </div>
+                            
+                            <div>
+                              <div style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '5px',
+                                background: 'rgba(244,160,35,0.2)', color: '#f4a023',
+                                padding: '2px 8px', borderRadius: '999px', fontSize: '9.5px',
+                                fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase',
+                                marginBottom: '8px'
+                              }}>
+                                {spotlight.badge}
+                              </div>
+                              <h4 style={{
+                                margin: '0 0 6px 0', fontSize: '14px', fontWeight: 700,
+                                color: '#ffffff', lineHeight: 1.3
+                              }}>
+                                {spotlight.title}
+                              </h4>
+                              <p style={{
+                                margin: 0, fontSize: '11.5px', color: '#cbd5e1', lineHeight: 1.45
+                              }}>
+                                {spotlight.desc}
+                              </p>
+                            </div>
+
+                            <Link
+                              to={spotlight.link}
+                              onClick={() => { setOpenL1(null); setOpenL2(null); setOpenL3(null); }}
+                              style={{
+                                marginTop: '14px', display: 'inline-flex', alignItems: 'center',
+                                justifyContent: 'center', padding: '7px 12px',
+                                background: 'linear-gradient(135deg, #f4a023, #d48b16)',
+                                color: '#060e1c', fontWeight: 700, fontSize: '11.5px',
+                                borderRadius: '7px', textDecoration: 'none',
+                                boxShadow: '0 4px 12px rgba(244,160,35,0.35)',
+                                transition: 'transform 0.2s, box-shadow 0.2s'
+                              }}
+                              onMouseEnter={e => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 6px 16px rgba(244,160,35,0.45)';
+                              }}
+                              onMouseLeave={e => {
+                                e.currentTarget.style.transform = 'none';
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(244,160,35,0.35)';
+                              }}
+                            >
+                              {spotlight.btnText}
+                            </Link>
+                          </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                )}
+                    );
+                  }
+
+                  // ── Mobile / Non-Mega Fallback Dropdown ──
+                  return (
+                    <div className="nav-dropdown-panel" style={{
+                      position: isMobile ? 'static' : 'absolute',
+                      top: '100%', left: 0,
+                      background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.95)',
+                      backdropFilter: isMobile ? 'none' : 'blur(20px)',
+                      WebkitBackdropFilter: isMobile ? 'none' : 'blur(20px)',
+                      border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.6)',
+                      minWidth: isMobile ? '100%' : 210,
+                      boxShadow: isMobile ? 'none' : '0 15px 35px rgba(0,0,0,.12)',
+                      borderTop: isMobile ? 'none' : '3px solid ' + COLORS.navy,
+                      borderRadius: isMobile ? 8 : '0 0 12px 12px',
+                      zIndex: 200, 
+                      padding: isMobile ? '5px 0' : '8px 0',
+                      animation: isMobile ? 'none' : 'dropdownFadeDown 0.25s ease-out forwards',
+                      transformOrigin: 'top center'
+                    }}>
+                      {l0.sub.map(l1 => (
+                        <div key={l1.label}
+                          style={{ position: 'relative' }}
+                          onMouseEnter={() => !isMobile && setOpenL2(l1.label)}
+                          onMouseLeave={() => !isMobile && setOpenL2(null)}
+                        >
+                          <div className="nav-dropdown-item"
+                            onClick={e => { if (isMobile && l1.sub) { e.stopPropagation(); toggleL2(l1.label) } }}
+                            style={{
+                              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                              padding: isMobile ? '12px 16px' : '6px 16px',
+                              minHeight: isMobile ? '44px' : 'auto',
+                              borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
+                              cursor: isMobile && l1.sub ? 'pointer' : 'default',
+                            }}
+                          >
+                            <Link to={getRoute(l1.href)} className="nav-hover-link dropdown-link-text"
+                              style={{ fontSize: 13, fontWeight: 600, color: COLORS.navy, display: 'block', width: '100%', textDecoration: 'none' }}>
+                              {l1.label}
+                            </Link>
+                            {l1.sub && <span style={{ fontSize: 12, color: COLORS.gold, marginLeft: 8 }}>{isMobile ? (openL2 === l1.label ? '▴' : '▾') : '▶'}</span>}
+                          </div>
+
+                          {/* ── L2 Dropdown ── */}
+                          {l1.sub && openL2 === l1.label && (
+                            <div className="nav-dropdown-panel" style={{
+                              position: isMobile ? 'static' : 'absolute',
+                              top: 0, left: '100%',
+                              background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.95)',
+                              backdropFilter: isMobile ? 'none' : 'blur(20px)',
+                              WebkitBackdropFilter: isMobile ? 'none' : 'blur(20px)',
+                              border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.6)',
+                              minWidth: isMobile ? '100%' : 210,
+                              boxShadow: isMobile ? 'none' : '5px 5px 25px rgba(0,0,0,.12)',
+                              borderTop: isMobile ? 'none' : '3px solid ' + COLORS.gold,
+                              borderRadius: isMobile ? 4 : '0 12px 12px 12px',
+                              margin: isMobile ? '0 16px 10px' : 0,
+                              borderLeft: isMobile ? '2px solid ' + COLORS.gold : 'none',
+                              padding: isMobile ? '5px 0' : '8px 0',
+                              animation: isMobile ? 'none' : 'dropdownFadeSide 0.25s ease-out forwards',
+                              transformOrigin: 'left top'
+                            }}>
+                              {l1.sub.map(l2 => (
+                                <div key={l2.label}
+                                  style={{ position: 'relative' }}
+                                  onMouseEnter={() => !isMobile && setOpenL3(l2.label)}
+                                  onMouseLeave={() => !isMobile && setOpenL3(null)}
+                                >
+                                  <div className="nav-dropdown-item"
+                                    onClick={e => { if (isMobile && l2.sub) { e.stopPropagation(); toggleL3(l2.label) } }}
+                                    style={{
+                                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                      padding: isMobile ? '12px 16px' : '6px 16px',
+                                      minHeight: isMobile ? '44px' : 'auto',
+                                      borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
+                                      cursor: isMobile && l2.sub ? 'pointer' : 'default',
+                                    }}
+                                  >
+                                    <Link to={getRoute(l2.href)} className="nav-hover-link dropdown-link-text"
+                                      style={{ fontSize: 12.5, fontWeight: 600, color: '#444', display: 'block', width: '100%', textDecoration: 'none' }}>
+                                      {l2.label}
+                                    </Link>
+                                    {l2.sub && <span style={{ fontSize: 11, color: COLORS.gold, marginLeft: 8 }}>{isMobile ? (openL3 === l2.label ? '▴' : '▾') : '▶'}</span>}
+                                  </div>
+
+                                  {/* ── L3 Dropdown ── */}
+                                  {l2.sub && openL3 === l2.label && (
+                                    <div className="nav-dropdown-panel" style={{
+                                      position: isMobile ? 'static' : 'absolute',
+                                      top: 0, left: '100%',
+                                      background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.95)',
+                                      backdropFilter: isMobile ? 'none' : 'blur(20px)',
+                                      WebkitBackdropFilter: isMobile ? 'none' : 'blur(20px)',
+                                      border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.6)',
+                                      minWidth: isMobile ? '100%' : 210,
+                                      boxShadow: isMobile ? 'none' : '5px 5px 25px rgba(0,0,0,.12)',
+                                      borderTop: isMobile ? 'none' : '3px solid ' + COLORS.navy,
+                                      borderRadius: isMobile ? 4 : '0 12px 12px 12px',
+                                      margin: isMobile ? '0 16px 10px' : 0,
+                                      borderLeft: isMobile ? '2px solid ' + COLORS.navy : 'none',
+                                      padding: isMobile ? '5px 0' : '8px 0',
+                                      animation: isMobile ? 'none' : 'dropdownFadeSide 0.25s ease-out forwards',
+                                      transformOrigin: 'left top'
+                                    }}>
+                                      {l2.sub.map(l3 => (
+                                        <Link key={l3.label} to={getRoute(l3.href)} className="nav-hover-link nav-dropdown-item dropdown-link-text"
+                                          style={{
+                                            display: 'block', padding: '6px 16px',
+                                            fontSize: 12, color: '#555',
+                                            borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
+                                            textDecoration: 'none',
+                                          }}
+                                        >
+                                          {l3.label}
+                                        </Link>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             ))}
 
