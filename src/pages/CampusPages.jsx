@@ -66,7 +66,7 @@ function LiveGallery({ categoryId }) {
         </div>
       </Fade>
       <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 24 }}>
         {loading ? (
           [1, 2, 3].map((n) => (
             <div key={n} style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid #f1f5f9', background: '#fff' }}>
@@ -144,7 +144,7 @@ export function Infrastructure() {
           <div style={{ color: GOLD, fontWeight: 700, letterSpacing: 2, marginBottom: 8 }}>OVERVIEW</div>
           <h1 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, color: NAVY, marginBottom: 40 }}>{content?.title || 'World-Class Infrastructure'}</h1>
         </Fade>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24, marginBottom: 60 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24, marginBottom: 60 }}>
           {boxes.map((b, i) => (
             <Fade key={i} delay={i * 0.1} style={{ gridColumn: `span ${window.innerWidth > 768 ? b.span : 1}` }}>
               <div style={{ background: b.bg, borderRadius: 24, padding: 32, height: '100%', border: '1.5px solid #e2e8f0' }}>
@@ -172,7 +172,7 @@ export function Classrooms() {
   return (
     <div style={{ background: '#fff', padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', fontFamily: "'DM Sans', sans-serif" }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: 60, alignItems: 'center', marginBottom: 60 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))', gap: 60, alignItems: 'center', marginBottom: 60 }}>
           <Fade>
             <div style={{ borderRadius: 24, overflow: 'hidden', boxShadow: `0 20px 40px ${NAVY}15` }}>
               <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&q=80" alt="Classroom" style={{ width: '100%', display: 'block' }} />

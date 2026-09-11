@@ -56,7 +56,7 @@ function NaacDocumentList({ categoryKey, emptyMsg = "Documents will be available
 
   return (
     <>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: 20 }}>
         {docs.length === 0 ? (
           <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 60, background: '#fff', borderRadius: 20, border: '2px dashed #e2e8f0', color: '#94a3b8' }}>{emptyMsg}</div>
         ) : (

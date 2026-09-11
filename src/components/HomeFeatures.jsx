@@ -262,7 +262,7 @@ export default function HomeFeatures() {
               <p className="hf-sec-sub">State-of-the-art infrastructure and premium facilities dedicated to holistic student development.</p>
             </div>
           </SA2>
-          <div style={{ display:'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 20 }}>
+          <div style={{ display:'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 180px), 1fr))', gap: 20 }}>
             {(facilities || []).map((ft, i) => (
               <div key={i} className="gc r30">
                 <div className="hf-fc">

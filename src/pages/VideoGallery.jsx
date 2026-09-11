@@ -156,7 +156,7 @@ export default function VideoGallery() {
         </div>
 
         <div style={{ maxWidth:1280, margin:'0 auto', padding:'48px 20px' }}>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))', gap:24 }}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(min(100%, 320px),1fr))', gap:24 }}>
             {paginatedIds.map((vid, i) => {
               const globalIdx = (currentPage - 1) * ITEMS_PER_PAGE + i;
               return (
@@ -310,7 +310,7 @@ export default function VideoGallery() {
             </div>
 
             {/* Grid */}
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))', gap:24 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(min(100%, 320px),1fr))', gap:24 }}>
               {paginatedVideos.map((v, i) => {
                 const vid = v.id;
                 const sn  = v.snippet || {};

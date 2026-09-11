@@ -105,7 +105,7 @@ function ContactForm() {
 
   return (
     <form className="contact-form" ref={formRef} onSubmit={handleSubmit} noValidate>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '20px' }}>
         <div className="form-field">
           <label htmlFor="cf-name" className="form-label required-mark">
             <User size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6 }} />
@@ -225,7 +225,7 @@ export default function Contact() {
         .map-container iframe { width:100%; height:100%; border:none; filter:grayscale(10%) contrast(1.05); transition:all .4s; }
         .campus-card:hover .map-container iframe { filter:grayscale(0%) contrast(1); }
 
-        .directory-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:1.5rem; }
+        .directory-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%, 320px),1fr)); gap:1.5rem; }
         .directory-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:1.5rem; display:flex; align-items:center; gap:1.5rem; transition:all .3s; }
         .directory-card:hover { transform:translateY(-5px); border-color:${COLORS.gold}; box-shadow:0 8px 25px rgba(15,35,71,.08); }
         .dir-icon { font-size:1.8rem; width:50px; height:50px; display:flex; align-items:center; justify-content:center; background:#f1f5f9; border-radius:50%; flex-shrink:0; }

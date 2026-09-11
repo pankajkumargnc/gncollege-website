@@ -115,7 +115,7 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
 
         {/* ── Commandment 7: Skeleton Loading ── */}
         {isLoading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))', gap: 20 }}>
             {Array(6).fill(0).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : filteredStaff.length === 0 ? (
@@ -148,7 +148,7 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
                 <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 700 }}>{members.length} member{members.length > 1 ? 's' : ''}</span>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))', gap: 20 }}>
                 {members.map(staff => (
                   <div key={staff.id} style={{ background: '#fff', borderRadius: 18, overflow: 'hidden', boxShadow: '0 4px 20px rgba(15,35,71,0.07)', border: '1px solid #e2e8f0', transition: 'transform 0.2s, box-shadow 0.2s' }}
                     onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 30px rgba(15,35,71,0.13)'; }}

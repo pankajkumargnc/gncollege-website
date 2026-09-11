@@ -153,7 +153,7 @@ const AdminNeuralStudioTab = () => {
                     margin-top: 24px; border: 1px solid #334155;
                 }
                 .action-hub {
-                    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;
+                    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 16px;
                 }
                 .btn-neon {
                     padding: 16px; border-radius: 14px; font-weight: 900; cursor: pointer;

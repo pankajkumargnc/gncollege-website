@@ -154,7 +154,7 @@ export default function BackupRestoreTab({ logAct }) {
         <p style={{ margin: '8px 0 0', color: T.t3, fontSize: 15, fontWeight: 600 }}>Manage infinite snapshots and ultra-secure system restoration.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: 32 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 450px), 1fr))', gap: 32 }}>
         
         {/* EXPORT COMPONENT */}
         <div className="bkp-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>

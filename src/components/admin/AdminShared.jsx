@@ -107,24 +107,64 @@ export const Toggle = ({ checked, onChange, label, color = T.green }) => {
   return (
     <div
       className="toggle-wrap"
-      style={{ userSelect: 'none', display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}
+      style={{
+        userSelect: 'none',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 10,
+        cursor: 'pointer',
+        flexShrink: 0,
+        verticalAlign: 'middle'
+      }}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
         onChange && onChange();
       }}
     >
-      <div className="toggle">
-        {/* We use a visible checkbox overlayed by the slider but clickable via the div */}
-        <input 
-          type="checkbox" 
-          checked={!!checked} 
-          readOnly
-          style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer', zIndex: 1 }}
+      <div
+        style={{
+          position: 'relative',
+          width: 44,
+          height: 24,
+          minWidth: 44,
+          minHeight: 24,
+          maxWidth: 44,
+          maxHeight: 24,
+          flexShrink: 0,
+          borderRadius: 99,
+          background: checked ? color : '#cbd5e1',
+          transition: 'background 0.2s ease',
+          boxSizing: 'border-box'
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            top: 3,
+            left: checked ? 23 : 3,
+            width: 18,
+            height: 18,
+            borderRadius: '50%',
+            background: '#ffffff',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.25)',
+            transition: 'left 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
         />
-        <span className="toggle-slider" style={checked ? { background: color } : {}} />
       </div>
-      {label && <span style={{ fontSize: 13, fontWeight: 700, color: checked ? color : T.t3 }}>{label}</span>}
+      {label && (
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 700,
+            color: checked ? color : T.t3,
+            whiteSpace: 'nowrap',
+            lineHeight: 1
+          }}
+        >
+          {label}
+        </span>
+      )}
     </div>
   );
 };
@@ -243,12 +283,12 @@ export const GCSS = `
 }
 .stat-card .stat-num { font-size: 32px; font-weight: 900; color:${NAVY}; font-family:'JetBrains Mono',monospace; line-height: 1; margin-bottom: 4px; }
 .stat-card .stat-label { font-size: 11px; font-weight: 800; color:${T.t3}; text-transform:uppercase; letter-spacing: 1px; }
-.toggle-wrap { display:inline-flex; align-items:center; gap:8px; cursor:pointer; }
-.toggle { position:relative; width:44px; height:24px; }
-.toggle input { opacity:0; width:0; height:0; }
-.toggle-slider { position:absolute; inset:0; background:${T.b2}; border-radius:99px; transition:.2s; }
+.toggle-wrap { display:inline-flex; align-items:center; gap:8px; cursor:pointer; flex-shrink:0; vertical-align:middle; }
+.toggle { position:relative; width:44px; height:24px; min-width:44px; min-height:24px; max-width:44px; max-height:24px; flex-shrink:0; }
+.toggle input { opacity:0; width:0; height:0; position:absolute; }
+.toggle-slider { position:absolute; top:0; left:0; width:44px; height:24px; background:${T.b2}; border-radius:99px; transition:.2s; }
 .toggle input:checked + .toggle-slider { background:${T.green}; }
-.toggle-slider:before { content:''; position:absolute; height:18px; width:18px; left:3px; bottom:3px; background:${WHITE}; border-radius:50%; transition:.2s; box-shadow:0 1px 4px rgba(0,0,0,.2); }
+.toggle-slider:before { content:''; position:absolute; height:18px; width:18px; left:3px; top:3px; background:${WHITE}; border-radius:50%; transition:.2s; box-shadow:0 1px 4px rgba(0,0,0,.2); }
 .toggle input:checked + .toggle-slider:before { transform:translateX(20px); }
 .bulk-bar { background:${NAVY}; color:${WHITE}; padding:12px 20px; border-radius:12px; display:flex; align-items:center; gap:12px; margin-bottom:16px; }
 .mini-log { background:${BG}; border-radius:10px; padding:12px 14px; margin-top:20px; }

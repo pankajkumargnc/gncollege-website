@@ -1015,7 +1015,7 @@ ${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).joi
     </div>
     <div class="sec">Executive Summary</div>
     <div class="stat">${summary || "Audit complete."}</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:20px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,120px),1fr));gap:16px;margin-top:20px">
       <div class="stat" style="text-align:center"><div style="font-size:30px;font-weight:950;color:#10b981">${analytics.passed}</div><div style="font-size:11px;font-weight:700;color:#64748b">PASSED</div></div>
       <div class="stat" style="text-align:center"><div style="font-size:30px;font-weight:950;color:#f59e0b">${analytics.warnings}</div><div style="font-size:11px;font-weight:700;color:#64748b">WARNED</div></div>
       <div class="stat" style="text-align:center"><div style="font-size:30px;font-weight:950;color:#ef4444">${analytics.failed}</div><div style="font-size:11px;font-weight:700;color:#64748b">FAILED</div></div>
@@ -1154,7 +1154,7 @@ ${tempResults.map(r => `[${r.status.toUpperCase()}] ${r.name}: ${r.detail}`).joi
       )}
 
       {/* ─── MAIN GRID ─── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(500px, 1fr))", gap: 32, marginBottom: 50 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 500px), 1fr))", gap: 32, marginBottom: 50 }}>
 
         {/* Terminal + Controls */}
         <div className="sup-card">

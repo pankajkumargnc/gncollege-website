@@ -909,6 +909,7 @@ h1, h2, h3,
   h2 { font-size:clamp(18px,5.5vw,28px); }
   h3 { font-size:clamp(16px,4.5vw,22px); }
   .stats-grid { grid-template-columns:1fr 1fr; }
+  p, li, td { text-align: left; text-justify: auto; }
 }
 /* ═══════════════════════════════════════════════════
    GNC CONSOLIDATED v12

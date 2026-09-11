@@ -58,21 +58,22 @@ export default function AlertsTab({ alerts, logAct, getSectionLog, softDelete, b
             <label className="alabel">Alert Message *</label>
             <textarea className="ainp" rows={3} style={{ borderRadius: 14, background: '#f8fafc', border: `1.5px solid #edf2f7` }} value={alertData.text || ''} onChange={(e) => setAlertData(d => ({...d, text: e.target.value}))} required placeholder="College will remain closed tomorrow due to holiday..." />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 24, padding: '18px 22px', background: '#f8fafc', borderRadius: 16, border: '1.5px solid #edf2f7', flexWrap: 'wrap' }}>
-            <Toggle checked={!!alertData.isActive} onChange={() => setAlertData(d => ({...d, isActive: !d.isActive}))} label={alertData.isActive ? '🔴 SIGNAL LIVE' : '⚪ SIGNAL OFF'} color={T.red} />
-            <div style={{ height: 40, width: 1.5, background: '#e2e8f0' }} />
-            <div style={{ flex: 1, minWidth: 200 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24, padding: '16px 18px', background: '#f8fafc', borderRadius: 16, border: '1.5px solid #edf2f7', flexWrap: 'wrap' }}>
+            <div style={{ flexShrink: 0 }}>
+              <Toggle checked={!!alertData.isActive} onChange={() => setAlertData(d => ({...d, isActive: !d.isActive}))} label={alertData.isActive ? '🔴 SIGNAL LIVE' : '⚪ SIGNAL OFF'} color={T.red} />
+            </div>
+            <div style={{ flex: '1 1 180px', minWidth: 160 }}>
               <label className="alabel">Notification Type</label>
               <select className="ainp" style={{ marginTop: 0, borderRadius: 10 }} value={alertData.type || 'urgent'} onChange={(e) => setAlertData(d => ({...d, type: e.target.value}))}>
                 {['urgent','holiday','exam','admission','event'].map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase()+t.slice(1)} Notification</option>)}
               </select>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 12 }}>
-            <button type="submit" className="abtn abtn-gold" style={{ height: 48, padding: '0 32px' }} disabled={loading}>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <button type="submit" className="abtn abtn-gold" style={{ height: 48, padding: '0 28px', flex: '1 1 auto', minWidth: 180, justifyContent: 'center' }} disabled={loading}>
               🚀 {editAlert ? 'Sync Updates' : 'Broadcast Now'}
             </button>
-            {editAlert && <button type="button" className="abtn abtn-outline" style={{ height: 48 }} onClick={() => { setEditAlert(null); clearAlertDraft(); }}>Cancel Edit</button>}
+            {editAlert && <button type="button" className="abtn abtn-outline" style={{ height: 48, flex: '1 1 auto', justifyContent: 'center' }} onClick={() => { setEditAlert(null); clearAlertDraft(); }}>Cancel Edit</button>}
           </div>
         </form>
       </div>

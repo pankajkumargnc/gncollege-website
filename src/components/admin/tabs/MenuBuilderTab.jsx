@@ -316,7 +316,7 @@ export default function MenuBuilderTab({ logAct }) {
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(330px, 1fr))', gap: 24, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 330px), 1fr))', gap: 24, alignItems: 'start' }}>
         
         {/* ── LEFT: ADVANCED FORM ── */}
         <div style={{

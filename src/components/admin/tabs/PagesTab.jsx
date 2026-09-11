@@ -561,7 +561,7 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
           TAB 1: CREATE / EDIT PAGE (EDITOR)
       =========================================== */}
       {activeTab === 'editor' && (
-        <div className="fade-up" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(360px, 1fr)', gap: 24, alignItems: 'start' }}>
+        <div className="fade-up" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(min(100%, 360px), 1fr)', gap: 24, alignItems: 'start' }}>
           
           {/* LEFT: CONTENT & WYSIWYG EDITOR */}
           <div style={{ background: WHITE, padding: 24, borderRadius: 16, border: `2px solid ${editItem ? GOLD : T.b1}`, boxShadow: '0 8px 30px rgba(15,35,71,0.06)' }}>

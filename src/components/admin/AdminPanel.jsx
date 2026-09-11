@@ -566,7 +566,19 @@ function AdminPanelInner({
         <div className="adm-mobile-top">
           <button onClick={()=>setSideOpen(true)} style={{ background:'none', border:'none', fontSize:22, cursor:'pointer', color:NAVY }} aria-label="Open navigation menu">☰</button>
           <span style={{ fontWeight:900, color:NAVY, fontSize:14 }}>GNC Admin Panel</span>
-          <div style={{ width: 44 }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(15,35,71,0.06)', padding: '4px 8px', borderRadius: 6, border: `1px solid ${T.b1}` }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: ADMIN_ROLES[activeRole]?.color || NAVY }} />
+            <select 
+              value={activeRole} 
+              onChange={e => handleRoleChange(e.target.value)}
+              style={{ background: 'transparent', border: 'none', fontSize: 11, fontWeight: 700, cursor: 'pointer', color: NAVY, outline: 'none' }}
+              aria-label="Switch Administrative Desk"
+            >
+              {Object.values(ADMIN_ROLES).map(r => (
+                <option key={r.id} value={r.id}>{r.badge}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Top bar */}
@@ -640,7 +652,7 @@ function AdminPanelInner({
       {/* Keyboard shortcuts modal */}
       {showKeyHelp && (
         <div style={{ position:'fixed', inset:0, background:'rgba(15,35,71,.6)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100001, backdropFilter:'blur(4px)' }} onClick={()=>setShowKeyHelp(false)}>
-          <div style={{ background:WHITE, borderRadius:18, padding:'28px 32px', width:440, boxShadow:'0 20px 50px rgba(0,0,0,.2)' }} onClick={e=>e.stopPropagation()}>
+          <div style={{ background:WHITE, borderRadius:18, padding:'28px 32px', width:'90vw', maxWidth:440, boxShadow:'0 20px 50px rgba(0,0,0,.2)' }} onClick={e=>e.stopPropagation()}>
             <div style={{ display:'flex', alignItems:'center', gap:10, fontWeight:900, color:NAVY, fontSize:18, marginBottom:20 }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="6" y1="8" x2="6.01" y2="8"></line><line x1="10" y1="8" x2="10.01" y2="8"></line><line x1="14" y1="8" x2="14.01" y2="8"></line><line x1="18" y1="8" x2="18.01" y2="8"></line><line x1="8" y1="12" x2="8.01" y2="12"></line><line x1="12" y1="12" x2="12.01" y2="12"></line><line x1="16" y1="12" x2="16.01" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
               Keyboard Shortcuts

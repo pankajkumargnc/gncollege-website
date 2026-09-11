@@ -42,7 +42,7 @@ export function NssPage() {
       <PageHeader title={content?.title || "National Service Scheme (NSS)"} subtitle={content?.subtitle || 'Motto: "Not Me But You". Developing student personality through community service.'} icon="🤝" />
       <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, marginBottom: 40 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 20, marginBottom: 40 }}>
             {stats.map((s, i) => (
               <div key={i} style={{ background: '#fff', borderRadius: 20, padding: 30, textAlign: 'center', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)' }}>
                 <div style={{ fontSize: 40, marginBottom: 16 }}>{s.icon}</div>
@@ -55,7 +55,7 @@ export function NssPage() {
         <Fade delay={0.2}>
           <div style={{ background: '#fff', borderRadius: 24, padding: 40, border: '1px solid #e2e8f0' }}>
             <h2 style={{ fontSize: 24, fontWeight: 800, color: NAVY, marginBottom: 24 }}>Major Activities</h2>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 16 }}>
               {['Swachh Bharat Abhiyan', 'Blood Donation Camps', 'Traffic Awareness Drives', 'Disaster Relief & Rescue', 'National Integration Camps'].map((item, i) => (
                 <li key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px', background: '#f8fafc', borderRadius: 12, border: '1px solid #f1f5f9' }}>
                   <span style={{ background: `${GOLD}20`, color: '#b45309', padding: 8, borderRadius: 8, fontSize: 18 }}>⭐</span><span style={{ fontWeight: 700, color: NAVY }}>{item}</span>
@@ -83,7 +83,7 @@ export function NccPage() {
       <PageHeader title={content?.title || "National Cadet Corps (NCC)"} subtitle={content?.subtitle || 'Motto: "Unity and Discipline". Shaping the youth into patriotic and disciplined citizens.'} icon="🎖️" theme="#1e3a8a" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
-          <div style={{ background: '#fff', borderRadius: 24, overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+          <div style={{ background: '#fff', borderRadius: 24, overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))' }}>
             <img src={`${import.meta.env.BASE_URL}images/HeroSlider/slide0.webp`} alt="NCC Parade" style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: 300 }} />
             <div style={{ padding: 40 }}>
               <div style={{ display: 'inline-block', background: '#dbeafe', color: '#1d4ed8', padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 800, letterSpacing: 1, marginBottom: 16 }}>GNC NCC WING</div>
@@ -115,7 +115,7 @@ export function WorkshopPage() {
       <PageHeader title="Workshops & Seminars" subtitle="Bridging the gap between academia and industry through expert sessions." icon="🎤" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 350px), 1fr))', gap: 20 }}>
             {workshops.map((w, i) => (
               <div key={i} style={{ background: '#fff', borderRadius: 20, padding: 30, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.03)', transition: 'transform 0.3s' }} onMouseEnter={e=>e.currentTarget.style.transform='translateY(-5px)'} onMouseLeave={e=>e.currentTarget.style.transform='none'}>
                 <div style={{ fontSize: 12, fontWeight: 800, color: GOLD, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>{w.date}</div>
@@ -145,7 +145,7 @@ export function SportsPage() {
       <PageHeader title={content?.title || "Games & Sports"} subtitle={content?.subtitle || "Promoting physical fitness, teamwork, and sportsmanship among students."} icon="🏆" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24 }}>
             <div style={{ background: '#fff', borderRadius: 24, padding: 40, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)' }}>
               <div style={{ fontSize: 40, marginBottom: 16 }}>🏏</div>
               <h2 style={{ fontSize: 24, fontWeight: 900, color: NAVY, marginBottom: 16 }}>Outdoor Sports</h2>

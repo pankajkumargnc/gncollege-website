@@ -186,6 +186,7 @@ const Footer = memo(() => {
 
         @media (max-width: 1200px) { .f-sitemap { grid-template-columns: 2fr repeat(2, 1fr) 1.5fr; } .f-reach-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 768px) { .f-sitemap { grid-template-columns: 1fr 1fr; } .f-reach-grid { grid-template-columns: 1fr; } .f-final-line { flex-direction: column; gap: 15px; text-align: center; } }
+        @media (max-width: 480px) { .f-sitemap { grid-template-columns: 1fr; } .f-hud-ultima { flex-direction: column; gap: 10px; text-align: center; border-radius: 16px; padding: 16px; } }
       `}</style>
       <StarField />
       <div className="f-container">

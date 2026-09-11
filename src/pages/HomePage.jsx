@@ -345,6 +345,7 @@ const CSS = `
   }
   @media(max-width:480px){
     .hp-imgstack{height:240px;}
+    .hp-img-main{width:100%;box-shadow:10px 10px 0 ${G};}
     .hp-cnt-num{font-size:clamp(26px,8vw,34px);}
     .hp-cnt-grid{gap:20px;}
     .hp-gal-filters{gap:8px;}

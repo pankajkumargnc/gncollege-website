@@ -211,7 +211,7 @@ export default function NotFoundPage() {
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '2px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: 14 }}>
               Or explore
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 100px), 1fr))', gap: 8 }}>
               {SUGGESTIONS.map((s, i) => (
                 <Link key={s.path} to={s.path} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,

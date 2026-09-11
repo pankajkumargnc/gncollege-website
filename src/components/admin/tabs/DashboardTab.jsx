@@ -132,7 +132,7 @@ export default function DashboardTab({ notices, events, faculties, placements, p
         <StatCard icon="📄" label="Pages"       count={(pages||[]).length}                               color={T.cyan}  onClick={() => onNavigate('pages')} />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24 }}>
         
         {/* 📈 REAL TRAFFIC ANALYTICS */}
         <div className="card" style={{ padding: 24, border: `1.5px solid #f1f5f9`, background: '#fff', overflow: 'hidden' }}>

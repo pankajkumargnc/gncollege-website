@@ -330,7 +330,7 @@ export default function QuickPublishTab({ logAct }) {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, position: 'relative', zIndex: 10 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 20, position: 'relative', zIndex: 10 }}>
         
         {/* 🤖 AI CREATION CORE (Top Section) */}
         <div className="qp-card" style={{ background: '#f1f5f9', gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: `1.5px solid ${NAVY}15`, flexWrap: 'wrap', gap: 20 }}>
@@ -369,7 +369,7 @@ export default function QuickPublishTab({ logAct }) {
           </div>
 
           <form onSubmit={handleMultiChannelDispatch}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: 16, marginBottom: 16 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: NAVY, marginBottom: 6, textTransform: 'uppercase' }}>
                   📌 Notice / Announcement Title *

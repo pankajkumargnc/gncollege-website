@@ -107,7 +107,7 @@ const PageLoader = () => (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
             <div className="premium-skeleton" style={{ width: 250, height: 40, borderRadius: 8 }}></div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '20px' }}>
             {[...Array(6)].map((_, i) => (
                 <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                     <div className="premium-skeleton" style={{ width: '100%', height: 200, borderRadius: 12 }}></div>

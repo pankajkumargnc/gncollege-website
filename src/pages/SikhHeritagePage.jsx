@@ -263,7 +263,7 @@ export default function SikhHeritagePage() {
         /* ── Principle Pill Grids ── */
         .sh-principles-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
           gap: 20px;
           margin-top: 24px;
         }
@@ -351,7 +351,7 @@ export default function SikhHeritagePage() {
         /* ── Badges & Quotas ── */
         .sh-badge-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
           gap: 16px;
           margin: 24px 0;
         }
@@ -565,7 +565,7 @@ export default function SikhHeritagePage() {
               </div>
             </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 30, alignItems: 'center' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 30, alignItems: 'center' }}>
               <div>
                 <h3 style={{ fontSize: 20, fontWeight: 800, color: '#0f2347', margin: '0 0 12px' }}>
                   The Vision of Sardar Pritam Singh Sahni
@@ -723,7 +723,7 @@ export default function SikhHeritagePage() {
               </div>
             </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24 }}>
               <div style={{ background: '#f8fafc', borderRadius: 16, padding: '24px', border: '1px solid #e2e8f0' }}>
                 <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0f2347', margin: '0 0 10px' }}>
                   Campus Gurudwara Sahib

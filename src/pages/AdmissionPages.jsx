@@ -93,7 +93,7 @@ export function DocumentRequired() {
       <PageHeader title={content?.title || "Documents Required"} subtitle={content?.subtitle || "Bring these documents during physical verification at the campus."} icon="📂" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: 16 }}>
             {docs.map((d, i) => (
               <div key={i} style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #e2e8f0', display: 'flex', gap: 16, boxShadow: '0 4px 15px rgba(15,35,71,0.03)' }}>
                 <div style={{ fontSize: 32 }}>{d.type === 'Original' ? '📜' : d.type === 'Print' ? 's🖨️' : '📄'}</div>
@@ -287,7 +287,7 @@ export function IntakeCapacity() {
       <PageHeader title="Intake Capacity" subtitle="Subject-wise maximum seat availability for the current academic session." icon="🪑" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 20 }}>
             {data.map((d, i) => (
               <div key={i} style={{ background: '#fff', borderRadius: 20, padding: 30, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.04)', display: 'flex', alignItems: 'center', gap: 20 }}>
                 <div style={{ width: 64, height: 64, borderRadius: 16, background: `${d.color}15`, color: d.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32 }}>{d.icon}</div>

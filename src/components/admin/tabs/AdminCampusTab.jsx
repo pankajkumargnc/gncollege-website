@@ -200,7 +200,7 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
             <div style={{ color: NAVY, fontWeight: 700, fontSize: 15, marginBottom: 6 }}>No photos yet</div>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 220px), 1fr))', gap: 16 }}>
             {images.map((img) => (
               <div key={img.id} style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', border: '1.5px solid #e2e8f0', background: '#f8fafc' }}>
                 <div style={{ position: 'relative', height: 160 }}>

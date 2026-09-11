@@ -70,7 +70,7 @@ export function IqacPage() {
       <PageHeader title="Internal Quality Assurance Cell" subtitle="Ensuring and enhancing the academic and administrative performance of the institution." icon="📈" />
       
       <div style={{ maxWidth: 1200, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24, marginBottom: 60 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24, marginBottom: 60 }}>
           {[{ i:'🎯', t:'Quality Benchmarks', d:'Developing parameters for various academic activities.' },
             { i:'📊', t:'Feedback System', d:'Collecting and analyzing feedback from all stakeholders.' },
             { i:'🛠️', t:'Workshops & FDPs', d:'Organizing quality-related seminars and training programs.' }].map((b, i) => (
@@ -90,7 +90,7 @@ export function IqacPage() {
             {docs.length === 0 ? (
               <p style={{ color: '#94a3b8' }}>No reports uploaded yet. (Upload from Admin Panel → Documents)</p>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 16 }}>
                 {docs.map(d => (
                   <a key={d.id} href={d.link} target="_blank" rel="noreferrer" 
                     onClick={(e) => { 
@@ -179,7 +179,7 @@ export function CourseOffered() {
             ))}
           </div>
 
-          <div style={{ background: '#fff', borderRadius: 24, padding: 40, border: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 20 }}>
+          <div style={{ background: '#fff', borderRadius: 24, padding: 40, border: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 20 }}>
             {courses[activeTab] && courses[activeTab].map((subject, i) => (
               <div key={i} style={{ background: '#f8fafc', padding: 20, borderRadius: 16, border: '1.5px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 14 }}>
                 <div style={{ background: `${GOLD}20`, color: '#b45309', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>{i+1}</div>
@@ -258,7 +258,7 @@ export function Syllabus() {
               <div style={{ fontSize: 14 }}>Try adjusting your search or upload from Admin Panel.</div>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: 16 }}>
               {filtered.map(s => (
                 <div key={s.id} style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 16, transition: 'transform 0.2s' }} onMouseEnter={e=>e.currentTarget.style.transform='translateY(-3px)'} onMouseLeave={e=>e.currentTarget.style.transform='none'}>
                   <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
@@ -436,7 +436,7 @@ export function PlacementsPage() {
                         </div>
                     </Fade>
                 ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 24 }}>
                         {filtered.map((p, i) => (
                             <Fade key={p.id} delay={i * 0.05}>
                                 <div style={{ background: '#fff', borderRadius: 24, padding: 28, border: '1px solid #e2e8f0', height: '100%', position: 'relative', transition: 'all 0.3s cubic-bezier(.22,1,.36,1)', textAlign: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.boxShadow = '0 20px 40px rgba(15,35,71,0.08)'; e.currentTarget.style.borderColor = GOLD + '40'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#e2e8f0'; }}>
