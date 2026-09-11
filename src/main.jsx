@@ -52,6 +52,15 @@ class RootErrorBoundary extends React.Component {
   }
 }
 
+// Auto update service worker on load if new version is deployed
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const reg of registrations) {
+      reg.update().catch(() => {});
+    }
+  }).catch(() => {});
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <RootErrorBoundary>
     <Router>
