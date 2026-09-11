@@ -190,6 +190,38 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
     return false;
   };
 
+  const renderBadge = (badge, badgeColor) => {
+    if (!badge) return null;
+    const colorMap = {
+      gold: { bg: 'rgba(244, 160, 35, 0.18)', text: '#f4a023', border: 'rgba(244, 160, 35, 0.4)' },
+      green: { bg: 'rgba(16, 185, 129, 0.18)', text: '#10b981', border: 'rgba(16, 185, 129, 0.4)' },
+      red: { bg: 'rgba(239, 68, 68, 0.18)', text: '#ef4444', border: 'rgba(239, 68, 68, 0.4)' },
+      blue: { bg: 'rgba(59, 130, 246, 0.18)', text: '#3b82f6', border: 'rgba(59, 130, 246, 0.4)' },
+      purple: { bg: 'rgba(168, 85, 247, 0.18)', text: '#a855f7', border: 'rgba(168, 85, 247, 0.4)' }
+    };
+    const c = colorMap[badgeColor] || colorMap.gold;
+    return (
+      <span style={{
+        fontSize: '9px',
+        fontWeight: 800,
+        letterSpacing: '0.4px',
+        textTransform: 'uppercase',
+        padding: '1px 5px',
+        borderRadius: '4px',
+        background: c.bg,
+        color: c.text,
+        border: `1px solid ${c.border}`,
+        marginLeft: '6px',
+        whiteSpace: 'nowrap',
+        lineHeight: '1.2',
+        display: 'inline-block',
+        verticalAlign: 'middle'
+      }}>
+        {badge}
+      </span>
+    );
+  };
+
   return (
     <>
       {/* Spacer to prevent content jump when navbar becomes fixed */}
@@ -450,9 +482,13 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
             zIndex: 250,
             flexWrap: 'nowrap'
           }}>
-            {(navLinks || []).map((l0, l0Index) => (
-              <div key={l0.label}
-                style={{ position: isMobile ? 'relative' : 'static', width: isMobile ? '100%' : 'auto' }}
+            {(navLinks || []).map((l0, l0Index) => {
+              const isMega = !isMobile && (SPOTLIGHT_CARDS[l0.label] || l0.sub?.some(item => item.sub && item.sub.length > 0));
+              const isRightAligned = l0.label === 'More' || l0Index >= (navLinks.length - 2);
+
+              return (
+                <div key={l0.label}
+                  style={{ position: isMobile ? 'relative' : (isMega ? 'static' : 'relative'), width: isMobile ? '100%' : 'auto' }}
                 onMouseEnter={() => {
                   if (closeTimer.current) clearTimeout(closeTimer.current)
                   if (!isMobile) setOpenL1(l0.label)
@@ -600,6 +636,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                                   >
                                     <span style={{ color: COLORS.gold, fontSize: '10px' }}>▸</span>
                                     <span>{link.label}</span>
+                                    {renderBadge(link.badge, link.badgeColor)}
                                   </Link>
                                 ))}
                               </div>
@@ -631,6 +668,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                                   >
                                     <span style={{ color: isDark ? '#64748b' : '#94a3b8', fontSize: '8px' }}>•</span>
                                     <span>{item.label}</span>
+                                    {renderBadge(item.badge, item.badgeColor)}
                                   </Link>
                                 ))}
                               </div>
@@ -662,6 +700,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                                   >
                                     <span style={{ color: COLORS.gold, fontSize: '8px' }}>•</span>
                                     <span>{item.label}</span>
+                                    {renderBadge(item.badge, item.badgeColor)}
                                   </Link>
                                 ))}
                               </div>
@@ -708,6 +747,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                                               }}
                                             >
                                               {l3.label}
+                                              {renderBadge(l3.badge, l3.badgeColor)}
                                             </Link>
                                           ))}
                                         </div>
@@ -726,6 +766,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                                       >
                                         <span style={{ color: isDark ? '#64748b' : '#94a3b8', fontSize: '8px' }}>•</span>
                                         <span>{item.label}</span>
+                                        {renderBadge(item.badge, item.badgeColor)}
                                       </Link>
                                     )}
                                   </React.Fragment>
@@ -768,6 +809,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                                     >
                                       <span style={{ color: COLORS.gold, fontSize: '10px' }}>▸</span>
                                       <span>{link.label}</span>
+                                      {renderBadge(link.badge, link.badgeColor)}
                                     </Link>
                                   ))}
                                 </div>
@@ -834,6 +876,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                                         >
                                           <span style={{ color: isDark ? '#64748b' : '#94a3b8', fontSize: '8px' }}>•</span>
                                           <span>{subItem.label}</span>
+                                          {renderBadge(subItem.badge, subItem.badgeColor)}
                                         </Link>
                                       )}
                                     </React.Fragment>
@@ -926,19 +969,21 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                   return (
                     <div className="nav-dropdown-panel" style={{
                       position: isMobile ? 'static' : 'absolute',
-                      top: '100%', left: 0,
+                      top: '100%',
+                      left: isMobile ? 0 : (isRightAligned ? 'auto' : 0),
+                      right: isMobile ? 'auto' : (isRightAligned ? 0 : 'auto'),
                       background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.95)',
                       backdropFilter: isMobile ? 'none' : 'blur(20px)',
                       WebkitBackdropFilter: isMobile ? 'none' : 'blur(20px)',
                       border: isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.6)',
-                      minWidth: isMobile ? '100%' : 210,
+                      minWidth: isMobile ? '100%' : 220,
                       boxShadow: isMobile ? 'none' : '0 15px 35px rgba(0,0,0,.12)',
                       borderTop: isMobile ? 'none' : '3px solid ' + COLORS.navy,
-                      borderRadius: isMobile ? 8 : '0 0 12px 12px',
+                      borderRadius: isMobile ? 8 : (isRightAligned ? '12px 0 12px 12px' : '0 0 12px 12px'),
                       zIndex: 200, 
                       padding: isMobile ? '5px 0' : '8px 0',
                       animation: isMobile ? 'none' : 'dropdownFadeDown 0.25s ease-out forwards',
-                      transformOrigin: 'top center'
+                      transformOrigin: isRightAligned ? 'top right' : 'top left'
                     }}>
                       {l0.sub.map(l1 => (
                         <div key={l1.label}
@@ -957,8 +1002,9 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                             }}
                           >
                             <Link to={getRoute(l1.href)} className="nav-hover-link dropdown-link-text"
-                              style={{ fontSize: 13, fontWeight: 600, color: COLORS.navy, display: 'block', width: '100%', textDecoration: 'none' }}>
-                              {l1.label}
+                              style={{ fontSize: 13, fontWeight: 600, color: COLORS.navy, display: 'flex', alignItems: 'center', width: '100%', textDecoration: 'none' }}>
+                              <span>{l1.label}</span>
+                              {renderBadge(l1.badge, l1.badgeColor)}
                             </Link>
                             {l1.sub && <span style={{ fontSize: 12, color: COLORS.gold, marginLeft: 8 }}>{isMobile ? (openL2 === l1.label ? '▴' : '▾') : '▶'}</span>}
                           </div>
@@ -967,7 +1013,9 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                           {l1.sub && openL2 === l1.label && (
                             <div className="nav-dropdown-panel" style={{
                               position: isMobile ? 'static' : 'absolute',
-                              top: 0, left: '100%',
+                              top: 0,
+                              left: isMobile ? 'auto' : (isRightAligned ? 'auto' : '100%'),
+                              right: isMobile ? 'auto' : (isRightAligned ? '100%' : 'auto'),
                               background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.95)',
                               backdropFilter: isMobile ? 'none' : 'blur(20px)',
                               WebkitBackdropFilter: isMobile ? 'none' : 'blur(20px)',
@@ -975,12 +1023,12 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                               minWidth: isMobile ? '100%' : 210,
                               boxShadow: isMobile ? 'none' : '5px 5px 25px rgba(0,0,0,.12)',
                               borderTop: isMobile ? 'none' : '3px solid ' + COLORS.gold,
-                              borderRadius: isMobile ? 4 : '0 12px 12px 12px',
+                              borderRadius: isMobile ? 4 : (isRightAligned ? '12px 0 12px 12px' : '0 12px 12px 12px'),
                               margin: isMobile ? '0 16px 10px' : 0,
                               borderLeft: isMobile ? '2px solid ' + COLORS.gold : 'none',
                               padding: isMobile ? '5px 0' : '8px 0',
                               animation: isMobile ? 'none' : 'dropdownFadeSide 0.25s ease-out forwards',
-                              transformOrigin: 'left top'
+                              transformOrigin: isRightAligned ? 'right top' : 'left top'
                             }}>
                               {l1.sub.map(l2 => (
                                 <div key={l2.label}
@@ -999,8 +1047,9 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                                     }}
                                   >
                                     <Link to={getRoute(l2.href)} className="nav-hover-link dropdown-link-text"
-                                      style={{ fontSize: 12.5, fontWeight: 600, color: '#444', display: 'block', width: '100%', textDecoration: 'none' }}>
-                                      {l2.label}
+                                      style={{ fontSize: 12.5, fontWeight: 600, color: '#444', display: 'flex', alignItems: 'center', width: '100%', textDecoration: 'none' }}>
+                                      <span>{l2.label}</span>
+                                      {renderBadge(l2.badge, l2.badgeColor)}
                                     </Link>
                                     {l2.sub && <span style={{ fontSize: 11, color: COLORS.gold, marginLeft: 8 }}>{isMobile ? (openL3 === l2.label ? '▴' : '▾') : '▶'}</span>}
                                   </div>
@@ -1009,7 +1058,9 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                                   {l2.sub && openL3 === l2.label && (
                                     <div className="nav-dropdown-panel" style={{
                                       position: isMobile ? 'static' : 'absolute',
-                                      top: 0, left: '100%',
+                                      top: 0,
+                                      left: isMobile ? 'auto' : (isRightAligned ? 'auto' : '100%'),
+                                      right: isMobile ? 'auto' : (isRightAligned ? '100%' : 'auto'),
                                       background: isMobile ? '#fff' : 'rgba(255, 255, 255, 0.95)',
                                       backdropFilter: isMobile ? 'none' : 'blur(20px)',
                                       WebkitBackdropFilter: isMobile ? 'none' : 'blur(20px)',
@@ -1017,23 +1068,24 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                                       minWidth: isMobile ? '100%' : 210,
                                       boxShadow: isMobile ? 'none' : '5px 5px 25px rgba(0,0,0,.12)',
                                       borderTop: isMobile ? 'none' : '3px solid ' + COLORS.navy,
-                                      borderRadius: isMobile ? 4 : '0 12px 12px 12px',
+                                      borderRadius: isMobile ? 4 : (isRightAligned ? '12px 0 12px 12px' : '0 12px 12px 12px'),
                                       margin: isMobile ? '0 16px 10px' : 0,
                                       borderLeft: isMobile ? '2px solid ' + COLORS.navy : 'none',
                                       padding: isMobile ? '5px 0' : '8px 0',
                                       animation: isMobile ? 'none' : 'dropdownFadeSide 0.25s ease-out forwards',
-                                      transformOrigin: 'left top'
+                                      transformOrigin: isRightAligned ? 'right top' : 'left top'
                                     }}>
                                       {l2.sub.map(l3 => (
                                         <Link key={l3.label} to={getRoute(l3.href)} className="nav-hover-link nav-dropdown-item dropdown-link-text"
                                           style={{
-                                            display: 'block', padding: '6px 16px',
+                                            display: 'flex', alignItems: 'center', padding: '6px 16px',
                                             fontSize: 12, color: '#555',
                                             borderBottom: isMobile ? 'none' : '1px solid rgba(15, 35, 71, 0.03)',
                                             textDecoration: 'none',
                                           }}
                                         >
-                                          {l3.label}
+                                          <span>{l3.label}</span>
+                                          {renderBadge(l3.badge, l3.badgeColor)}
                                         </Link>
                                       ))}
                                     </div>
@@ -1048,7 +1100,8 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                   );
                 })()}
               </div>
-            ))}
+            );
+          })}
 
             {/* Admin Portal is now located in the Footer */}
           </div>

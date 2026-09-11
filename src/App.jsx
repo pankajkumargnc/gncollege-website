@@ -45,9 +45,11 @@ export default function App() {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // ✅ PWA: Request Notification Permission
-    if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
+    // ✅ PWA: Request Notification Permission safely
+    if (typeof window !== 'undefined' && "Notification" in window && Notification.permission === "default") {
+      try {
+        Notification.requestPermission().catch(() => {});
+      } catch (e) {}
     }
 
     return () => {
@@ -58,18 +60,35 @@ export default function App() {
 
   // ✅ PWA: New Notice Push Simulator (Students only)
   useEffect(() => {
-    if (isAdminRoute || !notices?.length || !("Notification" in window) || Notification.permission !== "granted") return;
-    
-    const newest = notices[0];
-    if (newest && newest.isNew) {
-      const lastNotified = localStorage.getItem('gnc_last_notified');
-      if (lastNotified !== newest.id) {
-        new Notification("📢 New College Notice", {
-          body: newest.text?.substring(0, 100),
-          icon: `${import.meta.env.BASE_URL}images/logo.webp`
-        });
-        localStorage.setItem('gnc_last_notified', newest.id);
+    try {
+      if (isAdminRoute || !notices?.length || !("Notification" in window) || Notification.permission !== "granted") return;
+      
+      const newest = notices[0];
+      if (newest && newest.isNew) {
+        const lastNotified = localStorage.getItem('gnc_last_notified');
+        if (lastNotified !== newest.id) {
+          const title = "📢 New College Notice";
+          const options = {
+            body: newest.text?.substring(0, 100) || 'New update published',
+            icon: `${import.meta.env.BASE_URL}images/logo.webp`
+          };
+
+          // On mobile Android / Chrome, new Notification() throws Illegal Constructor.
+          // We MUST use ServiceWorkerRegistration.showNotification() or catch the error.
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(reg => {
+              reg.showNotification(title, options);
+            }).catch(() => {
+              try { new Notification(title, options); } catch (e) {}
+            });
+          } else {
+            try { new Notification(title, options); } catch (e) {}
+          }
+          localStorage.setItem('gnc_last_notified', newest.id);
+        }
       }
+    } catch (err) {
+      console.warn('Push notification safe-fail:', err);
     }
   }, [notices, isAdminRoute]);
 

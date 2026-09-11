@@ -430,9 +430,11 @@ const usePdfInterceptor = () => {
 // ─────────────────────────────────────────────────────────────────────────────
 // Page Hero Banner
 // ─────────────────────────────────────────────────────────────────────────────
-const PageHero = ({ title }) => (
+const PageHero = ({ title, featuredImage }) => (
   <div style={{
-    background: 'linear-gradient(135deg, #0f2347 0%, #1a3a7c 60%, #0f2347 100%)',
+    background: featuredImage
+      ? `linear-gradient(rgba(15,35,71,0.85), rgba(15,35,71,0.85)), url(${featuredImage}) center/cover no-repeat`
+      : 'linear-gradient(135deg, #0f2347 0%, #1a3a7c 60%, #0f2347 100%)',
     padding: 'clamp(50px, 10vw, 80px) 24px clamp(40px, 8vw, 60px)',
     textAlign: 'center',
     position: 'relative',
@@ -511,6 +513,39 @@ const ShortcodeRenderer = ({ code, gallery, events, faculties }) => {
   if (tag === 'EVENTS')  return <Suspense fallback={loadingBlock}><EventsPage headless /></Suspense>; 
   if (tag === 'STAFF')   return <Suspense fallback={loadingBlock}><StaffPage faculties={faculties} type={val === 'non-teaching' ? 'non-teaching-staff' : 'teaching-staff'} headless /></Suspense>;
   if (tag === 'TABLE')   return <div style={{ background: '#fff', padding: 20, borderRadius: 12, border: '1px dashed #ccc', textAlign: 'center', fontSize: 13 }}>[ Table Placeholder - Use Jodit Table Tool instead ]</div>;
+  if (tag === 'NOTICES') {
+    return (
+      <div style={{ padding: '24px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', margin: '24px 0' }}>
+        <h3 style={{ margin: '0 0 10px 0', color: '#0f2347', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>📢</span> Institutional Notices & Circulars
+        </h3>
+        <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+          Please check the latest college notices, exam schedules, and circulars on the <a href="#/notifications" style={{ color: '#f4a023', fontWeight: 700 }}>Notice Board ›</a>
+        </p>
+      </div>
+    );
+  }
+  if (tag === 'BANNER') {
+    return (
+      <div style={{
+        background: 'linear-gradient(135deg, #0f2347, #1e3a8a)',
+        color: '#fff',
+        padding: '28px',
+        borderRadius: '16px',
+        borderLeft: '6px solid #f4a023',
+        margin: '24px 0',
+        boxShadow: '0 8px 24px rgba(15,35,71,0.12)'
+      }}>
+        <div style={{ fontSize: '11px', textTransform: 'uppercase', color: '#f4a023', fontWeight: 800, letterSpacing: '1px', marginBottom: '6px' }}>
+          Guru Nanak College, Dhanbad
+        </div>
+        <h2 style={{ margin: '0 0 8px 0', color: '#fff', fontSize: '22px' }}>Excellence in Higher Education Since 1970</h2>
+        <p style={{ margin: 0, color: '#e2e8f0', fontSize: '14px', lineHeight: 1.6 }}>
+          NAAC Accredited Premier Minority Institution | Affiliated to Binod Bihari Mahto Koyalanchal University (BBMKU)
+        </p>
+      </div>
+    );
+  }
 
   return <span style={{ color: 'red', fontWeight: 800 }}>{code}</span>;
 };
@@ -519,7 +554,7 @@ const renderWithShortcodes = (html, props) => {
   if (!html) return null;
   
   // Regex to find [TAG:VAL]
-  const regex = /(\[GALLERY:[^\]]+\]|\[EVENTS:[^\]]+\]|\[STAFF:[^\]]+\]|\[TABLE:[^\]]+\])/g;
+  const regex = /(\[GALLERY:[^\]]+\]|\[EVENTS:[^\]]+\]|\[STAFF:[^\]]+\]|\[TABLE:[^\]]+\]|\[NOTICES:[^\]]+\]|\[BANNER:[^\]]+\])/g;
   const parts = html.split(regex);
 
   return parts.map((part, i) => {
@@ -590,7 +625,7 @@ const PageViewer = ({ path, content, title, gallery, events, faculties }) => {
 
   return (
     <div style={{ minHeight: '60vh', background: '#f8fafc' }}>
-      <PageHero title={page?.title || title || 'Page'} />
+      <PageHero title={page?.title || title || 'Page'} featuredImage={page?.featuredImage} />
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 24px 80px' }}>
         <div className="gnc-prose" onClick={handleContentClick}>
            {page?.sanitizedContent ? (
@@ -656,7 +691,7 @@ export const PageViewerStandalone = () => {
 
   return (
     <div style={{ minHeight: '60vh', background: '#f8fafc' }}>
-      <PageHero title={page?.title || 'Page'} />
+      <PageHero title={page?.title || 'Page'} featuredImage={page?.featuredImage} />
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 24px 80px' }}>
         <div className="gnc-prose" onClick={handleContentClick}>
            {renderWithShortcodes(page?.content, siteData)}

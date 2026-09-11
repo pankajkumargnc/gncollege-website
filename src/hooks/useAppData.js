@@ -17,43 +17,67 @@ export default function useAppData() {
   const [navLinks, setNavLinks]           = useState([]);
   const [pdfReports, setPdfReports]       = useState([]);
 
-  // Navigation — cached, not live
+  // Navigation — cached, but instant sync via gnc_nav_updated event
   useEffect(() => {
     const CACHE_KEY = 'gnc_nav_v1';
     const CACHE_TS_KEY = 'gnc_nav_v1_ts';
     const NAV_TTL = 30 * 60 * 1000; // 30 minutes
 
-    try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      const ts = localStorage.getItem(CACHE_TS_KEY);
-      if (cached && ts && Date.now() - Number(ts) < NAV_TTL) {
-        setNavLinks(JSON.parse(cached));
-        return;
-      }
-    } catch (_) {}
-
     const buildTree = (flat, pid = null) => {
-      const children = flat.filter(m => (m.parentId || null) === pid);
+      const children = flat.filter(m => (m.parentId || null) === pid && m.isActive !== false);
       if (!children.length) return null;
-      return children.map(c => ({ label: c.label, href: c.href, sub: buildTree(flat, c.id) }));
+      return children.map(c => ({
+        label: c.label,
+        href: c.href,
+        icon: c.icon || '',
+        badge: c.badge || '',
+        badgeColor: c.badgeColor || '',
+        subtitle: c.subtitle || '',
+        isExternal: c.isExternal || false,
+        sub: buildTree(flat, c.id)
+      }));
     };
 
-    if (!db) {
-      console.warn('[Backend] db not initialized in useAppData');
-      return;
-    }
-
-    getDocs(query(collection(db, 'navigation'), orderBy('order', 'asc')))
-      .then(snap => {
-        const flat = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        const tree = buildTree(flat) || [];
-        setNavLinks(tree);
+    const fetchNavigation = (forceBust = false) => {
+      if (!forceBust) {
         try {
-          localStorage.setItem(CACHE_KEY, JSON.stringify(tree));
-          localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
+          const cached = localStorage.getItem(CACHE_KEY);
+          const ts = localStorage.getItem(CACHE_TS_KEY);
+          if (cached && ts && Date.now() - Number(ts) < NAV_TTL) {
+            setNavLinks(JSON.parse(cached));
+            return;
+          }
         } catch (_) {}
-      })
-      .catch(err => console.error('[Backend] navigation fetch error:', err));
+      }
+
+      if (!db) return;
+
+      getDocs(query(collection(db, 'navigation'), orderBy('order', 'asc')))
+        .then(snap => {
+          const flat = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          const tree = buildTree(flat) || [];
+          setNavLinks(tree);
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(tree));
+            localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
+          } catch (_) {}
+        })
+        .catch(err => console.error('[Backend] navigation fetch error:', err));
+    };
+
+    fetchNavigation();
+
+    // ⚡ Instant Cache-Busting Event from Admin MenuBuilder
+    const handleNavUpdated = () => {
+      try {
+        localStorage.removeItem(CACHE_KEY);
+        localStorage.removeItem(CACHE_TS_KEY);
+      } catch (_) {}
+      fetchNavigation(true);
+    };
+
+    window.addEventListener('gnc_nav_updated', handleNavUpdated);
+    return () => window.removeEventListener('gnc_nav_updated', handleNavUpdated);
   }, []);
 
   // Live + Cached collections

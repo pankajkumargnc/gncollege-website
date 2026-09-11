@@ -99,12 +99,24 @@ export default function QuickPublishTab({ logAct }) {
       }
 
       // 4. Browser Push Notification
-      if (mcPush && 'Notification' in window) {
-        if (Notification.permission === 'granted') {
-          new Notification('Guru Nanak College Notice', {
+      if (mcPush && 'Notification' in window && Notification.permission === 'granted') {
+        try {
+          const notifTitle = 'Guru Nanak College Notice';
+          const notifOptions = {
             body: mcTitle.trim(),
             icon: 'images/logo.webp'
-          });
+          };
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(reg => {
+              reg.showNotification(notifTitle, notifOptions);
+            }).catch(() => {
+              try { new Notification(notifTitle, notifOptions); } catch (e) {}
+            });
+          } else {
+            try { new Notification(notifTitle, notifOptions); } catch (e) {}
+          }
+        } catch (err) {
+          console.warn('Push notification safe-fail:', err);
         }
       }
 
