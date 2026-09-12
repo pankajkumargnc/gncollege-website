@@ -17,8 +17,12 @@ export default function SettingsTab({ logAct }) {
     phone: '', email: '',
     facebook: '', twitter: '', youtube: '', linkedin: '',
     footerText: '', maintenanceMode: false, imgbbKey: '',
-  }, ['email', 'phone', 'imgbbKey']); // 🔐 These PII fields won't be saved to localStorage
+    geminiApiKey: '',
+  }, ['email', 'phone', 'imgbbKey', 'geminiApiKey']); // 🔐 These sensitive fields won't be saved to localStorage
   const [siteLoading, setSiteLoading] = useState(false);
+  const [showGeminiKey, setShowGeminiKey] = useState(false);
+  const [testingGemini, setTestingGemini] = useState(false);
+  const [geminiTestStatus, setGeminiTestStatus] = useState(null);
 
   useEffect(() => {
     getDoc(doc(db, 'settings', 'site'))
@@ -27,16 +31,51 @@ export default function SettingsTab({ logAct }) {
           const d = s.data();
           setSiteCfg(prev => ({ ...prev, ...d }));
           if (d.imgbbKey) window.GN_IMGBB_KEY = d.imgbbKey;
+          if (d.geminiApiKey) window.GNC_GEMINI_API_KEY = d.geminiApiKey;
         }
       })
       .catch(() => {});
   }, []);
+
+  const testGeminiConnection = async () => {
+    const key = (siteCfg.geminiApiKey || '').trim();
+    if (!key) {
+      toast.error('Pehle Gemini API key daaliye!');
+      return;
+    }
+    setTestingGemini(true);
+    setGeminiTestStatus(null);
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: 'Respond with exactly: GNC AI Online' }] }]
+          })
+        }
+      );
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error?.message || 'API Key validation failed');
+      }
+      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      setGeminiTestStatus({ success: true, message: `✅ Gemini Connected! Model response: "${reply?.trim()}"` });
+      toast.success('Gemini AI API Key verified successfully! 🚀');
+    } catch (err) {
+      setGeminiTestStatus({ success: false, message: `❌ Error: ${err.message}` });
+      toast.error(`Gemini validation error: ${err.message}`);
+    }
+    setTestingGemini(false);
+  };
 
   const saveSite = async e => {
     e.preventDefault(); setSiteLoading(true);
     try {
       await setDoc(doc(db, 'settings', 'site'), { ...siteCfg, updatedAt: serverTimestamp() });
       if (siteCfg.imgbbKey) window.GN_IMGBB_KEY = siteCfg.imgbbKey;
+      if (siteCfg.geminiApiKey) window.GNC_GEMINI_API_KEY = siteCfg.geminiApiKey;
       
       clearCache('site_settings');
       toast.success('Settings saved & live synced! 🎉');
@@ -133,6 +172,87 @@ export default function SettingsTab({ logAct }) {
               padding: '6px 12px 6px 20px', display: 'inline-flex', alignItems: 'center', gap: 6
             }}>
               \u2705 ImgBB key set \u2014 will work on all upload tabs
+            </div>
+          )}
+        </div>
+
+        {/* Google Gemini AI Chatbot */}
+        <div className="settings-group">
+          <div className="settings-group-title">🤖 Google Gemini AI Chatbot Configuration</div>
+          <div style={{
+            background: '#f0fdf4', border: '1px solid #bbf7d0',
+            borderRadius: 10, padding: '12px 16px', margin: '12px 20px',
+            fontSize: 12.5, color: '#166534', lineHeight: 1.7
+          }}>
+            <strong>How to get a 100% Free Gemini API Key:</strong><br />
+            1. Go to Google AI Studio: <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer"
+              style={{ color: '#15803d', fontWeight: 800, textDecoration: 'underline' }}>aistudio.google.com</a><br />
+            2. Sign in with your Google account and click <strong>"Get API key"</strong> ➜ <strong>"Create API key"</strong>.<br />
+            3. Paste the key below, click <strong>"⚡ Test Connection"</strong>, and <strong>Save</strong>.<br />
+            <em>Yeh key website ke AI Chatbot ko live Gemini AI powers deti hai aur public se safe/hidden rehti hai.</em>
+          </div>
+
+          <div className="settings-row">
+            <label className="alabel" style={{ minWidth: 140, margin: 0 }}>Gemini API Key</label>
+            <div style={{ flex: 1, display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input
+                className="ainp"
+                type={showGeminiKey ? 'text' : 'password'}
+                value={siteCfg.geminiApiKey || ''}
+                onChange={e => setSiteCfg(d => ({ ...d, geminiApiKey: e.target.value }))}
+                placeholder="Paste AIzaSy... key from Google AI Studio"
+                style={{ fontFamily: 'monospace', flex: 1 }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowGeminiKey(!showGeminiKey)}
+                className="abtn abtn-outline"
+                style={{ padding: '8px 12px', fontSize: 12 }}
+                title={showGeminiKey ? 'Hide key' : 'Show key'}
+              >
+                {showGeminiKey ? '🙈 Hide' : '👁️ Show'}
+              </button>
+              <button
+                type="button"
+                onClick={testGeminiConnection}
+                disabled={testingGemini || !siteCfg.geminiApiKey}
+                className="abtn"
+                style={{
+                  background: '#0f2347',
+                  color: '#f59e0b',
+                  border: '1px solid #f59e0b',
+                  padding: '8px 14px',
+                  fontSize: 12,
+                  fontWeight: 800,
+                  opacity: (!siteCfg.geminiApiKey || testingGemini) ? 0.6 : 1
+                }}
+              >
+                {testingGemini ? '⏳ Testing...' : '⚡ Test Connection'}
+              </button>
+            </div>
+          </div>
+
+          {geminiTestStatus && (
+            <div style={{
+              margin: '6px 20px 12px',
+              fontSize: 12,
+              padding: '8px 14px',
+              borderRadius: 8,
+              fontWeight: 600,
+              background: geminiTestStatus.success ? '#dcfce7' : '#fee2e2',
+              color: geminiTestStatus.success ? '#15803d' : '#b91c1c',
+              border: `1px solid ${geminiTestStatus.success ? '#86efac' : '#fca5a5'}`
+            }}>
+              {geminiTestStatus.message}
+            </div>
+          )}
+
+          {siteCfg.geminiApiKey && !geminiTestStatus && (
+            <div style={{
+              fontSize: 12, color: '#065f46', background: '#d1fae5',
+              padding: '6px 12px 6px 20px', display: 'inline-flex', alignItems: 'center', gap: 6
+            }}>
+              ✅ Gemini API Key set — All students will receive live AI responses
             </div>
           )}
         </div>

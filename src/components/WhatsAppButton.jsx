@@ -414,16 +414,21 @@ export default function WhatsAppButton() {
           <div className="wa-popup-header">
             <div className="wa-header-left">
               <div className="wa-avatar">
-                <img src="/images/logo.png" alt="GNC Logo" onError={(e) => { e.currentTarget.src = 'https://gncollege.org/images/logo.png'; }} />
+                <img
+                  src={`${import.meta.env.BASE_URL}images/logo.webp`}
+                  alt="Guru Nanak College Logo"
+                  onError={(e) => { e.currentTarget.src = 'https://gncollege.org/images/logo.webp'; }}
+                />
+                <span className="wa-online-dot" style={{ width: '12px', height: '12px', top: '-2px', right: '-2px' }}></span>
               </div>
               <div className="wa-header-info">
                 <div className="wa-header-title">
-                  Guru Nanak College
-                  <span className="wa-verified-badge" title="Official Verified Support">✓</span>
+                  Guru Nanak College Helpdesk
+                  <span className="wa-verified-badge" title="Official Verified WhatsApp">✓</span>
                 </div>
                 <div className="wa-header-status">
                   <span className="wa-status-dot"></span>
-                  <span>Online • Helpdesk Support</span>
+                  <span>Bhuda Campus • Typically replies in 15 mins</span>
                 </div>
               </div>
             </div>

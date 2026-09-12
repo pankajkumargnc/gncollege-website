@@ -1,5 +1,7 @@
 // src/components/AIChatbot.jsx
 import React, { useState, useEffect, useRef } from 'react';
+import { db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 const COLLEGE_PHONE = '917903340991';
 const CHANCELLOR_PORTAL = 'https://universities.jharkhand.gov.in/';
@@ -83,16 +85,14 @@ export default function AIChatbot() {
   const [messages, setMessages] = useState([
     {
       role: 'model',
-      text: 'Sat Sri Akal! 🙏 Welcome to **Guru Nanak College, Dhanbad**.\n\nI am your **AI Assistant**. How can I help you today with Admissions, Courses, Fees, or Results?',
+      text: 'Sat Sri Akal! 🙏 Welcome to **Guru Nanak College, Dhanbad**.\n\nI am your official **AI Academic Assistant**. How can I help you today with Admissions, Courses, Fees, or Exam Results?',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [customKey, setCustomKey] = useState(() => localStorage.getItem('gnc_gemini_api_key') || '');
-  const [keySavedMessage, setKeySavedMessage] = useState('');
+  const [adminApiKey, setAdminApiKey] = useState('');
   const [isDark, setIsDark] = useState(
     () => document.documentElement.getAttribute('data-theme') === 'dark'
   );
@@ -100,6 +100,23 @@ export default function AIChatbot() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const speechRecognitionRef = useRef(null);
+
+  // Logo URL with base support
+  const logoUrl = `${import.meta.env.BASE_URL}images/logo.webp`;
+
+  // Fetch API key securely from Firestore admin settings
+  useEffect(() => {
+    getDoc(doc(db, 'settings', 'site'))
+      .then(snap => {
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.geminiApiKey) {
+            setAdminApiKey(data.geminiApiKey.trim());
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Dark mode listener
   useEffect(() => {
@@ -170,7 +187,6 @@ export default function AIChatbot() {
   const speakText = (text) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      // Strip markdown tags for speech
       const cleanText = text.replace(/[*_#`[\]()]/g, '').replace(/https?:\/\/\S+/g, '');
       const utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.rate = 1.0;
@@ -187,7 +203,7 @@ export default function AIChatbot() {
       return `Sat Sri Akal! 🎓 **UG & Vocational Admission 2026** at Guru Nanak College is conducted through the official Jharkhand Chancellor Portal.\n\n` +
         `• **Portal Link**: [Apply on Chancellor Portal](${CHANCELLOR_PORTAL})\n` +
         `• **Steps**: Register ➜ Select BBMKU Dhanbad ➜ Select Guru Nanak College ➜ Choose Course (BCA, BBA, B.Com, B.Sc, B.A.) ➜ Upload documents ➜ Submit.\n` +
-        `• For guidance, contact our Admission Desk at **+91 79033 40991** or chat with our Counselor on WhatsApp!`;
+        `• For admission guidance, contact our Admission Desk at **+91 79033 40991** or chat with our Counselor on WhatsApp!`;
     }
 
     if (q.includes('fee') || q.includes('payment') || q.includes('cims') || q.includes('receipt') || q.includes('dues')) {
@@ -273,7 +289,7 @@ export default function AIChatbot() {
 
   // ── CALL GEMINI MULTI-TURN AI ──
   const callGeminiAPI = async (userPrompt, history) => {
-    const activeKey = customKey.trim() || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
+    const activeKey = adminApiKey || window.GNC_GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
 
     if (!activeKey) {
       return null;
@@ -323,9 +339,6 @@ export default function AIChatbot() {
         });
 
         if (!response.ok) {
-          // If 404 or 403, try next model or fallback
-          const errData = await response.json().catch(() => ({}));
-          console.warn(`Gemini model ${model} failed:`, errData);
           continue;
         }
 
@@ -379,24 +392,11 @@ export default function AIChatbot() {
     ]);
   };
 
-  const handleSaveCustomKey = (e) => {
-    e.preventDefault();
-    const clean = customKey.trim();
-    if (clean) {
-      localStorage.setItem('gnc_gemini_api_key', clean);
-      setKeySavedMessage('✅ API Key saved in your browser!');
-    } else {
-      localStorage.removeItem('gnc_gemini_api_key');
-      setKeySavedMessage('ℹ️ Key cleared. Using default college system.');
-    }
-    setTimeout(() => setKeySavedMessage(''), 3000);
-  };
-
   const handleClearChat = () => {
     setMessages([
       {
         role: 'model',
-        text: 'Sat Sri Akal! 🙏 Chat history cleared. How may I assist you now?',
+        text: 'Sat Sri Akal! 🙏 Chat history cleared. How may I assist you now with Guru Nanak College?',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
@@ -406,7 +406,6 @@ export default function AIChatbot() {
   const renderFormattedMessage = (text) => {
     if (!text) return null;
 
-    // Split by newlines
     const lines = text.split('\n');
 
     return (
@@ -416,12 +415,9 @@ export default function AIChatbot() {
             return <div key={lineIdx} style={{ height: '4px' }} />;
           }
 
-          // Bullet points
           const isBullet = line.trim().startsWith('•') || line.trim().startsWith('* ') || line.trim().startsWith('- ');
           const displayLine = isBullet ? line.trim().replace(/^([•*-]\s*)/, '') : line;
 
-          // Parse markdown bold and links
-          // regex for [link text](url)
           const parts = [];
           const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/#\/[^\s)]+)\)/g;
           let lastIndex = 0;
@@ -536,20 +532,21 @@ export default function AIChatbot() {
           border-radius: 50%;
           background: linear-gradient(135deg, #0f2347, #1e3a8a);
           color: #f59e0b;
-          border: 2px solid rgba(245, 158, 11, 0.5);
+          border: 2px solid rgba(245, 158, 11, 0.6);
           box-shadow: 0 10px 28px rgba(15, 35, 71, 0.45);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 26px;
           cursor: pointer;
           z-index: 999999;
           animation: gnc-bot-pulse 2.8s infinite;
           transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          padding: 0;
+          overflow: hidden;
         }
         .gnc-bot-trigger:hover {
           transform: scale(1.08) translateY(-2px);
-          box-shadow: 0 14px 34px rgba(245, 158, 11, 0.4);
+          box-shadow: 0 14px 34px rgba(245, 158, 11, 0.45);
           border-color: #f59e0b;
         }
         .gnc-bot-window {
@@ -588,21 +585,21 @@ export default function AIChatbot() {
           transform: translateY(-1px);
         }
         .gnc-action-btn-small {
-          background: transparent;
-          border: none;
-          color: inherit;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          color: #fff;
           cursor: pointer;
-          padding: 4px 6px;
-          border-radius: 6px;
-          opacity: 0.7;
+          padding: 5px 8px;
+          border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
           transition: all 0.2s;
+          font-size: 13px;
         }
         .gnc-action-btn-small:hover {
-          opacity: 1;
-          background: rgba(255, 255, 255, 0.15);
+          background: rgba(255, 255, 255, 0.25);
+          transform: scale(1.05);
         }
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
@@ -615,7 +612,16 @@ export default function AIChatbot() {
         aria-label={isOpen ? "Close GNC Assistant" : "Open GNC Assistant"}
         title="GNC AI Assistant"
       >
-        {isOpen ? '✕' : '🤖'}
+        {isOpen ? (
+          <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#f59e0b' }}>✕</span>
+        ) : (
+          <img
+            src={logoUrl}
+            alt="GNC Logo"
+            style={{ width: '38px', height: '38px', objectFit: 'contain' }}
+            onError={(e) => { e.currentTarget.src = 'https://gncollege.org/images/logo.webp'; }}
+          />
+        )}
       </button>
 
       {/* Main AI Chat Window */}
@@ -623,52 +629,75 @@ export default function AIChatbot() {
         <div className="gnc-bot-window" role="dialog" aria-modal="true" aria-label="GNC AI Assistant">
           {/* Header */}
           <div style={{
-            background: 'linear-gradient(135deg, #0f2347, #1e3a8a)',
+            background: 'linear-gradient(135deg, #09152b, #0f2347)',
             padding: '14px 18px',
             color: '#fff',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            borderBottom: '1px solid rgba(245, 158, 11, 0.3)'
+            borderBottom: '2px solid rgba(245, 158, 11, 0.4)',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.15)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {/* College Logo Avatar */}
               <div style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '12px',
-                background: 'rgba(245, 158, 11, 0.15)',
-                border: '1px solid rgba(245, 158, 11, 0.5)',
+                width: '44px',
+                height: '44px',
+                borderRadius: '50%',
+                background: '#ffffff',
+                border: '2px solid #f59e0b',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '20px'
+                boxShadow: '0 0 10px rgba(245, 158, 11, 0.4)',
+                position: 'relative',
+                flexShrink: 0
               }}>
-                🎓
+                <img
+                  src={logoUrl}
+                  alt="Guru Nanak College Logo"
+                  style={{ width: '32px', height: '32px', objectFit: 'contain' }}
+                  onError={(e) => { e.currentTarget.src = 'https://gncollege.org/images/logo.webp'; }}
+                />
+                <span style={{
+                  position: 'absolute',
+                  bottom: '-1px',
+                  right: '-1px',
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  background: '#10b981',
+                  border: '2px solid #09152b',
+                  boxShadow: '0 0 6px #10b981'
+                }}></span>
               </div>
-              <div>
-                <div style={{ fontWeight: 800, fontSize: '14px', color: '#f59e0b', letterSpacing: '0.3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  GNC AI Assistant
-                  <span style={{ fontSize: '10px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', padding: '1px 6px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
-                    Gemini Live
+
+              {/* Title & Accreditation */}
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ fontWeight: 900, fontSize: '14px', color: '#ffffff', letterSpacing: '0.2px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  Guru Nanak College
+                  <span style={{
+                    fontSize: '9.5px',
+                    background: 'rgba(245, 158, 11, 0.2)',
+                    color: '#f59e0b',
+                    border: '1px solid rgba(245, 158, 11, 0.5)',
+                    padding: '1px 6px',
+                    borderRadius: '6px',
+                    fontWeight: 800
+                  }}>
+                    Estd. 1970
                   </span>
                 </div>
-                <div style={{ fontSize: '11px', opacity: 0.85, display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
-                  Official College Knowledge Base
+                <div style={{ fontSize: '11px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
+                  <span style={{ color: '#38bdf8', fontWeight: 600 }}>NAAC Accredited</span>
+                  <span>•</span>
+                  <span style={{ color: '#34d399', fontWeight: 700 }}>AI Counselor Live</span>
                 </div>
               </div>
             </div>
 
             {/* Header Actions */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <button
-                onClick={() => setShowSettings(!showSettings)}
-                className="gnc-action-btn-small"
-                title="API Settings"
-                aria-label="AI Settings"
-              >
-                ⚙️
-              </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <button
                 onClick={handleClearChat}
                 className="gnc-action-btn-small"
@@ -682,66 +711,12 @@ export default function AIChatbot() {
                 className="gnc-action-btn-small"
                 title="Close Window"
                 aria-label="Close Assistant"
-                style={{ fontSize: '16px', fontWeight: 'bold' }}
+                style={{ fontSize: '14px', fontWeight: 'bold' }}
               >
                 ✕
               </button>
             </div>
           </div>
-
-          {/* Settings Drawer (if opened) */}
-          {showSettings && (
-            <div style={{
-              background: isDark ? '#1e293b' : '#f8fafc',
-              borderBottom: `1px solid ${borderModal}`,
-              padding: '12px 16px',
-              fontSize: '12px'
-            }}>
-              <div style={{ fontWeight: 700, color: textModal, marginBottom: '6px' }}>
-                🔑 Custom Gemini API Key (Optional)
-              </div>
-              <p style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: '11px', margin: '0 0 8px' }}>
-                Google AI Studio se free API key le kar yahan daal sakte hain. Agar blank chhodenge toh internal College Knowledge Engine chalega.
-              </p>
-              <form onSubmit={handleSaveCustomKey} style={{ display: 'flex', gap: '6px' }}>
-                <input
-                  type="password"
-                  value={customKey}
-                  onChange={(e) => setCustomKey(e.target.value)}
-                  placeholder="Paste AIzaSy... API key"
-                  style={{
-                    flex: 1,
-                    padding: '6px 10px',
-                    borderRadius: '8px',
-                    border: `1px solid ${borderModal}`,
-                    background: isDark ? '#0f172a' : '#fff',
-                    color: textModal,
-                    fontSize: '11.5px',
-                    outline: 'none'
-                  }}
-                />
-                <button
-                  type="submit"
-                  style={{
-                    background: '#f59e0b',
-                    color: '#000',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '6px 12px',
-                    fontWeight: 700,
-                    cursor: 'pointer'
-                  }}
-                >
-                  Save
-                </button>
-              </form>
-              {keySavedMessage && (
-                <div style={{ color: '#10b981', fontSize: '11px', marginTop: '6px', fontWeight: 600 }}>
-                  {keySavedMessage}
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Messages Area */}
           <div style={{
