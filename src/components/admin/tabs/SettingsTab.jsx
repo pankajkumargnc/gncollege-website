@@ -46,26 +46,83 @@ export default function SettingsTab({ logAct }) {
     setTestingGemini(true);
     setGeminiTestStatus(null);
     try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: 'Respond with exactly: GNC AI Online' }] }]
-          })
+      // 1. Query ListModels to find which models are enabled for this key
+      let candidateModels = [];
+      try {
+        const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+        const listData = await listRes.json();
+        if (listData?.error) {
+          if (listData.error.message?.toLowerCase().includes('leaked')) {
+            throw new Error('Google security alert: Yeh API key "Leaked/Revoked" mark ho chuki hai. Kripya aistudio.google.com se nayi free key banayein.');
+          }
+          if (listData.error.code === 400) {
+            throw new Error('API Key invalid hai. Kripya aistudio.google.com se copy karke sahi key paste karein.');
+          }
         }
-      );
-      const data = await res.json();
-      if (!res.ok || data.error) {
-        throw new Error(data.error?.message || 'API Key validation failed');
+        if (Array.isArray(listData?.models)) {
+          candidateModels = listData.models
+            .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+            .map(m => m.name.replace(/^models\//, ''));
+        }
+      } catch (listErr) {
+        if (listErr.message?.includes('Google security alert') || listErr.message?.includes('API Key invalid')) {
+          throw listErr;
+        }
       }
-      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      setGeminiTestStatus({ success: true, message: `✅ Gemini Connected! Model response: "${reply?.trim()}"` });
-      toast.success('Gemini AI API Key verified successfully! 🚀');
+
+      // Default fallback candidate models in order of speed and stability
+      const fallbackList = [
+        'gemini-2.0-flash',
+        'gemini-1.5-flash-latest',
+        'gemini-1.5-flash',
+        'gemini-1.5-flash-8b',
+        'gemini-1.5-pro',
+        'gemini-pro'
+      ];
+
+      const modelsToTry = Array.from(new Set([...candidateModels, ...fallbackList]));
+      let successModel = null;
+      let replyText = null;
+      let lastError = null;
+
+      for (const model of modelsToTry) {
+        for (const ver of ['v1beta', 'v1']) {
+          try {
+            const url = `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent?key=${key}`;
+            const res = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: 'Respond with exactly: GNC AI Online' }] }]
+              })
+            });
+            const data = await res.json();
+            if (res.ok && data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+              successModel = `${model} (${ver})`;
+              replyText = data.candidates[0].content.parts[0].text.trim();
+              break;
+            } else if (data?.error) {
+              lastError = data.error.message;
+            }
+          } catch (e) {
+            lastError = e.message;
+          }
+        }
+        if (successModel) break;
+      }
+
+      if (!successModel) {
+        throw new Error(lastError || 'Koi bhi Gemini model is key par generateContent ke liye available nahi mila.');
+      }
+
+      setGeminiTestStatus({
+        success: true,
+        message: `✅ Gemini Connected! Model: ${successModel} — Reply: "${replyText}"`
+      });
+      toast.success(`Gemini Connected successfully via ${successModel}! 🚀`);
     } catch (err) {
-      setGeminiTestStatus({ success: false, message: `❌ Error: ${err.message}` });
-      toast.error(`Gemini validation error: ${err.message}`);
+      setGeminiTestStatus({ success: false, message: `❌ ${err.message}` });
+      toast.error(`Gemini Error: ${err.message}`);
     }
     setTestingGemini(false);
   };

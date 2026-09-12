@@ -314,41 +314,46 @@ export default function AIChatbot() {
     });
 
     const modelsToTry = [
-      'gemini-1.5-flash',
       'gemini-2.0-flash',
-      'gemini-1.5-pro'
+      'gemini-1.5-flash-latest',
+      'gemini-1.5-flash',
+      'gemini-1.5-flash-8b',
+      'gemini-1.5-pro',
+      'gemini-pro'
     ];
 
     for (const model of modelsToTry) {
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey}`;
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            systemInstruction: {
-              parts: [{ text: SYSTEM_PROMPT }]
-            },
-            contents: contents,
-            generationConfig: {
-              temperature: 0.4,
-              maxOutputTokens: 600,
-              topP: 0.95
-            }
-          })
-        });
+      for (const ver of ['v1beta', 'v1']) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent?key=${activeKey}`;
+          const body = ver === 'v1beta'
+            ? {
+                systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                contents: contents,
+                generationConfig: { temperature: 0.4, maxOutputTokens: 600, topP: 0.95 }
+              }
+            : {
+                contents: [{ role: 'user', parts: [{ text: `${SYSTEM_PROMPT}\n\nUser Question: ${userPrompt}` }] }]
+              };
 
-        if (!response.ok) {
-          continue;
-        }
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
 
-        const data = await response.json();
-        const candidateText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (candidateText && candidateText.trim()) {
-          return candidateText.trim();
+          if (!response.ok) {
+            continue;
+          }
+
+          const data = await response.json();
+          const candidateText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (candidateText && candidateText.trim()) {
+            return candidateText.trim();
+          }
+        } catch (err) {
+          // try next model / endpoint
         }
-      } catch (err) {
-        console.warn(`Fetch error with model ${model}:`, err);
       }
     }
 
