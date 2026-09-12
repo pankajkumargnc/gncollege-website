@@ -102,7 +102,7 @@ const QUICK_ACTIONS = [
     icon: "🎓",
     title: "Apply for Admission",
     sub: "Chancellor portal",
-    href: "https://jharkhanduniversities.nic.in/",
+    href: "https://universities.jharkhand.gov.in/",
     color: "#3b82f6",
     bg: "#fff",
     hoverBg: "#eff6ff",

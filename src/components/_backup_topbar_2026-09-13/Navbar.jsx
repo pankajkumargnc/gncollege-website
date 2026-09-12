@@ -227,7 +227,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
       {/* Spacer to prevent content jump when navbar becomes fixed */}
       {isScrolled && <div style={{ height: isMobile ? '65px' : '95px', width: '100%' }} />}
       
-      <nav className={`glass-navbar${isScrolled ? ' scrolled' : ''}`} style={{
+      <nav className="glass-navbar" style={{
         position: isScrolled ? 'fixed' : 'relative',
         top: 0,
         left: 0,
@@ -238,147 +238,24 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
           : (isScrolled ? 'rgba(255,255,255,0.72)' : '#ffffff'),
         boxShadow: isDark
           ? '0 4px 30px rgba(0,0,0,0.55)'
-          : (isScrolled ? '0 8px 40px rgba(15,35,71,0.12), 0 2px 8px rgba(244,160,35,0.05)' : '0 4px 15px rgba(0,0,0,0.05)'),
-        backdropFilter: isScrolled ? 'blur(24px) saturate(200%)' : 'none',
-        WebkitBackdropFilter: isScrolled ? 'blur(24px) saturate(200%)' : 'none',
+          : (isScrolled ? '0 8px 32px rgba(15,35,71,0.1)' : '0 4px 15px rgba(0,0,0,0.05)'),
+        backdropFilter: isScrolled ? 'blur(20px) saturate(180%)' : 'none',
+        WebkitBackdropFilter: isScrolled ? 'blur(20px) saturate(180%)' : 'none',
         borderBottom: isDark ? '1px solid rgba(244,160,35,0.15)' : (isScrolled ? '1px solid rgba(255,255,255,0.5)' : 'none'),
         transition: 'all 0.4s ease-in-out',
         width: '100%'
       }}>
 
         <style>{`
-          /* ═══════════════════════════════════════════════════ */
-          /* ██  PREMIUM NAVBAR — GOLDEN AURA EDITION        ██ */
-          /* ═══════════════════════════════════════════════════ */
-
-          /* ── Logo: Endless Spin with Golden Glow Aura ── */
           @keyframes coinSpin {
             0%   { transform: rotateY(0deg); }
             100% { transform: rotateY(360deg); }
           }
-          @keyframes logoAuraBreath {
-            0%, 100% { box-shadow: 0 0 12px rgba(244,160,35,0.15), 0 0 25px rgba(244,160,35,0.05); }
-            50%      { box-shadow: 0 0 20px rgba(244,160,35,0.35), 0 0 40px rgba(244,160,35,0.12); }
+          @keyframes shineText {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
           }
-          .spinning-logo {
-            animation: coinSpin 6s linear infinite;
-            transform-style: preserve-3d;
-            filter: drop-shadow(0 2px 8px rgba(244,160,35,0.2));
-            transition: filter 0.4s ease;
-          }
-          .logo-box-container {
-            border-radius: 50%;
-            animation: logoAuraBreath 4s ease-in-out infinite;
-            transition: all 0.4s ease;
-          }
-          .logo-box-container:hover {
-            box-shadow: 0 0 25px rgba(244,160,35,0.45), 0 0 50px rgba(244,160,35,0.15) !important;
-          }
-          .logo-box-container:hover .spinning-logo {
-            animation-play-state: paused;
-            filter: drop-shadow(0 4px 15px rgba(244,160,35,0.4));
-          }
-
-          /* ── Title: Rich Gold-Pearl Shimmer Sweep ── */
-          @keyframes premiumShineText {
-            0%   { background-position: -100% 50%; }
-            100% { background-position: 200% 50%; }
-          }
-          .shimmering-title {
-            background: linear-gradient(
-              90deg, 
-              ${COLORS.navy} 0%, 
-              #1e3a8a 20%, 
-              #d4af37 40%,
-              #f5e6c8 50%, 
-              #d4af37 60%, 
-              #1e3a8a 80%, 
-              ${COLORS.navy} 100%
-            );
-            background-size: 250% auto;
-            color: transparent;
-            -webkit-background-clip: text;
-            background-clip: text;
-            animation: premiumShineText 6s linear infinite;
-          }
-          [data-theme="dark"] .shimmering-title {
-            background: linear-gradient(
-              90deg, 
-              #e2e8f0 0%, 
-              #94a3b8 20%, 
-              #fbbf24 40%,
-              #fff7ed 50%, 
-              #fbbf24 60%, 
-              #94a3b8 80%, 
-              #e2e8f0 100%
-            );
-            background-size: 250% auto;
-            color: transparent;
-            -webkit-background-clip: text;
-            background-clip: text;
-          }
-
-          /* ── Golden Accent Divider ── */
-          .clean-divider {
-            border-left: 2.5px solid ${COLORS.gold};
-            border-radius: 2px;
-            border-image: linear-gradient(to bottom, ${COLORS.gold}, #d97706, ${COLORS.gold}) 1;
-          }
-
-          /* ── Nav Links: Underline Grow from Center ── */
-          .nav-hover-link {
-            transition: color 0.25s ease, transform 0.25s cubic-bezier(.22,1,.36,1);
-            position: relative;
-          }
-          .nav-hover-link::after {
-            content: '';
-            position: absolute;
-            bottom: 6px; left: 50%;
-            width: 0; height: 2px;
-            background: linear-gradient(90deg, ${COLORS.gold}, #fbbf24);
-            border-radius: 2px;
-            transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform: translateX(-50%);
-            box-shadow: 0 1px 6px rgba(244,160,35,0.3);
-          }
-          .nav-hover-link:hover::after {
-            width: 80%;
-          }
-          .nav-hover-link:hover {
-            color: ${COLORS.gold} !important;
-          }
-
-          /* ── Active Link: Golden Dot Indicator ── */
-          .nav-link-active {
-            position: relative;
-          }
-          .nav-link-active::before {
-            content: '';
-            position: absolute;
-            bottom: 2px; left: 50%;
-            transform: translateX(-50%);
-            width: 5px; height: 5px;
-            border-radius: 50%;
-            background: ${COLORS.gold};
-            box-shadow: 0 0 8px rgba(244,160,35,0.6), 0 0 15px rgba(244,160,35,0.2);
-          }
-
-          /* ── Scroll State: Animated Gold Bottom Border ── */
-          .glass-navbar::after {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 50%;
-            width: 0; height: 2px;
-            background: linear-gradient(90deg, transparent, ${COLORS.gold}, #fbbf24, ${COLORS.gold}, transparent);
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform: translateX(-50%);
-          }
-          .glass-navbar.scrolled::after {
-            width: 100%;
-            box-shadow: 0 2px 12px rgba(244,160,35,0.2);
-          }
-
-          /* ── Dropdown Animations ── */
           @keyframes dropdownFadeDown {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -387,8 +264,32 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
             from { opacity: 0; transform: translateX(-10px); }
             to { opacity: 1; transform: translateX(0); }
           }
-
-          /* ── Mega-Menu Styles (preserved) ── */
+          .spinning-logo {
+            animation: coinSpin 6s linear infinite;
+            transform-style: preserve-3d;
+          }
+          .logo-box-container:hover .spinning-logo {
+            animation-play-state: paused;
+          }
+          .shimmering-title {
+            background: linear-gradient(90deg, ${COLORS.navy} 0%, #1e3a8a 30%, #d4af37 50%, #1e3a8a 70%, ${COLORS.navy} 100%);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shineText 5s linear infinite;
+          }
+          .clean-divider {
+            border-left: 2.5px solid ${COLORS.gold};
+            border-radius: 2px;
+          }
+          .nav-hover-link {
+            transition: color 0.25s ease, transform 0.25s cubic-bezier(.22,1,.36,1);
+          }
+          .nav-hover-link:hover {
+            color: ${COLORS.gold} !important;
+            transform: translateX(4px);
+          }
           .nav-dropdown-item {
             transition: background 0.2s ease;
           }
@@ -434,14 +335,6 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
           }
           .mega-menu-container::-webkit-scrollbar-thumb:hover {
             background: rgba(244, 160, 35, 0.7);
-          }
-
-          /* ── Reduced Motion ── */
-          @media (prefers-reduced-motion: reduce) {
-            .spinning-logo { transition: none !important; }
-            .logo-box-container { animation: none !important; }
-            .shimmering-title { animation: none !important; }
-            .nav-hover-link::after { transition: none !important; }
           }
         `}</style>
 
