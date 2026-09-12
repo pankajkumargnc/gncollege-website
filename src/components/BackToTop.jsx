@@ -36,9 +36,9 @@ export default function BackToTop() {
       tabIndex={visible ? 0 : -1}
       style={{
         position: 'fixed',
-        bottom: 'clamp(80px, 10vw, 100px)',
-        right: 'clamp(16px, 3vw, 28px)',
-        zIndex: 9990,
+        bottom: 'clamp(175px, 22vw, 195px)',
+        right: 'clamp(20px, 3vw, 26px)',
+        zIndex: 999980,
         width: 48,
         height: 48,
         borderRadius: '50%',

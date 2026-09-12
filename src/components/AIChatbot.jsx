@@ -96,10 +96,76 @@ export default function AIChatbot() {
   const [isDark, setIsDark] = useState(
     () => document.documentElement.getAttribute('data-theme') === 'dark'
   );
+  const [pos, setPos] = useState(null); // { x: number, y: number }
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ mouseX: 0, mouseY: 0, elX: 0, elY: 0 });
+  const hasDraggedRef = useRef(false);
+  const btnRef = useRef(null);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const speechRecognitionRef = useRef(null);
+
+  const handlePointerDown = (e) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    const clientX = e.clientX ?? e.touches?.[0]?.clientX;
+    const clientY = e.clientY ?? e.touches?.[0]?.clientY;
+    if (clientX === undefined || clientY === undefined) return;
+
+    const rect = btnRef.current ? btnRef.current.getBoundingClientRect() : { left: 0, top: 0 };
+    dragStartRef.current = {
+      mouseX: clientX,
+      mouseY: clientY,
+      elX: rect.left,
+      elY: rect.top
+    };
+    hasDraggedRef.current = false;
+
+    const onPointerMove = (moveEvt) => {
+      const moveX = moveEvt.clientX ?? moveEvt.touches?.[0]?.clientX;
+      const moveY = moveEvt.clientY ?? moveEvt.touches?.[0]?.clientY;
+      if (moveX === undefined || moveY === undefined) return;
+
+      const dx = moveX - dragStartRef.current.mouseX;
+      const dy = moveY - dragStartRef.current.mouseY;
+
+      if (!hasDraggedRef.current && Math.hypot(dx, dy) > 5) {
+        hasDraggedRef.current = true;
+        setIsDragging(true);
+      }
+
+      if (hasDraggedRef.current) {
+        if (moveEvt.preventDefault && moveEvt.cancelable) moveEvt.preventDefault();
+        const maxX = window.innerWidth - 65;
+        const maxY = window.innerHeight - 65;
+        const boundedX = Math.max(10, Math.min(maxX, dragStartRef.current.elX + dx));
+        const boundedY = Math.max(10, Math.min(maxY, dragStartRef.current.elY + dy));
+        setPos({ x: boundedX, y: boundedY });
+      }
+    };
+
+    const onPointerUp = () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('touchmove', onPointerMove);
+      window.removeEventListener('touchend', onPointerUp);
+      setTimeout(() => setIsDragging(false), 50);
+    };
+
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('touchmove', onPointerMove, { passive: false });
+    window.addEventListener('touchend', onPointerUp);
+  };
+
+  const handleButtonClick = (e) => {
+    if (hasDraggedRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    setIsOpen(!isOpen);
+  };
 
   // Logo URL with base support
   const logoUrl = `${import.meta.env.BASE_URL}images/logo.webp`;
@@ -610,12 +676,27 @@ export default function AIChatbot() {
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      {/* Floating Launcher Button */}
+      {/* Floatable / Draggable Launcher Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        ref={btnRef}
+        onPointerDown={handlePointerDown}
+        onClick={handleButtonClick}
         className="gnc-bot-trigger"
         aria-label={isOpen ? "Close GNC Assistant" : "Open GNC Assistant"}
-        title="GNC AI Assistant"
+        title="GNC AI Assistant (Drag karke kahi bhi move kar sakte hain)"
+        style={pos ? {
+          position: 'fixed',
+          left: `${pos.x}px`,
+          top: `${pos.y}px`,
+          bottom: 'auto',
+          right: 'auto',
+          zIndex: 999999,
+          cursor: isDragging ? 'grabbing' : 'grab',
+          touchAction: 'none'
+        } : {
+          cursor: 'grab',
+          touchAction: 'none'
+        }}
       >
         {isOpen ? (
           <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#f59e0b' }}>✕</span>
@@ -623,7 +704,7 @@ export default function AIChatbot() {
           <img
             src={logoUrl}
             alt="GNC Logo"
-            style={{ width: '38px', height: '38px', objectFit: 'contain' }}
+            style={{ width: '38px', height: '38px', objectFit: 'contain', pointerEvents: 'none' }}
             onError={(e) => { e.currentTarget.src = 'https://gncollege.org/images/logo.webp'; }}
           />
         )}
@@ -631,7 +712,19 @@ export default function AIChatbot() {
 
       {/* Main AI Chat Window */}
       {isOpen && (
-        <div className="gnc-bot-window" role="dialog" aria-modal="true" aria-label="GNC AI Assistant">
+        <div
+          className="gnc-bot-window"
+          role="dialog"
+          aria-modal="true"
+          aria-label="GNC AI Assistant"
+          style={pos ? {
+            left: pos.x > (window.innerWidth / 2) ? 'auto' : `${Math.max(12, pos.x)}px`,
+            right: pos.x > (window.innerWidth / 2) ? `${Math.max(12, window.innerWidth - pos.x - 60)}px` : 'auto',
+            bottom: pos.y > (window.innerHeight / 2) ? `${Math.max(12, window.innerHeight - pos.y + 10)}px` : 'auto',
+            top: pos.y > (window.innerHeight / 2) ? 'auto' : `${Math.max(12, pos.y + 65)}px`,
+            zIndex: 999999
+          } : {}}
+        >
           {/* Header */}
           <div style={{
             background: 'linear-gradient(135deg, #09152b, #0f2347)',

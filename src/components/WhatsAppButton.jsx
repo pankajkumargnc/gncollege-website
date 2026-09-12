@@ -18,6 +18,11 @@ export default function WhatsAppButton() {
   const [userQuery, setUserQuery] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('');
   const [currentTime, setCurrentTime] = useState('');
+  const [pos, setPos] = useState(null); // { x: number, y: number }
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ mouseX: 0, mouseY: 0, elX: 0, elY: 0 });
+  const hasDraggedRef = useRef(false);
+  const btnRef = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -35,6 +40,67 @@ export default function WhatsAppButton() {
       setTimeout(() => inputRef.current?.focus(), 200);
     }
   }, [isOpen]);
+
+  const handlePointerDown = (e) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    const clientX = e.clientX ?? e.touches?.[0]?.clientX;
+    const clientY = e.clientY ?? e.touches?.[0]?.clientY;
+    if (clientX === undefined || clientY === undefined) return;
+
+    const rect = btnRef.current ? btnRef.current.getBoundingClientRect() : { left: 0, top: 0 };
+    dragStartRef.current = {
+      mouseX: clientX,
+      mouseY: clientY,
+      elX: rect.left,
+      elY: rect.top
+    };
+    hasDraggedRef.current = false;
+
+    const onPointerMove = (moveEvt) => {
+      const moveX = moveEvt.clientX ?? moveEvt.touches?.[0]?.clientX;
+      const moveY = moveEvt.clientY ?? moveEvt.touches?.[0]?.clientY;
+      if (moveX === undefined || moveY === undefined) return;
+
+      const dx = moveX - dragStartRef.current.mouseX;
+      const dy = moveY - dragStartRef.current.mouseY;
+
+      if (!hasDraggedRef.current && Math.hypot(dx, dy) > 5) {
+        hasDraggedRef.current = true;
+        setIsDragging(true);
+      }
+
+      if (hasDraggedRef.current) {
+        if (moveEvt.preventDefault && moveEvt.cancelable) moveEvt.preventDefault();
+        const maxX = window.innerWidth - 65;
+        const maxY = window.innerHeight - 65;
+        const boundedX = Math.max(10, Math.min(maxX, dragStartRef.current.elX + dx));
+        const boundedY = Math.max(10, Math.min(maxY, dragStartRef.current.elY + dy));
+        setPos({ x: boundedX, y: boundedY });
+      }
+    };
+
+    const onPointerUp = () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('touchmove', onPointerMove);
+      window.removeEventListener('touchend', onPointerUp);
+      setTimeout(() => setIsDragging(false), 50);
+    };
+
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('touchmove', onPointerMove, { passive: false });
+    window.addEventListener('touchend', onPointerUp);
+  };
+
+  const handleButtonClick = (e) => {
+    if (hasDraggedRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    setIsOpen(!isOpen);
+  };
 
   const handleSelectTopic = (topic) => {
     setSelectedTopic(topic.id);
@@ -382,24 +448,39 @@ export default function WhatsAppButton() {
         }
       `}</style>
 
-      {/* Floating Trigger Button */}
+      {/* Floatable / Draggable WhatsApp Trigger Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        ref={btnRef}
+        onPointerDown={handlePointerDown}
+        onClick={handleButtonClick}
         className="wa-floating-btn"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        title="WhatsApp Support Window Kholiye"
+        title="WhatsApp Support (Drag karke kahi bhi move kar sakte hain)"
         aria-label="Toggle WhatsApp live support chat"
+        style={pos ? {
+          position: 'fixed',
+          left: `${pos.x}px`,
+          top: `${pos.y}px`,
+          bottom: 'auto',
+          right: 'auto',
+          zIndex: 999990,
+          cursor: isDragging ? 'grabbing' : 'grab',
+          touchAction: 'none'
+        } : {
+          cursor: 'grab',
+          touchAction: 'none'
+        }}
       >
         {/* Hover Tooltip Pill */}
-        {hovered && !isOpen && (
+        {hovered && !isOpen && !isDragging && (
           <div className="wa-tooltip-pill">
-            <span>🟢 Chat with College Helpdesk</span>
+            <span>🟢 Chat with College Helpdesk (Drag me!)</span>
           </div>
         )}
 
         {/* Pulsing WhatsApp Circle */}
-        <div className="wa-circle">
+        <div className="wa-circle" style={{ cursor: isDragging ? 'grabbing' : 'grab' }}>
           <span className="wa-online-dot"></span>
           <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
@@ -409,7 +490,19 @@ export default function WhatsAppButton() {
 
       {/* Interactive WhatsApp Live Helpdesk Popup Window */}
       {isOpen && (
-        <div className="wa-popup-window" role="dialog" aria-modal="true" aria-label="WhatsApp Live Chat Widget">
+        <div
+          className="wa-popup-window"
+          role="dialog"
+          aria-modal="true"
+          aria-label="WhatsApp Live Chat Widget"
+          style={pos ? {
+            left: pos.x > (window.innerWidth / 2) ? 'auto' : `${Math.max(12, pos.x)}px`,
+            right: pos.x > (window.innerWidth / 2) ? `${Math.max(12, window.innerWidth - pos.x - 60)}px` : 'auto',
+            bottom: pos.y > (window.innerHeight / 2) ? `${Math.max(12, window.innerHeight - pos.y + 10)}px` : 'auto',
+            top: pos.y > (window.innerHeight / 2) ? 'auto' : `${Math.max(12, pos.y + 65)}px`,
+            zIndex: 999995
+          } : {}}
+        >
           {/* Header */}
           <div className="wa-popup-header">
             <div className="wa-header-left">
