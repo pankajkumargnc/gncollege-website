@@ -321,8 +321,8 @@ export default function DocumentsTab({
                     type="image"
                     driveFolderId={import.meta.env.VITE_DRIVE_IMAGES_FOLDER || import.meta.env.VITE_DRIVE_COLLEGE_DOCUMENTS_FOLDER || '1bReeCuwZ_yS5vR7CIHbwQcs6Gw81xB-8'}
                   />
-                  <span style={{ fontSize: 11, color: T.t3, marginTop: 4, display: 'block' }}>
-                    * Recommended for E-Magazines, event circular flyers, and prospectus covers. Select from Google Drive or Upload.
+                  <span style={{ fontSize: 11, color: '#0284c7', marginTop: 4, display: 'block', fontWeight: 600 }}>
+                    ✨ Auto-Fit Ready: Magazine covers are automatically presented in full portrait mode without cropping.
                   </span>
                 </div>
               </div>
@@ -408,19 +408,53 @@ export default function DocumentsTab({
               }}>
                 {/* Visual Cover Poster Thumbnail (if provided) */}
                 {formData.coverImage ? (
-                  <div style={{ height: 180, position: 'relative', overflow: 'hidden', background: '#0b192e' }}>
+                  <div style={{
+                    height: isMagazine ? 280 : 180,
+                    position: 'relative',
+                    overflow: 'hidden',
+                    background: 'radial-gradient(ellipse at 50% 100%, rgba(244, 160, 35, 0.12) 0%, transparent 65%), linear-gradient(160deg, #071326 0%, #0c1d3b 60%, #152d59 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '16px'
+                  }}>
+                    {/* Ambient Glow */}
                     <img
                       src={formData.coverImage}
-                      alt="Cover Preview"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      onError={e => { e.currentTarget.style.display = 'none'; }}
+                      alt=""
+                      aria-hidden="true"
+                      style={{
+                        position: 'absolute',
+                        inset: -15,
+                        width: 'calc(100% + 30px)',
+                        height: 'calc(100% + 30px)',
+                        objectFit: 'cover',
+                        filter: 'blur(24px) saturate(2) brightness(0.35)',
+                        opacity: 0.65,
+                        pointerEvents: 'none',
+                        zIndex: 1
+                      }}
                     />
-                    <div style={{
-                      position: 'absolute', inset: 0,
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)'
-                    }} />
+                    {/* Uncropped Book/Cover Presentation */}
+                    <div style={{ position: 'relative', zIndex: 2, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img
+                        src={formData.coverImage}
+                        alt="Cover Preview"
+                        style={{
+                          maxHeight: '100%',
+                          maxWidth: '100%',
+                          width: 'auto',
+                          height: 'auto',
+                          objectFit: 'contain',
+                          borderRadius: isMagazine ? '3px 8px 8px 3px' : '6px',
+                          boxShadow: '-4px 4px 14px rgba(0,0,0,0.5), 6px 10px 20px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.2)',
+                          borderLeft: isMagazine ? '3px solid rgba(255,255,255,0.4)' : 'none'
+                        }}
+                        onError={e => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    </div>
                     <span style={{
-                      position: 'absolute', top: 10, right: 10,
+                      position: 'absolute', top: 10, right: 10, zIndex: 3,
                       background: formData.isFeatured ? `linear-gradient(135deg, ${GOLD}, #d97706)` : GOLD, 
                       color: NAVY,
                       fontSize: 10, fontWeight: 900, padding: '3px 10px', borderRadius: 20
@@ -430,10 +464,13 @@ export default function DocumentsTab({
                   </div>
                 ) : (
                   <div style={{
-                    height: 90, background: `linear-gradient(135deg, ${NAVY} 0%, #1a3a7c 100%)`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontSize: 32
+                    height: isMagazine ? 200 : 90,
+                    background: `linear-gradient(145deg, #09172e 0%, ${NAVY} 60%, #1a3a7c 100%)`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontSize: 32,
+                    flexDirection: 'column', gap: 6
                   }}>
-                    {isMagazine ? '📖' : '📄'}
+                    <span>{isMagazine ? '📖' : '📄'}</span>
+                    {isMagazine && <span style={{ fontSize: 11, color: GOLD, fontWeight: 800 }}>Add Coverpage to Preview Bookshelf</span>}
                   </div>
                 )}
 
@@ -538,16 +575,39 @@ export default function DocumentsTab({
 
               {/* Poster Thumbnail or Icon */}
               {d.coverImage ? (
-                <div style={{ width: 44, height: 44, borderRadius: 8, overflow: 'hidden', flexShrink: 0, border: '1px solid #e2e8f0' }}>
-                  <img src={d.coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <div style={{
+                  width: isDocMagazine ? 38 : 44,
+                  height: isDocMagazine ? 50 : 44,
+                  borderRadius: isDocMagazine ? '2px 6px 6px 2px' : 8,
+                  overflow: 'hidden',
+                  flexShrink: 0,
+                  border: '1px solid #cbd5e1',
+                  borderLeft: isDocMagazine ? '3px solid #f4a023' : '1px solid #e2e8f0',
+                  background: '#09172e',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <img
+                    src={resolveUrl(d.coverImage)}
+                    alt=""
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: isDocMagazine ? 'contain' : 'cover'
+                    }}
+                  />
                 </div>
               ) : (
                 <div style={{
-                  width: 44, height: 44, borderRadius: 8,
+                  width: isDocMagazine ? 38 : 44,
+                  height: isDocMagazine ? 50 : 44,
+                  borderRadius: isDocMagazine ? '2px 6px 6px 2px' : 8,
                   background: isDocMagazine ? `${GOLD}22` : `${NAVY}12`,
                   color: isDocMagazine ? GOLD : NAVY,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 20, flexShrink: 0
+                  fontSize: 20, flexShrink: 0,
+                  borderLeft: isDocMagazine ? '3px solid #f4a023' : 'none'
                 }}>
                   {isDocMagazine ? '📖' : '📄'}
                 </div>

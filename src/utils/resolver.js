@@ -1,8 +1,8 @@
 // src/utils/resolver.js — Universal Image & Media Resolver
 // ⚙️ @Backend_Agent & @Media_Agent — High-reliability image resolver for Google Drive, CDN, and local assets
 
-const BASE = import.meta.env.BASE_URL || '/';
-const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
+const BASE = import.meta.env?.BASE_URL || '/';
+const API_KEY = import.meta.env?.VITE_GOOGLE_API_KEY || '';
 
 /**
  * Extract Google Drive file ID from diverse formats:
@@ -37,6 +37,10 @@ export function extractDriveFileId(input) {
   const m1 = str.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (m1) return m1[1];
 
+  // /files/ID (e.g. googleapis.com/drive/v3/files/ID)
+  const mFiles = str.match(/\/files\/([a-zA-Z0-9_-]+)/);
+  if (mFiles) return mFiles[1];
+
   // ?id=ID or &id=ID
   const m2 = str.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (m2) return m2[1];
@@ -50,24 +54,14 @@ export function extractDriveFileId(input) {
 
 /**
  * Convert Google Drive links or IDs into reliable, direct streaming image URLs
- * Prioritizes authenticated Google Drive API streaming (alt=media&key=...)
- * which never triggers HTTP 429 rate limits or referrer blocks.
+ * Uses Google's high-speed public CDN (lh3.googleusercontent.com/d/ID)
+ * which never triggers 403 API authentication errors or Referrer blocks.
  */
 export function driveToDirectUrl(input) {
   if (!input) return '';
   
-  if (typeof input === 'string') {
-    // If it's already an active Google API streaming endpoint, return as-is
-    if (input.includes('googleapis.com/drive/v3/files') && input.includes('alt=media')) {
-      return input;
-    }
-  }
-
   const fileId = extractDriveFileId(input);
   if (fileId) {
-    if (API_KEY) {
-      return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
-    }
     return `https://lh3.googleusercontent.com/d/${fileId}=w1200`;
   }
 
@@ -77,12 +71,9 @@ export function driveToDirectUrl(input) {
 /**
  * Generates an efficient thumbnail URL for Google Drive items
  */
-export function driveToThumbnailUrl(input, size = 220) {
+export function driveToThumbnailUrl(input, size = 300) {
   const fileId = extractDriveFileId(input);
   if (fileId) {
-    if (API_KEY) {
-      return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
-    }
     return `https://lh3.googleusercontent.com/d/${fileId}=w${size}`;
   }
   return resolveUrl(input);
@@ -106,8 +97,8 @@ export function resolveUrl(input) {
   // Handle object inputs (e.g., Firestore gallery or event docs)
   if (typeof input === 'object') {
     const driveId = extractDriveFileId(input);
-    if (driveId && API_KEY) {
-      return `https://www.googleapis.com/drive/v3/files/${driveId}?alt=media&key=${API_KEY}`;
+    if (driveId) {
+      return driveToDirectUrl(driveId);
     }
     target = input.image || input.src || input.url || input.link || driveId || '';
   }

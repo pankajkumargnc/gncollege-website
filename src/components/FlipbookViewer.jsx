@@ -63,11 +63,68 @@ const Page = forwardRef(({ number, title, subtitle, image, content, isCover, isB
       ? `${activeMag?.volumeIssue || ''} • ${activeMag?.academicYear || '2024-25'}` 
       : 'GURUPRADEEP • 2024-25';
 
+    if (coverImg) {
+      return (
+        <div ref={ref} style={{
+          background: '#09172e',
+          color: '#ffffff',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxSizing: 'border-box',
+          borderRight: '2px solid rgba(255,255,255,0.12)',
+          boxShadow: 'inset -8px 0 20px rgba(0,0,0,0.45)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Ambient Blurred Background */}
+          <img
+            src={coverImg}
+            alt=""
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              inset: -20,
+              width: 'calc(100% + 40px)',
+              height: 'calc(100% + 40px)',
+              objectFit: 'cover',
+              filter: 'blur(30px) saturate(1.8) brightness(0.35)',
+              opacity: 0.7,
+              pointerEvents: 'none'
+            }}
+          />
+          {/* Uncropped Cover Image */}
+          <img
+            src={coverImg}
+            alt={magTitle}
+            style={{
+              maxHeight: '100%',
+              maxWidth: '100%',
+              objectFit: 'contain',
+              position: 'relative',
+              zIndex: 2,
+              display: 'block'
+            }}
+          />
+          {/* Spine Highlight */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: 0,
+            width: 14,
+            background: 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 40%, transparent 100%)',
+            pointerEvents: 'none',
+            zIndex: 3
+          }} />
+        </div>
+      );
+    }
+
     return (
       <div ref={ref} style={{
-        background: coverImg 
-          ? `linear-gradient(180deg, rgba(9,23,46,0.25) 0%, rgba(9,23,46,0.92) 100%), url('${coverImg}') center/cover no-repeat`
-          : `linear-gradient(145deg, #09172e 0%, ${NAVY} 60%, #1a3a7c 100%)`,
+        background: `linear-gradient(145deg, #09172e 0%, ${NAVY} 60%, #1a3a7c 100%)`,
         color: '#ffffff',
         height: '100%',
         padding: '36px 26px',

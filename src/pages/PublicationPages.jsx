@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, getDocsFromServer } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import FlipbookViewer from '../components/FlipbookViewer';
@@ -165,10 +165,10 @@ function PublicationDocList({ keyword }) {
                   transition: 'transform 0.2s, box-shadow 0.2s'
                 }}>
                   {d.coverImage && (
-                    <div style={{ width: '100%', height: 160, overflow: 'hidden', background: '#09172e', position: 'relative' }}>
-                      <img src={resolveUrl(d.coverImage)} alt={d.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, rgba(9,23,46,0.85) 100%)' }} />
-                      <span style={{ position: 'absolute', bottom: 10, left: 12, background: GOLD, color: NAVY, padding: '3px 9px', borderRadius: 6, fontSize: 10, fontWeight: 800 }}>
+                    <div style={{ width: '100%', height: 200, overflow: 'hidden', background: '#09172e', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src={resolveUrl(d.coverImage)} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(20px) brightness(0.4)', opacity: 0.7 }} />
+                      <img src={resolveUrl(d.coverImage)} alt={d.title} style={{ maxHeight: '90%', maxWidth: '90%', objectFit: 'contain', position: 'relative', zIndex: 2, borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.4)' }} />
+                      <span style={{ position: 'absolute', bottom: 10, left: 12, background: GOLD, color: NAVY, padding: '3px 9px', borderRadius: 6, fontSize: 10, fontWeight: 800, zIndex: 3 }}>
                         {d.category || d.type || 'DOCUMENT'}
                       </span>
                     </div>
@@ -323,6 +323,25 @@ export function PublicationPage({ type, title, subtitle, icon, keyword }) {
       console.warn('[PublicationPage] onSnapshot warning:', err);
     });
 
+    getDocsFromServer(q).then(serverSnap => {
+      const all = serverSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      all.sort((a, b) => {
+        const tA = a.createdAt?.toMillis?.() || (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+        const tB = b.createdAt?.toMillis?.() || (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+        return tB - tA;
+      });
+      const mags = all.filter(d =>
+        (d.targetPage || '').toLowerCase() === 'magazine' ||
+        (d.category || '').toLowerCase().includes('magazine') ||
+        (d.type || '').toLowerCase() === 'magazine' ||
+        (d.title || '').toLowerCase().includes('magazine') ||
+        (d.title || '').toLowerCase().includes('gurupradeep')
+      );
+      if (mags.length > 0) {
+        setMagazines(mags);
+      }
+    }).catch(() => {});
+
     const handleSync = () => {};
     window.addEventListener('gnc_live_sync', handleSync);
     return () => {
@@ -361,18 +380,26 @@ export function PublicationPage({ type, title, subtitle, icon, keyword }) {
       <style>{`
         .gnc-magazine-card {
           transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-          border-left: 6px solid #f4a023 !important;
+          border-left: 5px solid #f4a023 !important;
         }
         .gnc-magazine-card:hover {
-          transform: translateY(-8px) scale(1.015);
+          transform: translateY(-8px);
           box-shadow: 0 24px 50px rgba(15, 35, 71, 0.18) !important;
           border-color: #f4a023 !important;
         }
-        .gnc-magazine-card .cover-img {
-          transition: transform 0.5s ease;
+        .gnc-magazine-card .gnc-book-cover-img {
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
         }
-        .gnc-magazine-card:hover .cover-img {
-          transform: scale(1.06);
+        .gnc-magazine-card:hover .gnc-book-cover-img {
+          transform: translateY(-6px) scale(1.03);
+          box-shadow: -8px 8px 24px rgba(0,0,0,0.65), 14px 18px 36px rgba(0,0,0,0.5), 0 0 0 1.5px rgba(255,255,255,0.3) !important;
+        }
+        .gnc-magazine-card .gnc-ambient-glow {
+          transition: opacity 0.4s ease, filter 0.4s ease;
+        }
+        .gnc-magazine-card:hover .gnc-ambient-glow {
+          opacity: 0.85 !important;
+          filter: blur(24px) saturate(2.2) brightness(0.48) !important;
         }
         .gnc-magazine-card .action-btn-view {
           transition: all 0.2s ease;
@@ -509,129 +536,222 @@ export function PublicationPage({ type, title, subtitle, icon, keyword }) {
                           display: 'flex',
                           flexDirection: 'column',
                           height: '100%',
-                          position: 'relative',
-                          cursor: 'pointer'
+                          position: 'relative'
                         }}
                       >
-                        {/* ── Realistic Book Cover Poster Frame ── */}
-                        <div style={{
-                          height: 220,
-                          width: '100%',
-                          overflow: 'hidden',
-                          background: '#09172e',
-                          position: 'relative'
-                        }}>
-                          {coverImg ? (
+                        {/* ── 3D Realistic Book Showcase Frame (Never Crops Cover) ── */}
+                        <div
+                          style={{
+                            height: 380,
+                            width: '100%',
+                            overflow: 'hidden',
+                            position: 'relative',
+                            background: 'radial-gradient(ellipse at 50% 100%, rgba(244, 160, 35, 0.12) 0%, transparent 65%), linear-gradient(160deg, #071326 0%, #0c1d3b 60%, #152d59 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '24px 16px',
+                            boxSizing: 'border-box'
+                          }}
+                        >
+                          {/* Ambient Blurred Aura Matching the Magazine Color */}
+                          {coverImg && (
                             <img
                               src={coverImg}
-                              alt={mag.title}
-                              className="cover-img"
-                              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                              alt=""
+                              aria-hidden="true"
+                              className="gnc-ambient-glow"
+                              style={{
+                                position: 'absolute',
+                                inset: -20,
+                                width: 'calc(100% + 40px)',
+                                height: 'calc(100% + 40px)',
+                                objectFit: 'cover',
+                                filter: 'blur(30px) saturate(2) brightness(0.35)',
+                                opacity: 0.65,
+                                pointerEvents: 'none',
+                                zIndex: 1,
+                                transform: 'scale(1.15)'
+                              }}
                             />
-                          ) : (
-                            <div style={{
-                              width: '100%',
-                              height: '100%',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              background: `linear-gradient(135deg, #09172e 0%, ${NAVY} 60%, #1a3a7c 100%)`,
-                              color: '#ffffff',
-                              textAlign: 'center',
-                              padding: 24,
-                              boxSizing: 'border-box'
-                            }}>
-                              <span style={{ fontSize: 44, marginBottom: 8 }}>📖</span>
-                              <span style={{ fontSize: 11, fontWeight: 800, color: GOLD, letterSpacing: 1 }}>GURU NANAK COLLEGE</span>
-                              <h4 style={{ fontSize: 18, fontWeight: 900, margin: '8px 0 0', lineHeight: 1.3, textTransform: 'uppercase' }}>{mag.title}</h4>
-                            </div>
                           )}
 
-                          {/* Gradient lighting & book spine sheen */}
+                          {/* Subtle Bookshelf Perspective Base */}
                           <div style={{
                             position: 'absolute',
-                            inset: 0,
-                            background: 'linear-gradient(180deg, rgba(9,23,46,0.15) 0%, rgba(9,23,46,0.85) 100%)',
-                            boxShadow: 'inset 6px 0 12px rgba(255,255,255,0.25), inset -6px 0 14px rgba(0,0,0,0.5)'
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: 18,
+                            background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.5) 100%)',
+                            borderTop: '1px solid rgba(255,255,255,0.08)',
+                            zIndex: 2
                           }} />
 
-                          {/* Year Badge (Top-Left) */}
+                          {/* Top Badges Bar (Floating Outside Book Cover) */}
                           <div style={{
                             position: 'absolute',
-                            top: 14,
-                            left: 14,
-                            background: 'rgba(9, 23, 46, 0.75)',
-                            backdropFilter: 'blur(8px)',
-                            color: '#ffffff',
-                            padding: '4px 12px',
-                            borderRadius: 20,
-                            fontSize: 11,
-                            fontWeight: 800,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 5,
-                            border: '1px solid rgba(255,255,255,0.25)',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-                          }}>
-                            <Calendar size={12} color={GOLD} /> {magYear}
-                          </div>
-
-                          {/* Featured / Latest Issue Badge (Top-Right) */}
-                          {mag.isFeatured && (
-                            <div style={{
-                              position: 'absolute',
-                              top: 14,
-                              right: 14,
-                              background: `linear-gradient(135deg, ${GOLD}, #d97706)`,
-                              color: NAVY,
-                              padding: '4px 12px',
-                              borderRadius: 20,
-                              fontSize: 10.5,
-                              fontWeight: 900,
-                              letterSpacing: 0.5,
-                              boxShadow: `0 4px 14px ${GOLD}66`
-                            }}>
-                              ⭐ LATEST ISSUE
-                            </div>
-                          )}
-
-                          {/* Bottom Edition Tag Overlay */}
-                          <div style={{
-                            position: 'absolute',
-                            bottom: 12,
+                            top: 12,
                             left: 14,
                             right: 14,
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'space-between'
+                            justifyContent: 'space-between',
+                            zIndex: 4,
+                            pointerEvents: 'none'
                           }}>
-                            <span style={{
+                            {/* Academic Year Pill */}
+                            <div style={{
+                              background: 'rgba(9, 23, 46, 0.82)',
+                              backdropFilter: 'blur(10px)',
+                              color: '#ffffff',
+                              padding: '4px 12px',
+                              borderRadius: 20,
                               fontSize: 11,
                               fontWeight: 800,
-                              background: 'rgba(255,255,255,0.92)',
-                              color: NAVY,
-                              padding: '3px 10px',
-                              borderRadius: 6,
-                              boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 5,
+                              border: '1px solid rgba(255,255,255,0.22)',
+                              boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
                             }}>
-                              {mag.volumeIssue || 'Annual Issue'}
-                            </span>
-                            <span style={{ fontSize: 11, color: '#ffffff', fontWeight: 700, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
-                              GNC Dhanbad
-                            </span>
+                              <Calendar size={12} color={GOLD} /> {magYear}
+                            </div>
+
+                            {/* Featured / Latest Issue Badge */}
+                            {mag.isFeatured && (
+                              <div style={{
+                                background: `linear-gradient(135deg, ${GOLD}, #d97706)`,
+                                color: NAVY,
+                                padding: '4px 12px',
+                                borderRadius: 20,
+                                fontSize: 10.5,
+                                fontWeight: 900,
+                                letterSpacing: 0.5,
+                                boxShadow: `0 4px 14px ${GOLD}66`
+                              }}>
+                                ⭐ LATEST ISSUE
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Foreground Realistic 3D Magazine Cover Stand */}
+                          <div style={{
+                            position: 'relative',
+                            zIndex: 3,
+                            height: '100%',
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            {coverImg ? (
+                              <div style={{
+                                position: 'relative',
+                                height: '100%',
+                                maxHeight: 330,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}>
+                                <img
+                                  src={coverImg}
+                                  alt={mag.title}
+                                  className="gnc-book-cover-img"
+                                  style={{
+                                    maxHeight: '100%',
+                                    maxWidth: '100%',
+                                    width: 'auto',
+                                    height: 'auto',
+                                    objectFit: 'contain',
+                                    borderRadius: '3px 9px 9px 3px',
+                                    boxShadow: '-6px 4px 18px rgba(0,0,0,0.55), 10px 14px 28px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.18)',
+                                    borderLeft: '3px solid rgba(255,255,255,0.45)',
+                                    display: 'block'
+                                  }}
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    const next = e.currentTarget.parentElement?.querySelector('.gnc-fallback-cover');
+                                    if (next) next.style.display = 'flex';
+                                  }}
+                                />
+                                {/* Book Spine Gloss Highlight */}
+                                <div style={{
+                                  position: 'absolute',
+                                  top: 0,
+                                  bottom: 0,
+                                  left: 0,
+                                  width: 12,
+                                  background: 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 40%, transparent 100%)',
+                                  pointerEvents: 'none',
+                                  borderRadius: '3px 0 0 3px'
+                                }} />
+                              </div>
+                            ) : null}
+
+                            {/* Fallback Leatherbound Book Design if no cover or on error */}
+                            <div
+                              className="gnc-fallback-cover"
+                              style={{
+                                display: coverImg ? 'none' : 'flex',
+                                width: 220,
+                                height: 310,
+                                borderRadius: '4px 12px 12px 4px',
+                                borderLeft: `6px solid ${GOLD}`,
+                                boxShadow: '-6px 6px 20px rgba(0,0,0,0.6), 10px 14px 30px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.15)',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                background: `linear-gradient(145deg, #09172e 0%, ${NAVY} 60%, #1a3a7c 100%)`,
+                                color: '#ffffff',
+                                textAlign: 'center',
+                                padding: '26px 18px',
+                                boxSizing: 'border-box'
+                              }}
+                            >
+                              <div>
+                                <span style={{ fontSize: 10, fontWeight: 800, color: GOLD, letterSpacing: 1.5, textTransform: 'uppercase' }}>
+                                  GURU NANAK COLLEGE
+                                </span>
+                                <div style={{ fontSize: 9, color: '#94a3b8', marginTop: 2 }}>DHANBAD</div>
+                              </div>
+                              <div>
+                                <span style={{ fontSize: 42, display: 'block', marginBottom: 8 }}>📖</span>
+                                <h4 style={{ fontSize: 16, fontWeight: 900, margin: 0, lineHeight: 1.3, textTransform: 'uppercase', color: '#ffffff' }}>
+                                  {mag.title}
+                                </h4>
+                              </div>
+                              <div style={{
+                                fontSize: 10.5,
+                                fontWeight: 800,
+                                background: 'rgba(244,160,35,0.2)',
+                                color: GOLD,
+                                padding: '4px 10px',
+                                borderRadius: 12,
+                                border: `1px solid ${GOLD}44`
+                              }}>
+                                {mag.volumeIssue || `Annual Issue ${magYear}`}
+                              </div>
+                            </div>
                           </div>
                         </div>
 
                         {/* ── Magazine Information Body ── */}
-                        <div style={{ padding: '16px 18px 14px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                            <span style={{ fontSize: 10.5, fontWeight: 800, color: GOLD, textTransform: 'uppercase', letterSpacing: 0.8 }}>
-                              {mag.category || 'E-Magazine'}
+                        <div style={{ padding: '18px 20px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, marginBottom: 8 }}>
+                            <span style={{
+                              fontSize: 11,
+                              fontWeight: 800,
+                              background: '#fef3c7',
+                              color: '#92400e',
+                              padding: '2px 8px',
+                              borderRadius: 6,
+                              letterSpacing: 0.3
+                            }}>
+                              {mag.volumeIssue || 'Annual Issue'}
                             </span>
-                            <span style={{ color: '#cbd5e1' }}>•</span>
-                            <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>
-                              Academic Session {magYear}
+                            <span style={{ fontSize: 11.5, color: '#64748b', fontWeight: 700 }}>
+                              Session {magYear}
                             </span>
                           </div>
 
@@ -641,8 +761,7 @@ export function PublicationPage({ type, title, subtitle, icon, keyword }) {
                             color: NAVY,
                             margin: '0 0 6px',
                             lineHeight: 1.35,
-                            letterSpacing: '-0.2px',
-                            textTransform: 'uppercase'
+                            letterSpacing: '-0.2px'
                           }}>
                             {mag.title}
                           </h3>

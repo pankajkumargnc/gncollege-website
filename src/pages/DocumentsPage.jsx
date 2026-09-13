@@ -241,10 +241,45 @@ export default function DocumentsPage() {
                         style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 4px 18px rgba(11,31,78,.06)', border:'1.5px solid #edf2f7', display:'flex', flexDirection:'column' }}>
                         
                         {d.coverImage ? (
-                          <div style={{ width:'100%', height:160, position:'relative', overflow:'hidden', background:'#09172e' }}>
-                            <img src={d.coverImage} alt={d.title} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-                            <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, transparent 40%, rgba(9,23,46,0.85) 100%)' }} />
-                            <span style={{ position:'absolute', top:10, right:10, background:m.bg, color:m.text, border:`1px solid ${m.border}`, padding:'3px 10px', borderRadius:20, fontSize:11, fontWeight:800 }}>
+                          <div style={{
+                            width: '100%',
+                            height: (d.type === 'Magazine' || d.targetPage === 'magazine') ? 260 : 180,
+                            position: 'relative',
+                            overflow: 'hidden',
+                            background: '#09172e',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <img
+                              src={d.coverImage}
+                              alt=""
+                              aria-hidden="true"
+                              style={{
+                                position: 'absolute',
+                                inset: 0,
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                filter: 'blur(22px) brightness(0.4)',
+                                opacity: 0.7
+                              }}
+                            />
+                            <img
+                              src={d.coverImage}
+                              alt={d.title}
+                              style={{
+                                maxHeight: '90%',
+                                maxWidth: '90%',
+                                objectFit: 'contain',
+                                position: 'relative',
+                                zIndex: 2,
+                                borderRadius: (d.type === 'Magazine' || d.targetPage === 'magazine') ? '2px 6px 6px 2px' : 6,
+                                boxShadow: '0 8px 20px rgba(0,0,0,0.5)',
+                                borderLeft: (d.type === 'Magazine' || d.targetPage === 'magazine') ? '3px solid rgba(255,255,255,0.4)' : 'none'
+                              }}
+                            />
+                            <span style={{ position:'absolute', top:10, right:10, background:m.bg, color:m.text, border:`1px solid ${m.border}`, padding:'3px 10px', borderRadius:20, fontSize:11, fontWeight:800, zIndex: 3 }}>
                               {m.icon} {d.type||'Document'}
                             </span>
                           </div>
@@ -323,8 +358,20 @@ export default function DocumentsPage() {
                           <div key={d.id} className="doc-row-hover"
                             style={{ background:'#fff', borderRadius:11, padding:'12px 16px', display:'flex', alignItems:'center', gap:13, border:'1px solid #edf2f7', boxShadow:'0 2px 8px rgba(11,31,78,.04)' }}>
                             {d.coverImage ? (
-                              <div style={{ width:44, height:44, borderRadius:10, overflow:'hidden', flexShrink:0, background:'#09172e', border:'1px solid #e2e8f0' }}>
-                                <img src={d.coverImage} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                              <div style={{
+                                width: (d.type === 'Magazine' || d.targetPage === 'magazine') ? 38 : 44,
+                                height: (d.type === 'Magazine' || d.targetPage === 'magazine') ? 50 : 44,
+                                borderRadius: (d.type === 'Magazine' || d.targetPage === 'magazine') ? '2px 5px 5px 2px' : 10,
+                                overflow: 'hidden',
+                                flexShrink: 0,
+                                background: '#09172e',
+                                border: '1px solid #e2e8f0',
+                                borderLeft: (d.type === 'Magazine' || d.targetPage === 'magazine') ? `3px solid ${gold}` : '1px solid #e2e8f0',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}>
+                                <img src={d.coverImage} alt="" style={{ width:'100%', height:'100%', objectFit: (d.type === 'Magazine' || d.targetPage === 'magazine') ? 'contain' : 'cover' }} />
                               </div>
                             ) : (
                               <div style={{ width:44, height:44, borderRadius:10, background:m.bg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:21, flexShrink:0, border:`1px solid ${m.border}` }}>
