@@ -502,7 +502,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                 fontWeight: '900',
                 fontFamily: "'Plus Jakarta Sans', Georgia, serif",
                 whiteSpace: 'nowrap',
-                letterSpacing: isMobile ? '0px' : '2.5px',
+                letterSpacing: isMobile ? '0px' : '7.5px',
                 textAlign: 'left',
                 lineHeight: '1.1',
               }}>
