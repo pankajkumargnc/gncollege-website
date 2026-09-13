@@ -13,6 +13,8 @@ import { COLORS } from '../styles/colors';
 import { createPortal } from 'react-dom';
 import PremiumPagination from '../components/PremiumPagination';
 import { resolveUrl } from '../utils/resolver';
+import Lightbox from 'yet-another-react-lightbox';
+import 'yet-another-react-lightbox/styles.css';
 
 const ITEMS_PER_PAGE = 12;
 const FALLBACK_IMG = `${import.meta.env.BASE_URL}images/college_photo.webp`;
@@ -309,46 +311,17 @@ export default function GalleryPage({ gallery: galleryProp, headless }) {
         )}
       </div>
 
-      {/* ── LIGHTBOX ── */}
-      {light !== null && filtered[light] && createPortal(
-        <div className="lb-ov" onClick={closeLB}>
-          {/* Close */}
-          <button className="lb-close" onClick={closeLB} aria-label="Close lightbox">✕</button>
-
-          {/* Prev */}
-          {filtered.length > 1 && (
-            <button className="lb-btn" style={{ left:20 }} onClick={e => { e.stopPropagation(); prevImg(); }} aria-label="Previous image">‹</button>
-          )}
-
-          {/* Image */}
-          <div onClick={e => e.stopPropagation()} style={{ textAlign:'center' }}>
-            <img
-              src={resolveUrl(filtered[light]) || FALLBACK_IMG}
-              alt={filtered[light].title || 'Photo'}
-              className="lb-img"
-              referrerPolicy="no-referrer"
-              onError={(e) => {
-                if (e.target.src !== FALLBACK_IMG) e.target.src = FALLBACK_IMG;
-              }}
-            />
-            {(filtered[light].title || filtered[light].cat || filtered[light].album) && (
-              <div style={{ marginTop:14, color:'rgba(255,255,255,.8)', fontSize:14, fontWeight:600 }}>
-                {filtered[light].title}
-                {(filtered[light].cat || filtered[light].album) && <span style={{ color:G, marginLeft:8, fontSize:12 }}>#{(filtered[light].cat || filtered[light].album)}</span>}
-              </div>
-            )}
-            <div style={{ marginTop:8, color:'rgba(255,255,255,.35)', fontSize:12 }}>
-              {light + 1} / {filtered.length} &nbsp;·&nbsp; ← → keys to navigate &nbsp;·&nbsp; Esc to close
-            </div>
-          </div>
-
-          {/* Next */}
-          {filtered.length > 1 && (
-            <button className="lb-btn" style={{ right:20 }} onClick={e => { e.stopPropagation(); nextImg(); }} aria-label="Next image">›</button>
-          )}
-        </div>,
-        document.body
-      )}
+      {/* ── PRO LIGHTBOX (Swipe, Pinch-to-Zoom, Keyboard & Fullscreen) ── */}
+      <Lightbox
+        open={light !== null}
+        close={() => setLight(null)}
+        index={light ?? 0}
+        slides={filtered.map(img => ({
+          src: resolveUrl(img) || FALLBACK_IMG,
+          title: img.title || 'Campus Moment',
+          description: img.cat || img.album || 'Guru Nanak College'
+        }))}
+      />
     </div>
   );
 }

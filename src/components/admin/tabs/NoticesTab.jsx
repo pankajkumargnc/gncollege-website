@@ -53,6 +53,17 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
 
       if (editNotice) await updateDoc(doc(db, 'notices', editNotice.id), { ...payload, updatedAt: serverTimestamp() });
       else await addDoc(collection(db, 'notices'), { ...payload, date: new Date().toISOString(), createdAt: serverTimestamp() });
+
+      if (noticeData.sendPush) {
+        await addDoc(collection(db, 'push_broadcasts'), {
+          title: `📢 GNC Notice: ${noticeData.type || 'General'}`,
+          body: noticeData.text?.substring(0, 120),
+          url: noticeData.link || '/notifications',
+          createdAt: serverTimestamp()
+        });
+        toast.success('📢 Web push notification queued!');
+      }
+
       toast.success('Notice published!');
       logAct(editNotice ? 'update' : 'add', `Notice: ${noticeData.text?.substring(0, 30)}`, 'notices');
       setEditNotice(null); clearNoticeDraft();
@@ -152,6 +163,7 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 22 }}>
               <Toggle checked={!!noticeData.isNew} onChange={()=>setNoticeData(d=>({...d,isNew:!d.isNew}))} label="Mark as NEW" color={T.red} />
               <Toggle checked={!!noticeData.pinned} onChange={()=>setNoticeData(d=>({...d,pinned:!d.pinned}))} label="Pin to Top" color={NAVY} />
+              <Toggle checked={!!noticeData.sendPush} onChange={()=>setNoticeData(d=>({...d,sendPush:!d.sendPush}))} label="📢 Broadcast Push Notification" color={T.purple} />
             </div>
           </div>
 

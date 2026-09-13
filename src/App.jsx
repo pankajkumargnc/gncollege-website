@@ -16,6 +16,7 @@ import BackToTop from "./components/BackToTop";
 import AIChatbot from "./components/AIChatbot";
 import UniversalSearch from "./components/UniversalSearch";
 import AlertBanner from "./components/AlertBanner";
+import FloatingQRButton from "./components/FloatingQRButton";
 
 // ── Data & Styles ──
 import { navLinks as staticNavLinks } from "./data/db";
@@ -35,7 +36,7 @@ export default function App() {
   const data = useAppData();
   const { 
     updates, notices, announcements, events, gallery, 
-    faculties, testimonials, sliderSlides, navLinks 
+    faculties, testimonials, sliderSlides, navLinks, siteSettings 
   } = data;
 
   // ── Network Status & Notifications ──
@@ -272,15 +273,19 @@ export default function App() {
     <>
       <Toaster position="bottom-right" containerStyle={{ zIndex: 9999999 }} />
       <Suspense fallback={null}>
-        <UniversalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+        <UniversalSearch 
+          isOpen={searchOpen} 
+          onClose={() => setSearchOpen(false)} 
+          notices={notices}
+          faculties={faculties}
+          gallery={gallery}
+        />
       </Suspense>
       
       {!isAdminRoute && (
         <div style={{ position: 'relative', zIndex: 1000 }}>
-          <Suspense fallback={null}>
-            <AlertBanner />
-          </Suspense>
-          <TopBar isDark={isDark} onToggleDark={toggleDark} />
+          <AlertBanner />
+          <TopBar isDark={isDark} onToggleDark={toggleDark} siteSettings={siteSettings} />
           <Suspense fallback={null}>
             <Ticker items={notices} />
           </Suspense>
@@ -304,6 +309,7 @@ export default function App() {
         <>
           <Footer dynamicSocialLinks={baseNavLinks} />
           <Suspense fallback={null}>
+            {siteSettings?.enableFloatingQR !== false && <FloatingQRButton />}
             <WhatsAppButton />
             <AIChatbot />
             <BackToTop />

@@ -238,9 +238,21 @@ export default function PDFModal({ url, title = "Document", onClose }) {
                 </button>
               </div>
             )}
-            <a href={url} target="_blank" rel="noreferrer" style={S.openBtn}>
-              ↗ Open
-            </a>
+            {type === 'gdrive' ? (
+              <a 
+                href={url.replace(/\/preview(\?.*)?$/, '/view').replace(/\?id=([^&]+)/, '/d/$1/view')} 
+                target="_blank" 
+                rel="noreferrer" 
+                style={{ ...S.openBtn, background: '#f4a023', color: '#0f2347', fontWeight: 800 }}
+                title="Open full edition in Google Cloud Reader"
+              >
+                🚀 Cloud Reader
+              </a>
+            ) : (
+              <a href={url} target="_blank" rel="noreferrer" style={S.openBtn}>
+                ↗ Open
+              </a>
+            )}
             <button
               style={S.closeBtn}
               onClick={onClose}

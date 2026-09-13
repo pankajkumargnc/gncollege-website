@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, School, GraduationCap, Building2, Camera, Bell, FileText, Search, Sparkles } from 'lucide-react';
+import Fuse from 'fuse.js';
 import { COLORS } from '../styles/colors';
 
 const N = COLORS.navy;
@@ -67,12 +68,17 @@ export default function UniversalSearch({
     ];
 
     if (!query.trim()) return items.slice(0, 15);
-    const q = query.toLowerCase().trim();
-    return items.filter(i => 
-      i.title?.toLowerCase().includes(q) || 
-      i.sub?.toLowerCase().includes(q) ||
-      i.cat?.toLowerCase().includes(q)
-    );
+    const fuse = new Fuse(items, {
+      keys: [
+        { name: 'title', weight: 0.6 },
+        { name: 'sub', weight: 0.25 },
+        { name: 'cat', weight: 0.15 }
+      ],
+      threshold: 0.38,
+      ignoreLocation: true,
+      minMatchCharLength: 2,
+    });
+    return fuse.search(query.trim()).map(res => res.item);
   }, [query, notices, faculties, pages, gallery]);
 
   // Group by category for display

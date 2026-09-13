@@ -7,6 +7,7 @@ import {
 } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { T, NAVY, GOLD } from '../AdminShared';
+import { exportToExcel } from '../../../utils/excelExport';
 
 export default function ContactTab() {
   const INP = {
@@ -172,7 +173,29 @@ export default function ContactTab() {
 
       {/* ── Contact Directory ── */}
       <div style={{ background: '#fff', border: '1.5px solid #f1f5f9', borderRadius: 14, padding: 20 }}>
-        <SH txt="📋 Contact Directory (Officials list)" />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+          <SH txt="📋 Contact Directory (Officials list)" />
+          <button
+            type="button"
+            onClick={() => exportToExcel(
+              directory.map((d, idx) => ({
+                'S.No': idx + 1,
+                'Role / Designation': d.title || '',
+                'Official Name': d.name || '',
+                'Contact Number': d.phone || ''
+              })),
+              'GNC_Contact_Directory'
+            )}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: '#f8fafc', border: '1.5px solid #e2e8f0',
+              padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+              color: NAVY, cursor: 'pointer', transition: 'all 0.2s'
+            }}
+          >
+            📊 Export Directory Excel
+          </button>
+        </div>
         <p style={{ fontSize: 12.5, color: '#94a3b8', margin: '0 0 16px' }}>
           Firebase path: <code style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: 4, fontSize: 11.5 }}>contactDirectory/{`{docId}`}</code>
           &nbsp;— this list is displayed on the Contact page

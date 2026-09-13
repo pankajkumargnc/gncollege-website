@@ -235,3 +235,18 @@ export function GreenCampus() {
     </div>
   );
 }
+
+/* ════════════════════════════════════════════════════════════
+   6. 360° VIRTUAL CAMPUS TOUR
+════════════════════════════════════════════════════════════ */
+import VirtualTour from '../components/VirtualTour';
+
+export function VirtualTourPage() {
+  return (
+    <div style={{ background: '#f8fafc', padding: 'clamp(40px,6vw,64px) clamp(16px,3vw,24px)', minHeight: '100dvh' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <VirtualTour />
+      </div>
+    </div>
+  );
+}

@@ -3,11 +3,13 @@
 // ✅ UUPM Compliant: Labels, inline validation, toast feedback, free form submission
 
 import React, { useEffect, useState, useRef } from 'react';
-import { doc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { doc, collection, query, orderBy, onSnapshot, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import toast from 'react-hot-toast';
-import { Send, MapPin, Phone, Mail, User, AtSign, FileText, MessageSquare } from 'lucide-react';
+import { Send, MapPin, Phone, Mail, User, AtSign, FileText, MessageSquare, ShieldCheck } from 'lucide-react';
+import ReCAPTCHA from 'react-google-recaptcha';
+import CampusMap from '../components/CampusMap';
 
 // ── Default fallback — jab tak Firebase se data na aaye ────────────────────
 const DEFAULT_CONTACT = {
@@ -24,12 +26,27 @@ const DEFAULT_DIRECTORY = [
   { id:'6', title:"P.A. to Principal",                   name:"Mr. [Name Here]",   phone:"+91 XXXXX XXXXX", icon:"📝", order:6 },
 ];
 
-// ── Contact Form with Labels, Validation, Toast ─────────────────────
+// ── Contact Form with Labels, Validation, Toast & Anti-Bot Shield ─────────
 function ContactForm() {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [sending, setSending] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
+  const [recaptchaConfig, setRecaptchaConfig] = useState({ enabled: false, siteKey: '' });
   const formRef = useRef(null);
+  const formLoadTime = useRef(Date.now());
+  const recaptchaRef = useRef(null);
+
+  useEffect(() => {
+    getDoc(doc(db, 'settings', 'site')).then(snap => {
+      if (snap.exists()) {
+        const d = snap.data();
+        if (d.enableRecaptcha && d.recaptchaSiteKey) {
+          setRecaptchaConfig({ enabled: true, siteKey: d.recaptchaSiteKey });
+        }
+      }
+    }).catch(() => {});
+  }, []);
 
   const validate = (name, value) => {
     switch(name) {
@@ -52,10 +69,31 @@ function ContactForm() {
     const form = formRef.current;
     const data = new FormData(form);
     
+    // 🛡️ Anti-Bot Check 1: Honeypot Trap
+    if (data.get('_hp_security_check')) {
+      // Silently fool automated spambots
+      toast.success('Message sent successfully! We will get back to you soon.');
+      form.reset();
+      return;
+    }
+
+    // 🛡️ Anti-Bot Check 2: Submission velocity (<1.2 seconds = bot script)
+    if (Date.now() - formLoadTime.current < 1200) {
+      toast.error('Spam prevention: Submission too fast. Please take a moment to review.');
+      return;
+    }
+
+    // 🛡️ Anti-Bot Check 3: reCAPTCHA verification if enabled in admin
+    if (recaptchaConfig.enabled && !recaptchaToken) {
+      toast.error('Please complete the "I\'m not a robot" reCAPTCHA verification.');
+      return;
+    }
+
     // Validate all fields
     const newErrors = {};
     let hasError = false;
     for (const [name, value] of data.entries()) {
+      if (name.startsWith('_')) continue;
       const err = validate(name, value);
       if (err) { newErrors[name] = err; hasError = true; }
     }
@@ -82,6 +120,7 @@ function ContactForm() {
           email: data.get('email'),
           subject: data.get('subject'),
           message: data.get('message'),
+          _recaptcha: recaptchaToken || undefined,
           _subject: `📬 GNC Website: ${data.get('subject')}`,
         }),
       });
@@ -91,6 +130,8 @@ function ContactForm() {
         form.reset();
         setErrors({});
         setTouched({});
+        setRecaptchaToken(null);
+        recaptchaRef.current?.reset();
       } else {
         toast.error('Something went wrong. Please try again.', { duration: 4000 });
       }
@@ -139,6 +180,29 @@ function ContactForm() {
         <textarea id="cf-message" name="message" placeholder="Type your message here..." required rows="5" className={fieldClass('message')} onBlur={handleBlur} style={{ resize: 'vertical' }}></textarea>
         {touched.message && errors.message && <div className="form-error" role="alert"><span>⚠</span> {errors.message}</div>}
       </div>
+
+      {/* 🛡️ Hidden Honeypot Field (Inaccessible to human users, traps automatic scrapers/spambots) */}
+      <div style={{ display: 'none' }} aria-hidden="true">
+        <label htmlFor="_hp_security_check">Leave this field empty</label>
+        <input 
+          id="_hp_security_check" 
+          type="text" 
+          name="_hp_security_check" 
+          tabIndex={-1} 
+          autoComplete="off" 
+        />
+      </div>
+
+      {/* 🛡️ Optional Google reCAPTCHA v2 Widget */}
+      {recaptchaConfig.enabled && recaptchaConfig.siteKey && (
+        <div style={{ margin: '15px 0 10px', display: 'flex', justifyContent: 'flex-start' }}>
+          <ReCAPTCHA
+            ref={recaptchaRef}
+            sitekey={recaptchaConfig.siteKey}
+            onChange={token => setRecaptchaToken(token)}
+          />
+        </div>
+      )}
       
       <button type="submit" className="form-submit-btn" disabled={sending}>
         {sending ? (
@@ -397,6 +461,11 @@ export default function Contact() {
             </div>
           )}
         </section>
+      </div>
+
+      {/* 🗺️ Interactive Leaflet Campus Map */}
+      <div className="profile-container" style={{ marginTop: 40 }}>
+        <CampusMap />
       </div>
 
       {/* Contact Form — Free submission via FormSubmit.co (no API key needed) */}

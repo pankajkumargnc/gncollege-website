@@ -44,6 +44,7 @@ const NotFoundPage = safeLazy(() => import("../pages/NotFoundPage"));
 const RegulationsPage = safeLazy(() => import("../pages/RegulationsPage"));
 const SikhHeritagePage = safeLazy(() => import("../pages/SikhHeritagePage"));
 const ScholarshipsPage = safeLazy(() => import("../pages/ScholarshipsPage"));
+const AlumniWall = safeLazy(() => import("../pages/AlumniWall"));
 
 // ── Named export lazy helpers ────────────────────────────────────────────────
 const LazyAbout = (n) => safeLazy(() => import("../pages/AboutPages").then((m) => ({ default: m[n] })));
@@ -101,6 +102,7 @@ const Infrastructure = LazyCampus("Infrastructure");
 const Classrooms = LazyCampus("Classrooms");
 const IctRooms = LazyCampus("IctRooms");
 const GreenCampus = LazyCampus("GreenCampus");
+const VirtualTourPage = LazyCampus("VirtualTourPage");
 
 const PageLoader = () => (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '60px 20px', display: 'flex', flexDirection: 'column', gap: '30px', minHeight: '60vh' }}>
@@ -131,7 +133,7 @@ const R = ({ el }) => (
 export default function AppRoutes({
     updates, notices, announcements, events, gallery, 
     faculties, testimonials, sliderSlides, navLinks, pdfReports,
-    counterData, adminAuthed, handleAdminLogin, handleAdminLogout
+    counterData, adminAuthed, handleAdminLogin, handleAdminLogout, siteSettings
 }) {
     return (
         <Routes>
@@ -147,6 +149,7 @@ export default function AppRoutes({
                         sliderSlides={sliderSlides}
                         pdfReports={pdfReports}
                         counterData={counterData}
+                        siteSettings={siteSettings}
                     />
                 } />
             } />
@@ -194,6 +197,8 @@ export default function AppRoutes({
             <Route path="/campus/classroom" element={<R el={<Classrooms />} />} />
             <Route path="/campus/ict-rooms" element={<R el={<IctRooms />} />} />
             <Route path="/campus/green-campus" element={<R el={<GreenCampus />} />} />
+            <Route path="/campus/virtual-tour" element={<R el={<VirtualTourPage />} />} />
+            <Route path="/virtual-tour" element={<R el={<VirtualTourPage />} />} />
 
             {/* Academics */}
             <Route path="/academics/iqac" element={<R el={<IqacPage />} />} />
@@ -251,6 +256,8 @@ export default function AppRoutes({
             <Route path="/documents" element={<R el={<DocumentsPage />} />} />
             <Route path="/events" element={<R el={<EventsPage />} />} />
             <Route path="/scholarships" element={<R el={<ScholarshipsPage />} />} />
+            <Route path="/alumni" element={<R el={<AlumniWall />} />} />
+            <Route path="/alumni-wall" element={<R el={<AlumniWall />} />} />
 
             <Route path="/p/:slug" element={<R el={<PageViewer gallery={gallery} events={events} faculties={faculties} />} />} />
             <Route path="*" element={<R el={<NotFoundPage />} />} />

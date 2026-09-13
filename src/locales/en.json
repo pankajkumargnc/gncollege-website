@@ -1,0 +1,35 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About Us",
+    "admission": "Admission",
+    "academics": "Academics",
+    "campus": "Campus",
+    "gallery": "Gallery",
+    "contact": "Contact",
+    "alumni": "Alumni",
+    "admin": "Admin Portal"
+  },
+  "home": {
+    "hero_title": "Guru Nanak College, Dhanbad",
+    "hero_subtitle": "Affiliated to B.B.M.K. University, Dhanbad • Est. 1970",
+    "apply_now": "Apply for Admission 2026",
+    "explore_courses": "Explore Programs",
+    "latest_notices": "Latest Notices & Circulars",
+    "view_all_notices": "View All Notices",
+    "students_enrolled": "Students Enrolled",
+    "successful_alumni": "Successful Alumni",
+    "expert_faculty": "Expert Faculty",
+    "years_legacy": "Years of Legacy"
+  },
+  "search": {
+    "placeholder": "Search alumni, faculty, latest notices, or pages...",
+    "no_results": "No matching results found"
+  },
+  "footer": {
+    "about_text": "Guru Nanak College, Dhanbad is a premier Sikh minority degree institution dedicated to value-based academic excellence since 1970.",
+    "quick_links": "Quick Links",
+    "contact_info": "Campus Contact",
+    "all_rights": "All Rights Reserved."
+  }
+}

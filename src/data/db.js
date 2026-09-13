@@ -160,6 +160,7 @@ export const navLinks = [
       { label: 'Syllabus', href: '/syllabus' },
       { label: 'IQAC', href: '/academics/iqac' },
       { label: 'Placements', href: '/academics/placements' },
+      { label: 'Alumni Success Wall', href: '/alumni' },
     ]
   },
   {
@@ -258,6 +259,7 @@ export const navLinks = [
       { label: 'Classroom', href: '/campus/classroom' },
       { label: 'ICT Rooms', href: '/campus/ict-rooms' },
       { label: 'Green Campus', href: '/campus/green-campus' },
+      { label: '360° Virtual Tour', href: '/campus/virtual-tour' },
     ]
   },
   {

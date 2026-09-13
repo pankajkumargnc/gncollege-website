@@ -17,6 +17,9 @@ import PremiumTicker from "../components/PremiumTicker";
 const PDFModal = lazy(() => import("../components/PDFModal"));
 import TestimonialsSection from "../components/home/TestimonialsSection";
 import AdmissionTimeline from "../components/home/AdmissionTimeline";
+import AnimatedCounter from "../components/AnimatedCounter";
+import PollWidget from "../components/PollWidget";
+import { fireCelebration, fireConfetti, fireSchoolPride } from "../utils/confetti";
 
 const N = COLORS.navy || "#0f2347";
 const G = COLORS.gold || "#f4a023";
@@ -745,9 +748,26 @@ const HomePage = ({
   testimonials,
   counterData,
   updates,
+  siteSettings,
 }) => {
   const [tab, setTab] = useState("All Moments");
   const [selectedPdf, setSelectedPdf] = useState(null);
+  const [liveSettings, setLiveSettings] = useState(() => {
+    try {
+      const c = localStorage.getItem('gnc_site_settings_cache');
+      return c ? JSON.parse(c) : null;
+    } catch { return null; }
+  });
+
+  useEffect(() => {
+    const handleUpdate = (e) => {
+      if (e?.detail) {
+        setLiveSettings(prev => ({ ...(prev || {}), ...e.detail }));
+      }
+    };
+    window.addEventListener('gnc_settings_updated', handleUpdate);
+    return () => window.removeEventListener('gnc_settings_updated', handleUpdate);
+  }, []);
 
   const NOTICE_FOLDER_ID = import.meta.env.VITE_DRIVE_NOTICE_FOLDER;
   const { docs: driveNotices } = useDriveDocs(NOTICE_FOLDER_ID);
@@ -992,15 +1012,32 @@ const HomePage = ({
       <TestimonialsSection testimonials={testimonials} />
       <div className="hp-sec-divider" />
 
-      <section className="hp-cnt">
+      <section className="hp-cnt" data-aos="fade-up">
         <div className="hp-cnt-bg" />
         <div className="hp-cnt-grid">
           {counterData.map((c, i) => (
             <SA key={c.label} variant="rise" delay={`d${i + 1}`}>
-              <div className="gc r16">
+              <div 
+                className="gc r16" 
+                style={{ cursor: 'pointer' }}
+                onClick={() => {
+                  fireCelebration();
+                }}
+                title="Click to celebrate GNC achievements!"
+              >
                 <div className="hp-cnt-box">
                   <div className="hp-cnt-icon">{c.icon}</div>
-                  <div className="hp-cnt-num">{c.value}</div>
+                  <div className="hp-cnt-num">
+                    {c.raw ? (
+                      <AnimatedCounter 
+                        end={c.raw} 
+                        suffix={typeof c.value === 'string' && c.value.includes('+') ? '+' : ''} 
+                        fallback={c.value} 
+                      />
+                    ) : (
+                      c.value
+                    )}
+                  </div>
                   <div className="hp-cnt-lbl">{c.label}</div>
                 </div>
               </div>
@@ -1009,7 +1046,7 @@ const HomePage = ({
         </div>
       </section>
 
-      <section className="hp-links">
+      <section className="hp-links" data-aos="fade-up">
         <div className="hp-links-inner">
           <SA variant="up">
             <UniHeader
@@ -1038,6 +1075,38 @@ const HomePage = ({
           </div>
         </div>
       </section>
+
+      {/* 🗳️ Student Voice & Live Campus Poll */}
+      {(() => {
+        if (liveSettings && typeof liveSettings.enableCampusPoll === 'boolean') {
+          return liveSettings.enableCampusPoll;
+        }
+        if (siteSettings && typeof siteSettings.enableCampusPoll === 'boolean') {
+          return siteSettings.enableCampusPoll;
+        }
+        try {
+          const c = localStorage.getItem('gnc_site_settings_cache');
+          if (c) {
+            const parsed = JSON.parse(c);
+            if (typeof parsed.enableCampusPoll === 'boolean') return parsed.enableCampusPoll;
+          }
+        } catch {}
+        return true;
+      })() && (
+        <section className="hp-poll-section" data-aos="fade-up" style={{ padding: 'clamp(48px, 6vw, 72px) clamp(16px, 3vw, 24px)', background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)' }}>
+          <div style={{ maxWidth: 860, margin: '0 auto' }}>
+            <SA variant="up">
+              <UniHeader
+                label="🗳️ Student Voice"
+                title1="Live Campus"
+                title2="Poll"
+                sub="Have your say! Vote on upcoming campus activities, workshops, and college initiatives."
+              />
+            </SA>
+            <PollWidget />
+          </div>
+        </section>
+      )}
 
       <section id="gallery" className="hp-gal">
         <div className="hp-gal-inner">

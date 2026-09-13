@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, useLocalDraft, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
 import { resolveUrl } from '../../../utils/resolver';
+import { exportToExcel } from '../../../utils/excelExport';
 
 const DEPTS = ['B.A.', 'B.Sc.', 'B.Com.', 'M.A.', 'M.Sc.', 'M.Com.', 'B.Ed.', 'Other'];
 
@@ -102,7 +103,28 @@ export default function PlacementsTab({ placements, logAct, getSectionLog, softD
       <BulkBar count={selected.length} onDelete={() => { bulkDelete('placements', selected); setSelected([]); }} onClear={() => setSelected([])} />
 
       <div className="card">
-        <div className="actitle">Alumni ({filtered.length})</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <div className="actitle" style={{ margin: 0 }}>Alumni ({filtered.length})</div>
+          <button 
+            type="button" 
+            className="abtn abtn-outline abtn-sm"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700 }}
+            onClick={() => exportToExcel(
+              filtered.map(p => ({
+                Name: p.name || '',
+                Company: p.company || '',
+                Role: p.role || '',
+                Department: p.department || '',
+                Batch: p.batch || '',
+                Package: p.package || '',
+                Testimonial: p.testimonial || ''
+              })),
+              'GNC_Alumni_Placements'
+            )}
+          >
+            📊 Export Excel
+          </button>
+        </div>
         {filtered.map(p => (
           <div key={p.id} className={`arow ${selected.includes(p.id) ? 'selected' : ''}`}>
             <input type="checkbox" checked={selected.includes(p.id)} onChange={() => setSelected(s => s.includes(p.id) ? s.filter(x => x !== p.id) : [...s, p.id])} style={{ accentColor: NAVY }} />

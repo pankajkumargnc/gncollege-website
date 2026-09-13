@@ -3,39 +3,82 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 import { useState, useEffect } from 'react';
 import { db } from "../../../firebase";
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { T, NAVY, GOLD, Toggle, useLocalDraft } from '../AdminShared';
 import { clearCache } from '../../../utils/cachedFetch';
 import MediaPicker from "../../MediaPicker";
 
 export default function SettingsTab({ logAct }) {
-  const [siteCfg, setSiteCfg, clearDraft] = useLocalDraft('site_settings', {
-    name: 'Guru Nanak College',
-    tagline: 'Affiliated to B.B.M.K. University, Dhanbad',
-    address: 'Bank More, Dhanbad — 826001, Jharkhand',
-    phone: '', email: '',
-    facebook: '', twitter: '', youtube: '', linkedin: '',
-    footerText: '', maintenanceMode: false, imgbbKey: '',
-    geminiApiKey: '',
-  }, ['email', 'phone', 'imgbbKey', 'geminiApiKey']); // 🔐 These sensitive fields won't be saved to localStorage
+  const [siteCfg, setSiteCfg] = useState(() => {
+    try {
+      const cached = localStorage.getItem('gnc_site_settings_cache');
+      if (cached) return JSON.parse(cached);
+    } catch {}
+    return {
+      name: 'Guru Nanak College',
+      tagline: 'Affiliated to B.B.M.K. University, Dhanbad',
+      address: 'Bank More, Dhanbad — 826001, Jharkhand',
+      phone: '', email: '',
+      facebook: '', twitter: '', youtube: '', linkedin: '',
+      footerText: '', maintenanceMode: false, imgbbKey: '',
+      geminiApiKey: '',
+      recaptchaSiteKey: '',
+      enableRecaptcha: false,
+      enableLanguageToggle: true,
+      enableCampusPoll: true,
+      enableFloatingQR: true,
+      enableVirtualTour: true,
+      enableAlumniWall: true,
+    };
+  });
   const [siteLoading, setSiteLoading] = useState(false);
   const [showGeminiKey, setShowGeminiKey] = useState(false);
   const [testingGemini, setTestingGemini] = useState(false);
   const [geminiTestStatus, setGeminiTestStatus] = useState(null);
 
   useEffect(() => {
-    getDoc(doc(db, 'settings', 'site'))
-      .then(s => {
-        if (s.exists()) {
-          const d = s.data();
-          setSiteCfg(prev => ({ ...prev, ...d }));
-          if (d.imgbbKey) window.GN_IMGBB_KEY = d.imgbbKey;
-          if (d.geminiApiKey) window.GNC_GEMINI_API_KEY = d.geminiApiKey;
-        }
-      })
-      .catch(() => {});
+    const unsub = onSnapshot(doc(db, 'settings', 'site'), s => {
+      if (s.exists()) {
+        const d = s.data();
+        setSiteCfg(prev => ({ ...prev, ...d }));
+        try { localStorage.setItem('gnc_site_settings_cache', JSON.stringify(d)); } catch {}
+        if (d.imgbbKey) window.GN_IMGBB_KEY = d.imgbbKey;
+        if (d.geminiApiKey) window.GNC_GEMINI_API_KEY = d.geminiApiKey;
+      }
+    });
+    return () => unsub();
   }, []);
+
+  const handleFeatureToggle = async (key) => {
+    const currentVal = siteCfg[key] !== false;
+    const newVal = !currentVal;
+
+    // Instant local state update
+    setSiteCfg(prev => ({ ...prev, [key]: newVal }));
+
+    try {
+      await setDoc(doc(db, 'settings', 'site'), {
+        [key]: newVal,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      try {
+        const cached = localStorage.getItem('gnc_site_settings_cache');
+        const parsed = cached ? JSON.parse(cached) : {};
+        parsed[key] = newVal;
+        localStorage.setItem('gnc_site_settings_cache', JSON.stringify(parsed));
+      } catch {}
+
+      window.dispatchEvent(new CustomEvent('gnc_settings_updated', { detail: { [key]: newVal } }));
+      clearCache('site_settings');
+      toast.success(`${newVal ? '🟢 Feature Enabled' : '⚪ Feature Disabled'} (Live Synced!)`);
+      logAct?.('update', `Toggled ${key}: ${newVal}`, 'settings');
+    } catch (err) {
+      setSiteCfg(prev => ({ ...prev, [key]: currentVal }));
+      toast.error('Failed to update: ' + err.message);
+    }
+  };
 
   const testGeminiConnection = async () => {
     const key = (siteCfg.geminiApiKey || '').trim();
@@ -133,11 +176,12 @@ export default function SettingsTab({ logAct }) {
       await setDoc(doc(db, 'settings', 'site'), { ...siteCfg, updatedAt: serverTimestamp() });
       if (siteCfg.imgbbKey) window.GN_IMGBB_KEY = siteCfg.imgbbKey;
       if (siteCfg.geminiApiKey) window.GNC_GEMINI_API_KEY = siteCfg.geminiApiKey;
+      try { localStorage.setItem('gnc_site_settings_cache', JSON.stringify(siteCfg)); } catch {}
+      window.dispatchEvent(new CustomEvent('gnc_settings_updated', { detail: siteCfg }));
       
       clearCache('site_settings');
       toast.success('Settings saved & live synced! 🎉');
       logAct?.('update', 'Site settings updated', 'settings');
-      clearDraft(); // ✅ Draft clear after save
     } catch (err) { toast.error(err.message); }
     setSiteLoading(false);
   };
@@ -197,6 +241,79 @@ export default function SettingsTab({ logAct }) {
               onChange={() => setSiteCfg(d => ({ ...d, maintenanceMode: !d.maintenanceMode }))}
               label={siteCfg.maintenanceMode ? '🔴 Site is DOWN for maintenance' : '🟢 Site is LIVE'}
               color={T.red}
+            />
+          </div>
+        </div>
+
+        {/* 🎛️ Live Website Feature Switches */}
+        <div className="settings-group">
+          <div className="settings-group-title">🎛️ Live Website Feature Switches (On / Off)</div>
+          <p style={{ fontSize: 12.5, color: T.t3, margin: '6px 20px 14px', lineHeight: 1.6 }}>
+            Enable or disable major features across the website in real-time. Turn off any feature when not needed to hide it completely from public visitors.
+          </p>
+
+          <div className="settings-row">
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>🌐 Bilingual Language Switcher (EN / हिंदी)</div>
+              <div style={{ fontSize: 12, color: T.t3 }}>Show or hide English/Hindi translator toggle on the top navigation bar</div>
+            </div>
+            <Toggle
+              checked={siteCfg.enableLanguageToggle !== false}
+              onChange={() => handleFeatureToggle('enableLanguageToggle')}
+              label={siteCfg.enableLanguageToggle !== false ? '🟢 Visible' : '⚪ Hidden'}
+              color={T.green}
+            />
+          </div>
+
+          <div className="settings-row">
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>🗳️ Live Campus Poll (Student Voice)</div>
+              <div style={{ fontSize: 12, color: T.t3 }}>Show or hide student voting widget on homepage and public pages</div>
+            </div>
+            <Toggle
+              checked={siteCfg.enableCampusPoll !== false}
+              onChange={() => handleFeatureToggle('enableCampusPoll')}
+              label={siteCfg.enableCampusPoll !== false ? '🟢 Visible' : '⚪ Hidden'}
+              color={T.green}
+            />
+          </div>
+
+          <div className="settings-row">
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>📱 Floating QR Code Share Button</div>
+              <div style={{ fontSize: 12, color: T.t3 }}>Show or hide floating quick-share and print QR button at screen bottom</div>
+            </div>
+            <Toggle
+              checked={siteCfg.enableFloatingQR !== false}
+              onChange={() => handleFeatureToggle('enableFloatingQR')}
+              label={siteCfg.enableFloatingQR !== false ? '🟢 Visible' : '⚪ Hidden'}
+              color={T.green}
+            />
+          </div>
+
+          <div className="settings-row">
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>🏛️ 360° Virtual Campus Tour</div>
+              <div style={{ fontSize: 12, color: T.t3 }}>Enable panoramic 360° interactive campus tour for prospective students</div>
+            </div>
+            <Toggle
+              checked={siteCfg.enableVirtualTour !== false}
+              onChange={() => handleFeatureToggle('enableVirtualTour')}
+              label={siteCfg.enableVirtualTour !== false ? '🟢 Enabled' : '⚪ Disabled'}
+              color={T.green}
+            />
+          </div>
+
+          <div className="settings-row">
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>🎓 Alumni Success Wall</div>
+              <div style={{ fontSize: 12, color: T.t3 }}>Enable public masonry alumni wall with industry filters and batch tags</div>
+            </div>
+            <Toggle
+              checked={siteCfg.enableAlumniWall !== false}
+              onChange={() => handleFeatureToggle('enableAlumniWall')}
+              label={siteCfg.enableAlumniWall !== false ? '🟢 Enabled' : '⚪ Disabled'}
+              color={T.green}
             />
           </div>
         </div>
@@ -312,6 +429,41 @@ export default function SettingsTab({ logAct }) {
               ✅ Gemini API Key set — All students will receive live AI responses
             </div>
           )}
+        </div>
+
+        {/* Google reCAPTCHA v2 / Bot Protection */}
+        <div className="settings-group">
+          <div className="settings-group-title">🛡️ Google reCAPTCHA / Bot Protection</div>
+          <div style={{
+            background: '#eff6ff', border: '1px solid #bfdbfe',
+            borderRadius: 10, padding: '12px 16px', margin: '12px 20px',
+            fontSize: 12.5, color: '#1e40af', lineHeight: 1.7
+          }}>
+            <strong>Free Bot Protection for Contact & Inquiries:</strong><br />
+            1. Go to <a href="https://www.google.com/recaptcha/admin" target="_blank" rel="noreferrer"
+              style={{ color: '#2563eb', fontWeight: 800, textDecoration: 'underline' }}>google.com/recaptcha/admin</a><br />
+            2. Register domain <code>gncollege.org</code> (and <code>localhost</code> for testing) with reCAPTCHA v2 ("I'm not a robot" Checkbox or Invisible).<br />
+            3. Paste your <strong>Site Key</strong> below to activate bot filtering on the public contact form.
+          </div>
+          <div className="settings-row">
+            <label className="alabel" style={{ minWidth: 140, margin: 0 }}>Enable reCAPTCHA</label>
+            <Toggle
+              checked={siteCfg.enableRecaptcha || false}
+              onChange={() => setSiteCfg(d => ({ ...d, enableRecaptcha: !d.enableRecaptcha }))}
+              label={siteCfg.enableRecaptcha ? '🟢 reCAPTCHA Active' : '⚪ Disabled (Honeypot protection active)'}
+              color={T.green}
+            />
+          </div>
+          <div className="settings-row">
+            <label className="alabel" style={{ minWidth: 140, margin: 0 }}>reCAPTCHA Site Key</label>
+            <input 
+              className="ainp" 
+              value={siteCfg.recaptchaSiteKey || ''}
+              onChange={e => setSiteCfg(d => ({ ...d, recaptchaSiteKey: e.target.value }))}
+              placeholder="6Lxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              style={{ fontFamily: 'monospace' }} 
+            />
+          </div>
         </div>
 
         <button type="submit" className="abtn abtn-gold" disabled={siteLoading}>

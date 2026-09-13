@@ -7,6 +7,7 @@ import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, WHITE, useLocalDraft, Toggle, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
 import { clearCache } from '../../../utils/cachedFetch';
 import { resolveUrl } from '../../../utils/resolver';
+import { exportToExcel } from '../../../utils/excelExport';
 
 const DEPTS       = ['Botany','Chemistry','Commerce','Computer Science','Economics','Education','English','Geography','Hindi','History','Mathematics','Philosophy','Physics','Political Science','Sociology','Zoology','Library','Physical Education','Other'];
 const DESIGNATIONS = ['Professor','Associate Professor','Assistant Professor','Guest Lecturer','Lab Assistant','Librarian','Clerk','Peon','Other'];
@@ -177,7 +178,30 @@ export default function FacultyTab({ faculties, logAct, getSectionLog, softDelet
       <BulkBar count={selected.length} onDelete={() => { bulkDelete('faculties', selected); setSelected([]); clearCache('faculties'); }} onClear={() => setSelected([])} />
 
       <div className="card">
-        <div className="actitle">Staff ({filtered.length})</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <div className="actitle" style={{ margin: 0 }}>Staff ({filtered.length})</div>
+          <button 
+            type="button" 
+            className="abtn abtn-outline abtn-sm"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700 }}
+            onClick={() => exportToExcel(
+              filtered.map((f, idx) => ({
+                'S.No': idx + 1,
+                'Name': f.name || '',
+                'Type': f.staffType || 'Teaching',
+                'Designation': f.designation || '',
+                'Department': f.department || '',
+                'Qualification': f.qualification || '',
+                'Email': f.email || '',
+                'Phone': f.phone || '',
+                'Order': f.order || 0
+              })),
+              'GNC_Staff_Faculty'
+            )}
+          >
+            📊 Export Excel
+          </button>
+        </div>
         {renderList(teaching, 'Teaching Staff')}
         {renderList(nonTeaching, 'Non-Teaching Staff')}
         {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '30px 0', color: T.t4 }}>No staff found</div>}

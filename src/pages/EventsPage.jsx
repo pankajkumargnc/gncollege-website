@@ -8,7 +8,8 @@ import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import PDFModal from '../components/PDFModal';
 import PremiumPagination from '../components/PremiumPagination';
-import { Hammer, Mic, Theater, Trophy, Handshake, Medal, BookOpen } from 'lucide-react';
+import AcademicCalendarWidget from '../components/AcademicCalendarWidget';
+import { Hammer, Mic, Theater, Trophy, Handshake, Medal, BookOpen, Calendar } from 'lucide-react';
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const EVENT_TYPES  = ['All','WORKSHOP','SEMINAR','CULTURAL','SPORTS','NSS','NCC','ACADEMIC'];
@@ -174,11 +175,12 @@ export default function EventsPage({ headless }) {
         <main>
           {/* ── Filters ── */}
           <section style={{ background:'#fff', padding:'30px 40px', borderRadius:'16px', boxShadow:'0 8px 25px rgba(0,0,0,0.07)', marginTop:'30px' }}>
-            <div style={{ display:'flex', gap:3, marginBottom:16, background:'#f4f7fa', borderRadius:11, padding:3, width:'fit-content' }}>
+            <div style={{ display:'flex', gap:3, marginBottom:16, background:'#f4f7fa', borderRadius:11, padding:3, width:'fit-content', flexWrap: 'wrap' }}>
               {[
                 { id:'all',      label:'📆 All',      count:events.length   },
                 { id:'upcoming', label:'🔜 Upcoming', count:upcoming.length },
                 { id:'past',     label:'📜 Past',     count:past.length     },
+                { id:'calendar', label:'📅 Month Calendar', count:events.length },
               ].map(t => (
                 <button key={t.id} className="evt-fb" onClick={() => setTab(t.id)} style={{ padding:'8px 18px', minHeight: 44, justifyContent: 'center', borderRadius:9, background:tab===t.id?navy:'transparent', color:tab===t.id?'#fff':'#718096', fontWeight:700, fontSize:13, display:'flex', alignItems:'center', gap:7 }}>
                   {t.label}
@@ -186,31 +188,38 @@ export default function EventsPage({ headless }) {
                 </button>
               ))}
             </div>
-            <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'center' }}>
-              <div style={{ flex:1, minWidth:200, position:'relative' }}>
-                <span style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', opacity:.4, fontSize:16, pointerEvents:'none' }}>🔍</span>
-                <label htmlFor="event-search" className="sr-only">Search events</label>
-                <input id="event-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search events..."
-                  style={{ width:'100%', padding:'10px 14px 10px 38px', border:'2px solid #e2e8f0', borderRadius:10, fontSize:14, fontFamily:'inherit', background:'#f8fafc', outline:'none', boxSizing:'border-box' }} />
+            {tab !== 'calendar' && (
+              <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'center' }}>
+                <div style={{ flex:1, minWidth:200, position:'relative' }}>
+                  <span style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', opacity:.4, fontSize:16, pointerEvents:'none' }}>🔍</span>
+                  <label htmlFor="event-search" className="sr-only">Search events</label>
+                  <input id="event-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search events..."
+                    style={{ width:'100%', padding:'10px 14px 10px 38px', border:'2px solid #e2e8f0', borderRadius:10, fontSize:14, fontFamily:'inherit', background:'#f8fafc', outline:'none', boxSizing:'border-box' }} />
+                </div>
+                <span style={{ background:'#f0f4ff', color:navy, borderRadius:20, padding:'5px 14px', fontSize:12.5, fontWeight:800 }}>
+                  {filtered.length} event{filtered.length !== 1 ? 's' : ''}
+                </span>
               </div>
-              <span style={{ background:'#f0f4ff', color:navy, borderRadius:20, padding:'5px 14px', fontSize:12.5, fontWeight:800 }}>
-                {filtered.length} event{filtered.length !== 1 ? 's' : ''}
-              </span>
-            </div>
+            )}
           </section>
 
-          {/* ── Events Grid ── */}
-          <section style={{ background:'#fff', padding:'30px 40px', borderRadius:'16px', boxShadow:'0 8px 25px rgba(0,0,0,0.07)', marginTop:'30px', marginBottom:'60px' }}>
-            <h2 style={{ fontSize:'clamp(24px,4vw,32px)', fontWeight:800, color:navy, margin:'0 0 10px', letterSpacing:'-0.5px' }}>
-              Recent Events &amp; Happenings
-            </h2>
-            <div style={{ width:80, height:4, background:`linear-gradient(90deg,${gold},#fde68a)`, borderRadius:2, marginBottom:35 }} />
+          {/* ── Calendar View ── */}
+          {tab === 'calendar' ? (
+            <div style={{ marginTop: 30, marginBottom: 60 }}>
+              <AcademicCalendarWidget events={events} />
+            </div>
+          ) : (
+            <section style={{ background:'#fff', padding:'30px 40px', borderRadius:'16px', boxShadow:'0 8px 25px rgba(0,0,0,0.07)', marginTop:'30px', marginBottom:'60px' }}>
+              <h2 style={{ fontSize:'clamp(24px,4vw,32px)', fontWeight:800, color:navy, margin:'0 0 10px', letterSpacing:'-0.5px' }}>
+                Recent Events &amp; Happenings
+              </h2>
+              <div style={{ width:80, height:4, background:`linear-gradient(90deg,${gold},#fde68a)`, borderRadius:2, marginBottom:35 }} />
 
-            {loading ? (
-              <div style={{ textAlign:'center', padding:'60px 20px' }}>⏳ Loading events...</div>
-            ) : filtered.length === 0 ? (
-              <div style={{ textAlign:'center', padding:'50px 20px', color:'#94a3b8', fontSize:15, fontWeight:600 }}>🎭 No events found</div>
-            ) : (
+              {loading ? (
+                <div style={{ textAlign:'center', padding:'60px 20px' }}>⏳ Loading events...</div>
+              ) : filtered.length === 0 ? (
+                <div style={{ textAlign:'center', padding:'50px 20px', color:'#94a3b8', fontSize:15, fontWeight:600 }}>🎭 No events found</div>
+              ) : (
               <>
                 {Object.entries(grouped).map(([month, items]) => (
                   <div key={month} style={{ marginBottom:40 }}>
@@ -310,6 +319,7 @@ export default function EventsPage({ headless }) {
               </>
             )}
           </section>
+        )}
         </main>
       </div>
 

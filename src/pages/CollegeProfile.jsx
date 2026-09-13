@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
+import 'react-vertical-timeline-component/style.min.css';
 import '../styles/index.css';
 
 const CollegeProfile = () => {
@@ -103,6 +105,82 @@ const CollegeProfile = () => {
                 </p>
              </div>
           </div>
+          </div>
+
+          {/* ── HISTORIC MILESTONES TIMELINE ── */}
+          <div style={{ marginTop: '3.5rem' }}>
+            <h2 className="section-heading">Historic Milestones</h2>
+            <div className="heading-underline"></div>
+            <p className="rich-text-content" style={{ marginBottom: '2rem' }}>
+              Trace our transformative journey from 1970 to the present day:
+            </p>
+
+            <VerticalTimeline lineColor="#e2e8f0" layout="1-column-left">
+              <VerticalTimelineElement
+                date="1970"
+                contentStyle={{ background: '#0f2347', color: '#fff', borderRadius: '14px', boxShadow: '0 8px 25px rgba(15,35,71,0.15)' }}
+                contentArrowStyle={{ borderRight: '7px solid #0f2347' }}
+                iconStyle={{ background: '#f4a023', color: '#0f2347', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}
+                icon={<span>🏛️</span>}
+              >
+                <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#f4a023', margin: '0 0 6px' }}>Foundation & Affiliation</h3>
+                <p style={{ margin: 0, fontSize: '13.5px', color: '#cbd5e1', lineHeight: 1.6 }}>
+                  Established by Gurudwara Prabandhak Committee, Dhanbad to mark the 500th Birth Centenary of Sri Guru Nanak Dev Ji. First affiliated with Ranchi University.
+                </p>
+              </VerticalTimelineElement>
+
+              <VerticalTimelineElement
+                date="1985"
+                contentStyle={{ background: '#ffffff', color: '#0f2347', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 8px 25px rgba(0,0,0,0.05)' }}
+                contentArrowStyle={{ borderRight: '7px solid #ffffff' }}
+                iconStyle={{ background: '#0f2347', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}
+                icon={<span>📜</span>}
+              >
+                <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f2347', margin: '0 0 6px' }}>UGC 2(f) & 12(B) Recognition</h3>
+                <p style={{ margin: 0, fontSize: '13.5px', color: '#475569', lineHeight: 1.6 }}>
+                  Conferred "Deficit Grant College Status" by the Government of Jharkhand and permanently recognized under sections 2(f) and 12(B) of the UGC Act.
+                </p>
+              </VerticalTimelineElement>
+
+              <VerticalTimelineElement
+                date="2000"
+                contentStyle={{ background: '#ffffff', color: '#0f2347', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 8px 25px rgba(0,0,0,0.05)' }}
+                contentArrowStyle={{ borderRight: '7px solid #ffffff' }}
+                iconStyle={{ background: '#10b981', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}
+                icon={<span>👩‍🎓</span>}
+              >
+                <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f2347', margin: '0 0 6px' }}>Bank More Women's Wing Launched</h3>
+                <p style={{ margin: 0, fontSize: '13.5px', color: '#475569', lineHeight: 1.6 }}>
+                  Dedicated women's wing inaugurated at Bank More Campus, providing specialized morning degree education for girl students of the coal belt.
+                </p>
+              </VerticalTimelineElement>
+
+              <VerticalTimelineElement
+                date="2017"
+                contentStyle={{ background: '#ffffff', color: '#0f2347', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 8px 25px rgba(0,0,0,0.05)' }}
+                contentArrowStyle={{ borderRight: '7px solid #ffffff' }}
+                iconStyle={{ background: '#3b82f6', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}
+                icon={<span>🎓</span>}
+              >
+                <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f2347', margin: '0 0 6px' }}>Affiliation to BBMKU Dhanbad</h3>
+                <p style={{ margin: 0, fontSize: '13.5px', color: '#475569', lineHeight: 1.6 }}>
+                  Affiliation permanently shifted to newly established Binod Bihari Mahto Koyalanchal University (BBMKU) as a premier constituent degree institution.
+                </p>
+              </VerticalTimelineElement>
+
+              <VerticalTimelineElement
+                date="Present"
+                contentStyle={{ background: 'linear-gradient(135deg, #0f2347, #1e3a8a)', color: '#fff', borderRadius: '14px', boxShadow: '0 8px 25px rgba(15,35,71,0.2)' }}
+                contentArrowStyle={{ borderRight: '7px solid #0f2347' }}
+                iconStyle={{ background: '#f4a023', color: '#0f2347', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}
+                icon={<span>🚀</span>}
+              >
+                <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#f4a023', margin: '0 0 6px' }}>NEP 2020 & Digital Campus</h3>
+                <p style={{ margin: 0, fontSize: '13.5px', color: '#cbd5e1', lineHeight: 1.6 }}>
+                  Full implementation of NEP-2020 4-year FYUGP degree courses, smart classrooms, AI student portal, and comprehensive vocational skilling.
+                </p>
+              </VerticalTimelineElement>
+            </VerticalTimeline>
           </div>
         </section>
 

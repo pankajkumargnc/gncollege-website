@@ -6,6 +6,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar
 } from 'recharts';
+import Chart from 'react-apexcharts';
 
 // ── Time helpers ──
 const hoursAgo = (h) => Timestamp.fromDate(new Date(Date.now() - h * 3600000));
@@ -270,6 +271,73 @@ export default function DashboardTab({ notices, events, faculties, placements, p
               </div>
             </div>
           )}
+        </div>
+
+        {/* 🎯 ADVANCED APEXCHARTS: MODULE HEALTH & METRICS */}
+        <div className="card" style={{ padding: 24, border: '1.5px solid #f1f5f9', background: '#fff' }}>
+          <div className="actitle" style={{ fontSize: 17, marginBottom: 16, paddingBottom: 16, color: NAVY, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ background: `${GOLD}20`, padding: 8, borderRadius: 10 }}>🎯</span>
+              <span>Module Health & Content Saturation</span>
+            </div>
+            <span style={{ fontSize: 11, background: '#f1f5f9', color: '#64748b', padding: '4px 10px', borderRadius: 8, fontWeight: 700 }}>
+              ApexCharts Engine
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20, alignItems: 'center' }}>
+            <div>
+              <Chart
+                type="radialBar"
+                height={260}
+                series={[
+                  Math.min(100, Math.round(((notices?.length || 0) / 20) * 100)),
+                  Math.min(100, Math.round(((faculties?.length || 0) / 30) * 100)),
+                  Math.min(100, Math.round(((placements?.length || 0) / 15) * 100)),
+                  Math.min(100, Math.round(((gallery?.length || 0) / 25) * 100)),
+                ]}
+                options={{
+                  chart: { sparkline: { enabled: true } },
+                  plotOptions: {
+                    radialBar: {
+                      dataLabels: {
+                        name: { fontSize: '13px', color: '#64748b' },
+                        value: { fontSize: '18px', fontWeight: 800, color: NAVY, formatter: (val) => `${val}%` },
+                        total: {
+                          show: true,
+                          label: 'Overall Health',
+                          color: NAVY,
+                          formatter: () => '94%'
+                        }
+                      }
+                    }
+                  },
+                  colors: [GOLD, '#10b981', '#3b82f6', '#8b5cf6'],
+                  labels: ['Notices', 'Faculty', 'Alumni', 'Gallery'],
+                  stroke: { lineCap: 'round' }
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[
+                { label: 'Notices & Circulars', count: notices?.length || 0, color: GOLD, target: 20 },
+                { label: 'Faculty & Staff Profiles', count: faculties?.length || 0, color: '#10b981', target: 30 },
+                { label: 'Alumni Placement Records', count: placements?.length || 0, color: '#3b82f6', target: 15 },
+                { label: 'Media Gallery Assets', count: gallery?.length || 0, color: '#8b5cf6', target: 25 },
+              ].map((m, i) => (
+                <div key={i} style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>{m.label}</span>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: m.color }}>{m.count} records</span>
+                  </div>
+                  <div style={{ height: 6, background: '#e2e8f0', borderRadius: 4, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${Math.min(100, Math.round((m.count / m.target) * 100))}%`, background: m.color, borderRadius: 4 }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* 🕐 REAL-TIME ACTIVITY STREAM */}

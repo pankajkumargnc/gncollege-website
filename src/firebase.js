@@ -47,4 +47,27 @@ try {
 
 export const db = dbInstance;
 
+// ✅ Web Push Notifications (Firebase Cloud Messaging)
+export const requestNotificationPermission = async () => {
+  try {
+    if (typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator)) {
+      return null;
+    }
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      const { getMessaging, getToken } = await import('firebase/messaging');
+      const messaging = getMessaging(app);
+      const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+      const token = await getToken(messaging, { 
+        vapidKey: vapidKey || undefined 
+      });
+      return token;
+    }
+    return null;
+  } catch (err) {
+    console.warn('Notification permission/token error:', err);
+    return null;
+  }
+};
+
 export { logEvent };

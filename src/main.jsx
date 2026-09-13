@@ -4,6 +4,18 @@ import { HashRouter as Router } from 'react-router-dom'
 import AppWrapper from './AppWrapper'
 import './styles/index.css'
 import './styles/print.css'
+import AOS from 'aos'
+import 'aos/dist/aos.css'
+import './i18n'
+
+if (typeof window !== 'undefined') {
+  AOS.init({
+    duration: 750,
+    easing: 'ease-out-cubic',
+    once: true,
+    offset: 40,
+  });
+}
 
 // ── Root-level Error Boundary — poori app crash hone se bachata hai ──────────
 class RootErrorBoundary extends React.Component {

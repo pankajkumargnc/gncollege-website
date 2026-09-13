@@ -2,7 +2,9 @@
 // 🚀 ULTRA PRO MAX PREMIUM MEDIA PICKER WITH GOOGLE DRIVE ENGINE
 // 🛡️ 100% Crash-Free | Lag-Free | Backward Compatible
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import imageCompression from 'browser-image-compression';
 import { useDriveDocs } from '../hooks/useDriveDocs';
 import { COLORS } from '../styles/colors';
 import { resolveUrl } from '../utils/resolver';
@@ -35,15 +37,28 @@ export default function MediaPicker({
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
+  useEffect(() => {
+    setTempUrl(value || '');
+  }, [value]);
+
   // ── ☁️ DRIVE ENGINE (Error-Safe) ──
   const { docs: driveFiles, loading: driveLoading, error: driveError } = useDriveDocs(
     mode === 'drive' ? driveFolderId : null, 
     type
   );
 
+  const cleanMediaUrl = (input) => {
+    if (!input) return '';
+    const trimmed = String(input).trim();
+    if (isImage && (trimmed.includes('drive.google.com') || trimmed.includes('googleusercontent.com'))) {
+      return resolveUrl(trimmed);
+    }
+    return trimmed;
+  };
+
   const handleUrlSubmit = (e) => {
-    e.preventDefault();
-    if (tempUrl.trim()) onChange(tempUrl.trim());
+    if (e) e.preventDefault();
+    if (tempUrl.trim()) onChange(cleanMediaUrl(tempUrl));
   };
 
   // ── DYNAMIC NAVIGATION TABS ──
@@ -176,25 +191,37 @@ export default function MediaPicker({
         {/* ═════════ 2. URL MODE ═════════ */}
         {mode === 'url' && (
           <div style={S.panel}>
-            <p style={S.hint}>🔗 Paste a direct web link (e.g., https://.../document.pdf)</p>
+            <p style={S.hint}>🔗 Paste any link (Google Drive, Web URL, Cloud PDF/Image)</p>
             <div style={S.inputGroup}>
               <input 
-                type="text" value={tempUrl} onChange={e => setTempUrl(e.target.value)}
-                placeholder="Paste URL here..." style={S.input} 
+                type="text" 
+                value={tempUrl} 
+                onChange={e => {
+                  const val = e.target.value;
+                  setTempUrl(val);
+                  if (val.trim()) {
+                    onChange(cleanMediaUrl(val));
+                  }
+                }}
+                onBlur={e => {
+                  if (e.target.value.trim()) onChange(cleanMediaUrl(e.target.value));
+                }}
+                placeholder="Paste URL here (auto-applies immediately)..." 
+                style={S.input} 
               />
               <button type="button" onClick={handleUrlSubmit} style={S.actionBtn}>Apply Link</button>
             </div>
           </div>
         )}
 
-        {/* ═════════ 3. UPLOAD MODE (Firebase Storage Enabled) ═════════ */}
+        {/* ═════════ 3. UPLOAD MODE (Ultra-Resilient Multi-Engine) ═════════ */}
         {mode === 'upload' && (
           <div style={S.panel}>
-             <p style={S.hint}>📤 Upload files directly to Cloud Storage or select from Google Drive.</p>
+             <p style={S.hint}>📤 Select a file from your device (Auto-compressed & Instant Cloud Attachment)</p>
              <div style={S.dropZone}>
                 <div style={{ fontSize: '24px', marginBottom: '8px' }}>📂</div>
                 <div style={{ fontWeight: 700, color: NAVY }}>
-                  {uploading ? `Uploading... ${uploadProgress}%` : 'Click to select a file'}
+                  {uploading ? `Processing... ${uploadProgress}%` : 'Click to select a file'}
                 </div>
                 <input 
                   type="file" 
@@ -205,33 +232,108 @@ export default function MediaPicker({
                     const file = e.target.files?.[0];
                     if (!file) return;
                     setUploading(true);
-                    setUploadProgress(0);
-                    try {
-                      const { getStorage, ref, uploadBytesResumable, getDownloadURL } = await import('firebase/storage');
-                      const storage = getStorage();
-                      const subFolder = isPdf ? 'documents' : 'images';
-                      const fileRef = ref(storage, `${subFolder}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`);
-                      const uploadTask = uploadBytesResumable(fileRef, file);
+                    setUploadProgress(20);
 
-                      uploadTask.on('state_changed', 
-                        (snapshot) => {
-                          const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                          setUploadProgress(progress);
-                        }, 
-                        (error) => {
-                          console.error('Storage Upload Error:', error);
-                          alert('Upload failed: ' + error.message);
-                          setUploading(false);
-                        }, 
-                        async () => {
-                          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                          onChange(downloadURL);
-                          setUploading(false);
+                    try {
+                      let fileToUpload = file;
+                      if (file.type?.startsWith('image/')) {
+                        try {
+                          const origMB = (file.size / (1024 * 1024)).toFixed(2);
+                          toast.loading('⚡ Optimizing image size...', { id: 'img-compress' });
+                          const compressed = await imageCompression(file, {
+                            maxSizeMB: 0.15,
+                            maxWidthOrHeight: 1200,
+                            useWebWorker: true,
+                          });
+                          fileToUpload = compressed;
+                          const newKB = (compressed.size / 1024).toFixed(0);
+                          toast.success(`⚡ Compressed: ${origMB}MB → ${newKB}KB!`, { id: 'img-compress' });
+                        } catch (compErr) {
+                          console.warn('Compression failed, using original:', compErr);
+                          toast.dismiss('img-compress');
                         }
-                      );
+                      }
+
+                      // Engine 1: ImgBB (if available for images)
+                      const imgKey = window.GN_IMGBB_KEY || imgbbAPIKey;
+                      if (fileToUpload.type?.startsWith('image/') && imgKey) {
+                        try {
+                          setUploadProgress(50);
+                          const fd = new FormData();
+                          fd.append('image', fileToUpload);
+                          const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgKey}`, {
+                            method: 'POST',
+                            body: fd
+                          });
+                          const json = await res.json();
+                          if (json?.data?.url) {
+                            onChange(json.data.url);
+                            toast.success('Uploaded to Cloud successfully! 🖼️');
+                            setUploading(false);
+                            return;
+                          }
+                        } catch (imgbbErr) {
+                          console.warn('ImgBB upload error, attempting fallback:', imgbbErr);
+                        }
+                      }
+
+                      // Engine 2: Firebase Storage
+                      try {
+                        const { getStorage, ref, uploadBytesResumable, getDownloadURL } = await import('firebase/storage');
+                        const storage = getStorage();
+                        const subFolder = isPdf ? 'documents' : 'images';
+                        const fileRef = ref(storage, `${subFolder}/${Date.now()}_${fileToUpload.name.replace(/\s+/g, '_')}`);
+                        const uploadTask = uploadBytesResumable(fileRef, fileToUpload);
+
+                        uploadTask.on('state_changed', 
+                          (snapshot) => {
+                            const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                            setUploadProgress(progress);
+                          }, 
+                          async (error) => {
+                            console.warn('Storage task warning, falling back to base64 Data URL:', error);
+                            // Fallback to Data URL for images
+                            if (fileToUpload.type?.startsWith('image/')) {
+                              const reader = new FileReader();
+                              reader.onload = () => {
+                                onChange(reader.result);
+                                toast.success('Image optimized and attached! ✅');
+                                setUploading(false);
+                              };
+                              reader.readAsDataURL(fileToUpload);
+                            } else {
+                              toast.error('Upload failed: ' + error.message);
+                              setUploading(false);
+                            }
+                          }, 
+                          async () => {
+                            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                            onChange(downloadURL);
+                            toast.success('Attached successfully! ✅');
+                            setUploading(false);
+                          }
+                        );
+                        return;
+                      } catch (storageErr) {
+                        console.warn('Firebase Storage init failed, using inline Data URL fallback:', storageErr);
+                      }
+
+                      // Engine 3: Local Resilient Data URL Fallback for Images
+                      if (fileToUpload.type?.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                          onChange(reader.result);
+                          toast.success('Cover image ready & attached! 🎉');
+                          setUploading(false);
+                        };
+                        reader.readAsDataURL(fileToUpload);
+                      } else {
+                        toast.error('Could not upload PDF. Please select from Google Drive or paste direct link.');
+                        setUploading(false);
+                      }
                     } catch (err) {
-                      console.error('Storage init error:', err);
-                      alert('Could not initialize Firebase Storage: ' + err.message);
+                      console.error('File process error:', err);
+                      toast.error('Processing failed: ' + err.message);
                       setUploading(false);
                     }
                   }}

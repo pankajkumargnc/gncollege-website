@@ -8,15 +8,17 @@ import PremiumPagination from '../components/PremiumPagination';
 const ITEMS_PER_PAGE = 15;
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const DOC_TYPES = ['All','Document','Report','Syllabus','Circular','Result','Regulation','Affiliation'];
+const DOC_TYPES = ['All','Document','Report','Syllabus','Circular','Result','Regulation','Affiliation','Magazine','Poster'];
 const DOC_META = {
-  Document: { icon:'📄', bg:'#EBF0FF', text:'#1a365d', border:'#BED0FF', color:'#4a7fd4' },
-  Report:   { icon:'📊', bg:'#F0FFF4', text:'#1c4532', border:'#9AE6B4', color:'#38a169' },
-  Syllabus: { icon:'📚', bg:'#FFFBEB', text:'#744210', border:'#FAF089', color:'#d69e2e' },
-  Circular: { icon:'📋', bg:'#FFF5F5', text:'#742a2a', border:'#FEB2B2', color:'#e53e3e' },
-  Result:   { icon:'🏆', bg:'#E6FFFA', text:'#1d4044', border:'#81E6D9', color:'#319795' },
+  Document:   { icon:'📄', bg:'#EBF0FF', text:'#1a365d', border:'#BED0FF', color:'#4a7fd4' },
+  Report:     { icon:'📊', bg:'#F0FFF4', text:'#1c4532', border:'#9AE6B4', color:'#38a169' },
+  Syllabus:   { icon:'📚', bg:'#FFFBEB', text:'#744210', border:'#FAF089', color:'#d69e2e' },
+  Circular:   { icon:'📋', bg:'#FFF5F5', text:'#742a2a', border:'#FEB2B2', color:'#e53e3e' },
+  Result:     { icon:'🏆', bg:'#E6FFFA', text:'#1d4044', border:'#81E6D9', color:'#319795' },
   Regulation: { icon:'⚖️', bg:'#F5F3FF', text:'#4C1D95', border:'#DDD6FE', color:'#7C3AED' },
   Affiliation:{ icon:'🏛️', bg:'#F0F9FF', text:'#0C4A6E', border:'#BAE6FD', color:'#0284C7' },
+  Magazine:   { icon:'📖', bg:'#FEF3C7', text:'#92400E', border:'#FCD34D', color:'#F59E0B' },
+  Poster:     { icon:'🎨', bg:'#FDF2F8', text:'#9D174D', border:'#FBCFE8', color:'#EC4899' },
 };
 
 const getTS  = ts => ts?.toDate ? ts.toDate() : new Date(ts || Date.now());
@@ -38,12 +40,27 @@ export default function DocumentsPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    const q = query(collection(db, 'pdfReports'), orderBy('createdAt', 'desc'));
+    const q = collection(db, 'pdfReports');
     const unsub = onSnapshot(q, snap => {
-      setDocs(snap.docs.map(d => ({ id:d.id, ...d.data() })));
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      list.sort((a, b) => {
+        const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : (new Date(a.createdAt || 0).getTime() || 0);
+        const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : (new Date(b.createdAt || 0).getTime() || 0);
+        return tb - ta;
+      });
+      setDocs(list);
       setLoading(false);
     }, () => setLoading(false));
-    return () => unsub();
+
+    const handleSync = () => {
+      // Re-query triggered automatically by Firestore listener
+    };
+    window.addEventListener('gnc_live_sync', handleSync);
+
+    return () => {
+      unsub();
+      window.removeEventListener('gnc_live_sync', handleSync);
+    };
   }, []);
 
   const years = useMemo(() => {
@@ -213,33 +230,72 @@ export default function DocumentsPage() {
               ) : view === 'grid' ? (
 
                 /* ── GRID VIEW ── */
-                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))', gap:18 }}>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(270px,1fr))', gap:20 }}>
                   {paginated.map(d => {
                     const m = DOC_META[d.type]||DOC_META.Document;
+                    const pdfLink = d.pdfUrl || d.link;
+                    const waText = encodeURIComponent(`📄 Check out "${d.title}" from Guru Nanak College:\n${pdfLink || window.location.href}`);
+
                     return (
                       <div key={d.id} className="doc-card-hover"
-                        style={{ background:'#fff', borderRadius:14, overflow:'hidden', boxShadow:'0 4px 16px rgba(11,31,78,.06)', border:'1px solid #edf2f7' }}>
-                        <div style={{ height:5, background:`linear-gradient(90deg,${navy},${gold})` }} />
-                        <div style={{ padding:'18px 20px 16px' }}>
-                          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:14 }}>
-                            <div style={{ width:50, height:50, borderRadius:12, background:m.bg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:24, border:`1px solid ${m.border}` }}>
-                              {m.icon}
-                            </div>
-                            <span style={{ background:m.bg, color:m.text, border:`1px solid ${m.border}`, padding:'3px 11px', borderRadius:20, fontSize:11.5, fontWeight:700 }}>{d.type||'Document'}</span>
+                        style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 4px 18px rgba(11,31,78,.06)', border:'1.5px solid #edf2f7', display:'flex', flexDirection:'column' }}>
+                        
+                        {d.coverImage ? (
+                          <div style={{ width:'100%', height:160, position:'relative', overflow:'hidden', background:'#09172e' }}>
+                            <img src={d.coverImage} alt={d.title} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                            <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, transparent 40%, rgba(9,23,46,0.85) 100%)' }} />
+                            <span style={{ position:'absolute', top:10, right:10, background:m.bg, color:m.text, border:`1px solid ${m.border}`, padding:'3px 10px', borderRadius:20, fontSize:11, fontWeight:800 }}>
+                              {m.icon} {d.type||'Document'}
+                            </span>
                           </div>
-                          <h3 style={{ margin:'0 0 7px', fontSize:14.5, fontWeight:800, color:navy, lineHeight:1.4 }}>{d.title}</h3>
-                          <p style={{ margin:'0 0 16px', fontSize:12, color:'#a0aec0', fontWeight:600 }}>📅 {fmtDt(d.createdAt)}</p>
-                          <a href={d.link} target="_blank" rel="noreferrer" 
-                            onClick={(e) => { 
-                              if (d.link && (d.link.includes('drive.google') || d.link.toLowerCase().endsWith('.pdf') || d.link.includes('firebase'))) {
-                                e.preventDefault(); 
-                                setSelectedPdf({ url: d.link, title: d.title || 'Document' }); 
-                              }
-                            }} 
-                            className="dl-btn-hover"
-                            style={{ width:'100%', display:'inline-flex', alignItems:'center', justifyContent:'center', minHeight: 44, gap:8, background:navy, color:'#fff', padding:'10px 16px', borderRadius:9, fontSize:13.5, fontWeight:700, textDecoration:'none', border:'none', cursor:'pointer' }}>
-                            👁️ View PDF
-                          </a>
+                        ) : (
+                          <div style={{ height:5, background:`linear-gradient(90deg,${navy},${gold})` }} />
+                        )}
+
+                        <div style={{ padding:'18px 20px 16px', flex:1, display:'flex', flexDirection:'column' }}>
+                          {!d.coverImage && (
+                            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:14 }}>
+                              <div style={{ width:48, height:48, borderRadius:12, background:m.bg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, border:`1px solid ${m.border}` }}>
+                                {m.icon}
+                              </div>
+                              <span style={{ background:m.bg, color:m.text, border:`1px solid ${m.border}`, padding:'3px 11px', borderRadius:20, fontSize:11.5, fontWeight:700 }}>{d.type||'Document'}</span>
+                            </div>
+                          )}
+
+                          <h3 style={{ margin:'0 0 6px', fontSize:14.5, fontWeight:800, color:navy, lineHeight:1.4 }}>{d.title}</h3>
+                          
+                          {d.description && (
+                            <p style={{ margin:'0 0 10px', fontSize:12, color:'#64748b', lineHeight:1.4, overflow:'hidden', textOverflow:'ellipsis', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>
+                              {d.description}
+                            </p>
+                          )}
+
+                          <div style={{ marginTop:'auto', paddingTop:12, display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid #f1f5f9', marginBottom:14 }}>
+                            <span style={{ fontSize:11.5, color:'#a0aec0', fontWeight:600 }}>📅 {fmtDt(d.createdAt)}</span>
+                            {d.fileSize && <span style={{ fontSize:11, color:'#64748b', background:'#f8fafc', padding:'2px 7px', borderRadius:6, border:'1px solid #e2e8f0', fontWeight:700 }}>{d.fileSize}</span>}
+                          </div>
+
+                          <div style={{ display:'flex', gap:8 }}>
+                            <a href={pdfLink} target="_blank" rel="noreferrer" 
+                              onClick={(e) => { 
+                                if (pdfLink && (pdfLink.includes('drive.google') || pdfLink.toLowerCase().endsWith('.pdf') || pdfLink.includes('firebase') || pdfLink.startsWith('blob:'))) {
+                                  e.preventDefault(); 
+                                  setSelectedPdf({ url: pdfLink, title: d.title || 'Document' }); 
+                                }
+                              }} 
+                              className="dl-btn-hover"
+                              style={{ flex:1, display:'inline-flex', alignItems:'center', justifyContent:'center', minHeight: 42, gap:6, background:navy, color:'#fff', padding:'9px 14px', borderRadius:9, fontSize:13, fontWeight:700, textDecoration:'none', border:'none', cursor:'pointer' }}>
+                              👁️ View PDF
+                            </a>
+
+                            <button
+                              type="button"
+                              onClick={() => window.open(`https://api.whatsapp.com/send?text=${waText}`, '_blank')}
+                              style={{ background:'#25D366', color:'#fff', border:'none', borderRadius:9, minWidth:42, minHeight:42, display:'inline-flex', alignItems:'center', justifyContent:'center', cursor:'pointer', fontSize:15, boxShadow:'0 2px 8px rgba(37,211,102,0.3)' }}
+                              title="Share on WhatsApp">
+                              📲
+                            </button>
+                          </div>
                         </div>
                       </div>
                     );
@@ -260,30 +316,52 @@ export default function DocumentsPage() {
                     <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
                       {items.map(d => {
                         const m = DOC_META[d.type]||DOC_META.Document;
+                        const pdfLink = d.pdfUrl || d.link;
+                        const waText = encodeURIComponent(`📄 Check out "${d.title}" from Guru Nanak College:\n${pdfLink || window.location.href}`);
+
                         return (
                           <div key={d.id} className="doc-row-hover"
-                            style={{ background:'#fff', borderRadius:11, padding:'13px 16px', display:'flex', alignItems:'center', gap:13, border:'1px solid #edf2f7', boxShadow:'0 2px 8px rgba(11,31,78,.04)' }}>
-                            <div style={{ width:44, height:44, borderRadius:10, background:m.bg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:21, flexShrink:0, border:`1px solid ${m.border}` }}>
-                              {m.icon}
-                            </div>
+                            style={{ background:'#fff', borderRadius:11, padding:'12px 16px', display:'flex', alignItems:'center', gap:13, border:'1px solid #edf2f7', boxShadow:'0 2px 8px rgba(11,31,78,.04)' }}>
+                            {d.coverImage ? (
+                              <div style={{ width:44, height:44, borderRadius:10, overflow:'hidden', flexShrink:0, background:'#09172e', border:'1px solid #e2e8f0' }}>
+                                <img src={d.coverImage} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                              </div>
+                            ) : (
+                              <div style={{ width:44, height:44, borderRadius:10, background:m.bg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:21, flexShrink:0, border:`1px solid ${m.border}` }}>
+                                {m.icon}
+                              </div>
+                            )}
+
                             <div style={{ flex:1, overflow:'hidden' }}>
                               <div style={{ fontWeight:700, fontSize:14.5, color:navy, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{d.title}</div>
                               <div style={{ display:'flex', gap:8, marginTop:4, alignItems:'center' }}>
                                 <span style={{ background:m.bg, color:m.text, border:`1px solid ${m.border}`, padding:'2px 8px', borderRadius:20, fontSize:11, fontWeight:700 }}>{d.type||'Document'}</span>
                                 <span style={{ fontSize:12, color:'#a0aec0' }}>📅 {fmtDt(d.createdAt)}</span>
+                                {d.fileSize && <span style={{ fontSize:11, color:'#64748b' }}>• {d.fileSize}</span>}
                               </div>
                             </div>
-                            <a href={d.link} target="_blank" rel="noreferrer" 
-                              onClick={(e) => { 
-                                if (d.link && (d.link.includes('drive.google') || d.link.toLowerCase().endsWith('.pdf') || d.link.includes('firebase'))) {
-                                  e.preventDefault(); 
-                                  setSelectedPdf({ url: d.link, title: d.title || 'Document' }); 
-                                }
-                              }} 
-                              className="dl-btn-hover"
-                              style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', minHeight: 44, gap:6, background:navy, color:'#fff', padding:'9px 18px', borderRadius:9, fontSize:13, fontWeight:700, textDecoration:'none', border:'none', cursor:'pointer', flexShrink:0, whiteSpace:'nowrap' }}>
-                              👁️ Open
-                            </a>
+
+                            <div style={{ display:'flex', gap:6, flexShrink:0 }}>
+                              <a href={pdfLink} target="_blank" rel="noreferrer" 
+                                onClick={(e) => { 
+                                  if (pdfLink && (pdfLink.includes('drive.google') || pdfLink.toLowerCase().endsWith('.pdf') || pdfLink.includes('firebase') || pdfLink.startsWith('blob:'))) {
+                                    e.preventDefault(); 
+                                    setSelectedPdf({ url: pdfLink, title: d.title || 'Document' }); 
+                                  }
+                                }} 
+                                className="dl-btn-hover"
+                                style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', minHeight: 38, gap:6, background:navy, color:'#fff', padding:'8px 16px', borderRadius:8, fontSize:12.5, fontWeight:700, textDecoration:'none', border:'none', cursor:'pointer', whiteSpace:'nowrap' }}>
+                                👁️ Open
+                              </a>
+
+                              <button
+                                type="button"
+                                onClick={() => window.open(`https://api.whatsapp.com/send?text=${waText}`, '_blank')}
+                                style={{ background:'#25D366', color:'#fff', border:'none', borderRadius:8, width:38, minHeight:38, display:'inline-flex', alignItems:'center', justifyContent:'center', cursor:'pointer', fontSize:14 }}
+                                title="Share on WhatsApp">
+                                📲
+                              </button>
+                            </div>
                           </div>
                         );
                       })}

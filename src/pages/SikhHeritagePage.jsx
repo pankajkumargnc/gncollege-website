@@ -1,6 +1,7 @@
-// src/pages/SikhHeritagePage.jsx — Sikh Heritage, History & Minority Excellence
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
+import 'react-vertical-timeline-component/style.min.css';
 import { updateSEO } from '../utils/seoManager';
 import { COLORS } from '../styles/colors';
 
@@ -599,41 +600,73 @@ export default function SikhHeritagePage() {
             </div>
 
             {/* TIMELINE */}
-            <div className="sh-timeline">
-              <div className="sh-timeline-item">
-                <div className="sh-timeline-dot" />
-                <span className="sh-timeline-year">1970</span>
-                <div className="sh-timeline-title">Establishment of Guru Nanak College</div>
-                <p className="sh-timeline-desc">Inaugurated by the Sikh community of Dhanbad under the patronage of Sardar Pritam Singh Sahni to empower local youth.</p>
-              </div>
+            <div style={{ marginTop: '2.5rem' }}>
+              <VerticalTimeline lineColor="#e2e8f0" layout="1-column-left">
+                <VerticalTimelineElement
+                  date="1970"
+                  contentStyle={{ background: '#0f2347', color: '#fff', borderRadius: '14px', boxShadow: '0 8px 25px rgba(15,35,71,0.15)' }}
+                  contentArrowStyle={{ borderRight: '7px solid #0f2347' }}
+                  iconStyle={{ background: '#f4a023', color: '#0f2347', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}
+                  icon={<span>🏛️</span>}
+                >
+                  <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#f4a023', margin: '0 0 6px' }}>Establishment of Guru Nanak College</h4>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#cbd5e1', lineHeight: 1.6 }}>
+                    Inaugurated by the Sikh community of Dhanbad under the patronage of Sardar Pritam Singh Sahni to empower local youth with value-based higher education.
+                  </p>
+                </VerticalTimelineElement>
 
-              <div className="sh-timeline-item">
-                <div className="sh-timeline-dot" />
-                <span className="sh-timeline-year">1972</span>
-                <div className="sh-timeline-title">UGC 2(f) & 12(B) Status</div>
-                <p className="sh-timeline-desc">Secured permanent UGC recognition, establishing academic credibility across Jharkhand and Bihar.</p>
-              </div>
+                <VerticalTimelineElement
+                  date="1972"
+                  contentStyle={{ background: '#ffffff', color: '#0f2347', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 8px 25px rgba(0,0,0,0.05)' }}
+                  contentArrowStyle={{ borderRight: '7px solid #ffffff' }}
+                  iconStyle={{ background: '#0f2347', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}
+                  icon={<span>📜</span>}
+                >
+                  <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#0f2347', margin: '0 0 6px' }}>UGC 2(f) & 12(B) Status</h4>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: 1.6 }}>
+                    Secured permanent UGC recognition under sections 2(f) and 12(B), establishing recognized academic credibility across the nation.
+                  </p>
+                </VerticalTimelineElement>
 
-              <div className="sh-timeline-item">
-                <div className="sh-timeline-dot" />
-                <span className="sh-timeline-year">1992</span>
-                <div className="sh-timeline-title">Affiliation with Vinoba Bhave University (VBU)</div>
-                <p className="sh-timeline-desc">Transferred from Ranchi University to the newly chartered Vinoba Bhave University, Hazaribagh as a premier affiliated college.</p>
-              </div>
+                <VerticalTimelineElement
+                  date="1992"
+                  contentStyle={{ background: '#ffffff', color: '#0f2347', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 8px 25px rgba(0,0,0,0.05)' }}
+                  contentArrowStyle={{ borderRight: '7px solid #ffffff' }}
+                  iconStyle={{ background: '#3b82f6', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}
+                  icon={<span>🎓</span>}
+                >
+                  <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#0f2347', margin: '0 0 6px' }}>Affiliation with Vinoba Bhave University (VBU)</h4>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: 1.6 }}>
+                    Transferred from Ranchi University to the newly chartered Vinoba Bhave University, Hazaribagh as a premier affiliated college.
+                  </p>
+                </VerticalTimelineElement>
 
-              <div className="sh-timeline-item">
-                <div className="sh-timeline-dot" />
-                <span className="sh-timeline-year">2017</span>
-                <div className="sh-timeline-title">B.B.M. Koyalanchal University (BBMKU) Affiliation</div>
-                <p className="sh-timeline-desc">Became one of the cornerstone institutions of BBMKU Dhanbad upon the university’s establishment.</p>
-              </div>
+                <VerticalTimelineElement
+                  date="2017"
+                  contentStyle={{ background: '#ffffff', color: '#0f2347', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 8px 25px rgba(0,0,0,0.05)' }}
+                  contentArrowStyle={{ borderRight: '7px solid #ffffff' }}
+                  iconStyle={{ background: '#10b981', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}
+                  icon={<span>🌟</span>}
+                >
+                  <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#0f2347', margin: '0 0 6px' }}>B.B.M. Koyalanchal University (BBMKU)</h4>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: 1.6 }}>
+                    Became one of the cornerstone institutions of BBMKU Dhanbad upon the university’s establishment.
+                  </p>
+                </VerticalTimelineElement>
 
-              <div className="sh-timeline-item">
-                <div className="sh-timeline-dot" />
-                <span className="sh-timeline-year">PRESENT DAY</span>
-                <div className="sh-timeline-title">56 Years of Unbroken Academic Legacy</div>
-                <p className="sh-timeline-desc">Over 4,000 enrolled students across two vibrant campuses: Bhuda Campus (Main & Boys Wing) and Bank More Campus (Girls & Vocational Wing).</p>
-              </div>
+                <VerticalTimelineElement
+                  date="Present"
+                  contentStyle={{ background: 'linear-gradient(135deg, #0f2347, #1e3a8a)', color: '#fff', borderRadius: '14px', boxShadow: '0 8px 25px rgba(15,35,71,0.2)' }}
+                  contentArrowStyle={{ borderRight: '7px solid #0f2347' }}
+                  iconStyle={{ background: '#f4a023', color: '#0f2347', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}
+                  icon={<span>🚀</span>}
+                >
+                  <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#f4a023', margin: '0 0 6px' }}>56 Years of Unbroken Academic Legacy</h4>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#cbd5e1', lineHeight: 1.6 }}>
+                    Over 4,000 enrolled students across two vibrant campuses: Bhuda Campus (Main & Boys Wing) and Bank More Campus (Girls & Vocational Wing).
+                  </p>
+                </VerticalTimelineElement>
+              </VerticalTimeline>
             </div>
           </article>
         )}

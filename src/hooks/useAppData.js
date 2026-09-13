@@ -18,7 +18,12 @@ export default function useAppData() {
   const [sliderSlides, setSliderSlides]   = useState([]);
   const [navLinks, setNavLinks]           = useState([]);
   const [pdfReports, setPdfReports]       = useState([]);
-  const [siteSettings, setSiteSettings]   = useState(null);
+  const [siteSettings, setSiteSettings]   = useState(() => {
+    try {
+      const cached = localStorage.getItem('gnc_site_settings_cache');
+      return cached ? JSON.parse(cached) : null;
+    } catch { return null; }
+  });
 
   const initialSyncHandled = useRef(false);
 
@@ -78,8 +83,7 @@ export default function useAppData() {
     if (!db) return;
 
     const collectionsToFetch = [
-      ['faculties', setFaculties, 150],
-      ['pdfReports', setPdfReports, 60]
+      ['faculties', setFaculties, 150]
     ];
 
     collectionsToFetch.forEach(([col, setter, max]) => {
@@ -126,6 +130,7 @@ export default function useAppData() {
       ['sliderSlides',  setSliderSlides,  15, 'order',     'asc'],
       ['gallery',       setGallery,       80, 'createdAt', 'desc'],
       ['testimonials',  setTestimonials,  25, 'createdAt', 'desc'],
+      ['pdfReports',    setPdfReports,    80, 'createdAt', 'desc'],
     ];
 
     const unsubs = liveCols.map(([col, setter, max, sortField, sortDir]) => {
@@ -167,9 +172,19 @@ export default function useAppData() {
     // ── Real-Time Site Settings Listener ──
     const unsubSettings = onSnapshot(doc(db, 'settings', 'site'), snap => {
       if (snap.exists()) {
-        setSiteSettings(snap.data());
+        const d = snap.data();
+        setSiteSettings(d);
+        try { localStorage.setItem('gnc_site_settings_cache', JSON.stringify(d)); } catch {}
       }
     }, () => {});
+
+    // Listen to local settings broadcast
+    const handleSettingsUpdate = (e) => {
+      if (e.detail) {
+        setSiteSettings(prev => ({ ...(prev || {}), ...e.detail }));
+      }
+    };
+    window.addEventListener('gnc_settings_updated', handleSettingsUpdate);
 
     // ───────────────────────────────────────────────────────────────────────────
     // 5. ⚡ Zero-Lag Remote Sync Listener (`settings/site_sync`)
@@ -225,6 +240,7 @@ export default function useAppData() {
       if (unsubSettings) unsubSettings();
       if (unsubSync) unsubSync();
       window.removeEventListener('gnc_live_sync', handleSyncEvent);
+      window.removeEventListener('gnc_settings_updated', handleSettingsUpdate);
       window.removeEventListener('gnc_nav_updated', () => fetchNavigation(true));
       if (channel) channel.close();
     };

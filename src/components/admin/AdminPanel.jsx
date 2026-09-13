@@ -37,6 +37,7 @@ const SystemTestTab     = lazy(() => import('./tabs/SystemTestTab'));
 const MeetingPDFTab     = lazy(() => import('./tabs/MeetingPDFTab'));
 const TestimonialsTab   = lazy(() => import('./tabs/TestimonialsTab'));
 const ContentManagerTab = lazy(() => import('./tabs/ContentManagerTab'));
+const PollsTab          = lazy(() => import('./tabs/PollsTab'));
 
 // Purane Admin Tabs (Jo aapne tabs folder mein move kiye hain)
 const AdminNeuralStudioTab = lazy(() => import('./tabs/AdminNeuralStudioTab'));
@@ -97,6 +98,7 @@ const TABS = [
   { id:'documents',     icon: <TabIcon path={<><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></>} />, label:'Documents',        section:'' },
   { id:'events',        icon: <TabIcon path={<><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></>} />, label:'Events',           section:'' },
   { id:'testimonials',  icon: <TabIcon path={<><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></>} />, label:'Testimonials',      section:'' },
+  { id:'polls',         icon: <TabIcon path={<><path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-6"></path></>} />, label:'Campus Polls',      section:'' },
   { id:'youtube',       icon: <TabIcon path={<><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></>} />, label:'YouTube',          section:'API & INTEGRATIONS' },
   { id:'drive',         icon: <TabIcon path={<><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></>} />, label:'Drive Sync',       section:'' },
   { id:'settings',      icon: <TabIcon path={<><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></>} />, label:'Site Settings',    section:'SYSTEM' },
@@ -223,7 +225,7 @@ function AdminPanelInner({
     return () => subs.forEach(u => u && u());
   }, []);
 
-  const pdfReports   = pdfReportsProp    || _pdfReports;
+  const pdfReports   = (_pdfReports && _pdfReports.length > 0) ? _pdfReports : (pdfReportsProp || []);
   const pages        = pagesProp         || _pages;
   const placements   = placementsProp    || _placements;
   const alerts       = alertsProp        || _alerts;
@@ -368,6 +370,7 @@ function AdminPanelInner({
       case 'documents':    return <DocumentsTab pdfReports={pdfReports} {...sharedProps} />;
       case 'events':       return <EventsTab events={events} {...sharedProps} />;
       case 'testimonials': return <TestimonialsTab testimonials={testimonials} {...sharedProps} />;
+      case 'polls':        return <PollsTab {...sharedProps} />;
       case 'youtube':      return <YouTubeTab {...sharedProps} />;
       case 'drive':        return <DriveTab {...sharedProps} />;
       case 'settings':     return <SettingsTab {...sharedProps} />;

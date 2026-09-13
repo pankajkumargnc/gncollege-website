@@ -1,12 +1,50 @@
-// src/pages/PublicationPages.jsx
 import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
-const PDFModal = lazy(() => import('../components/PDFModal')); // ✅ PDF Modal Import
+import FlipbookViewer from '../components/FlipbookViewer';
+import { BookOpen, Download, Share2, Sparkles, Eye, Search, ExternalLink, Calendar, CheckCircle } from 'lucide-react';
+import { resolveUrl } from '../utils/resolver';
+const PDFModal = lazy(() => import('../components/PDFModal'));
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
+
+export function getDriveViewUrl(url) {
+  if (!url) return '';
+  const trimmed = String(url).trim();
+  const m1 = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  const m2 = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  const driveId = m1?.[1] || m2?.[1];
+  if (driveId) {
+    return `https://drive.google.com/file/d/${driveId}/view`;
+  }
+  return url;
+}
+
+export function getDriveDownloadUrl(url) {
+  if (!url) return '';
+  const trimmed = String(url).trim();
+  const m1 = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  const m2 = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  const driveId = m1?.[1] || m2?.[1];
+  if (driveId) {
+    return `https://drive.google.com/uc?id=${driveId}&export=download`;
+  }
+  return url;
+}
+
+const DEFAULT_MAGAZINE = {
+  id: 'default-gurupradeep',
+  title: 'Gurupradeep Annual Magazine 2024-25',
+  volumeIssue: 'Vol. 32 • Annual Edition',
+  academicYear: '2024-25',
+  coverImage: '',
+  pdfUrl: '',
+  link: '',
+  description: 'The flagship annual publication of Guru Nanak College Dhanbad, highlighting student achievements, departmental reports, creative literature, and campus milestones.',
+  isFeatured: true
+};
 
 function Fade({ children, delay = 0, y = 20 }) {
   const ref = useRef(null);
@@ -33,41 +71,182 @@ const PageHeader = ({ title, subtitle, icon }) => (
 
 function PublicationDocList({ keyword }) {
   const [docs, setDocs] = useState([]);
-  const [previewPdf, setPreviewPdf] = useState(null); // ✅ PDF Preview State
+  const [search, setSearch] = useState('');
+  const [previewPdf, setPreviewPdf] = useState(null);
 
   useEffect(() => {
-    const q = query(collection(db, 'pdfReports'), orderBy('createdAt', 'desc'));
+    const q = collection(db, 'pdfReports');
     const unsub = onSnapshot(q, snap => {
       const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      all.sort((a, b) => {
+        const tA = a.createdAt?.toMillis?.() || (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+        const tB = b.createdAt?.toMillis?.() || (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+        return tB - tA;
+      });
       setDocs(all.filter(d =>
         (d.targetPage || '').toLowerCase() === keyword.toLowerCase() ||
-        (d.title || '').toLowerCase().includes(keyword.toLowerCase())
+        (d.title || '').toLowerCase().includes(keyword.toLowerCase()) ||
+        (d.category || '').toLowerCase().includes(keyword.toLowerCase())
       ));
+    }, err => {
+      console.warn('[PublicationDocList] onSnapshot warning:', err);
     });
-    return () => unsub();
+
+    const handleSync = () => {
+      // Re-trigger snap automatically via Firestore listener
+    };
+    window.addEventListener('gnc_live_sync', handleSync);
+    return () => {
+      unsub();
+      window.removeEventListener('gnc_live_sync', handleSync);
+    };
   }, [keyword]);
+
+  const filtered = docs.filter(d => 
+    !search || 
+    (d.title || '').toLowerCase().includes(search.toLowerCase()) || 
+    (d.description || '').toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleShare = (doc) => {
+    const link = doc.pdfUrl || doc.link || window.location.href;
+    const text = encodeURIComponent(`📄 Check out "${doc.title}" from Guru Nanak College:\n${link}`);
+    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+  };
 
   return (
     <>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: 16 }}>
-        {docs.length === 0 ? (
-          <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 40, color: '#94a3b8', border: '2px dashed #e2e8f0', borderRadius: 20 }}>No documents found in this category.</div>
+      <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', minWidth: 260, flex: 1 }}>
+          <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
+          <input
+            type="text"
+            placeholder="Search documents, exam results, or circulars..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '10px 14px 10px 38px',
+              border: '1.5px solid #e2e8f0',
+              borderRadius: 12,
+              fontSize: 13.5,
+              background: '#ffffff',
+              boxSizing: 'border-box',
+              outline: 'none'
+            }}
+          />
+        </div>
+        <div style={{ fontSize: 13, color: '#64748b', fontWeight: 700 }}>
+          {filtered.length} document{filtered.length !== 1 ? 's' : ''} found
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: 18 }}>
+        {filtered.length === 0 ? (
+          <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px 20px', color: '#94a3b8', border: '2px dashed #e2e8f0', borderRadius: 20, background: '#ffffff' }}>
+            <div style={{ fontSize: 36, marginBottom: 10 }}>📁</div>
+            <div style={{ fontWeight: 800, color: NAVY, fontSize: 16 }}>No documents found in this section.</div>
+            <div style={{ fontSize: 13, marginTop: 4 }}>Documents uploaded from Admin Panel with target <code>{keyword}</code> will appear here automatically.</div>
+          </div>
         ) : (
-          docs.map((d, i) => (
-            <Fade key={d.id} delay={i * 0.05}>
-              <a href={d.link} target="_blank" rel="noreferrer" 
-                onClick={(e) => { e.preventDefault(); setPreviewPdf({ url: d.link, title: d.title }); }} // ✅ Modal Trigger
-                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 20, background: '#fff', borderRadius: 16, border: '1.5px solid #e2e8f0', textDecoration: 'none', color: NAVY, cursor: 'pointer' }}>
-                <div style={{ fontSize: 24 }}>📄</div>
-                <div style={{ flex: 1, fontWeight: 700, fontSize: 14 }}>{d.title}</div>
-                <div style={{ color: GOLD, fontWeight: 800 }}>↗</div>
-              </a>
-            </Fade>
-          ))
+          filtered.map((d, i) => {
+            const pdfLink = d.pdfUrl || d.link;
+            return (
+              <Fade key={d.id} delay={i * 0.04}>
+                <div style={{
+                  background: '#ffffff',
+                  borderRadius: 16,
+                  border: '1.5px solid #e2e8f0',
+                  boxShadow: '0 4px 16px rgba(15,35,71,0.05)',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  transition: 'transform 0.2s, box-shadow 0.2s'
+                }}>
+                  {d.coverImage && (
+                    <div style={{ width: '100%', height: 160, overflow: 'hidden', background: '#09172e', position: 'relative' }}>
+                      <img src={resolveUrl(d.coverImage)} alt={d.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, rgba(9,23,46,0.85) 100%)' }} />
+                      <span style={{ position: 'absolute', bottom: 10, left: 12, background: GOLD, color: NAVY, padding: '3px 9px', borderRadius: 6, fontSize: 10, fontWeight: 800 }}>
+                        {d.category || d.type || 'DOCUMENT'}
+                      </span>
+                    </div>
+                  )}
+
+                  <div style={{ padding: 18, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 10 }}>
+                      {!d.coverImage && <span style={{ fontSize: 24 }}>📄</span>}
+                      <div style={{ flex: 1 }}>
+                        <h3 style={{ fontSize: 15, fontWeight: 800, color: NAVY, margin: '0 0 4px', lineHeight: 1.4 }}>
+                          {d.title}
+                        </h3>
+                        {d.description && (
+                          <p style={{ fontSize: 12.5, color: '#64748b', margin: 0, lineHeight: 1.5, textAlign: 'justify', textJustify: 'inter-word' }}>
+                            {d.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: 'auto', paddingTop: 14, borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>
+                        {d.fileSize ? `📦 ${d.fileSize}` : 'PDF Document'}
+                      </span>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {pdfLink && (
+                          <button
+                            type="button"
+                            onClick={() => setPreviewPdf({ url: pdfLink, title: d.title })}
+                            style={{
+                              background: NAVY,
+                              color: '#ffffff',
+                              border: 'none',
+                              padding: '6px 12px',
+                              borderRadius: 8,
+                              fontSize: 12,
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 4
+                            }}
+                          >
+                            <Eye size={13} /> View
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => handleShare(d)}
+                          style={{
+                            background: '#25D366',
+                            color: '#ffffff',
+                            border: 'none',
+                            padding: '6px 10px',
+                            borderRadius: 8,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 3
+                          }}
+                          title="Share on WhatsApp"
+                        >
+                          <Share2 size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Fade>
+            );
+          })
         )}
       </div>
 
-      {/* ✅ Modal Render */}
       {previewPdf && (
         <Suspense fallback={null}>
           <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />
@@ -116,12 +295,505 @@ export function LibraryPage() {
 }
 
 export function PublicationPage({ type, title, subtitle, icon, keyword }) {
+  const isMagazine = type === 'magazine' || keyword === 'magazine';
+  const [magazines, setMagazines] = useState([]);
+  const [search, setSearch] = useState('');
+  const [selectedYear, setSelectedYear] = useState('All');
+  const [previewPdf, setPreviewPdf] = useState(null);
+
+  useEffect(() => {
+    if (!isMagazine) return;
+    const q = collection(db, 'pdfReports');
+    const unsub = onSnapshot(q, snap => {
+      const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      all.sort((a, b) => {
+        const tA = a.createdAt?.toMillis?.() || (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+        const tB = b.createdAt?.toMillis?.() || (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+        return tB - tA;
+      });
+      const mags = all.filter(d =>
+        (d.targetPage || '').toLowerCase() === 'magazine' ||
+        (d.category || '').toLowerCase().includes('magazine') ||
+        (d.type || '').toLowerCase() === 'magazine' ||
+        (d.title || '').toLowerCase().includes('magazine') ||
+        (d.title || '').toLowerCase().includes('gurupradeep')
+      );
+      setMagazines(mags);
+    }, err => {
+      console.warn('[PublicationPage] onSnapshot warning:', err);
+    });
+
+    const handleSync = () => {};
+    window.addEventListener('gnc_live_sync', handleSync);
+    return () => {
+      unsub();
+      window.removeEventListener('gnc_live_sync', handleSync);
+    };
+  }, [isMagazine]);
+
+  // Extract available years for filtering
+  const availableYears = ['All', ...Array.from(new Set(
+    magazines
+      .map(m => m.academicYear || m.year)
+      .filter(Boolean)
+  ))];
+
+  // Filter magazines based on search and year
+  const filteredMags = magazines.filter(m => {
+    const matchSearch = !search || 
+      (m.title || '').toLowerCase().includes(search.toLowerCase()) ||
+      (m.description || '').toLowerCase().includes(search.toLowerCase()) ||
+      (m.volumeIssue || '').toLowerCase().includes(search.toLowerCase());
+    const matchYear = selectedYear === 'All' || (m.academicYear === selectedYear || m.year === selectedYear);
+    return matchSearch && matchYear;
+  });
+
+  const handleShareWa = (mag) => {
+    const link = getDriveViewUrl(mag.pdfUrl || mag.link) || window.location.href;
+    const text = encodeURIComponent(`📖 Read "${mag.title}" (${mag.academicYear || mag.year || 'Official Issue'}) of Guru Nanak College:\n${link}`);
+    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+  };
+
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
       <PageHeader title={title} subtitle={subtitle} icon={icon} />
-      <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
-        <PublicationDocList keyword={keyword} />
+
+      <style>{`
+        .gnc-magazine-card {
+          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+          border-left: 6px solid #f4a023 !important;
+        }
+        .gnc-magazine-card:hover {
+          transform: translateY(-8px) scale(1.015);
+          box-shadow: 0 24px 50px rgba(15, 35, 71, 0.18) !important;
+          border-color: #f4a023 !important;
+        }
+        .gnc-magazine-card .cover-img {
+          transition: transform 0.5s ease;
+        }
+        .gnc-magazine-card:hover .cover-img {
+          transform: scale(1.06);
+        }
+        .gnc-magazine-card .action-btn-view {
+          transition: all 0.2s ease;
+        }
+        .gnc-magazine-card .action-btn-view:hover {
+          filter: brightness(1.1);
+          transform: translateY(-1px);
+        }
+      `}</style>
+
+      <div style={{ maxWidth: 1200, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+        {isMagazine ? (
+          <div>
+            {/* ── DIGITAL BOOKSHELF ARCHIVE HEADER & SEARCH ── */}
+            <div style={{
+              background: '#ffffff',
+              borderRadius: 24,
+              padding: '32px 28px',
+              border: '1.5px solid #e2e8f0',
+              boxShadow: '0 10px 35px rgba(15,35,71,0.05)',
+              marginBottom: 32
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 24 }}>
+                <div style={{ textAlign: 'left', maxWidth: 720 }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: GOLD, fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1, textAlign: 'left' }}>
+                    <Sparkles size={14} /> Official Publications
+                  </div>
+                  <h2 style={{ fontSize: 24, fontWeight: 900, color: NAVY, margin: '4px 0 0', letterSpacing: '-0.3px', textAlign: 'left' }}>
+                    Digital Magazine Archive & Annual Editions
+                  </h2>
+                  <p style={{ fontSize: 13.5, color: '#64748b', margin: '6px 0 0', textAlign: 'left' }}>
+                    Explore Guru Nanak College's annual publications, souvenirs, and student editions. Read online or download high-definition PDF copies.
+                  </p>
+                </div>
+
+                <div style={{ fontSize: 13, color: NAVY, fontWeight: 800, background: '#f1f5f9', padding: '8px 16px', borderRadius: 20, border: '1px solid #e2e8f0' }}>
+                  📚 {magazines.length} Edition{magazines.length !== 1 ? 's' : ''} in Archive
+                </div>
+              </div>
+
+              {/* Controls: Search & Year Filter */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
+                <div style={{ position: 'relative', minWidth: 260, flex: 1 }}>
+                  <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
+                  <input
+                    type="text"
+                    placeholder="Search magazine by title, year or description..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '11px 14px 11px 40px',
+                      border: '1.5px solid #e2e8f0',
+                      borderRadius: 14,
+                      fontSize: 13.5,
+                      background: '#f8fafc',
+                      boxSizing: 'border-box',
+                      outline: 'none',
+                      transition: 'all 0.2s'
+                    }}
+                  />
+                </div>
+
+                {/* Year Filter Pills */}
+                {availableYears.length > 1 && (
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginRight: 4 }}>
+                      Academic Year:
+                    </span>
+                    {availableYears.map(yr => (
+                      <button
+                        key={yr}
+                        type="button"
+                        onClick={() => setSelectedYear(yr)}
+                        style={{
+                          background: selectedYear === yr ? NAVY : '#f1f5f9',
+                          color: selectedYear === yr ? '#ffffff' : '#475569',
+                          border: selectedYear === yr ? `1px solid ${NAVY}` : '1px solid #e2e8f0',
+                          padding: '6px 14px',
+                          borderRadius: 20,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        {yr === 'All' ? 'All Years' : yr}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* ── BOOKSHELF MAGAZINE GRID ── */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 340px), 1fr))', gap: 28 }}>
+              {filteredMags.length === 0 ? (
+                <div style={{
+                  gridColumn: '1 / -1',
+                  background: '#ffffff',
+                  borderRadius: 20,
+                  padding: 50,
+                  textAlign: 'center',
+                  border: '2px dashed #cbd5e1'
+                }}>
+                  <div style={{ fontSize: 44, marginBottom: 12 }}>📚</div>
+                  <h3 style={{ fontSize: 18, fontWeight: 800, color: NAVY, margin: '0 0 6px' }}>
+                    No magazine editions found
+                  </h3>
+                  <p style={{ fontSize: 13, color: '#64748b', margin: 0 }}>
+                    {search || selectedYear !== 'All' 
+                      ? 'Try clearing your search query or selecting "All Years".' 
+                      : 'Upload annual magazines from Admin Panel -> Documents tab to display them here.'}
+                  </p>
+                </div>
+              ) : (
+                filteredMags.map((mag, idx) => {
+                  const rawPdf = mag.pdfUrl || mag.link || '';
+                  const viewLink = getDriveViewUrl(rawPdf);
+                  const downloadLink = getDriveDownloadUrl(rawPdf);
+                  const coverImg = mag.coverImage ? resolveUrl(mag.coverImage) : '';
+                  const magYear = mag.academicYear || mag.year || '2024';
+
+                  return (
+                    <Fade key={mag.id || idx} delay={idx * 0.05}>
+                      <div
+                        className="gnc-magazine-card"
+                        style={{
+                          background: '#ffffff',
+                          borderRadius: 20,
+                          border: '1.5px solid #e2e8f0',
+                          boxShadow: '0 10px 30px rgba(15,35,71,0.06)',
+                          overflow: 'hidden',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          height: '100%',
+                          position: 'relative',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {/* ── Realistic Book Cover Poster Frame ── */}
+                        <div style={{
+                          height: 220,
+                          width: '100%',
+                          overflow: 'hidden',
+                          background: '#09172e',
+                          position: 'relative'
+                        }}>
+                          {coverImg ? (
+                            <img
+                              src={coverImg}
+                              alt={mag.title}
+                              className="cover-img"
+                              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            />
+                          ) : (
+                            <div style={{
+                              width: '100%',
+                              height: '100%',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              background: `linear-gradient(135deg, #09172e 0%, ${NAVY} 60%, #1a3a7c 100%)`,
+                              color: '#ffffff',
+                              textAlign: 'center',
+                              padding: 24,
+                              boxSizing: 'border-box'
+                            }}>
+                              <span style={{ fontSize: 44, marginBottom: 8 }}>📖</span>
+                              <span style={{ fontSize: 11, fontWeight: 800, color: GOLD, letterSpacing: 1 }}>GURU NANAK COLLEGE</span>
+                              <h4 style={{ fontSize: 18, fontWeight: 900, margin: '8px 0 0', lineHeight: 1.3, textTransform: 'uppercase' }}>{mag.title}</h4>
+                            </div>
+                          )}
+
+                          {/* Gradient lighting & book spine sheen */}
+                          <div style={{
+                            position: 'absolute',
+                            inset: 0,
+                            background: 'linear-gradient(180deg, rgba(9,23,46,0.15) 0%, rgba(9,23,46,0.85) 100%)',
+                            boxShadow: 'inset 6px 0 12px rgba(255,255,255,0.25), inset -6px 0 14px rgba(0,0,0,0.5)'
+                          }} />
+
+                          {/* Year Badge (Top-Left) */}
+                          <div style={{
+                            position: 'absolute',
+                            top: 14,
+                            left: 14,
+                            background: 'rgba(9, 23, 46, 0.75)',
+                            backdropFilter: 'blur(8px)',
+                            color: '#ffffff',
+                            padding: '4px 12px',
+                            borderRadius: 20,
+                            fontSize: 11,
+                            fontWeight: 800,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 5,
+                            border: '1px solid rgba(255,255,255,0.25)',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                          }}>
+                            <Calendar size={12} color={GOLD} /> {magYear}
+                          </div>
+
+                          {/* Featured / Latest Issue Badge (Top-Right) */}
+                          {mag.isFeatured && (
+                            <div style={{
+                              position: 'absolute',
+                              top: 14,
+                              right: 14,
+                              background: `linear-gradient(135deg, ${GOLD}, #d97706)`,
+                              color: NAVY,
+                              padding: '4px 12px',
+                              borderRadius: 20,
+                              fontSize: 10.5,
+                              fontWeight: 900,
+                              letterSpacing: 0.5,
+                              boxShadow: `0 4px 14px ${GOLD}66`
+                            }}>
+                              ⭐ LATEST ISSUE
+                            </div>
+                          )}
+
+                          {/* Bottom Edition Tag Overlay */}
+                          <div style={{
+                            position: 'absolute',
+                            bottom: 12,
+                            left: 14,
+                            right: 14,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between'
+                          }}>
+                            <span style={{
+                              fontSize: 11,
+                              fontWeight: 800,
+                              background: 'rgba(255,255,255,0.92)',
+                              color: NAVY,
+                              padding: '3px 10px',
+                              borderRadius: 6,
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
+                            }}>
+                              {mag.volumeIssue || 'Annual Issue'}
+                            </span>
+                            <span style={{ fontSize: 11, color: '#ffffff', fontWeight: 700, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+                              GNC Dhanbad
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* ── Magazine Information Body ── */}
+                        <div style={{ padding: '16px 18px 14px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                            <span style={{ fontSize: 10.5, fontWeight: 800, color: GOLD, textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                              {mag.category || 'E-Magazine'}
+                            </span>
+                            <span style={{ color: '#cbd5e1' }}>•</span>
+                            <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>
+                              Academic Session {magYear}
+                            </span>
+                          </div>
+
+                          <h3 style={{
+                            fontSize: 16.5,
+                            fontWeight: 900,
+                            color: NAVY,
+                            margin: '0 0 6px',
+                            lineHeight: 1.35,
+                            letterSpacing: '-0.2px',
+                            textTransform: 'uppercase'
+                          }}>
+                            {mag.title}
+                          </h3>
+
+                          <p style={{
+                            fontSize: 12.5,
+                            color: '#64748b',
+                            lineHeight: 1.55,
+                            margin: '0 0 12px',
+                            flex: 1,
+                            display: '-webkit-box',
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            textAlign: 'justify',
+                            textJustify: 'inter-word'
+                          }}>
+                            {mag.description || 'Official digital publication of Guru Nanak College, Dhanbad featuring student articles, departmental achievements, faculty research, and campus memories.'}
+                          </p>
+
+                          <div style={{
+                            fontSize: 11,
+                            color: '#94a3b8',
+                            marginBottom: 12,
+                            paddingTop: 8,
+                            borderTop: '1px solid #f1f5f9',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between'
+                          }}>
+                            <span>📄 High-Definition Edition</span>
+                            <span>{mag.fileSize || 'PDF Format'}</span>
+                          </div>
+
+                          {/* ── Action Buttons (View, Download, Share) ── */}
+                          <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr auto', gap: 8, marginTop: 'auto' }}>
+                            
+                            {/* 1. View / Read Online Button */}
+                            {viewLink ? (
+                              <a
+                                href={viewLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="action-btn-view"
+                                style={{
+                                  background: `linear-gradient(135deg, ${NAVY}, #1a3a7c)`,
+                                  color: '#ffffff',
+                                  padding: '8px 12px',
+                                  borderRadius: 10,
+                                  fontSize: 12,
+                                  fontWeight: 800,
+                                  textDecoration: 'none',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: 6,
+                                  boxShadow: '0 3px 12px rgba(15,35,71,0.15)'
+                                }}
+                                title="Open full magazine online"
+                              >
+                                <Eye size={14} color={GOLD} /> View Online
+                              </a>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled
+                                style={{
+                                  background: '#f1f5f9',
+                                  color: '#94a3b8',
+                                  padding: '8px 12px',
+                                  borderRadius: 10,
+                                  fontSize: 12,
+                                  fontWeight: 700,
+                                  border: 'none',
+                                  cursor: 'not-allowed'
+                                }}
+                              >
+                                Processing
+                              </button>
+                            )}
+
+                            {/* 2. Download Button */}
+                            {downloadLink ? (
+                              <a
+                                href={downloadLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{
+                                  background: '#f8fafc',
+                                  border: '1.5px solid #cbd5e1',
+                                  color: NAVY,
+                                  padding: '8px 10px',
+                                  borderRadius: 10,
+                                  fontSize: 12,
+                                  fontWeight: 800,
+                                  textDecoration: 'none',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: 5,
+                                  transition: 'all 0.15s'
+                                }}
+                                title="Download PDF copy"
+                              >
+                                <Download size={13} /> Download
+                              </a>
+                            ) : null}
+
+                            {/* 3. WhatsApp Share Button */}
+                            <button
+                              type="button"
+                              onClick={() => handleShareWa(mag)}
+                              style={{
+                                background: '#25D366',
+                                color: '#ffffff',
+                                border: 'none',
+                                padding: '8px 11px',
+                                borderRadius: 10,
+                                fontSize: 13,
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: '0 3px 10px rgba(37,211,102,0.25)',
+                                transition: 'all 0.15s'
+                              }}
+                              title="Share Edition on WhatsApp"
+                            >
+                              <Share2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </Fade>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        ) : (
+          <PublicationDocList keyword={keyword} />
+        )}
       </div>
+
+      {/* PDF Modal */}
+      {previewPdf && (
+        <Suspense fallback={null}>
+          <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />
+        </Suspense>
+      )}
     </div>
   );
 }
