@@ -202,6 +202,24 @@ export default function DocumentsTab({
         </div>
       </div>
 
+      {/* ── 📁 CLEAR DESTINATION INDICATOR ── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        background: 'linear-gradient(135deg, rgba(6, 95, 70, 0.05) 0%, rgba(5, 150, 105, 0.08) 100%)',
+        border: '1.5px solid rgba(5, 150, 105, 0.2)',
+        borderRadius: 14, padding: '12px 16px', margin: '0 0 20px',
+      }}>
+        <span style={{ fontSize: 24 }}>📁</span>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: 13, color: '#065f46' }}>
+            Live Destination: Homepage Card 3 (E-Documents) &amp; /documents Archive
+          </div>
+          <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+            Documents uploaded here appear with instant 1-click in-app PDF preview on Homepage Card 3 and inside the official document archive.
+          </div>
+        </div>
+      </div>
+
       {/* ── MAIN UPLOADER / EDITOR (SPLIT VIEW WITH LIVE CARD PREVIEW) ── */}
       <div style={{ display: 'grid', gridTemplateColumns: showPreview ? 'minmax(0, 1.4fr) minmax(0, 1fr)' : '1fr', gap: 20, marginBottom: 24 }}>
         

@@ -4,10 +4,11 @@
 // Admin ko kuch alag nahi karna — Jodit se normal content likho, yahan auto-styled
 
 import React, { useEffect, useState, lazy, Suspense } from 'react';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, doc, getDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import DOMPurify from 'dompurify';
 import { useParams } from 'react-router-dom';
+import { DynamicSectionRenderer } from '../hooks/usePageContent';
 const PDFModal = lazy(() => import('./PDFModal'));
 const GalleryPage = lazy(() => import('../pages/GalleryPage'));
 const EventsPage = lazy(() => import('../pages/EventsPage'));
@@ -592,10 +593,21 @@ const PageViewer = ({ path, content, title, gallery, events, faculties }) => {
           // 🛡️ Sanitize once on fetch
           const sanitized = DOMPurify.sanitize(wrapTablesForMobile(found.content));
           setPage({ ...found, sanitizedContent: sanitized });
+          setLoading(false);
         } else {
-          setPage(null);
+          // 🛡️ Check pageContent collection fallback (Content Manager pages)
+          getDoc(doc(db, 'pageContent', slug)).then(cmsSnap => {
+            if (cmsSnap.exists()) {
+              setPage({ id: cmsSnap.id, ...cmsSnap.data(), isCmsContent: true });
+            } else {
+              setPage(null);
+            }
+            setLoading(false);
+          }).catch(() => {
+            setPage(null);
+            setLoading(false);
+          });
         }
-        setLoading(false);
       }, (err) => {
         console.error("[Backend] Page fetch error:", err);
         setLoading(false);
@@ -627,13 +639,26 @@ const PageViewer = ({ path, content, title, gallery, events, faculties }) => {
     <div style={{ minHeight: '60vh', background: '#f8fafc' }}>
       <PageHero title={page?.title || title || 'Page'} featuredImage={page?.featuredImage} />
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 24px 80px' }}>
-        <div className="gnc-prose" onClick={handleContentClick}>
-           {page?.sanitizedContent ? (
-             <div dangerouslySetInnerHTML={{ __html: page.sanitizedContent }} />
-           ) : (
-             renderWithShortcodes(page?.content, siteData)
-           )}
-        </div>
+        {page?.isCmsContent ? (
+          <div>
+            {page.subtitle && (
+              <p style={{ fontSize: 16, color: '#64748b', fontStyle: 'italic', marginBottom: 28, background: '#f1f5f9', padding: '12px 18px', borderRadius: 10, borderLeft: '4px solid #f4a023' }}>
+                {page.subtitle}
+              </p>
+            )}
+            {(page.sections || []).map((sec, i) => (
+              <DynamicSectionRenderer key={sec.id || i} section={sec} />
+            ))}
+          </div>
+        ) : (
+          <div className="gnc-prose" onClick={handleContentClick}>
+             {page?.sanitizedContent ? (
+               <div dangerouslySetInnerHTML={{ __html: page.sanitizedContent }} />
+             ) : (
+               renderWithShortcodes(page?.content, siteData)
+             )}
+          </div>
+        )}
       </div>
 
       {/* ✅ PDF Modal Render */}

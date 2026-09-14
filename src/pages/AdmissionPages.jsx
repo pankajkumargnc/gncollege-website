@@ -4,7 +4,7 @@ import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import DOMPurify from 'dompurify';
-import usePageContent from '../hooks/usePageContent';
+import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageContent';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -68,6 +68,7 @@ export function AdmissionRule() {
             </div>
           </div>
         </Fade>
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['important-rule', 'steps']} />
       </div>
     </div>
   );
@@ -96,16 +97,17 @@ export function DocumentRequired() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: 16 }}>
             {docs.map((d, i) => (
               <div key={i} style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #e2e8f0', display: 'flex', gap: 16, boxShadow: '0 4px 15px rgba(15,35,71,0.03)' }}>
-                <div style={{ fontSize: 32 }}>{d.type === 'Original' ? '📜' : d.type === 'Print' ? 's🖨️' : '📄'}</div>
+                <div style={{ fontSize: 32 }}>{d.type === 'Original' ? '📜' : d.type === 'Print' ? '🖨️' : '📄'}</div>
                 <div>
-                  <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 4, background: d.type === 'Original' ? '#fee2e2' : '#f1f5f9', color: d.type === 'Original' ? '#ef4444' : '#64748b', marginBottom: 6 }}>{d.type.toUpperCase()}</div>
-                  <div style={{ fontWeight: 800, color: NAVY, fontSize: 16, marginBottom: 4 }}>{d.t}</div>
-                  <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>{d.d}</div>
+                  <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 4, background: d.type === 'Original' ? '#fee2e2' : '#f1f5f9', color: d.type === 'Original' ? '#ef4444' : '#64748b', marginBottom: 6 }}>{(d.type || 'DOCUMENT').toUpperCase()}</div>
+                  <div style={{ fontWeight: 800, color: NAVY, fontSize: 16, marginBottom: 4 }}>{d.t || d.title}</div>
+                  <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>{d.d || d.desc}</div>
                 </div>
               </div>
             ))}
           </div>
         </Fade>
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['documents']} />
       </div>
     </div>
   );
@@ -218,6 +220,7 @@ export function FeeStructure() {
             )}
           </div>
         </Fade>
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['ug-fee', 'vocational-fee']} />
       </div>
     </div>
   );
@@ -274,32 +277,35 @@ export function AdmissionNotification() {
    5. INTAKE CAPACITY (Bento Box Stats)
 ════════════════════════════════════════════════════════════ */
 export function IntakeCapacity() {
-  const data = [
+  const { content, getList } = usePageContent('intake-capacity');
+  const defaultData = [
     { title: 'Commerce', seats: 550, icon: '📈', color: GOLD, sub: 'B.Com Honours' },
     { title: 'Arts (History & Pol. Sc)', seats: 312, icon: '🏛️', color: NAVY, sub: '156 Seats Each' },
     { title: 'Arts (Eng, Eco, Psy, Hin)', seats: 512, icon: '📚', color: '#0ea5e9', sub: '128 Seats Each' },
     { title: 'BCA', seats: 90, icon: '💻', color: '#ef4444', sub: 'Vocational Course' },
     { title: 'BBA', seats: 90, icon: '💼', color: '#10b981', sub: 'Vocational Course' }
   ];
+  const data = getList('seats', defaultData);
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
-      <PageHeader title="Intake Capacity" subtitle="Subject-wise maximum seat availability for the current academic session." icon="🪑" />
+      <PageHeader title={content?.title || "Intake Capacity"} subtitle={content?.subtitle || "Subject-wise maximum seat availability for the current academic session."} icon="🪑" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 20 }}>
             {data.map((d, i) => (
               <div key={i} style={{ background: '#fff', borderRadius: 20, padding: 30, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.04)', display: 'flex', alignItems: 'center', gap: 20 }}>
-                <div style={{ width: 64, height: 64, borderRadius: 16, background: `${d.color}15`, color: d.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32 }}>{d.icon}</div>
+                <div style={{ width: 64, height: 64, borderRadius: 16, background: `${d.color || GOLD}15`, color: d.color || GOLD, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32 }}>{d.icon || '🪑'}</div>
                 <div>
                   <div style={{ fontSize: 13, color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>{d.title}</div>
                   <div style={{ fontSize: 36, fontWeight: 900, color: NAVY, lineHeight: 1 }}>{d.seats}</div>
-                  <div style={{ fontSize: 12, color: d.color, fontWeight: 800, marginTop: 4 }}>{d.sub}</div>
+                  <div style={{ fontSize: 12, color: d.color || GOLD, fontWeight: 800, marginTop: 4 }}>{d.sub}</div>
                 </div>
               </div>
             ))}
           </div>
         </Fade>
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['seats']} />
       </div>
     </div>
   );

@@ -447,15 +447,15 @@ export default function QuickPublishTab({ logAct }) {
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, background: mcNotice ? `${NAVY}10` : '#f8fafc', padding: '8px 14px', borderRadius: 10, border: `1.5px solid ${mcNotice ? NAVY : '#e2e8f0'}`, cursor: 'pointer', fontSize: 12.5, fontWeight: 700, color: NAVY }}>
                   <input type="checkbox" checked={mcNotice} onChange={e => setMcNotice(e.target.checked)} />
-                  📌 College Notice Board
+                  📌 Card 1: College Notice Board
                 </label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, background: mcAlert ? '#fee2e2' : '#f8fafc', padding: '8px 14px', borderRadius: 10, border: `1.5px solid ${mcAlert ? '#ef4444' : '#e2e8f0'}`, cursor: 'pointer', fontSize: 12.5, fontWeight: 700, color: '#b91c1c' }}>
                   <input type="checkbox" checked={mcAlert} onChange={e => setMcAlert(e.target.checked)} />
-                  ⚡ Flash Alert Banner
+                  ⚡ Flash Alert Modal Banner
                 </label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, background: mcTicker ? `${GOLD}18` : '#f8fafc', padding: '8px 14px', borderRadius: 10, border: `1.5px solid ${mcTicker ? GOLD : '#e2e8f0'}`, cursor: 'pointer', fontSize: 12.5, fontWeight: 700, color: '#b45309' }}>
                   <input type="checkbox" checked={mcTicker} onChange={e => setMcTicker(e.target.checked)} />
-                  📢 Homepage Live Ticker
+                  📢 Card 2: News / Live Ticker
                 </label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, background: mcPush ? '#dcfce7' : '#f8fafc', padding: '8px 14px', borderRadius: 10, border: `1.5px solid ${mcPush ? '#22c55e' : '#e2e8f0'}`, cursor: 'pointer', fontSize: 12.5, fontWeight: 700, color: '#15803d' }}>
                   <input type="checkbox" checked={mcPush} onChange={e => setMcPush(e.target.checked)} />
@@ -577,9 +577,12 @@ export default function QuickPublishTab({ logAct }) {
         </div>
       )}
         <div className={`qp-card ${notData.id ? 'active' : ''}`}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
-            <div className="qp-icon-box" style={{ background: '#eff6ff', color: '#3b82f6' }}>📢</div>
-            <div className="qp-label">{notData.id ? 'Edit Notice' : 'Notice Board'}</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div className="qp-icon-box" style={{ background: '#eff6ff', color: '#3b82f6' }}>📢</div>
+              <div className="qp-label">{notData.id ? 'Edit Notice' : 'Notice Board'}</div>
+            </div>
+            <span style={{ fontSize: 10, background: 'rgba(15,35,71,0.08)', color: NAVY, padding: '3px 8px', borderRadius: 6, fontWeight: 800 }}>📌 Homepage Card 1</span>
           </div>
           <form onSubmit={saveNotice} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <textarea className="ainp" rows={3} style={{ borderRadius:16, border: '1.5px solid #f1f5f9', background: '#f8fafc' }} value={notData.text} onChange={e => setNotData({ ...notData, text: e.target.value })} placeholder="Write notice content..." required />
@@ -601,9 +604,12 @@ export default function QuickPublishTab({ logAct }) {
 
         {/* 2. NEWS */}
         <div className={`qp-card ${newsData.id ? 'active' : ''}`}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
-            <div className="qp-icon-box" style={{ background: '#f3e8ff', color: '#8b5cf6' }}>📣</div>
-            <div className="qp-label">{newsData.id ? 'Edit Story' : 'Campus News'}</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div className="qp-icon-box" style={{ background: '#f3e8ff', color: '#8b5cf6' }}>📣</div>
+              <div className="qp-label">{newsData.id ? 'Edit Story' : 'Campus News'}</div>
+            </div>
+            <span style={{ fontSize: 10, background: 'rgba(220,38,38,0.1)', color: '#dc2626', padding: '3px 8px', borderRadius: 6, fontWeight: 800 }}>🔥 Homepage Card 2</span>
           </div>
           <form onSubmit={saveNews} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <textarea className="ainp" rows={3} style={{ borderRadius:16, border: '1.5px solid #f1f5f9', background: '#f8fafc' }} value={newsData.text} onChange={e => setNewsData({ ...newsData, text: e.target.value })} placeholder="Write news announcement..." required />
@@ -625,9 +631,12 @@ export default function QuickPublishTab({ logAct }) {
 
         {/* 3. EVENTS */}
         <div className={`qp-card ${evtData.id ? 'active' : ''}`}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
-            <div className="qp-icon-box" style={{ background: '#dcfce7', color: '#10b981' }}>🏆</div>
-            <div className="qp-label">{evtData.id ? 'Edit Event' : 'Event Scheduler'}</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div className="qp-icon-box" style={{ background: '#dcfce7', color: '#10b981' }}>🏆</div>
+              <div className="qp-label">{evtData.id ? 'Edit Event' : 'Event Scheduler'}</div>
+            </div>
+            <span style={{ fontSize: 10, background: 'rgba(147,51,234,0.1)', color: '#7c3aed', padding: '3px 8px', borderRadius: 6, fontWeight: 800 }}>🏆 Homepage Card 2</span>
           </div>
           <form onSubmit={saveEvent} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <input type="text" className="ainp" style={{ borderRadius:12, background: '#f8fafc' }} value={evtData.title} onChange={e => setEvtData({...evtData, title: e.target.value})} placeholder="Event Title..." required />

@@ -20,6 +20,7 @@ const PAGE_CATEGORIES = [
     label: 'About Us',
     icon: '🏛️',
     pages: [
+      { slug: 'college-profile', label: 'College Profile', path: '/about-us/college-profile' },
       { slug: 'vision-mission', label: 'Vision & Mission', path: '/about-us/vision-mission' },
       { slug: 'principal-message', label: "Principal's Message", path: '/about-us/principal-message' },
       { slug: 'organogram', label: 'Organogram', path: '/about-us/college-management/organogram' },

@@ -5,7 +5,7 @@ import { collection, query, orderBy, onSnapshot, where } from 'firebase/firestor
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import PDFModal from '../components/PDFModal'; // ✅ PDF Modal Import
-import usePageContent from '../hooks/usePageContent'; // ✅ CMS Content Hook
+import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageContent'; // ✅ CMS Content Hook
 import '../styles/index.css';
 
 const N = COLORS.navy || '#0f2347';
@@ -294,6 +294,7 @@ export function VisionMission() {
             </div>
           </div>
         </Fade>
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['vision', 'mission', 'core-values']} />
       </PageLayout>
     </div>
   );
@@ -305,11 +306,16 @@ export function VisionMission() {
 ═══════════════════════════════════════════════════════════════ */
 export function PrincipalMessage() {
   useScrollTop();
-  const { content, getText, getSection } = usePageContent('principal-message');
+  const { content, getText, getObject } = usePageContent('principal-message');
 
-  // ── CMS content with hardcoded fallbacks ──
-  let pInfo = { name: 'Sanjay Prasad', designation: 'Secretary', institution: 'Guru Nanak College, Dhanbad', photo: 'images/principal.webp', quote: 'Education is not merely the acquisition of knowledge, but the transformation of character and the cultivation of a purposeful life.' };
-  try { const raw = getSection('principal-info'); if (raw?.content) { const parsed = JSON.parse(raw.content); pInfo = { ...pInfo, ...parsed }; } } catch {}
+  // ── CMS content with safe object resolution ──
+  const pInfo = getObject('principal-info', {
+    name: 'Sanjay Prasad',
+    designation: 'Secretary',
+    institution: 'Guru Nanak College, Dhanbad',
+    photo: 'images/principal.webp',
+    quote: 'Education is not merely the acquisition of knowledge, but the transformation of character and the cultivation of a purposeful life.'
+  });
 
   const messageHtml = getText('message', '<p>Dear Students and Parents, it gives me immense pleasure to welcome you to Guru Nanak College, Dhanbad — an institution that has been nurturing young minds for over five decades.</p><p>Our college stands as a beacon of quality education in Jharkhand, offering a rich blend of academic rigour, co-curricular activities, and personal development.</p><p>I invite you to be part of our vibrant community and assure you of our complete support at every step of your academic journey.</p>');
 
@@ -323,7 +329,7 @@ export function PrincipalMessage() {
               <div style={{ textAlign:'center', flexShrink:0 }}>
                 <DataMarker label="Principal ki photo ka path — src mein dalein" />
                 <div style={{ width:180, height:180, borderRadius:'50%', border:`6px solid ${G}`, boxShadow:'0 10px 30px rgba(15,35,71,0.2)', overflow:'hidden', margin:'0 auto', background:'#f1f5f9', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <img src={`${import.meta.env.BASE_URL}${pInfo.photo}`} alt="Principal" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<span style=\"font-size:72px\">👨‍💼</span>'; }} />
+                  <img src={`${import.meta.env.BASE_URL}${pInfo.photo || 'images/principal.webp'}`} alt="Principal" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<span style=\"font-size:72px\">👨‍💼</span>'; }} />
                 </div>
                 <div style={{ marginTop:14, fontWeight:800, fontSize:18, color:N }}>{pInfo.name}</div>
                 <div style={{ fontSize:13, color:'#64748b', marginTop:4 }}>{pInfo.designation}</div>
@@ -342,6 +348,7 @@ export function PrincipalMessage() {
             <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: messageHtml }} />
           </div>
         </Fade>
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['principal-info', 'message']} />
       </PageLayout>
     </div>
   );
@@ -353,12 +360,16 @@ export function PrincipalMessage() {
 ═══════════════════════════════════════════════════════════════ */
 export function Organogram() {
   useScrollTop();
+  const { content, getObject } = usePageContent('organogram');
   const [selectedPdf, setSelectedPdf] = useState(null); // ✅ PDF Modal State
-  const pdfUrl = '/pdfs/organogram.pdf'; // Aap isko Admin Panel ya required file se map kar sakte hain.
+  const orgInfo = getObject('organogram-image', { imagePath: 'images/organogram.webp', pdfUrl: '/pdfs/organogram.pdf' });
+  const pdfUrl = orgInfo.pdfUrl || '/pdfs/organogram.pdf';
+  const imgPath = orgInfo.imagePath || 'images/organogram.webp';
+  const fullImgSrc = imgPath.startsWith('http') || imgPath.startsWith('data:') ? imgPath : `${import.meta.env.BASE_URL}${imgPath}`;
 
   return (
     <div>
-      <PageHero title="Organogram" subtitle="Organizational structure and hierarchy of Guru Nanak College, Dhanbad" icon="🏛️" />
+      <PageHero title={content?.title || "Organogram"} subtitle={content?.subtitle || "Organizational structure and hierarchy of Guru Nanak College, Dhanbad"} icon="🏛️" />
       <PageLayout>
         {/* Image fallback */}
         <Fade delay={0.15}>
@@ -366,7 +377,7 @@ export function Organogram() {
             <h2 className="section-heading">Official Organogram (Image)</h2>
             <div className="heading-underline"/>
             <div style={{ textAlign:'center', marginTop:20 }}>
-              <img src={`${import.meta.env.BASE_URL}images/organogram.webp`} alt="College Organogram" style={{ maxWidth:'100%', borderRadius:10, boxShadow:'0 4px 16px rgba(0,0,0,0.1)' }}/>
+              <img src={fullImgSrc} alt="College Organogram" style={{ maxWidth:'100%', borderRadius:10, boxShadow:'0 4px 16px rgba(0,0,0,0.1)' }} onError={(e) => { e.target.src = `${import.meta.env.BASE_URL}images/organogram.webp`; }} />
             </div>
             <div style={{ textAlign:'center', marginTop:20 }}>
               <a href={pdfUrl} target="_blank" rel="noreferrer"
@@ -380,6 +391,7 @@ export function Organogram() {
             </div>
           </div>
         </Fade>
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['organogram-image']} />
       </PageLayout>
       {selectedPdf && (
         <Suspense fallback={null}>
@@ -401,19 +413,18 @@ export function Organogram() {
 export function CommitteePage({ name, desc, icon, purpose = [], responsibilities = [], pdfReportLink, slug }) {
   // ── CMS Content Hook — slug is derived from name if not provided ──
   const committeeSlug = slug || name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-  const { content, getList, getTable, getText } = usePageContent(committeeSlug);
+  const { content, getList, getTable, getObject } = usePageContent(committeeSlug);
 
   // ── CMS data with prop fallbacks ──
   const purposeList = getList('purpose', purpose);
   const respList = getList('responsibilities', responsibilities);
-  let chairInfo = { name: '✏️ [Chairperson Name]', designation: '✏️ [Designation, Department]' };
-  try { const raw = getText('chairperson'); if (raw) { const parsed = JSON.parse(raw); chairInfo = { ...chairInfo, ...parsed }; } } catch {}
+  const chairInfo = getObject('chairperson', { name: '✏️ [Chairperson Name]', designation: '✏️ [Designation, Department]' });
   const membersData = getTable('members', null);
   useScrollTop();
   const [selectedPdf, setSelectedPdf] = useState(null); // ✅ PDF Modal State
   return (
     <div>
-      <PageHero title={name} subtitle={desc} icon={icon} />
+      <PageHero title={content?.title || name} subtitle={content?.subtitle || desc} icon={icon} />
       <PageLayout>
         <Fade>
           <div style={{ background:'#fff', borderRadius:20, padding:32, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:20 }}>
@@ -447,7 +458,7 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
               <h2 className="section-heading">Purpose</h2>
               <div className="heading-underline" />
               <ul style={{ marginTop:12, paddingLeft:20 }}>
-                {purposeList.map((p, i) => <li key={i} style={{ marginBottom:8, color:'#475569', lineHeight:1.7 }}>{p}</li>)}
+                {purposeList.map((p, i) => <li key={i} style={{ marginBottom:8, color:'#475569', lineHeight:1.7 }}>{typeof p === 'object' ? (p.title || p.text || JSON.stringify(p)) : p}</li>)}
               </ul>
             </div>
           </Fade>
@@ -459,7 +470,7 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
               <div className="heading-underline" />
               <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(250px,1fr))', gap:12, marginTop:16 }}>
                 {respList.map((r, i) => (
-                  <div key={i} style={{ padding:'12px 16px', background:'#f8fafc', borderRadius:10, borderLeft:`4px solid ${G}`, fontSize:14, color:'#334155' }}>{r}</div>
+                  <div key={i} style={{ padding:'12px 16px', background:'#f8fafc', borderRadius:10, borderLeft:`4px solid ${G}`, fontSize:14, color:'#334155' }}>{typeof r === 'object' ? (r.title || r.text || JSON.stringify(r)) : r}</div>
                 ))}
               </div>
             </div>
@@ -496,6 +507,7 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
             </div>
           </div>
         </Fade>
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['chairperson', 'purpose', 'responsibilities', 'members']} />
       </PageLayout>
       {selectedPdf && (
         <Suspense fallback={null}>
@@ -526,17 +538,16 @@ export function RusaCell()      { return <CommitteePage slug="rusa" name="RUSA C
 ═══════════════════════════════════════════════════════════════ */
 export function GoverningBody() {
   useScrollTop();
-  const { content, getText, getTable } = usePageContent('governing-body');
+  const { content, getText, getTable, getObject } = usePageContent('governing-body');
 
-  // ── CMS data with fallbacks ──
+  // ── CMS data with safe object resolution ──
   const aboutText = getText('about-gb', '<p>The Governing Body of Guru Nanak College, Dhanbad is the supreme authority responsible for the overall management, policy decisions, and financial matters of the college. It is constituted as per UGC guidelines and the regulations of Binod Bihari Mahto Koylanchal University (BBMKU), Dhanbad.</p>');
-  let gbStats = { session: '✏️ [Session Year]', totalMembers: '✏️ [Number]', chairperson: '✏️ [Name]' };
-  try { const raw = getText('gb-stats'); if (raw) gbStats = { ...gbStats, ...JSON.parse(raw) }; } catch {}
+  const gbStats = getObject('gb-stats', { session: '2024-25', totalMembers: '8', chairperson: 'President, GPC' });
   const membersData = getTable('gb-members', null);
 
   return (
     <div>
-      <PageHero title="Governing Body" subtitle="The apex decision-making body of Guru Nanak College, Dhanbad" icon="🏛️" />
+      <PageHero title={content?.title || "Governing Body"} subtitle={content?.subtitle || "The apex decision-making body of Guru Nanak College, Dhanbad"} icon="🏛️" />
       <PageLayout>
         <Fade>
           <div style={{ background:'#fff', borderRadius:20, padding:36, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:24 }}>
@@ -545,9 +556,9 @@ export function GoverningBody() {
             <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: aboutText }} />
             <DataMarker label="Current session, total members, chairperson naam — niche stats box mein dalein" />
             <div style={{ marginTop:20, padding:'16px 24px', background:`linear-gradient(135deg,${N},#1a3a7c)`, borderRadius:12, color:'#fff', display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}>
-              <div><div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase' }}>Current Session</div><div style={{ fontWeight:800, fontSize:18 }}>{gbStats.session}</div></div>
-              <div><div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase' }}>Total Members</div><div style={{ fontWeight:800, fontSize:18 }}>{gbStats.totalMembers}</div></div>
-              <div><div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase' }}>Chairperson</div><div style={{ fontWeight:800, fontSize:18 }}>{gbStats.chairperson}</div></div>
+              <div><div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase' }}>Current Session</div><div style={{ fontWeight:800, fontSize:18 }}>{gbStats.session || '2024-25'}</div></div>
+              <div><div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase' }}>Total Members</div><div style={{ fontWeight:800, fontSize:18 }}>{gbStats.totalMembers || '8'}</div></div>
+              <div><div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase' }}>Chairperson</div><div style={{ fontWeight:800, fontSize:18 }}>{gbStats.chairperson || 'President, GPC'}</div></div>
             </div>
           </div>
         </Fade>
@@ -567,14 +578,14 @@ export function GoverningBody() {
                 </thead>
                 <tbody>
                   {(membersData?.rows || [
-                    ['1','✏️ [Name]','President, GPC','Management Nominee','Chairperson'],
-                    ['2','✏️ [Name]','Secretary, GPC','Management Nominee','Member'],
-                    ['3','✏️ [Name]','Principal, GNC','Ex-officio','Member Secretary'],
-                    ['4','✏️ [Name]','✏️ [Designation]','Management Nominee','Member'],
-                    ['5','✏️ [Name]','✏️ [Designation]','UGC Nominee','Member'],
-                    ['6','✏️ [Name]','✏️ [Designation]','University Nominee','Member'],
-                    ['7','✏️ [Name]','✏️ [Designation]','Teaching Staff Rep.','Member'],
-                    ['8','✏️ [Name]','✏️ [Designation]','Non-Teaching Rep.','Member'],
+                    ['1','President, GPC','President, Gurudwara Prabandhak Committee','Management Nominee','Chairperson'],
+                    ['2','Secretary, GPC','Secretary, Gurudwara Prabandhak Committee','Management Nominee','Member'],
+                    ['3','Principal, GNC','Principal, Guru Nanak College','Ex-officio','Member Secretary'],
+                    ['4','Management Nominee','Nominated by Managing Committee','Management Nominee','Member'],
+                    ['5','UGC Nominee','Nominated by University Grants Commission','UGC Nominee','Member'],
+                    ['6','University Nominee','Nominated by BBMKU, Dhanbad','University Nominee','Member'],
+                    ['7','Teaching Staff Rep.','Elected by Teaching Staff','Teaching Staff Rep.','Member'],
+                    ['8','Non-Teaching Rep.','Elected by Non-Teaching Staff','Non-Teaching Rep.','Member'],
                   ]).map((row,i)=>(
                     <tr key={i} style={{ background:i%2===0?'#f8fafc':'#fff', borderBottom:'1px solid #e2e8f0' }}>
                       <td style={{ padding:'11px 16px', color:'#64748b' }}>{row[0]}</td>
@@ -599,6 +610,7 @@ export function GoverningBody() {
             <MeetingPDFList collectionName="gb_meetings" accentColor={N} emptyText="No Governing Body meeting reports have been uploaded yet." />
           </div>
         </Fade>
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['about-gb', 'gb-stats', 'gb-members']} />
       </PageLayout>
     </div>
   );
@@ -644,12 +656,12 @@ export function StaffCouncil() {
                 <tbody>
                   {(scMembers?.rows || [
                     ['1','Principal','Principal','Administration','President / Chairman'],
-                    ['2','✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Secretary'],
-                    ['3','✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Joint Secretary'],
-                    ['4','✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Member'],
-                    ['5','✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Member'],
-                    ['6','✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Member'],
-                    ['7','✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Non-Teaching Rep.'],
+                    ['2','Senior Faculty','Associate Professor','Commerce','Secretary'],
+                    ['3','Faculty Member','Assistant Professor','Hindi','Joint Secretary'],
+                    ['4','Faculty Member','Assistant Professor','English','Member'],
+                    ['5','Faculty Member','Assistant Professor','Economics','Member'],
+                    ['6','Faculty Member','Assistant Professor','History','Member'],
+                    ['7','Non-Teaching Staff','Office Superintendent','Administration','Non-Teaching Rep.'],
                   ]).map((row,i)=>(
                     <tr key={i} style={{ background:i%2===0?'#f8fafc':'#fff', borderBottom:'1px solid #e2e8f0' }}>
                       <td style={{ padding:'11px 16px', color:'#64748b' }}>{row[0]}</td>
@@ -682,6 +694,7 @@ export function StaffCouncil() {
             <MeetingPDFList collectionName="staff_council" accentColor="#1a3a7c" emptyText="No Staff Council meeting reports have been uploaded yet." />
           </div>
         </Fade>
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['about-sc', 'sc-members', 'sc-functions']} />
       </PageLayout>
     </div>
   );

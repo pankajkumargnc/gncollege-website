@@ -82,23 +82,37 @@ export const useLocalDraft = (key, init, sensitiveKeys = []) => {
 };
 
 // ── Shared Components ─────────────────────────────────────────────────────────
-export const StatCard = React.memo(({ icon, label, count, color, sub, onClick }) => {
+export const StatCard = React.memo(({ icon, label, count, color = '#0f2347', sub, badge, onClick }) => {
   const a = useCountUp(count);
   return (
-    <div className="stat-card count-anim" onClick={onClick} 
+    <div 
+      className="adm-stat-card count-anim" 
+      onClick={onClick} 
       style={{ 
-        cursor: onClick ? 'pointer' : 'default', 
-        borderBottom: `3px solid ${color}`,
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-      <div style={{ position:'absolute', top:-15, right:-15, fontSize:64, opacity:0.05, transform:'rotate(15deg)', pointerEvents:'none' }}>{icon}</div>
-      <div className="stat-icon" style={{ background: `${color}15`, color }}>{icon}</div>
-      <div className="stat-num" style={{ color }}>{a.toLocaleString()}</div>
-      <div className="stat-label">{label}</div>
-      {sub && <div style={{ fontSize: 10, color: T.t4, marginTop: 4, fontWeight: 700, textTransform: 'uppercase' }}>{sub}</div>}
-      
-      {/* Subtle Glow on Hover logic is handled by CSS class .stat-card */}
+        cursor: onClick ? 'pointer' : 'default',
+        '--accent-color': color,
+      }}
+    >
+      <div className="adm-stat-inner">
+        <div className="adm-stat-icon-wrap" style={{ background: `${color}14`, color, border: `1px solid ${color}28` }}>
+          <span className="adm-stat-icon">{icon}</span>
+        </div>
+        <div className="adm-stat-body">
+          <div className="adm-stat-header">
+            <span className="adm-stat-label">{label}</span>
+            <span className="adm-stat-badge" style={{ color, background: `${color}12` }}>
+              {badge || 'Active'}
+            </span>
+          </div>
+          <div className="adm-stat-num">
+            {a.toLocaleString()}
+          </div>
+          <div className="adm-stat-sub">
+            {sub || 'System Records'}
+          </div>
+        </div>
+      </div>
+      <div className="adm-stat-bar" style={{ background: color }} />
     </div>
   );
 });
@@ -270,35 +284,67 @@ export const GCSS = `
 .sec-search { position:relative; }
 .sec-search input { padding-left:36px !important; }
 .sec-search::before { content:'🔍'; position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:13px; pointer-events:none; z-index:1; }
-.stat-card { 
-    background:${WHITE}; border-radius:20px; padding:24px; border:1.5px solid ${T.b1}; 
-    box-shadow:${T.shadow}; position:relative; overflow:hidden; transition:all .3s cubic-bezier(.25,.8,.25,1); 
+.adm-stat-card { 
+    background:${WHITE}; border:1.5px solid #e2e8f0; border-radius:14px; 
+    padding:16px 18px; position:relative; overflow:hidden; 
+    transition:all .25s cubic-bezier(.16,1,.3,1); 
+    box-shadow:0 2px 8px rgba(15,35,71,.03); display:flex; flex-direction:column; justify-content:space-between; 
 }
-.stat-card:hover { transform:translateY(-8px); box-shadow:${T.shadowHov}; border-color:${T.b2}; }
-.stat-card:hover .stat-icon { transform:scale(1.1) rotate(-5deg); }
+.adm-stat-card:hover { 
+    transform:translateY(-4px); 
+    border-color:var(--accent-color, ${NAVY}); 
+    box-shadow:0 12px 28px -4px rgba(15,35,71,.1), 0 4px 10px rgba(0,0,0,.03); 
+}
+.adm-stat-inner { display:flex; align-items:center; gap:14px; }
+.adm-stat-icon-wrap { 
+    width:48px; height:48px; min-width:48px; border-radius:12px; 
+    display:flex; align-items:center; justify-content:center; 
+    font-size:22px; transition:transform .25s ease; 
+}
+.adm-stat-card:hover .adm-stat-icon-wrap { transform:scale(1.08) rotate(-3deg); }
+.adm-stat-body { flex:1; min-width:0; }
+.adm-stat-header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:3px; }
+.adm-stat-label { font-size:11px; font-weight:800; color:${T.t3}; text-transform:uppercase; letter-spacing:.6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.adm-stat-badge { font-size:10px; font-weight:800; padding:1px 7px; border-radius:10px; letter-spacing:.2px; white-space:nowrap; }
+.adm-stat-num { font-size:26px; font-weight:900; color:${NAVY}; font-family:'JetBrains Mono','Plus Jakarta Sans',monospace; line-height:1.15; margin-bottom:2px; }
+.adm-stat-sub { font-size:11px; font-weight:600; color:${T.t4}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.adm-stat-bar { position:absolute; bottom:0; left:0; right:0; height:3px; opacity:.85; transition:height .2s ease; }
+.adm-stat-card:hover .adm-stat-bar { height:4px; opacity:1; }
+
+.stat-card { 
+    background:${WHITE}; border-radius:16px; padding:20px; border:1.5px solid ${T.b1}; 
+    box-shadow:${T.shadow}; position:relative; overflow:hidden; transition:all .25s cubic-bezier(.16,1,.3,1); 
+}
+.stat-card:hover { transform:translateY(-4px); box-shadow:${T.shadowHov}; border-color:${T.b2}; }
+.stat-card:hover .stat-icon { transform:scale(1.08) rotate(-3deg); }
 .stat-card .stat-icon { 
     width: 44px; height: 44px; border-radius: 12px; display: flex; 
     align-items: center; justify-content: center; font-size: 20px; 
-    margin-bottom: 16px; transition: transform 0.3s; 
+    margin-bottom: 12px; transition: transform 0.25s; 
 }
-.stat-card .stat-num { font-size: 32px; font-weight: 900; color:${NAVY}; font-family:'JetBrains Mono',monospace; line-height: 1; margin-bottom: 4px; }
+.stat-card .stat-num { font-size: 28px; font-weight: 900; color:${NAVY}; font-family:'JetBrains Mono',monospace; line-height: 1; margin-bottom: 4px; }
 .stat-card .stat-label { font-size: 11px; font-weight: 800; color:${T.t3}; text-transform:uppercase; letter-spacing: 1px; }
-.toggle-wrap { display:inline-flex; align-items:center; gap:8px; cursor:pointer; flex-shrink:0; vertical-align:middle; }
-.toggle { position:relative; width:44px; height:24px; min-width:44px; min-height:24px; max-width:44px; max-height:24px; flex-shrink:0; }
-.toggle input { opacity:0; width:0; height:0; position:absolute; }
-.toggle-slider { position:absolute; top:0; left:0; width:44px; height:24px; background:${T.b2}; border-radius:99px; transition:.2s; }
-.toggle input:checked + .toggle-slider { background:${T.green}; }
-.toggle-slider:before { content:''; position:absolute; height:18px; width:18px; left:3px; top:3px; background:${WHITE}; border-radius:50%; transition:.2s; box-shadow:0 1px 4px rgba(0,0,0,.2); }
-.toggle input:checked + .toggle-slider:before { transform:translateX(20px); }
-.bulk-bar { background:${NAVY}; color:${WHITE}; padding:12px 20px; border-radius:12px; display:flex; align-items:center; gap:12px; margin-bottom:16px; }
-.mini-log { background:${BG}; border-radius:10px; padding:12px 14px; margin-top:20px; }
-.mini-log-item { display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid ${T.b1}; font-size:12px; color:${T.t2}; }
-.mini-log-item:last-child { border-bottom:none; }
-.settings-group { border:1.5px solid ${T.b1}; border-radius:14px; overflow:hidden; margin-bottom:20px; }
-.settings-group-title { background:${BG}; padding:14px 20px; font-weight:800; color:${NAVY}; font-size:13.5px; border-bottom:1px solid ${T.b1}; display:flex; align-items:center; gap:8px; }
-.settings-row { padding:16px 20px; display:flex; align-items:center; gap:16px; border-bottom:1px solid ${T.b1}; }
-.settings-row:last-child { border-bottom:none; }
-.qa-card { background:${WHITE}; border:1.5px solid ${T.b1}; border-radius:14px; padding:18px; cursor:pointer; transition:all .2s; text-align:center; }
+
+.qa-card-v2 { 
+    background:${WHITE}; border:1.5px solid #e2e8f0; border-radius:12px; 
+    padding:12px 14px; cursor:pointer; transition:all .2s cubic-bezier(.16,1,.3,1); 
+    display:flex; align-items:center; gap:12px; text-decoration:none; 
+}
+.qa-card-v2:hover { 
+    transform:translateY(-2px); border-color:var(--qa-color, ${GOLD}); 
+    box-shadow:0 8px 20px -4px rgba(15,35,71,.08); background:#fafcff; 
+}
+.qa-card-v2:hover .qa-arrow { transform:translateX(4px); color:var(--qa-color, ${NAVY}); }
+.qa-icon-bubble { 
+    width:38px; height:38px; min-width:38px; border-radius:10px; 
+    display:flex; align-items:center; justify-content:center; 
+    font-size:18px; transition:transform .2s; 
+}
+.qa-card-v2:hover .qa-icon-bubble { transform:scale(1.1); }
+.qa-title { font-size:13px; font-weight:800; color:${NAVY}; flex:1; white-space:nowrap; }
+.qa-arrow { font-size:14px; color:#94a3b8; font-weight:700; transition:transform .2s, color .2s; }
+
+.qa-card { background:${WHITE}; border:1.5px solid ${T.b1}; border-radius:14px; padding:16px; cursor:pointer; transition:all .2s; text-align:center; }
 .qa-card:hover { border-color:${GOLD}; transform:translateY(-3px); box-shadow:0 8px 24px rgba(244,160,35,.12); }
 .top-search { flex:1; max-width:400px; position:relative; }
 .top-search input { width:100%; padding:9px 14px 9px 36px; border-radius:10px; border:1.5px solid ${T.b1}; background:${BG}; font-size:13.5px; outline:none; font-family:'Plus Jakarta Sans',sans-serif; color:${NAVY}; }

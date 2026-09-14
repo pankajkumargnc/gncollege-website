@@ -121,7 +121,25 @@ export default function EventsTab({
   return (
     <div className="fade-up">
       <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>🏆 Events Manager</p>
-      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage campus events, competitions, and seminars.</p>
+      <p style={{ margin: '4px 0 14px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage campus events, competitions, and seminars.</p>
+
+      {/* ── 🏆 CLEAR DESTINATION INDICATOR ── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.05) 0%, rgba(124, 58, 237, 0.08) 100%)',
+        border: '1.5px solid rgba(147, 51, 234, 0.2)',
+        borderRadius: 14, padding: '12px 16px', margin: '0 0 20px',
+      }}>
+        <span style={{ fontSize: 24 }}>🏆</span>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: 13, color: '#6b21a8' }}>
+            Live Destination: Homepage Card 2 (Upcoming Events) &amp; /events Page
+          </div>
+          <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+            "Upcoming" events show in Homepage Card 2 (News &amp; Events). "Recent" events show with photo reports in the College Activity gallery.
+          </div>
+        </div>
+      </div>
 
       <div className="card-gold">
         <div className="actitle">

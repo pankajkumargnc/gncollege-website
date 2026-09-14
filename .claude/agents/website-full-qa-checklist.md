@@ -146,7 +146,55 @@ Har breakpoint par check karo:
 - Admin se disable/hide kiya gaya content website par actually hide ho
 - SEO fields (agar admin se meta title/description edit hoti hai) website par sahi apply ho
 
-## 20) Final Report (Diagnosis Stage)
+## 20) Performance — Core Web Vitals (Google Standard)
+- LCP (Largest Contentful Paint) ≤ 2.5 seconds
+- INP (Interaction to Next Paint) ≤ 200 milliseconds
+- CLS (Cumulative Layout Shift) ≤ 0.1
+- Mobile 4G network par bhi speed test karo, sirf WiFi par nahi
+- Google Lighthouse / PageSpeed Insights se har page test karo
+
+## 21) Security (Additional)
+- Poora site HTTPS par load ho, koi "mixed content" warning na ho
+- Forms me autofill, double-click submit, refresh mid-submission jaise real-user mistakes handle ho
+- Staging environment production jaisa hi ho, taki deploy ke baad surprise na aaye
+
+## 22) Analytics / Tracking
+- Google Analytics/tracking pixels sahi fire ho rahe hain
+- Duplicate events na ho (ek hi action multiple baar track na ho)
+
+## 23) Admin Panel — Additional Checks
+- Delete/Block user ka cascading effect check karo: user delete karne ke baad woh dobara sign up kar sake; "forgot password" try karne par deleted email sahi tarike se handle ho
+- Pagination records dropdown (5/10/20/50 records per page) admin tables me sahi kaam kare
+- Sidebar menu icons har menu item ke naam se match karein (e.g. "Users" ke aage user icon)
+- Admin panel ka apna logo/favicon sab resolutions par sahi dikhe, browser tab me bhi sahi favicon ho
+- Backup & restore feature (agar hai) test karo — data loss hone par restore ho sake
+- Multiple role-based test accounts bana kar (admin/editor/viewer) unke actions try karo — koi bhi role apni limit se zyada access na kar sake
+
+## 25) Tools & Automation (Use These to Test Thoroughly)
+
+**Claude Code / Coding Assistant ki apni skills use karo:**
+- Bash/terminal se automated scripts chala kar Lighthouse CLI, HTML/CSS validators, broken-link checkers run karo
+- Browser automation (Playwright/Puppeteer) se har page ko har breakpoint par screenshot le kar visually compare karo
+- Codebase-wide search (grep) se saare typos, unused CSS classes, console.log/debug code, hardcoded test data dhoondo
+- Git diff/history dekh kar recent changes me kya break hua check karo
+- Linting tools (ESLint, Stylelint) chala kar code quality aur inconsistency pakdo
+
+**Google ke Tools:**
+- Google Lighthouse — performance, accessibility, SEO, best-practices audit
+- PageSpeed Insights — Core Web Vitals (LCP/INP/CLS) real-user aur lab data
+- Google Search Console — indexing errors, mobile usability issues, broken links
+- Mobile-Friendly Test — mobile responsiveness verify
+- Rich Results Test — structured data/schema markup check
+- Chrome DevTools — network throttling, device emulation, console errors
+
+**OpenAI / AI-based Tools:**
+- GPT-based grammar/content checker — spelling, tone, clarity ka secondary pass (Claude ke check ke alawa cross-verify)
+- AI vision-based tools — screenshots ko analyze karke layout/alignment anomalies pakadna
+- AI-based accessibility scanners — alt text quality aur ARIA labels ka semantic correctness check
+
+*Note: Yeh tools optional hain — agar available/connected hain to inka use karo automation aur cross-verification ke liye, warna manual checklist follow karo.*
+
+## 26) Final Report (Diagnosis Stage)
 Sab kuch check karne ke baad mujhe ek **complete report** do (implementation se pehle):
 - Kaunse issues mile (page-wise/module-wise)
 - Har issue ki severity (critical/major/minor)

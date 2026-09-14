@@ -615,7 +615,13 @@ p, li, td, th {
 .notif-card .rich-text-title,
 .notif-card .rich-text-title *,
 .notif-card .rich-text-desc,
-.notif-card .rich-text-desc * {
+.notif-card .rich-text-desc *,
+.ns-root .ns-title,
+.ns-root .ns-title *,
+.ns-card h3,
+.ns-card h3 *,
+.ns-card .ns-item-content,
+.ns-card .ns-item-content * {
   text-align: left !important;
 }
 

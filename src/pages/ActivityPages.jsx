@@ -4,7 +4,7 @@ import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 const PDFModal = lazy(() => import('../components/PDFModal'));
-import usePageContent from '../hooks/usePageContent';
+import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageContent';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -45,9 +45,9 @@ export function NssPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 20, marginBottom: 40 }}>
             {stats.map((s, i) => (
               <div key={i} style={{ background: '#fff', borderRadius: 20, padding: 30, textAlign: 'center', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)' }}>
-                <div style={{ fontSize: 40, marginBottom: 16 }}>{s.icon}</div>
-                <div style={{ fontSize: 32, fontWeight: 900, color: NAVY, marginBottom: 4 }}>{s.num}</div>
-                <div style={{ fontSize: 14, color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>{s.label}</div>
+                <div style={{ fontSize: 40, marginBottom: 16 }}>{s.icon || '🌟'}</div>
+                <div style={{ fontSize: 32, fontWeight: 900, color: NAVY, marginBottom: 4 }}>{s.num || s.number || '0'}</div>
+                <div style={{ fontSize: 14, color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>{s.label || s.title}</div>
               </div>
             ))}
           </div>
@@ -56,14 +56,20 @@ export function NssPage() {
           <div style={{ background: '#fff', borderRadius: 24, padding: 40, border: '1px solid #e2e8f0' }}>
             <h2 style={{ fontSize: 24, fontWeight: 800, color: NAVY, marginBottom: 24 }}>Major Activities</h2>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 16 }}>
-              {['Swachh Bharat Abhiyan', 'Blood Donation Camps', 'Traffic Awareness Drives', 'Disaster Relief & Rescue', 'National Integration Camps'].map((item, i) => (
-                <li key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px', background: '#f8fafc', borderRadius: 12, border: '1px solid #f1f5f9' }}>
-                  <span style={{ background: `${GOLD}20`, color: '#b45309', padding: 8, borderRadius: 8, fontSize: 18 }}>⭐</span><span style={{ fontWeight: 700, color: NAVY }}>{item}</span>
-                </li>
-              ))}
+              {activities.map((item, i) => {
+                const label = typeof item === 'string' ? item : (item?.title || item?.label || item?.name || JSON.stringify(item));
+                return (
+                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px', background: '#f8fafc', borderRadius: 12, border: '1px solid #f1f5f9' }}>
+                    <span style={{ background: `${GOLD}20`, color: '#b45309', padding: 8, borderRadius: 8, fontSize: 18 }}>⭐</span><span style={{ fontWeight: 700, color: NAVY }}>{label}</span>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </Fade>
+
+        {/* Dynamic sections from Content Manager */}
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['stats', 'activities']} />
       </div>
       {previewPdf && (
         <Suspense fallback={null}>
@@ -88,7 +94,7 @@ export function NccPage() {
             <div style={{ padding: 40 }}>
               <div style={{ display: 'inline-block', background: '#dbeafe', color: '#1d4ed8', padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 800, letterSpacing: 1, marginBottom: 16 }}>GNC NCC WING</div>
               <h2 style={{ fontSize: 28, fontWeight: 900, color: NAVY, marginBottom: 16 }}>Building Future Leaders</h2>
-              <p style={{ color: '#64748b', lineHeight: 1.7, marginBottom: 24 }} dangerouslySetInnerHTML={{ __html: aboutHtml }} />
+              <div style={{ color: '#64748b', lineHeight: 1.7, marginBottom: 24 }} dangerouslySetInnerHTML={{ __html: aboutHtml }} />
               <div style={{ display: 'flex', gap: 16 }}>
                 <div style={{ background: '#f8fafc', padding: '10px 20px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 700, color: NAVY }}>B-Certificate</div>
                 <div style={{ background: '#f8fafc', padding: '10px 20px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 700, color: NAVY }}>C-Certificate</div>
@@ -96,6 +102,9 @@ export function NccPage() {
             </div>
           </div>
         </Fade>
+
+        {/* Dynamic sections from Content Manager */}
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['about']} />
       </div>
       {previewPdf && (
         <Suspense fallback={null}>
@@ -112,19 +121,26 @@ export function WorkshopPage() {
   const workshops = getList('workshops', [{ title: 'Intellectual Property Rights (IPR)', dept: 'IQAC Cell', date: 'October 2023' }, { title: 'New Education Policy (NEP 2020) Seminar', dept: 'Education Dept', date: 'August 2023' }, { title: 'Cyber Security & Ethical Hacking', dept: 'BCA Department', date: 'July 2023' }, { title: 'Financial Literacy for Youth', dept: 'Commerce Dept', date: 'May 2023' }]);
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
-      <PageHeader title="Workshops & Seminars" subtitle="Bridging the gap between academia and industry through expert sessions." icon="🎤" />
+      <PageHeader title={content?.title || "Workshops & Seminars"} subtitle={content?.subtitle || "Bridging the gap between academia and industry through expert sessions."} icon="🎤" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 350px), 1fr))', gap: 20 }}>
             {workshops.map((w, i) => (
               <div key={i} style={{ background: '#fff', borderRadius: 20, padding: 30, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.03)', transition: 'transform 0.3s' }} onMouseEnter={e=>e.currentTarget.style.transform='translateY(-5px)'} onMouseLeave={e=>e.currentTarget.style.transform='none'}>
-                <div style={{ fontSize: 12, fontWeight: 800, color: GOLD, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>{w.date}</div>
-                <h3 style={{ fontSize: 20, fontWeight: 800, color: NAVY, margin: '0 0 12px', lineHeight: 1.4 }}>{w.title}</h3>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f1f5f9', color: '#64748b', padding: '6px 12px', borderRadius: 8, fontSize: 13, fontWeight: 700 }}><span>🏢</span> Organized by {w.dept}</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: GOLD, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>{w.date || w.year || 'Event'}</div>
+                <h3 style={{ fontSize: 20, fontWeight: 800, color: NAVY, margin: '0 0 12px', lineHeight: 1.4 }}>{w.title || w.heading}</h3>
+                {(w.dept || w.organizer) && (
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f1f5f9', color: '#64748b', padding: '6px 12px', borderRadius: 8, fontSize: 13, fontWeight: 700 }}>
+                    <span>🏢</span> Organized by {w.dept || w.organizer}
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </Fade>
+
+        {/* Dynamic sections from Content Manager */}
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['workshops']} />
       </div>
       {previewPdf && (
         <Suspense fallback={null}>
@@ -151,7 +167,10 @@ export function SportsPage() {
               <h2 style={{ fontSize: 24, fontWeight: 900, color: NAVY, marginBottom: 16 }}>Outdoor Sports</h2>
               <p style={{ color: '#64748b', marginBottom: 20, lineHeight: 1.6 }}>Our campus features a vast playground suitable for major athletic events and team sports.</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-                {outdoor.map(s => <span key={s} style={{ background: `${NAVY}10`, color: NAVY, padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700 }}>{s}</span>)}
+                {outdoor.map((s, idx) => {
+                  const name = typeof s === 'string' ? s : (s?.name || s?.title || JSON.stringify(s));
+                  return <span key={idx} style={{ background: `${NAVY}10`, color: NAVY, padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700 }}>{name}</span>;
+                })}
               </div>
             </div>
             <div style={{ background: '#fff', borderRadius: 24, padding: 40, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)' }}>
@@ -159,11 +178,17 @@ export function SportsPage() {
               <h2 style={{ fontSize: 24, fontWeight: 900, color: NAVY, marginBottom: 16 }}>Indoor Games</h2>
               <p style={{ color: '#64748b', marginBottom: 20, lineHeight: 1.6 }}>Dedicated indoor facilities for mind games and fast-paced table sports.</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-                {indoor.map(s => <span key={s} style={{ background: `${GOLD}20`, color: '#b45309', padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700 }}>{s}</span>)}
+                {indoor.map((s, idx) => {
+                  const name = typeof s === 'string' ? s : (s?.name || s?.title || JSON.stringify(s));
+                  return <span key={idx} style={{ background: `${GOLD}20`, color: '#b45309', padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700 }}>{name}</span>;
+                })}
               </div>
             </div>
           </div>
         </Fade>
+
+        {/* Dynamic sections from Content Manager */}
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['outdoor', 'indoor']} />
       </div>
       {previewPdf && (
         <Suspense fallback={null}>
@@ -186,14 +211,18 @@ export function RotaractClub() {
         <Fade>
           <div style={{ background: '#fff', borderRadius: 24, padding: 40, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(217,27,92,0.08)', textAlign: 'center' }}>
             <h2 style={{ fontSize: 28, fontWeight: 900, color: '#d91b5c', marginBottom: 20 }}>Empowering Youth</h2>
-            <p style={{ color: '#64748b', fontSize: 16, lineHeight: 1.8, marginBottom: 30 }} dangerouslySetInnerHTML={{ __html: aboutHtml }} />
+            <div style={{ color: '#64748b', fontSize: 16, lineHeight: 1.8, marginBottom: 30 }} dangerouslySetInnerHTML={{ __html: aboutHtml }} />
             <div style={{ display: 'flex', justifyContent: 'center', gap: 20, flexWrap: 'wrap' }}>
-              {focusAreas.map((k, i) => (
-                <div key={i} style={{ background: '#fdf2f8', color: '#be185d', padding: '10px 20px', borderRadius: 12, fontWeight: 800, fontSize: 14 }}>{k}</div>
-              ))}
+              {focusAreas.map((k, i) => {
+                const label = typeof k === 'string' ? k : (k?.title || k?.label || JSON.stringify(k));
+                return <div key={i} style={{ background: '#fdf2f8', color: '#be185d', padding: '10px 20px', borderRadius: 12, fontWeight: 800, fontSize: 14 }}>{label}</div>;
+              })}
             </div>
           </div>
         </Fade>
+
+        {/* Dynamic sections from Content Manager */}
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['about', 'focus']} />
       </div>
       {previewPdf && (
         <Suspense fallback={null}>
@@ -205,10 +234,14 @@ export function RotaractClub() {
 }
 
 export function SadbhavanaDiwas() {
-  const [previewPdf, setPreviewPdf] = useState(null); // ✅ MODAL PDF STATE
+  const [previewPdf, setPreviewPdf] = useState(null);
+  const { content, getText } = usePageContent('sadbhavana-diwas');
+  const pledgeText = getText('pledge', '"I take this solemn pledge that I will work for the emotional oneness and harmony of all the people of India regardless of caste, region, religion, or language. I further pledge that I shall resolve all differences among us through dialogue and constitutional means without resorting to violence."');
+  const dateInfo = getText('date-info', 'Observed Annually on 20th August');
+
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
-      <PageHeader title="Sadbhavana Diwas" subtitle="Promoting National Integration, Peace, and Communal Harmony." icon="🕊️" theme="#059669" />
+      <PageHeader title={content?.title || "Sadbhavana Diwas"} subtitle={content?.subtitle || "Promoting National Integration, Peace, and Communal Harmony."} icon="🕊️" theme="#059669" />
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ background: '#fff', borderRadius: 24, padding: 40, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(5,150,105,0.08)' }}>
@@ -216,14 +249,18 @@ export function SadbhavanaDiwas() {
               <div style={{ fontSize: 48 }}>🕯️</div>
               <div>
                 <h2 style={{ fontSize: 24, fontWeight: 900, color: NAVY, margin: '0 0 8px' }}>Harmony & Peace Pledge</h2>
-                <div style={{ color: '#059669', fontWeight: 700 }}>Observed Annually on 20th August</div>
+                <div style={{ color: '#059669', fontWeight: 700 }} dangerouslySetInnerHTML={{ __html: dateInfo }} />
               </div>
             </div>
-            <p style={{ color: '#64748b', fontSize: 16, lineHeight: 1.8, fontStyle: 'italic', background: '#ecfdf5', padding: 24, borderRadius: 16, borderLeft: '4px solid #10b981' }}>
-              "I take this solemn pledge that I will work for the emotional oneness and harmony of all the people of India regardless of caste, region, religion, or language. I further pledge that I shall resolve all differences among us through dialogue and constitutional means without resorting to violence."
-            </p>
+            <div 
+              style={{ color: '#64748b', fontSize: 16, lineHeight: 1.8, fontStyle: 'italic', background: '#ecfdf5', padding: 24, borderRadius: 16, borderLeft: '4px solid #10b981' }}
+              dangerouslySetInnerHTML={{ __html: pledgeText }}
+            />
           </div>
         </Fade>
+
+        {/* Dynamic sections from Content Manager */}
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['pledge', 'date-info']} />
       </div>
       {previewPdf && (
         <Suspense fallback={null}>

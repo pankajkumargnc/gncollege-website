@@ -54,7 +54,10 @@ export default function usePageContent(slug) {
           if (data.sections && Array.isArray(data.sections)) {
             data.sections = data.sections.map(section => ({
               ...section,
-              content: typeof section.content === 'string' ? DOMPurify.sanitize(section.content) : section.content
+              // Only sanitize text HTML sections — leave JSON strings intact so JSON.parse won't be corrupted
+              content: section.type === 'text' && typeof section.content === 'string'
+                ? DOMPurify.sanitize(section.content)
+                : section.content
             }));
           }
           newData = data;
@@ -104,7 +107,28 @@ export default function usePageContent(slug) {
    */
   const getText = (sectionId, fallback = '') => {
     const section = getSection(sectionId);
-    return section?.content || fallback;
+    if (!section?.content) return fallback;
+    if (typeof section.content === 'string') return section.content;
+    if (typeof section.content === 'object') {
+      try { return JSON.stringify(section.content); } catch { return fallback; }
+    }
+    return String(section.content);
+  };
+
+  /**
+   * getObject — Get structured object content of a section safely (handles both object & string)
+   * @param {string} sectionId - The section ID
+   * @param {object} fallback - Fallback object if section not found
+   * @returns {object} The section object or fallback
+   */
+  const getObject = (sectionId, fallback = {}) => {
+    const section = getSection(sectionId);
+    if (!section?.content) return fallback;
+    if (typeof section.content === 'object' && section.content !== null) return section.content;
+    try {
+      const parsed = JSON.parse(section.content);
+      return (typeof parsed === 'object' && parsed !== null) ? parsed : fallback;
+    } catch { return fallback; }
   };
 
   /**
@@ -116,9 +140,11 @@ export default function usePageContent(slug) {
   const getList = (sectionId, fallback = []) => {
     const section = getSection(sectionId);
     if (!section?.content) return fallback;
-    // Content can be an array directly, or stringified JSON
     if (Array.isArray(section.content)) return section.content;
-    try { return JSON.parse(section.content); } catch { return fallback; }
+    try {
+      const parsed = typeof section.content === 'string' ? JSON.parse(section.content) : section.content;
+      return Array.isArray(parsed) ? parsed : fallback;
+    } catch { return fallback; }
   };
 
   /**
@@ -130,11 +156,16 @@ export default function usePageContent(slug) {
   const getTable = (sectionId, fallback = { headers: [], rows: [] }) => {
     const section = getSection(sectionId);
     if (!section?.content) return fallback;
-    if (typeof section.content === 'object' && section.content.headers) return section.content;
-    try { return JSON.parse(section.content); } catch { return fallback; }
+    if (typeof section.content === 'object' && section.content !== null && section.content.headers) {
+      return section.content;
+    }
+    try {
+      const parsed = typeof section.content === 'string' ? JSON.parse(section.content) : section.content;
+      return (parsed && parsed.headers) ? parsed : fallback;
+    } catch { return fallback; }
   };
 
-  return { content, loading, getSection, getText, getList, getTable };
+  return { content, loading, getSection, getText, getObject, getList, getTable };
 }
 
 /**
@@ -147,3 +178,8 @@ export function invalidatePageContentCache(slug) {
     Object.keys(contentCache).forEach(k => delete contentCache[k]);
   }
 }
+
+// ── Re-export Dynamic Section Renderers from Component ────────────────────────
+export { default as DynamicSectionRenderer, DynamicSectionsContainer } from '../components/DynamicSectionRenderer';
+
+

@@ -43,6 +43,24 @@ export default function AnnouncementsTab({ announcements, logAct, getSectionLog,
       <p className="asec">📣 News &amp; Announcements</p>
       <p className="asub">Publish college news and announcements</p>
 
+      {/* ── 📣 CLEAR DESTINATION INDICATOR ── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        background: 'linear-gradient(135deg, rgba(185, 28, 28, 0.05) 0%, rgba(220, 38, 38, 0.08) 100%)',
+        border: '1.5px solid rgba(220, 38, 38, 0.2)',
+        borderRadius: 14, padding: '12px 16px', margin: '0 0 20px',
+      }}>
+        <span style={{ fontSize: 24 }}>🔥</span>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: 13, color: '#991b1b' }}>
+            Live Destination: Homepage Card 2 (News &amp; Events) &amp; /news Page
+          </div>
+          <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+            Headlines published here stream directly into Homepage Card 2 alongside upcoming campus events.
+          </div>
+        </div>
+      </div>
+
       <div className="card-gold">
         <div className="actitle">{editItem ? '✏️ Edit News' : '➕ Publish News'}</div>
         <form onSubmit={save}>

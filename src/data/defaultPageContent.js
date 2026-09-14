@@ -8,6 +8,31 @@
 const DEFAULT_PAGE_CONTENT = {
 
   // ────────────────────── ABOUT US ──────────────────────
+  'college-profile': {
+    title: 'College Profile',
+    subtitle: 'Excellence in Education Since 1970',
+    sections: [
+      {
+        id: 'intro', heading: 'College Overview', type: 'text', order: 1,
+        content: '<p class="rich-text-content">Guru Nanak College, Dhanbad (A Sikh Minority Degree College) was Established by the Gurudwara Prabandhak Committee in 1970 to mark the fifth Birth Centenary of the great Guru after whom this college is named.</p><p class="rich-text-content mt-4">The college is managed by a Governing Council nominated by the Gurudwara Prabandhak Committee, Dhanbad, and draws its inspiration from the teachings of the faith propounded by Guru Nanak Devji.</p>'
+      },
+      {
+        id: 'about', heading: 'About the College', type: 'text', order: 2,
+        content: '<p class="rich-text-content">Initially the college got affiliated to the Ranchi University – Ranchi since 1970 the year it was started. But with the passage of time, Binod Bihari Mahto Koylanchal University, Dhanbad came into existence in 2017; and the affiliation of the college got transferred to this new University in 2017.</p><p class="rich-text-content mt-4">At present, the college has got permanent affiliation with Binod Bihari Mahto Koylanchal University, Dhanbad in the faculties of Humanities, Social Sciences, commerce and such vocational courses as Bachelor of Computer Applications. The college has got “Deficit Grant College Status” by the government of Jharkhand. Also the college is registered u/s 2F and 12B of the UGC Act.</p><p class="rich-text-content mt-4">The main aim and objective behind sponsoring this college was to impart value-based teaching to the young men and women of Dhanbad. The college attaches great importance to moral teaching. The college does not merely offer teaching in such subjects as would enable young students to earn their bread and butter, but it also emphasizes grooming them into worthy (morally sound) citizens.</p>'
+      },
+      {
+        id: 'stats', heading: 'Key Statistics', type: 'list', order: 3,
+        content: JSON.stringify([
+          { label: 'Years of Legacy', value: '56+', icon: '🏛️' },
+          { label: 'Expert Faculty', value: '120+', icon: '👨‍🏫' },
+          { label: 'Students', value: '5000+', icon: '🎓' },
+          { label: 'Courses', value: '30+', icon: '📚' }
+        ])
+      }
+    ],
+    seo: { title: 'College Profile | Guru Nanak College, Dhanbad', description: 'Explore the history, legacy, and campus profile of Guru Nanak College Dhanbad, established in 1970.' }
+  },
+
   'vision-mission': {
     title: 'Vision & Mission',
     subtitle: 'Our guiding principles and future aspirations',

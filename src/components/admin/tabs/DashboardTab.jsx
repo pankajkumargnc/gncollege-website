@@ -121,25 +121,25 @@ export default function DashboardTab({ notices, events, faculties, placements, p
         </div>
       </div>
 
-      {/* 🏙️ OVERVIEW STATS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 16, marginBottom: 40 }}>
-        <StatCard icon="📢" label="Notices"     count={(notices||[]).length}                             color={GOLD}    onClick={() => onNavigate('notices')} />
-        <StatCard icon="🏆" label="Events"      count={(events||[]).length}                              color={NAVY}    onClick={() => onNavigate('events')} />
-        <StatCard icon="👨‍🏫" label="Faculty"    count={(faculties||[]).length}                           color={T.blue}  sub={`${(faculties||[]).filter(f=>f.staffType==='Non-Teaching').length} non-teaching`} onClick={() => onNavigate('faculty')} />
-        <StatCard icon="🎓" label="Alumni"      count={(placements||[]).length}                          color={T.green} onClick={() => onNavigate('placements')} />
-        <StatCard icon="📁" label="Documents"   count={(pdfReports||[]).length}                          color={T.purple} onClick={() => onNavigate('documents')} />
-        <StatCard icon="🚨" label="Live Alerts" count={(alerts||[]).filter(a=>a.isActive).length}        color={T.red}   onClick={() => onNavigate('alerts')} />
-        <StatCard icon="📸" label="Gallery"     count={(gallery||[]).length}                             color={T.orange} onClick={() => onNavigate('gallery')} />
-        <StatCard icon="📄" label="Pages"       count={(pages||[]).length}                               color={T.cyan}  onClick={() => onNavigate('pages')} />
+      {/* 🏙️ OVERVIEW STATS (Uniform, Balanced Grid) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 16, marginBottom: 32 }}>
+        <StatCard icon="📢" label="Notices"     count={(notices||[]).length}                             color={GOLD}    badge="Notices"  sub="Active circulars" onClick={() => onNavigate('notices')} />
+        <StatCard icon="🏆" label="Events"      count={(events||[]).length}                              color={NAVY}    badge="Events"   sub="Scheduled activities" onClick={() => onNavigate('events')} />
+        <StatCard icon="👨‍🏫" label="Faculty"    count={(faculties||[]).length}                           color={T.blue}  badge="Staff"    sub={`${(faculties||[]).filter(f=>f.staffType==='Non-Teaching').length} non-teaching`} onClick={() => onNavigate('faculty')} />
+        <StatCard icon="🎓" label="Alumni"      count={(placements||[]).length}                          color={T.green} badge="Placed"   sub="Career alumni" onClick={() => onNavigate('placements')} />
+        <StatCard icon="📁" label="Documents"   count={(pdfReports||[]).length}                          color={T.purple} badge="Archive" sub="Forms & reports" onClick={() => onNavigate('documents')} />
+        <StatCard icon="🚨" label="Live Alerts" count={(alerts||[]).filter(a=>a.isActive).length}        color={T.red}   badge="Urgent"   sub="Broadcast active" onClick={() => onNavigate('alerts')} />
+        <StatCard icon="📸" label="Gallery"     count={(gallery||[]).length}                             color={T.orange} badge="Photos"  sub="Media library" onClick={() => onNavigate('gallery')} />
+        <StatCard icon="📄" label="Pages"       count={(pages||[]).length}                               color={T.cyan}  badge="CMS"     sub="Published pages" onClick={() => onNavigate('pages')} />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24 }}>
         
         {/* 📈 REAL TRAFFIC ANALYTICS */}
-        <div className="card" style={{ padding: 24, border: `1.5px solid #f1f5f9`, background: '#fff', overflow: 'hidden' }}>
+        <div className="card" style={{ padding: 24, border: '1.5px solid #e2e8f0', borderRadius: 16, background: '#fff', boxShadow: '0 4px 20px rgba(0,0,0,0.02)', overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <div className="actitle" style={{ fontSize: 17, color: NAVY, margin: 0, paddingBottom: 0, borderBottom: 'none' }}>
-               <span style={{ background: `${NAVY}10`, padding: 8, borderRadius: 10 }}>📈</span> Real Traffic Analytics
+            <div className="actitle" style={{ fontSize: 16, color: NAVY, margin: 0, paddingBottom: 0, borderBottom: 'none' }}>
+               <span style={{ background: `${NAVY}10`, padding: '6px 10px', borderRadius: 8 }}>📈</span> Real Traffic Analytics
             </div>
             <div style={{ display: 'flex', gap: 4, background: '#f1f5f9', borderRadius: 8, padding: 3 }}>
               {[
@@ -157,22 +157,22 @@ export default function DashboardTab({ notices, events, faculties, placements, p
           </div>
 
           {/* Live metrics strip */}
-          <div style={{ display: 'flex', gap: 20, marginBottom: 20, flexWrap: 'wrap' }}>
-            <div style={{ background: '#f0fdf4', borderRadius: 12, padding: '12px 18px', flex: '1 1 80px', minWidth: 80 }}>
-              <div style={{ fontSize: 22, fontWeight: 900, color: T.green }}>{analytics.liveCount}</div>
-              <div style={{ fontSize: 10, color: T.t4, fontWeight: 700, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{ display: 'flex', gap: 14, marginBottom: 20, flexWrap: 'wrap' }}>
+            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '10px 14px', flex: '1 1 80px', minWidth: 80 }}>
+              <div style={{ fontSize: 20, fontWeight: 900, color: T.green }}>{analytics.liveCount}</div>
+              <div style={{ fontSize: 10, color: '#15803d', fontWeight: 800, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 4 }}>
                 <div className="glow" style={{ width: 6, height: 6, borderRadius: '50%' }} /> Live Now
               </div>
             </div>
-            <div style={{ background: '#eff6ff', borderRadius: 12, padding: '12px 18px', flex: '1 1 80px', minWidth: 80 }}>
-              <div style={{ fontSize: 22, fontWeight: 900, color: NAVY }}>{analytics.totalVisits}</div>
-              <div style={{ fontSize: 10, color: T.t4, fontWeight: 700, textTransform: 'uppercase' }}>
+            <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: '10px 14px', flex: '1 1 80px', minWidth: 80 }}>
+              <div style={{ fontSize: 20, fontWeight: 900, color: NAVY }}>{analytics.totalVisits}</div>
+              <div style={{ fontSize: 10, color: '#1d4ed8', fontWeight: 800, textTransform: 'uppercase' }}>
                 {timeRange === 'today' ? 'Today' : timeRange === 'week' ? 'This Week' : 'This Month'}
               </div>
             </div>
-            <div style={{ background: '#fefce8', borderRadius: 12, padding: '12px 18px', flex: '1 1 80px', minWidth: 80 }}>
-              <div style={{ fontSize: 22, fontWeight: 900, color: '#d97706' }}>{analytics.uniqueSessions}</div>
-              <div style={{ fontSize: 10, color: T.t4, fontWeight: 700, textTransform: 'uppercase' }}>Sessions</div>
+            <div style={{ background: '#fefce8', border: '1px solid #fde68a', borderRadius: 10, padding: '10px 14px', flex: '1 1 80px', minWidth: 80 }}>
+              <div style={{ fontSize: 20, fontWeight: 900, color: '#b45309' }}>{analytics.uniqueSessions}</div>
+              <div style={{ fontSize: 10, color: '#b45309', fontWeight: 800, textTransform: 'uppercase' }}>Sessions</div>
             </div>
           </div>
 
@@ -198,12 +198,12 @@ export default function DashboardTab({ notices, events, faculties, placements, p
           </div>
         </div>
 
-        {/* ⚡ QUICK ACTIONS */}
-        <div className="card" style={{ padding: 24, border: '1.5px solid #f1f5f9', background: '#fff' }}>
-          <div className="actitle" style={{ fontSize: 17, marginBottom: 24, paddingBottom: 16, color: NAVY }}>
-             <span style={{ background: `${NAVY}10`, padding: 8, borderRadius: 10 }}>⚡</span> Quick Actions
+        {/* ⚡ QUICK ACTIONS (Sleek Modern Action Tiles) */}
+        <div className="card" style={{ padding: 24, border: '1.5px solid #e2e8f0', borderRadius: 16, background: '#fff', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+          <div className="actitle" style={{ fontSize: 16, marginBottom: 20, paddingBottom: 14, color: NAVY }}>
+             <span style={{ background: `${NAVY}10`, padding: '6px 10px', borderRadius: 8 }}>⚡</span> Quick Actions
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 }}>
             {[
               { icon: '📢', label: 'Add Notice',  tab: 'notices', color: GOLD },
               { icon: '📣', label: 'Add News',     tab: 'announcements', color: T.purple },
@@ -214,18 +214,26 @@ export default function DashboardTab({ notices, events, faculties, placements, p
               { icon: '🚨', label: 'New Alert',    tab: 'alerts', color: T.red },
               { icon: '📸', label: 'Add Photo',    tab: 'gallery', color: T.orange },
             ].map(a => (
-              <div key={a.tab} className="qa-card" onClick={() => onNavigate(a.tab)} style={{ background: '#fff' }}>
-                <div style={{ fontSize: 32, marginBottom: 12, display: 'inline-block', filter: `drop-shadow(0 4px 10px ${a.color}30)` }}>{a.icon}</div>
-                <div style={{ fontSize: 13, fontWeight: 900, color: NAVY }}>{a.label}</div>
+              <div 
+                key={a.tab} 
+                className="qa-card-v2" 
+                onClick={() => onNavigate(a.tab)} 
+                style={{ '--qa-color': a.color }}
+              >
+                <div className="qa-icon-bubble" style={{ background: `${a.color}15`, color: a.color }}>
+                  {a.icon}
+                </div>
+                <span className="qa-title">{a.label}</span>
+                <span className="qa-arrow">→</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* 📊 POPULAR PAGES & DEVICE BREAKDOWN */}
-        <div className="card" style={{ padding: 24, border: '1.5px solid #f1f5f9', background: '#fff' }}>
-          <div className="actitle" style={{ fontSize: 17, marginBottom: 20, paddingBottom: 16, color: NAVY }}>
-            <span style={{ background: `${T.blue}10`, padding: 8, borderRadius: 10 }}>🔥</span> Popular Pages
+        <div className="card" style={{ padding: 24, border: '1.5px solid #e2e8f0', borderRadius: 16, background: '#fff', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+          <div className="actitle" style={{ fontSize: 16, marginBottom: 20, paddingBottom: 14, color: NAVY }}>
+            <span style={{ background: `${T.blue}10`, padding: '6px 10px', borderRadius: 8 }}>🔥</span> Popular Pages
           </div>
           {analytics.popularPages.length > 0 ? (
             <div style={{ height: 200 }}>
@@ -274,10 +282,10 @@ export default function DashboardTab({ notices, events, faculties, placements, p
         </div>
 
         {/* 🎯 ADVANCED APEXCHARTS: MODULE HEALTH & METRICS */}
-        <div className="card" style={{ padding: 24, border: '1.5px solid #f1f5f9', background: '#fff' }}>
-          <div className="actitle" style={{ fontSize: 17, marginBottom: 16, paddingBottom: 16, color: NAVY, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div className="card" style={{ padding: 24, border: '1.5px solid #e2e8f0', borderRadius: 16, background: '#fff', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+          <div className="actitle" style={{ fontSize: 16, marginBottom: 16, paddingBottom: 14, color: NAVY, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ background: `${GOLD}20`, padding: 8, borderRadius: 10 }}>🎯</span>
+              <span style={{ background: `${GOLD}20`, padding: '6px 10px', borderRadius: 8 }}>🎯</span>
               <span>Module Health & Content Saturation</span>
             </div>
             <span style={{ fontSize: 11, background: '#f1f5f9', color: '#64748b', padding: '4px 10px', borderRadius: 8, fontWeight: 700 }}>
@@ -341,9 +349,9 @@ export default function DashboardTab({ notices, events, faculties, placements, p
         </div>
 
         {/* 🕐 REAL-TIME ACTIVITY STREAM */}
-        <div className="card" style={{ padding: 24, border: '1.5px solid #f1f5f9', background: '#fff' }}>
-          <div className="actitle" style={{ fontSize: 17, marginBottom: 24, paddingBottom: 16, color: NAVY }}>
-            <span style={{ background: `${T.green}10`, padding: 8, borderRadius: 10 }}>🕐</span> Recent Activity Stream
+        <div className="card" style={{ padding: 24, border: '1.5px solid #e2e8f0', borderRadius: 16, background: '#fff', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+          <div className="actitle" style={{ fontSize: 16, marginBottom: 20, paddingBottom: 14, color: NAVY }}>
+            <span style={{ background: `${T.green}10`, padding: '6px 10px', borderRadius: 8 }}>🕐</span> Recent Activity Stream
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, background: `${T.green}10`, padding: '4px 10px', borderRadius: 20 }}>
               <div className="glow" style={{ width: 8, height: 8, borderRadius: '50%' }} />
               <span style={{ fontSize: 11, color: T.green, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1 }}>Live Sync</span>

@@ -87,7 +87,25 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
   return (
     <div className="fade-up">
       <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>📢 Notice Board</p>
-      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Publish and manage official notices.</p>
+      <p style={{ margin: '4px 0 14px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Publish and manage official notices.</p>
+
+      {/* ── 📌 CLEAR DESTINATION INDICATOR ── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        background: 'linear-gradient(135deg, rgba(15, 35, 71, 0.05) 0%, rgba(30, 58, 138, 0.08) 100%)',
+        border: '1.5px solid rgba(15, 35, 71, 0.15)',
+        borderRadius: 14, padding: '12px 16px', margin: '0 0 20px',
+      }}>
+        <span style={{ fontSize: 24 }}>📌</span>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: 13, color: NAVY }}>
+            Live Destination: Homepage Card 1 (Campus Notices) &amp; /notifications Page
+          </div>
+          <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+            Notices published here appear with 3D Date Tiles, Smart Badges (Exams, Results, Admission), and optional in-app PDF previews.
+          </div>
+        </div>
+      </div>
 
       <div className="card-gold">
         <div className="actitle">{editNotice ? '✏️ Edit Notice' : '➕ Publish Notice'}</div>

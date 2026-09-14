@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
-import usePageContent from '../hooks/usePageContent';
+import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageContent';
 import { resolveUrl } from '../utils/resolver';
 
 const NAVY = COLORS?.navy || '#0f2347';
@@ -143,18 +143,22 @@ export function Infrastructure() {
         <Fade>
           <div style={{ color: GOLD, fontWeight: 700, letterSpacing: 2, marginBottom: 8 }}>OVERVIEW</div>
           <h1 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, color: NAVY, marginBottom: 40 }}>{content?.title || 'World-Class Infrastructure'}</h1>
+          {content?.subtitle && (
+            <p style={{ color: '#64748b', fontSize: 16, marginTop: -20, marginBottom: 36 }}>{content.subtitle}</p>
+          )}
         </Fade>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24, marginBottom: 60 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24, marginBottom: 40 }}>
           {boxes.map((b, i) => (
-            <Fade key={i} delay={i * 0.1} style={{ gridColumn: `span ${window.innerWidth > 768 ? b.span : 1}` }}>
-              <div style={{ background: b.bg, borderRadius: 24, padding: 32, height: '100%', border: '1.5px solid #e2e8f0' }}>
-                <div style={{ fontSize: 40, marginBottom: 16 }}>{b.icon}</div>
-                <h3 style={{ fontSize: 22, fontWeight: 800, color: b.color, margin: '0 0 10px' }}>{b.title}</h3>
+            <Fade key={i} delay={i * 0.1} style={{ gridColumn: `span ${window.innerWidth > 768 ? (b.span || 1) : 1}` }}>
+              <div style={{ background: b.bg || '#fff', borderRadius: 24, padding: 32, height: '100%', border: '1.5px solid #e2e8f0' }}>
+                <div style={{ fontSize: 40, marginBottom: 16 }}>{b.icon || '🏛️'}</div>
+                <h3 style={{ fontSize: 22, fontWeight: 800, color: b.color || NAVY, margin: '0 0 10px' }}>{b.title}</h3>
                 <p style={{ color: '#64748b', fontSize: 15, margin: 0, lineHeight: 1.6 }}>{b.desc}</p>
               </div>
             </Fade>
           ))}
         </div>
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['facilities']} />
         {/* Live Gallery added below static content */}
         <LiveGallery categoryId="infrastructure" />
       </div>
@@ -168,11 +172,11 @@ export function Infrastructure() {
 export function Classrooms() {
   const { content, getList, getText } = usePageContent('classrooms');
   const features = getList('features', ['Spacious & Well-Ventilated', 'Ergonomic Seating', 'Interactive Smart Boards']);
-  const descText = getText('desc', 'Comfortable, well-ventilated, and equipped with smart tech.');
+  const descText = getText('desc', '<p>Comfortable, well-ventilated, and equipped with smart tech.</p>');
   return (
     <div style={{ background: '#fff', padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', fontFamily: "'DM Sans', sans-serif" }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))', gap: 60, alignItems: 'center', marginBottom: 60 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))', gap: 60, alignItems: 'center', marginBottom: 40 }}>
           <Fade>
             <div style={{ borderRadius: 24, overflow: 'hidden', boxShadow: `0 20px 40px ${NAVY}15` }}>
               <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&q=80" alt="Classroom" style={{ width: '100%', display: 'block' }} />
@@ -181,17 +185,18 @@ export function Classrooms() {
           <Fade delay={0.2}>
             <div style={{ background: `${GOLD}15`, padding: '8px 16px', borderRadius: 20, color: '#b45309', fontWeight: 700, display: 'inline-block', marginBottom: 16, fontSize: 13 }}>MODERN LEARNING</div>
             <h2 style={{ fontSize: 'clamp(28px, 4vw, 38px)', fontWeight: 800, color: NAVY, margin: '0 0 24px', lineHeight: 1.2 }}>{content?.title || 'Smart Classrooms'}</h2>
-            <p style={{ color: '#64748b', fontSize: 16, lineHeight: 1.8, marginBottom: 24 }} dangerouslySetInnerHTML={{ __html: descText }} />
+            <div className="rich-text-content" style={{ color: '#64748b', fontSize: 16, lineHeight: 1.8, marginBottom: 24 }} dangerouslySetInnerHTML={{ __html: descText }} />
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
               {features.map((item, i) => (
                 <li key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 15, fontWeight: 600, color: NAVY }}>
                   <span style={{ background: '#d1fae5', color: '#059669', width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>✓</span>
-                  {item}
+                  {typeof item === 'object' ? (item.title || item.name || JSON.stringify(item)) : item}
                 </li>
               ))}
             </ul>
           </Fade>
         </div>
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['features', 'desc']} />
         <LiveGallery categoryId="classrooms" />
       </div>
     </div>
@@ -203,13 +208,20 @@ export function Classrooms() {
 ════════════════════════════════════════════════════════════ */
 export function IctRooms() {
   const { content, getText } = usePageContent('ict-rooms');
+  const aboutHtml = getText('about', '<p>Our ICT rooms and computer laboratories are equipped with high-performance workstations, latest software, high-speed internet connectivity, and multimedia projectors to facilitate modern digital learning experiences for students across all departments.</p>');
   return (
     <div style={{ background: NAVY, padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', color: '#fff', fontFamily: "'DM Sans', sans-serif", minHeight: '100dvh' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 60 }}>
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <Fade><h2 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, margin: '0 0 16px' }}>{content?.title || 'ICT & Computer Labs'}</h2></Fade>
-          <Fade delay={0.1}><p style={{ color: '#94a3b8', fontSize: 16, maxWidth: 600, margin: '0 auto', lineHeight: 1.7 }}>{content?.subtitle || 'Empowering students with high-end workstations.'}</p></Fade>
+          <Fade delay={0.1}><p style={{ color: '#94a3b8', fontSize: 16, maxWidth: 600, margin: '0 auto 24px', lineHeight: 1.7 }}>{content?.subtitle || 'Empowering students with high-end workstations.'}</p></Fade>
+          {aboutHtml && (
+            <Fade delay={0.2}>
+              <div className="rich-text-content" style={{ maxWidth: 800, margin: '0 auto 30px', color: '#cbd5e1', fontSize: 15.5, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: aboutHtml }} />
+            </Fade>
+          )}
         </div>
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['about']} />
         <LiveGallery categoryId="ict-rooms" />
       </div>
     </div>
@@ -220,16 +232,26 @@ export function IctRooms() {
    5. GREEN CAMPUS
 ════════════════════════════════════════════════════════════ */
 export function GreenCampus() {
-  const { content } = usePageContent('green-campus');
+  const { content, getText } = usePageContent('green-campus');
+  const aboutHtml = getText('about', '<p>Guru Nanak College is committed to maintaining an eco-friendly campus with extensive green cover, rainwater harvesting, solar panels for clean energy, ban on single-use plastic, and regular tree plantation drives led by the NSS unit. Our green campus initiatives align with the UGC guidelines on sustainable development in higher education.</p>');
   return (
     <div style={{ background: 'linear-gradient(145deg, #f0fdf4 0%, #ffffff 100%)', padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', fontFamily: "'DM Sans', sans-serif", minHeight: '100dvh' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 60 }}>
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <Fade>
             <div style={{ fontSize: 48, marginBottom: 16 }}>🌿</div>
             <h2 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, color: '#064e3b', margin: '0 0 16px' }}>{content?.title || 'Our Green Initiatives'}</h2>
+            {content?.subtitle && (
+              <p style={{ color: '#047857', fontSize: 16, maxWidth: 600, margin: '0 auto 20px', fontWeight: 600 }}>{content.subtitle}</p>
+            )}
           </Fade>
+          {aboutHtml && (
+            <Fade delay={0.15}>
+              <div style={{ maxWidth: 840, margin: '0 auto 32px', background: '#fff', padding: '24px 32px', borderRadius: 20, boxShadow: '0 8px 24px rgba(6,78,59,0.06)', border: '1px solid #d1fae5', textAlign: 'left', color: '#334155', fontSize: 15, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: aboutHtml }} />
+            </Fade>
+          )}
         </div>
+        <DynamicSectionsContainer sections={content?.sections} excludeIds={['about']} />
         <LiveGallery categoryId="green-campus" />
       </div>
     </div>

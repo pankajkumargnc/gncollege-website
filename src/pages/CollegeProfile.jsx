@@ -3,12 +3,28 @@ import { Link } from 'react-router-dom';
 import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
 import 'react-vertical-timeline-component/style.min.css';
 import '../styles/index.css';
+import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageContent';
 
 const CollegeProfile = () => {
   // Page load hone par top par scroll karein
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const { content, getText, getList } = usePageContent('college-profile');
+  const heroTitle = content?.title || "College Profile";
+  const heroSubtitle = content?.subtitle || "Excellence in Education Since 1970";
+
+  const profileHtml = getText('intro', '<p class="rich-text-content">Guru Nanak College, Dhanbad (A Sikh Minority Degree College) was Established by the Gurudwara Prabandhak Committee in 1970 to mark the fifth Birth Centenary of the great Guru after whom this college is named.</p><p class="rich-text-content mt-4">The college is managed by a Governing Council nominated by the Gurudwara Prabandhak Committee, Dhanbad, and draws its inspiration from the teachings of the faith propounded by Guru Nanak Devji.</p>');
+
+  const aboutHtml = getText('about', '<p class="rich-text-content">Initially the college got affiliated to the Ranchi University – Ranchi since 1970 the year it was started. But with the passage of time, Binod Bihari Mahto Koylanchal University, Dhanbad came into existence in 2017; and the affiliation of the college got transferred to this new University in 2017.</p><p class="rich-text-content mt-4">At present, the college has got permanent affiliation with Binod Bihari Mahto Koylanchal University, Dhanbad in the faculties of Humanities, Social Sciences, commerce and such vocational courses as Bachelor of Computer Applications. The college has got “Deficit Grant College Status” by the government of Jharkhand. Also the college is registered u/s 2F and 12B of the UGC Act.</p><p class="rich-text-content mt-4">The main aim and objective behind sponsoring this college was to impart value-based teaching to the young men and women of Dhanbad. The college attaches great importance to moral teaching. The college does not merely offer teaching in such subjects as would enable young students to earn their bread and butter, but it also emphasizes grooming them into worthy (morally sound) citizens.</p>');
+
+  const stats = getList('stats', [
+    { label: "Years of Legacy", value: "56+", icon: "🏛️" },
+    { label: "Expert Faculty", value: "120+", icon: "👨‍🏫" },
+    { label: "Students", value: "5000+", icon: "🎓" },
+    { label: "Courses", value: "30+", icon: "📚" }
+  ]);
 
   return (
     <div className="profile-page-wrapper">
@@ -39,8 +55,8 @@ const CollegeProfile = () => {
       <header className="profile-hero">
         <div className="hero-overlay"></div>
         <div className="hero-content anim-fade-in">
-          <h1 className="hero-title">College Profile</h1>
-          <p className="hero-subtitle">Excellence in Education Since 1970</p>
+          <h1 className="hero-title">{heroTitle}</h1>
+          <p className="hero-subtitle">{heroSubtitle}</p>
         </div>
       </header>
 
@@ -62,27 +78,14 @@ const CollegeProfile = () => {
               className="profile-img hover-scale"
               style={{ float: 'right', width: '350px', maxWidth: '100%', marginLeft: '2rem', marginBottom: '1rem', borderRadius: '12px' }}
             />
-            <p className="rich-text-content">
-              Guru Nanak College, Dhanbad (A Sikh Minority Degree College) was Established by the Gurudwara Prabandhak Committee in 1970 to mark the fifth Birth Centenary of the great Guru after whom this college is named.
-            </p>
-            <p className="rich-text-content mt-4">
-              The college is managed by a Governing Council nominated by the Gurudwara Prabandhak Committee, Dhanbad, and draws its inspiration from the teachings of the faith propounded by Guru Nanak Devji.
-            </p>
+            <div dangerouslySetInnerHTML={{ __html: profileHtml }} />
             <div style={{ clear: 'both' }}></div>
           </div>
 
           <div style={{ marginBottom: '3rem' }}>
             <h2 className="section-heading">About the College</h2>
-          <div className="heading-underline"></div>
-          <p className="rich-text-content">
-            Initially the college got affiliated to the Ranchi University – Ranchi since 1970 the year it was started. But with the passage of time, Binod Bihari Mahto Koylanchal University, Dhanbad came into existence in 2017; and the affiliation of the college got transferred to this new University in 2017.
-          </p>
-          <p className="rich-text-content mt-4">
-            At present, the college has got permanent affiliation with Binod Bihari Mahto Koylanchal University, Dhanbad in the faculties of Humanities, Social Sciences, commerce and such vocational courses as Bachelor of Computer Applications. The college has got “Deficit Grant College Status” by the government of Jharkhand. Also the college is registered u/s 2F and 12B of the UGC Act.
-          </p>
-          <p className="rich-text-content mt-4">
-            The main aim and objective behind sponsoring this college was to impart value-based teaching to the young men and women of Dhanbad. The college attaches great importance to moral teaching. The college does not merely offer teaching in such subjects as would enable young students to earn their bread and butter, but it also emphasizes grooming them into worthy (morally sound) citizens.
-          </p>
+            <div className="heading-underline"></div>
+            <div dangerouslySetInnerHTML={{ __html: aboutHtml }} />
           </div>
 
           <div>
@@ -182,20 +185,18 @@ const CollegeProfile = () => {
               </VerticalTimelineElement>
             </VerticalTimeline>
           </div>
+
+          {/* Dynamic sections from Content Manager */}
+          <DynamicSectionsContainer sections={content?.sections} excludeIds={['intro', 'about', 'stats', 'timeline']} />
         </section>
 
         {/* Key Statistics (Plain Grid) */}
         <section className="stats-grid stats-grid-override mb-16 anim-slide-up" style={{animationDelay: '0.4s'}}>
-          {[
-            { label: "Years of Legacy", value: "56+", icon: "🏛️" },
-            { label: "Expert Faculty", value: "120+", icon: "👨‍🏫" },
-            { label: "Students", value: "5000+", icon: "🎓" },
-            { label: "Courses", value: "30+", icon: "📚" }
-          ].map((stat, idx) => (
+          {stats.map((stat, idx) => (
             <div key={idx} className="stat-card stat-card-small" style={{background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0'}}>
-              <div className="stat-icon">{stat.icon}</div>
-              <div className="stat-value stat-value-small">{stat.value}</div>
-              <div className="stat-label">{stat.label}</div>
+              <div className="stat-icon">{stat.icon || '📊'}</div>
+              <div className="stat-value stat-value-small">{stat.value || stat.num || '0'}</div>
+              <div className="stat-label">{stat.label || stat.title}</div>
             </div>
           ))}
         </section>
