@@ -32,10 +32,26 @@ service cloud.firestore {
     match /staff_council/{docId}    { allow read: if true; allow write: if isAdmin(); }
     match /pageContent/{docId}      { allow read: if true; allow write: if isAdmin(); }
     match /push_broadcasts/{docId}  { allow read, write: if isAdmin(); }
-    match /polls/{docId}            { allow read: if true; allow update: if true; allow create, delete: if isAdmin(); }
-    match /site_visits/{docId}      { allow read, write: if true; }
-    match /site_traffic/{docId}     { allow read, write: if true; }
-    match /counters/{docId}         { allow read: if true; allow write: if true; }
+    match /polls/{docId} { 
+      allow read: if true; 
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasAny(['votes', 'totalVotes', 'options', 'votedIps', 'hasVoted']) || isAdmin(); 
+      allow create, delete: if isAdmin(); 
+    }
+    match /site_visits/{docId} { 
+      allow read: if isAdmin(); 
+      allow create: if request.resource.data.keys().hasAny(['timestamp', 'page', 'device', 'referrer', 'date']); 
+      allow update, delete: if isAdmin(); 
+    }
+    match /site_traffic/{docId} { 
+      allow read: if isAdmin(); 
+      allow create, update: if request.resource.data.keys().hasAny(['count', 'views', 'updatedAt', 'date', 'page']) || isAdmin(); 
+      allow delete: if isAdmin(); 
+    }
+    match /counters/{docId} { 
+      allow read: if true; 
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasAny(['count', 'value', 'updatedAt']) || isAdmin(); 
+      allow create, delete: if isAdmin(); 
+    }
     match /settings/{settingId}     { allow read: if true; allow write: if isAdmin(); }
     match /adminLogs/{docId}        { allow read, write, create: if isAdmin(); }
     match /_sysTest/{docId}         { allow read, write, delete: if isAdmin(); }

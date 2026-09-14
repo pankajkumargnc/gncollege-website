@@ -34,8 +34,8 @@ body {
   --navy-light: #1a3a6b;
   --gold-light: #fbbf24;
   --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
+  --text-secondary: #334155;
+  --text-muted: #475569;
   --border-light: #edf2f7;
   --surface: #ffffff;
   --surface-raised: #f8fafc;
@@ -45,15 +45,16 @@ body {
   --glass-border: rgba(255,255,255,.42);
   --glass-shadow: 0 8px 32px rgba(15,35,71,.1);
 
-  /* Fluid type scale */
-  --text-xs:   clamp(10px, .75vw, 12px);
-  --text-sm:   clamp(12px, .9vw,  14px);
-  --text-base: clamp(13px, 1vw,   15px);
-  --text-md:   clamp(14px, 1.1vw, 16px);
-  --text-lg:   clamp(16px, 1.4vw, 20px);
-  --text-xl:   clamp(20px, 2vw,   28px);
-  --text-2xl:  clamp(24px, 3vw,   38px);
-  --text-3xl:  clamp(28px, 4vw,   48px);
+  /* Fluid Modular Type Scale (rem + vw) — WCAG 1.4.4 Accessible */
+  --text-xs:   clamp(0.75rem, 0.71rem + 0.18vw, 0.8125rem);  /* 12px → 13px */
+  --text-sm:   clamp(0.8125rem, 0.77rem + 0.22vw, 0.875rem); /* 13px → 14px */
+  --text-base: clamp(0.9375rem, 0.88rem + 0.28vw, 1.0625rem); /* 15px → 17px (body standard) */
+  --text-md:   clamp(1.0625rem, 0.98rem + 0.38vw, 1.1875rem); /* 17px → 19px */
+  --text-lg:   clamp(1.1875rem, 1.06rem + 0.55vw, 1.375rem);  /* 19px → 22px */
+  --text-xl:   clamp(1.375rem, 1.18rem + 0.85vw, 1.75rem);   /* 22px → 28px (h3) */
+  --text-2xl:  clamp(1.65rem, 1.35rem + 1.35vw, 2.25rem);   /* 26.4px → 36px (h2) */
+  --text-3xl:  clamp(2.1rem, 1.65rem + 2.0vw, 3.15rem);     /* 33.6px → 50.4px (h1) */
+  --text-display: clamp(2.5rem, 1.85rem + 2.8vw, 4.0rem);  /* 40px → 64px (hero stat/display) */
 
   /* Spacing — Mathematical 8px scale */
   --space-2xs: clamp(4px,  .5vw,  6px);
@@ -215,58 +216,146 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
   background-color: var(--bg);
-  /* ── UNIFORM FONT SYSTEM: Inter everywhere ── */
-  font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont,
-               'Segoe UI', Roboto, Arial, sans-serif;
+  /* ── UNIFORM FONT SYSTEM: Inter (Body/UI) & Plus Jakarta Sans (Headings) ── */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   font-size: var(--text-base);
-  color: #1e293b;
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  line-height: 1.62;
+  letter-spacing: normal;
 }
 
 /* ═══════════════════════════════════════
-   UNIFORM TYPOGRAPHY SYSTEM
-   Inter → body/UI | Plus Jakarta Sans → headings | Space Grotesk → display
+   UNIFORM TYPOGRAPHY SYSTEM (Web Typography Standards)
+   Inter → body/UI | Plus Jakarta Sans → headings | Space Grotesk → display/stats
 ═══════════════════════════════════════ */
 
-/* All headings — Plus Jakarta Sans for premium feel */
+/* All headings — Plus Jakarta Sans for premium, modern hierarchy */
 h1, h2, h3, h4, h5, h6,
 .section-heading,
 [class*="section-head"],
 [class*="SectionHead"] {
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
   font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: -0.3px;
   color: var(--navy);
+  text-wrap: balance; /* Prevents awkward single-word wraps */
 }
 
-/* Display / hero numbers */
+/* Modular Heading Hierarchy */
+h1 {
+  font-size: var(--text-3xl);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  margin-bottom: 0.5em;
+}
+
+h2 {
+  font-size: var(--text-2xl);
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5em;
+}
+
+h3 {
+  font-size: var(--text-xl);
+  line-height: 1.28;
+  letter-spacing: -0.015em;
+  font-weight: 700;
+  margin-bottom: 0.4em;
+}
+
+h4 {
+  font-size: var(--text-lg);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+  margin-bottom: 0.4em;
+}
+
+h5 {
+  font-size: var(--text-md);
+  line-height: 1.4;
+  font-weight: 600;
+  margin-bottom: 0.3em;
+}
+
+h6 {
+  font-size: var(--text-base);
+  line-height: 1.45;
+  font-weight: 600;
+  margin-bottom: 0.3em;
+}
+
+/* Display / hero metrics & counters */
 [class*="stat-value"],
 [class*="hp-stat-num"],
 [class*="hero-num"],
 .display-num {
   font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+  font-size: var(--text-display);
   font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
 }
 
-/* Buttons and nav — Inter for readability */
+/* Buttons, inputs, navigation — Inter for optimal UI legibility */
 button, input, select, textarea,
 nav, .glass-navbar,
 [class*="Navbar"],
 [class*="TopBar"] {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: var(--text-base);
+  letter-spacing: normal;
 }
 
-/* Rich body text — slightly more relaxed tracking */
+/* Uppercase Micro-Typography — subtle tracking improves readability of all-caps */
+.uni-label,
+.badge,
+.chip,
+.tag,
+th,
+[class*="-badge"],
+[class*="-tag"],
+.uppercase-label {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-feature-settings: "case" 1;
+}
+
+/* Rich body text — flush-left, ragged-right, pretty wrap */
 p, li, td, blockquote,
 .rich-text-content,
 [class*="content-card"] p {
   font-family: 'Inter', sans-serif;
-  line-height: 1.75;
-  letter-spacing: 0.01em;
-  text-align: justify;
+  line-height: 1.62;
+  letter-spacing: normal;
+  text-align: left; /* Flush-left, ragged-right to prevent rivers of white space */
+  text-wrap: pretty; /* Eliminates orphan words on final lines */
+}
+
+/* Optimal reading line-length (45-75 characters per line) */
+.prose p,
+.reading-text,
+.rich-text-content p,
+article p,
+.content-card p {
+  max-width: 68ch;
+}
+
+/* Heading-to-paragraph vertical rhythm */
+h1 + p, h2 + p, h3 + p, h4 + p {
+  margin-top: 0;
+}
+
+p {
+  margin-bottom: 1.15em;
+}
+
+p:last-child {
+  margin-bottom: 0;
 }
 
 /* Monospace — admin/code areas */
@@ -603,12 +692,12 @@ p:last-child { margin-bottom: 0; }
 }
 
 /* ═══════════════════════════════════════
-   5. TEXT ALIGNMENT & GLOBAL HEADERS
+   5. TEXT ALIGNMENT & SECTION HEADERS (Web Typography Rules)
 ═══════════════════════════════════════ */
-/* Body content — justified for professional look */
+/* Body content — flush-left, ragged-right for natural reading and no white-space rivers */
 p, li, td, th {
-  text-align: justify;
-  text-justify: inter-word;
+  text-align: left;
+  text-wrap: pretty;
 }
 
 /* Notification cards — force left */
@@ -625,11 +714,14 @@ p, li, td, th {
   text-align: left !important;
 }
 
-/* Page global headings — center */
-h1, h2, h3,
-[class*="section-title"],
-[class*="sec-h"],
-[class*="-heading"] {
+/* Standalone section headers — center aligned */
+.section-title,
+.section-header h2,
+.section-header h3,
+.sec-h,
+.uni-header,
+.uni-header h2,
+.uni-header h3 {
   text-align: center;
 }
 
@@ -831,7 +923,7 @@ h1, h2, h3,
   width:clamp(36px,5vw,50px); height:3px;
   background:var(--gold); border-radius:2px;
 }
-.footer-desc { line-height:1.65; margin-bottom:1.5rem; color:#94a3b8; text-align: justify; }
+.footer-desc { line-height:1.65; margin-bottom:1.5rem; color:#94a3b8; text-align: left; max-width: 48ch; text-wrap: pretty; }
 .footer-links { list-style:none; padding:0; }
 .footer-links li { margin-bottom:clamp(6px,.8vw,12px); }
 .footer-links a { color:#cbd5e1; text-decoration:none; transition:color .25s ease, padding-left .25s ease; display:flex; align-items:center; gap:8px; }
@@ -915,7 +1007,7 @@ h1, h2, h3,
   h2 { font-size:clamp(18px,5.5vw,28px); }
   h3 { font-size:clamp(16px,4.5vw,22px); }
   .stats-grid { grid-template-columns:1fr 1fr; }
-  p, li, td { text-align: left; text-justify: auto; }
+  p, li, td { text-align: left; }
 }
 /* ═══════════════════════════════════════════════════
    GNC CONSOLIDATED v12

@@ -571,13 +571,13 @@ export default function SikhHeritagePage() {
                 <h3 style={{ fontSize: 20, fontWeight: 800, color: '#0f2347', margin: '0 0 12px' }}>
                   The Vision of Sardar Pritam Singh Sahni
                 </h3>
-                <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.8, fontSize: 14.5, textAlign: 'justify' }}>
+                <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.68, fontSize: 15, textAlign: 'left', textWrap: 'pretty' }}>
                   In the late 1960s, Dhanbad was burgeoning as the coal capital of India, yet higher education facilities for middle-class 
                   and underprivileged families were scarce. Led by visionary philanthropist <strong>Sardar Pritam Singh Sahni</strong> alongside 
                   esteemed leaders of the local Sikh Gurudwara Prabandhak Committee, the Sikh community resolved to establish an institution 
                   of national stature.
                 </p>
-                <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.8, fontSize: 14.5, textAlign: 'justify' }}>
+                <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.68, fontSize: 15, textAlign: 'left', textWrap: 'pretty' }}>
                   Founded in 1970, Guru Nanak College began with a singular resolve: high-quality higher education accessible to everyone, 
                   preserving ethical virtues while fostering contemporary scientific and commerce disciplines.
                 </p>
@@ -704,12 +704,12 @@ export default function SikhHeritagePage() {
             <h3 style={{ fontSize: 19, fontWeight: 800, color: '#0f2347', margin: '24px 0 12px' }}>
               Constitutional Basis & Autonomous Administration
             </h3>
-            <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.8, fontSize: 14.5, textAlign: 'justify' }}>
+            <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.68, fontSize: 15, textAlign: 'left', textWrap: 'pretty' }}>
               Guru Nanak College is formally recognized as a <strong>Religious Minority Educational Institution</strong> by the 
               <strong> National Commission for Minority Educational Institutions (NCMEI)</strong>, a statutory body established by the 
               Government of India under the NCMEI Act 2004.
             </p>
-            <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.8, fontSize: 14.5, textAlign: 'justify' }}>
+            <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.68, fontSize: 15, textAlign: 'left', textWrap: 'pretty' }}>
               Under <strong>Article 30(1) of the Constitution of India</strong>, minority communities have the fundamental right to establish 
               and administer educational institutions of their choice. This grants the Governing Body autonomous authority in faculty appointments, 
               institutional governance, and strategic curriculum enhancement while strictly adhering to university academic schedules.

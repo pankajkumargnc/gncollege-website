@@ -9,7 +9,7 @@ import { useParams, Link } from 'react-router-dom';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
-import PDFModal from '../components/PDFModal';
+const PDFModal = lazy(() => import('../components/PDFModal'));
 
 // Specialized Sub-Components
 import { NAVY, Spin } from '../components/departments/DepartmentUI';

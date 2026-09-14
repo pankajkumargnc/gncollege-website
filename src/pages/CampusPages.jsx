@@ -261,13 +261,19 @@ export function GreenCampus() {
 /* ════════════════════════════════════════════════════════════
    6. 360° VIRTUAL CAMPUS TOUR
 ════════════════════════════════════════════════════════════ */
-import VirtualTour from '../components/VirtualTour';
+const VirtualTour = React.lazy(() => import('../components/VirtualTour'));
 
 export function VirtualTourPage() {
   return (
     <div style={{ background: '#f8fafc', padding: 'clamp(40px,6vw,64px) clamp(16px,3vw,24px)', minHeight: '100dvh' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <VirtualTour />
+        <React.Suspense fallback={
+          <div style={{ textAlign: 'center', padding: '100px 0', color: NAVY, fontWeight: 700 }}>
+            Loading 360° Panoramic Campus Tour...
+          </div>
+        }>
+          <VirtualTour />
+        </React.Suspense>
       </div>
     </div>
   );

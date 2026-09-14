@@ -1,0 +1,49 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuth() && (
+        request.auth.token.email in ["pankajkumargnc@gmail.com", "admin@gncollege.org", "principal@gncollege.org"] ||
+        request.auth.token.admin == true
+      );
+    }
+
+    // Public read access for published college media & documents
+    match /{allPaths=**} {
+      allow read: if true;
+    }
+
+    // ── SECURE DOCUMENTS VAULT ──
+    // Enforces:
+    // 1. Admin authenticated token
+    // 2. Size limit: Max 15MB (15 * 1024 * 1024 bytes)
+    // 3. Strict MIME type whitelist (PDF, Word, Excel). Executables and scripts are blocked.
+    match /documents/{docFile} {
+      allow write: if isAdmin()
+        && request.resource.size <= 15 * 1024 * 1024
+        && (
+          request.resource.contentType == 'application/pdf' ||
+          request.resource.contentType == 'application/msword' ||
+          request.resource.contentType == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+          request.resource.contentType == 'application/vnd.ms-excel' ||
+          request.resource.contentType == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+    }
+
+    // ── SECURE IMAGES VAULT ──
+    // Enforces:
+    // 1. Admin authenticated token
+    // 2. Size limit: Max 5MB (5 * 1024 * 1024 bytes)
+    // 3. Image MIME type only
+    match /images/{imgFile} {
+      allow write: if isAdmin()
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

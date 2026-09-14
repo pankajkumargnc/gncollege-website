@@ -77,13 +77,16 @@ export default function useAppData() {
   }, []);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 2. Fetch Cached Static Collections (Faculties & PDF Reports)
+  // 2. Fetch Cached Collections (Faculties, Gallery, Testimonials & PDF Reports)
   // ─────────────────────────────────────────────────────────────────────────────
   const fetchStaticCollections = useCallback((forceBust = false) => {
     if (!db) return;
 
     const collectionsToFetch = [
-      ['faculties', setFaculties, 150]
+      ['faculties',    setFaculties,    120],
+      ['gallery',      setGallery,      50],
+      ['testimonials', setTestimonials, 20],
+      ['pdfReports',   setPdfReports,   50]
     ];
 
     collectionsToFetch.forEach(([col, setter, max]) => {
@@ -98,7 +101,12 @@ export default function useAppData() {
       const q = query(collection(db, col), limit(max));
       getDocs(q)
         .then(snap => {
-          const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          const docs = snap.docs.map(d => {
+            const docData = d.data();
+            if (docData.description) docData.description = DOMPurify.sanitize(docData.description);
+            if (docData.content) docData.content = DOMPurify.sanitize(docData.content);
+            return { id: d.id, ...docData };
+          });
           docs.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
           setter(docs);
           setCache(col, docs);
@@ -116,21 +124,18 @@ export default function useAppData() {
   }, [fetchNavigation, fetchStaticCollections]);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 4. Real-Time High-Velocity Collections (Snapshots with DOMPurify sanitization)
+  // 4. Real-Time High-Velocity Collections (Focused Snapshots for Live Alerts)
   // ─────────────────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!db) return;
 
-    // Upgraded: Gallery, Hero Sliders, and Testimonials are now REAL-TIME!
+    // High-priority live collections that truly require instant real-time pushes
     const liveCols = [
-      ['notices',       setNotices,       40, 'createdAt', 'desc'],
-      ['announcements', setAnnouncements, 20, 'createdAt', 'desc'],
-      ['events',        setEvents,        30, 'createdAt', 'desc'],
+      ['notices',       setNotices,       30, 'createdAt', 'desc'],
+      ['announcements', setAnnouncements, 15, 'createdAt', 'desc'],
+      ['events',        setEvents,        25, 'createdAt', 'desc'],
       ['updates',       setUpdates,       15, 'createdAt', 'desc'],
-      ['sliderSlides',  setSliderSlides,  15, 'order',     'asc'],
-      ['gallery',       setGallery,       80, 'createdAt', 'desc'],
-      ['testimonials',  setTestimonials,  25, 'createdAt', 'desc'],
-      ['pdfReports',    setPdfReports,    80, 'createdAt', 'desc'],
+      ['sliderSlides',  setSliderSlides,  10, 'order',     'asc'],
     ];
 
     const unsubs = liveCols.map(([col, setter, max, sortField, sortDir]) => {
@@ -206,7 +211,7 @@ export default function useAppData() {
       if (!updatedCol || updatedCol === 'all' || updatedCol === 'navigation' || updatedCol === 'pages') {
         fetchNavigation(true);
       }
-      if (!updatedCol || updatedCol === 'all' || updatedCol === 'faculties' || updatedCol === 'pdfReports') {
+      if (!updatedCol || updatedCol === 'all' || updatedCol === 'faculties' || updatedCol === 'pdfReports' || updatedCol === 'gallery' || updatedCol === 'testimonials') {
         fetchStaticCollections(true);
       }
     }, () => {});
@@ -219,7 +224,7 @@ export default function useAppData() {
       if (!col || col === 'navigation' || col === 'pages') {
         fetchNavigation(true);
       }
-      if (!col || col === 'faculties' || col === 'pdfReports') {
+      if (!col || col === 'faculties' || col === 'pdfReports' || col === 'gallery' || col === 'testimonials') {
         fetchStaticCollections(true);
       }
     };

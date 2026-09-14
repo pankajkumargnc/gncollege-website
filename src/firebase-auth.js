@@ -83,54 +83,21 @@ export async function loginAdmin(usernameOrEmail, password) {
       }
     }
 
-    // 3. Fallback: If Firebase Email/Password is not enabled in Firebase Console (auth/operation-not-allowed)
-    // or auth configuration is missing/failing, use environment-configured admin credentials
-    const adminUser = (
-      import.meta.env.VITE_ADMIN_USER || 
-      import.meta.env.VITE_ADMIN_USERNAME || 
-      "admin"
-    ).toLowerCase();
-
-    const adminPass = 
-      import.meta.env.VITE_ADMIN_PASS || 
-      import.meta.env.VITE_ADMIN_PASSWORD || 
-      "admin123";
-    
-    const isUserMatch = 
-      cleanInput === adminUser || 
-      cleanInput === "admin" || 
-      AUTHORIZED_ADMIN_EMAILS.includes(targetEmail);
-
-    const isPassMatch = Boolean(adminPass && cleanPass === adminPass);
-
-    if (isUserMatch && isPassMatch) {
-      console.info("[FirebaseAuth] Authenticated via administrative credentials bridge.");
-      sessionStorage.removeItem('gnc_admin_auth');
-      sessionStorage.setItem('gnc_active_session', '1');
-      return {
-        uid: "gnc-admin-master-bridge",
-        email: targetEmail || "admin@gncollege.org",
-        displayName: "College Administrator",
-        isLocalBridge: true
-      };
-    }
-
-    if (isUserMatch && !isPassMatch) {
-      throw new Error("Invalid administrator password. Please verify credentials.");
-    }
-
-    // Friendly error messages
+    // Handle friendly error messages
     if (err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
-      throw new Error("Invalid password. Please verify your credentials.");
+      throw new Error("Invalid email/username or password. Please verify your credentials.");
     }
     if (err.code === "auth/too-many-requests") {
-      throw new Error("Access temporarily blocked due to many failed attempts. Try again later.");
+      throw new Error("Access temporarily blocked due to multiple failed attempts. Please try again later.");
     }
     if (err.code === "auth/network-request-failed") {
-      throw new Error("Network connection error. Check your internet.");
+      throw new Error("Network connection error. Please check your internet connection.");
+    }
+    if (err.code === "auth/operation-not-allowed") {
+      throw new Error("Email/Password sign-in is not enabled in the Firebase Console. Please enable it under Authentication > Sign-in method.");
     }
 
-    throw new Error(err.message || "Authentication failed.");
+    throw new Error(err.message || "Authentication failed. Please check credentials.");
   }
 }
 

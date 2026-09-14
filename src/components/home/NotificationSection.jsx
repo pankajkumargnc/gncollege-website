@@ -3,8 +3,9 @@ import React, { useRef, useEffect, useMemo, useState, lazy, Suspense } from 'rea
 import { Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { COLORS } from '../../styles/colors';
-import PDFModal from '../PDFModal';
 import { useDriveDocs } from '../../hooks/useDriveDocs';
+
+const PDFModal = lazy(() => import('../PDFModal'));
 
 const N = COLORS.navy || '#0f2347';
 const G = COLORS.gold || '#f4a023';

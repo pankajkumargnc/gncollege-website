@@ -1,6 +1,93 @@
 // src/components/home/AdmissionTimeline.jsx
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import confetti from 'canvas-confetti';
 import { COLORS } from '../../styles/colors';
+
+/**
+ * 🎆 Grand Admission Celebration Effect (Birthday party style flayers & crackers)
+ * Launches multi-angle colorful flayers, crackers, and golden stars to celebrate GNC admission!
+ */
+function launchAdmissionCelebration(cardElement) {
+  try {
+    if (typeof window === 'undefined') return;
+    const isReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (isReduced) return;
+
+    // Party colors: GNC Gold, Amber, Emerald, Royal Navy, Ruby Red, Violet, Cyan, Hot Pink, Pure White
+    const flayerColors = ['#f4a023', '#fbbf24', '#0f2347', '#10b981', '#ef4444', '#8b5cf6', '#3b82f6', '#ec4899', '#06b6d4', '#ffffff'];
+
+    // 1. Dual Corner Birthday Party Poppers (Flayers shooting inward from left & right)
+    confetti({
+      particleCount: 75,
+      angle: 60,
+      spread: 75,
+      origin: { x: 0.04, y: 0.82 },
+      colors: flayerColors,
+      shapes: ['square', 'circle'],
+      scalar: 1.3,
+      drift: 0.08,
+      gravity: 0.85,
+      ticks: 280,
+    });
+
+    confetti({
+      particleCount: 75,
+      angle: 120,
+      spread: 75,
+      origin: { x: 0.96, y: 0.82 },
+      colors: flayerColors,
+      shapes: ['square', 'circle'],
+      scalar: 1.3,
+      drift: -0.08,
+      gravity: 0.85,
+      ticks: 280,
+    });
+
+    // 2. Central Firework Cracker Burst directly over the Step 5 card
+    let burstX = 0.88;
+    let burstY = 0.58;
+    if (cardElement) {
+      const rect = cardElement.getBoundingClientRect();
+      burstX = (rect.left + rect.width / 2) / window.innerWidth;
+      burstY = (rect.top + rect.height / 3) / window.innerHeight;
+      burstX = Math.max(0.08, Math.min(0.92, burstX));
+      burstY = Math.max(0.15, Math.min(0.85, burstY));
+    }
+
+    // Step 5 center cracker fireworks burst
+    setTimeout(() => {
+      confetti({
+        particleCount: 90,
+        spread: 120,
+        startVelocity: 44,
+        origin: { x: burstX, y: burstY },
+        colors: ['#ffd700', '#f59e0b', '#fbbf24', '#ffffff', '#ec4899', '#3b82f6', '#10b981'],
+        shapes: ['star', 'circle'],
+        scalar: 1.4,
+        ticks: 240,
+      });
+    }, 180);
+
+    // 3. Ribbon Streamers / Floating Flayers (Slow-drifting birthday streamers)
+    setTimeout(() => {
+      confetti({
+        particleCount: 50,
+        angle: 90,
+        spread: 140,
+        startVelocity: 32,
+        origin: { x: burstX, y: Math.max(0.1, burstY - 0.12) },
+        colors: flayerColors,
+        shapes: ['square'],
+        scalar: 1.7,
+        decay: 0.92,
+        gravity: 0.65,
+        ticks: 300,
+      });
+    }, 450);
+  } catch (err) {
+    console.warn('Admission celebration confetti effect error:', err);
+  }
+}
 
 const N = COLORS.navy;
 const G = COLORS.gold;
@@ -573,6 +660,82 @@ const CSS = `
     color: rgba(255, 255, 255, 0.8);
   }
 
+  /* ═════════════════════════════════════════════════════════
+     🎉 STEP 05 CELEBRATION (Crackers & Birthday Party Flayers)
+  ═════════════════════════════════════════════════════════ */
+  .atl-card.celebrate.active .atl-card-inner {
+    border-color: #fbbf24 !important;
+    background: linear-gradient(145deg, rgba(245, 158, 11, 0.24), rgba(251, 191, 36, 0.16), rgba(16, 185, 129, 0.14)) !important;
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.5), 0 14px 36px rgba(0, 0, 0, 0.55) !important;
+    animation: atl-party-pulse 1.6s ease-in-out infinite alternate;
+  }
+
+  @keyframes atl-party-pulse {
+    0% {
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.4), 0 8px 24px rgba(0, 0, 0, 0.4);
+      transform: translateY(-8px) scale(1.02);
+    }
+    100% {
+      box-shadow: 0 0 50px rgba(251, 191, 36, 0.75), 0 16px 42px rgba(245, 158, 11, 0.35);
+      transform: translateY(-12px) scale(1.045);
+    }
+  }
+
+  /* Celebratory Party Popper Icon Bounce */
+  .atl-card.celebrate.active .atl-icon-ring {
+    animation: atl-popper-bounce 0.8s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite alternate;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.35), rgba(245, 158, 11, 0.25)) !important;
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 36px rgba(251, 191, 36, 0.8) !important;
+  }
+
+  @keyframes atl-popper-bounce {
+    0% { transform: scale(1.12) rotate(-8deg); }
+    100% { transform: scale(1.26) rotate(8deg); }
+  }
+
+  /* Floating Crackers Sparkles */
+  .atl-celebrate-sparks {
+    position: absolute;
+    top: -14px;
+    right: 14px;
+    font-size: 20px;
+    animation: atl-sparkle-spin 1.2s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  @keyframes atl-sparkle-spin {
+    0% { transform: scale(0.85) rotate(0deg); opacity: 0.7; }
+    50% { transform: scale(1.25) rotate(18deg); opacity: 1; filter: drop-shadow(0 0 10px #fbbf24); }
+    100% { transform: scale(0.85) rotate(0deg); opacity: 0.7; }
+  }
+
+  /* Party Celebration Shimmer Tag */
+  .atl-celebrate-banner {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3.5px 12px;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    color: #0b1120;
+    background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);
+    background-size: 200% auto;
+    animation: atl-shimmer 2s linear infinite;
+    box-shadow: 0 0 14px rgba(251, 191, 36, 0.65);
+    margin-top: 4px;
+    margin-bottom: 6px;
+  }
+
+  @keyframes atl-shimmer {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
   /* ── CTA Button ── */
   .atl-cta-wrap {
     display: flex;
@@ -1011,6 +1174,14 @@ export default function AdmissionTimeline() {
   const [isPaused, setIsPaused] = useState(false);
   const [isRewinding, setIsRewinding] = useState(false);
   const resumeTimerRef = useRef(null);
+  const step5CardRef = useRef(null);
+
+  // 🎆 CRACKERS & FLAYERS CELEBRATION TRIGGER WHEN STEP 5 (FINAL ADMISSION) BECOMES ACTIVE
+  useEffect(() => {
+    if (activeStep === STEPS.length - 1 && cardsVis && !isRewinding) {
+      launchAdmissionCelebration(step5CardRef.current);
+    }
+  }, [activeStep, cardsVis, isRewinding]);
 
   // Continuous auto-advancing loop across all 5 steps:
   // 0 -> 1 -> 2 -> 3 -> 4 -> 0
@@ -1018,7 +1189,7 @@ export default function AdmissionTimeline() {
     if (!cardsVis || isPaused) return;
 
     // Step 5 (Final Admission) stays longer to celebrate full completion
-    const stepDuration = activeStep === STEPS.length - 1 ? 3800 : 2800;
+    const stepDuration = activeStep === STEPS.length - 1 ? 4200 : 2800;
 
     const timer = setTimeout(() => {
       if (activeStep === STEPS.length - 1) {
@@ -1040,6 +1211,9 @@ export default function AdmissionTimeline() {
   const handleStepClick = useCallback((index) => {
     setActiveStep(index);
     setIsPaused(true);
+    if (index === STEPS.length - 1) {
+      launchAdmissionCelebration(step5CardRef.current);
+    }
     if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
     resumeTimerRef.current = setTimeout(() => {
       setIsPaused(false);
@@ -1158,12 +1332,15 @@ export default function AdmissionTimeline() {
               {STEPS.map((step, i) => {
                 const isPassed = i < activeStep;
                 const isActive = i === activeStep;
+                const isStep5 = step.id === 5;
                 const stateClass = isActive ? 'active' : isPassed ? 'passed' : 'upcoming';
+                const celebrateClass = isStep5 && isActive ? ' celebrate' : '';
 
                 return (
                   <div
                     key={step.id}
-                    className={`atl-card ${stateClass}${cardsVis ? ' vis' : ''}`}
+                    ref={isStep5 ? step5CardRef : null}
+                    className={`atl-card ${stateClass}${celebrateClass}${cardsVis ? ' vis' : ''}`}
                     style={{ transitionDelay: cardsVis ? `${0.1 + i * 0.08}s` : '0s' }}
                     onClick={() => handleStepClick(i)}
                     role="button"
@@ -1186,6 +1363,11 @@ export default function AdmissionTimeline() {
                     </div>
 
                     <div className="atl-card-inner">
+                      {isStep5 && isActive && (
+                        <div className="atl-celebrate-sparks" aria-hidden="true" title="Celebration!">
+                          ✨ 🎊
+                        </div>
+                      )}
                       <div className="atl-icon-wrap">
                         <div className="atl-icon-glow" />
                         <div className="atl-icon-ring">{step.icon}</div>
@@ -1194,6 +1376,11 @@ export default function AdmissionTimeline() {
                         <span className="atl-step-num">
                           {isPassed ? `✓ ${step.tag}` : isActive ? `● ${step.tag} Active` : step.tag}
                         </span>
+                        {isStep5 && isActive && (
+                          <div className="atl-celebrate-banner">
+                            🎉 Welcome to GNC!
+                          </div>
+                        )}
                         <h3 className="atl-step-title">{step.title}</h3>
                         <div className="atl-step-subtitle">{step.subtitle}</div>
                         <p className="atl-step-desc">{step.desc}</p>

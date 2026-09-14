@@ -13,10 +13,11 @@ import AppRoutes from "./components/AppRoutes";
 import Ticker from "./components/Ticker";
 import WhatsAppButton from "./components/WhatsAppButton";
 import BackToTop from "./components/BackToTop";
-import AIChatbot from "./components/AIChatbot";
 import UniversalSearch from "./components/UniversalSearch";
 import AlertBanner from "./components/AlertBanner";
 import FloatingQRButton from "./components/FloatingQRButton";
+
+const AIChatbot = lazy(() => import("./components/AIChatbot"));
 
 // ── Data & Styles ──
 import { navLinks as staticNavLinks } from "./data/db";

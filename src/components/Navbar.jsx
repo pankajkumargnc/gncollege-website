@@ -83,7 +83,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
   const [openL3, setOpenL3] = useState(null)
   const closeTimer = useRef(null)
 
-  const [isMobile,  setIsMobile]  = useState(window.innerWidth < 1250)
+  const [isMobile,  setIsMobile]  = useState(window.innerWidth < 1024)
   const [menuOpen,  setMenuOpen]  = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   // ── Dark mode detection (reads html[data-theme]) ──
@@ -93,8 +93,8 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 1250)
-      if (window.innerWidth >= 1250) setMenuOpen(false)
+      setIsMobile(window.innerWidth < 1024)
+      if (window.innerWidth >= 1024) setMenuOpen(false)
     }
     function handleScroll() {
       setIsScrolled(window.scrollY > 40)
@@ -498,11 +498,11 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
               <div className="shimmering-title" style={{
                 margin: '0 0 5px 0',
                 // ✅ FLUID TYPE HERE FOR EXTREME RESPONSIVENESS
-                fontSize: isMobile ? 'clamp(11px, 3.5vw, 14px)' : 'clamp(16px, 1.8vw, 21.5px)',
+                fontSize: isMobile ? 'clamp(11px, 3.5vw, 14px)' : 'clamp(15px, 1.6vw, 21.5px)',
                 fontWeight: '900',
                 fontFamily: "'Plus Jakarta Sans', Georgia, serif",
                 whiteSpace: 'nowrap',
-                letterSpacing: isMobile ? '0px' : '6.9px',
+                letterSpacing: isMobile ? '0px' : 'clamp(1.5px, 0.35vw, 6.9px)',
                 textAlign: 'left',
                 lineHeight: '1.1',
               }}>
@@ -577,7 +577,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
             backdropFilter: isMobile && isScrolled ? 'blur(16px)' : 'none',
             
             padding: isMobile ? '10px 20px 20px' : 0,
-            gap: isMobile ? 10 : '14px',
+            gap: isMobile ? 10 : 'clamp(6px, 0.75vw, 14px)',
             boxShadow: isMobile && menuOpen ? '0 10px 20px rgba(0,0,0,.15)' : 'none',
             maxHeight: isMobile ? '80vh' : 'auto',
             overflowY: isMobile ? 'auto' : 'visible',

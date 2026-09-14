@@ -8,6 +8,8 @@ import imageCompression from 'browser-image-compression';
 import { useDriveDocs } from '../hooks/useDriveDocs';
 import { COLORS } from '../styles/colors';
 import { resolveUrl } from '../utils/resolver';
+import { validateDocumentFile } from '../utils/documentValidator';
+import { optimizeDocumentOrImage, DPI_PROFILES } from '../utils/pdfOptimizer';
 
 // 🛑 CRASH FIX: Preserving legacy exports so AdminPanel doesn't crash on import
 export let imgbbAPIKey = '';
@@ -31,11 +33,15 @@ export default function MediaPicker({
   const isPdf   = type === 'pdf'   || type === 'any';
 
   // ── SMART DEFAULT TABS ──
-  const defaultTab = driveFolderId ? 'drive' : (isImage ? 'upload' : 'url');
+  const defaultTab = driveFolderId ? 'drive' : (isImage || isPdf ? 'upload' : 'url');
   const [mode, setMode] = useState(defaultTab);
   const [tempUrl, setTempUrl] = useState(value || '');
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [dpiMode, setDpiMode] = useState('web'); // 'web' (150 DPI) or 'print' (300 DPI)
+  const [validationInfo, setValidationInfo] = useState(null);
+  const [compressionStats, setCompressionStats] = useState(null);
+  const [processingStatus, setProcessingStatus] = useState('');
 
   useEffect(() => {
     setTempUrl(value || '');
@@ -64,7 +70,7 @@ export default function MediaPicker({
   // ── DYNAMIC NAVIGATION TABS ──
   const tabs = [
     ...(driveFolderId ? [{ id: 'drive', icon: '☁️', label: 'Google Drive' }] : []),
-    ...(isImage ? [{ id: 'upload', icon: '📤', label: 'Upload' }] : []),
+    { id: 'upload', icon: '📤', label: isPdf && !isImage ? 'Upload PDF' : 'Upload' },
     { id: 'local', icon: '🗂️', label: 'Local (Public)' },
     { id: 'url', icon: '🔗', label: 'Direct URL' },
   ];
@@ -214,136 +220,246 @@ export default function MediaPicker({
           </div>
         )}
 
-        {/* ═════════ 3. UPLOAD MODE (Ultra-Resilient Multi-Engine) ═════════ */}
+        {/* ═════════ 3. UPLOAD MODE (Enterprise DPI Engine + Magic Byte Security) ═════════ */}
         {mode === 'upload' && (
           <div style={S.panel}>
-             <p style={S.hint}>📤 Select a file from your device (Auto-compressed & Instant Cloud Attachment)</p>
-             <div style={S.dropZone}>
-                <div style={{ fontSize: '24px', marginBottom: '8px' }}>📂</div>
-                <div style={{ fontWeight: 700, color: NAVY }}>
-                  {uploading ? `Processing... ${uploadProgress}%` : 'Click to select a file'}
-                </div>
-                <input 
-                  type="file" 
-                  accept={isImage ? "image/*" : (isPdf ? "application/pdf" : "*/*")}
-                  style={S.hiddenFileInput}
+            {/* ── DPI RESOLUTION SELECTOR ── */}
+            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 800, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  🎯 Document / Image Quality Preset (DPI)
+                </span>
+                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>
+                  Active: {DPI_PROFILES[dpiMode]?.badgeText}
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                {/* 1. Web-Optimized (150 DPI) */}
+                <button
+                  type="button"
                   disabled={uploading}
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    setUploading(true);
-                    setUploadProgress(20);
+                  onClick={() => setDpiMode('web')}
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: dpiMode === 'web' ? `2px solid ${GOLD}` : '1.5px solid #cbd5e1',
+                    background: dpiMode === 'web' ? '#fffbeb' : '#ffffff',
+                    cursor: uploading ? 'not-allowed' : 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <div style={{ fontWeight: 800, fontSize: '12.5px', color: NAVY, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    📱 Web-Optimized
+                    <span style={{ fontSize: '10px', background: '#e0f2fe', color: '#0369a1', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                      72–150 DPI
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#64748b', marginTop: '3px' }}>
+                    Screen reading, notices and circulars. Smallest file size (under 1–2 MB).
+                  </div>
+                </button>
+
+                {/* 2. Print-Ready (300 DPI) */}
+                <button
+                  type="button"
+                  disabled={uploading}
+                  onClick={() => setDpiMode('print')}
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: dpiMode === 'print' ? `2px solid ${GOLD}` : '1.5px solid #cbd5e1',
+                    background: dpiMode === 'print' ? '#fffbeb' : '#ffffff',
+                    cursor: uploading ? 'not-allowed' : 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <div style={{ fontWeight: 800, fontSize: '12.5px', color: NAVY, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    🖨️ Print-Ready
+                    <span style={{ fontSize: '10px', background: '#dcfce7', color: '#15803d', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                      300 DPI
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#64748b', marginTop: '3px' }}>
+                    Admit cards, certificates & reports. Ultra-crisp vector printing.
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* ── DROP ZONE & FILE INPUT ── */}
+            <div style={S.dropZone}>
+              <div style={{ fontSize: '28px', marginBottom: '6px' }}>
+                {uploading ? '⚙️' : (isPdf && !isImage ? '📄' : '📤')}
+              </div>
+              <div style={{ fontWeight: 700, color: NAVY, fontSize: '14px' }}>
+                {uploading ? (processingStatus || `Processing... ${uploadProgress}%`) : `Click to select ${isPdf && !isImage ? 'PDF / Document' : 'file'}`}
+              </div>
+              <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '4px' }}>
+                Supported: {isPdf ? '.pdf, .docx, .xlsx' : 'Images (.jpg, .png, .webp)'} • Limit: {dpiMode === 'print' ? '15 MB (300 DPI)' : '5 MB (150 DPI)'}
+              </div>
+
+              <input 
+                type="file" 
+                accept={isImage && !isPdf ? "image/*" : (isPdf && !isImage ? ".pdf,application/pdf" : ".pdf,image/*,.docx,.xlsx")}
+                style={S.hiddenFileInput}
+                disabled={uploading}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  setUploading(true);
+                  setUploadProgress(10);
+                  setProcessingStatus('Inspecting security signature...');
+                  setValidationInfo(null);
+                  setCompressionStats(null);
+
+                  try {
+                    // 1. Binary Magic Bytes & Security Validation
+                    const validation = await validateDocumentFile(file, {
+                      dpiMode,
+                      expectedType: type,
+                    });
+
+                    if (!validation.isValid) {
+                      toast.error(validation.error || 'Upload validation failed');
+                      setUploading(false);
+                      setProcessingStatus('');
+                      return;
+                    }
+
+                    if (validation.warning) {
+                      toast(validation.warning, { icon: '⚠️', duration: 4000 });
+                    }
+
+                    setValidationInfo(validation);
+                    setUploadProgress(25);
+
+                    // 2. DPI Optimization & Compression Pipeline
+                    setProcessingStatus(`Optimizing for ${DPI_PROFILES[dpiMode]?.name || 'Web'}...`);
+                    const optResult = await optimizeDocumentOrImage(file, dpiMode, (pct, status) => {
+                      setUploadProgress(Math.min(75, 25 + Math.round(pct * 0.5)));
+                      setProcessingStatus(status);
+                    });
+
+                    const fileToUpload = optResult.file;
+                    setCompressionStats(optResult.stats);
+
+                    if (optResult.stats?.reductionPercent > 0) {
+                      toast.success(`⚡ Compressed: ${optResult.stats.originalSizeMB}MB → ${optResult.stats.optimizedSizeMB}MB (-${optResult.stats.reductionPercent}%)!`);
+                    }
+
+                    // 3. Cloud Storage Upload (Firebase Storage)
+                    setProcessingStatus('Uploading securely to Cloud Storage...');
+                    setUploadProgress(80);
 
                     try {
-                      let fileToUpload = file;
-                      if (file.type?.startsWith('image/')) {
-                        try {
-                          const origMB = (file.size / (1024 * 1024)).toFixed(2);
-                          toast.loading('⚡ Optimizing image size...', { id: 'img-compress' });
-                          const compressed = await imageCompression(file, {
-                            maxSizeMB: 0.15,
-                            maxWidthOrHeight: 1200,
-                            useWebWorker: true,
-                          });
-                          fileToUpload = compressed;
-                          const newKB = (compressed.size / 1024).toFixed(0);
-                          toast.success(`⚡ Compressed: ${origMB}MB → ${newKB}KB!`, { id: 'img-compress' });
-                        } catch (compErr) {
-                          console.warn('Compression failed, using original:', compErr);
-                          toast.dismiss('img-compress');
-                        }
-                      }
+                      const { getStorage, ref, uploadBytesResumable, getDownloadURL } = await import('firebase/storage');
+                      const storage = getStorage();
+                      const isDocFile = fileToUpload.name?.toLowerCase().endsWith('.pdf') || 
+                                        fileToUpload.type === 'application/pdf' || 
+                                        fileToUpload.name?.toLowerCase().endsWith('.docx');
+                      const subFolder = isDocFile ? 'documents' : 'images';
+                      const sanitizedName = fileToUpload.name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9._-]/g, '');
+                      const fileRef = ref(storage, `${subFolder}/${Date.now()}_${sanitizedName}`);
 
-                      // Engine 1: ImgBB (if available for images)
-                      const imgKey = window.GN_IMGBB_KEY || imgbbAPIKey;
-                      if (fileToUpload.type?.startsWith('image/') && imgKey) {
-                        try {
-                          setUploadProgress(50);
-                          const fd = new FormData();
-                          fd.append('image', fileToUpload);
-                          const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgKey}`, {
-                            method: 'POST',
-                            body: fd
-                          });
-                          const json = await res.json();
-                          if (json?.data?.url) {
-                            onChange(json.data.url);
-                            toast.success('Uploaded to Cloud successfully! 🖼️');
-                            setUploading(false);
-                            return;
-                          }
-                        } catch (imgbbErr) {
-                          console.warn('ImgBB upload error, attempting fallback:', imgbbErr);
-                        }
-                      }
+                      const uploadMetadata = {
+                        contentType: fileToUpload.type || (isDocFile ? 'application/pdf' : 'image/jpeg'),
+                        customMetadata: {
+                          dpiMode,
+                          dpi: String(DPI_PROFILES[dpiMode]?.targetDpi || 150),
+                          originalName: file.name,
+                          originalSizeMB: String(optResult.stats?.originalSizeMB || ''),
+                          optimizedSizeMB: String(optResult.stats?.optimizedSizeMB || ''),
+                          savingsPercent: String(optResult.stats?.reductionPercent || '0'),
+                        },
+                      };
 
-                      // Engine 2: Firebase Storage
-                      try {
-                        const { getStorage, ref, uploadBytesResumable, getDownloadURL } = await import('firebase/storage');
-                        const storage = getStorage();
-                        const subFolder = isPdf ? 'documents' : 'images';
-                        const fileRef = ref(storage, `${subFolder}/${Date.now()}_${fileToUpload.name.replace(/\s+/g, '_')}`);
-                        const uploadTask = uploadBytesResumable(fileRef, fileToUpload);
+                      const uploadTask = uploadBytesResumable(fileRef, fileToUpload, uploadMetadata);
 
-                        uploadTask.on('state_changed', 
-                          (snapshot) => {
-                            const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                            setUploadProgress(progress);
-                          }, 
-                          async (error) => {
-                            console.warn('Storage task warning, falling back to base64 Data URL:', error);
-                            // Fallback to Data URL for images
-                            if (fileToUpload.type?.startsWith('image/')) {
-                              const reader = new FileReader();
-                              reader.onload = () => {
-                                onChange(reader.result);
-                                toast.success('Image optimized and attached! ✅');
-                                setUploading(false);
-                              };
-                              reader.readAsDataURL(fileToUpload);
-                            } else {
-                              toast.error('Upload failed: ' + error.message);
-                              setUploading(false);
-                            }
-                          }, 
-                          async () => {
-                            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                            onChange(downloadURL);
-                            toast.success('Attached successfully! ✅');
-                            setUploading(false);
-                          }
-                        );
-                        return;
-                      } catch (storageErr) {
-                        console.warn('Firebase Storage init failed, using inline Data URL fallback:', storageErr);
-                      }
-
-                      // Engine 3: Local Resilient Data URL Fallback for Images
-                      if (fileToUpload.type?.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                          onChange(reader.result);
-                          toast.success('Cover image ready & attached! 🎉');
+                      uploadTask.on(
+                        'state_changed',
+                        (snapshot) => {
+                          const progress = 80 + Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 20);
+                          setUploadProgress(Math.min(99, progress));
+                        },
+                        async (storageErr) => {
+                          console.warn('Firebase Storage upload error:', storageErr);
+                          toast.error(`Upload error: ${storageErr.message}`);
                           setUploading(false);
-                        };
-                        reader.readAsDataURL(fileToUpload);
-                      } else {
-                        toast.error('Could not upload PDF. Please select from Google Drive or paste direct link.');
-                        setUploading(false);
-                      }
-                    } catch (err) {
-                      console.error('File process error:', err);
-                      toast.error('Processing failed: ' + err.message);
+                          setProcessingStatus('');
+                        },
+                        async () => {
+                          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                          onChange(downloadURL);
+                          setUploadProgress(100);
+                          setProcessingStatus('Upload complete!');
+                          toast.success(`${isDocFile ? 'Document' : 'Image'} uploaded & attached! ✅`);
+                          setUploading(false);
+                        }
+                      );
+                      return;
+                    } catch (storageInitErr) {
+                      console.warn('Firebase Storage init error, attempting direct URL fallback:', storageInitErr);
+                      toast.error('Firebase Storage unavailable: ' + storageInitErr.message);
                       setUploading(false);
+                      setProcessingStatus('');
                     }
-                  }}
-                />
-             </div>
-             {uploading && (
-               <div style={{ marginTop: 10, width: '100%', background: '#e2e8f0', borderRadius: 6, overflow: 'hidden', height: 6 }}>
-                 <div style={{ width: `${uploadProgress}%`, background: GOLD, height: '100%', transition: 'width 0.3s' }} />
-               </div>
-             )}
+                  } catch (err) {
+                    console.error('File process error:', err);
+                    toast.error('File processing error: ' + err.message);
+                    setUploading(false);
+                    setProcessingStatus('');
+                  }
+                }}
+              />
+            </div>
+
+            {/* ── PROGRESS BAR ── */}
+            {uploading && (
+              <div style={{ marginTop: 10, width: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: 4 }}>
+                  <span>{processingStatus || 'Processing file...'}</span>
+                  <span>{uploadProgress}%</span>
+                </div>
+                <div style={{ width: '100%', background: '#e2e8f0', borderRadius: 6, overflow: 'hidden', height: 7 }}>
+                  <div style={{ width: `${uploadProgress}%`, background: GOLD, height: '100%', transition: 'width 0.3s ease' }} />
+                </div>
+              </div>
+            )}
+
+            {/* ── SECURITY VALIDATION & COMPRESSION SUMMARY CARD ── */}
+            {(validationInfo || compressionStats) && (
+              <div style={{
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                borderRadius: '8px',
+                padding: '10px 14px',
+                fontSize: '12px',
+                color: '#166534',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px'
+              }}>
+                {validationInfo?.magicVerified && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}>
+                    <span>🛡️</span>
+                    <span>Binary Signature Verified ({validationInfo.fileType.toUpperCase()}) • Authenticated Safe File</span>
+                  </div>
+                )}
+                {compressionStats && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11.5px', color: '#15803d' }}>
+                    <span>📊</span>
+                    <span>
+                      Size: <strong>{compressionStats.originalSizeMB} MB</strong> → <strong>{compressionStats.optimizedSizeMB} MB</strong>
+                      {compressionStats.reductionPercent > 0 ? ` (${compressionStats.reductionPercent}% reduction @ ${compressionStats.dpi} DPI)` : ` (${compressionStats.profile})`}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 

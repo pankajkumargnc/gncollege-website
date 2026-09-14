@@ -2,9 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ErrorBoundary from "./ErrorBoundary";
 import HomePage from "../pages/HomePage";
-import Contact from "../pages/Contact";
 import VideoLibrary from '../pages/VideoLibrary';
-import AdminLogin from "./AdminLogin";
 import { Newspaper, ClipboardList, BarChart3, BookOpen } from "lucide-react";
 
 // ── 🛡️ SMART LAZY LOADER ─────────────────────────────────────────────────────
@@ -28,6 +26,8 @@ const safeLazy = (importFunction) => {
 };
 
 // ── Lazy pages ───────────────────────────────────────────────────────────────
+const Contact = safeLazy(() => import("../pages/Contact"));
+const AdminLogin = safeLazy(() => import("./AdminLogin"));
 const StaffPage = safeLazy(() => import("../pages/StaffPage"));
 const DepartmentPage = safeLazy(() => import("../pages/DepartmentPage"));
 const GalleryPage = safeLazy(() => import("../pages/GalleryPage"));
@@ -273,7 +273,9 @@ export default function AppRoutes({
                 adminAuthed ? (
                     <R el={<AdminPanel notices={notices} announcements={announcements} events={events} gallery={gallery} faculties={faculties} onClose={handleAdminLogout} />} />
                 ) : (
-                    <AdminLogin onSuccess={handleAdminLogin} onClose={() => { window.location.hash = "/"; }} />
+                    <Suspense fallback={<PageLoader />}>
+                        <AdminLogin onSuccess={handleAdminLogin} onClose={() => { window.location.hash = "/"; }} />
+                    </Suspense>
                 )
             } />
         </Routes>

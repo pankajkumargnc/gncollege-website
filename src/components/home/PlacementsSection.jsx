@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { collection, query, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { COLORS } from '../../styles/colors';
-import PlacementAnalytics from './PlacementAnalytics';
+const PlacementAnalytics = React.lazy(() => import('./PlacementAnalytics'));
 
 const N = COLORS.navy;
 const G = COLORS.gold;
@@ -242,7 +242,9 @@ export default function PlacementsSection() {
         )}
 
         {/* Academic Placement Analytics Chart */}
-        <PlacementAnalytics />
+        <React.Suspense fallback={<div style={{ minHeight: 120 }} />}>
+          <PlacementAnalytics />
+        </React.Suspense>
 
         <div className="wof-foot">
             <Link to="/academics/placements" className="wof-btn">

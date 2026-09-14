@@ -182,7 +182,7 @@ function PublicationDocList({ keyword }) {
                           {d.title}
                         </h3>
                         {d.description && (
-                          <p style={{ fontSize: 12.5, color: '#64748b', margin: 0, lineHeight: 1.5, textAlign: 'justify', textJustify: 'inter-word' }}>
+                          <p style={{ fontSize: 13, color: '#475569', margin: 0, lineHeight: 1.55, textAlign: 'left', textWrap: 'pretty' }}>
                             {d.description}
                           </p>
                         )}
@@ -548,8 +548,8 @@ function MagazineCardItem({ mag, idx, onShareWa }) {
             WebkitLineClamp: 3,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
-            textAlign: 'justify',
-            textJustify: 'inter-word'
+            textAlign: 'left',
+            textWrap: 'pretty'
           }}>
             {mag.description || 'Official digital publication of Guru Nanak College, Dhanbad featuring student articles, departmental achievements, faculty research, and campus memories.'}
           </p>

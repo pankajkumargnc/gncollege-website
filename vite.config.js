@@ -100,12 +100,26 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes("node_modules")) {
-            if (id.includes("firebase")) return "vendor-firebase";
-            if (id.includes("react") || id.includes("react-dom") || id.includes("react-router")) return "vendor-react";
-            if (id.includes("jodit")) return "vendor-jodit";
-            if (id.includes("recharts") || id.includes("d3")) return "vendor-charts";
-            if (id.includes("pdfjs-dist") || id.includes("react-pdf")) return "vendor-pdf";
+          const norm = id.replace(/\\/g, '/');
+          if (norm.includes('node_modules')) {
+            if (norm.includes('/firebase/') || norm.includes('/@firebase/')) return 'vendor-firebase';
+            if (
+              norm.includes('/node_modules/react/') ||
+              norm.includes('/node_modules/react-dom/') ||
+              norm.includes('/node_modules/react-router/') ||
+              norm.includes('/node_modules/react-router-dom/') ||
+              norm.includes('/node_modules/scheduler/')
+            ) {
+              return 'vendor-react';
+            }
+            if (norm.includes('jodit')) return 'vendor-jodit';
+            if (norm.includes('xlsx')) return 'vendor-excel';
+            if (norm.includes('pdfjs-dist') || norm.includes('react-pdf') || norm.includes('pdf-lib')) return 'vendor-pdf';
+            if (norm.includes('recharts') || norm.includes('/d3-') || norm.includes('/d3/')) return 'vendor-charts';
+            if (norm.includes('apexcharts')) return 'vendor-apexcharts';
+            if (norm.includes('leaflet')) return 'vendor-leaflet';
+            if (norm.includes('@photo-sphere-viewer')) return 'vendor-360tour';
+            if (norm.includes('axe-core')) return 'vendor-axe';
           }
         },
       },
