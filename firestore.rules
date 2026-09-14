@@ -30,9 +30,16 @@ service cloud.firestore {
     match /campus_gallery/{docId}   { allow read: if true; allow write: if isAdmin(); }
     match /gb_meetings/{docId}      { allow read: if true; allow write: if isAdmin(); }
     match /staff_council/{docId}    { allow read: if true; allow write: if isAdmin(); }
+    match /pageContent/{docId}      { allow read: if true; allow write: if isAdmin(); }
+    match /push_broadcasts/{docId}  { allow read, write: if isAdmin(); }
+    match /polls/{docId}            { allow read: if true; allow update: if true; allow create, delete: if isAdmin(); }
+    match /site_visits/{docId}      { allow read, write: if true; }
+    match /site_traffic/{docId}     { allow read, write: if true; }
+    match /counters/{docId}         { allow read: if true; allow write: if true; }
     match /settings/{settingId}     { allow read: if true; allow write: if isAdmin(); }
     match /adminLogs/{docId}        { allow read, write, create: if isAdmin(); }
     match /_sysTest/{docId}         { allow read, write, delete: if isAdmin(); }
+    match /_systemTest/{docId}      { allow read, write, delete: if isAdmin(); }
     match /{document=**}            { allow read, write: if false; }
   }
 }

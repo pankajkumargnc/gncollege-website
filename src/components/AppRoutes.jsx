@@ -45,6 +45,8 @@ const RegulationsPage = safeLazy(() => import("../pages/RegulationsPage"));
 const SikhHeritagePage = safeLazy(() => import("../pages/SikhHeritagePage"));
 const ScholarshipsPage = safeLazy(() => import("../pages/ScholarshipsPage"));
 const AlumniWall = safeLazy(() => import("../pages/AlumniWall"));
+const PrivacyPolicy = safeLazy(() => import("../pages/LegalPages").then((m) => ({ default: m.PrivacyPolicy })));
+const TermsOfService = safeLazy(() => import("../pages/LegalPages").then((m) => ({ default: m.TermsOfService })));
 
 // ── Named export lazy helpers ────────────────────────────────────────────────
 const LazyAbout = (n) => safeLazy(() => import("../pages/AboutPages").then((m) => ({ default: m[n] })));
@@ -69,6 +71,7 @@ const PlacementCell = LazyAbout("PlacementCell");
 const RusaCell = LazyAbout("RusaCell");
 const GoverningBody = LazyAbout("GoverningBody");
 const StaffCouncil = LazyAbout("StaffCouncil");
+const AuditReport = LazyAbout("AuditReport");
 
 const IqacPage = LazyAcademics("IqacPage");
 const CourseOffered = LazyAcademics("CourseOffered");
@@ -176,6 +179,7 @@ export default function AppRoutes({
             <Route path="/about-us/various-committees/placement" element={<R el={<PlacementCell />} />} />
             <Route path="/about-us/various-committees/rusa" element={<R el={<RusaCell />} />} />
             <Route path="/about-us/college-staff/:staffType" element={<R el={<StaffPage faculties={faculties} />} />} />
+            <Route path="/about-us/audit-report" element={<R el={<AuditReport />} />} />
             
             {/* Regulations */}
             <Route path="/about-us/regulations" element={<R el={<RegulationsPage />} />} />
@@ -190,9 +194,9 @@ export default function AppRoutes({
             <Route path="/about-us/regulations/minority-exemption" element={<R el={<EmbeddedPDFPage title="Minority Exemption & Quota" subtitle="UGC Guidelines & Supreme Court" pdfUrl="https://drive.google.com/file/d/1zBn3_dL5dIZBV_tQEoxdUDbokuofeRfd/view?usp=sharing" />} />} />
 
             {/* Campus */}
-            <Route path="/campus/visuals/bhuda" element={<R el={<CampusVisuals title="Bhuda Campus" categoryId="bhuda" desc="Bhuda campus ki photos" />} />} />
-            <Route path="/campus/visuals/bank-more" element={<R el={<CampusVisuals title="Bank More Campus" categoryId="bank-more" desc="Bank More campus ki photos" />} />} />
-            <Route path="/campus/visuals/vocational-building" element={<R el={<CampusVisuals title="Vocational Building" categoryId="vocational" desc="Vocational building ki photos" />} />} />
+            <Route path="/campus/visuals/bhuda" element={<R el={<CampusVisuals title="Bhuda Campus" categoryId="bhuda" desc="Photographs and visual tour of Bhuda Campus" />} />} />
+            <Route path="/campus/visuals/bank-more" element={<R el={<CampusVisuals title="Bank More Campus" categoryId="bank-more" desc="Photographs and visual tour of Bank More Campus" />} />} />
+            <Route path="/campus/visuals/vocational-building" element={<R el={<CampusVisuals title="Vocational Building" categoryId="vocational" desc="Photographs and visual tour of Vocational Building" />} />} />
             <Route path="/campus/infrastructure" element={<R el={<Infrastructure />} />} />
             <Route path="/campus/classroom" element={<R el={<Classrooms />} />} />
             <Route path="/campus/ict-rooms" element={<R el={<IctRooms />} />} />
@@ -238,9 +242,9 @@ export default function AppRoutes({
 
             {/* Publication */}
             <Route path="/publication/college-library" element={<R el={<LibraryPage />} />} />
-            <Route path="/publication/e-magazine" element={<R el={<PublicationPage type="magazine" title="E-Magazine" subtitle="College ki digital publications" icon={<Newspaper size={40} />} keyword="magazine" />} />} />
-            <Route path="/publication/examination-results/2024" element={<R el={<PublicationPage type="result" title="Exam Results 2024" subtitle="Academic year 2023-24 ke results" icon={<ClipboardList size={40} />} keyword="result-2024" />} />} />
-            <Route path="/publication/examination-results/2023" element={<R el={<PublicationPage type="result" title="Exam Results 2023" subtitle="Academic year 2022-23 ke results" icon={<ClipboardList size={40} />} keyword="result-2023" />} />} />
+            <Route path="/publication/e-magazine" element={<R el={<PublicationPage type="magazine" title="E-Magazine" subtitle="Official college digital publications and periodicals" icon={<Newspaper size={40} />} keyword="magazine" />} />} />
+            <Route path="/publication/examination-results/2024" element={<R el={<PublicationPage type="result" title="Exam Results 2024" subtitle="Academic year 2023-24 examination results" icon={<ClipboardList size={40} />} keyword="result-2024" />} />} />
+            <Route path="/publication/examination-results/2023" element={<R el={<PublicationPage type="result" title="Exam Results 2023" subtitle="Academic year 2022-23 examination results" icon={<ClipboardList size={40} />} keyword="result-2023" />} />} />
             <Route path="/publication/sss-report/2023-24" element={<R el={<PublicationPage type="sss" title="SSS Report 2023-24" subtitle="Student Satisfaction Survey" icon={<BarChart3 size={40} />} keyword="sss-2023-24" />} />} />
             <Route path="/publication/sss-report/2022-23" element={<R el={<PublicationPage type="sss" title="SSS Report 2022-23" subtitle="Student Satisfaction Survey" icon={<BarChart3 size={40} />} keyword="sss-2022-23" />} />} />
 
@@ -258,6 +262,8 @@ export default function AppRoutes({
             <Route path="/scholarships" element={<R el={<ScholarshipsPage />} />} />
             <Route path="/alumni" element={<R el={<AlumniWall />} />} />
             <Route path="/alumni-wall" element={<R el={<AlumniWall />} />} />
+            <Route path="/privacy-policy" element={<R el={<PrivacyPolicy />} />} />
+            <Route path="/terms-of-service" element={<R el={<TermsOfService />} />} />
 
             <Route path="/p/:slug" element={<R el={<PageViewer gallery={gallery} events={events} faculties={faculties} />} />} />
             <Route path="*" element={<R el={<NotFoundPage />} />} />

@@ -294,6 +294,380 @@ export function LibraryPage() {
   );
 }
 
+function MagazineCardItem({ mag, idx, onShareWa }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const rawPdf = mag.pdfUrl || mag.link || '';
+  const viewLink = getDriveViewUrl(rawPdf);
+  const downloadLink = getDriveDownloadUrl(rawPdf);
+  const coverImg = mag.coverImage && !imgFailed ? resolveUrl(mag.coverImage) : '';
+  const magYear = mag.academicYear || mag.year || '2024';
+
+  return (
+    <Fade delay={idx * 0.05}>
+      <div
+        className="gnc-magazine-card"
+        style={{
+          background: '#ffffff',
+          borderRadius: 20,
+          border: '1.5px solid #e2e8f0',
+          boxShadow: '0 10px 30px rgba(15,35,71,0.06)',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          position: 'relative'
+        }}
+      >
+        {/* ── 3D Realistic Book Showcase Frame ── */}
+        <div
+          style={{
+            height: 380,
+            width: '100%',
+            overflow: 'hidden',
+            position: 'relative',
+            background: 'radial-gradient(ellipse at 50% 100%, rgba(244, 160, 35, 0.12) 0%, transparent 65%), linear-gradient(160deg, #071326 0%, #0c1d3b 60%, #152d59 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '24px 16px',
+            boxSizing: 'border-box'
+          }}
+        >
+          {/* Ambient Blurred Aura */}
+          {coverImg && (
+            <img
+              src={coverImg}
+              alt=""
+              aria-hidden="true"
+              className="gnc-ambient-glow"
+              onError={() => setImgFailed(true)}
+              style={{
+                position: 'absolute',
+                inset: -20,
+                width: 'calc(100% + 40px)',
+                height: 'calc(100% + 40px)',
+                objectFit: 'cover',
+                filter: 'blur(30px) saturate(2) brightness(0.35)',
+                opacity: 0.65,
+                pointerEvents: 'none',
+                zIndex: 1,
+                transform: 'scale(1.15)'
+              }}
+            />
+          )}
+
+          {/* Subtle Bookshelf Perspective Base */}
+          <div style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 18,
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.5) 100%)',
+            borderTop: '1px solid rgba(255,255,255,0.08)',
+            zIndex: 2
+          }} />
+
+          {/* Top Badges Bar */}
+          <div style={{
+            position: 'absolute',
+            top: 12,
+            left: 14,
+            right: 14,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            zIndex: 4,
+            pointerEvents: 'none'
+          }}>
+            <div style={{
+              background: 'rgba(9, 23, 46, 0.82)',
+              backdropFilter: 'blur(10px)',
+              color: '#ffffff',
+              padding: '4px 12px',
+              borderRadius: 20,
+              fontSize: 11,
+              fontWeight: 800,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              border: '1px solid rgba(255,255,255,0.22)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+            }}>
+              <Calendar size={12} color={GOLD} /> {magYear}
+            </div>
+
+            {mag.isFeatured && (
+              <div style={{
+                background: `linear-gradient(135deg, ${GOLD}, #d97706)`,
+                color: NAVY,
+                padding: '4px 12px',
+                borderRadius: 20,
+                fontSize: 10.5,
+                fontWeight: 900,
+                letterSpacing: 0.5,
+                boxShadow: `0 4px 14px ${GOLD}66`
+              }}>
+                ⭐ LATEST ISSUE
+              </div>
+            )}
+          </div>
+
+          {/* Foreground Realistic 3D Magazine Cover Stand */}
+          <div style={{
+            position: 'relative',
+            zIndex: 3,
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            {coverImg ? (
+              <div style={{
+                position: 'relative',
+                height: '100%',
+                maxHeight: 330,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <img
+                  src={coverImg}
+                  alt={mag.title}
+                  className="gnc-book-cover-img"
+                  style={{
+                    maxHeight: '100%',
+                    maxWidth: '100%',
+                    width: 'auto',
+                    height: 'auto',
+                    objectFit: 'contain',
+                    borderRadius: '3px 9px 9px 3px',
+                    boxShadow: '-6px 4px 18px rgba(0,0,0,0.55), 10px 14px 28px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.18)',
+                    borderLeft: '3px solid rgba(255,255,255,0.45)',
+                    display: 'block'
+                  }}
+                  onError={() => setImgFailed(true)}
+                />
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  bottom: 0,
+                  left: 0,
+                  width: 12,
+                  background: 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 40%, transparent 100%)',
+                  pointerEvents: 'none',
+                  borderRadius: '3px 0 0 3px'
+                }} />
+              </div>
+            ) : (
+              <div
+                className="gnc-fallback-cover"
+                style={{
+                  display: 'flex',
+                  width: 220,
+                  height: 310,
+                  borderRadius: '4px 12px 12px 4px',
+                  borderLeft: `6px solid ${GOLD}`,
+                  boxShadow: '-6px 6px 20px rgba(0,0,0,0.6), 10px 14px 30px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.15)',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  background: `linear-gradient(145deg, #09172e 0%, ${NAVY} 60%, #1a3a7c 100%)`,
+                  color: '#ffffff',
+                  textAlign: 'center',
+                  padding: '26px 18px',
+                  boxSizing: 'border-box'
+                }}
+              >
+                <div>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: GOLD, letterSpacing: 1.5, textTransform: 'uppercase' }}>
+                    GURU NANAK COLLEGE
+                  </span>
+                  <div style={{ fontSize: 9, color: '#94a3b8', marginTop: 2 }}>DHANBAD</div>
+                </div>
+                <div>
+                  <span style={{ fontSize: 42, display: 'block', marginBottom: 8 }}>📖</span>
+                  <h4 style={{ fontSize: 16, fontWeight: 900, margin: 0, lineHeight: 1.3, textTransform: 'uppercase', color: '#ffffff' }}>
+                    {mag.title}
+                  </h4>
+                </div>
+                <div style={{
+                  fontSize: 10.5,
+                  fontWeight: 800,
+                  background: 'rgba(244,160,35,0.2)',
+                  color: GOLD,
+                  padding: '4px 10px',
+                  borderRadius: 12,
+                  border: `1px solid ${GOLD}44`
+                }}>
+                  {mag.volumeIssue || `Annual Issue ${magYear}`}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── Magazine Information Body ── */}
+        <div style={{ padding: '18px 20px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, marginBottom: 8 }}>
+            <span style={{
+              fontSize: 11,
+              fontWeight: 800,
+              background: '#fef3c7',
+              color: '#92400e',
+              padding: '2px 8px',
+              borderRadius: 6,
+              letterSpacing: 0.3
+            }}>
+              {mag.volumeIssue || 'Annual Issue'}
+            </span>
+            <span style={{ fontSize: 11.5, color: '#64748b', fontWeight: 700 }}>
+              Session {magYear}
+            </span>
+          </div>
+
+          <h3 style={{
+            fontSize: 16.5,
+            fontWeight: 900,
+            color: NAVY,
+            margin: '0 0 6px',
+            lineHeight: 1.35,
+            letterSpacing: '-0.2px'
+          }}>
+            {mag.title}
+          </h3>
+
+          <p style={{
+            fontSize: 12.5,
+            color: '#64748b',
+            lineHeight: 1.55,
+            margin: '0 0 12px',
+            flex: 1,
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            textAlign: 'justify',
+            textJustify: 'inter-word'
+          }}>
+            {mag.description || 'Official digital publication of Guru Nanak College, Dhanbad featuring student articles, departmental achievements, faculty research, and campus memories.'}
+          </p>
+
+          <div style={{
+            fontSize: 11,
+            color: '#94a3b8',
+            marginBottom: 12,
+            paddingTop: 8,
+            borderTop: '1px solid #f1f5f9',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <span>📄 High-Definition Edition</span>
+            <span>{mag.fileSize || 'PDF Format'}</span>
+          </div>
+
+          {/* ── Action Buttons ── */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr auto', gap: 8, marginTop: 'auto' }}>
+            {viewLink ? (
+              <a
+                href={viewLink}
+                target="_blank"
+                rel="noreferrer"
+                className="action-btn-view"
+                style={{
+                  background: `linear-gradient(135deg, ${NAVY}, #1a3a7c)`,
+                  color: '#ffffff',
+                  padding: '8px 12px',
+                  borderRadius: 10,
+                  fontSize: 12,
+                  fontWeight: 800,
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                  boxShadow: '0 3px 12px rgba(15,35,71,0.15)'
+                }}
+                title="Open full magazine online"
+              >
+                <Eye size={14} color={GOLD} /> View Online
+              </a>
+            ) : (
+              <button
+                type="button"
+                disabled
+                style={{
+                  background: '#f1f5f9',
+                  color: '#94a3b8',
+                  padding: '8px 12px',
+                  borderRadius: 10,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  border: 'none',
+                  cursor: 'not-allowed'
+                }}
+              >
+                Processing
+              </button>
+            )}
+
+            {downloadLink ? (
+              <a
+                href={downloadLink}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  background: '#f8fafc',
+                  border: '1.5px solid #cbd5e1',
+                  color: NAVY,
+                  padding: '8px 10px',
+                  borderRadius: 10,
+                  fontSize: 12,
+                  fontWeight: 800,
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 5,
+                  transition: 'all 0.15s'
+                }}
+                title="Download Magazine PDF"
+              >
+                <Download size={13} /> PDF
+              </a>
+            ) : null}
+
+            <button
+              type="button"
+              onClick={() => onShareWa(mag)}
+              style={{
+                background: '#25D366',
+                color: '#ffffff',
+                border: 'none',
+                padding: '8px 11px',
+                borderRadius: 10,
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 3px 10px rgba(37,211,102,0.25)',
+                transition: 'all 0.15s'
+              }}
+              title="Share Edition on WhatsApp"
+            >
+              <Share2 size={14} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </Fade>
+  );
+}
+
 export function PublicationPage({ type, title, subtitle, icon, keyword }) {
   const isMagazine = type === 'magazine' || keyword === 'magazine';
   const [magazines, setMagazines] = useState([]);
@@ -516,389 +890,14 @@ export function PublicationPage({ type, title, subtitle, icon, keyword }) {
                   </p>
                 </div>
               ) : (
-                filteredMags.map((mag, idx) => {
-                  const rawPdf = mag.pdfUrl || mag.link || '';
-                  const viewLink = getDriveViewUrl(rawPdf);
-                  const downloadLink = getDriveDownloadUrl(rawPdf);
-                  const coverImg = mag.coverImage ? resolveUrl(mag.coverImage) : '';
-                  const magYear = mag.academicYear || mag.year || '2024';
-
-                  return (
-                    <Fade key={mag.id || idx} delay={idx * 0.05}>
-                      <div
-                        className="gnc-magazine-card"
-                        style={{
-                          background: '#ffffff',
-                          borderRadius: 20,
-                          border: '1.5px solid #e2e8f0',
-                          boxShadow: '0 10px 30px rgba(15,35,71,0.06)',
-                          overflow: 'hidden',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          height: '100%',
-                          position: 'relative'
-                        }}
-                      >
-                        {/* ── 3D Realistic Book Showcase Frame (Never Crops Cover) ── */}
-                        <div
-                          style={{
-                            height: 380,
-                            width: '100%',
-                            overflow: 'hidden',
-                            position: 'relative',
-                            background: 'radial-gradient(ellipse at 50% 100%, rgba(244, 160, 35, 0.12) 0%, transparent 65%), linear-gradient(160deg, #071326 0%, #0c1d3b 60%, #152d59 100%)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: '24px 16px',
-                            boxSizing: 'border-box'
-                          }}
-                        >
-                          {/* Ambient Blurred Aura Matching the Magazine Color */}
-                          {coverImg && (
-                            <img
-                              src={coverImg}
-                              alt=""
-                              aria-hidden="true"
-                              className="gnc-ambient-glow"
-                              style={{
-                                position: 'absolute',
-                                inset: -20,
-                                width: 'calc(100% + 40px)',
-                                height: 'calc(100% + 40px)',
-                                objectFit: 'cover',
-                                filter: 'blur(30px) saturate(2) brightness(0.35)',
-                                opacity: 0.65,
-                                pointerEvents: 'none',
-                                zIndex: 1,
-                                transform: 'scale(1.15)'
-                              }}
-                            />
-                          )}
-
-                          {/* Subtle Bookshelf Perspective Base */}
-                          <div style={{
-                            position: 'absolute',
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            height: 18,
-                            background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.5) 100%)',
-                            borderTop: '1px solid rgba(255,255,255,0.08)',
-                            zIndex: 2
-                          }} />
-
-                          {/* Top Badges Bar (Floating Outside Book Cover) */}
-                          <div style={{
-                            position: 'absolute',
-                            top: 12,
-                            left: 14,
-                            right: 14,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            zIndex: 4,
-                            pointerEvents: 'none'
-                          }}>
-                            {/* Academic Year Pill */}
-                            <div style={{
-                              background: 'rgba(9, 23, 46, 0.82)',
-                              backdropFilter: 'blur(10px)',
-                              color: '#ffffff',
-                              padding: '4px 12px',
-                              borderRadius: 20,
-                              fontSize: 11,
-                              fontWeight: 800,
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: 5,
-                              border: '1px solid rgba(255,255,255,0.22)',
-                              boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-                            }}>
-                              <Calendar size={12} color={GOLD} /> {magYear}
-                            </div>
-
-                            {/* Featured / Latest Issue Badge */}
-                            {mag.isFeatured && (
-                              <div style={{
-                                background: `linear-gradient(135deg, ${GOLD}, #d97706)`,
-                                color: NAVY,
-                                padding: '4px 12px',
-                                borderRadius: 20,
-                                fontSize: 10.5,
-                                fontWeight: 900,
-                                letterSpacing: 0.5,
-                                boxShadow: `0 4px 14px ${GOLD}66`
-                              }}>
-                                ⭐ LATEST ISSUE
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Foreground Realistic 3D Magazine Cover Stand */}
-                          <div style={{
-                            position: 'relative',
-                            zIndex: 3,
-                            height: '100%',
-                            width: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}>
-                            {coverImg ? (
-                              <div style={{
-                                position: 'relative',
-                                height: '100%',
-                                maxHeight: 330,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}>
-                                <img
-                                  src={coverImg}
-                                  alt={mag.title}
-                                  className="gnc-book-cover-img"
-                                  style={{
-                                    maxHeight: '100%',
-                                    maxWidth: '100%',
-                                    width: 'auto',
-                                    height: 'auto',
-                                    objectFit: 'contain',
-                                    borderRadius: '3px 9px 9px 3px',
-                                    boxShadow: '-6px 4px 18px rgba(0,0,0,0.55), 10px 14px 28px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.18)',
-                                    borderLeft: '3px solid rgba(255,255,255,0.45)',
-                                    display: 'block'
-                                  }}
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = 'none';
-                                    const next = e.currentTarget.parentElement?.querySelector('.gnc-fallback-cover');
-                                    if (next) next.style.display = 'flex';
-                                  }}
-                                />
-                                {/* Book Spine Gloss Highlight */}
-                                <div style={{
-                                  position: 'absolute',
-                                  top: 0,
-                                  bottom: 0,
-                                  left: 0,
-                                  width: 12,
-                                  background: 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 40%, transparent 100%)',
-                                  pointerEvents: 'none',
-                                  borderRadius: '3px 0 0 3px'
-                                }} />
-                              </div>
-                            ) : null}
-
-                            {/* Fallback Leatherbound Book Design if no cover or on error */}
-                            <div
-                              className="gnc-fallback-cover"
-                              style={{
-                                display: coverImg ? 'none' : 'flex',
-                                width: 220,
-                                height: 310,
-                                borderRadius: '4px 12px 12px 4px',
-                                borderLeft: `6px solid ${GOLD}`,
-                                boxShadow: '-6px 6px 20px rgba(0,0,0,0.6), 10px 14px 30px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.15)',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                background: `linear-gradient(145deg, #09172e 0%, ${NAVY} 60%, #1a3a7c 100%)`,
-                                color: '#ffffff',
-                                textAlign: 'center',
-                                padding: '26px 18px',
-                                boxSizing: 'border-box'
-                              }}
-                            >
-                              <div>
-                                <span style={{ fontSize: 10, fontWeight: 800, color: GOLD, letterSpacing: 1.5, textTransform: 'uppercase' }}>
-                                  GURU NANAK COLLEGE
-                                </span>
-                                <div style={{ fontSize: 9, color: '#94a3b8', marginTop: 2 }}>DHANBAD</div>
-                              </div>
-                              <div>
-                                <span style={{ fontSize: 42, display: 'block', marginBottom: 8 }}>📖</span>
-                                <h4 style={{ fontSize: 16, fontWeight: 900, margin: 0, lineHeight: 1.3, textTransform: 'uppercase', color: '#ffffff' }}>
-                                  {mag.title}
-                                </h4>
-                              </div>
-                              <div style={{
-                                fontSize: 10.5,
-                                fontWeight: 800,
-                                background: 'rgba(244,160,35,0.2)',
-                                color: GOLD,
-                                padding: '4px 10px',
-                                borderRadius: 12,
-                                border: `1px solid ${GOLD}44`
-                              }}>
-                                {mag.volumeIssue || `Annual Issue ${magYear}`}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* ── Magazine Information Body ── */}
-                        <div style={{ padding: '18px 20px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, marginBottom: 8 }}>
-                            <span style={{
-                              fontSize: 11,
-                              fontWeight: 800,
-                              background: '#fef3c7',
-                              color: '#92400e',
-                              padding: '2px 8px',
-                              borderRadius: 6,
-                              letterSpacing: 0.3
-                            }}>
-                              {mag.volumeIssue || 'Annual Issue'}
-                            </span>
-                            <span style={{ fontSize: 11.5, color: '#64748b', fontWeight: 700 }}>
-                              Session {magYear}
-                            </span>
-                          </div>
-
-                          <h3 style={{
-                            fontSize: 16.5,
-                            fontWeight: 900,
-                            color: NAVY,
-                            margin: '0 0 6px',
-                            lineHeight: 1.35,
-                            letterSpacing: '-0.2px'
-                          }}>
-                            {mag.title}
-                          </h3>
-
-                          <p style={{
-                            fontSize: 12.5,
-                            color: '#64748b',
-                            lineHeight: 1.55,
-                            margin: '0 0 12px',
-                            flex: 1,
-                            display: '-webkit-box',
-                            WebkitLineClamp: 3,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                            textAlign: 'justify',
-                            textJustify: 'inter-word'
-                          }}>
-                            {mag.description || 'Official digital publication of Guru Nanak College, Dhanbad featuring student articles, departmental achievements, faculty research, and campus memories.'}
-                          </p>
-
-                          <div style={{
-                            fontSize: 11,
-                            color: '#94a3b8',
-                            marginBottom: 12,
-                            paddingTop: 8,
-                            borderTop: '1px solid #f1f5f9',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between'
-                          }}>
-                            <span>📄 High-Definition Edition</span>
-                            <span>{mag.fileSize || 'PDF Format'}</span>
-                          </div>
-
-                          {/* ── Action Buttons (View, Download, Share) ── */}
-                          <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr auto', gap: 8, marginTop: 'auto' }}>
-                            
-                            {/* 1. View / Read Online Button */}
-                            {viewLink ? (
-                              <a
-                                href={viewLink}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="action-btn-view"
-                                style={{
-                                  background: `linear-gradient(135deg, ${NAVY}, #1a3a7c)`,
-                                  color: '#ffffff',
-                                  padding: '8px 12px',
-                                  borderRadius: 10,
-                                  fontSize: 12,
-                                  fontWeight: 800,
-                                  textDecoration: 'none',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  gap: 6,
-                                  boxShadow: '0 3px 12px rgba(15,35,71,0.15)'
-                                }}
-                                title="Open full magazine online"
-                              >
-                                <Eye size={14} color={GOLD} /> View Online
-                              </a>
-                            ) : (
-                              <button
-                                type="button"
-                                disabled
-                                style={{
-                                  background: '#f1f5f9',
-                                  color: '#94a3b8',
-                                  padding: '8px 12px',
-                                  borderRadius: 10,
-                                  fontSize: 12,
-                                  fontWeight: 700,
-                                  border: 'none',
-                                  cursor: 'not-allowed'
-                                }}
-                              >
-                                Processing
-                              </button>
-                            )}
-
-                            {/* 2. Download Button */}
-                            {downloadLink ? (
-                              <a
-                                href={downloadLink}
-                                target="_blank"
-                                rel="noreferrer"
-                                style={{
-                                  background: '#f8fafc',
-                                  border: '1.5px solid #cbd5e1',
-                                  color: NAVY,
-                                  padding: '8px 10px',
-                                  borderRadius: 10,
-                                  fontSize: 12,
-                                  fontWeight: 800,
-                                  textDecoration: 'none',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  gap: 5,
-                                  transition: 'all 0.15s'
-                                }}
-                                title="Download PDF copy"
-                              >
-                                <Download size={13} /> Download
-                              </a>
-                            ) : null}
-
-                            {/* 3. WhatsApp Share Button */}
-                            <button
-                              type="button"
-                              onClick={() => handleShareWa(mag)}
-                              style={{
-                                background: '#25D366',
-                                color: '#ffffff',
-                                border: 'none',
-                                padding: '8px 11px',
-                                borderRadius: 10,
-                                fontSize: 13,
-                                fontWeight: 700,
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                boxShadow: '0 3px 10px rgba(37,211,102,0.25)',
-                                transition: 'all 0.15s'
-                              }}
-                              title="Share Edition on WhatsApp"
-                            >
-                              <Share2 size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </Fade>
-                  );
-                })
+                filteredMags.map((mag, idx) => (
+                  <MagazineCardItem
+                    key={mag.id || idx}
+                    mag={mag}
+                    idx={idx}
+                    onShareWa={handleShareWa}
+                  />
+                ))
               )}
             </div>
           </div>

@@ -67,7 +67,10 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
       toast.success('Notice published!');
       logAct(editNotice ? 'update' : 'add', `Notice: ${noticeData.text?.substring(0, 30)}`, 'notices');
       setEditNotice(null); clearNoticeDraft();
-    } catch { }
+    } catch (err) {
+      console.error('[NoticesTab] Failed to save notice:', err);
+      toast.error('Failed to save notice: ' + (err.message || 'Unknown error'));
+    }
     setLoading(false);
   };
 

@@ -33,6 +33,8 @@ export default function LanguageToggle() {
         borderRadius: 99,
         padding: '0 8px',
         height: 20,
+        minHeight: 'unset',
+        minWidth: 'unset',
         fontSize: 10,
         fontWeight: 800,
         cursor: 'pointer',

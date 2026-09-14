@@ -3,31 +3,49 @@ import { Link } from "react-router-dom";
 import { SOCIAL_LINKS } from '../../data/db';
 import LanguageToggle from '../LanguageToggle';
 
+// ☬ SACRED SIKH INSPIRATIONS & GURU NANAK DEV JI'S TEACHINGS
 const SIKH_DIVINE_QUOTES = [
   {
-    gurmukhi: "ੴ ਸਤਿਨਾਮੁ ਕਰਤਾ ਪੁਰਖੁ ਨਿਰਭਉ ਨਿਰਵੈਰੁ",
-    english: "One Universal Creator God, The Name Is Truth, Creative Being Personified, Without Fear, Without Hatred",
-    author: "Mool Mantar — Guru Nanak Dev Ji"
-  },
-  {
+    badge: "☬ ਕਾਲਜ ਆਦਰਸ਼",
     gurmukhi: "ਵਿਦਿਆ ਵੀਚਾਰੀ ਤਾਂ ਪਰਉਪਕਾਰੀ ॥",
-    english: "Contemplate on knowledge and become a benefactor to humanity",
-    author: "Sri Guru Granth Sahib Ji (Ang 356)"
+    english: "Contemplate and reflect upon true knowledge, and become a benefactor to humanity.",
+    author: "College Motto • Sri Guru Granth Sahib Ji (Ang 356)"
   },
   {
-    gurmukhi: "ਕਿਰਤ ਕਰੋ • ਨਾਮ ਜਪੋ • ਵੰਡ ਛਕੋ",
-    english: "Honest hard work, remembrance of the Divine, and selfless sharing with society",
-    author: "Three Pillars of Sikh Philosophy"
+    badge: "☬ ਮੂਲ ਮੰਤਰ",
+    gurmukhi: "ੴ ਸਤਿਨਾਮੁ ਕਰਤਾ ਪੁਰਖੁ ਨਿਰਭਉ ਨਿਰਵੈਰੁ ਅਕਾਲ ਮੂਰਤਿ ਅਜੂਨੀ ਸੈਭੰ ਗੁਰ ਪ੍ਰਸਾਦਿ ॥",
+    english: "One Universal Creator God, Truth is the Name, Creative Being Personified, Without Fear, Without Hatred, Timeless Form, Beyond Birth, Self-Existent, By Guru's Grace.",
+    author: "Mool Mantar • Sri Guru Nanak Dev Ji"
   },
   {
-    gurmukhi: "ਨਾਨਕ ਨਾਮ ਚੜ੍ਹਦੀ ਕਲਾ, ਤੇਰੇ ਭਾਣੇ ਸਰਬੱਤ ਦਾ ਭਲਾ ॥",
-    english: "May high spirits prevail, and by Thy Will, may peace and prosperity bless all mankind",
-    author: "Sikh Ardaas"
+    badge: "☬ ਤਿੰਨ ਸੁਨਹਿਰੀ ਅਸੂਲ",
+    gurmukhi: "ਨਾਮ ਜਪੋ • ਕਿਰਤ ਕਰੋ • ਵੰਡ ਛਕੋ",
+    english: "Meditate on the Divine Name • Earn through honest labor • Selflessly share with society.",
+    author: "Three Pillars of Sikh Philosophy • Guru Nanak Dev Ji"
   },
   {
+    badge: "☬ ਸਰਬੱਤ ਦਾ ਭਲਾ",
+    gurmukhi: "ਨਾਨਕ ਨਾਮ ਚੜ੍ਹਦੀ ਕਲਾ ॥ ਤੇਰੇ ਭਾਣੇ ਸਰਬੱਤ ਦਾ ਭਲਾ ॥",
+    english: "O Nanak, may the Divine Name remain in high spirits; by Thy Will, may peace and prosperity bless all mankind.",
+    author: "Sikh Ardaas (Universal Supplication)"
+  },
+  {
+    badge: "☬ ਸੱਚਾ ਆਚਾਰ",
     gurmukhi: "ਸਚਹੁ ਓਰੈ ਸਭੁ ਕੋ ਉਪਰਿ ਸਚੁ ਆਚਾਰੁ ॥",
-    english: "Truth is the highest virtue, but higher still is truthful living",
-    author: "Guru Nanak Dev Ji (Ang 62)"
+    english: "Truth is the highest virtue, but higher still is truthful living.",
+    author: "Sri Guru Nanak Dev Ji • Ang 62"
+  },
+  {
+    badge: "☬ ਸ਼ੁਭ ਕਰਮਨ",
+    gurmukhi: "ਦੇਹ ਸਿਵਾ ਬਰੁ ਮੋਹਿ ਇਹੈ ਸੁਭ ਕਰਮਨ ਤੇ ਕਬਹੂੰ ਨ ਟਰੋਂ ॥",
+    english: "Grant me this boon, O Lord, that I may never waver from performing righteous deeds.",
+    author: "Sri Guru Gobind Singh Ji • Dasam Granth"
+  },
+  {
+    badge: "☬ ਜਪੁਜੀ ਸਾਹਿਬ",
+    gurmukhi: "ਮਨਿ ਜੀਤੈ ਜਗੁ ਜੀਤੁ ॥",
+    english: "Conquering one's mind is conquering the entire world.",
+    author: "Sri Guru Nanak Dev Ji • Japji Sahib (Pauri 28)"
   }
 ];
 
@@ -58,8 +76,8 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
       setTimeout(() => {
         setQuoteIndex(prev => (prev + 1) % SIKH_DIVINE_QUOTES.length);
         setQuoteFading(false);
-      }, 400);
-    }, 7500);
+      }, 350);
+    }, 8000);
     return () => clearInterval(timer);
   }, []);
 
@@ -68,7 +86,7 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
     setTimeout(() => {
       setQuoteIndex(prev => (prev + dir + SIKH_DIVINE_QUOTES.length) % SIKH_DIVINE_QUOTES.length);
       setQuoteFading(false);
-    }, 300);
+    }, 200);
   };
 
   const currentQuote = SIKH_DIVINE_QUOTES[quoteIndex];
@@ -77,18 +95,21 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
     <div className={`premium-topbar ${isDark ? 'is-dark' : ''}`}>
       <style>{`
         /* ══════════════════════════════════════════════════════════ */
-        /* ██  ULTRA-SLIM CORPORATE TOPBAR — PRO MAX ADVANCED DESIGN ██ */
+        /* ██  PREMIUM CORPORATE TOPBAR WITH GURMUKHI HERITAGE RIBBON ██ */
         /* ══════════════════════════════════════════════════════════ */
 
         .premium-topbar {
           width: 100%;
+          max-width: 100vw;
+          overflow-x: clip;
           position: relative;
           z-index: 1000;
           font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
           border-top: 2.5px solid #e89222;
           background: #ffffff;
           box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-          transition: all 0.25s ease;
+          transition: background 0.25s ease, border-color 0.25s ease;
+          box-sizing: border-box;
         }
 
         .premium-topbar.is-dark {
@@ -97,15 +118,25 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
           box-shadow: 0 1px 5px rgba(0,0,0,0.25);
         }
 
-        /* ── MAIN HORIZONTAL ROW (ULTRA-SLIM COMPACT HEIGHT) ── */
+        /* Explicitly prevent global CSS button / link 44px min-size bloat */
+        .premium-topbar a,
+        .premium-topbar button {
+          min-width: unset !important;
+          min-height: unset !important;
+          box-sizing: border-box;
+        }
+
+        /* ── MAIN HORIZONTAL ROW ── */
         .tb-main-row {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 2.5px clamp(12px, 2.5vw, 36px);
+          padding: 2.5px clamp(8px, 2vw, 36px);
           min-height: 29px;
           border-bottom: 1.5px solid #2b3a67;
-          gap: 12px;
+          gap: 8px;
+          max-width: 100vw;
+          box-sizing: border-box;
         }
 
         .premium-topbar.is-dark .tb-main-row {
@@ -116,18 +147,18 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
         .tb-contact-group {
           display: flex;
           align-items: center;
-          gap: clamp(10px, 1.8vw, 20px);
-          flex-wrap: wrap;
+          gap: clamp(8px, 1.5vw, 18px);
+          flex-shrink: 0;
         }
 
         .tb-contact-link {
           display: inline-flex;
           align-items: center;
-          gap: 5px;
+          gap: 4px;
           text-decoration: none;
           color: #475569;
           font-size: clamp(10.5px, 0.8vw, 11.5px);
-          font-weight: 500;
+          font-weight: 600;
           letter-spacing: 0.1px;
           white-space: nowrap;
           padding: 2px 4px;
@@ -155,6 +186,7 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
           justify-content: center;
           color: #64748b;
           transition: color 0.2s ease;
+          flex-shrink: 0;
         }
 
         .tb-contact-link:hover .tb-icon-glyph {
@@ -191,6 +223,7 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
           width: 1px;
           height: 11px;
           background: #e2e8f0;
+          flex-shrink: 0;
         }
 
         .premium-topbar.is-dark .tb-contact-divider {
@@ -201,21 +234,25 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
         .tb-right-group {
           display: flex;
           align-items: center;
-          gap: clamp(8px, 1.2vw, 14px);
+          gap: clamp(5px, 1vw, 12px);
           margin-left: auto;
+          flex-shrink: 0;
         }
 
-        /* ── CIRCULAR SOCIAL ICONS: COMPACT 20PX DISC, LARGE BOLD GLYPHS ── */
+        /* ── CIRCULAR SOCIAL ICONS: COMPACT 22PX DISC ── */
         .tb-social-list {
           display: flex;
           align-items: center;
-          gap: 5px;
-          margin: 1.5px 0;
+          gap: 4px;
         }
 
         .tb-social-disc {
-          width: 20px;
-          height: 20px;
+          width: 22px !important;
+          height: 22px !important;
+          min-width: 22px !important;
+          min-height: 22px !important;
+          max-width: 22px !important;
+          max-height: 22px !important;
           border-radius: 50%;
           background: #b0b7c3;
           color: #ffffff;
@@ -223,10 +260,12 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
           align-items: center;
           justify-content: center;
           text-decoration: none;
-          transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+          transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
           box-shadow: 0 1px 2px rgba(0,0,0,0.08);
           position: relative;
           flex-shrink: 0;
+          padding: 0;
+          line-height: 1;
         }
 
         .premium-topbar.is-dark .tb-social-disc {
@@ -234,21 +273,21 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
         }
 
         .tb-social-disc:hover {
-          transform: translateY(-1.5px) scale(1.15);
-          box-shadow: 0 3px 8px rgba(0,0,0,0.22);
+          transform: translateY(-1px) scale(1.1);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.22);
         }
 
         .tb-social-disc:active {
-          transform: scale(0.92);
+          transform: scale(0.94);
         }
 
-        .tb-social-disc.fb:hover { background: #1877F2; }
-        .tb-social-disc.x:hover  { background: #000000; }
-        .tb-social-disc.yt:hover { background: #FF0000; }
-        .tb-social-disc.li:hover { background: #0A66C2; }
-        .tb-social-disc.wa:hover { background: #25D366; }
+        .tb-social-disc.fb:hover { background: #1877F2 !important; }
+        .tb-social-disc.x:hover  { background: #000000 !important; }
+        .tb-social-disc.yt:hover { background: #FF0000 !important; }
+        .tb-social-disc.li:hover { background: #0A66C2 !important; }
+        .tb-social-disc.wa:hover { background: #25D366 !important; }
 
-        /* ── HUD QUICK LINKS (ULTRA-SLIM PILLS) ── */
+        /* ── HUD QUICK LINKS (DESKTOP PILLS) ── */
         .tb-hud-list {
           display: flex;
           align-items: center;
@@ -304,8 +343,12 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
 
         /* ── COMPACT DARK MODE TOGGLE ── */
         .tb-dark-btn {
-          width: 20px;
-          height: 20px;
+          width: 22px !important;
+          height: 22px !important;
+          min-width: 22px !important;
+          min-height: 22px !important;
+          max-width: 22px !important;
+          max-height: 22px !important;
           border-radius: 50%;
           background: #f1f5f9;
           border: 1px solid #e2e8f0;
@@ -318,6 +361,7 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
           transition: all 0.2s ease;
           padding: 0;
           flex-shrink: 0;
+          line-height: 1;
         }
 
         .premium-topbar.is-dark .tb-dark-btn {
@@ -328,25 +372,28 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
 
         .tb-dark-btn:hover {
           background: #e2e8f0;
-          transform: rotate(18deg) scale(1.1);
+          transform: rotate(18deg) scale(1.08);
         }
 
         .premium-topbar.is-dark .tb-dark-btn:hover {
           background: #334155;
         }
 
-        /* ═══════════════════════════════════ */
-        /* ██  DIVINE WISDOM GURBANI RIBBON ██ */
-        /* ═══════════════════════════════════ */
+        /* ══════════════════════════════════════════════════ */
+        /* ██  AUTHENTIC GURMUKHI DIVINE WISDOM RIBBON      ██ */
+        /* ══════════════════════════════════════════════════ */
         .tb-divine-row {
           background: #070e1a;
-          border-bottom: 1px solid rgba(244,160,35,0.18);
-          padding: 2px clamp(12px, 2.5vw, 36px);
+          border-bottom: 1px solid rgba(244,160,35,0.22);
+          padding: 2.5px clamp(8px, 2vw, 36px);
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 10px;
-          min-height: 23px;
+          gap: 8px;
+          min-height: 26px;
+          box-sizing: border-box;
+          max-width: 100vw;
+          overflow: hidden;
         }
 
         .tb-divine-content {
@@ -357,7 +404,8 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
           text-overflow: ellipsis;
           white-space: nowrap;
           flex: 1;
-          transition: opacity 0.3s ease;
+          min-width: 0;
+          transition: opacity 0.25s ease;
         }
 
         .tb-divine-content.fading {
@@ -368,41 +416,57 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
           display: inline-flex;
           align-items: center;
           gap: 3px;
-          background: rgba(244,160,35,0.14);
-          border: 1px solid rgba(244,160,35,0.3);
+          background: rgba(244,160,35,0.16);
+          border: 1px solid rgba(244,160,35,0.38);
           color: #f4a023;
           padding: 0 6px;
           border-radius: 12px;
           font-weight: 800;
           font-size: 8.5px;
           flex-shrink: 0;
-          height: 16px;
-          line-height: 16px;
+          height: 17px;
+          line-height: 17px;
+          font-family: 'Noto Sans Gurmukhi', 'Plus Jakarta Sans', sans-serif;
+          letter-spacing: 0.2px;
         }
 
+        /* Gurmukhi Typography: Native Gurmukhi font, radiant gold, sharp rendering */
         .tb-gurmukhi {
+          font-family: 'Noto Sans Gurmukhi', 'Mukta Mahee', 'Gurmukhi MN', 'Raavi', system-ui, -apple-system, sans-serif;
           font-weight: 700;
           color: #fbd38d;
-          font-size: 10.5px;
+          font-size: 12px;
           white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          letter-spacing: 0.3px;
+          line-height: 1.45;
+          text-shadow: 0 0 10px rgba(244,160,35,0.25);
+          min-width: 0;
         }
 
         .tb-eng-text {
-          color: rgba(255,255,255,0.65);
+          color: rgba(255,255,255,0.7);
           font-size: 10px;
           font-style: italic;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          min-width: 0;
         }
 
         .tb-author {
-          color: rgba(244,160,35,0.75);
-          font-size: 9px;
+          color: rgba(244,160,35,0.8);
+          font-size: 9.5px;
           font-weight: 700;
+          white-space: nowrap;
+          flex-shrink: 0;
         }
 
         .tb-divine-actions {
           display: flex;
           align-items: center;
-          gap: 5px;
+          gap: 4px;
           flex-shrink: 0;
         }
 
@@ -411,47 +475,121 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
           text-decoration: none;
           font-size: 9.5px;
           font-weight: 700;
-          padding: 0 5px;
-          height: 17px;
-          line-height: 17px;
+          padding: 0 6px;
+          height: 18px;
+          line-height: 18px;
           border-radius: 4px;
-          border: 1px solid rgba(244,160,35,0.25);
+          border: 1px solid rgba(244,160,35,0.3);
+          background: rgba(244,160,35,0.06);
           transition: all 0.2s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 2px;
+          white-space: nowrap;
+          font-family: 'Noto Sans Gurmukhi', 'Plus Jakarta Sans', sans-serif;
         }
 
         .tb-heritage-link:hover {
           color: #ffffff;
-          background: rgba(244,160,35,0.2);
+          background: rgba(244,160,35,0.25);
+          border-color: #f4a023;
+        }
+
+        .tb-heritage-text-mobile {
+          display: none;
+        }
+
+        .tb-heritage-text-desktop {
+          display: inline;
         }
 
         .tb-quote-nav {
           background: transparent;
-          border: 1px solid rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.12);
           color: #94a3b8;
           cursor: pointer;
-          font-size: 10px;
-          padding: 0 4px;
+          font-size: 11px;
+          width: 18px !important;
+          height: 18px !important;
+          min-width: 18px !important;
+          min-height: 18px !important;
           border-radius: 3px;
-          line-height: 1.1;
+          line-height: 1;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
           transition: all 0.2s ease;
         }
 
         .tb-quote-nav:hover {
           color: #f4a023;
-          border-color: rgba(244,160,35,0.4);
+          border-color: rgba(244,160,35,0.5);
+          background: rgba(255,255,255,0.06);
         }
 
-        /* ── RESPONSIVE ── */
-        @media(max-width: 900px) {
+        /* ══════════════════════════════════════════════════ */
+        /* ██  RESPONSIVE BREAKPOINTS (FLAWLESS ON ALL SIZES)██ */
+        /* ══════════════════════════════════════════════════ */
+        @media(max-width: 1024px) {
           .tb-hud-list { display: none; }
           .tb-eng-text { display: none; }
+        }
+
+        @media(max-width: 768px) {
           .tb-author { display: none; }
+          .tb-email-item { display: none; }
+          .tb-contact-divider { display: none; }
         }
 
         @media(max-width: 640px) {
-          .tb-email-item { display: none; }
-          .tb-contact-divider { display: none; }
-          .tb-main-row { padding: 3px 10px; }
+          .tb-main-row {
+            padding: 2.5px 8px;
+            min-height: 27px;
+          }
+          .tb-contact-label {
+            display: none; /* Saves 40px width on mobile */
+          }
+          .tb-contact-link {
+            font-size: 11px;
+            padding: 1px 2px;
+          }
+          .tb-divine-row {
+            padding: 2px 6px;
+            min-height: 24px;
+            gap: 5px;
+          }
+          .tb-gurmukhi {
+            font-size: 11px;
+          }
+          .tb-heritage-text-desktop {
+            display: none;
+          }
+          .tb-heritage-text-mobile {
+            display: inline;
+          }
+          .tb-heritage-link {
+            font-size: 9px;
+            padding: 0 4px;
+            height: 17px;
+            line-height: 17px;
+          }
+        }
+
+        @media(max-width: 380px) {
+          .tb-social-disc.li {
+            display: none; /* Hide 1 social icon on narrowest screens (< 380px) */
+          }
+          .tb-social-list {
+            gap: 3px;
+          }
+          .tb-contact-val {
+            font-size: 10.5px;
+          }
+          .tb-quote-badge {
+            font-size: 8px;
+            padding: 0 4px;
+          }
         }
       `}</style>
 
@@ -486,7 +624,7 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
         {/* ── RIGHT: Social Media Discs + Quick HUD Actions ── */}
         <div className="tb-right-group">
 
-          {/* Circular Grey Social Media Icons (Compact 20px, Bold Prominent Letters) */}
+          {/* Circular Grey Social Media Icons (Compact 22px, Bold Crisp Glyphs) */}
           <div className="tb-social-list" aria-label="Social links">
             {SOCIAL_LINKS.map(s => {
               let cls = (s.id === 'twitter' ? 'x' : (s.id === 'youtube' ? 'yt' : (s.id === 'facebook' ? 'fb' : (s.id === 'linkedin' ? 'li' : ''))));
@@ -494,26 +632,22 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
                 <a key={s.id} href={s.href} target="_blank" rel="noopener noreferrer"
                    className={`tb-social-disc ${cls}`} aria-label={s.id} title={s.id}>
                   {s.id === 'facebook' && (
-                    /* Prominent, bold classic Facebook 'f' filling the circle */
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'translate(0.5px, 0.5px)' }}>
                       <path d="M13.5 24V13.07H17.2L17.75 8.78H13.5V6.04C13.5 4.8 13.84 3.96 15.62 3.96H17.91V0.12C17.51 0.07 16.14 0 14.54 0C11.21 0 8.93 2.03 8.93 5.75V8.78H5.2V13.07H8.93V24H13.5Z"/>
                     </svg>
                   )}
                   {s.id === 'twitter' && (
-                    /* Sharp, bold 𝕏 letter */
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                     </svg>
                   )}
                   {s.id === 'youtube' && (
-                    /* Bold YouTube play mark */
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                     </svg>
                   )}
                   {s.id === 'linkedin' && (
-                    /* Bold LinkedIn 'in' lettermark */
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/>
                     </svg>
                   )}
@@ -528,7 +662,7 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
             </a>
           </div>
 
-          {/* Quick HUD Buttons (Ultra-Slim Pill Badges) */}
+          {/* Quick HUD Buttons (Ultra-Slim Pill Badges - Desktop) */}
           <div className="tb-hud-list">
             <a href="https://bbmkuniv.in/login" target="_blank" rel="noopener noreferrer" className="tb-hud-item">
               📊 Result
@@ -541,7 +675,7 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
             </a>
           </div>
 
-          {/* Bilingual Language Switcher (Guarded by Real-Time Admin Switch) */}
+          {/* Bilingual Language Switcher */}
           {(() => {
             if (liveSettings && typeof liveSettings.enableLanguageToggle === 'boolean') {
               return liveSettings.enableLanguageToggle;
@@ -569,18 +703,19 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
         </div>
       </div>
 
-      {/* ══════ DIVINE WISDOM RIBBON ══════ */}
+      {/* ══════ AUTHENTIC GURMUKHI DIVINE WISDOM RIBBON ══════ */}
       <div className="tb-divine-row">
         <div className={`tb-divine-content${quoteFading ? ' fading' : ''}`}>
-          <span className="tb-quote-badge">☬ ਗੁਰਬਾਣੀ</span>
-          <span className="tb-gurmukhi">{currentQuote.gurmukhi}</span>
+          <span className="tb-quote-badge">{currentQuote.badge}</span>
+          <span className="tb-gurmukhi" title={currentQuote.gurmukhi}>{currentQuote.gurmukhi}</span>
           <span className="tb-eng-text">— "{currentQuote.english}"</span>
           <span className="tb-author">({currentQuote.author})</span>
         </div>
 
         <div className="tb-divine-actions">
           <Link to="/about-us/sikh-heritage" className="tb-heritage-link" title="Sikh Heritage & Minority Status">
-            ਸਿੱਖ ਵਿਰਾਸਤ →
+            <span className="tb-heritage-text-desktop">ਸਿੱਖ ਵਿਰਾਸਤ →</span>
+            <span className="tb-heritage-text-mobile">ਵਿਰਾਸਤ ›</span>
           </Link>
           <button onClick={() => changeQuote(-1)} className="tb-quote-nav" title="Previous Quote" aria-label="Previous quote">‹</button>
           <button onClick={() => changeQuote(1)} className="tb-quote-nav" title="Next Quote" aria-label="Next quote">›</button>

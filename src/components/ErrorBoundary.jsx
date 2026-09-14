@@ -13,19 +13,19 @@ import { COLORS } from '../styles/colors';
 // ── Error States Config ─────────────────────────────────────────────
 // Har page ke liye alag friendly message
 const PAGE_MESSAGES = {
-  HomePage:          { icon: '🏠', msg: 'Home page load nahi ho saka.'   },
-  EventsPage:        { icon: '🏆', msg: 'Events section mein kuch gadbad.'  },
-  NotificationsPage: { icon: '📢', msg: 'Notice board load nahi ho saka.' },
-  DocumentsPage:     { icon: '📁', msg: 'Documents section mein error.'   },
-  NewsPage:          { icon: '📣', msg: 'News section load nahi ho saka.' },
-  VideoGallery:      { icon: '▶️',  msg: 'Video gallery load nahi ho saka.'},
-  StaffPage:         { icon: '👨‍🏫', msg: 'Staff directory mein kuch gadbad.'},
-  CollegeProfile:    { icon: '🏛️', msg: 'College profile load nahi ho saka.'},
-  Contact:           { icon: '📞', msg: 'Contact page load nahi ho saka.' },
-  PageViewer:        { icon: '📄', msg: 'Page content load nahi ho saka.' },
-  PlacementsSection: { icon: '🎓', msg: 'Placements section mein error.'  },
-  AlertBanner:       { icon: '🔔', msg: ''  }, // Silent — banner hide ho jaayega
-  DEFAULT:           { icon: '⚠️', msg: 'Kuch gadbad ho gayi.'           },
+  HomePage:          { icon: '🏠', msg: 'Unable to load the Home page.' },
+  EventsPage:        { icon: '🏆', msg: 'Unable to load the Events section.' },
+  NotificationsPage: { icon: '📢', msg: 'Unable to load the Notice Board.' },
+  DocumentsPage:     { icon: '📁', msg: 'Unable to load the Documents section.' },
+  NewsPage:          { icon: '📣', msg: 'Unable to load the News section.' },
+  VideoGallery:      { icon: '▶️',  msg: 'Unable to load the Video Gallery.' },
+  StaffPage:         { icon: '👨‍🏫', msg: 'Unable to load the Faculty & Staff directory.' },
+  CollegeProfile:    { icon: '🏛️', msg: 'Unable to load the College Profile.' },
+  Contact:           { icon: '📞', msg: 'Unable to load the Contact page.' },
+  PageViewer:        { icon: '📄', msg: 'Unable to load the requested page.' },
+  PlacementsSection: { icon: '🎓', msg: 'Unable to load the Placements section.' },
+  AlertBanner:       { icon: '🔔', msg: '' },
+  DEFAULT:           { icon: '⚠️', msg: 'An unexpected application error occurred.' },
 };
 
 class ErrorBoundary extends React.Component {

@@ -18,12 +18,12 @@ const DEFAULT_CONTACT = {
 };
 
 const DEFAULT_DIRECTORY = [
-  { id:'1', title:"Prof. In-Charge (Bhuda Campus)",      name:"Prof. [Name Here]", phone:"+91 XXXXX XXXXX", icon:"👩‍🏫", order:1 },
-  { id:'2', title:"Prof. In-Charge (Bank More Campus)",  name:"Prof. [Name Here]", phone:"+91 XXXXX XXXXX", icon:"👩‍🏫", order:2 },
-  { id:'3', title:"BCA Coordinator",                     name:"Prof. [Name Here]", phone:"+91 XXXXX XXXXX", icon:"💻",  order:3 },
-  { id:'4', title:"Member, Women's Cell",                name:"Prof. [Name Here]", phone:"+91 XXXXX XXXXX", icon:"🛡️", order:4 },
-  { id:'5', title:"Member, Anti-Ragging Squad",          name:"Prof. [Name Here]", phone:"+91 XXXXX XXXXX", icon:"🛑", order:5 },
-  { id:'6', title:"P.A. to Principal",                   name:"Mr. [Name Here]",   phone:"+91 XXXXX XXXXX", icon:"📝", order:6 },
+  { id:'1', title:"Prof. In-Charge (Bhuda Campus)",      name:"Bhuda Administrative Office", phone:"+91 79033 40991", icon:"🏛️", order:1 },
+  { id:'2', title:"Prof. In-Charge (Bank More Campus)",  name:"Bank More Campus Office",     phone:"+91 326 2304074", icon:"🏫", order:2 },
+  { id:'3', title:"BCA / Vocational Coordinator",        name:"Department of Computer Applications", phone:"+91 79033 40991", icon:"💻",  order:3 },
+  { id:'4', title:"Women's Development Cell",            name:"Convener, Women's Cell",      phone:"+91 79033 40991", icon:"🛡️", order:4 },
+  { id:'5', title:"Anti-Ragging Squad Helpline",         name:"Anti-Ragging Committee",      phone:"1800-180-5522",   icon:"🛑", order:5 },
+  { id:'6', title:"Office of the Principal",             name:"Administrative Section",      phone:"+91 79033 40991", icon:"📝", order:6 },
 ];
 
 // ── Contact Form with Labels, Validation, Toast & Anti-Bot Shield ─────────

@@ -1,4 +1,4 @@
-// src/components/HeroSlider.jsx — 3D Immersive Parallax Slider
+// src/components/HeroSlider.jsx — 3D Immersive Parallax & Mobile Touch-Optimized Slider
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { resolveUrl } from '../utils/resolver';
 
@@ -26,6 +26,10 @@ const HeroSlider = ({ slides = [] }) => {
   const rootRef = useRef(null);
   const rafRef = useRef(null);
 
+  // 👆 Touch Swipe tracking refs
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
+
   const displaySlides = useMemo(() => {
     const list = (!slides || slides.length === 0) ? FALLBACK_SLIDES : slides;
     return [...list].sort((a, b) => (Number(a.order)||0) - (Number(b.order)||0));
@@ -45,10 +49,10 @@ const HeroSlider = ({ slides = [] }) => {
     setLoaded(prev => new Set([...prev, cur, (cur+1)%len, (cur-1+len)%len]));
   }, [cur, len]);
 
-  // 🖱️ 3D Parallax Effect on Mouse Move — throttled with rAF
+  // 🖱️ 3D Parallax Effect on Mouse Move (Desktop only)
   const handleMouseMove = useCallback((e) => {
     if (!rootRef.current || window.innerWidth < 1024) return;
-    if (rafRef.current) return; // skip if frame already pending
+    if (rafRef.current) return;
     rafRef.current = requestAnimationFrame(() => {
       const { left, top, width, height } = rootRef.current.getBoundingClientRect();
       const x = ((e.clientX - left) / width - 0.5) * 30;
@@ -63,6 +67,33 @@ const HeroSlider = ({ slides = [] }) => {
     setOffset({ x: 0, y: 0 });
   };
 
+  // 👆 Touch Gesture Handlers for Mobile Swipe
+  const handleTouchStart = (e) => {
+    if (e.touches && e.touches.length === 1) {
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const deltaX = touchEndX - touchStartX.current;
+    const deltaY = touchEndY - touchStartY.current;
+
+    // Minimum swipe threshold: 40px horizontal dominance
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 40) {
+      if (deltaX < 0) {
+        next();
+      } else {
+        prev();
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
   return (
     <div 
       className="parallax-hs" 
@@ -70,12 +101,16 @@ const HeroSlider = ({ slides = [] }) => {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       <style>{`
         .parallax-hs {
           width: 100%; height: clamp(380px, 70vh, 580px);
           position: relative; overflow: hidden; background: #071124;
           perspective: 1000px;
+          user-select: none;
+          -webkit-user-select: none;
         }
 
         .phs-slide {
@@ -86,12 +121,13 @@ const HeroSlider = ({ slides = [] }) => {
 
         /* ── IMAGE LAYER ── */
         .phs-img-wrap {
-          position: absolute; inset: -50px; /* Bleed for parallax */
+          position: absolute; inset: -50px; /* Bleed for desktop parallax */
           transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
         .phs-img {
           width: 100%; height: 100%; object-fit: cover;
-          filter: brightness(0.7) contrast(1.05);
+          object-position: center 25%;
+          filter: brightness(0.72) contrast(1.05);
           transform: scale(1.1); transition: transform 10s linear;
         }
         .cur .phs-img { transform: scale(1); }
@@ -145,50 +181,180 @@ const HeroSlider = ({ slides = [] }) => {
           text-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
 
-        @media(max-width: 900px) {
-          .phs-title, .phs-sub { white-space: normal; }
-          .phs-content { width: 90%; }
-        }
-
         @keyframes phsFadeUp {
           from { opacity: 0; transform: translateY(30px); filter: blur(10px); }
           to { opacity: 1; transform: none; filter: blur(0); }
         }
 
-        /* ── UI ELEMENTS ── */
+        /* ── UI CONTROLS (DESKTOP) ── */
         .phs-nav {
-          position: absolute; bottom: 40px; right: 40px;
-          display: flex; align-items: center; gap: 20px; z-index: 20;
+          position: absolute; bottom: 35px; right: 45px;
+          display: flex; align-items: center; gap: 12px; z-index: 20;
         }
-        .phs-dots { display: flex; gap: 8px; }
-        .phs-dot {
-          width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.3);
-          cursor: pointer; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); border: none; padding: 0;
-        }
-        .phs-dot.active { width: 18px; border-radius: 4px; background: #f4a023; box-shadow: 0 0 10px rgba(244,160,35,0.4); }
 
-        .phs-arrows { display: flex; gap: 8px; }
+        /* Arrows stay per user request: "nhi arreow jo tha wo rehne do" */
+        .phs-arrows {
+          display: flex;
+          gap: 8px;
+        }
         .phs-btn {
-          width: 40px; height: 40px; border-radius: 50%;
-          background: rgba(255,255,255,0.04); color: #fff;
-          border: 1px solid rgba(255,255,255,0.08); cursor: pointer;
-          transition: all 0.3s; display: flex; align-items: center; justify-content: center;
-          backdrop-filter: blur(8px); font-size: 14px;
+          width: 38px !important;
+          height: 38px !important;
+          min-width: 38px !important;
+          min-height: 38px !important;
+          border-radius: 50%;
+          background: rgba(15, 35, 71, 0.65);
+          color: #ffffff;
+          border: 1.5px solid rgba(255, 255, 255, 0.25);
+          cursor: pointer;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          font-size: 15px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+          padding: 0;
         }
-        .phs-btn:hover { background: #f4a023; color: #0f2347; transform: scale(1.1); border-color: #f4a023; }
+        .phs-btn:hover {
+          background: #f4a023;
+          color: #0f2347;
+          border-color: #f4a023;
+          transform: scale(1.08);
+          box-shadow: 0 6px 20px rgba(244, 160, 35, 0.4);
+        }
 
+        /* Hide the big circle navigation dots on desktop */
+        .phs-dots {
+          display: none !important;
+        }
+
+        .phs-dots-mobile { display: none; }
+
+        /* ══════════════════════════════════════════════════ */
+        /* ██  MOBILE VIEWPORT OPTIMIZATION (< 768px)       ██ */
+        /* ══════════════════════════════════════════════════ */
         @media(max-width: 768px) {
-          .parallax-hs { height: 320px; }
-          .phs-content { bottom: 0; left: 0; width: 100%; max-width: 100%; border-radius: 0; z-index: 100; }
-          .phs-glass { border-radius: 0; padding: 18px 15px; border-left: none; border-top: 3px solid #f4a023; background: rgba(15,35,71,0.88); backdrop-filter: blur(15px); }
-          .phs-title { font-size: 18px; width: 100%; white-space: normal; line-height: 1.2; text-align: center; margin-bottom: 6px; letter-spacing: -0.5px; }
-          .phs-sub { font-size: 12px; text-align: center; line-height: 1.35; opacity: 0.8; margin-top: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+          .parallax-hs {
+            /* Natural widescreen proportion preserving photo content */
+            height: clamp(230px, 62vw, 310px);
+          }
+          /* Reset desktop parallax bleed and artificial zoom */
+          .phs-img-wrap {
+            inset: 0 !important;
+            transform: none !important;
+          }
+          .phs-img {
+            transform: none !important;
+            object-position: center 22% !important;
+            filter: brightness(0.78) contrast(1.04);
+          }
+          .cur .phs-img {
+            transform: none !important;
+          }
+          /* Content layer: Sleek subtle bottom gradient */
+          .phs-content {
+            bottom: 0; left: 0; width: 100%; max-width: 100%;
+            z-index: 10; transform: none !important;
+          }
+          .phs-glass {
+            border-radius: 0;
+            border: none;
+            border-top: 2px solid rgba(244,160,35,0.7);
+            background: linear-gradient(to top, rgba(7,17,36,0.94) 0%, rgba(7,17,36,0.75) 60%, transparent 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 32px 14px 10px 14px;
+            box-sizing: border-box;
+          }
+          .phs-title {
+            font-size: clamp(14px, 4.2vw, 17px);
+            line-height: 1.25;
+            margin: 0 0 3px 0;
+            text-align: left;
+            letter-spacing: -0.3px;
+            padding-right: 76px; /* Prevents overlap with navigation arrows */
+            white-space: normal;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+          .phs-sub {
+            font-size: 11px;
+            text-align: left;
+            line-height: 1.35;
+            opacity: 0.85;
+            margin: 0;
+            padding-right: 76px; /* Prevents overlap with navigation arrows */
+            white-space: normal;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
           .phs-badge { display: none; }
-          .phs-nav { width: 100%; right: 0; bottom: 8px; display: flex; justify-content: flex-end; padding-right: 15px; }
-          .phs-arrows { display: flex; gap: 6px; }
-          .phs-btn { width: 32px; height: 32px; font-size: 11px; }
+          
+          /* Clean navigation controls positioned at bottom right without overlap */
+          .phs-nav {
+            position: absolute;
+            right: 12px;
+            bottom: 8px;
+            width: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 25;
+            padding-right: 0;
+          }
+          .phs-arrows { display: flex; gap: 5px; }
+          .phs-btn {
+            width: 28px !important;
+            height: 28px !important;
+            min-width: 28px !important;
+            min-height: 28px !important;
+            font-size: 11px;
+            background: rgba(15,35,71,0.75);
+            border: 1px solid rgba(255,255,255,0.22);
+            border-radius: 50%;
+            padding: 0;
+          }
+          .phs-dots { display: none; }
+
+          /* Sleek slide counter pill on mobile top right */
+          .phs-dots-mobile {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            z-index: 20;
+            background: rgba(7, 17, 36, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 3px 7px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.15);
+          }
+          .phs-dot-m {
+            width: 5px; height: 5px; border-radius: 50%;
+            background: rgba(255,255,255,0.35);
+            transition: all 0.3s ease;
+          }
+          .phs-dot-m.active {
+            width: 13px; border-radius: 3px; background: #f4a023;
+          }
         }
       `}</style>
+
+      {/* ── TOP-RIGHT MOBILE SLIDE INDICATOR ── */}
+      <div className="phs-dots-mobile" aria-hidden="true">
+        {displaySlides.map((_, i) => (
+          <span key={i} className={`phs-dot-m ${i === cur ? 'active' : ''}`} />
+        ))}
+      </div>
 
       {displaySlides.map((s, i) => {
         const { webp, jpg } = resolveImage(s.image);
@@ -223,7 +389,7 @@ const HeroSlider = ({ slides = [] }) => {
                 >
                   <div className="phs-glass">
                     <span className="phs-badge">Featured Update</span>
-                    <h1 className="phs-title">{s.title}</h1>
+                    <h2 className="phs-title">{s.title}</h2>
                     <p className="phs-sub">{s.subtitle}</p>
                   </div>
                 </div>
@@ -234,6 +400,16 @@ const HeroSlider = ({ slides = [] }) => {
       })}
 
       <div className="phs-nav">
+        <div className="phs-dots">
+          {displaySlides.map((_, i) => (
+            <button 
+              key={i}
+              className={`phs-dot ${i === cur ? 'active' : ''}`}
+              onClick={() => setCur(i)}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
+        </div>
         <div className="phs-arrows">
           <button className="phs-btn" aria-label="Previous Slide" onClick={prev}>←</button>
           <button className="phs-btn" aria-label="Next Slide" onClick={next}>→</button>

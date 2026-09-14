@@ -123,10 +123,10 @@ const DEFAULT_CONTENT = {
   },
   hindi: {
     fullName: 'Department of Hindi', 
-    tagline: 'Hindi: Sahitya, Sanskriti aur Shaurya.',
-    about: 'Through the Department of Hindi, we take Hindi literature, poetry, and Indian culture to the younger generation. Our focus is on the purity of the language and the depth of its literature.',
-    vision: 'Hindi bhasha aur sahitya ka vishv-star par prachar aur prasar.',
-    mission: 'Vidhyarthiyon mein hindi sahitya ke prati ruchi aur critical research ki bhavna ko jagrit karna.',
+    tagline: 'Literature, Cultural Heritage, and Linguistic Excellence.',
+    about: 'The Department of Hindi is committed to imparting profound knowledge of Hindi literature, poetic traditions, and linguistic heritage. Our curriculum emphasizes grammatical rigor, creative expression, and deep literary scholarship.',
+    vision: 'Promoting Hindi language and literature with academic distinction on national and international forums.',
+    mission: 'Fostering literary appreciation, creative writing, and research orientation among students in Hindi literary studies.',
     stats: [
       { label: 'Language', value: 'National' },
       { label: 'Focus', value: 'Sahitya' },

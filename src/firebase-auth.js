@@ -84,14 +84,14 @@ export async function loginAdmin(usernameOrEmail, password) {
     }
 
     // 3. Fallback: If Firebase Email/Password is not enabled in Firebase Console (auth/operation-not-allowed)
-    // or auth configuration is missing, use verified admin authorization bridge so college admins are never locked out
+    // or auth configuration is missing, use environment-configured admin credentials
     if (err.code === "auth/operation-not-allowed" || err.code === "auth/configuration-not-found") {
-      console.warn("[FirebaseAuth] Email/Password provider not enabled in Firebase Console yet. Using verified credentials bridge.");
+      console.warn("[FirebaseAuth] Email/Password provider not enabled in Firebase Console. Checking configured admin credentials.");
       const adminUser = (import.meta.env.VITE_ADMIN_USER || "admin").toLowerCase();
-      const adminPass = import.meta.env.VITE_ADMIN_PASS || "admin123";
+      const adminPass = import.meta.env.VITE_ADMIN_PASS;
       
       const isUserMatch = cleanInput === adminUser || AUTHORIZED_ADMIN_EMAILS.includes(targetEmail);
-      const isPassMatch = cleanPass === adminPass || cleanPass === "admin123";
+      const isPassMatch = Boolean(adminPass && cleanPass === adminPass);
 
       if (isUserMatch && isPassMatch) {
         sessionStorage.removeItem('gnc_admin_auth');
@@ -103,7 +103,7 @@ export async function loginAdmin(usernameOrEmail, password) {
           isLocalBridge: true
         };
       } else {
-        throw new Error("Invalid username or password.");
+        throw new Error(adminPass ? "Invalid administrator username or password." : "Authentication service unavailable. Please configure Firebase Authentication or administrative credentials.");
       }
     }
 

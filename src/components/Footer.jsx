@@ -410,7 +410,7 @@ const Footer = memo(() => {
               <li><Link to="/about-us/college-profile">College Profile</Link></li>
               <li><Link to="/about-us/sikh-heritage">Sikh Heritage</Link></li>
               <li><Link to="/naac/aqar">AQAR 2024</Link></li>
-              <li><Link to="/p/contact-directory">Directory</Link></li>
+              <li><Link to="/contact">Directory</Link></li>
             </ul>
           </SA>
           <SA variant="up" delay="sa-d2" className="f-col">
@@ -471,6 +471,11 @@ const Footer = memo(() => {
         </SA>
         <div className="f-final-line">
           <div>© {new Date().getFullYear()} <b>Guru Nanak College.</b> All rights reserved.</div>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center', fontSize: 12 }}>
+            <Link to="/privacy-policy" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}>Privacy Policy</Link>
+            <span style={{ color: '#475569' }}>•</span>
+            <Link to="/terms-of-service" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}>Terms of Service</Link>
+          </div>
           <div className="f-dev-pill">⚡ <b>React + Firebase</b> | Dev: <b>Pankaj Kumar</b></div>
         </div>
       </div>

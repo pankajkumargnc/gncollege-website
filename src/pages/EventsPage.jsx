@@ -79,8 +79,11 @@ export default function EventsPage({ headless }) {
     return ['All', ...Array.from(s).sort((a,b) => b-a)];
   }, [events]);
 
-  const filtered = useMemo(() => {
+  useEffect(() => {
     setCurrentPage(1);
+  }, [tab, search, selYear]);
+
+  const filtered = useMemo(() => {
     const now = new Date();
     return events.filter(e => {
       // ── Content Scheduling: hide scheduled/expired events ──
@@ -234,7 +237,9 @@ export default function EventsPage({ headless }) {
                         const isUp = ev.status === 'upcoming';
                         const exp  = expandId === ev.id;
                         const plainText = (ev.displayDesc || '').replace(/<[^>]*>?/gm, '');
-                        const imgSrc    = resolveUrl(ev.displayImage);
+                        const rawImg    = ev.displayImage;
+                        const isValid   = rawImg && !rawImg.includes('test.webp') && !rawImg.includes('test2.webp');
+                        const imgSrc    = isValid ? resolveUrl(rawImg) : null;
                         // ✅ FIX: only show report button if link actually exists
                         const hasReport = !!ev.reportLink;
 

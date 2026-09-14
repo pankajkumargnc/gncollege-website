@@ -48,32 +48,37 @@ export default function VirtualTour() {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Initialize Photo-Sphere-Viewer
-    const viewer = new Viewer({
-      container: containerRef.current,
-      panorama: activeLocation.image,
-      caption: `${activeLocation.title} — Guru Nanak College`,
-      loadingTxt: 'Loading 360° Panorama...',
-      touchmoveTwoFingers: false,
-      mousewheelCtrlKey: false,
-      defaultZoomLvl: 50,
-      navbar: [
-        'zoom',
-        'move',
-        'caption',
-        'fullscreen',
-      ],
-    });
+    let viewer = null;
+    try {
+      viewer = new Viewer({
+        container: containerRef.current,
+        panorama: activeLocation.image,
+        caption: `${activeLocation.title} — Guru Nanak College`,
+        loadingTxt: 'Loading 360° Panorama...',
+        touchmoveTwoFingers: false,
+        mousewheelCtrlKey: false,
+        defaultZoomLvl: 50,
+        navbar: [
+          'zoom',
+          'move',
+          'caption',
+          'fullscreen',
+        ],
+      });
 
-    viewerRef.current = viewer;
+      viewerRef.current = viewer;
 
-    viewer.addEventListener('ready', () => {
+      viewer.addEventListener('ready', () => {
+        setLoading(false);
+      });
+    } catch (e) {
+      console.warn('[VirtualTour] 360 viewer initialization note:', e);
       setLoading(false);
-    });
+    }
 
     return () => {
       try {
-        viewer.destroy();
+        if (viewer) viewer.destroy();
       } catch (e) {
         console.warn('Error destroying 360 viewer:', e);
       }

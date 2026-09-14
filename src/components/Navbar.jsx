@@ -495,7 +495,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
               alignItems: 'flex-start',
               minWidth: 0 // ✅ Allow text truncation if needed
             }}>
-              <h1 className="shimmering-title" style={{
+              <div className="shimmering-title" style={{
                 margin: '0 0 5px 0',
                 // ✅ FLUID TYPE HERE FOR EXTREME RESPONSIVENESS
                 fontSize: isMobile ? 'clamp(11px, 3.5vw, 14px)' : 'clamp(16px, 1.8vw, 21.5px)',
@@ -507,7 +507,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                 lineHeight: '1.1',
               }}>
                 GURU NANAK COLLEGE, DHANBAD
-              </h1>
+              </div>
 
               {!isMobile && (
                 <p style={{

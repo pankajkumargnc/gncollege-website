@@ -74,8 +74,11 @@ export default function DocumentsPage() {
     return m;
   }, [docs]);
 
-  const filtered = useMemo(() => {
+  useEffect(() => {
     setCurrentPage(1);
+  }, [selYear, selMonth, selType, search]);
+
+  const filtered = useMemo(() => {
     return docs.filter(d => {
       const dt = getTS(d.createdAt);
       if (selYear  !== 'All' && dt.getFullYear() !== Number(selYear))         return false;
@@ -119,7 +122,7 @@ export default function DocumentsPage() {
         <div className="hero-overlay" />
         <div className="hero-content anim-fade-in">
           <h1 className="hero-title">📁 Document Archive</h1>
-          <p className="hero-subtitle">Syllabus, circulars, reports aur important documents — year aur type wise filter karo</p>
+          <p className="hero-subtitle">Official syllabi, circulars, institutional reports, and regulatory archives filtered by year and category</p>
         </div>
       </header>
 
@@ -153,7 +156,7 @@ export default function DocumentsPage() {
                 <div style={{ flex:1, minWidth:200, position:'relative' }}>
                   <span style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', opacity:.4, fontSize:16, pointerEvents:'none' }}>🔍</span>
                   <label htmlFor="doc-search" className="sr-only">Search documents</label>
-                  <input id="doc-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Document search karo..."
+                  <input id="doc-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search documents by title or keyword..."
                     style={{ width:'100%', padding:'10px 14px 10px 38px', border:'2px solid #e2e8f0', borderRadius:10, fontSize:14, fontFamily:'inherit', background:'#f8fafc', outline:'none', boxSizing:'border-box', transition:'border-color .2s' }}
                     onFocus={e => e.target.style.borderColor=gold}
                     onBlur={e  => e.target.style.borderColor='#e2e8f0'} />
@@ -219,13 +222,13 @@ export default function DocumentsPage() {
               {loading ? (
                 <div style={{ textAlign:'center', padding:'60px 20px' }}>
                   <div style={{ width:40, height:40, border:`4px solid ${gold}`, borderTop:'4px solid transparent', borderRadius:'50%', animation:'spin .8s linear infinite', margin:'0 auto 14px' }} />
-                  <p style={{ color:'#718096', fontWeight:600 }}>Documents load ho rahe hain...</p>
+                  <p style={{ color:'#718096', fontWeight:600 }}>Loading official documents...</p>
                 </div>
               ) : filtered.length === 0 ? (
                 <div style={{ textAlign:'center', padding:'50px 20px' }}>
                   <div style={{ fontSize:44, marginBottom:10 }}>📂</div>
-                  <h3 style={{ color:navy, fontWeight:800, margin:'0 0 6px' }}>Koi document nahi mila</h3>
-                  <p style={{ color:'#718096', fontSize:13.5 }}>Filter ya search change karo</p>
+                  <h3 style={{ color:navy, fontWeight:800, margin:'0 0 6px' }}>No documents found</h3>
+                  <p style={{ color:'#718096', fontSize:13.5 }}>Try adjusting your search criteria or resetting filters</p>
                 </div>
               ) : view === 'grid' ? (
 

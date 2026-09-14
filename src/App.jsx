@@ -295,7 +295,7 @@ export default function App() {
         </div>
       )}
 
-      <main style={{ minHeight: '80vh', background: isDark ? '#060e1c' : '#f4f7f9' }}>
+      <main id="main-content" tabIndex="-1" style={{ minHeight: '80vh', background: isDark ? '#060e1c' : '#f4f7f9', outline: 'none' }}>
         <AppRoutes 
           {...data} 
           counterData={counterData}

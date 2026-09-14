@@ -1032,7 +1032,16 @@ img.loaded, img[loading="lazy"][src] { background: none; animation: none; }
 button, a, [role="button"], input[type="checkbox"], input[type="radio"] {
   min-height: 44px; min-width: 44px;
 }
-p a, li a, td a { min-height: unset; min-width: unset; }
+p a, li a, td a,
+.premium-topbar a, .premium-topbar button,
+.navbar a, .navbar button,
+.tb-social-disc, .tb-dark-btn, .tb-hud-item, .tb-quote-nav, .tb-heritage-link, .tb-contact-link,
+.lang-btn, .lang-toggle-wrapper button,
+.qan-item, .qan-toggle,
+.phs-dot, .phs-btn, .phs-nav button,
+.ticker-nav-btn, .gnc-ticker-root a {
+  min-height: unset; min-width: unset;
+}
 
 /* ── High Contrast Mode ── */
 @media (forced-colors: active) {

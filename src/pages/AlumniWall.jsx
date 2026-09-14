@@ -16,6 +16,114 @@ const BREAKPOINTS = {
   700: 1
 };
 
+function AlumniCardItem({ a }) {
+  const [photoFailed, setPhotoFailed] = useState(false);
+  const showPhoto = a.photo && !photoFailed;
+
+  return (
+    <div className="alumni-card">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
+        {showPhoto ? (
+          <img
+            src={resolveUrl(a.photo)}
+            alt={a.name}
+            style={{
+              width: 58,
+              height: 58,
+              borderRadius: '50%',
+              objectFit: 'cover',
+              border: `2px solid ${GOLD}`,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+            }}
+            onError={() => setPhotoFailed(true)}
+          />
+        ) : (
+          <div style={{
+            width: 58,
+            height: 58,
+            borderRadius: '50%',
+            background: `${NAVY}15`,
+            color: NAVY,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 26,
+            fontWeight: 900
+          }}>
+            🎓
+          </div>
+        )}
+
+        <div>
+          <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: NAVY }}>
+            {a.name}
+          </h3>
+          <div style={{ fontSize: 13, color: '#64748b', fontWeight: 600, marginTop: 2 }}>
+            {a.role} {a.company ? `@ ${a.company}` : ''}
+          </div>
+        </div>
+      </div>
+
+      {/* Testimonial Quote */}
+      {a.testimonial && (
+        <div style={{
+          background: '#f8fafc',
+          borderLeft: `3px solid ${GOLD}`,
+          padding: '12px 14px',
+          borderRadius: '0 10px 10px 0',
+          marginBottom: 16,
+          position: 'relative'
+        }}>
+          <Quote size={16} color={GOLD} style={{ opacity: 0.6, marginBottom: 4 }} />
+          <p style={{ margin: 0, fontSize: 13, color: '#334155', fontStyle: 'italic', lineHeight: 1.6 }}>
+            "{a.testimonial}"
+          </p>
+        </div>
+      )}
+
+      {/* Badges / Meta Info */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+        {a.department && (
+          <span style={{
+            background: `${NAVY}08`,
+            color: NAVY,
+            fontSize: 11,
+            fontWeight: 700,
+            padding: '4px 10px',
+            borderRadius: 6
+          }}>
+            🏛️ {a.department}
+          </span>
+        )}
+        {a.batch && (
+          <span style={{
+            background: '#f1f5f9',
+            color: '#64748b',
+            fontSize: 11,
+            fontWeight: 700,
+            padding: '4px 10px',
+            borderRadius: 6
+          }}>
+            Batch {a.batch}
+          </span>
+        )}
+        {a.package && (
+          <span style={{
+            background: '#dcfce7',
+            color: '#15803d',
+            fontSize: 11,
+            fontWeight: 800,
+            padding: '4px 10px',
+            borderRadius: 6
+          }}>
+            💰 {a.package}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AlumniWall() {
   const [alumni, setAlumni] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -187,106 +295,7 @@ export default function AlumniWall() {
             columnClassName="alumni-masonry-column"
           >
             {filteredAlumni.map((a) => (
-              <div key={a.id} className="alumni-card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
-                  {a.photo ? (
-                    <img
-                      src={resolveUrl(a.photo)}
-                      alt={a.name}
-                      style={{
-                        width: 58,
-                        height: 58,
-                        borderRadius: '50%',
-                        objectFit: 'cover',
-                        border: `2px solid ${GOLD}`,
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
-                      }}
-                      onError={e => { e.target.style.display = 'none'; }}
-                    />
-                  ) : (
-                    <div style={{
-                      width: 58,
-                      height: 58,
-                      borderRadius: '50%',
-                      background: `${NAVY}15`,
-                      color: NAVY,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 26,
-                      fontWeight: 900
-                    }}>
-                      🎓
-                    </div>
-                  )}
-
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: NAVY }}>
-                      {a.name}
-                    </h3>
-                    <div style={{ fontSize: 13, color: '#64748b', fontWeight: 600, marginTop: 2 }}>
-                      {a.role} {a.company ? `@ ${a.company}` : ''}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Testimonial Quote */}
-                {a.testimonial && (
-                  <div style={{
-                    background: '#f8fafc',
-                    borderLeft: `3px solid ${GOLD}`,
-                    padding: '12px 14px',
-                    borderRadius: '0 10px 10px 0',
-                    marginBottom: 16,
-                    position: 'relative'
-                  }}>
-                    <Quote size={16} color={GOLD} style={{ opacity: 0.6, marginBottom: 4 }} />
-                    <p style={{ margin: 0, fontSize: 13, color: '#334155', fontStyle: 'italic', lineHeight: 1.6 }}>
-                      "{a.testimonial}"
-                    </p>
-                  </div>
-                )}
-
-                {/* Badges / Meta Info */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-                  {a.department && (
-                    <span style={{
-                      background: `${NAVY}08`,
-                      color: NAVY,
-                      fontSize: 11,
-                      fontWeight: 700,
-                      padding: '4px 10px',
-                      borderRadius: 6
-                    }}>
-                      🏛️ {a.department}
-                    </span>
-                  )}
-                  {a.batch && (
-                    <span style={{
-                      background: '#f1f5f9',
-                      color: '#64748b',
-                      fontSize: 11,
-                      fontWeight: 700,
-                      padding: '4px 10px',
-                      borderRadius: 6
-                    }}>
-                      Batch {a.batch}
-                    </span>
-                  )}
-                  {a.package && (
-                    <span style={{
-                      background: '#dcfce7',
-                      color: '#15803d',
-                      fontSize: 11,
-                      fontWeight: 800,
-                      padding: '4px 10px',
-                      borderRadius: 6
-                    }}>
-                      💰 {a.package}
-                    </span>
-                  )}
-                </div>
-              </div>
+              <AlumniCardItem key={a.id} a={a} />
             ))}
           </Masonry>
         )}

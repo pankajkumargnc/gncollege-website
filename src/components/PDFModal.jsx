@@ -308,7 +308,7 @@ export default function PDFModal({ url, title = "Document", onClose }) {
                   fontWeight: 800,
                 }}
               >
-                PDF load nahi ho saka
+                Unable to Display Document
               </h3>
               <p
                 style={{
@@ -320,7 +320,7 @@ export default function PDFModal({ url, title = "Document", onClose }) {
                   margin: 0,
                 }}
               >
-                CORS restriction ya network issue ho sakta hai.
+                The document could not be previewed directly due to network or provider restrictions.
               </p>
               <div
                 style={{

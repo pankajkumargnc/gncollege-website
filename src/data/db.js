@@ -276,7 +276,7 @@ export const navLinks = [
 // ✅ FIX: Added id to each slide — some components may use .id for keying
 export const sliderSlides = [
   { id: 1, text: '🏆 Winner - 4th Inter-College Youth Festival' },
-  { id: 2, text: '🎓 Admission 2024-28 Now Open - Apply Today!' },
+  { id: 2, text: '🎓 Admissions Open for FYUGP 2026-30 - Apply Today!' },
   { id: 3, text: '✅ NAAC Accredited Institution - Excellence in Education' },
   { id: 4, text: '💻 AICTE Approved BCA & BBA Courses Available' },
   { id: 5, text: '📚 Affiliated to B.B.M.K. University, Dhanbad' },

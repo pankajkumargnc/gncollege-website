@@ -26,8 +26,9 @@ function getSharedObserver() {
   return _sharedObserver;
 }
 
-const LazyImg = memo(function LazyImg({ src, alt = '', className = '', style = {}, width, height, onClick }) {
+const LazyImg = memo(function LazyImg({ src, alt = '', className = '', style = {}, width, height, onClick, fallbackIcon = '🖼️' }) {
   const [loaded, setLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const [inView, setInView] = useState(false);
   const imgRef = useRef(null);
 
@@ -52,7 +53,7 @@ const LazyImg = memo(function LazyImg({ src, alt = '', className = '', style = {
 
   return (
     <div ref={imgRef} className={className} style={{ position: 'relative', overflow: 'hidden', ...style }} onClick={onClick}>
-      {!loaded && (
+      {!loaded && !hasError && (
         <div style={{
           position: 'absolute', inset: 0,
           background: 'linear-gradient(110deg, #f0f0f0 25%, #e0e0e0 37%, #f0f0f0 63%)',
@@ -61,7 +62,21 @@ const LazyImg = memo(function LazyImg({ src, alt = '', className = '', style = {
           borderRadius: 'inherit',
         }} />
       )}
-      {inView && (
+      {hasError && (
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: '#f1f5f9',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#94a3b8',
+          fontSize: 24,
+          borderRadius: 'inherit'
+        }}>
+          {fallbackIcon}
+        </div>
+      )}
+      {inView && !hasError && (
         <img
           src={src}
           alt={alt}
@@ -70,7 +85,10 @@ const LazyImg = memo(function LazyImg({ src, alt = '', className = '', style = {
           loading="lazy"
           decoding="async"
           onLoad={() => setLoaded(true)}
-          onError={(e) => { e.target.style.display = 'none'; }}
+          onError={() => {
+            setHasError(true);
+            setLoaded(true);
+          }}
           style={{
             width: '100%', height: '100%', objectFit: 'cover',
             opacity: loaded ? 1 : 0,

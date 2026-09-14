@@ -594,9 +594,9 @@ export function GoverningBody() {
             <h2 className="section-heading">GB Meeting Reports</h2>
             <div className="heading-underline" />
             <p style={{ color:'#64748b', fontSize:14, marginBottom:20, lineHeight:1.7 }}>
-              🔒 <strong>Admin Panel → GB Meetings</strong> tab se date-wise PDF reports yahan automatically dikhte hain.
+              Official date-wise Governing Body meeting minutes, proceedings, and resolutions.
             </p>
-            <MeetingPDFList collectionName="gb_meetings" accentColor={N} emptyText="Abhi tak koi GB Meeting report upload nahi ki gayi." />
+            <MeetingPDFList collectionName="gb_meetings" accentColor={N} emptyText="No Governing Body meeting reports have been uploaded yet." />
           </div>
         </Fade>
       </PageLayout>
@@ -677,9 +677,9 @@ export function StaffCouncil() {
             <h2 className="section-heading">Staff Council Meeting Reports</h2>
             <div className="heading-underline" />
             <p style={{ color:'#64748b', fontSize:14, marginBottom:20, lineHeight:1.7 }}>
-              🔒 <strong>Admin Panel → Staff Council</strong> tab se date-wise PDF reports yahan automatically dikhte hain.
+              Official date-wise Staff Council meeting minutes, proceedings, and circulars.
             </p>
-            <MeetingPDFList collectionName="staff_council" accentColor="#1a3a7c" emptyText="Abhi tak koi Staff Council Meeting report upload nahi ki gayi." />
+            <MeetingPDFList collectionName="staff_council" accentColor="#1a3a7c" emptyText="No Staff Council meeting reports have been uploaded yet." />
           </div>
         </Fade>
       </PageLayout>
@@ -687,12 +687,12 @@ export function StaffCouncil() {
   );
 }
 export function AuditReport() {
-  useScrollTop();
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPdf, setSelectedPdf] = useState(null);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const q = query(
       collection(db, 'pdfReports'),
       where('targetPage', '==', 'audit-report'),
@@ -723,8 +723,8 @@ export function AuditReport() {
             ) : docs.length === 0 ? (
               <div style={{ padding:32, textAlign:'center', color:'#94a3b8', background:'#f8fafc', borderRadius:12, border:'1px solid #e2e8f0' }}>
                 <div style={{ fontSize:36, marginBottom:10 }}>📊</div>
-                <div style={{ fontWeight:700, marginBottom:6 }}>Koi Audit Report upload nahi ki gayi abhi tak.</div>
-                <div style={{ fontSize:13 }}>Admin Panel → Documents → Target Page: Audit Report se upload karein.</div>
+                <div style={{ fontWeight:700, marginBottom:6 }}>No audit reports have been uploaded yet.</div>
+                <div style={{ fontSize:13 }}>Annual financial statements and audit certificates will appear here once published.</div>
               </div>
             ) : (
               <div style={{ display:'flex', flexDirection:'column', gap:14, marginTop:20 }}>
@@ -765,7 +765,7 @@ export function AuditReport() {
             )}
 
             <div style={{ marginTop:24, padding:'14px 18px', background:'#fffbeb', border:'1.5px dashed #f59e0b', borderRadius:10, fontSize:13, color:'#92400e' }}>
-              💡 <strong>Admin ke liye:</strong> Admin Panel → Documents → Type: Report → Target Page: <code style={{ background:'#fef3c7', padding:'1px 6px', borderRadius:4 }}>Audit Report (/about-us/audit-report)</code> select karein.
+              💡 <strong>Administrator Guidance:</strong> Publish annual audit statements via Admin Panel → Documents → Target Page: <code style={{ background:'#fef3c7', padding:'1px 6px', borderRadius:4 }}>Audit Report (/about-us/audit-report)</code>.
             </div>
           </div>
         </Fade>

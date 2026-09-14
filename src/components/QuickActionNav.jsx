@@ -14,7 +14,7 @@ const G = COLORS.gold || '#f4a023';
 const ACTIONS = [
   { label:'Principal Message', icon: <User size={20} />, href:'#/about-us/principal-message' },
   { label:'Admission Rules',   icon: <GraduationCap size={20} />, href:'#/admission/rule' },
-  { label:'Departments',       icon: <Building2 size={20} />, href:'#/academics/course-offered' },
+  { label:'Departments',       icon: <Building2 size={20} />, href:'#/academics/departments' },
   { label:'NSS / NCC',         icon: <Medal size={20} />, href:'#/activity/nss' },
   { label:'Syllabus',          icon: <BookOpen size={20} />, href:'#/syllabus' },
   { label:'Photo Gallery',     icon: <Camera size={20} />, href:'#/gallery' },
@@ -99,6 +99,7 @@ export default function QuickActionNav() {
         .qan-sidebar.mobile-closed {
           transform:translateY(-50%) translateX(calc(100% + ${TOGGLE_W}px));
           opacity:0; pointer-events:none;
+          visibility: hidden;
         }
 
         /* Desktop — no toggle, sidebar at right:0 */
