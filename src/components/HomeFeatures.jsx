@@ -32,6 +32,14 @@ const DEPTS = [
 ];
 
 const CSS = `
+  /* ── Mobile: Facilities 2-col compact ── */
+  @media(max-width: 550px) {
+    .hf-fac-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+    .hf-fc { padding: 18px 10px !important; border-radius: 16px !important; gap: 8px !important; }
+    .hf-fc-icon { font-size: 28px !important; }
+    .hf-fc-name { font-size: 10px !important; letter-spacing: 0.5px !important; }
+  }
+
   .hf-wrap { font-family:"Plus Jakarta Sans", "Inter", sans-serif; }
 
   /* ── Glow card ── */
@@ -178,8 +186,23 @@ const CSS = `
   .gc:hover .hf-fc-icon { transform: scale(1.3) rotate(-10deg); }
 
   @media(max-width: 1250px){ .hf-dept-grid { grid-template-columns: repeat(3, 1fr); } }
-  @media(max-width: 900px){ .hf-dept-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media(max-width: 550px){ .hf-dept-grid { grid-template-columns: 1fr; } .hf-dc { height: 420px; } }
+  @media(max-width: 900px){ .hf-dept-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+  @media(max-width: 550px){
+    .hf-dept-sec { padding: clamp(40px, 8vw, 60px) 12px !important; }
+    .hf-dept-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .hf-dc { height: 180px; border-radius: 16px; }
+    .hf-dc-content { padding: 12px 14px; }
+    .hf-dc-icon-box { width: 36px; height: 36px; border-radius: 10px; font-size: 18px; margin-bottom: 8px; }
+    .hf-dc-name { font-size: 12.5px; margin-bottom: 6px; letter-spacing: -0.3px; }
+    .hf-dc-btn { font-size: 9px; letter-spacing: 0.8px; }
+    .hf-dc-btn::after { font-size: 12px; }
+    .hf-dc-badge { top: 10px; left: 10px; font-size: 7.5px; padding: 3px 8px; letter-spacing: 1px; }
+    .hf-dc-sym { font-size: 60px; top: -5px; right: -5px; }
+    .hf-section-header { margin-bottom: clamp(24px, 4vw, 36px) !important; }
+    .hf-sec-h { font-size: clamp(24px, 6vw, 32px) !important; letter-spacing: -1px !important; }
+    .hf-sec-sub { font-size: 12.5px !important; }
+    .hf-sec-label { font-size: 9px !important; padding: 5px 14px !important; letter-spacing: 1.5px !important; }
+  }
 `;
 
 const SA2 = ({ children, variant='up', d='', tag:Tag='div', style={}, className='' }) => {
@@ -262,7 +285,7 @@ export default function HomeFeatures() {
               <p className="hf-sec-sub">State-of-the-art infrastructure and premium facilities dedicated to holistic student development.</p>
             </div>
           </SA2>
-          <div style={{ display:'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 180px), 1fr))', gap: 20 }}>
+          <div className="hf-fac-grid" style={{ display:'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 180px), 1fr))', gap: 20 }}>
             {(facilities || []).map((ft, i) => (
               <div key={i} className="gc r30">
                 <div className="hf-fc">

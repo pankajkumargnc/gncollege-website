@@ -1360,3 +1360,16 @@ img {
   .premium-hero, .contact-header { background: #0f2347 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   a[href]::after { content: " (" attr(href) ")"; font-size: 0.8em; color: #666; }
 }
+
+/* ══ Accessibility Utilities ══ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

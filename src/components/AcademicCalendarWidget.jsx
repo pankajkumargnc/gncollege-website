@@ -184,12 +184,15 @@ export default function AcademicCalendarWidget({ events = [] }) {
           <button
             type="button"
             onClick={prevMonth}
+            aria-label="Previous month"
             style={{
               background: 'rgba(255,255,255,0.15)',
               border: 'none',
               color: '#fff',
-              width: 34,
-              height: 34,
+              width: 44,
+              height: 44,
+              minWidth: 44,
+              minHeight: 44,
               borderRadius: 8,
               display: 'flex',
               alignItems: 'center',
@@ -197,17 +200,20 @@ export default function AcademicCalendarWidget({ events = [] }) {
               cursor: 'pointer'
             }}
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={20} />
           </button>
           <button
             type="button"
             onClick={nextMonth}
+            aria-label="Next month"
             style={{
               background: 'rgba(255,255,255,0.15)',
               border: 'none',
               color: '#fff',
-              width: 34,
-              height: 34,
+              width: 44,
+              height: 44,
+              minWidth: 44,
+              minHeight: 44,
               borderRadius: 8,
               display: 'flex',
               alignItems: 'center',
@@ -215,7 +221,7 @@ export default function AcademicCalendarWidget({ events = [] }) {
               cursor: 'pointer'
             }}
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={20} />
           </button>
         </div>
       </div>

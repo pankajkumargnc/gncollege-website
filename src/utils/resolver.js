@@ -107,22 +107,42 @@ export function resolveUrl(input) {
   const trimmed = target.trim();
   if (!trimmed) return '';
 
+  // Normalize backslashes (Windows paths)
+  const normalized = trimmed.replace(/\\/g, '/');
+
+  // Check if URL points to a known local asset file
+  const KNOWN_LOCAL_ASSETS = [
+    'green1.webp', 'green2.webp', 'green3.webp', 'green4.webp', 'green5.webp', 'green6.webp', 'green7.webp', 'greencampus.webp',
+    'pf1.webp', 'pf2.webp', 'pf3.webp', 'pf4.webp', 'pf5.webp', 'pf6.webp', 'pf7.webp', 'pf8.webp', 'pf9.webp', 'pf10.webp',
+    'pic1.webp', 'pic1.png', 'college_photo.webp', 'organogram.webp', 'organogram.jpg',
+    'slider_baisakhi.webp', 'slider_cricket.webp', 'slider_ncc.webp', 'slider_seminar.webp', 'slider_youth_winners.webp',
+    'logo.webp', 'logo.png', 'logo1.webp', 'logo1.png'
+  ];
+
+  for (const asset of KNOWN_LOCAL_ASSETS) {
+    const baseName = asset.split('.')[0];
+    const regex = new RegExp(`[/\\\\]${baseName}\\.(webp|jpg|jpeg|png)($|\\?)`, 'i');
+    if (regex.test(normalized)) {
+      return `${BASE}images/${asset}`;
+    }
+  }
+
   // Data URIs pass through
-  if (trimmed.startsWith('data:')) return trimmed;
+  if (normalized.startsWith('data:')) return normalized;
 
   // Check if it represents a Google Drive file
-  const driveId = extractDriveFileId(trimmed);
+  const driveId = extractDriveFileId(normalized);
   if (driveId) {
     return driveToDirectUrl(driveId);
   }
 
   // Absolute external URLs
-  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-    return trimmed;
+  if (normalized.startsWith('http://') || normalized.startsWith('https://')) {
+    return normalized;
   }
 
   // Relative path cleanup: remove leading "public/" and "/"
-  let cleaned = trimmed.replace(/^public\//, '').replace(/^\//, '');
+  let cleaned = normalized.replace(/^public\//, '').replace(/^\//, '');
 
   return `${BASE}${cleaned}`;
 }

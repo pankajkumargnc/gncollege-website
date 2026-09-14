@@ -343,12 +343,13 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
 
         /* ── COMPACT DARK MODE TOGGLE ── */
         .tb-dark-btn {
-          width: 22px !important;
-          height: 22px !important;
-          min-width: 22px !important;
-          min-height: 22px !important;
-          max-width: 22px !important;
-          max-height: 22px !important;
+          position: relative;
+          width: 24px !important;
+          height: 24px !important;
+          min-width: 24px !important;
+          min-height: 24px !important;
+          max-width: 24px !important;
+          max-height: 24px !important;
           border-radius: 50%;
           background: #f1f5f9;
           border: 1px solid #e2e8f0;
@@ -356,12 +357,24 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          font-size: 11px;
+          font-size: 12px;
           color: #475569;
           transition: all 0.2s ease;
           padding: 0;
           flex-shrink: 0;
           line-height: 1;
+        }
+
+        .tb-dark-btn::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 44px;
+          height: 44px;
+          min-width: 44px;
+          min-height: 44px;
         }
 
         .premium-topbar.is-dark .tb-dark-btn {
@@ -504,15 +517,16 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
         }
 
         .tb-quote-nav {
+          position: relative;
           background: transparent;
           border: 1px solid rgba(255,255,255,0.12);
           color: #94a3b8;
           cursor: pointer;
-          font-size: 11px;
-          width: 18px !important;
-          height: 18px !important;
-          min-width: 18px !important;
-          min-height: 18px !important;
+          font-size: 12px;
+          width: 20px !important;
+          height: 20px !important;
+          min-width: 20px !important;
+          min-height: 20px !important;
           border-radius: 3px;
           line-height: 1;
           display: inline-flex;
@@ -520,6 +534,18 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
           justify-content: center;
           padding: 0;
           transition: all 0.2s ease;
+        }
+
+        .tb-quote-nav::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 44px;
+          height: 44px;
+          min-width: 44px;
+          min-height: 44px;
         }
 
         .tb-quote-nav:hover {

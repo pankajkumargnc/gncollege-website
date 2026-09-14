@@ -26,7 +26,7 @@ function getSharedObserver() {
   return _sharedObserver;
 }
 
-const LazyImg = memo(function LazyImg({ src, alt = '', className = '', style = {}, width, height, onClick, fallbackIcon = '🖼️' }) {
+const LazyImg = memo(function LazyImg({ src, fallbackSrc, alt = '', className = '', style = {}, width, height, onClick, fallbackIcon = '🖼️' }) {
   const [loaded, setLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [inView, setInView] = useState(false);
@@ -85,8 +85,12 @@ const LazyImg = memo(function LazyImg({ src, alt = '', className = '', style = {
           loading="lazy"
           decoding="async"
           onLoad={() => setLoaded(true)}
-          onError={() => {
-            setHasError(true);
+          onError={(e) => {
+            if (fallbackSrc && e.target.src !== fallbackSrc) {
+              e.target.src = fallbackSrc;
+            } else {
+              setHasError(true);
+            }
             setLoaded(true);
           }}
           style={{

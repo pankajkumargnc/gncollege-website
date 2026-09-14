@@ -317,6 +317,15 @@ const CSS = `
   .gc:hover .hp-link-icon{background:${N};transform:rotate(15deg);}
   .hp-link-name{font-size:12.5px;font-weight:800;color:${N};letter-spacing:.4px;}
 
+  /* ── Mobile: External Links 2-col compact ── */
+  @media(max-width:550px){
+    .hp-links{padding:clamp(40px,6vw,56px) 12px !important;}
+    .hp-links-grid{grid-template-columns:repeat(2,1fr) !important;gap:10px !important;}
+    .hp-link-tile{padding:16px 8px !important;border-radius:10px !important;gap:6px !important;}
+    .hp-link-icon{width:40px !important;height:40px !important;font-size:20px !important;}
+    .hp-link-name{font-size:10px !important;letter-spacing:.2px !important;}
+  }
+
   .hp-gal{padding:clamp(64px,8vw,96px) clamp(16px,3vw,24px);background:#fff;}
   .hp-gal-inner{max-width:1300px;margin:0 auto;}
   .hp-gal-filters{display:flex;justify-content:center;gap:10px;margin-bottom:clamp(32px,5vw,48px);flex-wrap:wrap;}
@@ -835,6 +844,7 @@ const HomePage = ({
       style={{ background: "#f8fafc", minHeight: "100dvh", overflowX: "hidden" }}
     >
       <style>{ANIM_CSS + CSS}</style>
+      <h1 className="sr-only">Guru Nanak College Dhanbad — NAAC Accredited Sikh Minority Degree College</h1>
       <div className="hp-watermark" />
       <HeroSlider slides={sliderSlides} />
       <PremiumTicker items={updates?.length > 0 ? updates : TICKER_ITEMS} />

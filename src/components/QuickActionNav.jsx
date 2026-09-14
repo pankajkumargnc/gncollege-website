@@ -41,7 +41,7 @@ export default function QuickActionNav() {
   // Sidebar width
   const SIDEBAR_W  = 58;   // collapsed width
   const EXPANDED_W = 200;  // hover expanded width
-  const TOGGLE_W   = 32;   // toggle button width
+  const TOGGLE_W   = 44;   // toggle button width (WCAG touch-target compliant >=44px)
 
   return (
     <>

@@ -11,6 +11,7 @@
 import { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
+import { resolveUrl } from '../utils/resolver';
 
 // ── Config per type ──────────────────────────────────────────────────────────
 const TYPE_CONFIG = {
@@ -40,7 +41,7 @@ const TYPE_CONFIG = {
   },
 };
 
-const FALLBACK = '/images/college_photo.webp';
+const FALLBACK = `${import.meta.env.BASE_URL}images/college_photo.webp`;
 
 // ── Styles ───────────────────────────────────────────────────────────────────
 const css = `
@@ -482,7 +483,7 @@ const LeadershipPage = ({ type = 'president', title }) => {
                 )}
                 <div className="lp-card-inner">
                   <img
-                    src={r.photo || FALLBACK}
+                    src={resolveUrl(r.photo) || FALLBACK}
                     alt={r.name}
                     className="lp-avatar"
                     onError={e => { e.target.src = FALLBACK; }}
@@ -530,7 +531,7 @@ const LeadershipPage = ({ type = 'president', title }) => {
                     <td>
                       <div className="lp-tname">
                         <img
-                          src={r.photo || FALLBACK}
+                          src={resolveUrl(r.photo) || FALLBACK}
                           alt={r.name}
                           className="lp-tavatar"
                           onError={e => { e.target.src = FALLBACK; }}

@@ -122,9 +122,9 @@ export default function VirtualTour() {
           }}>
             <Compass size={14} /> 360° INTERACTIVE IMMERSIVE VIEW
           </div>
-          <h2 style={{ margin: '0 0 6px', fontSize: 'clamp(20px, 4vw, 28px)', fontWeight: 900 }}>
+          <h1 style={{ margin: '0 0 6px', fontSize: 'clamp(20px, 4vw, 28px)', fontWeight: 900 }}>
             {activeLocation.title}
-          </h2>
+          </h1>
           <p style={{ margin: 0, color: 'rgba(255,255,255,0.75)', fontSize: 13.5, maxWidth: 650 }}>
             {activeLocation.description}
           </p>

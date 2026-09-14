@@ -143,18 +143,18 @@ export default function NotFoundPage() {
         </div>
 
         {/* Typewriter line */}
-        <div style={{
+        <h1 style={{
           fontSize: 'clamp(14px,2vw,18px)',
           color: 'rgba(255,255,255,0.5)',
           fontWeight: 600,
           letterSpacing: '4px',
           textTransform: 'uppercase',
-          marginBottom: 28,
+          margin: '0 0 28px',
           minHeight: '1.4em',
           fontFamily: "'Space Grotesk',monospace",
         }}>
           {typed}<span style={{ animation: 'nf-blink 1s infinite', opacity: typed.length < fullText.length ? 1 : 0 }}>|</span>
-        </div>
+        </h1>
 
         {/* Glassmorphism card */}
         <div style={{

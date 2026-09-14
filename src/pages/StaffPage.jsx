@@ -9,6 +9,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { COLORS } from '../styles/colors';
 import LazyImg from '../components/LazyImg';
+import { resolveUrl } from '../utils/resolver';
 
 const N = COLORS.navy || '#0f2347';
 const G = COLORS.gold || '#f4a023';
@@ -158,11 +159,17 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
                     <div style={{ padding: '24px 20px', textAlign: 'center' }}>
                       <div style={{ position: 'relative', display: 'inline-block', marginBottom: 14 }}>
                         {/* ── Commandment 3: LazyImg with fallback ── */}
-                        <LazyImg
-                          src={staff.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(staff.name || 'Staff')}&background=0f2347&color=f4a023&size=120`}
-                          alt={staff.name || 'Faculty member'}
-                          style={{ width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', border: `3px solid ${G}` }}
-                        />
+                        {(() => {
+                          const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(staff.name || 'Staff')}&background=0f2347&color=f4a023&size=120`;
+                          return (
+                            <LazyImg
+                              src={resolveUrl(staff.imageUrl) || avatarFallback}
+                              fallbackSrc={avatarFallback}
+                              alt={staff.name || 'Faculty member'}
+                              style={{ width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', border: `3px solid ${G}` }}
+                            />
+                          );
+                        })()}
                         <div style={{ position: 'absolute', bottom: 2, right: 2, width: 18, height: 18, borderRadius: '50%', background: isTeaching ? '#10b981' : '#3b82f6', border: '2px solid #fff' }} />
                       </div>
                       <h3 style={{ margin: '0 0 4px', fontSize: 'clamp(14px, 2vw, 15.5px)', fontWeight: 800, color: N, lineHeight: 1.3 }}>{staff.name}</h3>

@@ -120,7 +120,14 @@ export default function VideoGallery() {
     return filtered.slice(start, start + ITEMS_PER_PAGE);
   }, [filtered, currentPage]);
 
-  if (!ready) return null;
+  if (!ready) {
+    return (
+      <div style={{ background: '#f8fafc', minHeight: '100dvh', padding: '70px 20px', textAlign: 'center' }}>
+        <h1 style={{ color: N, fontSize: 'clamp(28px,5vw,48px)', fontWeight: 900, margin: '0 0 12px' }}>🎬 Video Gallery</h1>
+        <p style={{ color: '#94a3b8' }}>Loading video gallery...</p>
+      </div>
+    );
+  }
 
   // ── SIMPLE EMBED MODE (no API key, just videoIds) ─────────────────────────
   if (!hasApiKey && hasVideoIds) {

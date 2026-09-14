@@ -184,7 +184,7 @@ export function Classrooms() {
           </Fade>
           <Fade delay={0.2}>
             <div style={{ background: `${GOLD}15`, padding: '8px 16px', borderRadius: 20, color: '#b45309', fontWeight: 700, display: 'inline-block', marginBottom: 16, fontSize: 13 }}>MODERN LEARNING</div>
-            <h2 style={{ fontSize: 'clamp(28px, 4vw, 38px)', fontWeight: 800, color: NAVY, margin: '0 0 24px', lineHeight: 1.2 }}>{content?.title || 'Smart Classrooms'}</h2>
+            <h1 style={{ fontSize: 'clamp(28px, 4vw, 38px)', fontWeight: 800, color: NAVY, margin: '0 0 24px', lineHeight: 1.2 }}>{content?.title || 'Smart Classrooms'}</h1>
             <div className="rich-text-content" style={{ color: '#64748b', fontSize: 16, lineHeight: 1.8, marginBottom: 24 }} dangerouslySetInnerHTML={{ __html: descText }} />
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
               {features.map((item, i) => (
@@ -213,7 +213,7 @@ export function IctRooms() {
     <div style={{ background: NAVY, padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', color: '#fff', fontFamily: "'DM Sans', sans-serif", minHeight: '100dvh' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <Fade><h2 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, margin: '0 0 16px' }}>{content?.title || 'ICT & Computer Labs'}</h2></Fade>
+          <Fade><h1 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, margin: '0 0 16px' }}>{content?.title || 'ICT & Computer Labs'}</h1></Fade>
           <Fade delay={0.1}><p style={{ color: '#94a3b8', fontSize: 16, maxWidth: 600, margin: '0 auto 24px', lineHeight: 1.7 }}>{content?.subtitle || 'Empowering students with high-end workstations.'}</p></Fade>
           {aboutHtml && (
             <Fade delay={0.2}>
@@ -240,7 +240,7 @@ export function GreenCampus() {
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <Fade>
             <div style={{ fontSize: 48, marginBottom: 16 }}>🌿</div>
-            <h2 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, color: '#064e3b', margin: '0 0 16px' }}>{content?.title || 'Our Green Initiatives'}</h2>
+            <h1 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, color: '#064e3b', margin: '0 0 16px' }}>{content?.title || 'Our Green Initiatives'}</h1>
             {content?.subtitle && (
               <p style={{ color: '#047857', fontSize: 16, maxWidth: 600, margin: '0 auto 20px', fontWeight: 600 }}>{content.subtitle}</p>
             )}
