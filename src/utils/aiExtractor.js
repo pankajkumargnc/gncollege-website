@@ -59,19 +59,26 @@ function ruleBasedExtractor(input) {
   const isUrgent = lower.includes('urgent') || lower.includes('last date') || lower.includes('immediate') || lower.includes('important') || lower.includes('without fine');
   const polished = formatAcademicText(str);
 
+  // Extract memo or reference number if pattern matches
+  const memoMatch = str.match(/(?:memo|ref|dispatch)[\s.:/no]*([a-z0-9/-]+)/i);
+  const memoNo = memoMatch ? memoMatch[1].toUpperCase() : null;
+
   return {
     text: polished,
     type,
+    memoNo,
     isNew: true,
     pinned: isUrgent,
-    shortSummary: `${type} Notice: ${polished}`
+    shortSummary: `${type} Notice: ${polished}`,
+    hasTable: lower.includes('routine') || lower.includes('datesheet') || lower.includes('schedule'),
+    tableHtml: ''
   };
 }
 
 /**
  * Auto-extracts metadata, formalizes notice text, and predicts category using Google Gemini API
  * @param {string} rawInput - Rough draft text, circular headline, or PDF filename
- * @returns {Promise<{ text: string, type: string, isNew: boolean, pinned: boolean, shortSummary: string }>}
+ * @returns {Promise<{ text: string, type: string, memoNo?: string, isNew: boolean, pinned: boolean, shortSummary: string, hasTable?: boolean, tableHtml?: string }>}
  */
 export async function extractNoticeMetadata(rawInput) {
   const cleanInput = (rawInput || '').trim();
@@ -97,17 +104,23 @@ INPUT:
 RULES:
 1. "text": Write a formal, grammatically polished, official academic notice headline/announcement (1-2 sentences). Do not use Markdown formatting inside the text field.
 2. "type": Must be EXACTLY ONE of: ["General", "Examination", "Admission", "Result", "Holiday", "Scholarship", "Sports"].
-3. "isNew": true if this relates to an active event, upcoming deadline, or new notification; otherwise false.
-4. "pinned": true only if this is high priority or urgent (e.g., examination schedules, fee deadline with fine, immediate holiday); otherwise false.
-5. "shortSummary": A brief 10-15 word summary.
+3. "memoNo": Extract or generate formal reference number if indicated (e.g. "GNC/EXAM/2026/...", or null).
+4. "isNew": true if this relates to an active event, upcoming deadline, or new notification; otherwise false.
+5. "pinned": true only if this is high priority or urgent (e.g., examination schedules, fee deadline with fine, immediate holiday); otherwise false.
+6. "shortSummary": A brief 10-15 word summary.
+7. "hasTable": true if the input contains schedule, timetable, or examination routine dates; otherwise false.
+8. "tableHtml": If hasTable is true, generate an accessible HTML table with class "gnc-routine-table" with <thead> and <tbody>; otherwise empty string.
 
 Return ONLY a valid, raw JSON object without markdown code blocks, following this schema:
 {
   "text": "Formal notice text",
   "type": "Category",
+  "memoNo": null,
   "isNew": true,
   "pinned": false,
-  "shortSummary": "Short summary"
+  "shortSummary": "Short summary",
+  "hasTable": false,
+  "tableHtml": ""
 }
 `;
 
@@ -143,9 +156,12 @@ Return ONLY a valid, raw JSON object without markdown code blocks, following thi
     return {
       text: parsed.text || cleanInput,
       type: finalType,
+      memoNo: parsed.memoNo || null,
       isNew: typeof parsed.isNew === 'boolean' ? parsed.isNew : true,
       pinned: typeof parsed.pinned === 'boolean' ? parsed.pinned : false,
-      shortSummary: parsed.shortSummary || ''
+      shortSummary: parsed.shortSummary || '',
+      hasTable: Boolean(parsed.hasTable),
+      tableHtml: parsed.tableHtml || ''
     };
   } catch (err) {
     console.warn('[AIExtractor] Gemini extraction error, applying fallback:', err.message);

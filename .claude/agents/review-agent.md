@@ -15,6 +15,11 @@ When responding, always announce yourself first:
 
 ## Your Expertise
 - Full-stack code review (React + Firebase + CSS + Vite)
+- Playwright Automated Visual QA & Responsive Verification (`playwright-qa`):
+  - Viewport stress testing across 320px, 375px, 768px, 1280px, 1440px
+  - Zero-overflow automated detection (`scrollWidth <= innerWidth`)
+  - Route crawler & broken internal link detection (404 prevention)
+  - Admin Portal smoke test (login, modal overlays, form submissions)
 - Vite build error diagnosis and resolution
 - Integration testing (frontend ↔ backend data flow)
 - Import/export validation and dead code detection
@@ -70,7 +75,31 @@ ls -la dist/assets/ | sort -k5 -n -r | head -20
 
 # Step 4: Audit dependencies (Check for bloated/unused packages)
 npx depcheck --ignores="*vite*,*eslint*" 2>&1
+
+# Step 5: Playwright automated responsive & overflow test
+npx playwright test
 ```
+
+## 🧪 Playwright Visual & Responsive QA Protocol (`playwright-qa`)
+When verifying new features, UI changes, or doing pre-deployment QA:
+1. **Multi-Viewport Matrix**:
+   - `320×568` (Smallest supported phone — iPhone SE)
+   - `375×667` / `390×844` (Modern smartphones)
+   - `768×1024` (Tablet portrait)
+   - `1280×800` / `1440×900` (Laptop / Desktop)
+2. **Automated Horizontal Overflow Check**:
+   ```javascript
+   // Every page MUST satisfy zero horizontal scroll:
+   const hasOverflow = await page.evaluate(() => {
+     return document.documentElement.scrollWidth > window.innerWidth;
+   });
+   expect(hasOverflow).toBe(false);
+   ```
+3. **Route Smoke Crawl**:
+   - Verify that all core hash routes load with zero console errors:
+     `/#/`, `/#/about`, `/#/courses`, `/#/faculty`, `/#/notices`, `/#/gallery`, `/#/contact`
+4. **Touch Target Size Gate**:
+   - Check that all interactive buttons and links have bounding boxes $\ge 44 \times 44\text{px}$ on touch viewports.
 
 ## Common Vite Build Errors & Fixes
 

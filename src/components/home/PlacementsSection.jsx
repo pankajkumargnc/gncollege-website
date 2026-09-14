@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { collection, query, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { COLORS } from '../../styles/colors';
+import PlacementAnalytics from './PlacementAnalytics';
 
 const N = COLORS.navy;
 const G = COLORS.gold;
@@ -239,6 +240,9 @@ export default function PlacementsSection() {
             </div>
           </div>
         )}
+
+        {/* Academic Placement Analytics Chart */}
+        <PlacementAnalytics />
 
         <div className="wof-foot">
             <Link to="/academics/placements" className="wof-btn">

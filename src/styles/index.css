@@ -1373,3 +1373,86 @@ img {
   white-space: nowrap;
   border-width: 0;
 }
+
+.sr-only-focusable:not(:focus):not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ══ Micro-Craft Engine (Interfaces.dev & UUPM Standards) ══ */
+
+/* 1. Concentric Border Radius Utilities: R_outer = R_inner + padding */
+.radius-outer-lg {
+  border-radius: var(--radius-xl); /* 24px */
+  padding: 16px;
+}
+.radius-inner-lg {
+  border-radius: calc(var(--radius-xl) - 16px); /* 8px exact concentric match */
+}
+.radius-outer-md {
+  border-radius: var(--radius-lg); /* 16px */
+  padding: 12px;
+}
+.radius-inner-md {
+  border-radius: calc(var(--radius-lg) - 12px); /* 4px exact concentric match */
+}
+
+/* 2. Tactile Button Scale — 0.96 with platform easing */
+.btn-tactile,
+.button-primary,
+.cta-btn,
+.navbar-btn {
+  transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.btn-tactile:active,
+.button-primary:active,
+.cta-btn:active {
+  transform: scale(0.96) !important;
+}
+
+/* 3. Tabular Numerals — Layout Shift Prevention for Stats, Timers, Prices */
+.tabular-nums,
+.stat-number,
+.wof-stat-num,
+.timer-digit,
+.counter-value,
+.notice-date {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* 4. Image Outlines — 1px pure black in light mode, pure white in dark mode */
+.img-outline {
+  outline: 1px solid rgba(0, 0, 0, 0.08);
+  outline-offset: -1px;
+}
+[data-theme="dark"] .img-outline,
+.dark-mode .img-outline {
+  outline: 1px solid rgba(255, 255, 255, 0.1);
+  outline-offset: -1px;
+}
+
+/* 5. Hit Target Guard — Minimum 44x44px for Touch Controls */
+.touch-target-min {
+  position: relative;
+}
+.touch-target-min::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 44px;
+  min-height: 44px;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}
+

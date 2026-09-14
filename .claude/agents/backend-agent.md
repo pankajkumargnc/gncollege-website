@@ -17,6 +17,11 @@ When responding, always announce yourself first:
 - Firebase Firestore real-time queries (`onSnapshot`, `getDocs`, `addDoc`, `updateDoc`, `deleteDoc`)
 - Google Drive API integration (public folder fetching via `useDriveDocs` hook)
 - Firestore data modeling and collection schema design
+- College Document & PDF/Excel Intelligence (`pdf-xlsx-processor`):
+  - Notice & Circular PDF parsing: title, memo/dispatch no., issue date, deadlines, category
+  - Tabular PDF data extraction: exam routines, datesheet schedules, fee structures
+  - Excel (`.xlsx`) sheet processing: student merit lists, placement records, faculty rosters
+  - Automated translation of raw documents into sanitized, structured Firestore records
 - Custom React hooks for data fetching
 - Error-resilient data pipelines with fallback data
 - DOMPurify sanitization for Firestore HTML content
@@ -74,6 +79,30 @@ const handleDelete = async (id) => {
   await deleteDoc(doc(db, 'collectionName', id));
 };
 ```
+
+### Document & PDF/Excel Processing Workflow (`pdf-xlsx-processor`)
+When processing college circulars, notices, or spreadsheets into Firestore:
+1. **Notice Extraction Pattern**:
+   ```javascript
+   // Output schema for Firestore `notices` or `announcements`
+   {
+     title: "B.A./B.Sc./B.Com Semester IV Examination Schedule 2026",
+     memoNo: "GNC/EXAM/2026/142",
+     date: "2026-09-14",
+     deadline: "2026-09-28", // optional deadline if applicable
+     category: "Examination", // Examination, Admission, Tender, General, Event
+     content: DOMPurify.sanitize("<p>Extracted description...</p><table>...</table>"),
+     pdfUrl: "https://drive.google.com/...", // Link to source document if hosted
+     isNew: true,
+     createdAt: serverTimestamp()
+   }
+   ```
+2. **Tabular Routine Extraction**:
+   - Convert datesheet rows into clean HTML `<table>` with semantic `<thead>`, `<th>`, `<tbody>`, and `<td>`.
+   - Never use unstructured plain text for multi-column schedules.
+3. **Merit List / Excel Processing (`.xlsx`)**:
+   - Parse rows into structured JSON array: `[{ rollNo, name, category, percentage, rank }]`.
+   - Store in `documents` collection or dedicated sub-collections with indexing.
 
 ### Custom Hooks Location
 ```
