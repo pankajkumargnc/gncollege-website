@@ -10,7 +10,7 @@ import {
 } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { setImgbbKey } from '../MediaPicker';
-import { NAVY, GOLD, WHITE, BG, T, GCSS, useDebounce } from './AdminShared';
+import { NAVY, GOLD, WHITE, BG, T, useDebounce } from './AdminShared';
 import "../../styles/admin.css";
 
 // ── Lazy-loaded tab components (Path FIXED: Removed '/admin' as we are already in it) ──
@@ -384,68 +384,6 @@ function AdminPanelInner({
 
   return (
     <div className="adm" style={{ display:'flex', height:'100dvh', width:'100vw', position:'fixed', top:0, left:0, zIndex:99999, overflow:'hidden', background: '#f8fafc' }}>
-      <style>{GCSS + `
-        .exit-overlay {
-            position: fixed; inset: 0; background: #0f172a; z-index: 1000000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 1; transition: opacity 0.5s;
-        }
-        .exit-shutter {
-            position: absolute; left: 0; right: 0; height: 50%; background: #000;
-            transition: all 1s cubic-bezier(0.85, 0, 0.15, 1);
-        }
-        .exit-top { top: 0; transform: translateY(-100%); }
-        .exit-bottom { bottom: 0; transform: translateY(100%); }
-        .is-exiting .exit-top { transform: translateY(0); }
-        .is-exiting .exit-bottom { transform: translateY(0); }
-        
-        .exit-monitor {
-            width: 300px; padding: 24px; background: rgba(0,0,0,0.4); border: 2px solid rgba(244,160,35,0.4);
-            border-radius: 20px; text-align: center; color: #fff; position: relative; z-index: 2;
-            backdrop-filter: blur(20px);
-        }
-        .exit-scan {
-            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: #f4a023; opacity: 0.8; box-shadow: 0 0 15px #f4a023;
-            animation: exit-scan 1.5s infinite;
-        }
-        @keyframes exit-scan { 0% { top: 0; } 100% { top: 100%; } }
-
-        /* 💓 HEARTBEAT PULSE */
-        .live-pulse {
-            width: 8px; height: 8px; background: #22c55e; border-radius: 50%;
-            display: inline-block; margin-right: 8px;
-            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
-            animation: pulse-green 2s infinite;
-        }
-        @keyframes pulse-green {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-        }
-
-        /* 🌊 FLUID FILL & BOUNCY BUTTON CUSTOM CSS */
-        .fluid-btn {
-            position: relative; overflow: hidden; height: 38px !important;
-            padding: 0 16px !important; margin: 0 auto !important; width: fit-content !important;
-            background: rgba(239, 68, 68, 0.1) !important;
-            border: 1px solid rgba(239, 68, 68, 0.3) !important;
-            color: #ef4444 !important; font-size: 11.5px !important; font-weight: 800 !important;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-            border-radius: 50px !important; cursor: pointer;
-            display: flex; align-items: center; gap: 8px; z-index: 1;
-        }
-        .fluid-btn:hover { transform: scale(1.08); background: transparent !important; color: #fff !important; border-color: #ef4444 !important; }
-        .fluid-btn:active { transform: scale(0.95); }
-        .fluid-btn::before {
-            content: ''; position: absolute; top: 100%; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: -1; border-radius: 50px;
-        }
-        .fluid-btn:hover::before { top: 0; }
-      `}</style>
-
       {/* 🛡️ ULTRA ADVANCE LOGOUT TRANSITION OVERLAY */}
       {isExiting && (
         <div className={`exit-overlay ${isExiting ? 'is-exiting' : ''}`}>

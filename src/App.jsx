@@ -101,31 +101,32 @@ export default function App() {
   useEffect(() => {
     let unsub;
     import('firebase/auth').then(({ onAuthStateChanged }) => {
-      import('./firebase-auth').then(({ auth }) => {
+      import('./firebase-auth').then(({ auth, isUserAuthorizedAdmin }) => {
         unsub = onAuthStateChanged(auth, (user) => {
-          const isAuthed = !!user || sessionStorage.getItem('gnc_active_session') === '1' || sessionStorage.getItem('gnc_admin_auth') === 'true';
+          const isAuthed = !!user && isUserAuthorizedAdmin(user);
           setAdminAuthed(isAuthed);
           setIsInitializing(false);
         });
       });
     }).catch(err => {
       console.error("Auth sync error", err);
-      const isAuthed = sessionStorage.getItem('gnc_active_session') === '1' || sessionStorage.getItem('gnc_admin_auth') === 'true';
-      setAdminAuthed(isAuthed);
+      setAdminAuthed(false);
       setIsInitializing(false);
     });
     return () => unsub && unsub();
   }, []);
 
   const handleAdminLogin = () => {
-    sessionStorage.removeItem('gnc_admin_auth');
-    sessionStorage.setItem('gnc_active_session', '1');
     setAdminAuthed(true);
   };
   const handleAdminLogout = () => {
     sessionStorage.removeItem('gnc_admin_auth');
     sessionStorage.removeItem('gnc_active_session');
-    import('./firebase-auth').then(({ auth }) => auth.signOut());
+    sessionStorage.removeItem('gnc_admin_role');
+    import('./firebase-auth').then(({ auth, logoutAdmin }) => {
+      if (typeof logoutAdmin === 'function') logoutAdmin();
+      else auth.signOut();
+    });
     setAdminAuthed(false);
   };
 

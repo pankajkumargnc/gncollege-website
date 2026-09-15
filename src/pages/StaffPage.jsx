@@ -47,6 +47,7 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
   const { staffType: urlType } = useParams(); 
   const staffType = forcedType || urlType || 'teaching-staff';
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDept, setSelectedDept] = useState('ALL');
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
@@ -54,12 +55,27 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
   const label      = isTeaching ? 'Teaching' : 'Non-Teaching';
   const isLoading  = !faculties;
 
-  const filteredStaff = useMemo(() => (faculties || []).filter(f =>
-    (f.staffType || 'Teaching') === label &&
-    (f.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-     f.dept?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     f.desig?.toLowerCase().includes(searchTerm.toLowerCase()))
-  ), [faculties, label, searchTerm]);
+  // Available unique departments
+  const availableDepts = useMemo(() => {
+    const set = new Set();
+    (faculties || []).forEach(f => {
+      if ((f.staffType || 'Teaching') === label && f.dept) {
+        set.add(f.dept);
+      }
+    });
+    return ['ALL', ...Array.from(set).sort()];
+  }, [faculties, label]);
+
+  const filteredStaff = useMemo(() => (faculties || []).filter(f => {
+    const matchesType = (f.staffType || 'Teaching') === label;
+    const matchesDept = selectedDept === 'ALL' || (f.dept || 'General') === selectedDept;
+    const matchesSearch = !searchTerm || (
+      f.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      f.dept?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      f.desig?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return matchesType && matchesDept && matchesSearch;
+  }), [faculties, label, selectedDept, searchTerm]);
 
   // Group by department
   const grouped = useMemo(() => filteredStaff.reduce((acc, f) => {
@@ -70,7 +86,7 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
   }, {}), [filteredStaff]);
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
 
       {/* Premium Hero */}
       {!headless && (
@@ -110,6 +126,49 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
             onBlur={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(15,35,71,0.05)'; }}
           />
         </div>
+
+        {/* ── Department Filter Pills ── */}
+        {availableDepts.length > 2 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 20 }}>
+            {availableDepts.map(dept => {
+              const active = selectedDept === dept;
+              return (
+                <button
+                  key={dept}
+                  onClick={() => setSelectedDept(dept)}
+                  style={{
+                    padding: '8px 18px',
+                    borderRadius: 30,
+                    border: active ? `2px solid ${N}` : '1.5px solid #e2e8f0',
+                    background: active ? N : '#fff',
+                    color: active ? G : '#475569',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: active ? `0 4px 14px ${N}25` : '0 2px 6px rgba(0,0,0,0.03)',
+                  }}
+                  onMouseEnter={e => {
+                    if (!active) {
+                      e.currentTarget.style.borderColor = G;
+                      e.currentTarget.style.color = N;
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (!active) {
+                      e.currentTarget.style.borderColor = '#e2e8f0';
+                      e.currentTarget.style.color = '#475569';
+                      e.currentTarget.style.transform = 'none';
+                    }
+                  }}
+                >
+                  {dept === 'ALL' ? '🏛️ All Departments' : dept}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div style={{ maxWidth: 1300, margin: '0 auto', padding: '40px 20px' }}>
@@ -127,16 +186,24 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
               No data found
             </h3>
             <p style={{ color: '#64748b', margin: '0 0 24px', fontSize: 'clamp(13px,1.8vw,15px)', lineHeight: 1.7, maxWidth: 400, marginLeft: 'auto', marginRight: 'auto' }}>
-              {searchTerm
-                ? `No results found for "${searchTerm}". Please clear the search.`
+              {searchTerm || selectedDept !== 'ALL'
+                ? `No results found matching your current filter criteria.`
                 : `Add staff via the Admin Panel → Faculty & Staff → ${label}`}
             </p>
-            {searchTerm && (
-              <button onClick={() => setSearchTerm('')}
-                style={{ background: N, color: G, border: 'none', padding: '10px 24px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, minHeight: 44, fontSize: 'clamp(13px,1.5vw,15px)' }}>
-                Clear Search
-              </button>
-            )}
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+              {searchTerm && (
+                <button onClick={() => setSearchTerm('')}
+                  style={{ background: N, color: G, border: 'none', padding: '10px 24px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, minHeight: 44, fontSize: 'clamp(13px,1.5vw,15px)' }}>
+                  Clear Search
+                </button>
+              )}
+              {selectedDept !== 'ALL' && (
+                <button onClick={() => setSelectedDept('ALL')}
+                  style={{ background: '#e2e8f0', color: N, border: 'none', padding: '10px 24px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, minHeight: 44, fontSize: 'clamp(13px,1.5vw,15px)' }}>
+                  Show All Departments
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           Object.entries(grouped).sort(([a],[b]) => a.localeCompare(b)).map(([dept, members]) => (

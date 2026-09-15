@@ -5,6 +5,7 @@ import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 const PDFModal = lazy(() => import('../components/PDFModal'));
 import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageContent';
+import DOMPurify from 'dompurify';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -38,7 +39,7 @@ export function NssPage() {
   const stats = getList('stats', [{ num: '500+', label: 'Active Volunteers', icon: '🙋‍♂️' }, { num: '50+', label: 'Blood Units Donated', icon: '🩸' }, { num: '20+', label: 'Adopted Villages', icon: '🏡' }, { num: '1000+', label: 'Trees Planted', icon: '🌳' }]);
   const activities = getList('activities', ['Swachh Bharat Abhiyan', 'Blood Donation Camps', 'Traffic Awareness Drives', 'Disaster Relief & Rescue', 'National Integration Camps']);
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "National Service Scheme (NSS)"} subtitle={content?.subtitle || 'Motto: "Not Me But You". Developing student personality through community service.'} icon="🤝" />
       <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -85,7 +86,7 @@ export function NccPage() {
   const { content, getText } = usePageContent('ncc');
   const aboutHtml = getText('about', '<p>The NCC unit of Guru Nanak College actively participates in Republic Day Camps (RDC), Combined Annual Training Camps (CATC), and Trekking expeditions. Cadets are trained in drill, map reading, and weapon handling.</p>');
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "National Cadet Corps (NCC)"} subtitle={content?.subtitle || 'Motto: "Unity and Discipline". Shaping the youth into patriotic and disciplined citizens.'} icon="🎖️" theme="#1e3a8a" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -94,7 +95,7 @@ export function NccPage() {
             <div style={{ padding: 40 }}>
               <div style={{ display: 'inline-block', background: '#dbeafe', color: '#1d4ed8', padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 800, letterSpacing: 1, marginBottom: 16 }}>GNC NCC WING</div>
               <h2 style={{ fontSize: 28, fontWeight: 900, color: NAVY, marginBottom: 16 }}>Building Future Leaders</h2>
-              <div style={{ color: '#64748b', lineHeight: 1.7, marginBottom: 24 }} dangerouslySetInnerHTML={{ __html: aboutHtml }} />
+              <div style={{ color: '#64748b', lineHeight: 1.7, marginBottom: 24 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutHtml) }} />
               <div style={{ display: 'flex', gap: 16 }}>
                 <div style={{ background: '#f8fafc', padding: '10px 20px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 700, color: NAVY }}>B-Certificate</div>
                 <div style={{ background: '#f8fafc', padding: '10px 20px', borderRadius: 12, border: '1px solid #e2e8f0', fontWeight: 700, color: NAVY }}>C-Certificate</div>
@@ -120,7 +121,7 @@ export function WorkshopPage() {
   const { content, getList } = usePageContent('workshop');
   const workshops = getList('workshops', [{ title: 'Intellectual Property Rights (IPR)', dept: 'IQAC Cell', date: 'October 2023' }, { title: 'New Education Policy (NEP 2020) Seminar', dept: 'Education Dept', date: 'August 2023' }, { title: 'Cyber Security & Ethical Hacking', dept: 'BCA Department', date: 'July 2023' }, { title: 'Financial Literacy for Youth', dept: 'Commerce Dept', date: 'May 2023' }]);
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Workshops & Seminars"} subtitle={content?.subtitle || "Bridging the gap between academia and industry through expert sessions."} icon="🎤" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -157,7 +158,7 @@ export function SportsPage() {
   const outdoor = getList('outdoor', ['Cricket', 'Football', 'Volleyball', 'Athletics']);
   const indoor = getList('indoor', ['Table Tennis', 'Chess', 'Carrom', 'Badminton']);
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Games & Sports"} subtitle={content?.subtitle || "Promoting physical fitness, teamwork, and sportsmanship among students."} icon="🏆" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -205,13 +206,13 @@ export function RotaractClub() {
   const aboutHtml = getText('about', '<p>The Rotaract Club of Guru Nanak College operates under the guidance of Rotary International. It provides an opportunity for young men and women to enhance the knowledge and skills that will assist them in personal development, to address the physical and social needs of their communities.</p>');
   const focusAreas = getList('focus', ['Leadership Development', 'Community Service', 'Professional Networking']);
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Rotaract Club"} subtitle={content?.subtitle || 'Motto: "Fellowship Through Service". A global movement of young leaders.'} icon="⚙️" theme="#d91b5c" />
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ background: '#fff', borderRadius: 24, padding: 40, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(217,27,92,0.08)', textAlign: 'center' }}>
             <h2 style={{ fontSize: 28, fontWeight: 900, color: '#d91b5c', marginBottom: 20 }}>Empowering Youth</h2>
-            <div style={{ color: '#64748b', fontSize: 16, lineHeight: 1.8, marginBottom: 30 }} dangerouslySetInnerHTML={{ __html: aboutHtml }} />
+            <div style={{ color: '#64748b', fontSize: 16, lineHeight: 1.8, marginBottom: 30 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutHtml) }} />
             <div style={{ display: 'flex', justifyContent: 'center', gap: 20, flexWrap: 'wrap' }}>
               {focusAreas.map((k, i) => {
                 const label = typeof k === 'string' ? k : (k?.title || k?.label || JSON.stringify(k));
@@ -240,7 +241,7 @@ export function SadbhavanaDiwas() {
   const dateInfo = getText('date-info', 'Observed Annually on 20th August');
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Sadbhavana Diwas"} subtitle={content?.subtitle || "Promoting National Integration, Peace, and Communal Harmony."} icon="🕊️" theme="#059669" />
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -249,12 +250,12 @@ export function SadbhavanaDiwas() {
               <div style={{ fontSize: 48 }}>🕯️</div>
               <div>
                 <h2 style={{ fontSize: 24, fontWeight: 900, color: NAVY, margin: '0 0 8px' }}>Harmony & Peace Pledge</h2>
-                <div style={{ color: '#059669', fontWeight: 700 }} dangerouslySetInnerHTML={{ __html: dateInfo }} />
+                <div style={{ color: '#059669', fontWeight: 700 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(dateInfo) }} />
               </div>
             </div>
             <div 
               style={{ color: '#64748b', fontSize: 16, lineHeight: 1.8, fontStyle: 'italic', background: '#ecfdf5', padding: 24, borderRadius: 16, borderLeft: '4px solid #10b981' }}
-              dangerouslySetInnerHTML={{ __html: pledgeText }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pledgeText) }}
             />
           </div>
         </Fade>

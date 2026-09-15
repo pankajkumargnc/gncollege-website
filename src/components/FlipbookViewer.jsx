@@ -423,7 +423,7 @@ export default function FlipbookViewer({ activeMagazine, onOpenPdf }) {
       flexDirection: 'column',
       alignItems: 'center',
       padding: '20px 10px 40px',
-      fontFamily: "'DM Sans', sans-serif"
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
     }}>
       {/* ── Magazine Header & Dual-Engine Toolbar ── */}
       <div style={{

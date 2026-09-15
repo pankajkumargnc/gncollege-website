@@ -137,7 +137,7 @@ export default function ContactTab() {
   ];
 
   return (
-    <div className="fade-up" style={{ fontFamily: "'DM Sans','Plus Jakarta Sans',sans-serif", maxWidth: 1000 }}>
+    <div className="fade-up" style={{ fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif", maxWidth: 1000 }}>
       <p className="asec">📞 Contact Settings</p>
       <p className="asub">Campus addresses and contact directory — will automatically update on the Contact page</p>
 

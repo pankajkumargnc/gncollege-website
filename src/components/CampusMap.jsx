@@ -73,7 +73,7 @@ export default function CampusMap() {
       border: '1px solid #e2e8f0',
       boxShadow: '0 15px 35px rgba(15,35,71,0.06)',
       overflow: 'hidden',
-      fontFamily: "'DM Sans', sans-serif"
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
     }}>
       {/* Map Header */}
       <div style={{
@@ -155,7 +155,7 @@ export default function CampusMap() {
               icon={createCampusIcon(c.id === 'bhuda' ? NAVY : GOLD, c.name)}
             >
               <Popup>
-                <div style={{ padding: '6px', maxWidth: 220, fontFamily: "'DM Sans', sans-serif" }}>
+                <div style={{ padding: '6px', maxWidth: 220, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
                   <div style={{ fontWeight: 800, fontSize: 13, color: NAVY, marginBottom: 4 }}>
                     {c.name}
                   </div>

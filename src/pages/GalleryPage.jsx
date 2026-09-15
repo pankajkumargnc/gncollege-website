@@ -62,52 +62,8 @@ export default function GalleryPage({ gallery: galleryProp, headless }) {
     return filtered.slice(start, start + ITEMS_PER_PAGE);
   }, [filtered, currentPage]);
 
-  const closeLB   = useCallback(() => setLight(null), []);
-  const prevImg   = useCallback(() => setLight(i => (i > 0 ? i - 1 : filtered.length - 1)), [filtered.length]);
-  const nextImg   = useCallback(() => setLight(i => (i < filtered.length - 1 ? i + 1 : 0)), [filtered.length]);
-
-  useEffect(() => {
-    if (light === null) return;
-    const fn = e => {
-      if (e.key === 'Escape')     closeLB();
-      if (e.key === 'ArrowLeft')  prevImg();
-      if (e.key === 'ArrowRight') nextImg();
-      if (e.key === 'Tab') {
-        const lb = document.querySelector('.lb-ov');
-        if (!lb) return;
-        const focusable = lb.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-        if (focusable.length === 0) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (e.shiftKey) {
-          if (document.activeElement === first) {
-            e.preventDefault();
-            last.focus();
-          }
-        } else {
-          if (document.activeElement === last) {
-            e.preventDefault();
-            first.focus();
-          }
-        }
-      }
-    };
-    window.addEventListener('keydown', fn);
-    
-    // Auto-focus the close button when opened
-    setTimeout(() => {
-      const lb = document.querySelector('.lb-ov');
-      if (lb) {
-        const firstBtn = lb.querySelector('.lb-close');
-        if (firstBtn) firstBtn.focus();
-      }
-    }, 10);
-    
-    return () => window.removeEventListener('keydown', fn);
-  }, [light, closeLB, prevImg, nextImg]);
-
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: '"Amazon Ember","Inter",sans-serif' }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
 
       <style>{`
         /* glow card wrapper — same as homepage */

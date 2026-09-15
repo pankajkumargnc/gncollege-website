@@ -143,7 +143,7 @@ export default function AdminDepartmentTab() {
   const C = info?.color || BLUE;
 
   return (
-    <div style={{ display: 'flex', gap: 32, fontFamily: "'Plus Jakarta Sans','DM Sans',sans-serif", color: '#1e293b' }}>
+    <div style={{ display: 'flex', gap: 32, fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif", color: '#1e293b' }}>
       <style>{`
         .pbtn{background:${BLUE};color:#fff;border:none;padding:12px 28px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer;transition:all .2s;box-shadow:0 10px 20px ${BLUE}22;}
         .pbtn:hover{transform:translateY(-2px);box-shadow:0 12px 24px ${BLUE}33;}

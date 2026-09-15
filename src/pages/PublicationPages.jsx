@@ -265,7 +265,7 @@ export function LibraryPage() {
   ];
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
       <PageHeader title="College Library" subtitle="A hub of knowledge equipped with vast resources for research and learning." icon="📖" />
       <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 20, marginBottom: 40 }}>
@@ -748,7 +748,7 @@ export function PublicationPage({ type, title, subtitle, icon, keyword }) {
   };
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
       <PageHeader title={title} subtitle={subtitle} icon={icon} />
 
       <style>{`

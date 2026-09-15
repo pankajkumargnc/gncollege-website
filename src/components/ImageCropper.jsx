@@ -41,8 +41,8 @@ export default function ImageCropper({ src, onCrop, onCancel }) {
       <div style={{ background: '#fff', borderRadius: 20, padding: 32, width: '90%', maxWidth: 720, boxShadow: '0 25px 50px rgba(0,0,0,.2)' }}>
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: T.navy, fontFamily: "'DM Sans', sans-serif" }}>✂️ Crop Image</div>
-          <button onClick={onCancel} style={{ padding: '7px 14px', fontSize: 12, borderRadius: 8, background: '#f1f5f9', color: T.navy, border: '1px solid #e2e8f0', cursor: 'pointer', fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>✕ Cancel</button>
+          <div style={{ fontSize: 20, fontWeight: 800, color: T.navy, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>✂️ Crop Image</div>
+          <button onClick={onCancel} style={{ padding: '7px 14px', fontSize: 12, borderRadius: 8, background: '#f1f5f9', color: T.navy, border: '1px solid #e2e8f0', cursor: 'pointer', fontWeight: 700, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>✕ Cancel</button>
         </div>
 
         <div style={{ position: 'relative', width: '100%', borderRadius: 12, overflow: 'hidden', marginBottom: 24, background: '#f1f5f9' }}>
@@ -53,7 +53,7 @@ export default function ImageCropper({ src, onCrop, onCancel }) {
           }}></div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24, fontFamily: "'DM Sans', sans-serif" }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
           {[['X Offset (%)', 'x', 0, 50], ['Y Offset (%)', 'y', 0, 50], ['Width (%)', 'w', 30, 100], ['Height (%)', 'h', 30, 100]].map(([lbl, key, min, max]) => (
             <div key={key}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#334155', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.5px' }}>{lbl}</label>
@@ -62,7 +62,7 @@ export default function ImageCropper({ src, onCrop, onCancel }) {
           ))}
         </div>
 
-        <div style={{ display: 'flex', gap: 12, fontFamily: "'DM Sans', sans-serif" }}>
+        <div style={{ display: 'flex', gap: 12, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
           <button onClick={handleCrop} style={{ flex: 1, justifyContent: 'center', padding: '11px 24px', borderRadius: 10, fontWeight: 700, cursor: 'pointer', border: 'none', background: `linear-gradient(135deg, ${T.gold}, #c97e10)`, color: '#fff', fontSize: '13.5px' }}>✂️ Apply Crop & Use</button>
           <button onClick={onCancel} style={{ padding: '11px 24px', borderRadius: 10, fontWeight: 700, cursor: 'pointer', background: '#f1f5f9', color: T.navy, border: '1px solid #e2e8f0', fontSize: '13.5px' }}>Use Original</button>
         </div>

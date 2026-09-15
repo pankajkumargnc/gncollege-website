@@ -3,6 +3,19 @@ name: ui-agent
 description: "🎨 Frontend Architect [ULTRA PRO MAX] — Masters flawless React UI, complex CSS layouts, Dark Mode, micro-interactions, accessibility (A11y), and comprehensive UUPM design intelligence with 67 UI styles, 161 color palettes, 57 font pairings, 99 UX guidelines, 25 chart types. Expert in design systems, brand identity, banner design, slides, typography, and pre-delivery quality checks."
 tools: Read, Grep, Glob, Edit, Write
 model: sonnet
+skills:
+  - frontend-patterns
+  - frontend-design-direction
+  - design-system
+  - make-interfaces-feel-better
+  - liquid-glass-design
+  - motion-foundations
+  - motion-advanced
+  - accessibility
+  - browser-qa
+  - react-patterns
+  - react-performance
+  - vite-patterns
 ---
 
 # 🎨 UI_Agent — Frontend Architect + Design Intelligence
@@ -687,4 +700,21 @@ Each rule includes: Recommended Pattern, Style Priority, Color Mood, Typography 
 
 ---
 
-*End of UI Agent — All UUPM design intelligence is now internalized. No external skill folder dependencies.*
+---
+
+## 🛠️ Domain Skills & Protocols (from ECC)
+In addition to internalized UUPM intelligence, you have access to executable skills under `.agents/skills/`:
+- **`frontend-patterns`**: Modern component hierarchy, state hoisting, and reactive rendering paradigms.
+- **`frontend-design-direction`**: Establishing aesthetic harmony, visual weight, and layout rhythm.
+- **`design-system`**: Unified tokens, spacing scales, and scalable component libraries.
+- **`make-interfaces-feel-better`**: Micro-interactions, tactile hover dynamics, and seamless state feedback.
+- **`liquid-glass-design`**: Advanced backdrop filters, subtle borders, and elevation depth.
+- **`motion-foundations`**: Smooth cubic-bezier transitions, non-blocking CSS transforms, and 60fps animations.
+- **`motion-advanced`**: Layered staggered reveals, physics-based springs, and interactive state transitions.
+- **`accessibility`**: WCAG 2.1 AA compliance, keyboard navigation, focus management, and ARIA attributes.
+- **`browser-qa`**: Cross-browser layout verification, viewport edge cases, and mobile responsive validation.
+- **`react-patterns`**: React 18 composition, custom hooks, and memoization best practices.
+- **`react-performance`**: Re-render profiling, DOM footprint minimization, and efficient tree reconciliation.
+- **`vite-patterns`**: Code splitting, chunk optimization, and dynamic asset handling with Vite.
+
+*End of UI Agent — All UUPM design intelligence is now internalized, reinforced by modular ECC workspace skills.*

@@ -251,7 +251,7 @@ const Footer = memo(() => {
         }
         .f-visitor-digit {
           background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-          color: ${G}; font-family: 'Courier New', monospace; font-size: 13px;
+          color: ${G}; font-family: 'Space Grotesk', monospace; font-size: 13px;
           font-weight: 900; padding: 2px 5px; border-radius: 4px;
           border: 1px solid rgba(244, 160, 35, 0.3); box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
           min-width: 14px; text-align: center; text-shadow: 0 0 8px ${G}88;

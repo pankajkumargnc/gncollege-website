@@ -206,7 +206,7 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
 
   // Category Tabs with Photo Counters
   return (
-    <div style={{ fontFamily: "'DM Sans', sans-serif", width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+    <div style={{ fontFamily: "'Inter', sans-serif", width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       {/* Hidden file input */}
       <input
         type="file"

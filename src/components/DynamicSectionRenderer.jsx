@@ -1,5 +1,6 @@
 // src/components/DynamicSectionRenderer.jsx
 import React from 'react';
+import DOMPurify from 'dompurify';
 
 // ── Shared Dynamic Section Renderer for CMS Content ─────────────────────────
 export function DynamicSectionRenderer({ section }) {
@@ -35,7 +36,7 @@ export function DynamicSectionRenderer({ section }) {
         <div
           className="rich-text-content"
           style={{ fontSize: 15, color: '#475569', lineHeight: 1.8 }}
-          dangerouslySetInnerHTML={{ __html: typeof parsed === 'string' ? parsed : '' }}
+          dangerouslySetInnerHTML={{ __html: typeof parsed === 'string' ? DOMPurify.sanitize(parsed) : '' }}
         />
       )}
 

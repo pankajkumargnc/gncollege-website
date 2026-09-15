@@ -66,7 +66,7 @@ export function IqacPage() {
   }, []);
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title="Internal Quality Assurance Cell" subtitle="Ensuring and enhancing the academic and administrative performance of the institution." icon="📈" />
       
       <div style={{ maxWidth: 1200, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
@@ -155,7 +155,7 @@ export function CourseOffered() {
   } catch (e) { console.error('Error parsing courses JSON', e); }
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Courses Offered (NEP 2022)"} subtitle={content?.subtitle || "Four Year Undergraduate Programme (FYUGP) with Multiple Entry & Exit Options."} icon="🎓" />
       
       <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
@@ -222,7 +222,7 @@ export function Syllabus() {
   ];
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title="Syllabus Database" subtitle="Download official FYUGP and CBCS syllabi for all departments." icon="📚" />
       
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
@@ -313,7 +313,7 @@ export function AcademicCalendar() {
   ]);
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Academic Calendar"} subtitle={content?.subtitle || "Key dates, examination schedules, and holidays for the current session."} icon="🗓️" />
       
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
@@ -380,7 +380,7 @@ export function PlacementsPage() {
     const GOLD = COLORS?.gold || '#f4a023';
 
     return (
-        <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+        <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
             <PageHeader 
                 title="Placements & Wall of Fame" 
                 subtitle="Celebrating the success of our students who have been placed in leading industries and organizations." 

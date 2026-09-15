@@ -100,7 +100,7 @@ export default function SikhHeritagePage() {
           user-select: none;
         }
         .sh-gurmukhi-lead {
-          font-family: serif, 'Plus Jakarta Sans', sans-serif;
+          font-family: 'Noto Sans Gurmukhi', serif, sans-serif;
           color: #fbd38d;
           font-size: clamp(16px, 2.2vw, 22px);
           font-weight: 700;
@@ -393,7 +393,7 @@ export default function SikhHeritagePage() {
           color: rgba(244,160,35,0.06); pointer-events: none;
         }
         .sh-mantar-gurmukhi {
-          font-family: serif;
+          font-family: 'Noto Sans Gurmukhi', serif;
           font-size: clamp(20px, 2.8vw, 30px);
           color: #fbd38d;
           line-height: 1.6;

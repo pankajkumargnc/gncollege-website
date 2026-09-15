@@ -21,18 +21,20 @@ const StaffPage = lazy(() => import('../pages/StaffPage'));
 const PROSE_CSS = `
   /* ── Base ── */
   .gnc-prose {
-    font-family: 'Plus Jakarta Sans', 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     font-size: 16px;
     line-height: 1.8;
     color: #334155;
     max-width: 100%;
     word-break: break-word;
+    text-align: left;
+    text-wrap: pretty;
   }
 
   /* ── Headings ── */
   .gnc-prose h1, .gnc-prose h2, .gnc-prose h3,
   .gnc-prose h4, .gnc-prose h5, .gnc-prose h6 {
-    font-family: 'Plus Jakarta Sans', 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     color: #0f2347;
     font-weight: 800;
     line-height: 1.3;

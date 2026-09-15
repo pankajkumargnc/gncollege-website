@@ -358,6 +358,79 @@ p:last-child {
   margin-bottom: 0;
 }
 
+/* ── Rich Text Content Engine (CMS & dynamic pages) ── */
+.rich-text-content {
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  line-height: 1.75;
+  text-align: left;
+}
+.rich-text-content p {
+  margin-bottom: 1.25rem;
+  line-height: 1.75;
+  color: var(--text-secondary);
+}
+.rich-text-content h2,
+.rich-text-content h3,
+.rich-text-content h4 {
+  color: var(--navy);
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+}
+.rich-text-content ul,
+.rich-text-content ol {
+  padding-left: 1.75rem;
+  margin-bottom: 1.25rem;
+  color: var(--text-secondary);
+}
+.rich-text-content li {
+  margin-bottom: 0.5rem;
+  line-height: 1.7;
+}
+.rich-text-content a {
+  color: var(--gold);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+.rich-text-content a:hover {
+  color: var(--navy-light);
+}
+.rich-text-content blockquote {
+  border-left: 4px solid var(--gold);
+  padding: 0.75rem 1.25rem;
+  margin: 1.5rem 0;
+  background: var(--surface-raised);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-style: italic;
+  color: var(--text-muted);
+}
+.rich-text-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.rich-text-content th,
+.rich-text-content td {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-light);
+  font-size: 0.9375rem;
+}
+.rich-text-content th {
+  background: var(--navy);
+  color: #ffffff;
+  font-weight: 700;
+  text-align: left;
+}
+.rich-text-content td {
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+
 /* Monospace — admin/code areas */
 code, pre, .code,
 [class*="AdminPanel"] textarea {

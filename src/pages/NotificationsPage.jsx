@@ -94,7 +94,7 @@ export default function NotificationsPage() {
   }, [paginated]);
 
   return (
-    <div style={{ minHeight: '100dvh', background: '#fff', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ minHeight: '100dvh', background: '#fff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
       <style>{`
         .filter-container { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; margin-bottom: 40px; box-shadow: 0 10px 40px -10px rgba(15,23,42,0.05); }
         .search-wrapper { position: relative; flex: 1; }

@@ -48,12 +48,12 @@ export function AdmissionRule() {
   ]);
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Admission Procedure"} subtitle={content?.subtitle || "Complete step-by-step guide for UG and Vocational admission under NEP 2020."} icon="📝" />
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ background: '#fff', padding: 40, borderRadius: 24, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)' }}>
-            <div style={{ background: '#fef2f2', borderLeft: `4px solid #ef4444`, padding: 16, borderRadius: '0 12px 12px 0', marginBottom: 30 }} dangerouslySetInnerHTML={{ __html: importantRule }} />
+            <div style={{ background: '#fef2f2', borderLeft: `4px solid #ef4444`, padding: 16, borderRadius: '0 12px 12px 0', marginBottom: 30 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(importantRule) }} />
             
             <div style={{ position: 'relative', paddingLeft: 24 }}>
               <div style={{ position: 'absolute', top: 10, bottom: 20, left: 9, width: 3, background: '#e2e8f0', borderRadius: 3 }} />
@@ -90,7 +90,7 @@ export function DocumentRequired() {
   ]);
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Documents Required"} subtitle={content?.subtitle || "Bring these documents during physical verification at the campus."} icon="📂" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -139,7 +139,7 @@ export function FeeStructure() {
   ];
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title="Fee Structure" subtitle="Detailed semester-wise fee breakdown for 4-Year FYUGP (8 Semesters), BCA, and BBA." icon="💳" />
       <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -242,7 +242,7 @@ export function AdmissionNotification() {
   }, []);
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title="Admission Notifications" subtitle="Latest updates, merit lists, and announcements regarding admissions." icon="📢" />
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -288,7 +288,7 @@ export function IntakeCapacity() {
   const data = getList('seats', defaultData);
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Intake Capacity"} subtitle={content?.subtitle || "Subject-wise maximum seat availability for the current academic session."} icon="🪑" />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>

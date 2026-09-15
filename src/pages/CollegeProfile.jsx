@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import DOMPurify from 'dompurify';
 import { Link } from 'react-router-dom';
 import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
 import 'react-vertical-timeline-component/style.min.css';
@@ -78,14 +79,14 @@ const CollegeProfile = () => {
               className="profile-img hover-scale"
               style={{ float: 'right', width: '350px', maxWidth: '100%', marginLeft: '2rem', marginBottom: '1rem', borderRadius: '12px' }}
             />
-            <div dangerouslySetInnerHTML={{ __html: profileHtml }} />
+            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(profileHtml) }} />
             <div style={{ clear: 'both' }}></div>
           </div>
 
           <div style={{ marginBottom: '3rem' }}>
             <h2 className="section-heading">About the College</h2>
             <div className="heading-underline"></div>
-            <div dangerouslySetInnerHTML={{ __html: aboutHtml }} />
+            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutHtml) }} />
           </div>
 
           <div>

@@ -4,7 +4,6 @@
 import { 
   getAuth, 
   signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword,
   signOut, 
   setPersistence, 
   browserLocalPersistence,
@@ -54,33 +53,23 @@ export async function loginAdmin(usernameOrEmail, password) {
   try {
     // 1. Attempt standard Firebase Auth sign-in
     const credential = await signInWithEmailAndPassword(auth, targetEmail, cleanPass);
+    if (!isUserAuthorizedAdmin(credential.user)) {
+      await signOut(auth);
+      throw new Error("Access denied: This account is not authorized as an administrator.");
+    }
     sessionStorage.removeItem('gnc_admin_auth');
     sessionStorage.setItem('gnc_active_session', '1');
     return credential.user;
   } catch (err) {
-    // 2. If user not found and this is the primary authorized email, auto-create account
+    if (err.message && err.message.startsWith("Access denied")) {
+      throw err;
+    }
     if (
-      err.code === "auth/user-not-found" ||
-      err.code === "auth/invalid-credential"
+      err.code === "auth/wrong-password" ||
+      err.code === "auth/invalid-credential" ||
+      err.code === "auth/user-not-found"
     ) {
-      if (AUTHORIZED_ADMIN_EMAILS.includes(targetEmail)) {
-        try {
-          const newCredential = await createUserWithEmailAndPassword(auth, targetEmail, cleanPass);
-          console.info("[FirebaseAuth] Successfully provisioned primary admin account:", targetEmail);
-          sessionStorage.removeItem('gnc_admin_auth');
-          sessionStorage.setItem('gnc_active_session', '1');
-          return newCredential.user;
-        } catch (createErr) {
-          if (createErr.code === "auth/email-already-in-use") {
-            throw new Error("Incorrect password for this admin account.");
-          }
-          if (createErr.code === "auth/operation-not-allowed") {
-            err = createErr;
-          } else {
-            throw createErr;
-          }
-        }
-      }
+      throw new Error("Invalid email/username or password. Please verify your credentials.");
     }
 
     // Handle friendly error messages

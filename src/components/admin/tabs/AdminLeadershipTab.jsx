@@ -40,7 +40,7 @@ const FALLBACK = '/images/college_photo.webp';
 // ── Styles ────────────────────────────────────────────────────────────────────
 const S = {
   wrap: {
-    fontFamily: "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif",
+    fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
     color: '#334155',
   },
   header: {

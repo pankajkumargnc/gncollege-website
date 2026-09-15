@@ -92,7 +92,7 @@ export default function VirtualTour() {
   };
 
   return (
-    <div style={{ width: '100%', fontFamily: "'DM Sans', 'Plus Jakarta Sans', sans-serif" }}>
+    <div style={{ width: '100%', fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif" }}>
       {/* Tour Header */}
       <div style={{
         background: `linear-gradient(135deg, ${NAVY} 0%, #173266 100%)`,

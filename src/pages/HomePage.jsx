@@ -153,7 +153,7 @@ function useScrollAnim(options = {}) {
 
 const ANIM_CSS = `
   .hp-root {
-    font-family: "Amazon Ember","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
   .sa{opacity:0;will-change:opacity,transform;}
   .sa.visible{will-change:auto;}
@@ -219,7 +219,7 @@ const ANIM_CSS = `
 // ✅ ULTRA PRO MAX RESPONSIVE CSS INJECTED HERE
 const CSS = `
   *,*::before,*::after{box-sizing:border-box;}
-  p { text-align: justify; }
+  p { text-align: left; text-wrap: pretty; }
   .hp-watermark{position:fixed;inset:0;background-image:url(${import.meta.env.BASE_URL}images/logo.webp);background-repeat:repeat;background-size:320px;opacity:.025;z-index:-1;background-color:#f4f7f9;pointer-events:none;}
 
   .hp-qab{background:#fff;border-bottom:1.5px solid #f1f5f9;box-shadow:0 2px 12px rgba(15,35,71,.06);}
@@ -252,7 +252,7 @@ const CSS = `
   .hp-imgstack:hover .hp-img-main{transform:scale(1.02);}
   .hp-img-accent{position:absolute;bottom:-28px;right:0;background:${N};color:#fff;padding:22px 26px;border-radius:14px;z-index:3;box-shadow:0 10px 30px rgba(0,0,0,.2);animation:float 3s ease-in-out infinite;}
   @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
-  .hp-adesc{color:#555;line-height:1.8;font-size:15.5px;margin-bottom:28px;text-align:justify;}
+  .hp-adesc{color:var(--text-secondary,#334155);line-height:1.8;font-size:15.5px;margin-bottom:28px;text-align:left;text-wrap:pretty;max-width:68ch;}
   .hp-afeat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%, 200px),1fr));gap:14px;margin-bottom:32px;}
   .hp-afeat{display:flex;gap:11px;align-items:flex-start;}
   .hp-afeat-t{font-weight:800;font-size:13.5px;color:${N};}
@@ -286,7 +286,7 @@ const CSS = `
   .hp-ev-info{padding:20px;display:flex;flex-direction:column;flex:1;}
   .hp-ev-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:${N};margin:0 0 8px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:44px;flex-shrink:0;}
   .hp-ev-desc-wrap{flex:1; display:flex; flex-direction:column;}
-  .hp-ev-desc{font-size:13px;color:#64748b;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;height:62px;text-align:justify;margin:0;}
+  .hp-ev-desc{font-size:13px;color:#64748b;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;height:62px;text-align:left;margin:0;}
   
   .hp-ev-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:14px;margin-top:auto;gap:8px;}
   .hp-ev-loc{font-size:11px;color:#94a3b8;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
@@ -305,7 +305,7 @@ const CSS = `
   .gc:hover .hp-cnt-box{transform:translateY(-8px);box-shadow:0 16px 36px rgba(15,35,71,.12);border-color:transparent;}
   .hp-cnt-icon{font-size:clamp(36px,5vw,46px);margin-bottom:clamp(10px,1.5vw,16px);display:inline-block;transition:transform .4s cubic-bezier(.22,1,.36,1);}
   .gc:hover .hp-cnt-icon{transform:scale(1.15) rotate(8deg);}
-  .hp-cnt-num{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(32px,5vw,44px);font-weight:800;color:${N};line-height:1;margin-bottom:10px;letter-spacing:-1px;}
+  .hp-cnt-num{font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif;font-size:clamp(32px,5vw,46px);font-weight:900;color:${N};line-height:1;margin-bottom:10px;letter-spacing:-1.2px;}
   .hp-cnt-lbl{font-size:clamp(10px,.85vw,13px);color:#64748b;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
 
   .hp-links{padding:clamp(64px,8vw,96px) clamp(16px,3vw,24px);background:#fff;}

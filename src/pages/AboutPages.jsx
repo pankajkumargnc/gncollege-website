@@ -6,6 +6,7 @@ import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import PDFModal from '../components/PDFModal'; // ✅ PDF Modal Import
 import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageContent'; // ✅ CMS Content Hook
+import DOMPurify from 'dompurify';
 import '../styles/index.css';
 
 const N = COLORS.navy || '#0f2347';
@@ -264,7 +265,7 @@ export function VisionMission() {
               <div style={{ padding:32 }}>
                 <div style={{ fontSize:42, marginBottom:14 }}>🎯</div>
                 <h2 style={{ color:N, fontSize:22, fontWeight:800, marginBottom:16 }}>Our Vision</h2>
-                <div style={{ color:'#475569', lineHeight:1.8, fontSize:15 }} dangerouslySetInnerHTML={{ __html: visionText }} />
+                <div style={{ color:'#475569', lineHeight:1.8, fontSize:15 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(visionText) }} />
               </div>
             </div>
             <div style={{ background:'#fff', borderRadius:20, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', overflow:'hidden' }}>
@@ -272,7 +273,7 @@ export function VisionMission() {
               <div style={{ padding:32 }}>
                 <div style={{ fontSize:42, marginBottom:14 }}>📌</div>
                 <h2 style={{ color:N, fontSize:22, fontWeight:800, marginBottom:16 }}>Our Mission</h2>
-                <div style={{ color:'#475569', lineHeight:1.8, fontSize:15 }} dangerouslySetInnerHTML={{ __html: missionText }} />
+                <div style={{ color:'#475569', lineHeight:1.8, fontSize:15 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(missionText) }} />
               </div>
             </div>
           </div>
@@ -345,7 +346,7 @@ export function PrincipalMessage() {
             </div>
             <h2 className="section-heading">Message to Students & Parents</h2>
             <div className="heading-underline" />
-            <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: messageHtml }} />
+            <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(messageHtml) }} />
           </div>
         </Fade>
         <DynamicSectionsContainer sections={content?.sections} excludeIds={['principal-info', 'message']} />
@@ -553,7 +554,7 @@ export function GoverningBody() {
           <div style={{ background:'#fff', borderRadius:20, padding:36, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:24 }}>
             <h2 className="section-heading">About the Governing Body</h2>
             <div className="heading-underline" />
-            <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: aboutText }} />
+            <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutText) }} />
             <DataMarker label="Current session, total members, chairperson naam — niche stats box mein dalein" />
             <div style={{ marginTop:20, padding:'16px 24px', background:`linear-gradient(135deg,${N},#1a3a7c)`, borderRadius:12, color:'#fff', display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}>
               <div><div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase' }}>Current Session</div><div style={{ fontWeight:800, fontSize:18 }}>{gbStats.session || '2024-25'}</div></div>
@@ -636,7 +637,7 @@ export function StaffCouncil() {
           <div style={{ background:'#fff', borderRadius:20, padding:36, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:24 }}>
             <h2 className="section-heading">About Staff Council</h2>
             <div className="heading-underline" />
-            <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: aboutText }} />
+            <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutText) }} />
           </div>
         </Fade>
         <Fade delay={0.1}>

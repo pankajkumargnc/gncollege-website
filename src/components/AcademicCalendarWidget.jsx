@@ -129,7 +129,7 @@ export default function AcademicCalendarWidget({ events = [] }) {
       border: '1px solid #e2e8f0',
       boxShadow: '0 20px 40px rgba(15,35,71,0.06)',
       overflow: 'hidden',
-      fontFamily: "'DM Sans', sans-serif"
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
     }}>
       {/* Calendar Header */}
       <div style={{

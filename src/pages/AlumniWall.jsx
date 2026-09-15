@@ -157,7 +157,7 @@ export default function AlumniWall() {
   }, [alumni, search, selectedDept]);
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
       <style>{`
         .alumni-masonry-grid {
           display: flex;

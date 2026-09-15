@@ -5,6 +5,7 @@ import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageContent';
 import { resolveUrl } from '../utils/resolver';
+import DOMPurify from 'dompurify';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -109,7 +110,7 @@ function LiveGallery({ categoryId }) {
 ════════════════════════════════════════════════════════════ */
 export function CampusVisuals({ title, desc, categoryId }) {
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <header className="premium-hero">
         <div className="kinetic-bg" />
         <div className="hero-content-wrapper">
@@ -138,7 +139,7 @@ export function Infrastructure() {
   ]);
 
   return (
-    <div style={{ background: '#f8fafc', padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#f8fafc', padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <Fade>
           <div style={{ color: GOLD, fontWeight: 700, letterSpacing: 2, marginBottom: 8 }}>OVERVIEW</div>
@@ -174,7 +175,7 @@ export function Classrooms() {
   const features = getList('features', ['Spacious & Well-Ventilated', 'Ergonomic Seating', 'Interactive Smart Boards']);
   const descText = getText('desc', '<p>Comfortable, well-ventilated, and equipped with smart tech.</p>');
   return (
-    <div style={{ background: '#fff', padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#fff', padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))', gap: 60, alignItems: 'center', marginBottom: 40 }}>
           <Fade>
@@ -185,7 +186,7 @@ export function Classrooms() {
           <Fade delay={0.2}>
             <div style={{ background: `${GOLD}15`, padding: '8px 16px', borderRadius: 20, color: '#b45309', fontWeight: 700, display: 'inline-block', marginBottom: 16, fontSize: 13 }}>MODERN LEARNING</div>
             <h1 style={{ fontSize: 'clamp(28px, 4vw, 38px)', fontWeight: 800, color: NAVY, margin: '0 0 24px', lineHeight: 1.2 }}>{content?.title || 'Smart Classrooms'}</h1>
-            <div className="rich-text-content" style={{ color: '#64748b', fontSize: 16, lineHeight: 1.8, marginBottom: 24 }} dangerouslySetInnerHTML={{ __html: descText }} />
+            <div className="rich-text-content" style={{ color: '#64748b', fontSize: 16, lineHeight: 1.8, marginBottom: 24 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(descText) }} />
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
               {features.map((item, i) => (
                 <li key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 15, fontWeight: 600, color: NAVY }}>
@@ -210,14 +211,14 @@ export function IctRooms() {
   const { content, getText } = usePageContent('ict-rooms');
   const aboutHtml = getText('about', '<p>Our ICT rooms and computer laboratories are equipped with high-performance workstations, latest software, high-speed internet connectivity, and multimedia projectors to facilitate modern digital learning experiences for students across all departments.</p>');
   return (
-    <div style={{ background: NAVY, padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', color: '#fff', fontFamily: "'DM Sans', sans-serif", minHeight: '100dvh' }}>
+    <div style={{ background: NAVY, padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', color: '#fff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", minHeight: '100dvh' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <Fade><h1 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, margin: '0 0 16px' }}>{content?.title || 'ICT & Computer Labs'}</h1></Fade>
           <Fade delay={0.1}><p style={{ color: '#94a3b8', fontSize: 16, maxWidth: 600, margin: '0 auto 24px', lineHeight: 1.7 }}>{content?.subtitle || 'Empowering students with high-end workstations.'}</p></Fade>
           {aboutHtml && (
             <Fade delay={0.2}>
-              <div className="rich-text-content" style={{ maxWidth: 800, margin: '0 auto 30px', color: '#cbd5e1', fontSize: 15.5, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: aboutHtml }} />
+              <div className="rich-text-content" style={{ maxWidth: 800, margin: '0 auto 30px', color: '#cbd5e1', fontSize: 15.5, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutHtml) }} />
             </Fade>
           )}
         </div>
@@ -235,7 +236,7 @@ export function GreenCampus() {
   const { content, getText } = usePageContent('green-campus');
   const aboutHtml = getText('about', '<p>Guru Nanak College is committed to maintaining an eco-friendly campus with extensive green cover, rainwater harvesting, solar panels for clean energy, ban on single-use plastic, and regular tree plantation drives led by the NSS unit. Our green campus initiatives align with the UGC guidelines on sustainable development in higher education.</p>');
   return (
-    <div style={{ background: 'linear-gradient(145deg, #f0fdf4 0%, #ffffff 100%)', padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', fontFamily: "'DM Sans', sans-serif", minHeight: '100dvh' }}>
+    <div style={{ background: 'linear-gradient(145deg, #f0fdf4 0%, #ffffff 100%)', padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", minHeight: '100dvh' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <Fade>
@@ -247,7 +248,7 @@ export function GreenCampus() {
           </Fade>
           {aboutHtml && (
             <Fade delay={0.15}>
-              <div style={{ maxWidth: 840, margin: '0 auto 32px', background: '#fff', padding: '24px 32px', borderRadius: 20, boxShadow: '0 8px 24px rgba(6,78,59,0.06)', border: '1px solid #d1fae5', textAlign: 'left', color: '#334155', fontSize: 15, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: aboutHtml }} />
+              <div style={{ maxWidth: 840, margin: '0 auto 32px', background: '#fff', padding: '24px 32px', borderRadius: 20, boxShadow: '0 8px 24px rgba(6,78,59,0.06)', border: '1px solid #d1fae5', textAlign: 'left', color: '#334155', fontSize: 15, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutHtml) }} />
             </Fade>
           )}
         </div>

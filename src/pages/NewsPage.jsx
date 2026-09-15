@@ -116,7 +116,7 @@ export default function NewsPage() {
             { val:years.length - 1,                                  label:'Active Years' },
           ].map((s, i) => (
             <div key={i} style={{ background:'#fff', border:'1px solid #e2e8f0', borderRadius:11, padding:'10px 20px', textAlign:'center', flex:1, minWidth:'150px' }}>
-              <div style={{ fontSize:24, fontWeight:900, color:gold, lineHeight:1 }}>{s.val}</div>
+              <div style={{ fontSize:24, fontWeight:900, color:gold, lineHeight:1, fontFamily: "'Space Grotesk', sans-serif" }}>{s.val}</div>
               <div style={{ fontSize:11, color:'#64748b', marginTop:3, fontWeight:600 }}>{s.label}</div>
             </div>
           ))}

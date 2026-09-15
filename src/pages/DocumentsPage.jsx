@@ -135,7 +135,7 @@ export default function DocumentsPage() {
               <button key={type} onClick={() => setSelType(selType===type?'All':type)}
                 style={{ background:selType===type ? '#fffbeb' : '#fff', border:`1px solid ${selType===type ? gold : '#e2e8f0'}`, borderRadius:11, padding:'10px 18px', color:navy, cursor:'pointer', textAlign:'center', transition:'all .2s' }}>
                 <span style={{ display:'block', fontSize:19 }}>{m.icon}</span>
-                <span style={{ display:'block', fontSize:22, fontWeight:900, color:gold, lineHeight:1 }}>{count}</span>
+                <span style={{ display:'block', fontSize:22, fontWeight:900, color:gold, lineHeight:1, fontFamily: "'Space Grotesk', sans-serif" }}>{count}</span>
                 <span style={{ display:'block', fontSize:11, color:'#64748b', marginTop:2, fontWeight: 600 }}>{type}</span>
               </button>
             );
