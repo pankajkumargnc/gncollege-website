@@ -6,14 +6,14 @@ import { db } from "../../../firebase";
 import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { T, NAVY, GOLD, Toggle, useLocalDraft } from '../AdminShared';
-import { clearCache } from '../../../utils/cachedFetch';
+import { clearCache, encodePayload, decodePayload } from '../../../utils/cachedFetch';
 import MediaPicker from "../../MediaPicker";
 
 export default function SettingsTab({ logAct }) {
   const [siteCfg, setSiteCfg] = useState(() => {
     try {
       const cached = localStorage.getItem('gnc_site_settings_cache');
-      if (cached) return JSON.parse(cached);
+      if (cached) return decodePayload(cached) || {};
     } catch {}
     return {
       name: 'Guru Nanak College',
@@ -42,7 +42,7 @@ export default function SettingsTab({ logAct }) {
       if (s.exists()) {
         const d = s.data();
         setSiteCfg(prev => ({ ...prev, ...d }));
-        try { localStorage.setItem('gnc_site_settings_cache', JSON.stringify(d)); } catch {}
+        try { localStorage.setItem('gnc_site_settings_cache', encodePayload(d)); } catch {}
         if (d.imgbbKey) window.GN_IMGBB_KEY = d.imgbbKey;
         if (d.geminiApiKey) window.GNC_GEMINI_API_KEY = d.geminiApiKey;
       }
@@ -65,9 +65,9 @@ export default function SettingsTab({ logAct }) {
 
       try {
         const cached = localStorage.getItem('gnc_site_settings_cache');
-        const parsed = cached ? JSON.parse(cached) : {};
+        const parsed = (cached ? decodePayload(cached) : null) || {};
         parsed[key] = newVal;
-        localStorage.setItem('gnc_site_settings_cache', JSON.stringify(parsed));
+        localStorage.setItem('gnc_site_settings_cache', encodePayload(parsed));
       } catch {}
 
       window.dispatchEvent(new CustomEvent('gnc_settings_updated', { detail: { [key]: newVal } }));
@@ -176,7 +176,7 @@ export default function SettingsTab({ logAct }) {
       await setDoc(doc(db, 'settings', 'site'), { ...siteCfg, updatedAt: serverTimestamp() });
       if (siteCfg.imgbbKey) window.GN_IMGBB_KEY = siteCfg.imgbbKey;
       if (siteCfg.geminiApiKey) window.GNC_GEMINI_API_KEY = siteCfg.geminiApiKey;
-      try { localStorage.setItem('gnc_site_settings_cache', JSON.stringify(siteCfg)); } catch {}
+      try { localStorage.setItem('gnc_site_settings_cache', encodePayload(siteCfg)); } catch {}
       window.dispatchEvent(new CustomEvent('gnc_settings_updated', { detail: siteCfg }));
       
       clearCache('site_settings');

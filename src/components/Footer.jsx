@@ -201,14 +201,14 @@ const Footer = memo(() => {
         }
         .f-brand-sub {
           font-size: 10.5px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;
-          color: ${G}; margin-top: 3px; opacity: 0.9; white-space: nowrap; text-align: left;
+          color: ${G}; margin-top: 3px; opacity: 1; white-space: nowrap; text-align: left;
         }
-        .f-brand-side p { font-size: 12.5px; color: rgba(255,255,255,0.6); line-height: 1.6; margin-bottom: 20px; }
+        .f-brand-side p { font-size: 12.5px; color: rgba(255,255,255,0.85); line-height: 1.6; margin-bottom: 20px; }
 
         .f-col h4 { font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: ${G}; margin-bottom: 20px; }
         .f-links { list-style: none; padding: 0; margin: 0; }
         .f-links li { margin-bottom: 10px; }
-        .f-links a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13px; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .f-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 13px; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
         .f-links a:hover { color: #fff; transform: translateX(8px); }
 
         /* 🏀 Bouncing Social Icons */
@@ -242,8 +242,8 @@ const Footer = memo(() => {
           padding: 4px 12px; border-radius: 30px; backdrop-filter: blur(8px);
         }
         .f-visitor-label {
-          font-size: 10.5px; font-weight: 700; text-transform: uppercase;
-          letter-spacing: 0.5px; color: rgba(255, 255, 255, 0.7);
+          font-size: 11px; font-weight: 800; text-transform: uppercase;
+          letter-spacing: 0.5px; color: #ffffff;
           display: flex; align-items: center; gap: 5px;
         }
         .f-visitor-counter {
@@ -257,8 +257,8 @@ const Footer = memo(() => {
           min-width: 14px; text-align: center; text-shadow: 0 0 8px ${G}88;
         }
         
-        .f-final-line { display: flex; justify-content: space-between; align-items: center; padding-top: 20px; font-size: 11.5px; color: rgba(255,255,255,0.35); }
-        .f-dev-pill { background: #000; border: 1px solid rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 50px; color: rgba(255,255,255,0.5); }
+        .f-final-line { display: flex; justify-content: space-between; align-items: center; padding-top: 20px; font-size: 12px; color: rgba(255,255,255,0.8); }
+        .f-dev-pill { background: #000; border: 1px solid rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 50px; color: rgba(255,255,255,0.88); }
 
         .sa { opacity: 0; transition: 1s cubic-bezier(0.22, 1, 0.36, 1); }
         .sa-up { transform: translateY(40px); }
@@ -391,7 +391,7 @@ const Footer = memo(() => {
 
             <div className="f-soc-hub">
               {rawLinks.map(l => (
-                <a key={l.id} href={l.href} target="_blank" rel="noopener noreferrer" className="f-soc-btn">{getIcon(l)}</a>
+                <a key={l.id} href={l.href} target="_blank" rel="noopener noreferrer" className="f-soc-btn" aria-label={`Follow GNC on ${l.id || 'Social Media'}`}>{getIcon(l)}</a>
               ))}
             </div>
 
@@ -400,7 +400,7 @@ const Footer = memo(() => {
               <div className="f-hours-title">🕒 Administrative & Counter Hours</div>
               <p className="f-hours-desc">
                 Monday – Saturday: <b>09:30 AM – 04:30 PM</b><br />
-                <span style={{ fontSize: 10.5, color: '#94a3b8' }}>Sunday & University Holidays: Closed</span>
+                <span style={{ fontSize: 10.5, color: '#cbd5e1' }}>Sunday & University Holidays: Closed</span>
               </p>
             </div>
           </SA>
@@ -434,7 +434,7 @@ const Footer = memo(() => {
           <SA variant="up" delay="sa-d3" className="f-col" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <h4>Command</h4>
             <a href={`${import.meta.env.BASE_URL}#/admin`} target="_blank" rel="noopener noreferrer" style={{ background: G, color: '#000', padding: '10px', borderRadius: 10, textAlign: 'center', fontWeight: 900, textDecoration: 'none', fontSize: 12 }}>ADMIN PORTAL</a>
-            <div style={{ padding: 12, background: 'rgba(255,255,255,0.02)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.05)', fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>
+            <div style={{ padding: 12, background: 'rgba(255,255,255,0.02)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.05)', fontSize: 10.5, color: 'rgba(255,255,255,0.85)' }}>
               <b>💡 Tip:</b> Press <b>Ctrl + K</b> to search anything.
             </div>
           </SA>
@@ -443,7 +443,7 @@ const Footer = memo(() => {
         <SA variant="up" className="f-hud-ultima">
           <div className="hud-left">
             <div className="hud-status"><div className="pulse"></div> GNC SERVER: ONLINE</div>
-            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, fontWeight: 700 }}>⏲️ {time.toLocaleTimeString('en-IN', { hour12: true })}</div>
+            <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11, fontWeight: 700 }}>⏲️ {time.toLocaleTimeString('en-IN', { hour12: true })}</div>
             {visitorCount !== null && (
               <div className="f-visitor-box" title="Total page visits recorded">
                 <span className="f-visitor-label">👁️ Visitors:</span>
@@ -457,13 +457,14 @@ const Footer = memo(() => {
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: 0.5, color: G }}>ESTD: 1970 | DHANBAD</div>
+            <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: 0.5, color: G }}>ESTD: 1970 | DHANBAD</div>
             {/* ⬆️ 4. Sleek Back to Top Button */}
             <button
               type="button"
               className="f-top-btn"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               title="Scroll to top of page"
+              aria-label="Scroll to top of page"
             >
               ↑ TOP
             </button>
@@ -472,9 +473,9 @@ const Footer = memo(() => {
         <div className="f-final-line">
           <div>© {new Date().getFullYear()} <b>Guru Nanak College.</b> All rights reserved.</div>
           <div style={{ display: 'flex', gap: 14, alignItems: 'center', fontSize: 12 }}>
-            <Link to="/privacy-policy" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}>Privacy Policy</Link>
-            <span style={{ color: '#475569' }}>•</span>
-            <Link to="/terms-of-service" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}>Terms of Service</Link>
+            <Link to="/privacy-policy" style={{ color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = '#cbd5e1'}>Privacy Policy</Link>
+            <span style={{ color: 'rgba(255,255,255,0.5)' }}>•</span>
+            <Link to="/terms-of-service" style={{ color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = '#cbd5e1'}>Terms of Service</Link>
           </div>
           <div className="f-dev-pill">⚡ <b>React + Firebase</b> | Dev: <b>Pankaj Kumar</b></div>
         </div>

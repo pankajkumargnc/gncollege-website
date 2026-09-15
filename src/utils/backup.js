@@ -3,6 +3,7 @@
 
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
+import { encodePayload, decodePayload } from './cachedFetch';
 
 const BACKUP_KEY = 'gnc_backup_data';
 const BACKUP_TIME_KEY = 'gnc_backup_timestamp';
@@ -48,7 +49,7 @@ export async function createBackup() {
 
   // Save to localStorage
   try {
-    localStorage.setItem(BACKUP_KEY, JSON.stringify(backup));
+    localStorage.setItem(BACKUP_KEY, encodePayload(backup));
     localStorage.setItem(BACKUP_TIME_KEY, backup.timestamp);
   } catch {
     // localStorage full — skip
@@ -76,7 +77,7 @@ export function isBackupNeeded() {
 export function getLastBackup() {
   try {
     const raw = localStorage.getItem(BACKUP_KEY);
-    return raw ? JSON.parse(raw) : null;
+    return raw ? decodePayload(raw) : null;
   } catch {
     return null;
   }

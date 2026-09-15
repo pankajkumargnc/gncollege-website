@@ -413,7 +413,7 @@ function AdminPanelInner({
       )}
 
       {/* ── Sidebar ── */}
-      <div className={`adm-side ${sideCollapsed&&!isMobile?'collapsed':''} ${isMobile&&sideOpen?'open':''}`}>
+      <aside aria-label="Admin Navigation" className={`adm-side ${sideCollapsed&&!isMobile?'collapsed':''} ${isMobile&&sideOpen?'open':''}`}>
         <div className="adm-brand">
           <img 
             src="images/logo.webp" 
@@ -480,7 +480,14 @@ function AdminPanelInner({
               return (
                 <React.Fragment key={t.id}>
                   {showSec && <div className="adm-sec-label">{t.section}</div>}
-                  <div className={`anav ${tab===t.id?'active':''}`} onClick={() => { setTab(t.id); if (isMobile) setSideOpen(false); }} title={t.label}>
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    className={`anav ${tab===t.id?'active':''}`}
+                    onClick={() => { setTab(t.id); if (isMobile) setSideOpen(false); }}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTab(t.id); if (isMobile) setSideOpen(false); } }}
+                    title={t.label}
+                  >
                     <span style={{ fontSize:16, width:22, textAlign:'center', flexShrink:0 }}>{t.icon}</span>
                     <span className="nav-label" style={{ flex:1 }}>{t.label}</span>
                     {badge ? <span className="nav-badge">{badge}</span> : null}
@@ -492,18 +499,24 @@ function AdminPanelInner({
         </div>
 
         <div className="adm-side-footer" style={{ padding: '16px 12px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-          <div className="fluid-btn" onClick={handlePremiumLogout}>
+          <div
+            role="button"
+            tabIndex={0}
+            className="fluid-btn"
+            onClick={handlePremiumLogout}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handlePremiumLogout(); } }}
+          >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
             <span className="nav-label" style={{ opacity: sideCollapsed && !isMobile ? 0 : 1 }}>EXIT CORE</span>
           </div>
         </div>
-      </div>
+      </aside>
 
       {/* Mobile overlay */}
       {isMobile && sideOpen && <div onClick={()=>setSideOpen(false)} style={{ position:'fixed', inset:0, background:'rgba(15,35,71,.6)', zIndex:10000, backdropFilter:'blur(3px)' }} />}
 
       {/* ── Main content ── */}
-      <div className="adm-main">
+      <main role="main" className="adm-main">
         {/* Mobile top bar */}
         <div className="adm-mobile-top">
           <button onClick={()=>setSideOpen(true)} style={{ background:'none', border:'none', fontSize:22, cursor:'pointer', color:NAVY }} aria-label="Open navigation menu">☰</button>
@@ -524,7 +537,7 @@ function AdminPanelInner({
         </div>
 
         {/* Top bar */}
-        <div className="adm-topbar">
+        <header className="adm-topbar">
           {!isMobile && <button onClick={()=>setSideCollapsed(c=>!c)} style={{ background:'none', border:'none', fontSize:18, cursor:'pointer', color:T.t3, flexShrink:0 }} aria-label="Toggle sidebar">☰</button>}
           
           <div className="top-search" style={{ position:'relative' }}>
@@ -582,7 +595,7 @@ function AdminPanelInner({
               Shortcuts
             </button>
           </div>
-        </div>
+        </header>
 
         {/* Tab content */}
         <div className="adm-content" ref={contentRef}>
@@ -590,7 +603,7 @@ function AdminPanelInner({
             {renderTab()}
           </Suspense>
         </div>
-      </div>
+      </main>
 
       {/* Keyboard shortcuts modal */}
       {showKeyHelp && (

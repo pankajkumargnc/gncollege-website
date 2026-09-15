@@ -14,7 +14,7 @@ try {
 } catch (_) {}
 
 // 🔐 Safe base64 encoding to prevent PII exposure in localStorage audits
-function encodePayload(obj) {
+export function encodePayload(obj) {
   try {
     return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
   } catch (_) {
@@ -22,7 +22,7 @@ function encodePayload(obj) {
   }
 }
 
-function decodePayload(str) {
+export function decodePayload(str) {
   if (!str) return null;
   try {
     return JSON.parse(decodeURIComponent(escape(atob(str))));

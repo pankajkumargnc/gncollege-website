@@ -4,7 +4,7 @@ import {
   collection, query, onSnapshot, orderBy, limit, getDocs, doc 
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { getCached, setCache, clearCache, SYNC_CHANNEL_NAME } from '../utils/cachedFetch';
+import { getCached, setCache, clearCache, SYNC_CHANNEL_NAME, encodePayload, decodePayload } from '../utils/cachedFetch';
 import DOMPurify from 'dompurify';
 
 export default function useAppData() {
@@ -21,7 +21,7 @@ export default function useAppData() {
   const [siteSettings, setSiteSettings]   = useState(() => {
     try {
       const cached = localStorage.getItem('gnc_site_settings_cache');
-      return cached ? JSON.parse(cached) : null;
+      return cached ? decodePayload(cached) : null;
     } catch { return null; }
   });
 
@@ -55,8 +55,11 @@ export default function useAppData() {
         const cached = localStorage.getItem(CACHE_KEY);
         const ts = localStorage.getItem(CACHE_TS_KEY);
         if (cached && ts && Date.now() - Number(ts) < NAV_TTL) {
-          setNavLinks(JSON.parse(cached));
-          return;
+          const decoded = decodePayload(cached);
+          if (decoded) {
+            setNavLinks(decoded);
+            return;
+          }
         }
       } catch (_) {}
     }
@@ -69,7 +72,7 @@ export default function useAppData() {
         const tree = buildTree(flat) || [];
         setNavLinks(tree);
         try {
-          localStorage.setItem(CACHE_KEY, JSON.stringify(tree));
+          localStorage.setItem(CACHE_KEY, encodePayload(tree));
           localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
         } catch (_) {}
       })
@@ -179,7 +182,7 @@ export default function useAppData() {
       if (snap.exists()) {
         const d = snap.data();
         setSiteSettings(d);
-        try { localStorage.setItem('gnc_site_settings_cache', JSON.stringify(d)); } catch {}
+        try { localStorage.setItem('gnc_site_settings_cache', encodePayload(d)); } catch {}
       }
     }, () => {});
 
