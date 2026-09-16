@@ -14,6 +14,7 @@ import {
   Lightbulb, BookOpen, Briefcase, Landmark, Ban, Moon, FileCheck, Loader2
 } from 'lucide-react';
 import '../styles/index.css';
+import { resolveUrl } from '../utils/resolver';
 
 const N = COLORS.navy || '#0f2347';
 const G = COLORS.gold || '#f4a023';
@@ -336,14 +337,17 @@ export function PrincipalMessage() {
 
   // ── CMS content with safe object resolution ──
   const pInfo = getObject('principal-info', {
-    name: 'Sanjay Prasad',
-    designation: 'Secretary',
+    name: 'Dr. Sanjay Prasad',
+    designation: 'Principal',
+    qualification: 'M.Com, Ph.D.',
     institution: 'Guru Nanak College, Dhanbad',
     photo: 'images/principal.webp',
     quote: 'Education is not merely the acquisition of knowledge, but the transformation of character and the cultivation of a purposeful life.'
   });
 
   const messageHtml = getText('message', '<p>Dear Students and Parents, it gives me immense pleasure to welcome you to Guru Nanak College, Dhanbad — an institution that has been nurturing young minds for over five decades.</p><p>Our college stands as a beacon of quality education in Jharkhand, offering a rich blend of academic rigour, co-curricular activities, and personal development.</p><p>I invite you to be part of our vibrant community and assure you of our complete support at every step of your academic journey.</p>');
+
+  const photoSrc = resolveUrl(pInfo.photo || 'images/principal.webp');
 
   return (
     <div>
@@ -353,13 +357,15 @@ export function PrincipalMessage() {
           <div style={{ background:'#fff', borderRadius:20, padding:40, boxShadow:'0 8px 30px rgba(0,0,0,0.07)' }}>
             <div style={{ display:'flex', gap:36, alignItems:'flex-start', flexWrap:'wrap', marginBottom:36 }}>
               <div style={{ textAlign:'center', flexShrink:0 }}>
-                <DataMarker label="Principal ki photo ka path — src mein dalein" />
                 <div style={{ width:180, height:180, borderRadius:'50%', border:`6px solid ${G}`, boxShadow:'0 10px 30px rgba(15,35,71,0.2)', overflow:'hidden', margin:'0 auto', background:'#f1f5f9', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <img src={`${import.meta.env.BASE_URL}${pInfo.photo || 'images/principal.webp'}`} alt="Principal" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<div style=\"display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8\"><svg width=\"64\" height=\"64\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><polyline points=\"16 11 18 13 22 9\"/></svg></div>'; }} />
+                  <img src={photoSrc} alt={pInfo.name || "Principal"} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<div style=\"display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8\"><svg width=\"64\" height=\"64\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><polyline points=\"16 11 18 13 22 9\"/></svg></div>'; }} />
                 </div>
                 <div style={{ marginTop:14, fontWeight:800, fontSize:18, color:N }}>{pInfo.name}</div>
-                <div style={{ fontSize:13, color:'#64748b', marginTop:4 }}>{pInfo.designation}</div>
-                <div style={{ fontSize:13, color:'#64748b' }}>{pInfo.institution}</div>
+                <div style={{ fontSize:13, color:G, fontWeight:800, marginTop:3 }}>{pInfo.designation || 'Principal'}</div>
+                {pInfo.qualification && (
+                  <div style={{ fontSize:12, color:'#64748b', fontWeight:600, marginTop:2 }}>{pInfo.qualification}</div>
+                )}
+                <div style={{ fontSize:12.5, color:'#475569', marginTop:2, fontWeight:600 }}>{pInfo.institution || 'Guru Nanak College, Dhanbad'}</div>
               </div>
               <div style={{ flex:1, minWidth:260 }}>
                 <div style={{ borderLeft:`5px solid ${G}`, paddingLeft:24, marginBottom:24 }}>

@@ -89,6 +89,10 @@ const SsrCyclePage = LazyNaac("SsrCyclePage");
 const AqarPage = LazyNaac("AqarPage");
 const NirfPage = LazyNaac("NirfPage");
 const PerspectivePlan = LazyNaac("PerspectivePlan");
+const NaacPortalPage = LazyNaac("NaacPortalPage");
+const NaacIqacPage = LazyNaac("NaacIqacPage");
+const NaacCriteriaPage = LazyNaac("NaacCriteriaPage");
+const NaacBestPracticesPage = LazyNaac("NaacBestPracticesPage");
 
 const LibraryPage = LazyPublication("LibraryPage");
 const PublicationPage = LazyPublication("PublicationPage");
@@ -232,6 +236,11 @@ export default function AppRoutes({
             <Route path="/activity/collaboration/sadbhavana-diwas" element={<R el={<SadbhavanaDiwas />} />} />
 
             {/* NAAC */}
+            <Route path="/naac" element={<R el={<NaacPortalPage />} />} />
+            <Route path="/naac/portal" element={<R el={<NaacPortalPage />} />} />
+            <Route path="/naac/iqac" element={<R el={<NaacIqacPage />} />} />
+            <Route path="/naac/criteria" element={<R el={<NaacCriteriaPage />} />} />
+            <Route path="/naac/best-practices" element={<R el={<NaacBestPracticesPage />} />} />
             <Route path="/naac/ssr-1st-cycle/cycle-1-documents" element={<R el={<SsrCyclePage cycle={1} />} />} />
             <Route path="/naac/ssr-1st-cycle/peer-team-report" element={<R el={<SsrCyclePage cycle={1} />} />} />
             <Route path="/naac/ssr-2nd-cycle/cycle-2-documents" element={<R el={<SsrCyclePage cycle={2} />} />} />

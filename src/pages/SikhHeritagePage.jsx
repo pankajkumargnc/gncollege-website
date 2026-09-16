@@ -118,6 +118,16 @@ export default function SikhHeritagePage() {
           letter-spacing: -0.02em;
           margin: 0 0 16px;
           line-height: 1.15;
+          color: #ffffff;
+          text-shadow: 0 2px 14px rgba(0,0,0,0.6);
+        }
+        .sh-title-white {
+          color: #ffffff !important;
+          text-shadow: 0 2px 14px rgba(0,0,0,0.6);
+        }
+        .sh-title-gold {
+          color: #f4a023;
+          text-shadow: 0 0 24px rgba(244,160,35,0.45);
         }
         .sh-title span { color: #f4a023; }
         .sh-subtitle {
@@ -442,8 +452,8 @@ export default function SikhHeritagePage() {
         <div style={{ position: 'relative', zIndex: 2, maxWidth: 960, margin: '0 auto' }}>
           <div className="sh-khanda-emblem">☬</div>
           <div className="sh-gurmukhi-lead">ੴ ਸਤਿਗੁਰ ਪ੍ਰਸਾਦਿ • ਸਿੱਖ ਵਿਰਾਸਤ</div>
-          <h1 className="sh-title">
-            Sikh Heritage & <span>Minority Excellence</span>
+          <h1 className="sh-title" style={{ color: '#ffffff' }}>
+            <span className="sh-title-white" style={{ color: '#ffffff' }}>Sikh Heritage</span> & <span className="sh-title-gold" style={{ color: '#f4a023' }}>Minority Excellence</span>
           </h1>
           <p className="sh-subtitle">
             Founded in 1970 under the eternal light of Guru Nanak Dev Ji, Guru Nanak College, Dhanbad stands as 

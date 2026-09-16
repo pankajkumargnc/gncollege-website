@@ -59,8 +59,26 @@ function CustomChartTooltip({ active, payload, label }) {
   );
 }
 
-export default function PlacementAnalytics() {
+export default function PlacementAnalytics({ siteSettings }) {
   const [metricMode, setMetricMode] = useState('both'); // 'both' | 'students' | 'package'
+
+  const isEnabled = useMemo(() => {
+    if (siteSettings && typeof siteSettings.enablePlacementAnalytics === 'boolean') {
+      return siteSettings.enablePlacementAnalytics;
+    }
+    try {
+      const cached = localStorage.getItem('gnc_site_settings_cache');
+      if (cached) {
+        const parsed = JSON.parse(atob(cached));
+        if (parsed && typeof parsed.enablePlacementAnalytics === 'boolean') {
+          return parsed.enablePlacementAnalytics;
+        }
+      }
+    } catch {}
+    return true;
+  }, [siteSettings]);
+
+  if (!isEnabled) return null;
 
   return (
     <div 

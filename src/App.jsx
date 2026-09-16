@@ -60,6 +60,22 @@ export default function App() {
     };
   }, []);
 
+  // ── 🌐 Real-Time SEO Title & Meta Description Sync ──
+  useEffect(() => {
+    if (siteSettings?.metaTitle && !isAdminRoute) {
+      document.title = siteSettings.metaTitle;
+    }
+    if (siteSettings?.metaDescription) {
+      let metaDesc = document.querySelector('meta[name="description"]');
+      if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.name = 'description';
+        document.head.appendChild(metaDesc);
+      }
+      metaDesc.setAttribute('content', siteSettings.metaDescription);
+    }
+  }, [siteSettings?.metaTitle, siteSettings?.metaDescription, isAdminRoute]);
+
   // ✅ PWA: New Notice Push Simulator (Students only)
   useEffect(() => {
     try {
@@ -271,6 +287,73 @@ export default function App() {
     );
   }
 
+  if (siteSettings?.maintenanceMode && !isAdminRoute) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #070d1e, #0f2347, #020617)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#ffffff',
+        padding: 24,
+        textAlign: 'center',
+        fontFamily: "'Plus Jakarta Sans', sans-serif",
+      }}>
+        <div style={{
+          width: 80, height: 80, borderRadius: 20,
+          background: '#ffffff', padding: 10,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
+          marginBottom: 20
+        }}>
+          <img src="images/logo.webp" alt="GNC Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        </div>
+        <div style={{ fontSize: 12, fontWeight: 900, color: '#f59e0b', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 6 }}>
+          Guru Nanak College, Dhanbad
+        </div>
+        <h1 style={{ fontSize: 'clamp(22px, 5vw, 32px)', fontWeight: 900, margin: '0 0 12px', letterSpacing: '-0.5px' }}>
+          System Under Scheduled Maintenance
+        </h1>
+        <p style={{ maxWidth: 560, fontSize: 14, color: '#94a3b8', lineHeight: 1.7, margin: '0 auto 24px' }}>
+          {siteSettings.maintenanceMessage || 'Guru Nanak College online services are currently undergoing scheduled optimization. All portals will resume operation shortly.'}
+        </p>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <button 
+            onClick={() => window.location.reload()}
+            style={{
+              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+              color: '#0f2347',
+              border: 'none',
+              padding: '12px 24px',
+              borderRadius: 10,
+              fontWeight: 800,
+              fontSize: 13,
+              cursor: 'pointer'
+            }}
+          >
+            Check Status (Refresh)
+          </button>
+          <a 
+            href="#/admin" 
+            style={{
+              color: 'rgba(255,255,255,0.6)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              padding: '12px 20px',
+              borderRadius: 10,
+              fontSize: 13,
+              fontWeight: 700,
+              textDecoration: 'none'
+            }}
+          >
+            Staff & Admin Login →
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <Toaster position="bottom-right" containerStyle={{ zIndex: 9999999 }} />
@@ -286,6 +369,50 @@ export default function App() {
       
       {!isAdminRoute && (
         <div style={{ position: 'relative', zIndex: 1000 }}>
+          {/* 🚨 Real-Time Emergency Flash Broadcast Ribbon */}
+          {siteSettings?.emergencyBroadcastEnabled && siteSettings?.emergencyBroadcastText && (
+            <div style={{
+              background: siteSettings.emergencyBroadcastType === 'critical' ? 'linear-gradient(90deg, #991b1b, #dc2626, #b91c1c)' :
+                          siteSettings.emergencyBroadcastType === 'gold' ? 'linear-gradient(90deg, #b45309, #d97706, #f59e0b)' :
+                          'linear-gradient(90deg, #0f2347, #1e3a8a)',
+              color: '#ffffff',
+              padding: '8px 16px',
+              textAlign: 'center',
+              fontSize: '13px',
+              fontWeight: 700,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 12,
+              boxShadow: '0 2px 10px rgba(0,0,0,0.15)',
+              position: 'relative',
+              zIndex: 10001
+            }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#fff', animation: 'pulse 1.2s infinite' }} />
+                {siteSettings.emergencyBroadcastText}
+              </span>
+              {siteSettings.emergencyBroadcastLink && (
+                <a 
+                  href={siteSettings.emergencyBroadcastLink} 
+                  style={{ 
+                    color: '#ffffff', 
+                    background: 'rgba(255,255,255,0.22)', 
+                    padding: '2px 10px', 
+                    borderRadius: 6, 
+                    fontSize: '11px', 
+                    fontWeight: 800,
+                    textDecoration: 'none',
+                    border: '1px solid rgba(255,255,255,0.4)',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {siteSettings.emergencyBroadcastLinkText || 'View Details →'}
+                </a>
+              )}
+            </div>
+          )}
+
           <AlertBanner />
           <TopBar isDark={isDark} onToggleDark={toggleDark} siteSettings={siteSettings} />
           <Suspense fallback={null}>

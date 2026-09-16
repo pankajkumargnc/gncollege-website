@@ -3,7 +3,7 @@
 //  Refined UX with full field synchronization and enhanced save states
 // ═══════════════════════════════════════════════════════════════════════
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { doc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { db } from "../../../firebase";
 import { Laptop, BarChart3, Landmark, BookOpen, FileText, Globe2, History, Scale, TrendingUp, Brain, IndianRupee, Save, CheckCircle2, Loader2, Plus, Trash2, Building2, Target, Users, Sparkles } from 'lucide-react';

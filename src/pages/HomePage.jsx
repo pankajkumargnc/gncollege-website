@@ -1022,7 +1022,7 @@ const HomePage = ({
         </div>
       </section>
 
-      <PlacementsSection />
+      <PlacementsSection siteSettings={siteSettings} />
       
       <div className="hp-sec-divider" />
       <TestimonialsSection testimonials={testimonials} />

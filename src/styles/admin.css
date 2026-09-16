@@ -8,7 +8,7 @@
 .adm ::-webkit-scrollbar-track { background: transparent; }
 .adm ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 99px; }
 .adm ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-.adm-side { width: 256px; background: #0f2347; display: flex; flex-direction: column; flex-shrink: 0; height: 100%; transition: width .3s ease; overflow: hidden; }
+.adm-side { width: 270px; background: #0f2347; display: flex; flex-direction: column; flex-shrink: 0; height: 100%; transition: width .3s ease; overflow: hidden; }
 .adm-side.collapsed { width: 68px; }
 .adm-brand { padding: 20px 16px; border-bottom: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; gap: 12px; min-height: 70px; }
 .adm-brand-text { overflow: hidden; transition: opacity .2s; }

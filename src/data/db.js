@@ -183,8 +183,11 @@ export const navLinks = [
   },
   {
     label: 'NAAC',
-    href: '#',
+    href: '/naac/portal',
     sub: [
+      { label: 'NAAC Portal & Overview', href: '/naac/portal' },
+      { label: 'IQAC Quality Cell', href: '/naac/iqac' },
+      { label: '7 Criteria Explorer', href: '/naac/criteria' },
       {
         label: 'SSR 2nd Cycle',
         sub: [
@@ -199,9 +202,9 @@ export const navLinks = [
           { label: 'Peer Team Report', href: '/naac/ssr-1st-cycle/peer-team-report' },
         ]
       },
-      { label: 'AQAR', href: '/naac/aqar' },
-      { label: 'NIRF', href: '/naac/nirf' },
-      { label: 'Perspective Plan', href: '/naac/perspective-plan' },
+      { label: 'AQAR Repository', href: '/naac/aqar' },
+      { label: 'Best Practices & Distinctiveness', href: '/naac/best-practices' },
+      { label: 'NIRF & Perspective Plan', href: '/naac/nirf' },
     ]
   },
   {

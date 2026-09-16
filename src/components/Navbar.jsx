@@ -47,8 +47,8 @@ const SPOTLIGHT_CARDS = {
     badge: 'QUALITY BENCHMARK',
     title: 'NAAC Cycles & SSR',
     desc: 'Complete transparency in institutional reporting: SSR Cycle 1 & 2, AQAR, NIRF, and IQAC perspective plan.',
-    link: '/naac/aqar',
-    btnText: 'View AQAR Reports →',
+    link: '/naac/portal',
+    btnText: 'Explore NAAC Portal →',
     icon: '✦'
   },
   'Activity': {

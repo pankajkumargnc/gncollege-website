@@ -175,7 +175,7 @@ const WofCard = memo(({ p }) => {
   );
 });
 
-export default function PlacementsSection() {
+export default function PlacementsSection({ siteSettings }) {
   const [placements, set] = useState([]);
   const [loading, setL]   = useState(true);
 
@@ -241,10 +241,12 @@ export default function PlacementsSection() {
           </div>
         )}
 
-        {/* Academic Placement Analytics Chart */}
-        <React.Suspense fallback={<div style={{ minHeight: 120 }} />}>
-          <PlacementAnalytics />
-        </React.Suspense>
+        {/* Academic Placement Analytics Chart (Toggleable via Site Settings) */}
+        {siteSettings?.enablePlacementAnalytics !== false && (
+          <React.Suspense fallback={<div style={{ minHeight: 120 }} />}>
+            <PlacementAnalytics siteSettings={siteSettings} />
+          </React.Suspense>
+        )}
 
         <div className="wof-foot">
             <Link to="/academics/placements" className="wof-btn">

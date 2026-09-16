@@ -1,15 +1,29 @@
-// src/pages/NotificationsPage.jsx
-// 🚀 100% Synced with Google Drive Notice Folder
-
+// src/pages/NotificationsPage.jsx — GNC Official Notifications & Circulars Hub
+// 🚀 Dual-Synced with Google Drive & Firestore + Voice Reader + URL Param Synergy
 import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { COLORS } from '../styles/colors';
 import PDFModal from '../components/PDFModal';
 import PremiumPagination from '../components/PremiumPagination';
 import { useDriveDocs } from '../hooks/useDriveDocs';
 import useAppData from '../hooks/useAppData';
+import { 
+  Bell, Volume2, VolumeX, Share2, Search, Calendar, FileText, 
+  Sparkles, ExternalLink, Check, Filter, AlertCircle, BookmarkCheck
+} from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const ITEMS_PER_PAGE = 15;
+
+const CATEGORIES = [
+  { id: 'All', label: 'All Notices', icon: '📢' },
+  { id: 'exam', label: 'Examinations', icon: '📝' },
+  { id: 'admission', label: 'Admissions', icon: '🎓' },
+  { id: 'holiday', label: 'Holidays & Recess', icon: '🏖️' },
+  { id: 'academic', label: 'Academic & NEP', icon: '📚' },
+  { id: 'general', label: 'General Circulars', icon: '📄' }
+];
 
 const getTS = ts => {
   if (!ts) return new Date();
@@ -18,15 +32,39 @@ const getTS = ts => {
   return isNaN(d.getTime()) ? new Date() : d;
 };
 
+// Heuristic categorization based on notice text & title
+const detectCategory = (text = '', type = '') => {
+  const combined = `${text} ${type}`.toLowerCase();
+  if (combined.includes('exam') || combined.includes('practical') || combined.includes('admit') || combined.includes('routine') || combined.includes('viva') || combined.includes('semester')) {
+    return { id: 'exam', label: 'Examination', badgeBg: '#eff6ff', badgeColor: '#1d4ed8', border: '#bfdbfe' };
+  }
+  if (combined.includes('admission') || combined.includes('merit') || combined.includes('fyugp') || combined.includes('chancellor') || combined.includes('registration') || combined.includes('fee')) {
+    return { id: 'admission', label: 'Admission', badgeBg: '#f0fdf4', badgeColor: '#15803d', border: '#bbf7d0' };
+  }
+  if (combined.includes('holiday') || combined.includes('closed') || combined.includes('vacation') || combined.includes('recess') || combined.includes('baisakhi') || combined.includes('puja')) {
+    return { id: 'holiday', label: 'Campus Holiday', badgeBg: '#fffbeb', badgeColor: '#b45309', border: '#fde68a' };
+  }
+  if (combined.includes('syllabus') || combined.includes('class') || combined.includes('lecture') || combined.includes('seminar') || combined.includes('workshop')) {
+    return { id: 'academic', label: 'Academic Notice', badgeBg: '#faf5ff', badgeColor: '#7e22ce', border: '#e9d5ff' };
+  }
+  return { id: 'general', label: 'Official Circular', badgeBg: '#f8fafc', badgeColor: '#334155', border: '#cbd5e1' };
+};
+
 export default function NotificationsPage() {
-  const [selYear,  setSelYear]  = useState('All');
+  const [searchParams] = useSearchParams();
+  const initialType = searchParams.get('type') || searchParams.get('category') || 'All';
+  const initialSearch = searchParams.get('search') || '';
+
+  const [activeCategory, setActiveCategory] = useState(initialType);
+  const [selYear, setSelYear] = useState('All');
   const [selMonth, setSelMonth] = useState('All');
-  const [search,   setSearch]   = useState('');
+  const [search, setSearch] = useState(initialSearch);
   const [currentPage, setCurrentPage] = useState(1);
   const [previewPdf, setPreviewPdf] = useState(null);
+  const [speakingId, setSpeakingId] = useState(null);
 
-  const navy = COLORS.navy || '#0B1F4E';
-  const gold = COLORS.gold || '#C9A227';
+  const navy = COLORS.navy || '#0f2347';
+  const gold = COLORS.gold || '#f4a023';
 
   // Fetch Firestore Notices
   const { notices: fbNotices } = useAppData();
@@ -35,6 +73,14 @@ export default function NotificationsPage() {
   const NOTICE_FOLDER_ID = import.meta.env.VITE_DRIVE_NOTICE_FOLDER;
   const { docs: driveNotices, loading, error } = useDriveDocs(NOTICE_FOLDER_ID);
 
+  // Sync with URL query parameters on mount or change
+  useEffect(() => {
+    const urlType = searchParams.get('type') || searchParams.get('category');
+    if (urlType) setActiveCategory(urlType.toLowerCase());
+    const urlSearch = searchParams.get('search');
+    if (urlSearch) setSearch(urlSearch);
+  }, [searchParams]);
+
   // Merge & Sort both data sources
   const notices = useMemo(() => {
     const drNotices = driveNotices.map(doc => ({
@@ -42,11 +88,10 @@ export default function NotificationsPage() {
       text: doc.name, 
       createdAt: { toDate: () => new Date(doc.rawDate || Date.now()) },
       link: doc.previewUrl,
-      type: 'General',
+      type: 'Drive Notice',
       isNew: (new Date() - new Date(doc.rawDate || Date.now())) < 7 * 24 * 60 * 60 * 1000 
     }));
     
-    // Combine and sort by date descending
     return [...drNotices, ...(fbNotices || [])].sort((a, b) => {
       const aTime = getTS(a.createdAt).getTime();
       const bTime = getTS(b.createdAt).getTime();
@@ -61,21 +106,36 @@ export default function NotificationsPage() {
     return ['All', ...Array.from(s).sort((a, b) => b - a)];
   }, [notices]);
 
+  // Filter pipeline
   const filtered = useMemo(() => {
-    setCurrentPage(1);
     const now = new Date();
     return notices.filter(n => {
-      // ── Content Scheduling: hide scheduled/expired notices ──
+      // Content Scheduling
       if (n.publishDate && new Date(n.publishDate) > now) return false;
       if (n.expiryDate && new Date(n.expiryDate) < now) return false;
 
       const d = getTS(n.createdAt);
-      if (selYear  !== 'All' && d.getFullYear() !== Number(selYear))        return false;
-      if (selMonth !== 'All' && MONTHS_SHORT[d.getMonth()] !== selMonth)    return false;
-      if (search && !n.text?.toLowerCase().includes(search.toLowerCase()))  return false;
+      if (selYear !== 'All' && d.getFullYear() !== Number(selYear)) return false;
+      if (selMonth !== 'All' && MONTHS_SHORT[d.getMonth()] !== selMonth) return false;
+
+      // Category filter
+      if (activeCategory !== 'All') {
+        const cat = detectCategory(n.text, n.type);
+        if (cat.id !== activeCategory && !cat.label.toLowerCase().includes(activeCategory.toLowerCase())) {
+          return false;
+        }
+      }
+
+      if (search && !n.text?.toLowerCase().includes(search.toLowerCase()) && !n.description?.toLowerCase().includes(search.toLowerCase())) {
+        return false;
+      }
       return true;
     });
-  }, [notices, selYear, selMonth, search]);
+  }, [notices, selYear, selMonth, activeCategory, search]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selYear, selMonth, activeCategory, search]);
 
   const paginated = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -93,136 +153,459 @@ export default function NotificationsPage() {
     return map;
   }, [paginated]);
 
-  return (
-    <div style={{ minHeight: '100dvh', background: '#fff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
-      <style>{`
-        .filter-container { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; margin-bottom: 40px; box-shadow: 0 10px 40px -10px rgba(15,23,42,0.05); }
-        .search-wrapper { position: relative; flex: 1; }
-        .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); font-size: 18px; opacity: 0.4; pointer-events: none; }
-        .premium-input { width: 100%; padding: 15px 20px 15px 48px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; font-size: 15px; color: ${navy}; font-family: inherit; font-weight: 600; outline: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-sizing: border-box; }
-        .premium-input:focus { background: #fff; border-color: ${gold}; box-shadow: 0 0 0 4px rgba(244,160,35,0.15); }
-        .premium-input::placeholder { color: #94a3b8; font-weight: 500; }
-        .filter-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 20px; padding-top: 20px; border-top: 1px dashed #e2e8f0; }
-        .filter-label { font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; min-width: 80px; }
-        .pill-group { display: flex; gap: 10px; flex-wrap: wrap; }
-        .premium-pill { background: #f1f5f9; border: 1px solid transparent; color: #475569; padding: 8px 20px; border-radius: 50px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-        .premium-pill:hover { background: #e2e8f0; color: #0f172a; }
-        .premium-pill.active { background: ${navy}; color: #fff; box-shadow: 0 6px 15px rgba(15,35,71,0.2); transform: translateY(-2px); }
-        .clear-btn { background: #fef2f2; color: #ef4444; border: none; padding: 15px 24px; border-radius: 14px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.2s; white-space: nowrap; height: fit-content; }
-        .clear-btn:hover { background: #fee2e2; }
-        .flat-card { border: 1px solid #e2e8f0; background: #fff; border-radius: 16px; padding: 24px; margin-bottom: 16px; transition: all 0.2s; display: flex; align-items: flex-start; gap: 20px; }
-        .flat-card:hover { background: #f8fafc; border-color: ${gold}; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
-      `}</style>
+  // Audio Text-to-Speech handler
+  const handleSpeak = (id, text) => {
+    if (!('speechSynthesis' in window)) {
+      toast.error('Voice playback is not supported on this browser');
+      return;
+    }
+    if (speakingId === id) {
+      window.speechSynthesis.cancel();
+      setSpeakingId(null);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const cleanText = text.replace(/<[^>]*>?/gm, '').replace(/[-_.]+/g, ' ');
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+    utterance.onend = () => setSpeakingId(null);
+    utterance.onerror = () => setSpeakingId(null);
+    setSpeakingId(id);
+    window.speechSynthesis.speak(utterance);
+  };
 
-      {/* Hero */}
-      <header style={{ position: 'relative', padding: '100px 20px 80px', background: `url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop') center/cover`, borderBottom: '1px solid #e2e8f0' }}>
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to right, ${navy}f2, ${navy}cc)` }} />
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1000px', margin: '0 auto' }}>
-          <h1 style={{ color: '#fff', fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 900, margin: '0 0 15px', letterSpacing: '-1px' }}>Notice Board</h1>
-          <p style={{ color: '#cbd5e1', fontSize: '18px', maxWidth: '600px', margin: 0, lineHeight: 1.6 }}>Official announcements & circulars directly from our Cloud Drive.</p>
+  const handleShareWhatsapp = (n) => {
+    const shareText = `📢 *GNC Official Notice*\n${n.text}\n\nRead full circular at Guru Nanak College portal:\n${window.location.origin}/notifications#${n.id}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+  };
+
+  const handleCopyLink = (n) => {
+    const url = `${window.location.origin}/notifications#${n.id}`;
+    navigator.clipboard.writeText(url).then(() => {
+      toast.success('Direct circular link copied to clipboard!');
+    });
+  };
+
+  return (
+    <div style={{ minHeight: '100dvh', background: '#f8fafc', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+      {/* 1. HERO BANNER */}
+      <header className="premium-hero" style={{
+        background: 'linear-gradient(135deg, #0a192f 0%, #0f2347 60%, #1e3a8a 100%)',
+        color: '#fff',
+        padding: 'clamp(50px, 8vw, 80px) 20px 40px',
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'radial-gradient(rgba(244,160,35,0.08) 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
+          pointerEvents: 'none'
+        }} />
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: 900, margin: '0 auto' }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            background: 'rgba(244,160,35,0.15)', border: '1px solid rgba(244,160,35,0.3)',
+            padding: '4px 14px', borderRadius: 50, fontSize: 12, fontWeight: 800,
+            color: '#f59e0b', marginBottom: 14
+          }}>
+            <Bell size={13} className="animate-pulse" /> OFFICIAL ADMINISTRATIVE & ACADEMIC REPOSITORY
+          </div>
+          <h1 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 900, margin: '0 0 12px', letterSpacing: '-0.02em', color: '#fff' }}>
+            Notifications & <span style={{ color: '#f4a023' }}>Circulars</span>
+          </h1>
+          <p style={{ fontSize: 'clamp(14px, 1.2vw, 16px)', color: '#cbd5e1', maxWidth: 640, margin: '0 auto', lineHeight: 1.6 }}>
+            Live authoritative circulars, university exam routines, admission merit lists, and academic schedules of Guru Nanak College, Dhanbad.
+          </p>
         </div>
       </header>
 
-      <div style={{ maxWidth: '1000px', margin: '0 auto 80px', padding: '0 20px', marginTop: '40px' }}>
-        <div className="filter-container">
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <div className="search-wrapper">
-              <span className="search-icon">🔍</span>
-              <label htmlFor="notice-search" className="sr-only">Search notices by title or keyword</label>
-              <input id="notice-search" className="premium-input" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search notices by title or keyword..." />
+      {/* 2. MAIN CONTENT WRAPPER */}
+      <main style={{ maxWidth: 1160, margin: '-28px auto 60px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+        {/* FILTER CONTROLS HUD */}
+        <div style={{
+          background: '#ffffff',
+          borderRadius: 20,
+          padding: '24px',
+          boxShadow: '0 12px 36px rgba(15,35,71,0.06)',
+          border: '1px solid #e2e8f0',
+          marginBottom: 32
+        }}>
+          {/* Top Search and Category Pills */}
+          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center', marginBottom: 20 }}>
+            <div style={{ position: 'relative', flex: 1, minWidth: 260 }}>
+              <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
+              <input 
+                type="text" 
+                placeholder="Search by keyword, subject, exam code, circular number..." 
+                value={search} 
+                onChange={e => setSearch(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '13px 18px 13px 44px',
+                  borderRadius: 12,
+                  border: '1.5px solid #e2e8f0',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  outline: 'none',
+                  background: '#f8fafc',
+                  color: navy,
+                  boxSizing: 'border-box'
+                }}
+              />
+              {search && (
+                <button 
+                  onClick={() => setSearch('')}
+                  style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontWeight: 800 }}
+                >
+                  ✕
+                </button>
+              )}
             </div>
-            {(selYear!=='All'||selMonth!=='All'||search) && (
-              <button className="clear-btn" onClick={() => { setSelYear('All'); setSelMonth('All'); setSearch(''); }}>✕ Clear All</button>
-            )}
+
+            {/* Year selector */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Calendar size={16} color="#64748b" />
+              <select 
+                value={selYear} 
+                onChange={e => setSelYear(e.target.value)}
+                style={{
+                  padding: '11px 14px',
+                  borderRadius: 10,
+                  border: '1.5px solid #e2e8f0',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: navy,
+                  background: '#fff',
+                  cursor: 'pointer'
+                }}
+              >
+                {years.map(y => <option key={y} value={y}>{y === 'All' ? 'All Years' : `Session ${y}`}</option>)}
+              </select>
+            </div>
           </div>
-          <div className="filter-row">
-            <div className="filter-label">Month</div>
-            <div className="pill-group">
-              {['All',...MONTHS_SHORT].map(m => <button key={m} className={`premium-pill ${selMonth===m?'active':''}`} onClick={() => setSelMonth(m)}>{m}</button>)}
-            </div>
+
+          {/* Category Pills Row */}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', paddingTop: 16, borderTop: '1px dashed #e2e8f0' }}>
+            <span style={{ fontSize: 11.5, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.8px', marginRight: 4 }}>
+              Category:
+            </span>
+            {CATEGORIES.map(cat => {
+              const isActive = activeCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setActiveCategory(cat.id)}
+                  style={{
+                    padding: '7px 14px',
+                    borderRadius: 50,
+                    border: isActive ? `1.5px solid ${navy}` : '1px solid #e2e8f0',
+                    background: isActive ? navy : '#f8fafc',
+                    color: isActive ? '#fff' : '#475569',
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    transition: 'all 0.2s ease',
+                    boxShadow: isActive ? '0 4px 12px rgba(15,35,71,0.2)' : 'none'
+                  }}
+                >
+                  <span>{cat.icon}</span>
+                  <span>{cat.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {error && <div style={{ color: 'red', textAlign: 'center', fontWeight: 'bold' }}>⚠️ Failed to sync with Google Drive</div>}
-
-        {!loading && (
-          <div style={{ marginBottom: 16, fontSize: 13, color: '#64748b', fontWeight: 600 }}>
-            Showing {paginated.length} of {filtered.length} notice{filtered.length !== 1 ? 's' : ''}
+        {/* Sync Status Banner */}
+        {error && (
+          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '12px 16px', borderRadius: 12, marginBottom: 20, fontSize: 13, fontWeight: 700 }}>
+            ⚠️ Google Drive sync notice: Serving latest verified records from college database.
           </div>
         )}
 
-        {loading ? <div style={{ textAlign: 'center', padding: '40px', color: '#64748b', fontWeight: 700 }}>⏳ Syncing with Google Drive...</div> : 
-         filtered.length === 0 ? (
-           <div style={{ textAlign: 'center', padding: 'clamp(40px,6vw,64px) 20px', color: '#94a3b8' }}>
-             <div style={{ fontSize: 'clamp(40px,8vw,56px)', marginBottom: 16 }}>📭</div>
-               <h3 style={{ color: '#0f2347', fontWeight: 800, marginBottom: 8, fontSize: 'clamp(16px,2.5vw,20px)' }}>
-                No Notices Found
-               </h3>
-               <p style={{ fontSize: 'clamp(13px,1.8vw,15px)', marginBottom: 24, lineHeight: 1.7, maxWidth: 400, margin: '0 auto 24px', textAlign: 'center' }}>
-                {search
-                  ? `No results found for "${search}". Please try a different keyword.`
-                  : 'No notices have been published yet.'}
-               </p>
-             {search && (
-               <button onClick={() => setSearch('')}
-                 style={{ background: '#0f2347', color: '#f4a023', border: 'none', padding: '10px 24px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, minHeight: 44, fontSize: 'clamp(13px,1.5vw,15px)' }}>
-                 Clear Search
-               </button>
-             )}
-           </div>
-         ) : (
-          <>
-          {Object.entries(grouped).map(([monthYear, items]) => (
-            <div key={monthYear} style={{ marginBottom: '40px' }}>
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: 12, margin: 'clamp(20px,3vw,32px) 0 clamp(12px,2vw,20px)' }}>
-                <span style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
-                <span style={{ background: '#fff', color: '#0f2347', fontWeight: 800, fontSize: 12, padding: '4px 12px', borderRadius: 20, border: '1.5px solid #e2e8f0', whiteSpace: 'nowrap', letterSpacing: 0.3 }}>{monthYear}</span>
-                <span style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
-              </h3>
-              {items.map(n => {
-                const d = getTS(n.createdAt);
-                return (
-                  <div key={n.id} className="flat-card">
-                    <div style={{ textAlign: 'center', minWidth: '65px', background: '#f1f5f9', border: '1px solid #e2e8f0', padding: '14px 10px', borderRadius: '12px' }}>
-                      <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>{MONTHS_SHORT[d.getMonth()]}</div>
-                      <div style={{ fontSize: '26px', fontWeight: 900, color: navy, lineHeight: 1, marginTop: '4px' }}>{d.getDate()}</div>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '11px', fontWeight: 800, padding: '4px 12px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '50px', color: navy, textTransform: 'uppercase' }}>Document</span>
-                        {n.isNew && <span className="badge-new" style={{ fontSize: '10px', fontWeight: 900, color: '#fff', background: '#ef4444', padding: '3px 8px', borderRadius: '50px' }}>NEW</span>}
-                      </div>
-                      <div style={{ fontSize: '16px', fontWeight: 700, color: navy, lineHeight: 1.5, textAlign: 'justify', textJustify: 'inter-word', textWrap: 'pretty' }}>{n.text}</div>
-                      {n.description && (
-                        <p style={{ fontSize: '14px', color: '#475569', lineHeight: 1.68, margin: '8px 0 0', textAlign: 'justify', textJustify: 'inter-word', textWrap: 'pretty' }}>
-                          {n.description}
-                        </p>
-                      )}
-                      {n.link && (
-                        <a href={n.link} target="_blank" rel="noreferrer"
-                          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '16px', fontSize: '13px', fontWeight: 800, color: navy, textDecoration: 'none', background: '#f1f5f9', padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', transition: 'all .2s' }}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setPreviewPdf({ url: n.link, title: n.text });
-                          }}
-                        >
-                          📄 View Official Notice
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+        {/* Active Result Count */}
+        {!loading && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, padding: '0 4px' }}>
+            <div style={{ fontSize: 13, color: '#64748b', fontWeight: 700 }}>
+              Showing <span style={{ color: navy, fontWeight: 900 }}>{filtered.length}</span> official notifications
+              {activeCategory !== 'All' && <span> under <strong>{CATEGORIES.find(c => c.id === activeCategory)?.label}</strong></span>}
             </div>
-          ))}
-          <PremiumPagination totalItems={filtered.length} itemsPerPage={ITEMS_PER_PAGE} currentPage={currentPage} setCurrentPage={setCurrentPage} />
-          </>
+            {(search || activeCategory !== 'All' || selYear !== 'All') && (
+              <button
+                type="button"
+                onClick={() => { setSearch(''); setActiveCategory('All'); setSelYear('All'); }}
+                style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}
+              >
+                ✕ Reset Filters
+              </button>
+            )}
+          </div>
         )}
-      </div>
 
+        {/* FEED RENDERING */}
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b', fontWeight: 700 }}>
+            <div style={{ fontSize: 32, marginBottom: 10 }} className="animate-spin">🔄</div>
+            <div>Syncing official notices from college archive...</div>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div style={{
+            textAlign: 'center', padding: '60px 20px',
+            background: '#ffffff', borderRadius: 20,
+            border: '2px dashed #e2e8f0', color: '#94a3b8'
+          }}>
+            <div style={{ fontSize: 44, marginBottom: 12 }}>📭</div>
+            <h3 style={{ color: navy, fontWeight: 800, margin: '0 0 8px', fontSize: 18 }}>No Notifications Found</h3>
+            <p style={{ margin: '0 auto 20px', maxWidth: 380, fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>
+              {search ? `No circulars match "${search}". Try searching with another keyword or resetting categories.` : 'No notifications found for the selected category.'}
+            </p>
+            <button
+              type="button"
+              onClick={() => { setSearch(''); setActiveCategory('All'); setSelYear('All'); }}
+              className="abtn abtn-navy"
+              style={{ padding: '8px 18px', fontSize: 12 }}
+            >
+              Show All Notices
+            </button>
+          </div>
+        ) : (
+          <div>
+            {Object.entries(grouped).map(([monthYear, items]) => (
+              <div key={monthYear} style={{ marginBottom: 36 }}>
+                {/* Month Separator */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, margin: '24px 0 16px' }}>
+                  <span style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+                  <span style={{
+                    background: '#ffffff',
+                    color: navy,
+                    fontWeight: 900,
+                    fontSize: 12,
+                    padding: '4px 14px',
+                    borderRadius: 20,
+                    border: '1.5px solid #e2e8f0',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
+                  }}>
+                    📅 {monthYear}
+                  </span>
+                  <span style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+                </div>
+
+                {/* Items */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {items.map(n => {
+                    const d = getTS(n.createdAt);
+                    const catInfo = detectCategory(n.text, n.type);
+                    const isSpeaking = speakingId === n.id;
+
+                    return (
+                      <article 
+                        key={n.id}
+                        id={n.id}
+                        style={{
+                          background: '#ffffff',
+                          borderRadius: 16,
+                          border: n.isNew ? '1.5px solid #f87171' : '1px solid #e2e8f0',
+                          padding: '20px 22px',
+                          display: 'flex',
+                          gap: 18,
+                          alignItems: 'flex-start',
+                          boxShadow: '0 4px 16px rgba(15,35,71,0.03)',
+                          transition: 'all 0.2s ease',
+                          position: 'relative'
+                        }}
+                      >
+                        {/* Date Calendar Box */}
+                        <div style={{
+                          textAlign: 'center',
+                          minWidth: 62,
+                          background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: 12,
+                          padding: '10px 8px',
+                          flexShrink: 0
+                        }}>
+                          <div style={{ fontSize: 10.5, fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+                            {MONTHS_SHORT[d.getMonth()]}
+                          </div>
+                          <div style={{ fontSize: 24, fontWeight: 900, color: navy, lineHeight: 1.1, marginTop: 2 }}>
+                            {d.getDate()}
+                          </div>
+                          <div style={{ fontSize: 9.5, color: '#94a3b8', fontWeight: 700, marginTop: 2 }}>
+                            {d.getFullYear()}
+                          </div>
+                        </div>
+
+                        {/* Text & Meta Information */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 8 }}>
+                            {/* Category Badge */}
+                            <span style={{
+                              fontSize: 10.5,
+                              fontWeight: 800,
+                              padding: '2px 10px',
+                              borderRadius: 50,
+                              background: catInfo.badgeBg,
+                              color: catInfo.badgeColor,
+                              border: `1px solid ${catInfo.border}`,
+                              textTransform: 'uppercase'
+                            }}>
+                              {catInfo.label}
+                            </span>
+
+                            {n.isNew && (
+                              <span style={{
+                                fontSize: 9.5,
+                                fontWeight: 900,
+                                background: '#dc2626',
+                                color: '#ffffff',
+                                padding: '2px 8px',
+                                borderRadius: 50,
+                                letterSpacing: '0.6px'
+                              }}>
+                                🌟 NEW
+                              </span>
+                            )}
+                          </div>
+
+                          <h2 style={{
+                            margin: 0,
+                            fontSize: 'clamp(14.5px, 1.4vw, 16.5px)',
+                            fontWeight: 800,
+                            color: navy,
+                            lineHeight: 1.45,
+                            letterSpacing: '-0.01em'
+                          }}>
+                            {n.text}
+                          </h2>
+
+                          {n.description && (
+                            <p style={{ margin: '8px 0 0', fontSize: 13.5, color: '#475569', lineHeight: 1.6 }}>
+                              {n.description}
+                            </p>
+                          )}
+
+                          {/* Quick Interactive Actions Row */}
+                          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 14, paddingTop: 12, borderTop: '1px solid #f1f5f9' }}>
+                            {n.link && (
+                              <button
+                                type="button"
+                                onClick={() => setPreviewPdf({ url: n.link, title: n.text })}
+                                style={{
+                                  background: 'linear-gradient(135deg, #0f2347, #1e3a8a)',
+                                  border: 'none',
+                                  color: '#ffffff',
+                                  padding: '6px 14px',
+                                  borderRadius: 8,
+                                  fontSize: 12,
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: 6
+                                }}
+                              >
+                                <FileText size={13} color="#f4a023" /> View Official PDF
+                              </button>
+                            )}
+
+                            {/* Voice Reader */}
+                            <button
+                              type="button"
+                              onClick={() => handleSpeak(n.id, n.text + (n.description ? '. ' + n.description : ''))}
+                              title={isSpeaking ? 'Stop listening' : 'Listen to notice audio'}
+                              style={{
+                                background: isSpeaking ? '#fef3c7' : '#f8fafc',
+                                border: isSpeaking ? '1.5px solid #f59e0b' : '1px solid #e2e8f0',
+                                color: isSpeaking ? '#b45309' : '#64748b',
+                                padding: '6px 12px',
+                                borderRadius: 8,
+                                fontSize: 12,
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 5
+                              }}
+                            >
+                              {isSpeaking ? <VolumeX size={13} color="#b45309" /> : <Volume2 size={13} />}
+                              <span>{isSpeaking ? 'Stop Audio' : 'Listen'}</span>
+                            </button>
+
+                            {/* WhatsApp Share */}
+                            <button
+                              type="button"
+                              onClick={() => handleShareWhatsapp(n)}
+                              title="Share with classmates on WhatsApp"
+                              style={{
+                                background: '#f0fdf4',
+                                border: '1px solid #bbf7d0',
+                                color: '#15803d',
+                                padding: '6px 12px',
+                                borderRadius: 8,
+                                fontSize: 12,
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 5
+                              }}
+                            >
+                              <Share2 size={13} /> WhatsApp
+                            </button>
+
+                            {/* Copy Anchor */}
+                            <button
+                              type="button"
+                              onClick={() => handleCopyLink(n)}
+                              title="Copy direct circular link"
+                              style={{
+                                background: '#f8fafc',
+                                border: '1px solid #e2e8f0',
+                                color: '#64748b',
+                                padding: '6px 10px',
+                                borderRadius: 8,
+                                fontSize: 11.5,
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              🔗 Copy Link
+                            </button>
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+
+            {/* Smart Pagination Component */}
+            <PremiumPagination
+              totalItems={filtered.length}
+              itemsPerPage={ITEMS_PER_PAGE}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+            />
+          </div>
+        )}
+      </main>
+
+      {/* PDF Modal Preview */}
       {previewPdf && (
         <Suspense fallback={null}>
-          <PDFModal url={previewPdf.url} title={previewPdf.title} onClose={() => setPreviewPdf(null)} />
+          <PDFModal
+            url={previewPdf.url}
+            title={previewPdf.title}
+            onClose={() => setPreviewPdf(null)}
+          />
         </Suspense>
       )}
     </div>

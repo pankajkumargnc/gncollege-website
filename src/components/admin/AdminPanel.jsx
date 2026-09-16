@@ -422,26 +422,69 @@ function AdminPanelInner({
 
       {/* ── Sidebar ── */}
       <aside aria-label="Admin Navigation" className={`adm-side ${sideCollapsed&&!isMobile?'collapsed':''} ${isMobile&&sideOpen?'open':''}`}>
-        <div className="adm-brand">
-          <img 
-            src="images/logo.webp" 
-            alt="GNC Logo" 
-            style={{ 
-              width: 38, height: 38, borderRadius: 8, 
-              objectFit: 'contain', background: '#fff', padding: 2, 
-              flexShrink: 0, cursor: 'pointer' 
-            }}
+        <div className="adm-brand" style={{ padding: '16px 14px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div 
             onClick={() => isMobile ? setSideOpen(false) : setSideCollapsed(c=>!c)}
-          />
-          <div className="adm-brand-text" style={{ marginLeft: 10, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ fontWeight: 900, color: WHITE, fontSize: 13, lineHeight: 1.2, display: 'flex', alignItems: 'center' }}>
-              <span className="live-pulse" /> Guru Nanak College
+            style={{ 
+              width: 38, height: 38, borderRadius: 10, 
+              background: '#ffffff', padding: 3, 
+              flexShrink: 0, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+              border: '1.5px solid rgba(244,160,35,0.4)',
+              transition: 'transform 0.2s ease',
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            title="Toggle Sidebar Navigation"
+          >
+            <img 
+              src="images/logo.webp" 
+              alt="GNC Logo" 
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            />
+          </div>
+          <div className="adm-brand-text" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', minWidth: 0, flex: 1, overflow: 'hidden' }}>
+            <div style={{ 
+              fontWeight: 900, 
+              color: WHITE, 
+              fontSize: 12.5, 
+              letterSpacing: '0.4px', 
+              textTransform: 'uppercase', 
+              lineHeight: 1.25, 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 6,
+              whiteSpace: 'normal',
+              wordBreak: 'break-word',
+              width: '100%'
+            }}>
+              <span className="live-pulse" style={{ width: 6, height: 6, flexShrink: 0 }} />
+              <span>GURU NANAK COLLEGE</span>
             </div>
-            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.55)', fontWeight: 600, marginTop: 2 }}>
-              Dhanbad, Jharkhand - 826001
+            <div style={{ 
+              fontSize: 9.5, 
+              color: '#f59e0b', 
+              fontWeight: 800, 
+              letterSpacing: '1.2px', 
+              textTransform: 'uppercase', 
+              marginTop: 3,
+              whiteSpace: 'nowrap',
+              textAlign: 'left'
+            }}>
+              DHANBAD • ESTD 1970
             </div>
-            <div style={{ fontWeight: 900, color: WHITE, fontSize: 15, lineHeight: 1.8 }}>
-              GNC Admin Panel
+            <div style={{ 
+              fontSize: 9, 
+              color: 'rgba(255,255,255,0.5)', 
+              fontWeight: 800, 
+              letterSpacing: '0.8px', 
+              textTransform: 'uppercase', 
+              marginTop: 2,
+              whiteSpace: 'nowrap',
+              textAlign: 'left'
+            }}>
+              ADMIN CONTROL PORTAL
             </div>
           </div>
         </div>
@@ -503,19 +546,130 @@ function AdminPanelInner({
           })()}
         </div>
 
-        {/* User bar */}
-        <div className="adm-side-user">
-          <div style={{ width:32, height:32, borderRadius:'50%', background:`${GOLD}25`, border:`1.5px solid ${GOLD}60`, display:'flex', alignItems:'center', justifyContent:'center', color:GOLD, fontWeight:900, fontSize:13, flexShrink:0 }}>
-            PK
-          </div>
-          <div style={{ overflow:'hidden', opacity: sideCollapsed && !isMobile ? 0 : 1 }}>
-            <div style={{ fontSize:12, fontWeight:800, color:WHITE, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>Pankaj Kumar Prasad</div>
-            <div style={{ fontSize:10, color:GOLD, fontWeight:700 }}>SUPER ADMIN</div>
-          </div>
-          <div role="button" tabIndex={0} onClick={handlePremiumLogout} onKeyDown={e=>{if(e.key==='Enter'||e.key===' ')handlePremiumLogout();}} title="Exit Core" style={{ marginLeft:'auto', cursor:'pointer', color:'rgba(255,255,255,0.4)', padding:4, display:'flex', alignItems:'center', gap: 6 }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-            <span className="nav-label" style={{ opacity: sideCollapsed && !isMobile ? 0 : 1 }}>EXIT CORE</span>
-          </div>
+        {/* 🚪 Premium Exit Core Action */}
+        <div style={{ 
+          padding: sideCollapsed && !isMobile ? '12px 10px' : '12px 12px', 
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          background: 'rgba(8, 18, 38, 0.75)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          {sideCollapsed && !isMobile ? (
+            <button
+              type="button"
+              onClick={handlePremiumLogout}
+              title="Exit Core (Terminate Session)"
+              aria-label="Exit Core"
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 10,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(185, 28, 28, 0.28))',
+                border: '1.5px solid rgba(239, 68, 68, 0.35)',
+                color: '#f87171',
+                cursor: 'pointer',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: '0 2px 8px rgba(239, 68, 68, 0.12)',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(220, 38, 38, 0.5))';
+                e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.7)';
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 4px 14px rgba(239, 68, 68, 0.3)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(185, 28, 28, 0.28))';
+                e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.35)';
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.12)';
+              }}
+            >
+              <LogOut size={18} strokeWidth={2.5} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handlePremiumLogout}
+              title="Exit Admin Core & Terminate Session"
+              aria-label="Exit Core"
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 14px',
+                borderRadius: 10,
+                background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(185, 28, 28, 0.22))',
+                border: '1.5px solid rgba(239, 68, 68, 0.32)',
+                color: '#fee2e2',
+                cursor: 'pointer',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                textAlign: 'left',
+                boxShadow: '0 2px 8px rgba(239, 68, 68, 0.1)',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.24), rgba(220, 38, 38, 0.4))';
+                e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.7)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(239, 68, 68, 0.25)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(185, 28, 28, 0.22))';
+                e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.32)';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.1)';
+              }}
+            >
+              <div style={{
+                width: 30, height: 30, borderRadius: 8,
+                background: 'rgba(239, 68, 68, 0.22)',
+                border: '1px solid rgba(239, 68, 68, 0.45)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#f87171', flexShrink: 0
+              }}>
+                <LogOut size={16} strokeWidth={2.5} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, textAlign: 'left' }}>
+                <span style={{ 
+                  fontSize: 12, 
+                  fontWeight: 900, 
+                  color: '#ffffff', 
+                  letterSpacing: '1.2px', 
+                  textTransform: 'uppercase',
+                  lineHeight: 1.2
+                }}>
+                  EXIT CORE
+                </span>
+                <span style={{ 
+                  fontSize: 8.5, 
+                  fontWeight: 700, 
+                  color: 'rgba(254, 202, 202, 0.7)', 
+                  letterSpacing: '0.8px', 
+                  textTransform: 'uppercase',
+                  marginTop: 2
+                }}>
+                  TERMINATE SESSION
+                </span>
+              </div>
+              <span style={{
+                fontSize: 9.5,
+                fontWeight: 800,
+                letterSpacing: '0.5px',
+                padding: '2px 6px',
+                borderRadius: 4,
+                background: 'rgba(255, 255, 255, 0.1)',
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontFamily: 'monospace'
+              }}>
+                ESC
+              </span>
+            </button>
+          )}
         </div>
       </aside>
 

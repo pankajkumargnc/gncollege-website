@@ -1,232 +1,322 @@
+// src/pages/CollegeProfile.jsx
 import React, { useEffect } from 'react';
 import DOMPurify from 'dompurify';
 import { Link } from 'react-router-dom';
-import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
-import 'react-vertical-timeline-component/style.min.css';
 import '../styles/index.css';
 import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageContent';
 
 const CollegeProfile = () => {
-  // Page load hone par top par scroll karein
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const { content, getText, getList } = usePageContent('college-profile');
-  const heroTitle = content?.title || "College Profile";
-  const heroSubtitle = content?.subtitle || "Excellence in Education Since 1970";
+  const heroTitle = content?.title || "College Profile & History";
+  const heroSubtitle = content?.subtitle || "Excellence in Value-Based Degree Education Since 1970";
 
-  const profileHtml = getText('intro', '<p class="rich-text-content">Guru Nanak College, Dhanbad (A Sikh Minority Degree College) was Established by the Gurudwara Prabandhak Committee in 1970 to mark the fifth Birth Centenary of the great Guru after whom this college is named.</p><p class="rich-text-content mt-4">The college is managed by a Governing Council nominated by the Gurudwara Prabandhak Committee, Dhanbad, and draws its inspiration from the teachings of the faith propounded by Guru Nanak Devji.</p>');
+  const profileHtml = getText(
+    'intro',
+    '<p>Guru Nanak College, Dhanbad (A Sikh Minority Degree College) was established by the Gurudwara Prabandhak Committee in 1970 to commemorate the 500th Birth Centenary of Sri Guru Nanak Dev Ji, the revered founder of Sikhism.</p><p style="margin-top: 14px;">The college is governed by an eminent Governing Council nominated by the Gurudwara Prabandhak Committee, Dhanbad, and draws its perennial inspiration from the timeless teachings of universal brotherhood, selfless service (Seva), and moral rectitude propounded by Guru Nanak Dev Ji.</p>'
+  );
 
-  const aboutHtml = getText('about', '<p class="rich-text-content">Initially the college got affiliated to the Ranchi University – Ranchi since 1970 the year it was started. But with the passage of time, Binod Bihari Mahto Koylanchal University, Dhanbad came into existence in 2017; and the affiliation of the college got transferred to this new University in 2017.</p><p class="rich-text-content mt-4">At present, the college has got permanent affiliation with Binod Bihari Mahto Koylanchal University, Dhanbad in the faculties of Humanities, Social Sciences, commerce and such vocational courses as Bachelor of Computer Applications. The college has got “Deficit Grant College Status” by the government of Jharkhand. Also the college is registered u/s 2F and 12B of the UGC Act.</p><p class="rich-text-content mt-4">The main aim and objective behind sponsoring this college was to impart value-based teaching to the young men and women of Dhanbad. The college attaches great importance to moral teaching. The college does not merely offer teaching in such subjects as would enable young students to earn their bread and butter, but it also emphasizes grooming them into worthy (morally sound) citizens.</p>');
+  const aboutHtml = getText(
+    'about',
+    '<p>Initially affiliated with Ranchi University upon its founding in 1970, the college became a premier constituent pillar of Binod Bihari Mahto Koyalanchal University (BBMKU), Dhanbad upon its establishment in 2017.</p><p style="margin-top: 14px;">At present, Guru Nanak College enjoys permanent affiliation with BBMKU across Humanities, Social Sciences, Commerce, and premier vocational disciplines including Bachelor of Computer Applications (BCA). The college holds the prestigious "Deficit Grant College Status" conferred by the Government of Jharkhand and is permanently recognized under Sections 2(f) and 12(B) of the UGC Act, 1956.</p><p style="margin-top: 14px;">The foundational objective of the Gurudwara Prabandhak Committee in sponsoring this institution was to provide value-grounded higher education to the youth of Dhanbad and the surrounding coal belt. Beyond academic degree qualifications, the college places vital emphasis on moral consciousness, character building, and social responsibility.</p>'
+  );
 
   const stats = getList('stats', [
-    { label: "Years of Legacy", value: "56+", icon: "🏛️" },
-    { label: "Expert Faculty", value: "120+", icon: "👨‍🏫" },
-    { label: "Students", value: "5000+", icon: "🎓" },
-    { label: "Courses", value: "30+", icon: "📚" }
+    { label: "Years of Heritage", value: "56+", icon: "🏛️" },
+    { label: "Qualified Faculty", value: "65+", icon: "👨‍🏫" },
+    { label: "Enrolled Scholars", value: "5,000+", icon: "🎓" },
+    { label: "Academic Programs", value: "15+", icon: "📚" }
   ]);
+
+  const milestones = [
+    {
+      year: "1970",
+      title: "Foundation & Inception",
+      desc: "Established by Gurudwara Prabandhak Committee, Dhanbad on the auspicious occasion of the 500th Birth Centenary of Sri Guru Nanak Dev Ji. First affiliated with Ranchi University.",
+      badge: "Inception",
+      icon: "🏛️"
+    },
+    {
+      year: "1985",
+      title: "UGC 2(f) & 12(B) Recognition",
+      desc: "Conferred permanent recognition under Sections 2(f) and 12(B) of the UGC Act and granted Deficit Grant College Status by the Government of Jharkhand.",
+      badge: "Recognition",
+      icon: "📜"
+    },
+    {
+      year: "2000",
+      title: "Bank More Women's Wing Inception",
+      desc: "Dedicated women's campus inaugurated at Bank More, Dhanbad to empower female scholars across the coal belt with specialized morning degree classes.",
+      badge: "Expansion",
+      icon: "👩‍🎓"
+    },
+    {
+      year: "2017",
+      title: "Affiliation to BBMKU Dhanbad",
+      desc: "Permanently affiliated with the newly established Binod Bihari Mahto Koyalanchal University (BBMKU) as a premier Sikh Minority Degree College.",
+      badge: "University Shift",
+      icon: "🎓"
+    },
+    {
+      year: "Present",
+      title: "NEP-2020 & Digital Campus",
+      desc: "Complete rollout of NEP 2020 4-year FYUGP degree courses, smart audio-visual lecture theatres, digitized library resources, and active placement drives.",
+      badge: "Modern Era",
+      icon: "🚀"
+    }
+  ];
 
   return (
     <div className="profile-page-wrapper">
       <style>{`
-        @media (min-width: 1024px) {
-          .stats-grid-override {
-            grid-template-columns: repeat(4, 1fr) !important;
-          }
+        .profile-fact-card {
+          background: #fff;
+          border-radius: 16px;
+          border: 1px solid #e2e8f0;
+          padding: 20px;
+          box-shadow: 0 4px 16px rgba(15,35,71,0.05);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .stat-card-small {
-          padding: 1.5rem !important;
+        .profile-fact-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 10px 25px rgba(15,35,71,0.1);
         }
-        .stat-value-small {
-          font-size: 1.8rem !important;
+        .campus-card {
+          background: #fff;
+          border-radius: 16px;
+          border: 1px solid #e2e8f0;
+          padding: 24px;
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 4px 16px rgba(15,35,71,0.05);
+          transition: transform 0.2s ease;
         }
-        .social-icon-btn {
-          width: 45px; height: 45px; border-radius: 50%; background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; color: var(--primary-navy); font-size: 20px; text-decoration: none; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid #f0f2f5;
+        .campus-card:hover {
+          transform: translateY(-4px);
         }
-        .social-icon-btn:hover { 
-          background: var(--accent-gold); color: var(--primary-navy); transform: translateY(-5px) scale(1.1); box-shadow: 0 10px 25px rgba(244,160,35,0.4); border-color: var(--accent-gold);
+        .campus-card::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 4px;
+          background: linear-gradient(90deg, #0f2347, #f4a023);
         }
-        .rich-text-content {
-          text-align: justify;
-          text-justify: inter-word;
-          hyphens: auto;
-          -webkit-hyphens: auto;
+        .milestone-step {
+          position: relative;
+          padding-left: 36px;
+          padding-bottom: 28px;
+          border-left: 2px solid #e2e8f0;
+        }
+        .milestone-step:last-child {
+          border-left: 2px solid transparent;
+          padding-bottom: 0;
+        }
+        .milestone-dot {
+          position: absolute;
+          left: -14px;
+          top: 0;
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          background: #0f2347;
+          color: #f4a023;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 13px;
+          box-shadow: 0 0 0 4px #fff, 0 2px 8px rgba(15,35,71,0.2);
         }
       `}</style>
-      
-      {/* 1. HERO SECTION (Parallax Effect) */}
-      <header className="profile-hero">
-        <div className="hero-overlay"></div>
+
+      {/* Hero */}
+      <header className="profile-hero" style={{ backgroundImage: `url('/images/college_photo.webp')` }}>
+        <div className="hero-overlay" style={{ background: 'linear-gradient(135deg, rgba(15, 35, 71, 0.94) 0%, rgba(10, 25, 47, 0.88) 100%)' }} />
         <div className="hero-content anim-fade-in">
-          <h1 className="hero-title">{heroTitle}</h1>
-          <p className="hero-subtitle">{heroSubtitle}</p>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(244, 160, 35, 0.18)', border: '1px solid rgba(244, 160, 35, 0.4)', borderRadius: 20, padding: '4px 14px', marginBottom: 14 }}>
+            <span style={{ fontSize: 13, color: '#f4a023', fontWeight: 800, letterSpacing: 0.5 }}>ESTABLISHED 1970 • UGC 2(F) &amp; 12(B)</span>
+          </div>
+          <h1 className="hero-title" style={{ fontSize: 'clamp(26px, 5vw, 42px)', fontWeight: 900, letterSpacing: '-0.5px' }}>
+            {heroTitle}
+          </h1>
+          <p className="hero-subtitle" style={{ maxWidth: 700, margin: '0 auto', fontSize: 15, opacity: 0.9 }}>
+            {heroSubtitle}
+          </p>
         </div>
       </header>
 
-      {/* 2. MAIN CONTENT CONTAINER (Overlapping Hero) */}
-      <div style={{ maxWidth: '1200px', margin: '3rem auto 0', padding: '0 20px', position: 'relative', zIndex: 20 }}>
-        <div className="profile-layout">
-        <main className="profile-main">
-        <section className="profile-section anim-slide-up" style={{animationDelay: '0.2s', background: '#fff', borderRadius: '24px'}}>
-          <div style={{ marginBottom: '3rem' }}>
-            <h2 className="section-heading">College Profile</h2>
-            <div className="heading-underline"></div>
-            <img 
-              src="https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=800&auto=format&fit=crop" 
-              alt="College Campus" 
-              loading="lazy"
-              decoding="async"
-              width="350"
-              height="233"
-              className="profile-img hover-scale"
-              style={{ float: 'right', width: '350px', maxWidth: '100%', marginLeft: '2rem', marginBottom: '1rem', borderRadius: '12px' }}
-            />
-            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(profileHtml) }} />
-            <div style={{ clear: 'both' }}></div>
-          </div>
-
-          <div style={{ marginBottom: '3rem' }}>
-            <h2 className="section-heading">About the College</h2>
-            <div className="heading-underline"></div>
-            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutHtml) }} />
-          </div>
-
-          <div>
-            <h2 className="section-heading">Our Campuses</h2>
-          <div className="heading-underline"></div>
-          <p className="rich-text-content" style={{ marginBottom: '3rem' }}>Guru Nanak College, Dhanbad functions at two main campuses:</p>
-          
-          <div className="grid-2-col gap-6">
-             <div className="campus-box">
-                <h3 style={{fontSize: 'var(--h3)', color: 'var(--navy)', fontWeight: '700', marginBottom: '10px'}}>1. Bank More Campus (Girls Wing)</h3>
-                <p className="rich-text-content">
-                  The women’s wing of the College was started in the year 2000 in the Bank More Campus of the College in the morning hours. As an exclusive centre of teaching for girls, this wing has earned high reputation among stakeholders during the last few years. In the Women’s wing also, teaching is imparted for B.A./B.Com. (Hons/General) Course.
-                </p>
-             </div>
-
-             <div className="campus-box">
-                <h3 style={{fontSize: 'var(--h3)', color: 'var(--navy)', fontWeight: '700', marginBottom: '10px'}}>2. Bhuda Campus (Boys Wing)</h3>
-                <p className="rich-text-content">
-                  The main building – the Boys’ wing of the College is situated at Bhuda. The main building is spaciously designed in an airy surrounding quite suitable for the environment of an academic institution. The present campus has been so planned as to cater to the needs of the students for a long time.
-                </p>
-             </div>
-          </div>
-          </div>
-
-          {/* ── HISTORIC MILESTONES TIMELINE ── */}
-          <div style={{ marginTop: '3.5rem' }}>
-            <h2 className="section-heading">Historic Milestones</h2>
-            <div className="heading-underline"></div>
-            <p className="rich-text-content" style={{ marginBottom: '2rem' }}>
-              Trace our transformative journey from 1970 to the present day:
-            </p>
-
-            <VerticalTimeline lineColor="#e2e8f0" layout="1-column-left">
-              <VerticalTimelineElement
-                date="1970"
-                contentStyle={{ background: '#0f2347', color: '#fff', borderRadius: '14px', boxShadow: '0 8px 25px rgba(15,35,71,0.15)' }}
-                contentArrowStyle={{ borderRight: '7px solid #0f2347' }}
-                iconStyle={{ background: '#f4a023', color: '#0f2347', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}
-                icon={<span>🏛️</span>}
-              >
-                <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#f4a023', margin: '0 0 6px' }}>Foundation & Affiliation</h3>
-                <p style={{ margin: 0, fontSize: '13.5px', color: '#cbd5e1', lineHeight: 1.6 }}>
-                  Established by Gurudwara Prabandhak Committee, Dhanbad to mark the 500th Birth Centenary of Sri Guru Nanak Dev Ji. First affiliated with Ranchi University.
-                </p>
-              </VerticalTimelineElement>
-
-              <VerticalTimelineElement
-                date="1985"
-                contentStyle={{ background: '#ffffff', color: '#0f2347', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 8px 25px rgba(0,0,0,0.05)' }}
-                contentArrowStyle={{ borderRight: '7px solid #ffffff' }}
-                iconStyle={{ background: '#0f2347', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}
-                icon={<span>📜</span>}
-              >
-                <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f2347', margin: '0 0 6px' }}>UGC 2(f) & 12(B) Recognition</h3>
-                <p style={{ margin: 0, fontSize: '13.5px', color: '#475569', lineHeight: 1.6 }}>
-                  Conferred "Deficit Grant College Status" by the Government of Jharkhand and permanently recognized under sections 2(f) and 12(B) of the UGC Act.
-                </p>
-              </VerticalTimelineElement>
-
-              <VerticalTimelineElement
-                date="2000"
-                contentStyle={{ background: '#ffffff', color: '#0f2347', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 8px 25px rgba(0,0,0,0.05)' }}
-                contentArrowStyle={{ borderRight: '7px solid #ffffff' }}
-                iconStyle={{ background: '#10b981', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}
-                icon={<span>👩‍🎓</span>}
-              >
-                <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f2347', margin: '0 0 6px' }}>Bank More Women's Wing Launched</h3>
-                <p style={{ margin: 0, fontSize: '13.5px', color: '#475569', lineHeight: 1.6 }}>
-                  Dedicated women's wing inaugurated at Bank More Campus, providing specialized morning degree education for girl students of the coal belt.
-                </p>
-              </VerticalTimelineElement>
-
-              <VerticalTimelineElement
-                date="2017"
-                contentStyle={{ background: '#ffffff', color: '#0f2347', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 8px 25px rgba(0,0,0,0.05)' }}
-                contentArrowStyle={{ borderRight: '7px solid #ffffff' }}
-                iconStyle={{ background: '#3b82f6', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}
-                icon={<span>🎓</span>}
-              >
-                <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f2347', margin: '0 0 6px' }}>Affiliation to BBMKU Dhanbad</h3>
-                <p style={{ margin: 0, fontSize: '13.5px', color: '#475569', lineHeight: 1.6 }}>
-                  Affiliation permanently shifted to newly established Binod Bihari Mahto Koyalanchal University (BBMKU) as a premier constituent degree institution.
-                </p>
-              </VerticalTimelineElement>
-
-              <VerticalTimelineElement
-                date="Present"
-                contentStyle={{ background: 'linear-gradient(135deg, #0f2347, #1e3a8a)', color: '#fff', borderRadius: '14px', boxShadow: '0 8px 25px rgba(15,35,71,0.2)' }}
-                contentArrowStyle={{ borderRight: '7px solid #0f2347' }}
-                iconStyle={{ background: '#f4a023', color: '#0f2347', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}
-                icon={<span>🚀</span>}
-              >
-                <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#f4a023', margin: '0 0 6px' }}>NEP 2020 & Digital Campus</h3>
-                <p style={{ margin: 0, fontSize: '13.5px', color: '#cbd5e1', lineHeight: 1.6 }}>
-                  Full implementation of NEP-2020 4-year FYUGP degree courses, smart classrooms, AI student portal, and comprehensive vocational skilling.
-                </p>
-              </VerticalTimelineElement>
-            </VerticalTimeline>
-          </div>
-
-          {/* Dynamic sections from Content Manager */}
-          <DynamicSectionsContainer sections={content?.sections} excludeIds={['intro', 'about', 'stats', 'timeline']} />
-        </section>
-
-        {/* Key Statistics (Plain Grid) */}
-        <section className="stats-grid stats-grid-override mb-16 anim-slide-up" style={{animationDelay: '0.4s'}}>
+      {/* Overlapping Institutional Stats Strip */}
+      <div style={{ maxWidth: '1120px', margin: '-50px auto 30px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+        <div style={{ background: '#fff', borderRadius: 16, padding: '20px 28px', boxShadow: '0 12px 36px rgba(15,35,71,0.09)', border: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
           {stats.map((stat, idx) => (
-            <div key={idx} className="stat-card stat-card-small" style={{background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0'}}>
-              <div className="stat-icon">{stat.icon || '📊'}</div>
-              <div className="stat-value stat-value-small">{stat.value || stat.num || '0'}</div>
-              <div className="stat-label">{stat.label || stat.title}</div>
+            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(244,160,35,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>
+                {stat.icon || '📊'}
+              </div>
+              <div>
+                <div style={{ fontSize: 24, fontWeight: 900, color: '#0f2347', lineHeight: 1.1 }}>{stat.value || stat.num || '0'}</div>
+                <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>{stat.label || stat.title}</div>
+              </div>
             </div>
           ))}
-        </section>
+        </div>
+      </div>
 
-      </main>
+      <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 20px 60px' }}>
+        <div className="profile-layout">
+          <main className="profile-main">
+            {/* 1. College Profile & Institutional Identity Card */}
+            <section style={{ background: '#fff', padding: '32px', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', marginBottom: '30px' }}>
+              <h2 className="section-heading" style={{ fontSize: '24px', color: '#0f2347', fontWeight: 900, margin: '0 0 8px' }}>
+                Institutional Profile
+              </h2>
+              <div className="heading-underline" style={{ width: 50, height: 4, background: '#f4a023', borderRadius: 2, marginBottom: 24 }} />
 
-      {/* 3. SIDEBAR SECTION (Quick Links & Helpdesk) */}
-      <aside className="profile-sidebar anim-slide-up" style={{animationDelay: '0.5s'}}>
-            
+              {/* 2-Column Responsive Layout: Photo & Key Facts + Narrative */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 28, alignItems: 'start', marginBottom: 24 }}>
+                {/* Real Campus Photo Card with Official Seal */}
+                <div style={{ background: '#f8fafc', borderRadius: 16, overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 4px 14px rgba(15,35,71,0.06)' }}>
+                  <div style={{ position: 'relative', height: 220, overflow: 'hidden' }}>
+                    <img
+                      src="/images/college_photo.webp"
+                      alt="Guru Nanak College Dhanbad Campus"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, rgba(15,35,71,0.85) 100%)' }} />
+                    <span style={{ position: 'absolute', bottom: 12, left: 14, color: '#fff', fontWeight: 800, fontSize: 13 }}>
+                      📍 Bhuda Campus, Dhanbad
+                    </span>
+                  </div>
+                  <div style={{ padding: '16px 20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: '#0f2347', textTransform: 'uppercase' }}>Affiliated University</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#1e40af' }}>BBMKU, Dhanbad</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: '#0f2347', textTransform: 'uppercase' }}>UGC Status</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#047857' }}>2(f) &amp; 12(B) Permanent</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: '#0f2347', textTransform: 'uppercase' }}>Institution Category</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#9333ea' }}>Deficit Grant Sikh Minority</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: '#0f2347', textTransform: 'uppercase' }}>Sponsoring Body</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#d97706' }}>Gurudwara Prabandhak Comm.</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Narrative Intro Text */}
+                <div style={{ fontSize: 15, color: '#334155', lineHeight: 1.8 }}>
+                  <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(profileHtml) }} />
+                </div>
+              </div>
+
+              {/* Detailed About College Section */}
+              <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid #f1f5f9' }}>
+                <h3 style={{ fontSize: 19, fontWeight: 800, color: '#0f2347', marginBottom: 12 }}>
+                  Academic Roots &amp; Evolution
+                </h3>
+                <div style={{ fontSize: 14.5, color: '#334155', lineHeight: 1.75 }}>
+                  <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutHtml) }} />
+                </div>
+              </div>
+            </section>
+
+            {/* 2. Dual Campuses Section */}
+            <section style={{ background: '#fff', padding: '32px', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', marginBottom: '30px' }}>
+              <h2 className="section-heading" style={{ fontSize: '24px', color: '#0f2347', fontWeight: 900, margin: '0 0 8px' }}>
+                Our Campuses
+              </h2>
+              <div className="heading-underline" style={{ width: 50, height: 4, background: '#f4a023', borderRadius: 2, marginBottom: 20 }} />
+              <p style={{ fontSize: 14.5, color: '#64748b', marginBottom: 24 }}>
+                To serve both co-educational scholars and dedicated female education, Guru Nanak College operates across two prominent campuses in Dhanbad:
+              </p>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
+                {/* Campus 1: Bhuda */}
+                <div className="campus-card">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                    <span style={{ fontSize: 24 }}>🏛️</span>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: '#0f2347' }}>Bhuda Campus (Main Wing)</h4>
+                      <span style={{ fontSize: 12, color: '#f4a023', fontWeight: 700 }}>Boys &amp; Co-Educational Complex</span>
+                    </div>
+                  </div>
+                  <p style={{ margin: 0, fontSize: 13.5, color: '#475569', lineHeight: 1.65 }}>
+                    Situated in the peaceful, green surroundings of Bhuda, the main campus hosts expansive administrative offices, modern BCA computer laboratories, central library archives, seminar halls, NCC/NSS activity hubs, and athletic grounds.
+                  </p>
+                </div>
+
+                {/* Campus 2: Bank More */}
+                <div className="campus-card">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                    <span style={{ fontSize: 24 }}>👩‍🎓</span>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: '#0f2347' }}>Bank More Campus (Women's Wing)</h4>
+                      <span style={{ fontSize: 12, color: '#047857', fontWeight: 700 }}>Dedicated Morning Degree Wing</span>
+                    </div>
+                  </div>
+                  <p style={{ margin: 0, fontSize: 13.5, color: '#475569', lineHeight: 1.65 }}>
+                    Established in the year 2000 in the heart of Dhanbad at Bank More, this dedicated morning wing provides an exclusive, empowering educational environment for female students pursuing B.A. and B.Com. (Hons &amp; General) courses.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* 3. Historic Milestones (Clean Modern Steps) */}
+            <section style={{ background: '#fff', padding: '32px', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', marginBottom: '30px' }}>
+              <h2 className="section-heading" style={{ fontSize: '24px', color: '#0f2347', fontWeight: 900, margin: '0 0 8px' }}>
+                Historic Milestones
+              </h2>
+              <div className="heading-underline" style={{ width: 50, height: 4, background: '#f4a023', borderRadius: 2, marginBottom: 24 }} />
+
+              <div style={{ marginTop: 10 }}>
+                {milestones.map((m, idx) => (
+                  <div key={idx} className="milestone-step">
+                    <div className="milestone-dot">{m.icon}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                      <span style={{ background: '#0f2347', color: '#f4a023', padding: '2px 10px', borderRadius: 6, fontSize: 12, fontWeight: 800 }}>
+                        {m.year}
+                      </span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                        {m.badge}
+                      </span>
+                    </div>
+                    <h4 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 800, color: '#0f2347' }}>
+                      {m.title}
+                    </h4>
+                    <p style={{ margin: 0, fontSize: 13.5, color: '#475569', lineHeight: 1.6 }}>
+                      {m.desc}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Dynamic sections from Content Manager */}
+            <DynamicSectionsContainer sections={content?.sections} excludeIds={['intro', 'about', 'stats', 'timeline']} />
+          </main>
+
+          {/* Sidebar */}
+          <aside className="profile-sidebar anim-slide-up" style={{ animationDelay: '0.4s' }}>
             {/* Quick Links Widget */}
             <div className="widget">
-              <h3 className="widget-title"><span>📑</span> Quick Links</h3>
+              <h3 className="widget-title"><span>📑</span> Institutional Links</h3>
               <ul className="quick-links">
                 {[
-                  { label: 'Principal Message', path: '/about-us/principal-message' },
-                  { label: 'Governing Body', path: '/about-us/governing-body' },
-                  { label: 'Latest Notifications', path: '/admission/notification/latest' },
-                  { label: 'Admission Rules', path: '/admission/rule' },
-                  { label: 'Fee Structure', path: '/admission/fee-structure' },
-                  { label: 'Academic Departments', path: '/academics/departments' },
-                  { label: 'Career & Placements', path: '/academics/placements' },
-                  { label: 'NSS & NCC Units', path: '/activity/nss' },
-                  { label: 'Sports & Games', path: '/activity/games-sports' },
-                  { label: 'Course Syllabus', path: '/syllabus' },
-                  { label: 'Academic Calendar', path: '/academics/academic-calendar' },
-                  { label: 'Photo Gallery', path: '/gallery' },
+                  { label: "Principal's Desk", path: '/about-us/principal-message' },
+                  { label: 'Governing Council', path: '/about-us/governing-body' },
+                  { label: 'College Notifications', path: '/notifications' },
+                  { label: 'Media & Press Coverage', path: '/news?tab=press' },
+                  { label: 'Document Vault & Syllabi', path: '/documents' },
+                  { label: 'NAAC Accreditation Cell', path: '/naac/portal' },
+                  { label: 'Departments & Programs', path: '/academics/departments' },
+                  { label: 'NSS & NCC Wings', path: '/activity/nss' },
+                  { label: 'Campus Photo Gallery', path: '/gallery' },
                 ].map((link, i) => (
                   <li key={i} className="quick-link-item">
                     <Link to={link.path} className="quick-link" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
@@ -237,33 +327,31 @@ const CollegeProfile = () => {
               </ul>
             </div>
 
-            {/* Helpdesk Widget */}
-            <div className="helpdesk-widget">
-              <div style={{ fontSize: '45px', marginBottom: '15px', position: 'relative', zIndex: 2 }}>📞</div>
-              <h4 style={{ margin: '0 0 12px', fontSize: '19px', color: '#f4a023', position: 'relative', zIndex: 2 }}>Need Assistance?</h4>
-              <p style={{ fontSize: '14px', margin: '0 0 20px', color: '#e2e8f0', lineHeight: '1.6', position: 'relative', zIndex: 2 }}>
-                Contact our administration office for any queries related to admission or academics.
-              </p>
-              <a href="tel:+917903340991" className="helpdesk-btn">Call Helpdesk Now</a>
-            </div>
-            
-            {/* Social Media Widget */}
-            <div style={{ marginTop: '30px' }}>
-              <h4 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--primary-navy)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span>🌐</span> Connect With Us
+            {/* Minority Institution Badge */}
+            <div style={{ background: 'linear-gradient(135deg, #0f2347, #1e3a8a)', color: '#fff', borderRadius: 16, padding: '22px', marginBottom: 24, boxShadow: '0 8px 24px rgba(15,35,71,0.15)' }}>
+              <div style={{ fontSize: 26, marginBottom: 8 }}>☬</div>
+              <h4 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 800, color: '#f4a023' }}>
+                Sikh Minority Degree College
               </h4>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <a href="https://facebook.com" target="_blank" rel="noreferrer" className="social-icon-btn">f</a>
-                <a href="https://twitter.com" target="_blank" rel="noreferrer" className="social-icon-btn">𝕏</a>
-                <a href="https://instagram.com" target="_blank" rel="noreferrer" className="social-icon-btn">📸</a>
-                <a href="https://youtube.com" target="_blank" rel="noreferrer" className="social-icon-btn">▶</a>
-              </div>
+              <p style={{ margin: 0, fontSize: 12.5, color: '#cbd5e1', lineHeight: 1.6 }}>
+                Committed to universal brotherhood, self-discipline, and high moral integrity under the patronage of Gurudwara Prabandhak Committee, Dhanbad.
+              </p>
             </div>
 
+            {/* Helpdesk Widget */}
+            <div className="helpdesk-widget">
+              <div style={{ fontSize: '38px', marginBottom: '12px', position: 'relative', zIndex: 2 }}>📞</div>
+              <h4 style={{ margin: '0 0 8px', fontSize: '18px', color: '#f4a023', position: 'relative', zIndex: 2 }}>Administrative Desk</h4>
+              <p style={{ fontSize: '13px', margin: '0 0 16px', color: '#e2e8f0', lineHeight: '1.6', position: 'relative', zIndex: 2 }}>
+                For admissions, transcripts, or institutional verification queries:
+              </p>
+              <a href="tel:+917903340991" className="helpdesk-btn" style={{ fontSize: 13, padding: '10px 18px' }}>
+                Contact Administrative Office
+              </a>
+            </div>
           </aside>
         </div>
       </div>
-
     </div>
   );
 };

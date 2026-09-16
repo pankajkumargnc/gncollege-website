@@ -6,6 +6,7 @@ import { db } from '../firebase';
 import { resolveUrl } from '../utils/resolver';
 import { COLORS } from '../styles/colors';
 import { GraduationCap, Briefcase, Building2, Quote, Search, Sparkles, Filter, Award } from 'lucide-react';
+import PremiumPagination from '../components/PremiumPagination';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -129,6 +130,12 @@ export default function AlumniWall() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedDept, setSelectedDept] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 12;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedDept]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -155,6 +162,11 @@ export default function AlumniWall() {
       return matchSearch && matchDept;
     });
   }, [alumni, search, selectedDept]);
+
+  const paginatedAlumni = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredAlumni.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredAlumni, currentPage]);
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
@@ -289,15 +301,24 @@ export default function AlumniWall() {
             <p style={{ color: '#94a3b8', fontSize: 13, margin: 0 }}>Try clearing filters or search terms.</p>
           </div>
         ) : (
-          <Masonry
-            breakpointCols={BREAKPOINTS}
-            className="alumni-masonry-grid"
-            columnClassName="alumni-masonry-column"
-          >
-            {filteredAlumni.map((a) => (
-              <AlumniCardItem key={a.id} a={a} />
-            ))}
-          </Masonry>
+          <>
+            <Masonry
+              breakpointCols={BREAKPOINTS}
+              className="alumni-masonry-grid"
+              columnClassName="alumni-masonry-column"
+            >
+              {paginatedAlumni.map((a) => (
+                <AlumniCardItem key={a.id} a={a} />
+              ))}
+            </Masonry>
+
+            <PremiumPagination
+              totalItems={filteredAlumni.length}
+              itemsPerPage={ITEMS_PER_PAGE}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+            />
+          </>
         )}
       </div>
     </div>

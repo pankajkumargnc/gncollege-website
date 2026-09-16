@@ -10,8 +10,9 @@ import { db } from '../../../firebase';
 import { NAVY, GOLD, WHITE, BG, T, useDebounce } from '../AdminShared';
 import toast from 'react-hot-toast';
 import DEFAULT_PAGE_CONTENT from '../../../data/defaultPageContent';
-import DOMPurify from 'dompurify';
 import { Sparkles, Edit3, Columns, Eye, Download, Upload, Plus, Undo2, Save, Check, ExternalLink } from 'lucide-react';
+import MediaPicker from '../../MediaPicker';
+import DOMPurify from 'dompurify';
 
 const JoditEditor = lazy(() => import('jodit-react'));
 
@@ -178,6 +179,226 @@ const cardStyle = {
   border: `1.5px solid ${T.b1}`,
   boxShadow: T.shadow,
 };
+
+// ── 🎓 Dedicated Principal Information Card Editor ──
+function PrincipalInfoForm({ content, onChange }) {
+  const parsed = useMemo(() => {
+    if (!content) return {};
+    if (typeof content === 'object') return content;
+    try { return JSON.parse(content); } catch { return {}; }
+  }, [content]);
+
+  const [name, setName] = useState(parsed.name || 'Dr. Sanjay Prasad');
+  const [designation, setDesignation] = useState(parsed.designation || 'Principal');
+  const [qualification, setQualification] = useState(parsed.qualification || 'M.Com, Ph.D.');
+  const [institution, setInstitution] = useState(parsed.institution || 'Guru Nanak College, Dhanbad');
+  const [photo, setPhoto] = useState(parsed.photo || 'images/principal.webp');
+  const [quote, setQuote] = useState(parsed.quote || 'Education is not merely the acquisition of knowledge, but the transformation of character and the cultivation of a purposeful life.');
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (parsed.name && parsed.name !== name) setName(parsed.name);
+    if (parsed.designation && parsed.designation !== designation) setDesignation(parsed.designation);
+    if (parsed.qualification && parsed.qualification !== qualification) setQualification(parsed.qualification);
+    if (parsed.institution && parsed.institution !== institution) setInstitution(parsed.institution);
+    if (parsed.photo && parsed.photo !== photo) setPhoto(parsed.photo);
+    if (parsed.quote && parsed.quote !== quote) setQuote(parsed.quote);
+  }, [parsed]);
+
+  const sync = (next) => {
+    onChange(JSON.stringify(next));
+  };
+
+  const updateField = (field, val) => {
+    const next = {
+      name: field === 'name' ? val : name,
+      designation: field === 'designation' ? val : designation,
+      qualification: field === 'qualification' ? val : qualification,
+      institution: field === 'institution' ? val : institution,
+      photo: field === 'photo' ? val : photo,
+      quote: field === 'quote' ? val : quote,
+    };
+    if (field === 'name') setName(val);
+    if (field === 'designation') setDesignation(val);
+    if (field === 'qualification') setQualification(val);
+    if (field === 'institution') setInstitution(val);
+    if (field === 'photo') setPhoto(val);
+    if (field === 'quote') setQuote(val);
+    sync(next);
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error('Image size must be under 3MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target.result;
+      updateField('photo', dataUrl);
+      toast.success('Principal photo uploaded! 📸');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const previewSrc = photo?.startsWith('http') || photo?.startsWith('data:') 
+    ? photo 
+    : `${import.meta.env.BASE_URL}${photo || 'images/principal.webp'}`;
+
+  return (
+    <div style={{ background: '#f8fafc', border: `1.5px solid #f4a02355`, borderRadius: 14, padding: 18, marginBottom: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, borderBottom: '1px solid #e2e8f0', paddingBottom: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 22 }}>🎓</span>
+          <div>
+            <div style={{ fontWeight: 800, color: NAVY, fontSize: 14 }}>Principal Official Profile & Message Header</div>
+            <div style={{ fontSize: 11.5, color: T.t3 }}>Edit the Principal's name, designation, degrees, inspirational quote, and photo.</div>
+          </div>
+        </div>
+        <span style={{ fontSize: 10.5, background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '3px 8px', borderRadius: 6, fontWeight: 800 }}>
+          ✓ Live Front-end Sync
+        </span>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: 20, alignItems: 'start' }}>
+        {/* Photo Upload & Preview Column */}
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: 120, height: 120, borderRadius: '50%',
+            border: `3.5px solid #f4a023`, boxShadow: '0 8px 24px rgba(15,35,71,0.15)',
+            overflow: 'hidden', margin: '0 auto 10px', background: '#e2e8f0'
+          }}>
+            <img 
+              src={previewSrc} 
+              alt="Principal Preview" 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              onError={(e) => { e.target.src = `${import.meta.env.BASE_URL}images/principal.webp`; }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="abtn abtn-navy"
+              style={{ fontSize: 11, padding: '6px 10px', justifyContent: 'center', width: '100%' }}
+            >
+              📷 Upload Photo
+            </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              hidden 
+              accept="image/*" 
+              onChange={handleFileUpload} 
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowMediaPicker(true)}
+              className="abtn abtn-outline"
+              style={{ fontSize: 11, padding: '5px 10px', justifyContent: 'center', width: '100%' }}
+            >
+              🖼️ Media Library
+            </button>
+          </div>
+        </div>
+
+        {/* Form Fields Column */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: T.t3, marginBottom: 4, display: 'block' }}>
+              Principal Full Name *
+            </label>
+            <input
+              value={name}
+              onChange={e => updateField('name', e.target.value)}
+              placeholder="e.g. Dr. Sanjay Prasad"
+              style={{ width: '100%', padding: '9px 12px', border: `1.5px solid ${T.b1}`, borderRadius: 8, fontSize: 13, fontWeight: 700 }}
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: T.t3, marginBottom: 4, display: 'block' }}>
+              Designation *
+            </label>
+            <input
+              value={designation}
+              onChange={e => updateField('designation', e.target.value)}
+              placeholder="e.g. Principal"
+              style={{ width: '100%', padding: '9px 12px', border: `1.5px solid ${T.b1}`, borderRadius: 8, fontSize: 13, fontWeight: 700 }}
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: T.t3, marginBottom: 4, display: 'block' }}>
+              Qualifications / Degrees
+            </label>
+            <input
+              value={qualification}
+              onChange={e => updateField('qualification', e.target.value)}
+              placeholder="e.g. M.Com, Ph.D."
+              style={{ width: '100%', padding: '9px 12px', border: `1.5px solid ${T.b1}`, borderRadius: 8, fontSize: 13, fontWeight: 600 }}
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: T.t3, marginBottom: 4, display: 'block' }}>
+              Institution
+            </label>
+            <input
+              value={institution}
+              onChange={e => updateField('institution', e.target.value)}
+              placeholder="e.g. Guru Nanak College, Dhanbad"
+              style={{ width: '100%', padding: '9px 12px', border: `1.5px solid ${T.b1}`, borderRadius: 8, fontSize: 13, fontWeight: 600 }}
+            />
+          </div>
+
+          <div style={{ gridColumn: 'span 2' }}>
+            <label style={{ fontSize: 11, fontWeight: 700, color: T.t3, marginBottom: 4, display: 'block' }}>
+              Photo URL / Cloud Path (Auto-filled on upload)
+            </label>
+            <input
+              value={photo}
+              onChange={e => updateField('photo', e.target.value)}
+              placeholder="images/principal.webp or https://..."
+              style={{ width: '100%', padding: '7px 10px', border: `1.5px solid ${T.b1}`, borderRadius: 8, fontSize: 11.5, fontFamily: 'monospace' }}
+            />
+          </div>
+
+          <div style={{ gridColumn: 'span 2' }}>
+            <label style={{ fontSize: 11, fontWeight: 700, color: T.t3, marginBottom: 4, display: 'block' }}>
+              Inspirational Quote / Motto
+            </label>
+            <textarea
+              rows={2}
+              value={quote}
+              onChange={e => updateField('quote', e.target.value)}
+              placeholder="Inspirational words displayed in the quote highlight box..."
+              style={{ width: '100%', padding: '8px 12px', border: `1.5px solid ${T.b1}`, borderRadius: 8, fontSize: 12.5, fontStyle: 'italic', resize: 'vertical' }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {showMediaPicker && (
+        <Suspense fallback={null}>
+          <MediaPicker
+            onSelect={(url) => {
+              updateField('photo', url);
+              setShowMediaPicker(false);
+              toast.success('Media photo selected!');
+            }}
+            onClose={() => setShowMediaPicker(false)}
+          />
+        </Suspense>
+      )}
+    </div>
+  );
+}
 
 // ── Single Section Editor Component ──
 function SectionEditor({
@@ -370,7 +591,12 @@ function SectionEditor({
             </div>
           </div>
 
-          {section.type === 'text' ? (
+          {section.id === 'principal-info' ? (
+            <PrincipalInfoForm
+              content={section.content}
+              onChange={newJsonString => update('content', newJsonString)}
+            />
+          ) : section.type === 'text' ? (
             <div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                 <label style={{ fontSize: 11.5, fontWeight: 700, color: T.t2 }}>

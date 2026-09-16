@@ -67,8 +67,9 @@ const DEFAULT_PAGE_CONTENT = {
       {
         id: 'principal-info', heading: 'Principal Information', type: 'text', order: 1,
         content: JSON.stringify({
-          name: 'Sanjay Prasad',
-          designation: 'Secretary',
+          name: 'Dr. Sanjay Prasad',
+          designation: 'Principal',
+          qualification: 'M.Com, Ph.D.',
           institution: 'Guru Nanak College, Dhanbad',
           photo: 'images/principal.webp',
           quote: 'Education is not merely the acquisition of knowledge, but the transformation of character and the cultivation of a purposeful life.'
