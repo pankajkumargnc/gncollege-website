@@ -652,6 +652,8 @@ export default function ContentManagerTab({ logAct }) {
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
   const [isDirty, setIsDirty] = useState(false);
+  const [hasCmsDraft, setHasCmsDraft] = useState(false);
+  const [cmsDraftTime, setCmsDraftTime] = useState(null);
 
   // View mode: 'editor' | 'split' | 'preview'
   const [viewMode, setViewMode] = useState('editor');
@@ -659,6 +661,40 @@ export default function ContentManagerTab({ logAct }) {
   // Modals
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const [aiModal, setAiModal] = useState({ open: false, sectionIndex: null, prompt: '', loading: false });
+
+  // 🛡️ Inspect for uncommitted local draft when page selection changes
+  useEffect(() => {
+    if (!selectedSlug) {
+      setHasCmsDraft(false);
+      return;
+    }
+    try {
+      const raw = localStorage.getItem(`gnc_cms_draft_${selectedSlug}`);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.editData) {
+          setHasCmsDraft(true);
+          setCmsDraftTime(parsed.timestamp ? new Date(parsed.timestamp) : new Date());
+          return;
+        }
+      }
+    } catch (_) {}
+    setHasCmsDraft(false);
+  }, [selectedSlug]);
+
+  // 🛡️ Debounced 2.5s auto-save when content changes
+  useEffect(() => {
+    if (!selectedSlug || !editData || !isDirty) return;
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(`gnc_cms_draft_${selectedSlug}`, JSON.stringify({
+          editData,
+          timestamp: Date.now()
+        }));
+      } catch (_) {}
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [editData, selectedSlug, isDirty]);
 
   // ── Subscribe to all pageContent documents ──
   useEffect(() => {
@@ -740,6 +776,8 @@ export default function ContentManagerTab({ logAct }) {
       toast.success(`✅ "${editData.title}" saved successfully!`);
       setHistorySnapshot(JSON.parse(JSON.stringify(payload)));
       setIsDirty(false);
+      localStorage.removeItem(`gnc_cms_draft_${selectedSlug}`);
+      setHasCmsDraft(false);
     } catch (err) {
       console.error('[ContentManager] Save error:', err);
       toast.error(`❌ Save failed: ${err.message}`);
@@ -1075,6 +1113,69 @@ Format Required: Return HTML suitable for website display without markdown wrapp
               </div>
             ) : (
               <div>
+                {/* 💾 Draft Auto-Save Recovery Banner */}
+                {hasCmsDraft && (
+                  <div style={{
+                    background: '#fffbeb',
+                    border: '1.5px solid #f59e0b',
+                    borderRadius: 10,
+                    padding: '12px 16px',
+                    marginBottom: 16,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: 12
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 18 }}>💾</span>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 800, color: '#92400e' }}>
+                          Unsaved CMS Draft Recovered
+                        </div>
+                        <div style={{ fontSize: 11.5, color: '#b45309' }}>
+                          Found auto-saved edits from previous session ({cmsDraftTime ? cmsDraftTime.toLocaleTimeString() : 'recently'}).
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          try {
+                            const raw = localStorage.getItem(`gnc_cms_draft_${selectedSlug}`);
+                            if (raw) {
+                              const parsed = JSON.parse(raw);
+                              if (parsed?.editData) {
+                                setEditData(parsed.editData);
+                                setIsDirty(true);
+                                setHasCmsDraft(false);
+                                toast.success('CMS Draft restored!');
+                              }
+                            }
+                          } catch (_) {}
+                        }}
+                        className="abtn abtn-sm"
+                        style={{ background: '#d97706', color: '#fff', border: 'none', fontWeight: 800, padding: '6px 14px' }}
+                      >
+                        Restore Edits
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          localStorage.removeItem(`gnc_cms_draft_${selectedSlug}`);
+                          setHasCmsDraft(false);
+                          toast('Draft discarded');
+                        }}
+                        className="abtn abtn-sm"
+                        style={{ background: 'transparent', color: '#b45309', border: '1px solid #d97706', fontWeight: 700, padding: '6px 12px' }}
+                      >
+                        Discard
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* ── Page Header Controls & Metrics ── */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 16, borderBottom: `1px solid ${T.b1}`, paddingBottom: 16 }}>
                   <div>

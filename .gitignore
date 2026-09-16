@@ -8,3 +8,5 @@ old-project-key.json
 new-project-key.json
 migrate.js
 backup_*.zip
+backups/snapshots/
+backups/

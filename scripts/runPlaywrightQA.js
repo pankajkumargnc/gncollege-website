@@ -30,11 +30,21 @@ async function runQA() {
   console.log(`Target: ${BASE_URL} | Viewports: 320px → 1920px`);
   console.log('======================================================\n');
 
+  let server;
+  try {
+    const { preview } = await import('vite');
+    server = await preview({ preview: { port: 3000, open: false } });
+    console.log('⚡ Vite Preview Server booted successfully on http://localhost:3000\n');
+  } catch (err) {
+    console.log('ℹ️ Server notice: ' + err.message);
+  }
+
   let browser;
   try {
     browser = await chromium.launch({ headless: true });
   } catch (err) {
     console.error('Failed to launch Chromium:', err.message);
+    if (server?.httpServer) server.httpServer.close();
     process.exit(1);
   }
 
@@ -116,10 +126,12 @@ async function runQA() {
     failures.forEach((f, i) => {
       console.log(`  ${i + 1}. [${f.viewport}] ${f.route}: ${f.error}`);
     });
+    if (server?.httpServer) server.httpServer.close();
     process.exit(1);
   } else {
     console.log('\n🎉 ALL 42 VIEWPORT-ROUTE CHECKS PASSED WITH ZERO OVERFLOW!');
     console.log('Layout is 100% stable from 320px mobile to 1920px Full HD.\n');
+    if (server?.httpServer) server.httpServer.close();
     process.exit(0);
   }
 }

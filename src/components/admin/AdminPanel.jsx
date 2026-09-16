@@ -1,6 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // GNC COLLEGE — ADMIN PANEL v11.0 (Split Architecture)
 // Main shell — handles nav, global state, lazy tab loading
+// Sole Root Administrator: Pankaj Kumar Prasad
 // ═══════════════════════════════════════════════════════════════════════════════
 import React, { useState, useRef, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { db } from '../../firebase';
@@ -9,9 +10,10 @@ import {
   onSnapshot, query, orderBy, getDocs, writeBatch, limit
 } from 'firebase/firestore';
 import toast from 'react-hot-toast';
-import { FileText, Users, Undo2, Trash2, ShieldCheck, LogOut } from 'lucide-react';
+import { FileText, Users, Undo2, Trash2, ShieldCheck, LogOut, Download, UploadCloud } from 'lucide-react';
 import { setImgbbKey } from '../MediaPicker';
 import { NAVY, GOLD, WHITE, BG, T, useDebounce } from './AdminShared';
+import BulkImportModal from './BulkImportModal';
 import "../../styles/admin.css";
 
 // ── 🛡️ Safe Lazy Loader for Admin Tabs with Auto-Retry & Graceful Degradation ──
@@ -130,7 +132,7 @@ const TABS = [
   { id:'polls',         icon: <TabIcon path={<><path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-6"></path></>} />, label:'Campus Polls',      section:'' },
   { id:'youtube',       icon: <TabIcon path={<><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></>} />, label:'YouTube',          section:'API & INTEGRATIONS' },
   { id:'drive',         icon: <TabIcon path={<><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></>} />, label:'Drive Sync',       section:'' },
-  { id:'settings',      icon: <TabIcon path={<><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></>} />, label:'Site Settings',    section:'SYSTEM' },
+  { id:'settings',      icon: <TabIcon path={<><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l-.06-.06a1.65 1.65 0 0 0-.33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></>} />, label:'Site Settings',    section:'SYSTEM' },
   { id:'contact',       icon: <TabIcon path={<><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></>} />, label:'Contact Settings', section:'' },
   { id:'activity',      icon: <TabIcon path={<><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></>} />, label:'Activity Log',     section:'' },
   { id:'backup',        icon: <TabIcon path={<><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></>} />, label:'Cloud Vault & Backup', section:'' },
@@ -153,39 +155,15 @@ const TabLoader = () => (
   </div>
 );
 
-// ── RBAC Administrative Roles Definition ──────────────────────────────────────
+// ── Single-Owner Root Administrator Role ───────────────────────────────────────
 export const ADMIN_ROLES = {
   SUPER_ADMIN: {
     id: 'SUPER_ADMIN',
     name: 'Super Administrator',
-    badge: 'FULL CORE',
-    desc: 'Unrestricted Access (Principal / IT Incharge)',
+    badge: 'ROOT CORE',
+    desc: 'Sole System Owner & Lead Architect: Pankaj Kumar Prasad',
     color: '#f4a023',
-    tabs: null // All 27 tabs
-  },
-  ACADEMIC_EXAM: {
-    id: 'ACADEMIC_EXAM',
-    name: 'Exam & Academic Desk',
-    badge: 'ACADEMICS',
-    desc: 'Notices, News, Documents, Departments, Meetings',
-    color: '#0284c7',
-    tabs: ['dashboard', 'quick', 'notices', 'announcements', 'documents', 'departments', 'gb_meetings', 'staff_council', 'alerts', 'activity']
-  },
-  CULTURAL_EVENTS: {
-    id: 'CULTURAL_EVENTS',
-    name: 'Events & Cultural Desk',
-    badge: 'EVENTS',
-    desc: 'Events, Gallery, Campus, YouTube, Testimonials, Slider',
-    color: '#db2777',
-    tabs: ['dashboard', 'quick', 'events', 'gallery', 'campus', 'slider', 'youtube', 'testimonials', 'activity']
-  },
-  FACULTY_PLACEMENT: {
-    id: 'FACULTY_PLACEMENT',
-    name: 'Faculty & Alumni Desk',
-    badge: 'FACULTY',
-    desc: 'Faculty Directory, Placements & Alumni Wall',
-    color: '#059669',
-    tabs: ['dashboard', 'quick', 'faculty', 'placements', 'content_mgr', 'testimonials', 'activity']
+    tabs: null // All tabs authorized
   }
 };
 
@@ -197,9 +175,8 @@ function AdminPanelInner({
   navLinks, faculties: facultiesProp, placements: placementsProp, alerts: alertsProp
 }) {
   const [tab, setTab] = useState('dashboard');
-  const [activeRole, setActiveRole] = useState(() => {
-    return sessionStorage.getItem('gnc_admin_role') || 'SUPER_ADMIN';
-  });
+  const [activeRole] = useState('SUPER_ADMIN');
+  const [showBulkImport, setShowBulkImport] = useState(false);
   const [sideOpen, setSideOpen] = useState(false);
   const [sideCollapsed, setSideCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024);
@@ -469,34 +446,31 @@ function AdminPanelInner({
           </div>
         </div>
 
-        {/* 🛡️ RBAC Role Indicator in Sidebar */}
+        {/* 👑 Sole Administrator Attribution & Root Status */}
         {(!sideCollapsed || isMobile) && (
           <div style={{ padding: '0 12px 10px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
             <div style={{ 
-              background: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: '6px 10px', 
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              border: '1px solid rgba(244,160,35,0.25)'
+              background: 'rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 10px', 
+              display: 'flex', alignItems: 'center', gap: 8,
+              border: '1px solid rgba(244,160,35,0.3)'
             }}>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', fontWeight: 800, textTransform: 'uppercase' }}>Active Desk</span>
-                <span style={{ fontSize: 11, fontWeight: 900, color: ADMIN_ROLES[activeRole]?.color || '#f4a023' }}>
-                  {ADMIN_ROLES[activeRole]?.name}
+              <div style={{ 
+                width: 28, height: 28, borderRadius: 6, background: 'rgba(244,160,35,0.2)', 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD, flexShrink: 0 
+              }}>
+                <ShieldCheck size={16} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', fontWeight: 800, textTransform: 'uppercase' }}>
+                  Root Administrator
+                </span>
+                <span style={{ fontSize: 11, fontWeight: 900, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  Pankaj Kumar Prasad
+                </span>
+                <span style={{ fontSize: 9, fontWeight: 800, color: GOLD }}>
+                  SUPER ADMIN
                 </span>
               </div>
-              <select 
-                value={activeRole} 
-                onChange={e => handleRoleChange(e.target.value)}
-                style={{ 
-                  background: 'rgba(6,14,28,0.85)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: 6, fontSize: 10, fontWeight: 700, padding: '3px 6px', cursor: 'pointer', outline: 'none'
-                }}
-                title="Switch Administrative Desk"
-                aria-label="Switch Administrative Desk"
-              >
-                {Object.values(ADMIN_ROLES).map(r => (
-                  <option key={r.id} value={r.id} style={{ background: '#0f2347', color: '#fff' }}>{r.name}</option>
-                ))}
-              </select>
             </div>
           </div>
         )}
@@ -521,7 +495,7 @@ function AdminPanelInner({
                   >
                     <span style={{ fontSize:16, width:22, textAlign:'center', flexShrink:0 }}>{t.icon}</span>
                     <span className="nav-label" style={{ flex:1 }}>{t.label}</span>
-                    {badge ? <span className="nav-badge">{badge}</span> : null}
+                    {badge > 0 && <span className="abadge red">{badge}</span>}
                   </div>
                 </React.Fragment>
               );
@@ -529,14 +503,16 @@ function AdminPanelInner({
           })()}
         </div>
 
-        <div className="adm-side-footer" style={{ padding: '16px 12px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-          <div
-            role="button"
-            tabIndex={0}
-            className="fluid-btn"
-            onClick={handlePremiumLogout}
-            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handlePremiumLogout(); } }}
-          >
+        {/* User bar */}
+        <div className="adm-side-user">
+          <div style={{ width:32, height:32, borderRadius:'50%', background:`${GOLD}25`, border:`1.5px solid ${GOLD}60`, display:'flex', alignItems:'center', justifyContent:'center', color:GOLD, fontWeight:900, fontSize:13, flexShrink:0 }}>
+            PK
+          </div>
+          <div style={{ overflow:'hidden', opacity: sideCollapsed && !isMobile ? 0 : 1 }}>
+            <div style={{ fontSize:12, fontWeight:800, color:WHITE, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>Pankaj Kumar Prasad</div>
+            <div style={{ fontSize:10, color:GOLD, fontWeight:700 }}>SUPER ADMIN</div>
+          </div>
+          <div role="button" tabIndex={0} onClick={handlePremiumLogout} onKeyDown={e=>{if(e.key==='Enter'||e.key===' ')handlePremiumLogout();}} title="Exit Core" style={{ marginLeft:'auto', cursor:'pointer', color:'rgba(255,255,255,0.4)', padding:4, display:'flex', alignItems:'center', gap: 6 }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
             <span className="nav-label" style={{ opacity: sideCollapsed && !isMobile ? 0 : 1 }}>EXIT CORE</span>
           </div>
@@ -552,18 +528,9 @@ function AdminPanelInner({
         <div className="adm-mobile-top">
           <button onClick={()=>setSideOpen(true)} style={{ background:'none', border:'none', fontSize:22, cursor:'pointer', color:NAVY }} aria-label="Open navigation menu">☰</button>
           <span style={{ fontWeight:900, color:NAVY, fontSize:14 }}>GNC Admin Panel</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(15,35,71,0.06)', padding: '4px 8px', borderRadius: 6, border: `1px solid ${T.b1}` }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: ADMIN_ROLES[activeRole]?.color || NAVY }} />
-            <select 
-              value={activeRole} 
-              onChange={e => handleRoleChange(e.target.value)}
-              style={{ background: 'transparent', border: 'none', fontSize: 11, fontWeight: 700, cursor: 'pointer', color: NAVY, outline: 'none' }}
-              aria-label="Switch Administrative Desk"
-            >
-              {Object.values(ADMIN_ROLES).map(r => (
-                <option key={r.id} value={r.id}>{r.badge}</option>
-              ))}
-            </select>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(244,160,35,0.12)', padding: '4px 8px', borderRadius: 6, border: '1px solid rgba(244,160,35,0.3)' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: GOLD }} />
+            <span style={{ fontSize: 10, fontWeight: 800, color: NAVY }}>Pankaj Kumar Prasad (Super Admin)</span>
           </div>
         </div>
 
@@ -593,25 +560,28 @@ function AdminPanelInner({
           </div>
 
           <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:10 }}>
-            {/* RBAC Top Bar Role Indicator / Switcher */}
+            {/* Sole Administrator Super Admin Badge */}
             <div style={{ 
               display: 'flex', alignItems: 'center', gap: 6, 
-              background: 'rgba(15,35,71,0.04)', padding: '5px 10px', 
-              borderRadius: 8, border: `1px solid ${T.b1}` 
+              background: 'rgba(244,160,35,0.1)', padding: '5px 12px', 
+              borderRadius: 8, border: '1px solid rgba(244,160,35,0.3)' 
             }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: ADMIN_ROLES[activeRole]?.color || NAVY }} />
-              <select 
-                value={activeRole} 
-                onChange={e => handleRoleChange(e.target.value)}
-                style={{ background: 'transparent', border: 'none', fontSize: 11.5, fontWeight: 800, cursor: 'pointer', color: NAVY, outline: 'none' }}
-                title="Switch Administrative Desk"
-                aria-label="Switch Administrative Desk"
-              >
-                {Object.values(ADMIN_ROLES).map(r => (
-                  <option key={r.id} value={r.id}>{r.name} ({r.badge})</option>
-                ))}
-              </select>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: GOLD }} />
+              <span style={{ fontSize: 11.5, fontWeight: 900, color: NAVY }}>
+                Pankaj Kumar Prasad <span style={{ color: '#b45309', fontSize: 10, fontWeight: 700 }}>(Super Admin)</span>
+              </span>
             </div>
+
+            {/* Bulk Excel/CSV Importer Button */}
+            <button 
+              className="abtn abtn-navy abtn-sm"
+              onClick={() => setShowBulkImport(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 800 }}
+              title="Bulk Import Excel / CSV Data"
+            >
+              <UploadCloud size={14} />
+              Bulk Import (XLSX/CSV)
+            </button>
 
             <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:12, color:T.t3, fontWeight:700 }}>
               <div className="glow" style={{ width:7, height:7, borderRadius:'50%' }} />
@@ -635,6 +605,15 @@ function AdminPanelInner({
           </Suspense>
         </div>
       </main>
+
+      {/* ── Bulk Excel / CSV Data Importer Modal ── */}
+      <BulkImportModal 
+        isOpen={showBulkImport} 
+        onClose={() => setShowBulkImport(false)} 
+        onImportComplete={(stats) => {
+          toast.success(`Import completed: ${stats.success} records inserted into ${stats.collection}.`);
+        }} 
+      />
 
       {/* Keyboard shortcuts modal */}
       {showKeyHelp && (

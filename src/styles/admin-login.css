@@ -521,6 +521,121 @@
   animation: gnc-blink 2.5s infinite;
 }
 
+/* ── 2FA & SECURITY PIN VERIFICATION STYLES ── */
+.gnc-2fa-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(244,160,35,0.15);
+  border: 1px solid rgba(244,160,35,0.35);
+  color: #f4a023;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+.gnc-pin-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 18px 0;
+}
+.gnc-pin-digit {
+  width: 46px;
+  height: 52px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  background: rgba(15, 35, 71, 0.7);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+.gnc-pin-digit:focus {
+  border-color: #f4a023;
+  box-shadow: 0 0 12px rgba(244, 160, 35, 0.4);
+  background: rgba(15, 35, 71, 0.9);
+}
+.gnc-recovery-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 12px;
+}
+.gnc-recovery-link-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: underline;
+  transition: color 0.15s ease;
+  padding: 0;
+}
+.gnc-recovery-link-btn:hover {
+  color: #f4a023;
+}
+
+/* ── RECOVERY MODAL OVERLAY ── */
+.gnc-recovery-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 14, 28, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: gnc-fade-in 0.25s ease-out;
+}
+.gnc-recovery-modal-card {
+  background: #0f2347;
+  border: 1.5px solid rgba(244, 160, 35, 0.4);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  padding: 24px 28px;
+  position: relative;
+}
+.gnc-rec-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  padding-bottom: 10px;
+}
+.gnc-rec-tab {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.7);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.gnc-rec-tab.active {
+  background: #f4a023;
+  color: #0f2347;
+}
+
+@keyframes gnc-fade-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 /* ── RESPONSIVE ADAPTATIONS ── */
 @media (max-width: 1199px) {
   .gnc-wrap { width: 820px; }

@@ -1,27 +1,97 @@
 // src/components/admin/tabs/BackupRestoreTab.jsx
-// GNC CLOUD VAULT - BACKUP & RESTORE v2.0
-// Architect: Pankaj Kumar
+// GNC CLOUD VAULT - BACKUP & RESTORE v3.0
+// Lead Architect & Primary Owner: Pankaj Kumar Prasad
 // ═══════════════════════════════════════════════════════════════════════════════
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { db } from "../../../firebase";
 import { collection, getDocs, writeBatch, doc, serverTimestamp } from "firebase/firestore";
 import toast from "react-hot-toast";
-import { ShieldCheck, Download, Upload, Cloud, Lock, Unlock, AlertTriangle, FolderArchive, RefreshCw, CheckCircle2, Database, ShieldAlert, Loader2 } from "lucide-react";
+import { ShieldCheck, Download, Upload, Cloud, Lock, Unlock, AlertTriangle, FolderArchive, RefreshCw, CheckCircle2, Database, ShieldAlert, Loader2, Clock } from "lucide-react";
 import { T, NAVY, GOLD } from "../AdminShared";
 
 export default function BackupRestoreTab({ logAct }) {
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [lastBackup, setLastBackup] = useState(localStorage.getItem('gnc_last_backup') || 'Never');
-  const [autoBackup, setAutoBackup] = useState(() => localStorage.getItem('gnc_auto_backup') === 'true');
+  const [autoBackup, setAutoBackup] = useState(() => localStorage.getItem('gnc_auto_backup') !== 'false');
   const [driveSync, setDriveSync] = useState(() => localStorage.getItem('gnc_drive_sync') === 'true');
   
+  const [autoSnapshotMeta, setAutoSnapshotMeta] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('gnc_auto_snapshot_meta') || 'null');
+    } catch { return null; }
+  });
+
   const COLLECTIONS = [
     'notices', 'announcements', 'events', 'faculties', 
     'placements', 'pdfReports', 'alerts', 'gallery', 
     'pages', 'navigation', 'testimonials', 'sliderSlides'
   ];
+
+  // 🛡️ 24-Hour Automated Background Snapshot Engine
+  useEffect(() => {
+    const runAutoSnapshotCheck = async () => {
+      if (!autoBackup) return;
+      const now = Date.now();
+      const lastRun = autoSnapshotMeta?.timestamp ? new Date(autoSnapshotMeta.timestamp).getTime() : 0;
+      const twentyFourHours = 24 * 60 * 60 * 1000;
+
+      if (now - lastRun > twentyFourHours) {
+        console.log('[CloudVault] Generating 24-hour automated database snapshot...');
+        try {
+          const snapshotData = {
+            version: "3.0",
+            timestamp: new Date().toISOString(),
+            author: "Pankaj Kumar Prasad (Auto-Scheduler Engine)",
+            collections: {}
+          };
+          let totalRecords = 0;
+
+          for (const col of COLLECTIONS) {
+            const snap = await getDocs(collection(db, col));
+            snapshotData.collections[col] = snap.docs.map(d => ({ ...d.data(), _id: d.id }));
+            totalRecords += snap.docs.length;
+          }
+
+          const serialized = JSON.stringify(snapshotData);
+          try {
+            sessionStorage.setItem('gnc_auto_snapshot_data', serialized);
+          } catch (_) {}
+
+          const meta = {
+            timestamp: new Date().toISOString(),
+            totalRecords,
+            collectionsCount: COLLECTIONS.length,
+            sizeKB: (serialized.length / 1024).toFixed(1)
+          };
+
+          localStorage.setItem('gnc_auto_snapshot_meta', JSON.stringify(meta));
+          setAutoSnapshotMeta(meta);
+          logAct?.('add', `24-Hour Auto-Snapshot Generated (${totalRecords} records across ${COLLECTIONS.length} collections)`, 'backup');
+        } catch (err) {
+          console.warn('[CloudVault] Background auto-snapshot warning:', err.message);
+        }
+      }
+    };
+
+    runAutoSnapshotCheck();
+  }, [autoBackup]);
+
+  const downloadLatestAutoSnapshot = () => {
+    const raw = sessionStorage.getItem('gnc_auto_snapshot_data');
+    if (raw) {
+      const blob = new Blob([raw], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `GNC_AUTO_SNAPSHOT_${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      toast.success('Latest 24h Auto-Snapshot downloaded!');
+    } else {
+      handleBackup(false);
+    }
+  };
 
   // EXPORT CORE: All collections to one JSON
   const handleBackup = async (isAuto = false) => {
@@ -225,13 +295,29 @@ export default function BackupRestoreTab({ logAct }) {
               <Database size={32} />
             </div>
             <div style={{ flex: '1 1 280px' }}>
-                <h4 style={{ margin: 0, color: '#fff', fontSize: 17, fontWeight: 800 }}>Sentinel Data Governance</h4>
-                <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 500 }}>
+                <h4 style={{ margin: 0, color: '#fff', fontSize: 17, fontWeight: 800 }}>Sentinel Data Governance & Resilience</h4>
+                <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: 500 }}>
                    Auto-Backup is <b style={{ color: autoBackup ? '#4ade80' : '#f87171' }}>{autoBackup ? 'ACTIVE' : 'DISABLED'}</b>. 
-                   Google Drive Sync is <b style={{ color: driveSync ? GOLD : '#f87171' }}>{driveSync ? 'CONNECTED' : 'OFFLINE'}</b>.
+                   {autoSnapshotMeta ? (
+                     <span> Latest 24h Auto-Snapshot: <b style={{ color: GOLD }}>{new Date(autoSnapshotMeta.timestamp).toLocaleString()}</b> ({autoSnapshotMeta.totalRecords} records, {autoSnapshotMeta.sizeKB} KB).</span>
+                   ) : (
+                     <span> 24-Hour Snapshot Engine initialized.</span>
+                   )}
                 </p>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>
+                   Sole System Architect & Root Security: Pankaj Kumar Prasad
+                </div>
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <button 
+                  className="abtn" 
+                  onClick={downloadLatestAutoSnapshot} 
+                  style={{ background: 'rgba(244,160,35,0.2)', color: GOLD, fontWeight: 800, border: '1px solid rgba(244,160,35,0.4)', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                  title="Download Latest 24-Hour Auto-Snapshot"
+                >
+                   <Download size={14} />
+                   Download 24h Snapshot
+                </button>
                 <button className="abtn" onClick={toggleDriveSync} style={{ background: driveSync ? '#15803d' : 'rgba(255,255,255,0.1)', color: '#fff', fontWeight: 700, border: '1px solid rgba(255,255,255,0.15)', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                    <Cloud size={14} />
                    {driveSync ? 'Drive Linked' : 'Link Drive'}

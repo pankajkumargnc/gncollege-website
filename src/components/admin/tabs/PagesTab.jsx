@@ -5,6 +5,7 @@ import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, query, wh
 import toast from 'react-hot-toast';
 import { T, NAVY, GOLD, WHITE, useLocalDraft, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
 import { clearCache } from '../../../utils/cachedFetch';
+import useDraftAutoSave from '../../../hooks/useDraftAutoSave';
 import {
   FileText,
   Plus,
@@ -51,6 +52,20 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
     addToMenu: true,
     template: 'none'
   });
+
+  // 🛡️ Enterprise Rich-Text Draft Auto-Save & Crash Recovery
+  const {
+    hasDraft,
+    draftTimestamp,
+    saveStatus,
+    restoreDraft,
+    discardDraft,
+    clearDraft: clearRteDraft
+  } = useDraftAutoSave(
+    editItem ? `page_${editItem.id}` : `page_new_${formData.slug || 'untitled'}`,
+    formData.content,
+    (restoredContent) => setFormData(prev => ({ ...prev, content: restoredContent }))
+  );
 
   // Handle title change and auto-slug generation
   const handleTitleChange = (e) => {
@@ -307,6 +322,8 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
       clearCache('pages');
       if (formData.addToMenu) clearCache('navigation');
       
+      clearRteDraft();
+      clearDraft();
       resetEditor();
       setActiveTab('manage'); 
     } catch (err) {
@@ -600,6 +617,52 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
               )}
             </div>
 
+            {/* 💾 Draft Auto-Save Recovery Banner */}
+            {hasDraft && (
+              <div style={{
+                background: '#fffbeb',
+                border: '1.5px solid #f59e0b',
+                borderRadius: 10,
+                padding: '12px 16px',
+                marginBottom: 16,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 12
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 18 }}>💾</span>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: '#92400e' }}>
+                      Unsaved Draft Recovered
+                    </div>
+                    <div style={{ fontSize: 11.5, color: '#b45309' }}>
+                      Auto-saved from your previous editing session ({draftTimestamp ? draftTimestamp.toLocaleTimeString() : 'recently'}).
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    type="button"
+                    onClick={restoreDraft}
+                    className="abtn abtn-sm"
+                    style={{ background: '#d97706', color: '#fff', border: 'none', fontWeight: 800, padding: '6px 14px' }}
+                  >
+                    Restore Draft
+                  </button>
+                  <button
+                    type="button"
+                    onClick={discardDraft}
+                    className="abtn abtn-sm"
+                    style={{ background: 'transparent', color: '#b45309', border: '1px solid #d97706', fontWeight: 700, padding: '6px 12px' }}
+                  >
+                    Discard
+                  </button>
+                </div>
+              </div>
+            )}
+
             <form id="pageForm" onSubmit={save} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {/* Row 1: Title & Status */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px', gap: 12 }}>
@@ -659,8 +722,18 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
               {/* Row 3: Templates & Shortcodes Bar */}
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <label style={{ fontSize: 12, fontWeight: 800, color: NAVY }}>Content Editor</label>
+                    {saveStatus === 'saving' && (
+                      <span style={{ fontSize: 11, color: '#b45309', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        <span className="live-pulse" style={{ width: 6, height: 6, background: '#f59e0b' }} /> Saving draft...
+                      </span>
+                    )}
+                    {saveStatus === 'saved' && (
+                      <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        ✓ Draft saved
+                      </span>
+                    )}
                     <div style={{ display: 'flex', background: '#e2e8f0', borderRadius: 6, padding: 2 }}>
                       <button
                         type="button"

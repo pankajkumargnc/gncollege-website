@@ -15,7 +15,8 @@
     "deploy:github": "npm run build:github && npx gh-pages -d dist",
     "deploy:all": "npm run deploy && npm run deploy:github",
     "backup": "node scripts/backupFirestore.js",
-    "test:qa": "playwright test"
+    "backup:scheduled": "node scripts/scheduledBackup.mjs",
+    "test:qa": "node scripts/runPlaywrightQA.js"
   },
   "dependencies": {
     "@photo-sphere-viewer/core": "^5.15.1",
