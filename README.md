@@ -15,7 +15,7 @@
 **🏛️ Recognized by UGC under Sections 2(f) and 12(B) of UGC Act, 1956**  
 **📍 Dual Campuses: Bhuda Campus (Main / Boys Wing) & Bank More Campus (Girls Wing / Vocational Studies) | Dhanbad, Jharkhand — 826001**
 
-[🌐 Live Official Website](https://pankajkumargnc.github.io/gncollege-website) · [📋 Architecture Encyclopedia](./public/docs/GNC_MASTER_ARCHITECTURE_BLUEPRINT.html) · [🛡️ Admin Reference Guide](./public/docs/CLAUDE_GNC_Reference.pdf)
+[🌐 Live Official Website](https://pankajkumargnc.github.io/gncollege-website) · [📄 Printable Official Documentation (PDF)](./GNC_College_Official_Documentation_v2.1.0.pdf) · [📋 Architecture Blueprint (HTML)](./public/docs/GNC_College_Official_Documentation_v2.1.0.html) · [🛡️ Admin Reference Guide](./public/docs/CLAUDE_GNC_Reference.pdf)
 
 ---
 
@@ -33,20 +33,21 @@
 2. [Current Project Status (v2.1.0)](#-current-project-status-v210)
 3. [Master Technology Stack](#-master-technology-stack)
 4. [Architectural Highlights & Innovations](#-architectural-highlights--innovations)
-5. [Complete Master Directory Structure](#-complete-master-directory-structure)
-6. [Frontend Experience & Public Feature Directory (27+ Pages)](#-frontend-experience--public-feature-directory-27-pages)
-7. [Admin Portal Ecosystem (All 28 Dedicated Tabs)](#-admin-portal-ecosystem-all-28-dedicated-tabs)
-8. [Backend Architecture & Cloud Firestore Data Models](#-backend-architecture--cloud-firestore-data-models)
-9. [Google Drive API Integration & 4-Tier Quota Shield](#-google-drive-api-integration--4-tier-quota-shield)
-10. [Design System, Fluid Typography & Zero-Emoji Standard](#-design-system-fluid-typography--zero-emoji-standard)
-11. [Security, Access Control & Compliance Framework](#-security-access-control--compliance-framework)
-12. [Supreme Diagnostic Engine v400.0 (36-Phase Real Audit)](#-supreme-diagnostic-engine-v4000-36-phase-real-audit)
-13. [Progressive Web App (PWA) & Service Worker Engine](#-progressive-web-app-pwa--service-worker-engine)
-14. [Deep SEO & Dynamic Schema.org Graph Engine](#-deep-seo--dynamic-schemaorg-graph-engine)
-15. [Automated Playwright QA & Viewport Verification](#-automated-playwright-qa--viewport-verification)
-16. [Build Pipeline & Bundle Optimization](#-build-pipeline--bundle-optimization)
-17. [Developer Commands & CLI Workflow](#-developer-commands--cli-workflow)
-18. [Authorship, Copyright & Credits](#-authorship-copyright--credits)
+5. [Graphical Data Flow Diagrams & Architecture Blueprint](#-graphical-data-flow-diagrams--architecture-blueprint)
+6. [Complete Master Directory Structure](#-complete-master-directory-structure)
+7. [Frontend Experience & Public Feature Directory (27+ Pages)](#-frontend-experience--public-feature-directory-27-pages)
+8. [Admin Portal Ecosystem (All 28 Dedicated Tabs)](#-admin-portal-ecosystem-all-28-dedicated-tabs)
+9. [Backend Architecture & Cloud Firestore Data Models](#-backend-architecture--cloud-firestore-data-models)
+10. [Google Drive API Integration & 4-Tier Quota Shield](#-google-drive-api-integration--4-tier-quota-shield)
+11. [Design System, Fluid Typography & Zero-Emoji Standard](#-design-system-fluid-typography--zero-emoji-standard)
+12. [Security, Access Control & Compliance Framework](#-security-access-control--compliance-framework)
+13. [Supreme Diagnostic Engine v400.0 (36-Phase Real Audit)](#-supreme-diagnostic-engine-v4000-36-phase-real-audit)
+14. [Progressive Web App (PWA) & Service Worker Engine](#-progressive-web-app-pwa--service-worker-engine)
+15. [Deep SEO & Dynamic Schema.org Graph Engine](#-deep-seo--dynamic-schemaorg-graph-engine)
+16. [Automated Playwright QA & Viewport Verification](#-automated-playwright-qa--viewport-verification)
+17. [Build Pipeline & Bundle Optimization](#-build-pipeline--bundle-optimization)
+18. [Developer Commands & CLI Workflow](#-developer-commands--cli-workflow)
+19. [Authorship, Copyright & Credits](#-authorship-copyright--credits)
 
 ---
 
@@ -162,6 +163,109 @@ const safeLazy = (importFn) => lazy(() =>
 Changes made in the Admin Panel instantly synchronize worldwide without manual page reloads:
 - **Global Firestore Trigger**: Listens on `settings/site_sync` document snapshot updates.
 - **Cross-Tab Browser Sync**: Uses standard `BroadcastChannel('gnc_sync_channel')` to synchronize multiple open tabs on the same computer simultaneously with zero network calls.
+
+---
+
+## 🔄 Graphical Data Flow Diagrams & Architecture Blueprint
+
+> [!TIP]
+> **Printable Executive Document Available:**  
+> A publication-grade, vector-quality PDF version of this documentation with high-resolution vector diagrams, executive cover page, and institutional styling is available:  
+> 📄 **[Download Ready-to-Print Documentation PDF (v2.1.0)](./GNC_College_Official_Documentation_v2.1.0.pdf)** &bull; 🌐 **[Interactive HTML Architecture Blueprint](./public/docs/GNC_College_Official_Documentation_v2.1.0.html)**
+
+### 1. End-to-End System Architecture & Data Pipeline
+The following architectural diagram illustrates how public visitor requests flow through the static hosting CDN and HashRouter, separated from the lazy-loaded administrative authentication barrier, and interact with Cloud Firestore streams, Cloud Storage vaults, and the Google Drive 4-Tier Quota Shield:
+
+```mermaid
+flowchart TD
+    subgraph Clients["1. Client Layer"]
+        D["💻 Public Desktop User"]
+        M["📱 Mobile Web User"]
+        P["📲 PWA Offline App (225 Precached Assets)"]
+    end
+
+    subgraph Core["2. Routing, Resilience & Guards"]
+        HR["HashRouter (#/ Static Hosting Compatible)"]
+        SL["safeLazy Dynamic Chunk Loader (Auto-Reload on Stale Chunks)"]
+        EB["ErrorBoundary Per-Route Containment"]
+    end
+
+    subgraph SplitAuth["3. Split-Core Authentication Barrier"]
+        PubSDK["src/firebase.js<br/><b>Public Firestore & Analytics Only</b><br/>(Zero Auth Payload Weight)"]
+        AdminSDK["src/firebase-auth.js<br/><b>Lazy-Loaded Auth SDK</b><br/>(Restricted to Verified Admins)"]
+    end
+
+    subgraph CloudData["4. Cloud BaaS Data Layer"]
+        FS_HV[("🔥 Firestore: High-Velocity Stream<br/>(notices, announcements, events, slider)")]
+        FS_LV[("📦 Firestore: Low-Velocity Stream<br/>(faculties, gallery, navigation, pdfReports)")]
+        FS_SYNC[("⚡ Firestore: settings/site_sync<br/>(Zero-Lag Remote Invalidation Trigger)")]
+        CS[("☁️ Cloud Storage Vault<br/>(Docs &le; 15MB, Images &le; 5MB)")]
+        GD[("📁 Google Drive API v3<br/>(4-Tier Resilient Quota Shield)")]
+    end
+
+    subgraph AdminHub["5. Admin Ecosystem (28 Dedicated Tabs)"]
+        AP["AdminPanel.jsx (safeLazyTab Protected)"]
+        Jodit["Jodit WYSIWYG RTE (Headless CMS Studio)"]
+        Diag["Supreme Diagnostic Engine v400.0 (36-Phase Real Audit)"]
+    end
+
+    D & M & P --> HR
+    HR --> SL --> EB
+    EB --> PubSDK
+    AP --> AdminSDK
+    PubSDK <==>|"Real-time onSnapshot Listeners"| FS_HV
+    PubSDK <-->|"localStorage TTL Caching"| FS_LV
+    PubSDK <==>|"Remote Invalidation Listener"| FS_SYNC
+    AdminSDK -->|"Authenticated Write Operations"| FS_HV & FS_LV & FS_SYNC & CS
+    PubSDK <-->|"4-Tier Shield (0ms Map &rarr; Cooldown &rarr; SWR)"| GD
+    AP <==>|"BroadcastChannel('gnc_sync_channel')"| D
+```
+
+---
+
+### 2. Real-Time Reactive Synchronization Flowchart
+When an administrator publishes or updates content, the change propagates worldwide in under 200ms without requiring page reloads, while simultaneously synchronizing local browser tabs via standard `BroadcastChannel`:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as 👨‍💼 College Admin
+    participant AdminUI as 🖥️ Admin Panel (28 Tabs)
+    participant FS as 🔥 Cloud Firestore
+    participant Broadcast as 📡 BroadcastChannel ('gnc_sync_channel')
+    participant GlobalClient as 🌍 Global Public Clients (Worldwide)
+    participant LocalTab as 📑 Same-Browser Public Tabs
+
+    Admin->>AdminUI: Publishes New Circular / Notice / Faculty Card
+    AdminUI->>FS: Atomic Write to target collection + 'settings/site_sync'
+    par Global Remote Reactivity
+        FS-->>GlobalClient: onSnapshot('settings/site_sync') fires (<200ms)
+        GlobalClient->>GlobalClient: Invalidate LocalStorage Cache & Refresh State
+        GlobalClient->>GlobalClient: UI Re-renders Smoothly with Zero-Flicker
+    and Same-Browser Local Reactivity
+        AdminUI->>Broadcast: postMessage({ collection: 'notices' })
+        Broadcast-->>LocalTab: onmessage listener executes synchronously
+        LocalTab->>LocalTab: Updates React State Instantly (0 Network Calls)
+    end
+```
+
+---
+
+### 3. Google Drive API 4-Tier Quota Shield Decision Tree
+To guarantee 100% immunity against Google Drive API v3 free tier quota exhaustion (HTTP 403 / 429), the `useDriveDocs.js` hook executes an intelligent tiered decision algorithm:
+
+```mermaid
+graph TD
+    Req([📄 Document Requested by Component]) --> T1{Tier 1: Memory Map?}
+    T1 -- Yes (Found in RAM) --> S1[✅ Serve Synchronously in 0ms]
+    T1 -- No (Cache Miss) --> T2{Tier 2: Quota Shield Active?}
+    T2 -- Yes (403/429 within 15 mins) --> S2[🛡️ Serve Stale Cache or Bundled Fallback]
+    T2 -- No (Quota Healthy) --> T3{Tier 3: LocalStorage Valid <30m?}
+    T3 -- Yes (Fresh) --> S3[⚡ Serve Immediately & Background Revalidate]
+    T3 -- No (Expired / Empty) --> T4[🌐 Tier 4: Live Google Drive API v3 Call]
+    T4 -- HTTP 200 (Success) --> Save[💾 Save to Memory Map & LocalStorage] --> S4[🎉 Render Document]
+    T4 -- HTTP 403/429 (Quota Limit) --> Shield[🚨 Activate 15-min sessionStorage Shield] --> S2
+```
 
 ---
 
