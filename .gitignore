@@ -10,3 +10,4 @@ migrate.js
 backup_*.zip
 backups/snapshots/
 backups/
+.firebase/
