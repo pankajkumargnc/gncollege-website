@@ -4,7 +4,7 @@ import { COLORS } from '../styles/colors'
 
 const SPOTLIGHT_CARDS = {
   'About Us': {
-    badge: '☬ SIKH MINORITY',
+    badge: 'SIKH MINORITY INSTITUTION',
     title: 'Heritage & 1970 Roots',
     desc: 'Empowering coalfield youth for 56 years with UGC 2(f) & 12(B) status, NCMEI minority recognition, and constitutional autonomy.',
     link: '/about-us/sikh-heritage',
@@ -12,68 +12,68 @@ const SPOTLIGHT_CARDS = {
     icon: '☬'
   },
   'Academics': {
-    badge: '🎓 NEP-2020 & BBMKU',
+    badge: 'NEP-2020 & BBMKU',
     title: 'Curriculum & Degrees',
     desc: 'BA, B.Sc, B.Com honors degrees, premier BCA vocational IT wing, and updated university CBCS syllabi.',
     link: '/academics/departments',
     btnText: 'Explore Departments →',
-    icon: '📚'
+    icon: '✦'
   },
   'Admission': {
-    badge: '⚡ SESSION 2026',
+    badge: 'SESSION 2026–27',
     title: 'Admissions & Quotas',
     desc: 'Direct registration via Chancellor Portal. 50% Sikh Minority Quota reservations & fee concession assistance.',
     link: '/admission/rule',
     btnText: 'Admission Rules →',
-    icon: '🎓'
+    icon: '✦'
   },
   'Admissions': {
-    badge: '⚡ SESSION 2026',
+    badge: 'SESSION 2026–27',
     title: 'Admissions & Quotas',
     desc: 'Direct registration via Chancellor Portal. 50% Sikh Minority Quota reservations & fee concession assistance.',
     link: '/admission/rule',
     btnText: 'Admission Rules →',
-    icon: '🎓'
+    icon: '✦'
   },
   'Campus': {
-    badge: '🏛️ TWO CAMPUSES',
+    badge: 'DUAL CAMPUS WINGS',
     title: 'Bhuda & Bank More',
     desc: 'Main Boys Wing at Bhuda & Vocational Girls Wing at Bank More with hi-tech science and computer labs.',
     link: '/campus/infrastructure',
     btnText: 'Campus Tour →',
-    icon: '🏛️'
+    icon: '✦'
   },
   'NAAC': {
-    badge: '🏅 QUALITY BENCHMARK',
+    badge: 'QUALITY BENCHMARK',
     title: 'NAAC Cycles & SSR',
     desc: 'Complete transparency in institutional reporting: SSR Cycle 1 & 2, AQAR, NIRF, and IQAC perspective plan.',
     link: '/naac/aqar',
     btnText: 'View AQAR Reports →',
-    icon: '📜'
+    icon: '✦'
   },
   'Activity': {
-    badge: '🌟 CHARACTER & SERVICE',
+    badge: 'CHARACTER & SERVICE',
     title: 'NSS, NCC & Sports',
     desc: 'Active student volunteer units delivering blood donation camps, disaster relief, and university sports champions.',
     link: '/activity/nss',
     btnText: 'NSS Activities →',
-    icon: '🏅'
+    icon: '✦'
   },
   'Publication': {
-    badge: '📰 RESEARCH & MEDIA',
+    badge: 'RESEARCH & MEDIA',
     title: 'Journals & Student Media',
     desc: 'Annual college e-magazines, semester examination results, digital library resources, and Student Satisfaction Surveys.',
     link: '/publication/e-magazine',
     btnText: 'Read E-Magazine →',
-    icon: '📰'
+    icon: '✦'
   },
   'Gallery': {
-    badge: '📸 CAMPUS MOMENTS',
+    badge: 'CAMPUS LIFE ARCHIVE',
     title: 'Life at Guru Nanak',
     desc: 'High-definition photo archives and video coverage of Youth Festivals, Sports Meets, Prakash Purab, and Convocation.',
     link: '/gallery/photos',
     btnText: 'Browse Gallery →',
-    icon: '📸'
+    icon: '✦'
   }
 };
 
@@ -789,7 +789,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                                 paddingBottom: '5px', borderBottom: '1.5px solid rgba(244,160,35,0.3)',
                                 display: 'flex', alignItems: 'center', gap: '5px'
                               }}>
-                                <span>⚖️ Committees (9)</span>
+                                <span>Statutory Committees</span>
                               </div>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                 {(groupSections.find(g => g.label === 'Various Committees')?.sub || []).map(item => (
@@ -821,7 +821,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                                 paddingBottom: '5px', borderBottom: '1.5px solid rgba(244,160,35,0.3)',
                                 display: 'flex', alignItems: 'center', gap: '5px'
                               }}>
-                                <span>📜 Regulations & Affiliation</span>
+                                <span>Regulations & Affiliation</span>
                               </div>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                                 {(groupSections.find(g => g.label === 'Regulations')?.sub || []).map(item => (

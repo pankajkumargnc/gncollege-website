@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { SOCIAL_LINKS } from '../../data/db';
 import LanguageToggle from '../LanguageToggle';
+import { decodePayload } from '../../utils/cachedFetch';
 
 // ☬ SACRED SIKH INSPIRATIONS & GURU NANAK DEV JI'S TEACHINGS
 const SIKH_DIVINE_QUOTES = [
@@ -56,7 +57,7 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
   const [liveSettings, setLiveSettings] = useState(() => {
     try {
       const c = localStorage.getItem('gnc_site_settings_cache');
-      return c ? JSON.parse(c) : null;
+      return c ? decodePayload(c) : null;
     } catch { return null; }
   });
 
@@ -712,8 +713,8 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
             try {
               const c = localStorage.getItem('gnc_site_settings_cache');
               if (c) {
-                const parsed = JSON.parse(c);
-                if (typeof parsed.enableLanguageToggle === 'boolean') return parsed.enableLanguageToggle;
+                const parsed = decodePayload(c);
+                if (parsed && typeof parsed.enableLanguageToggle === 'boolean') return parsed.enableLanguageToggle;
               }
             } catch {}
             return true;

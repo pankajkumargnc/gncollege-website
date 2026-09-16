@@ -6,6 +6,7 @@ import { db } from "../firebase";
 import { COLORS } from "../styles/colors";
 import { SOCIAL_LINKS } from "../data/db";
 import { useDriveDocs } from "../hooks/useDriveDocs";
+import { decodePayload } from "../utils/cachedFetch";
 
 import HeroSlider from "../components/HeroSlider";
 import { resolveUrl } from "../utils/resolver";
@@ -20,6 +21,11 @@ import AdmissionTimeline from "../components/home/AdmissionTimeline";
 import AnimatedCounter from "../components/AnimatedCounter";
 import PollWidget from "../components/PollWidget";
 import { fireCelebration, fireConfetti, fireSchoolPride } from "../utils/confetti";
+import {
+  Landmark, GraduationCap, Gem, Unlock, ScrollText, Award,
+  CreditCard, Globe, Microscope, BookOpen, UserCheck, BarChart3,
+  Users, Building2, ShieldCheck, FlaskConical, ClipboardList, Bell
+} from "lucide-react";
 
 const N = COLORS.navy || "#0f2347";
 const G = COLORS.gold || "#f4a023";
@@ -52,35 +58,35 @@ const GALLERY_TABS = [
   "NSS Programs",
 ];
 const LINKS_DATA = [
-  { name: "BBMK UNIV.", url: "https://bbmku.ac.in", icon: "🏛️" },
-  { name: "CHANCELLOR PORTAL", url: "https://jharkhanduniversities.nic.in", icon: "🎓" },
-  { name: "E-KALYAN", url: "https://ekalyan.cgg.gov.in", icon: "💎" },
-  { name: "DIGILOCKER", url: "https://www.digilocker.gov.in", icon: "🔓" },
-  { name: "UGC INDIA", url: "https://ugc.ac.in", icon: "📜" },
-  { name: "NAAC", url: "https://naac.gov.in", icon: "🏅" },
-  { name: "NSP PORTAL", url: "https://scholarships.gov.in", icon: "💳" },
-  { name: "SWAYAM", url: "https://swayam.gov.in", icon: "🌐" },
-  { name: "NDL INDIA", url: "https://ndl.gov.in", icon: "🔬" },
-  { name: "INFLIBNET", url: "https://inflibnet.ac.in", icon: "📚" },
-  { name: "NCTE", url: "https://ncte.gov.in", icon: "👨‍🏫" },
-  { name: "AISHE", url: "https://aishe.gov.in", icon: "📊" },
+  { name: "BBMK UNIV.", url: "https://bbmku.ac.in", icon: <Landmark size={20} /> },
+  { name: "CHANCELLOR PORTAL", url: "https://jharkhanduniversities.nic.in", icon: <GraduationCap size={20} /> },
+  { name: "E-KALYAN", url: "https://ekalyan.cgg.gov.in", icon: <Gem size={20} /> },
+  { name: "DIGILOCKER", url: "https://www.digilocker.gov.in", icon: <Unlock size={20} /> },
+  { name: "UGC INDIA", url: "https://ugc.ac.in", icon: <ScrollText size={20} /> },
+  { name: "NAAC", url: "https://naac.gov.in", icon: <Award size={20} /> },
+  { name: "NSP PORTAL", url: "https://scholarships.gov.in", icon: <CreditCard size={20} /> },
+  { name: "SWAYAM", url: "https://swayam.gov.in", icon: <Globe size={20} /> },
+  { name: "NDL INDIA", url: "https://ndl.gov.in", icon: <Microscope size={20} /> },
+  { name: "INFLIBNET", url: "https://inflibnet.ac.in", icon: <BookOpen size={20} /> },
+  { name: "NCTE", url: "https://ncte.gov.in", icon: <UserCheck size={20} /> },
+  { name: "AISHE", url: "https://aishe.gov.in", icon: <BarChart3 size={20} /> },
 ];
 const COUNTERS = [
-  { label: "Students Enrolled", value: "4,000+", icon: "👨‍🎓" },
-  { label: "Successful Alumni", value: "45,000+", icon: "🎓" },
-  { label: "Expert Faculty", value: "50+", icon: "👨‍🏫" },
-  { label: "Years of Legacy", value: "56", icon: "🏛️" },
+  { label: "Students Enrolled", value: "4,000+", icon: <Users size={28} /> },
+  { label: "Successful Alumni", value: "45,000+", icon: <GraduationCap size={28} /> },
+  { label: "Expert Faculty", value: "50+", icon: <UserCheck size={28} /> },
+  { label: "Years of Legacy", value: "56", icon: <Building2 size={28} /> },
 ];
 const ABOUT_FEATS = [
-  { icon: "🛡️", title: "NAAC Accredited", desc: "Grade B Institution" },
-  { icon: "👨‍🏫", title: "Expert Faculty", desc: "Highly Experienced" },
-  { icon: "🔬", title: "Modern Labs", desc: "Tech-enabled Learning" },
-  { icon: "🏅", title: "NSS & NCC", desc: "Character Building" },
+  { icon: <ShieldCheck size={24} style={{ color: "#f4a023" }} />, title: "NAAC Accredited", desc: "Grade B Institution" },
+  { icon: <UserCheck size={24} style={{ color: "#f4a023" }} />, title: "Expert Faculty", desc: "Highly Experienced" },
+  { icon: <FlaskConical size={24} style={{ color: "#f4a023" }} />, title: "Modern Labs", desc: "Tech-enabled Learning" },
+  { icon: <Award size={24} style={{ color: "#f4a023" }} />, title: "NSS & NCC", desc: "Character Building" },
 ];
 
 const QUICK_ACTIONS = [
   {
-    icon: "📋",
+    icon: <ClipboardList size={22} style={{ color: "#f4a023" }} />,
     title: "Exam Results",
     sub: "BBMKU result portal",
     href: "https://bbmkuniv.in/login",
@@ -91,7 +97,7 @@ const QUICK_ACTIONS = [
     external: true,
   },
   {
-    icon: "💳",
+    icon: <CreditCard size={22} style={{ color: "#10b981" }} />,
     title: "Fee Payment",
     sub: "Online fee portal",
     href: "https://cimsstudentnewui.mastersofterp.in/",
@@ -102,7 +108,7 @@ const QUICK_ACTIONS = [
     external: true,
   },
   {
-    icon: "🎓",
+    icon: <GraduationCap size={22} style={{ color: "#3b82f6" }} />,
     title: "Apply for Admission",
     sub: "Chancellor portal",
     href: "https://universities.jharkhand.gov.in/",
@@ -113,7 +119,7 @@ const QUICK_ACTIONS = [
     external: true,
   },
   {
-    icon: "📢",
+    icon: <Bell size={22} style={{ color: "#8b5cf6" }} />,
     title: "Notice Board",
     sub: "Latest updates",
     href: "#notifications",
@@ -219,7 +225,7 @@ const ANIM_CSS = `
 // ✅ ULTRA PRO MAX RESPONSIVE CSS INJECTED HERE
 const CSS = `
   *,*::before,*::after{box-sizing:border-box;}
-  p { text-align: left; text-wrap: pretty; }
+  p { text-align: justify; text-justify: inter-word; text-wrap: pretty; hyphens: auto; -webkit-hyphens: auto; }
   .hp-watermark{position:fixed;inset:0;background-image:url(${import.meta.env.BASE_URL}images/logo.webp);background-repeat:repeat;background-size:320px;opacity:.025;z-index:-1;background-color:#f4f7f9;pointer-events:none;}
 
   .hp-qab{background:#fff;border-bottom:1.5px solid #f1f5f9;box-shadow:0 2px 12px rgba(15,35,71,.06);}
@@ -252,7 +258,7 @@ const CSS = `
   .hp-imgstack:hover .hp-img-main{transform:scale(1.02);}
   .hp-img-accent{position:absolute;bottom:-28px;right:0;background:${N};color:#fff;padding:22px 26px;border-radius:14px;z-index:3;box-shadow:0 10px 30px rgba(0,0,0,.2);animation:float 3s ease-in-out infinite;}
   @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
-  .hp-adesc{color:var(--text-secondary,#334155);line-height:1.8;font-size:15.5px;margin-bottom:28px;text-align:left;text-wrap:pretty;max-width:68ch;}
+  .hp-adesc{color:var(--text-secondary,#334155);line-height:1.8;font-size:15.5px;margin-bottom:28px;text-align:justify;text-justify:inter-word;text-wrap:pretty;max-width:68ch;}
   .hp-afeat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%, 200px),1fr));gap:14px;margin-bottom:32px;}
   .hp-afeat{display:flex;gap:11px;align-items:flex-start;}
   .hp-afeat-t{font-weight:800;font-size:13.5px;color:${N};}
@@ -651,7 +657,7 @@ function YouTubeSection() {
       <div className="hp-yt-inner">
         <SA variant="up">
           <UniHeader
-            label="🎬 Campus Video Highlights"
+            label="Campus Video Highlights"
             title1="Campus Video"
             title2="Highlights"
             sub={`Latest highlights from the official ${channel} YouTube channel`}
@@ -738,7 +744,7 @@ function YouTubeSection() {
                 transition: "transform .2s, box-shadow .2s",
               }}
             >
-              🎬 View All Videos <span className="arr">›</span>
+              View All Videos <span className="arr">›</span>
             </Link>
           </div>
         )}
@@ -755,7 +761,7 @@ const HomePage = ({
   events,
   gallery,
   testimonials,
-  counterData,
+  counterData = COUNTERS,
   updates,
   siteSettings,
 }) => {
@@ -764,7 +770,7 @@ const HomePage = ({
   const [liveSettings, setLiveSettings] = useState(() => {
     try {
       const c = localStorage.getItem('gnc_site_settings_cache');
-      return c ? JSON.parse(c) : null;
+      return c ? decodePayload(c) : null;
     } catch { return null; }
   });
 
@@ -887,7 +893,7 @@ const HomePage = ({
           </SA>
           <SA variant="right" slow>
             <UniHeader
-              label="📚 Established 1970"
+              label="Established 1970"
               title1="About the"
               title2="College"
               sub=""
@@ -947,7 +953,7 @@ const HomePage = ({
         <div className="hp-ev-inner">
           <SA variant="up">
             <UniHeader
-              label="🌟 Campus Life"
+              label="Campus Life"
               title1="Recent Events &"
               title2="Happenings"
               sub="A glimpse into the latest seminars, workshops, and campus activities"
@@ -1010,7 +1016,7 @@ const HomePage = ({
                 boxShadow: `0 4px 18px ${G}55`,
               }}
             >
-              🏆 View All Events <span className="arr">›</span>
+              View All Events <span className="arr">›</span>
             </Link>
           </SA>
         </div>
@@ -1060,7 +1066,7 @@ const HomePage = ({
         <div className="hp-links-inner">
           <SA variant="up">
             <UniHeader
-              label="🔗 Quick Access"
+              label="Quick Access"
               title1="Important External"
               title2="Links"
               sub="Quick access to official education and government portals"
@@ -1097,8 +1103,8 @@ const HomePage = ({
         try {
           const c = localStorage.getItem('gnc_site_settings_cache');
           if (c) {
-            const parsed = JSON.parse(c);
-            if (typeof parsed.enableCampusPoll === 'boolean') return parsed.enableCampusPoll;
+            const parsed = decodePayload(c);
+            if (parsed && typeof parsed.enableCampusPoll === 'boolean') return parsed.enableCampusPoll;
           }
         } catch {}
         return true;
@@ -1107,7 +1113,7 @@ const HomePage = ({
           <div style={{ maxWidth: 860, margin: '0 auto' }}>
             <SA variant="up">
               <UniHeader
-                label="🗳️ Student Voice"
+                label="Student Voice"
                 title1="Live Campus"
                 title2="Poll"
                 sub="Have your say! Vote on upcoming campus activities, workshops, and college initiatives."
@@ -1122,7 +1128,7 @@ const HomePage = ({
         <div className="hp-gal-inner">
           <SA variant="up">
             <UniHeader
-              label="📸 Memories"
+              label="Campus Gallery"
               title1="Photo"
               title2="Gallery"
               sub="Memorable highlights of academic excellence and cultural heritage"

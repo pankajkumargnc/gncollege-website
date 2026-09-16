@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { Vote, Plus, Trash2, Download, RotateCcw, CheckCircle2, BarChart3, Pause, Play } from 'lucide-react';
 import { T, NAVY, GOLD, BG, Toggle, SectionSearch } from '../AdminShared';
 import { exportToExcel } from '../../../utils/excelExport';
 
@@ -93,7 +94,7 @@ export default function PollsTab({ logAct }) {
         createdAt: serverTimestamp()
       });
 
-      toast.success('🗳️ Student Poll created successfully!');
+      toast.success('Student Poll created successfully!');
       if (logAct) logAct('add', `Poll: ${question.trim()}`, 'polls');
 
       // Reset form
@@ -160,7 +161,7 @@ export default function PollsTab({ logAct }) {
     }));
 
     exportToExcel(data, `GNC_Poll_${poll.question.slice(0, 25).replace(/[^a-zA-Z0-9]/g, '_')}`);
-    toast.success('Poll results exported to Excel! 📊');
+    toast.success('Poll results exported to Excel!');
   };
 
   const filteredPolls = polls.filter(p =>
@@ -183,7 +184,7 @@ export default function PollsTab({ logAct }) {
       }}>
         <div>
           <h2 style={{ margin: '0 0 6px 0', fontSize: 22, fontWeight: 900, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span>🗳️</span> Campus Polls & Student Voice
+            <Vote size={24} color={GOLD} /> Campus Polls & Student Voice
           </h2>
           <p style={{ margin: 0, fontSize: 13.5, color: 'rgba(255,255,255,0.75)' }}>
             Conduct live polls for students, collect instant votes, and export verified statistical data.
@@ -197,7 +198,8 @@ export default function PollsTab({ logAct }) {
             padding: '6px 14px',
             borderRadius: 20,
             fontSize: 12,
-            fontWeight: 800
+            fontWeight: 800,
+            fontVariantNumeric: 'tabular-nums'
           }}>
             {polls.filter(p => p.active).length} Active Live
           </span>
@@ -349,7 +351,8 @@ export default function PollsTab({ logAct }) {
               gap: 8
             }}
           >
-            {submitting ? 'Creating Poll...' : '🚀 Publish Student Poll'}
+            <CheckCircle2 size={16} />
+            {submitting ? 'Creating Poll...' : 'Publish Student Poll'}
           </button>
         </form>
 
@@ -375,7 +378,7 @@ export default function PollsTab({ logAct }) {
               textAlign: 'center',
               color: '#94a3b8'
             }}>
-              <div style={{ fontSize: 32, marginBottom: 8 }}>🗳️</div>
+              <Vote size={36} color="#94a3b8" style={{ margin: '0 auto 8px' }} />
               <div style={{ fontWeight: 700 }}>No polls found</div>
               <div style={{ fontSize: 12, marginTop: 4 }}>Create your first poll using the form on the left!</div>
             </div>
@@ -405,9 +408,9 @@ export default function PollsTab({ logAct }) {
                           fontSize: 11,
                           fontWeight: 800
                         }}>
-                          {p.active ? '🟢 ACTIVE LIVE' : '⚪ CLOSED'}
+                          {p.active ? 'ACTIVE LIVE' : 'CLOSED'}
                         </span>
-                        <span style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>
+                        <span style={{ fontSize: 12, color: '#64748b', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
                           Total Votes: {total}
                         </span>
                       </div>
@@ -425,33 +428,35 @@ export default function PollsTab({ logAct }) {
                       <button
                         onClick={() => toggleActive(p)}
                         className="abtn abtn-outline abtn-sm"
-                        style={{ fontSize: 11 }}
+                        style={{ fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 4 }}
                       >
+                        {p.active ? <Pause size={12} /> : <Play size={12} />}
                         {p.active ? 'Pause' : 'Activate'}
                       </button>
                       <button
                         onClick={() => handleExport(p)}
                         className="abtn abtn-outline abtn-sm"
-                        style={{ fontSize: 11, color: '#15803d', borderColor: '#86efac' }}
+                        style={{ fontSize: 11, color: '#15803d', borderColor: '#86efac', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                         title="Export Excel"
                       >
-                        📊 Excel
+                        <Download size={12} /> Excel
                       </button>
                       <button
                         onClick={() => resetVotes(p)}
                         className="abtn abtn-outline abtn-sm"
-                        style={{ fontSize: 11, color: '#f59e0b' }}
+                        style={{ fontSize: 11, color: '#f59e0b', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                         title="Reset Votes"
                       >
-                        🔄 Reset
+                        <RotateCcw size={12} /> Reset
                       </button>
                       <button
                         onClick={() => deletePoll(p)}
                         className="abtn abtn-danger abtn-sm"
                         style={{ fontSize: 11 }}
-                        title="Delete"
+                        title="Delete poll"
+                        aria-label="Delete poll"
                       >
-                        🗑️
+                        <Trash2 size={13} />
                       </button>
                     </div>
                   </div>

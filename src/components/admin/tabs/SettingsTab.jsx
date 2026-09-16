@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { db } from "../../../firebase";
 import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { Settings, Sliders, Globe, Share2, Compass, GraduationCap, Image as ImageIcon, Bot, Shield, Save, Eye, EyeOff, Zap, CheckCircle2, Building2, Wrench, Loader2 } from 'lucide-react';
 import { T, NAVY, GOLD, Toggle, useLocalDraft } from '../AdminShared';
 import { clearCache, encodePayload, decodePayload } from '../../../utils/cachedFetch';
 import MediaPicker from "../../MediaPicker";
@@ -197,14 +198,24 @@ export default function SettingsTab({ logAct }) {
 
   return (
     <div className="fade-up">
-      <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>⚙️ Site Settings</p>
-      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage college information, social links, and system status.</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+        <Settings size={22} color={NAVY} />
+        <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>
+          Site Settings
+        </p>
+      </div>
+      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 500 }}>
+        Manage college information, social links, system status, and public feature switches.
+      </p>
 
       <form onSubmit={saveSite}>
 
         {/* College Info */}
         <div className="settings-group">
-          <div className="settings-group-title">🏫 College Information</div>
+          <div className="settings-group-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Building2 size={16} color={GOLD} />
+            <span>College Information</span>
+          </div>
           {field('name', 'College Name')}
           {field('tagline', 'Tagline')}
           {field('address', 'Address')}
@@ -214,7 +225,10 @@ export default function SettingsTab({ logAct }) {
 
         {/* Social Links */}
         <div className="settings-group">
-          <div className="settings-group-title">🌐 Social Media Links</div>
+          <div className="settings-group-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Globe size={16} color={GOLD} />
+            <span>Social Media Links</span>
+          </div>
           {['facebook', 'twitter', 'youtube', 'linkedin'].map(s => (
             <div key={s} className="settings-row">
               <label className="alabel" style={{ minWidth: 140, margin: 0, textTransform: 'capitalize' }}>{s}</label>
@@ -227,7 +241,10 @@ export default function SettingsTab({ logAct }) {
 
         {/* Advanced */}
         <div className="settings-group">
-          <div className="settings-group-title">🔧 Advanced</div>
+          <div className="settings-group-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Wrench size={16} color={GOLD} />
+            <span>Advanced Configuration</span>
+          </div>
           <div className="settings-row">
             <label className="alabel" style={{ minWidth: 140, margin: 0 }}>Footer Text</label>
             <input className="ainp" value={siteCfg.footerText || ''}
@@ -239,80 +256,83 @@ export default function SettingsTab({ logAct }) {
             <Toggle
               checked={siteCfg.maintenanceMode || false}
               onChange={() => setSiteCfg(d => ({ ...d, maintenanceMode: !d.maintenanceMode }))}
-              label={siteCfg.maintenanceMode ? '🔴 Site is DOWN for maintenance' : '🟢 Site is LIVE'}
+              label={siteCfg.maintenanceMode ? 'Site is DOWN for maintenance' : 'Site is LIVE'}
               color={T.red}
             />
           </div>
         </div>
 
-        {/* 🎛️ Live Website Feature Switches */}
+        {/* Live Website Feature Switches */}
         <div className="settings-group">
-          <div className="settings-group-title">🎛️ Live Website Feature Switches (On / Off)</div>
+          <div className="settings-group-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Sliders size={16} color={GOLD} />
+            <span>Live Website Feature Switches (On / Off)</span>
+          </div>
           <p style={{ fontSize: 12.5, color: T.t3, margin: '6px 20px 14px', lineHeight: 1.6 }}>
             Enable or disable major features across the website in real-time. Turn off any feature when not needed to hide it completely from public visitors.
           </p>
 
           <div className="settings-row">
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>🌐 Bilingual Language Switcher (EN / हिंदी)</div>
+              <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>Bilingual Language Switcher (EN / हिंदी)</div>
               <div style={{ fontSize: 12, color: T.t3 }}>Show or hide English/Hindi translator toggle on the top navigation bar</div>
             </div>
             <Toggle
               checked={siteCfg.enableLanguageToggle !== false}
               onChange={() => handleFeatureToggle('enableLanguageToggle')}
-              label={siteCfg.enableLanguageToggle !== false ? '🟢 Visible' : '⚪ Hidden'}
+              label={siteCfg.enableLanguageToggle !== false ? 'Visible' : 'Hidden'}
               color={T.green}
             />
           </div>
 
           <div className="settings-row">
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>🗳️ Live Campus Poll (Student Voice)</div>
+              <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>Live Campus Poll (Student Voice)</div>
               <div style={{ fontSize: 12, color: T.t3 }}>Show or hide student voting widget on homepage and public pages</div>
             </div>
             <Toggle
               checked={siteCfg.enableCampusPoll !== false}
               onChange={() => handleFeatureToggle('enableCampusPoll')}
-              label={siteCfg.enableCampusPoll !== false ? '🟢 Visible' : '⚪ Hidden'}
+              label={siteCfg.enableCampusPoll !== false ? 'Visible' : 'Hidden'}
               color={T.green}
             />
           </div>
 
           <div className="settings-row">
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>📱 Floating QR Code Share Button</div>
+              <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>Floating QR Code Share Button</div>
               <div style={{ fontSize: 12, color: T.t3 }}>Show or hide floating quick-share and print QR button at screen bottom</div>
             </div>
             <Toggle
               checked={siteCfg.enableFloatingQR !== false}
               onChange={() => handleFeatureToggle('enableFloatingQR')}
-              label={siteCfg.enableFloatingQR !== false ? '🟢 Visible' : '⚪ Hidden'}
+              label={siteCfg.enableFloatingQR !== false ? 'Visible' : 'Hidden'}
               color={T.green}
             />
           </div>
 
           <div className="settings-row">
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>🏛️ 360° Virtual Campus Tour</div>
+              <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>360° Virtual Campus Tour</div>
               <div style={{ fontSize: 12, color: T.t3 }}>Enable panoramic 360° interactive campus tour for prospective students</div>
             </div>
             <Toggle
               checked={siteCfg.enableVirtualTour !== false}
               onChange={() => handleFeatureToggle('enableVirtualTour')}
-              label={siteCfg.enableVirtualTour !== false ? '🟢 Enabled' : '⚪ Disabled'}
+              label={siteCfg.enableVirtualTour !== false ? 'Enabled' : 'Disabled'}
               color={T.green}
             />
           </div>
 
           <div className="settings-row">
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>🎓 Alumni Success Wall</div>
+              <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>Alumni Success Wall</div>
               <div style={{ fontSize: 12, color: T.t3 }}>Enable public masonry alumni wall with industry filters and batch tags</div>
             </div>
             <Toggle
               checked={siteCfg.enableAlumniWall !== false}
               onChange={() => handleFeatureToggle('enableAlumniWall')}
-              label={siteCfg.enableAlumniWall !== false ? '🟢 Enabled' : '⚪ Disabled'}
+              label={siteCfg.enableAlumniWall !== false ? 'Enabled' : 'Disabled'}
               color={T.green}
             />
           </div>
@@ -320,7 +340,10 @@ export default function SettingsTab({ logAct }) {
 
         {/* ImgBB */}
         <div className="settings-group">
-          <div className="settings-group-title">🖼️ ImgBB — Free Image Hosting</div>
+          <div className="settings-group-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <ImageIcon size={16} color={GOLD} />
+            <span>ImgBB — Free Image Hosting</span>
+          </div>
           <div style={{
             background: '#fffbeb', border: '1px solid #fed7aa',
             borderRadius: 10, padding: '10px 14px', margin: '12px 20px',
@@ -345,14 +368,17 @@ export default function SettingsTab({ logAct }) {
               fontSize: 12, color: '#065f46', background: '#d1fae5',
               padding: '6px 12px 6px 20px', display: 'inline-flex', alignItems: 'center', gap: 6
             }}>
-              \u2705 ImgBB key set \u2014 will work on all upload tabs
+              <CheckCircle2 size={13} color="#10b981" /> ImgBB key set — active across all upload tabs
             </div>
           )}
         </div>
 
         {/* Google Gemini AI Chatbot */}
         <div className="settings-group">
-          <div className="settings-group-title">🤖 Google Gemini AI Chatbot Configuration</div>
+          <div className="settings-group-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Bot size={16} color={GOLD} />
+            <span>Google Gemini AI Chatbot Configuration</span>
+          </div>
           <div style={{
             background: '#f0fdf4', border: '1px solid #bbf7d0',
             borderRadius: 10, padding: '12px 16px', margin: '12px 20px',
@@ -362,8 +388,8 @@ export default function SettingsTab({ logAct }) {
             1. Go to Google AI Studio: <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer"
               style={{ color: '#15803d', fontWeight: 800, textDecoration: 'underline' }}>aistudio.google.com</a><br />
             2. Sign in with your Google account and click <strong>"Get API key"</strong> ➜ <strong>"Create API key"</strong>.<br />
-            3. Paste the key below, click <strong>"⚡ Test Connection"</strong>, and <strong>Save</strong>.<br />
-            <em>Yeh key website ke AI Chatbot ko live Gemini AI powers deti hai aur public se safe/hidden rehti hai.</em>
+            3. Paste the key below, click <strong>"Test Connection"</strong>, and <strong>Save</strong>.<br />
+            <em>This key activates live student assistance on the website while remaining secure from public inspection.</em>
           </div>
 
           <div className="settings-row">
@@ -381,10 +407,10 @@ export default function SettingsTab({ logAct }) {
                 type="button"
                 onClick={() => setShowGeminiKey(!showGeminiKey)}
                 className="abtn abtn-outline"
-                style={{ padding: '8px 12px', fontSize: 12 }}
+                style={{ padding: '8px 12px', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4 }}
                 title={showGeminiKey ? 'Hide key' : 'Show key'}
               >
-                {showGeminiKey ? '🙈 Hide' : '👁️ Show'}
+                {showGeminiKey ? <><EyeOff size={13} /> Hide</> : <><Eye size={13} /> Show</>}
               </button>
               <button
                 type="button"
@@ -397,11 +423,15 @@ export default function SettingsTab({ logAct }) {
                   border: '1px solid #f59e0b',
                   padding: '8px 14px',
                   fontSize: 12,
-                  fontWeight: 800,
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
                   opacity: (!siteCfg.geminiApiKey || testingGemini) ? 0.6 : 1
                 }}
               >
-                {testingGemini ? '⏳ Testing...' : '⚡ Test Connection'}
+                {testingGemini ? <Loader2 size={13} className="animate-spin" /> : <Zap size={13} />}
+                {testingGemini ? 'Testing...' : 'Test Connection'}
               </button>
             </div>
           </div>
@@ -426,14 +456,17 @@ export default function SettingsTab({ logAct }) {
               fontSize: 12, color: '#065f46', background: '#d1fae5',
               padding: '6px 12px 6px 20px', display: 'inline-flex', alignItems: 'center', gap: 6
             }}>
-              ✅ Gemini API Key set — All students will receive live AI responses
+              <CheckCircle2 size={13} color="#10b981" /> Gemini API Key configured — AI assistance active
             </div>
           )}
         </div>
 
         {/* Google reCAPTCHA v2 / Bot Protection */}
         <div className="settings-group">
-          <div className="settings-group-title">🛡️ Google reCAPTCHA / Bot Protection</div>
+          <div className="settings-group-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Shield size={16} color={GOLD} />
+            <span>Google reCAPTCHA / Bot Protection</span>
+          </div>
           <div style={{
             background: '#eff6ff', border: '1px solid #bfdbfe',
             borderRadius: 10, padding: '12px 16px', margin: '12px 20px',
@@ -450,7 +483,7 @@ export default function SettingsTab({ logAct }) {
             <Toggle
               checked={siteCfg.enableRecaptcha || false}
               onChange={() => setSiteCfg(d => ({ ...d, enableRecaptcha: !d.enableRecaptcha }))}
-              label={siteCfg.enableRecaptcha ? '🟢 reCAPTCHA Active' : '⚪ Disabled (Honeypot protection active)'}
+              label={siteCfg.enableRecaptcha ? 'reCAPTCHA Active' : 'Disabled (Honeypot protection active)'}
               color={T.green}
             />
           </div>
@@ -466,8 +499,9 @@ export default function SettingsTab({ logAct }) {
           </div>
         </div>
 
-        <button type="submit" className="abtn abtn-gold" disabled={siteLoading}>
-          💾 Save All Settings
+        <button type="submit" className="abtn abtn-gold" disabled={siteLoading} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 28px', fontSize: 14 }}>
+          {siteLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+          <span>Save All Settings</span>
         </button>
       </form>
     </div>

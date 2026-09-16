@@ -6,6 +6,7 @@ import {
   collection, getDocs, writeBatch, onSnapshot, query, orderBy
 } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { Phone, Mail, MapPin, Save, CheckCircle2, FileSpreadsheet, Building, Building2, Plus, Trash2, Loader2, Contact } from 'lucide-react';
 import { T, NAVY, GOLD } from '../AdminShared';
 import { exportToExcel } from '../../../utils/excelExport';
 
@@ -64,7 +65,7 @@ export default function ContactTab() {
     try {
       await setDoc(doc(db, 'settings', 'contact'), { ...campus, updatedAt: serverTimestamp() }, { merge: true });
       setCampusSaved(true);
-      toast.success('✅ Campus details saved!');
+      toast.success('Campus details saved successfully');
       if (campusTimerRef.current) clearTimeout(campusTimerRef.current);
       campusTimerRef.current = setTimeout(() => setCampusSaved(false), 2500);
     } catch (e) { toast.error('Save failed: ' + e.message); }
@@ -82,7 +83,7 @@ export default function ContactTab() {
           ? doc(db, 'contactDirectory', entry.id)
           : doc(collection(db, 'contactDirectory'));
         batch.set(ref, {
-          icon:  entry.icon  || '📞',
+          icon:  entry.icon  || 'Phone',
           title: entry.title || '',
           name:  entry.name  || '',
           phone: entry.phone || '',
@@ -92,7 +93,7 @@ export default function ContactTab() {
       });
       await batch.commit();
       setDirSaved(true);
-      toast.success('✅ Directory saved!');
+      toast.success('Directory saved successfully');
       if (dirTimerRef.current) clearTimeout(dirTimerRef.current);
       dirTimerRef.current = setTimeout(() => setDirSaved(false), 2500);
     } catch (e) { toast.error('Directory save failed: ' + e.message); }
@@ -102,12 +103,15 @@ export default function ContactTab() {
   const setC = (campus_key, field, val) =>
     setCampus(p => ({ ...p, [campus_key]: { ...p[campus_key], [field]: val } }));
 
-  const addDir  = () => setDirectory(p => [...p, { icon: '📞', title: '', name: '', phone: '', order: p.length }]);
+  const addDir  = () => setDirectory(p => [...p, { icon: 'Phone', title: '', name: '', phone: '', order: p.length }]);
   const delDir  = (i) => setDirectory(p => p.filter((_, j) => j !== i));
   const updDir  = (i, k, v) => setDirectory(p => p.map((e, j) => j === i ? { ...e, [k]: v } : e));
 
-  const SH = ({ txt }) => (
-    <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY, margin: '24px 0 12px', paddingBottom: 8, borderBottom: '2px solid #f1f5f9' }}>{txt}</div>
+  const SH = ({ icon: Icon, txt }) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 13.5, color: NAVY, margin: '20px 0 12px', paddingBottom: 8, borderBottom: '2px solid #f1f5f9' }}>
+      {Icon && <Icon size={16} color={GOLD} />}
+      <span>{txt}</span>
+    </div>
   );
 
   const SaveBar = ({ saving, saved, onSave, label }) => (
@@ -116,65 +120,79 @@ export default function ContactTab() {
         onClick={onSave}
         disabled={saving}
         style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
           background: saving ? '#94a3b8' : `linear-gradient(135deg,${NAVY},#1a3a7c)`,
-          color: '#fff', border: 'none', padding: '11px 28px', borderRadius: 10,
-          cursor: saving ? 'not-allowed' : 'pointer', fontWeight: 800, fontSize: 13.5,
+          color: '#fff', border: 'none', padding: '10px 24px', borderRadius: 9,
+          cursor: saving ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: 13.5,
           fontFamily: 'inherit', boxShadow: saving ? 'none' : `0 4px 14px ${NAVY}28`,
         }}>
-        {saving ? '⏳ Saving...' : label}
+        {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+        {saving ? 'Saving...' : label}
       </button>
       {saved && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#d1fae5', color: '#065f46', padding: '8px 16px', borderRadius: 9, fontSize: 13, fontWeight: 700 }}>
-          ✅ Saved! Contact page updated automatically.
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#d1fae5', color: '#065f46', padding: '8px 16px', borderRadius: 9, fontSize: 13, fontWeight: 700 }}>
+          <CheckCircle2 size={15} color="#10b981" /> Saved! Contact page updated automatically.
         </div>
       )}
     </div>
   );
 
   const campusCards = [
-    { key: 'bhuda',    label: '🏛️ Bhuda Campus',    sub: 'Main campus contact details' },
-    { key: 'bankMore', label: '🏢 Bank More Campus', sub: 'Branch campus contact details' },
+    { key: 'bhuda',    icon: Building,  label: 'Bhuda Campus',    sub: 'Main campus contact details' },
+    { key: 'bankMore', icon: Building2, label: 'Bank More Campus', sub: 'Branch campus contact details' },
   ];
 
   return (
     <div className="fade-up" style={{ fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif", maxWidth: 1000 }}>
-      <p className="asec">📞 Contact Settings</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+        <Contact size={20} color={NAVY} />
+        <p className="asec" style={{ margin: 0 }}>Contact Settings</p>
+      </div>
       <p className="asub">Campus addresses and contact directory — will automatically update on the Contact page</p>
 
       {/* ── Campus Contact ── */}
       <div style={{ background: '#fff', border: '1.5px solid #f1f5f9', borderRadius: 14, padding: 20, marginBottom: 16 }}>
-        <SH txt="🏫 Campus Contact Details" />
+        <SH icon={Building} txt="Campus Contact Details" />
         <p style={{ fontSize: 12.5, color: '#94a3b8', margin: '0 0 18px' }}>
           Firebase path: <code style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: 4, fontSize: 11.5 }}>settings/contact</code>
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: 16 }}>
-          {campusCards.map(({ key, label, sub }) => (
+          {campusCards.map(({ key, icon: CIcon, label, sub }) => (
             <div key={key} style={{ background: '#f8fafc', border: '1.5px solid #f1f5f9', borderRadius: 12, padding: '18px 18px 14px' }}>
-              <div style={{ fontWeight: 800, color: NAVY, fontSize: 14, marginBottom: 3 }}>{label}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 800, color: NAVY, fontSize: 14, marginBottom: 3 }}>
+                <CIcon size={16} color={NAVY} />
+                <span>{label}</span>
+              </div>
               <div style={{ fontSize: 11.5, color: '#94a3b8', marginBottom: 16 }}>{sub}</div>
               <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b', marginBottom: 5 }}>📞 Phone / WhatsApp</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11.5, fontWeight: 700, color: '#64748b', marginBottom: 5 }}>
+                  <Phone size={12} /> Phone / WhatsApp
+                </div>
                 <input style={INP} value={campus[key].phone} onChange={e => setC(key, 'phone', e.target.value)} placeholder="+91 XXXXX XXXXX" />
               </div>
               <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b', marginBottom: 5 }}>✉ Email</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11.5, fontWeight: 700, color: '#64748b', marginBottom: 5 }}>
+                  <Mail size={12} /> Email
+                </div>
                 <input style={INP} type="email" value={campus[key].email} onChange={e => setC(key, 'email', e.target.value)} placeholder="contact@gnc.ac.in" />
               </div>
               <div>
-                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b', marginBottom: 5 }}>📍 Full Address</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11.5, fontWeight: 700, color: '#64748b', marginBottom: 5 }}>
+                  <MapPin size={12} /> Full Address
+                </div>
                 <textarea style={TEA} value={campus[key].address} onChange={e => setC(key, 'address', e.target.value)} placeholder="Building name, Street, City — PIN" rows={3} />
               </div>
             </div>
           ))}
         </div>
-        <SaveBar saving={campusSaving} saved={campusSaved} onSave={saveCampus} label="💾 Save Campus Details" />
+        <SaveBar saving={campusSaving} saved={campusSaved} onSave={saveCampus} label="Save Campus Details" />
       </div>
 
       {/* ── Contact Directory ── */}
       <div style={{ background: '#fff', border: '1.5px solid #f1f5f9', borderRadius: 14, padding: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-          <SH txt="📋 Contact Directory (Officials list)" />
+          <SH icon={Phone} txt="Contact Directory (Officials List)" />
           <button
             type="button"
             onClick={() => exportToExcel(
@@ -193,7 +211,7 @@ export default function ContactTab() {
               color: NAVY, cursor: 'pointer', transition: 'all 0.2s'
             }}
           >
-            📊 Export Directory Excel
+            <FileSpreadsheet size={14} /> Export Directory Excel
           </button>
         </div>
         <p style={{ fontSize: 12.5, color: '#94a3b8', margin: '0 0 16px' }}>
@@ -205,7 +223,7 @@ export default function ContactTab() {
           <div key={entry.id || i} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 1fr 1fr auto', gap: 10, alignItems: 'center', marginBottom: 10 }}>
             <div>
               {i === 0 && <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 5 }}>Icon</div>}
-              <input style={{ ...INP, textAlign: 'center', fontSize: 18 }} value={entry.icon} onChange={e => updDir(i, 'icon', e.target.value)} placeholder="📞" />
+              <input style={{ ...INP, textAlign: 'center', fontSize: 13 }} value={entry.icon} onChange={e => updDir(i, 'icon', e.target.value)} placeholder="Phone" />
             </div>
             <div>
               {i === 0 && <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 5 }}>Title / Role</div>}
@@ -223,9 +241,14 @@ export default function ContactTab() {
               onClick={() => delDir(i)}
               style={{
                 background: '#fee2e2', border: 'none', color: '#ef4444',
-                width: 30, height: 30, borderRadius: 8, cursor: 'pointer',
-                fontSize: 13, fontWeight: 800, marginTop: i === 0 ? 22 : 0, flexShrink: 0,
-              }}>✕</button>
+                width: 32, height: 32, borderRadius: 8, cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                marginTop: i === 0 ? 22 : 0, flexShrink: 0,
+              }}
+              title="Remove entry"
+            >
+              <Trash2 size={14} />
+            </button>
           </div>
         ))}
 
@@ -235,13 +258,14 @@ export default function ContactTab() {
             width: '100%', padding: '9px 16px', border: '1.5px dashed #cbd5e1',
             background: 'transparent', color: '#64748b', borderRadius: 9, cursor: 'pointer',
             fontFamily: 'inherit', fontSize: 12.5, fontWeight: 600, marginTop: 8, transition: 'all .16s',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = GOLD; e.currentTarget.style.color = NAVY; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.color = '#64748b'; }}>
-          + Add Directory Entry
+          <Plus size={15} /> Add Directory Entry
         </button>
 
-        <SaveBar saving={dirSaving} saved={dirSaved} onSave={saveDirectory} label="💾 Save Directory" />
+        <SaveBar saving={dirSaving} saved={dirSaved} onSave={saveDirectory} label="Save Directory" />
       </div>
     </div>
   );

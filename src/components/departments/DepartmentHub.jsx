@@ -3,6 +3,16 @@ import { Link } from 'react-router-dom';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { NAVY, Fade, Spin } from './DepartmentUI';
+import { Laptop, Briefcase, Landmark, BookOpen, Globe, GraduationCap, Building2, ArrowRight } from 'lucide-react';
+
+const renderDeptIcon = (slug, color) => {
+  if (slug === 'bca') return <Laptop size={28} color={color} />;
+  if (slug === 'bba') return <Briefcase size={28} color={color} />;
+  if (slug === 'commerce') return <Landmark size={28} color={color} />;
+  if (slug === 'humanities') return <BookOpen size={28} color={color} />;
+  if (slug === 'social-science') return <Globe size={28} color={color} />;
+  return <GraduationCap size={28} color={color} />;
+};
 
 export const DepartmentHub = ({ DEPT_META }) => {
   const [cards, setCards] = useState([]);
@@ -67,14 +77,14 @@ export const DepartmentHub = ({ DEPT_META }) => {
         
         <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
           <Fade>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'linear-gradient(135deg,#0ea5e9, #2563eb)', color: '#fff', fontSize: 12, fontWeight: 800, padding: '6px 18px', borderRadius: 100, marginBottom: 24, boxShadow: '0 8px 16px rgba(14,165,233,0.2)', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              <span>🏢</span> Academic Excellence
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg,#0ea5e9, #2563eb)', color: '#fff', fontSize: 12, fontWeight: 800, padding: '6px 18px', borderRadius: 100, marginBottom: 24, boxShadow: '0 8px 16px rgba(14,165,233,0.2)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+              <Building2 size={15} /> Academic Excellence
             </div>
             <h1 style={{ fontSize: 'clamp(32px,6vw,58px)', fontWeight: 900, color: NAVY, lineHeight: 1, letterSpacing: '-2px', marginBottom: 20 }}>
               Future-Ready <span style={{ background: 'linear-gradient(135deg,#0ea5e9, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Departments</span>
             </h1>
-            <p style={{ color: '#64748b', fontSize: 'clamp(16px,2vw,18px)', maxWidth: 640, margin: '0 auto', lineHeight: 1.8 }}>
-              GNC College ke specialized academic sections — jahan innovation aur traditional learning milti hai perfect career growth ke liye.
+            <p style={{ color: '#64748b', fontSize: 'clamp(16px,2vw,18px)', maxWidth: 640, margin: '0 auto', lineHeight: 1.8, textWrap: 'pretty' }}>
+              Specialized academic departments at Guru Nanak College — where rigorous curriculum, distinguished faculty, and career outcomes empower your future.
             </p>
           </Fade>
         </div>
@@ -93,16 +103,16 @@ export const DepartmentHub = ({ DEPT_META }) => {
                     <div style={{ height: 6, background: `linear-gradient(90deg, ${dept.color}, ${dept.color}88)` }} />
                     <div style={{ padding: '32px 28px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                       <div className="hub-icon-box" style={{ background: `${dept.color}14`, border: `1px solid ${dept.color}22`, marginBottom: 24, color: dept.color }}>
-                        {dept.icon}
+                        {renderDeptIcon(dept.slug, dept.color)}
                       </div>
                       <div style={{ fontSize: 13, fontWeight: 900, color: dept.color, letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 8 }}>{dept.short}</div>
                       <h3 style={{ fontSize: 22, fontWeight: 900, color: NAVY, marginBottom: 12, lineHeight: 1.25, letterSpacing: '-0.3px' }}>{dept.fullName || dept.name || dept.full}</h3>
-                      <p style={{ fontSize: 14.5, color: '#64748b', lineHeight: 1.65, marginBottom: 28, flex: 1, textAlign: 'justify' }}>{dept.tagline || 'Excellence in education and professional growth.'}</p>
+                      <p style={{ fontSize: 14.5, color: '#64748b', lineHeight: 1.65, marginBottom: 28, flex: 1, textAlign: 'justify', textJustify: 'inter-word', textWrap: 'pretty' }}>{dept.tagline || 'Excellence in education and professional growth.'}</p>
                       
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 16, borderTop: '1px solid rgba(241,245,249,0.6)' }}>
                         <span style={{ fontSize: 12.5, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1 }}>Explore Stream</span>
-                        <div className="hub-btn" style={{ background: `${dept.color}10`, color: dept.color, border: `1.5px solid ${dept.color}28`, margin: 0, padding: '8px 16px' }}>
-                          View <span>→</span>
+                        <div className="hub-btn" style={{ background: `${dept.color}10`, color: dept.color, border: `1.5px solid ${dept.color}28`, margin: 0, padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          View <ArrowRight size={14} />
                         </div>
                       </div>
                     </div>

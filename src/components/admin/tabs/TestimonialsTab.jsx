@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { db } from "../../../firebase";
 import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { MessageSquareQuote, Plus, Edit2, Trash2, CheckCircle2, X } from 'lucide-react';
 import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, useLocalDraft, Toggle, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
 import { clearCache } from '../../../utils/cachedFetch';
@@ -34,7 +35,10 @@ export default function TestimonialsTab({ testimonials, logAct, getSectionLog })
 
       if (editItem) {
         await updateDoc(doc(db, 'testimonials', editItem.id), payload);
-        toast.success(editItem ? 'Testimonial updated!' : '💬 Testimonial added!');
+        toast.success('Testimonial updated!');
+      } else {
+        await addDoc(collection(db, 'testimonials'), { ...payload, createdAt: serverTimestamp() });
+        toast.success('Testimonial added!');
       }
       clearCache('testimonials');
       logAct(editItem ? 'update' : 'add', `Testimonial: ${formData.name}`, 'testimonials');
@@ -59,16 +63,22 @@ export default function TestimonialsTab({ testimonials, logAct, getSectionLog })
 
   return (
     <div className="fade-up">
-      <p className="asec">💬 Student & Alumni Testimonials</p>
-      <p className="asub">Home page par aane wale reviews manage karein</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+        <MessageSquareQuote size={24} color={GOLD} />
+        <h2 className="asec" style={{ margin: 0 }}>Student & Alumni Testimonials</h2>
+      </div>
+      <p className="asub">Manage verified reviews and success stories displayed on the institutional website</p>
 
       <div className="card-gold">
-        <div className="actitle">{editItem ? '✏️ Edit Testimonial' : '➕ Add Testimonial'}</div>
+        <div className="actitle" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {editItem ? <Edit2 size={16} color={GOLD} /> : <Plus size={16} color={GOLD} />}
+          {editItem ? 'Edit Testimonial' : 'Add New Testimonial'}
+        </div>
         <form onSubmit={save}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
             <div>
               <label className="alabel">Full Name *</label>
-              <input className="ainp" value={formData.name || ''} onChange={e => setFormData(d => ({ ...d, name: e.target.value }))} required />
+              <input className="ainp" value={formData.name || ''} onChange={e => setFormData(d => ({ ...d, name: e.target.value }))} required placeholder="Student or Alumni name" />
             </div>
             <div>
               <label className="alabel">Type</label>
@@ -78,13 +88,13 @@ export default function TestimonialsTab({ testimonials, logAct, getSectionLog })
             </div>
             <div>
               <label className="alabel">Batch / Year</label>
-              <input className="ainp" value={formData.year || ''} onChange={e => setFormData(d => ({ ...d, year: e.target.value }))} placeholder="Batch 2020-23" />
+              <input className="ainp" value={formData.year || ''} onChange={e => setFormData(d => ({ ...d, year: e.target.value }))} placeholder="Batch 2020–23" />
             </div>
           </div>
           
           <div style={{ marginBottom: 14 }}>
             <label className="alabel">Testimonial Content *</label>
-            <textarea className="ainp" style={{ height: 100, resize: 'vertical' }} value={formData.content || ''} onChange={e => setFormData(d => ({ ...d, content: e.target.value }))} required />
+            <textarea className="ainp" style={{ height: 100, resize: 'vertical' }} value={formData.content || ''} onChange={e => setFormData(d => ({ ...d, content: e.target.value }))} required placeholder="Share their feedback and experiences..." />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 20, alignItems: 'end', marginBottom: 20 }}>
@@ -101,16 +111,26 @@ export default function TestimonialsTab({ testimonials, logAct, getSectionLog })
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
-            <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editItem ? 'Update' : 'Save Testimonial'}</button>
-            {editItem && <button type="button" className="abtn abtn-outline" onClick={() => { setEditItem(null); clearDraft(); }}>Cancel</button>}
+            <button type="submit" className="abtn abtn-gold" disabled={loading} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <CheckCircle2 size={16} />
+              {loading ? 'Saving…' : editItem ? 'Update Testimonial' : 'Save Testimonial'}
+            </button>
+            {editItem && (
+              <button type="button" className="abtn abtn-outline" onClick={() => { setEditItem(null); clearDraft(); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <X size={15} /> Cancel
+              </button>
+            )}
           </div>
         </form>
       </div>
 
-      <SectionSearch value={search} onChange={setSearch} placeholder="Search testimonials..." />
+      <SectionSearch value={search} onChange={setSearch} placeholder="Search testimonials by name or content..." />
 
       <div className="card">
-        <div className="actitle">All Testimonials ({filtered.length})</div>
+        <div className="actitle" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span>All Testimonials</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: T.t3, fontVariantNumeric: 'tabular-nums' }}>{filtered.length} entries</span>
+        </div>
         {filtered.map(t => (
           <div key={t.id} className="arow">
             <img 
@@ -125,8 +145,12 @@ export default function TestimonialsTab({ testimonials, logAct, getSectionLog })
               <div style={{ fontSize: 12, color: T.t3, marginTop: 2, display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{t.content}</div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="abtn abtn-sm abtn-outline" onClick={() => { setEditItem(t); setFormData(t); window.scrollTo({top:0, behavior:'smooth'}); }} aria-label="Edit testimonial">✏️</button>
-              <button className="abtn abtn-sm abtn-red" onClick={() => del(t.id, t.name)} aria-label="Delete testimonial">🗑️</button>
+              <button className="abtn abtn-sm abtn-outline" onClick={() => { setEditItem(t); setFormData(t); window.scrollTo({top:0, behavior:'smooth'}); }} aria-label="Edit testimonial">
+                <Edit2 size={13} />
+              </button>
+              <button className="abtn abtn-sm abtn-red" onClick={() => del(t.id, t.name)} aria-label="Delete testimonial">
+                <Trash2 size={13} />
+              </button>
             </div>
           </div>
         ))}

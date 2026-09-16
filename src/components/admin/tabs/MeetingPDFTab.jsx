@@ -11,6 +11,7 @@ import {
   doc, serverTimestamp, onSnapshot, query, orderBy,
 } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { FileText, Calendar, ExternalLink, Edit2, Trash2, Plus, Info, UploadCloud } from 'lucide-react';
 import { T, NAVY, GOLD, WHITE } from '../AdminShared';
 
 export default function MeetingPDFTab({
@@ -104,12 +105,18 @@ export default function MeetingPDFTab({
 
   return (
     <div className="fade-up">
-      <p className="asec" ref={topRef}>{icon} {title}</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+        {icon && <span style={{ color: accentColor || GOLD, display: 'inline-flex' }}>{icon}</span>}
+        <h2 className="asec" ref={topRef} style={{ margin: 0 }}>{title}</h2>
+      </div>
       <p className="asub">{subtitle}</p>
 
       {/* ── Form ── */}
       <div className="card-gold">
-        <div className="actitle">{editItem ? '✏️ Edit Meeting' : '➕ Add Meeting PDF'}</div>
+        <div className="actitle" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {editItem ? <Edit2 size={16} /> : <Plus size={16} />}
+          <span>{editItem ? 'Edit Meeting Record' : 'Add Meeting PDF'}</span>
+        </div>
         <form onSubmit={save}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
             <div style={{ gridColumn: '1/-1' }}>
@@ -146,8 +153,8 @@ export default function MeetingPDFTab({
                   href={form.pdfUrl}
                   target="_blank"
                   rel="noreferrer"
-                  style={{ fontSize: 12, color: accentColor || GOLD, marginTop: 4, display: 'inline-block', fontWeight: 700 }}>
-                  🔗 PDF Preview Test
+                  style={{ fontSize: 12, color: accentColor || GOLD, marginTop: 4, display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 700 }}>
+                  <ExternalLink size={12} /> PDF Preview Test
                 </a>
               )}
             </div>
@@ -164,7 +171,7 @@ export default function MeetingPDFTab({
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
             <button type="submit" className="abtn abtn-gold" disabled={loading}>
-              {loading ? '⏳ Saving…' : editItem ? '💾 Update Meeting' : '🚀 Add Meeting'}
+              {loading ? 'Saving…' : editItem ? 'Update Meeting' : 'Add Meeting'}
             </button>
             {editItem && (
               <button type="button" className="abtn abtn-outline" onClick={resetForm}>Cancel</button>
@@ -185,15 +192,19 @@ export default function MeetingPDFTab({
       </div>
 
       {/* ── Info Banner ── */}
-      <div style={{ background: '#fffbeb', border: '1.5px solid #f59e0b', borderRadius: 12, padding: '12px 18px', marginBottom: 20, fontSize: 13, color: '#92400e' }}>
-        💡 <strong>How to use:</strong> Upload the meeting PDF to Google Drive → Share → Anyone with link → Paste the link here.
-        These meetings will automatically show on the <code style={{ background: '#fef3c7', padding: '1px 4px', borderRadius: 4 }}>{publicPath}</code> page.
+      <div style={{ background: '#fffbeb', border: '1.5px solid #f59e0b', borderRadius: 12, padding: '12px 18px', marginBottom: 20, fontSize: 13, color: '#92400e', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+        <Info size={18} style={{ flexShrink: 0, marginTop: 2, color: '#d97706' }} />
+        <div>
+          <strong>How to use:</strong> Upload the meeting PDF to Google Drive → Share → Anyone with link → Paste the link here.
+          These meetings will automatically show on the <code style={{ background: '#fef3c7', padding: '1px 4px', borderRadius: 4 }}>{publicPath}</code> page.
+        </div>
       </div>
 
       {/* ── List ── */}
       <div className="card">
-        <div className="actitle">
-          {icon} All Meetings ({filtered.length})
+        <div className="actitle" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {icon && <span style={{ color: accentColor || GOLD }}>{icon}</span>}
+          <span>All Meetings ({filtered.length})</span>
           {filtered.length !== meetings.length && (
             <span style={{ fontSize: 11, color: '#94a3b8', marginLeft: 8 }}>filtered from {meetings.length}</span>
           )}
@@ -201,7 +212,9 @@ export default function MeetingPDFTab({
 
         {filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>{icon}</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+              <FileText size={42} strokeWidth={1.5} color="#94a3b8" />
+            </div>
             <div style={{ fontWeight: 700, marginBottom: 8 }}>No meetings found</div>
             <div style={{ fontSize: 13 }}>{search ? 'Clear search' : 'Add your first meeting using the form above'}</div>
           </div>
@@ -215,13 +228,13 @@ export default function MeetingPDFTab({
                   borderRadius: 10, padding: '8px 12px', textAlign: 'center',
                   flexShrink: 0, minWidth: 60,
                 }}>
-                  <div style={{ fontSize: 18, fontWeight: 900, lineHeight: 1 }}>
+                  <div style={{ fontSize: 18, fontWeight: 900, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
                     {m.date ? new Date(m.date).getDate().toString().padStart(2, '0') : '--'}
                   </div>
                   <div style={{ fontSize: 10, fontWeight: 700, marginTop: 3, opacity: 0.85 }}>
                     {m.date ? new Date(m.date).toLocaleString('en-IN', { month: 'short' }).toUpperCase() : '--'}
                   </div>
-                  <div style={{ fontSize: 9, opacity: 0.7 }}>
+                  <div style={{ fontSize: 9, opacity: 0.7, fontVariantNumeric: 'tabular-nums' }}>
                     {m.date ? new Date(m.date).getFullYear() : ''}
                   </div>
                 </div>
@@ -238,10 +251,10 @@ export default function MeetingPDFTab({
                       target="_blank"
                       rel="noreferrer"
                       style={{ fontSize: 12, color: accentColor || GOLD, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                      📄 View PDF
+                      <FileText size={13} /> View PDF
                     </a>
                     <span style={{ fontSize: 11, color: '#cbd5e1' }}>•</span>
-                    <span style={{ fontSize: 11, color: '#94a3b8' }}>
+                    <span style={{ fontSize: 11, color: '#94a3b8', fontVariantNumeric: 'tabular-nums' }}>
                       Added: {m.createdAt?.toDate?.()?.toLocaleDateString('en-IN') || 'N/A'}
                     </span>
                   </div>
@@ -249,8 +262,12 @@ export default function MeetingPDFTab({
 
                 {/* Actions */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
-                  <button className="abtn abtn-outline abtn-sm" onClick={() => startEdit(m)}>✏️ Edit</button>
-                  <button className="abtn abtn-red abtn-sm" onClick={() => remove(m.id, m.title)}>🗑️</button>
+                  <button className="abtn abtn-outline abtn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }} onClick={() => startEdit(m)}>
+                    <Edit2 size={12} /> Edit
+                  </button>
+                  <button className="abtn abtn-red abtn-sm" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => remove(m.id, m.title)} aria-label="Delete meeting">
+                    <Trash2 size={13} />
+                  </button>
                 </div>
               </div>
             ))}

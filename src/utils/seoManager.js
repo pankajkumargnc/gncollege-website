@@ -510,8 +510,8 @@ export function updateSEO(pathname, custom = {}) {
   setMeta('twitter:description', description);
   setMeta('twitter:image', image);
 
-  // Dynamic BreadcrumbList JSON-LD Schema
-  setJsonLd(pathname);
+  // Dynamic Multi-Entity JSON-LD Schema (@graph: Org, Breadcrumbs, Course/Event/Dept)
+  setJsonLd(pathname, title, description);
 }
 
 function setMeta(name, content, attr = 'name') {
@@ -524,32 +524,149 @@ function setMeta(name, content, attr = 'name') {
   el.setAttribute('content', content);
 }
 
-function setJsonLd(pathname) {
+function setJsonLd(pathname, pageTitle = SITE_NAME, pageDesc = DEFAULT_DESC) {
   const parts = pathname.split('/').filter(Boolean);
-  if (parts.length === 0) return;
 
-  const itemListElement = parts.map((part, index) => {
-    const urlPath = '/' + parts.slice(0, index + 1).join('/');
-    return {
+  // 1. Core Educational Organization Schema
+  const collegeSchema = {
+    "@type": "CollegeOrUniversity",
+    "@id": `${BASE_URL}/#organization`,
+    "name": "Guru Nanak College, Dhanbad",
+    "alternateName": ["GNC Dhanbad", "Guru Nanak Degree College"],
+    "url": BASE_URL,
+    "logo": `${BASE_URL}/images/gnc-logo.png`,
+    "image": DEFAULT_IMAGE,
+    "description": DEFAULT_DESC,
+    "foundingDate": "1970",
+    "naacAccreditation": "Accredited Grade B",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Post Box - 93, Guru Gobind Singh Marg, Bhuda",
+      "addressLocality": "Dhanbad",
+      "addressRegion": "Jharkhand",
+      "postalCode": "826001",
+      "addressCountry": "IN"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": "23.7957",
+      "longitude": "86.4304"
+    },
+    "telephone": "+91-326-2302685",
+    "email": "principal@gncdhanbad.edu.in",
+    "parentOrganization": {
+      "@type": "CollegeOrUniversity",
+      "name": "Binod Bihari Mahto Koyalanchal University (BBMKU)"
+    }
+  };
+
+  // 2. BreadcrumbList Schema
+  const itemListElement = [
+    {
       "@type": "ListItem",
-      "position": index + 2, // 1 is reserved for Home
+      "position": 1,
+      "name": "Home",
+      "item": `${BASE_URL}/#/`
+    }
+  ];
+
+  parts.forEach((part, index) => {
+    const urlPath = '/' + parts.slice(0, index + 1).join('/');
+    itemListElement.push({
+      "@type": "ListItem",
+      "position": index + 2,
       "name": part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' '),
       "item": `${BASE_URL}/#${urlPath}`
-    };
+    });
   });
 
-  const schema = {
-    "@context": "https://schema.org",
+  const breadcrumbSchema = {
     "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": `${BASE_URL}/#/`
+    "@id": `${BASE_URL}/#${pathname}-breadcrumbs`,
+    "itemListElement": itemListElement
+  };
+
+  const graph = [collegeSchema, breadcrumbSchema];
+
+  // 3. Deep Course Schema (for Academics / Course Routes)
+  if (pathname.includes('/academics') || pathname.includes('/course') || pathname.includes('/program')) {
+    const isBCA = pathname.includes('bca') || pathname.includes('computer');
+    const isBBA = pathname.includes('bba') || pathname.includes('management');
+    const isBCom = pathname.includes('bcom') || pathname.includes('commerce');
+
+    let courseName = pageTitle.split('|')[0].trim();
+    let courseCode = isBCA ? 'BCA-FYUGP' : isBBA ? 'BBA-FYUGP' : isBCom ? 'BCOM-FYUGP' : 'UG-FYUGP';
+
+    graph.push({
+      "@type": "Course",
+      "@id": `${BASE_URL}/#${pathname}-course`,
+      "name": courseName,
+      "description": pageDesc,
+      "courseCode": courseCode,
+      "educationalCredentialAwarded": "Bachelor's Degree (NEP 2020 FYUGP)",
+      "timeToComplete": "P4Y", // 4 Years under NEP FYUGP
+      "provider": {
+        "@id": `${BASE_URL}/#organization`
       },
-      ...itemListElement
-    ]
+      "inLanguage": "en-IN",
+      "hasCourseInstance": {
+        "@type": "CourseInstance",
+        "courseMode": "Onsite",
+        "location": "Guru Nanak College Campus, Dhanbad"
+      }
+    });
+  }
+
+  // 4. Department Schema (for /departments/* Routes)
+  if (pathname.includes('/departments') && parts.length >= 2) {
+    const deptSlug = parts[parts.length - 1];
+    const deptName = deptSlug.charAt(0).toUpperCase() + deptSlug.slice(1).replace(/-/g, ' ');
+
+    graph.push({
+      "@type": "EducationalOrganization",
+      "@id": `${BASE_URL}/#${pathname}-department`,
+      "name": `Department of ${deptName}`,
+      "department": {
+        "@id": `${BASE_URL}/#organization`
+      },
+      "parentOrganization": {
+        "@id": `${BASE_URL}/#organization`
+      },
+      "description": pageDesc,
+      "url": `${BASE_URL}/#${pathname}`
+    });
+  }
+
+  // 5. Event Schema (for Notice, Announcements, Campus-Life, Events)
+  if (pathname.includes('/events') || pathname.includes('/campus-life') || pathname.includes('/notices')) {
+    graph.push({
+      "@type": "EducationEvent",
+      "@id": `${BASE_URL}/#${pathname}-event`,
+      "name": pageTitle.split('|')[0].trim(),
+      "description": pageDesc,
+      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+      "eventStatus": "https://schema.org/EventScheduled",
+      "location": {
+        "@type": "Place",
+        "name": "Guru Nanak College Auditorium & Campus",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Guru Gobind Singh Marg, Bhuda",
+          "addressLocality": "Dhanbad",
+          "addressRegion": "Jharkhand",
+          "postalCode": "826001",
+          "addressCountry": "IN"
+        }
+      },
+      "organizer": {
+        "@id": `${BASE_URL}/#organization`
+      }
+    });
+  }
+
+  const finalSchema = {
+    "@context": "https://schema.org",
+    "@graph": graph
   };
 
   let el = document.getElementById('gnc-json-ld');
@@ -559,7 +676,7 @@ function setJsonLd(pathname) {
     el.id = 'gnc-json-ld';
     document.head.appendChild(el);
   }
-  el.textContent = JSON.stringify(schema);
+  el.textContent = JSON.stringify(finalSchema, null, 2);
 }
 
 export default updateSEO;

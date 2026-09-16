@@ -5,6 +5,10 @@ import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 const PDFModal = lazy(() => import('../components/PDFModal')); // ✅ PDF Modal Import
 import usePageContent from '../hooks/usePageContent';
+import {
+  TrendingUp, Target, BarChart3, Wrench, FileText, GraduationCap,
+  BookOpen, FolderOpen, Calendar, Sun, Rocket, Banknote, Download, ArrowUpRight
+} from 'lucide-react';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -67,16 +71,16 @@ export function IqacPage() {
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-      <PageHeader title="Internal Quality Assurance Cell" subtitle="Ensuring and enhancing the academic and administrative performance of the institution." icon="📈" />
+      <PageHeader title="Internal Quality Assurance Cell" subtitle="Ensuring and enhancing the academic and administrative performance of the institution." icon={<TrendingUp size={36} color={GOLD} />} />
       
       <div style={{ maxWidth: 1200, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24, marginBottom: 60 }}>
-          {[{ i:'🎯', t:'Quality Benchmarks', d:'Developing parameters for various academic activities.' },
-            { i:'📊', t:'Feedback System', d:'Collecting and analyzing feedback from all stakeholders.' },
-            { i:'🛠️', t:'Workshops & FDPs', d:'Organizing quality-related seminars and training programs.' }].map((b, i) => (
+          {[{ i: <Target size={30} color={GOLD} />, t:'Quality Benchmarks', d:'Developing parameters for various academic activities.' },
+            { i: <BarChart3 size={30} color={GOLD} />, t:'Feedback System', d:'Collecting and analyzing feedback from all stakeholders.' },
+            { i: <Wrench size={30} color={GOLD} />, t:'Workshops & FDPs', d:'Organizing quality-related seminars and training programs.' }].map((b, i) => (
             <Fade key={i} delay={i * 0.1}>
               <div style={{ background: '#fff', borderRadius: 20, padding: 32, height: '100%', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.04)', transition: 'transform 0.3s' }} onMouseEnter={e=>e.currentTarget.style.transform='translateY(-5px)'} onMouseLeave={e=>e.currentTarget.style.transform='none'}>
-                <div style={{ fontSize: 36, marginBottom: 16, background: '#f1f5f9', width: 64, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 16 }}>{b.i}</div>
+                <div style={{ marginBottom: 16, background: '#f1f5f9', width: 64, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 16 }}>{b.i}</div>
                 <h3 style={{ fontSize: 20, fontWeight: 800, color: NAVY, margin: '0 0 10px' }}>{b.t}</h3>
                 <p style={{ color: '#64748b', fontSize: 15, margin: 0, lineHeight: 1.6 }}>{b.d}</p>
               </div>
@@ -102,9 +106,9 @@ export function IqacPage() {
                     style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 16, border: '1.5px solid #e2e8f0', borderRadius: 14, textDecoration: 'none', color: NAVY, transition: 'all 0.2s', background: '#f8fafc' }} 
                     onMouseEnter={e=>{e.currentTarget.style.borderColor=GOLD;e.currentTarget.style.background='#fff'}} 
                     onMouseLeave={e=>{e.currentTarget.style.borderColor='#e2e8f0';e.currentTarget.style.background='#f8fafc'}}>
-                    <div style={{ fontSize: 28 }}>📄</div>
+                    <FileText size={24} color={NAVY} />
                     <div style={{ flex: 1, fontWeight: 700, fontSize: 14 }}>{d.title}</div>
-                    <div style={{ color: GOLD, fontWeight: 800 }}>↗</div>
+                    <ArrowUpRight size={18} color={GOLD} />
                   </a>
                 ))}
               </div>
@@ -156,7 +160,7 @@ export function CourseOffered() {
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-      <PageHeader title={content?.title || "Courses Offered (NEP 2022)"} subtitle={content?.subtitle || "Four Year Undergraduate Programme (FYUGP) with Multiple Entry & Exit Options."} icon="🎓" />
+      <PageHeader title={content?.title || "Courses Offered (NEP 2022)"} subtitle={content?.subtitle || "Four Year Undergraduate Programme (FYUGP) with Multiple Entry & Exit Options."} icon={<GraduationCap size={36} color={GOLD} />} />
       
       <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -223,13 +227,13 @@ export function Syllabus() {
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-      <PageHeader title="Syllabus Database" subtitle="Download official FYUGP and CBCS syllabi for all departments." icon="📚" />
+      <PageHeader title="Syllabus Database" subtitle="Download official FYUGP and CBCS syllabi for all departments." icon={<BookOpen size={36} color={GOLD} />} />
       
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ background: '#fff', padding: 20, borderRadius: 20, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', marginBottom: 30 }}>
             <label htmlFor="syllabus-search" className="sr-only">Search syllabus by subject or semester</label>
-            <input id="syllabus-search" type="text" placeholder="🔍 Search subject or semester... (e.g., BCA Sem 1)" value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%', padding: '16px 20px', borderRadius: 12, border: '1.5px solid #e2e8f0', fontSize: 16, outline: 'none', background: '#f8fafc', color: NAVY, fontWeight: 600, boxSizing: 'border-box' }} />
+            <input id="syllabus-search" type="text" placeholder="Search subject or semester... (e.g., BCA Sem 1)" value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%', padding: '16px 20px', borderRadius: 12, border: '1.5px solid #e2e8f0', fontSize: 16, outline: 'none', background: '#f8fafc', color: NAVY, fontWeight: 600, boxSizing: 'border-box' }} />
             
             <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
               {filterOptions.map(f => (
@@ -253,7 +257,7 @@ export function Syllabus() {
         <Fade delay={0.1}>
           {filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 60, color: '#94a3b8', background: '#fff', borderRadius: 20, border: '2px dashed #e2e8f0' }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>📂</div>
+              <FolderOpen size={40} color="#94a3b8" style={{ margin: '0 auto 12px' }} />
               <div style={{ fontWeight: 700, fontSize: 16, color: NAVY }}>No Syllabus Found</div>
               <div style={{ fontSize: 14 }}>Try adjusting your search or upload from Admin Panel.</div>
             </div>
@@ -262,7 +266,7 @@ export function Syllabus() {
               {filtered.map(s => (
                 <div key={s.id} style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 16, transition: 'transform 0.2s' }} onMouseEnter={e=>e.currentTarget.style.transform='translateY(-3px)'} onMouseLeave={e=>e.currentTarget.style.transform='none'}>
                   <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                    <div style={{ fontSize: 32 }}>📘</div>
+                    <BookOpen size={28} color={NAVY} />
                     <div>
                       <div style={{ fontWeight: 800, color: NAVY, fontSize: 16, lineHeight: 1.3 }}>{s.title}</div>
                       <div style={{ fontSize: 12, color: '#64748b', marginTop: 4, fontWeight: 600 }}>NEP 2022 Format</div>
@@ -275,8 +279,8 @@ export function Syllabus() {
                         setSelectedPdf({ url: s.link, title: s.title || 'Syllabus' }); 
                       }
                     }} 
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 44, textAlign: 'center', background: `linear-gradient(135deg, ${NAVY}, #1a3a7c)`, color: '#fff', padding: '10px', borderRadius: 10, textDecoration: 'none', fontWeight: 800, fontSize: 14 }}>
-                    📥 Download PDF
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 44, textAlign: 'center', background: `linear-gradient(135deg, ${NAVY}, #1a3a7c)`, color: '#fff', padding: '10px', borderRadius: 10, textDecoration: 'none', fontWeight: 800, fontSize: 14 }}>
+                    <Download size={16} /> Download PDF
                   </a>
                 </div>
               ))}
@@ -314,7 +318,7 @@ export function AcademicCalendar() {
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-      <PageHeader title={content?.title || "Academic Calendar"} subtitle={content?.subtitle || "Key dates, examination schedules, and holidays for the current session."} icon="🗓️" />
+      <PageHeader title={content?.title || "Academic Calendar"} subtitle={content?.subtitle || "Key dates, examination schedules, and holidays for the current session."} icon={<Calendar size={36} color={GOLD} />} />
       
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
@@ -335,7 +339,7 @@ export function AcademicCalendar() {
             </div>
             
             <div style={{ marginTop: 40, padding: 20, background: '#fffbeb', borderRadius: 16, border: '1px solid #fde68a', display: 'flex', gap: 16, alignItems: 'center' }}>
-              <div style={{ fontSize: 32 }}>⛱️</div>
+              <Sun size={32} color="#b45309" />
               <div>
                 <div style={{ fontWeight: 800, color: '#92400e', fontSize: 16 }}>List of Holidays</div>
                 <div style={{ fontSize: 14, color: '#b45309', marginTop: 4 }}>College strictly follows the holiday calendar issued by BBMKU University. Download the official PDF for exact dates.</div>
@@ -384,7 +388,7 @@ export function PlacementsPage() {
             <PageHeader 
                 title="Placements & Wall of Fame" 
                 subtitle="Celebrating the success of our students who have been placed in leading industries and organizations." 
-                icon="🚀" 
+                icon={<Rocket size={36} color={GOLD} />} 
             />
 
             <div style={{ maxWidth: 1200, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
@@ -396,7 +400,7 @@ export function PlacementsPage() {
                             <input 
                                 id="placement-search"
                                 type="text" 
-                                placeholder="🔍 Search by student name or company..." 
+                                placeholder="Search by student name or company..." 
                                 value={search} 
                                 onChange={e => setSearch(e.target.value)} 
                                 style={{ width: '100%', padding: '14px 18px', borderRadius: 12, border: '1.5px solid #e2e8f0', fontSize: 15, outline: 'none', background: '#f8fafc', color: NAVY, fontWeight: 600, boxSizing: 'border-box' }} 
@@ -430,7 +434,7 @@ export function PlacementsPage() {
                 ) : filtered.length === 0 ? (
                     <Fade>
                         <div style={{ textAlign: 'center', padding: '100px 20px', background: '#fff', borderRadius: 24, border: '2px dashed #e2e8f0' }}>
-                            <div style={{ fontSize: 60, marginBottom: 20 }}>🎓</div>
+                            <GraduationCap size={48} color={GOLD} style={{ margin: '0 auto 16px' }} />
                             <h3 style={{ fontSize: 24, fontWeight: 800, color: NAVY }}>No Records Found</h3>
                             <p style={{ color: '#64748b', maxWidth: 400, margin: '10px auto' }}>No student records found matching your search criteria.</p>
                         </div>
@@ -442,8 +446,8 @@ export function PlacementsPage() {
                                 <div style={{ background: '#fff', borderRadius: 24, padding: 28, border: '1px solid #e2e8f0', height: '100%', position: 'relative', transition: 'all 0.3s cubic-bezier(.22,1,.36,1)', textAlign: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.boxShadow = '0 20px 40px rgba(15,35,71,0.08)'; e.currentTarget.style.borderColor = GOLD + '40'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#e2e8f0'; }}>
                                     
                                     {p.package && (
-                                        <div style={{ position: 'absolute', top: 20, left: 20, background: '#fffbeb', color: GOLD, fontSize: 11, fontWeight: 900, padding: '4px 12px', borderRadius: 50, border: `1.5px solid ${GOLD}20`, boxShadow: '0 4px 10px rgba(244,160,35,0.1)' }}>
-                                            💰 {p.package} LPA
+                                        <div style={{ position: 'absolute', top: 20, left: 20, background: '#fffbeb', color: GOLD, fontSize: 11, fontWeight: 900, padding: '4px 12px', borderRadius: 50, border: `1.5px solid ${GOLD}20`, boxShadow: '0 4px 10px rgba(244,160,35,0.1)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                            <Banknote size={13} /> {p.package} LPA
                                         </div>
                                     )}
 
@@ -451,7 +455,7 @@ export function PlacementsPage() {
                                         {p.photo ? (
                                             <img src={p.photo} alt={p.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                                         ) : (
-                                            <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>🎓</div>
+                                            <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><GraduationCap size={40} color="#94a3b8" /></div>
                                         )}
                                     </div>
 

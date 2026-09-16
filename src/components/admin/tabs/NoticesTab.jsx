@@ -4,6 +4,7 @@ import { db } from '../../../firebase'; // ✅ FIXED: Teen folder peechhe
 import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import DOMPurify from 'dompurify';
+import { Bell, Pin, Calendar, Clock, Sparkles, Edit2, Trash2, Plus, Info } from 'lucide-react';
 import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, useLocalDraft, Toggle, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
 import { extractNoticeMetadata } from '../../../utils/aiExtractor';
@@ -86,17 +87,19 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
 
   return (
     <div className="fade-up">
-      <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>📢 Notice Board</p>
+      <h2 style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>Official Notice Board</h2>
       <p style={{ margin: '4px 0 14px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Publish and manage official notices.</p>
 
-      {/* ── 📌 CLEAR DESTINATION INDICATOR ── */}
+      {/* ── Destination Indicator ── */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 12,
         background: 'linear-gradient(135deg, rgba(15, 35, 71, 0.05) 0%, rgba(30, 58, 138, 0.08) 100%)',
         border: '1.5px solid rgba(15, 35, 71, 0.15)',
         borderRadius: 14, padding: '12px 16px', margin: '0 0 20px',
       }}>
-        <span style={{ fontSize: 24 }}>📌</span>
+        <div style={{ width: 36, height: 36, borderRadius: 10, background: `${NAVY}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Pin size={20} color={NAVY} />
+        </div>
         <div>
           <div style={{ fontWeight: 800, fontSize: 13, color: NAVY }}>
             Live Destination: Homepage Card 1 (Campus Notices) &amp; /notifications Page
@@ -108,7 +111,10 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
       </div>
 
       <div className="card-gold">
-        <div className="actitle">{editNotice ? '✏️ Edit Notice' : '➕ Publish Notice'}</div>
+        <div className="actitle" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {editNotice ? <Edit2 size={16} /> : <Plus size={16} />}
+          <span>{editNotice ? 'Edit Notice' : 'Publish Notice'}</span>
+        </div>
         <form onSubmit={saveNotice}>
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
@@ -134,7 +140,8 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
                 }}
                 title="Polish draft text, detect category and urgency using AI"
               >
-                {aiLoading ? '✨ Processing...' : '✨ AI Auto-Fill & Polish'}
+                <Sparkles size={13} />
+                <span>{aiLoading ? 'Processing...' : 'AI Auto-Fill & Polish'}</span>
               </button>
             </div>
             <textarea 
@@ -143,7 +150,7 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
               value={noticeData.text || ''} 
               onChange={(e) => setNoticeData(d=>({...d,text:e.target.value}))} 
               required 
-              placeholder="Type rough text or select a PDF below, then click ✨ AI Auto-Fill..." 
+              placeholder="Type rough text or select a PDF below, then click AI Auto-Fill..." 
             />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 14, marginBottom: 14 }}>
@@ -172,7 +179,7 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
             isNew: autoData.isNew,
             pinned: autoData.pinned
           }));
-          toast.success(`✨ Auto-detected: ${autoData.type} Notice`);
+          toast.success(`Auto-detected: ${autoData.type} Notice`);
         }
       }
     }} 
@@ -184,14 +191,15 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 22 }}>
               <Toggle checked={!!noticeData.isNew} onChange={()=>setNoticeData(d=>({...d,isNew:!d.isNew}))} label="Mark as NEW" color={T.red} />
               <Toggle checked={!!noticeData.pinned} onChange={()=>setNoticeData(d=>({...d,pinned:!d.pinned}))} label="Pin to Top" color={NAVY} />
-              <Toggle checked={!!noticeData.sendPush} onChange={()=>setNoticeData(d=>({...d,sendPush:!d.sendPush}))} label="📢 Broadcast Push Notification" color={T.purple} />
+              <Toggle checked={!!noticeData.sendPush} onChange={()=>setNoticeData(d=>({...d,sendPush:!d.sendPush}))} label="Broadcast Push Notification" color={T.purple} />
             </div>
           </div>
 
-          {/* ── 📅 Content Scheduling ── */}
+          {/* ── Content Scheduling ── */}
           <div style={{ background: '#f8fafc', borderRadius: 12, padding: 16, marginBottom: 14, border: `1px solid ${T.b1}` }}>
             <div style={{ fontSize: 13, fontWeight: 800, color: NAVY, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-              📅 Scheduling <span style={{ fontSize: 11, color: T.t4, fontWeight: 600 }}>(optional)</span>
+              <Calendar size={15} color={NAVY} />
+              <span>Scheduling</span> <span style={{ fontSize: 11, color: T.t4, fontWeight: 600 }}>(optional)</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14 }}>
               <div>
@@ -211,7 +219,9 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
             </div>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
-            <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editNotice?'Update':'Publish'}</button>
+            <button type="submit" className="abtn abtn-gold" disabled={loading}>
+              {loading ? 'Saving…' : editNotice ? 'Update Notice' : 'Publish Notice'}
+            </button>
             {editNotice && <button type="button" className="abtn abtn-outline" onClick={()=>{setEditNotice(null);clearNoticeDraft();}}>Cancel</button>}
           </div>
         </form>
@@ -226,19 +236,19 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
           <div key={n.id} className={`arow ${noticeSel.includes(n.id)?'selected':''}`} style={{ borderLeft: `4px solid ${n.pinned?NAVY:n.isNew?T.red:T.b2}` }}>
             <input type="checkbox" checked={noticeSel.includes(n.id)} onChange={() => setNoticeSel(s=>s.includes(n.id)?s.filter(x=>x!==n.id):[...s,n.id])} style={{ accentColor: NAVY }} />
             <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', gap: 6, marginBottom: 5, flexWrap: 'wrap' }}>
-                {n.pinned && <span className="abadge" style={{ background: `${NAVY}15`, color: NAVY }}>📌 Pinned</span>}
+              <div style={{ display: 'flex', gap: 6, marginBottom: 5, flexWrap: 'wrap', alignItems: 'center' }}>
+                {n.pinned && <span className="abadge" style={{ background: `${NAVY}15`, color: NAVY, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Pin size={10} /> Pinned</span>}
                 {n.isNew && <span className="abadge" style={{ background: '#fee2e2', color: T.red }}>NEW</span>}
                 <span className="abadge" style={{ background: BG, color: T.t2 }}>{n.type}</span>
                 {(() => { const s = getScheduleStatus(n); return <span className="abadge" style={{ background: s.bg, color: s.color, fontWeight: 800 }}>{s.label}</span>; })()}
-                {n.publishDate && <span className="abadge" style={{ background: '#f0fdf4', color: T.t3, fontSize: 10 }}>📅 {new Date(n.publishDate).toLocaleDateString('en-IN', {day:'2-digit', month:'short'})}</span>}
-                {n.expiryDate && <span className="abadge" style={{ background: '#fef3c7', color: '#d97706', fontSize: 10 }}>⏰ {new Date(n.expiryDate).toLocaleDateString('en-IN', {day:'2-digit', month:'short'})}</span>}
+                {n.publishDate && <span className="abadge" style={{ background: '#f0fdf4', color: T.t3, fontSize: 10, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Calendar size={10} /> {new Date(n.publishDate).toLocaleDateString('en-IN', {day:'2-digit', month:'short'})}</span>}
+                {n.expiryDate && <span className="abadge" style={{ background: '#fef3c7', color: '#d97706', fontSize: 10, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock size={10} /> {new Date(n.expiryDate).toLocaleDateString('en-IN', {day:'2-digit', month:'short'})}</span>}
               </div>
               <div style={{ fontWeight: 700, color: NAVY, fontSize: 14 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize((n.text||'').substring(0,100)) }} />
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="abtn abtn-outline abtn-sm" onClick={()=>{setEditNotice(n);setNoticeData({text:n.text||'',link:n.link||'',type:n.type||'General',isNew:!!n.isNew,pinned:!!n.pinned,publishDate:n.publishDate||'',expiryDate:n.expiryDate||''});window.scrollTo({top:0,behavior:'smooth'});}} aria-label="Edit notice">✏️</button>
-              <button className="abtn abtn-red abtn-sm" onClick={()=>softDelete('notices',n.id,n,(n.text||'').substring(0,30))} aria-label="Delete notice">🗑️</button>
+              <button className="abtn abtn-outline abtn-sm" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} onClick={()=>{setEditNotice(n);setNoticeData({text:n.text||'',link:n.link||'',type:n.type||'General',isNew:!!n.isNew,pinned:!!n.pinned,publishDate:n.publishDate||'',expiryDate:n.expiryDate||''});window.scrollTo({top:0,behavior:'smooth'});}} aria-label="Edit notice"><Edit2 size={13} /></button>
+              <button className="abtn abtn-red abtn-sm" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} onClick={()=>softDelete('notices',n.id,n,(n.text||'').substring(0,30))} aria-label="Delete notice"><Trash2 size={13} /></button>
             </div>
           </div>
         ))}

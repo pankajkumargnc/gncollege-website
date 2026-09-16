@@ -15,13 +15,14 @@ import {
 } from 'firebase/firestore';
 import { db } from "../../../firebase";
 import toast from 'react-hot-toast';
+import { Landmark, FileText, GraduationCap, Calendar, Plus, Edit2, Trash2, ClipboardList, CheckCircle2 } from 'lucide-react';
 import MediaPicker from '../../MediaPicker';
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const TYPES = [
-  { value: 'president', label: '🏛️ President',  color: '#0f2347' },
-  { value: 'secretary', label: '📋 Secretary',   color: '#1a3a7c' },
-  { value: 'principal', label: '🎓 Principal',   color: '#155e2d' },
+  { value: 'president', label: 'President',  icon: Landmark, color: '#0f2347' },
+  { value: 'secretary', label: 'Secretary',  icon: FileText, color: '#1a3a7c' },
+  { value: 'principal', label: 'Principal',  icon: GraduationCap, color: '#155e2d' },
 ];
 
 const CURRENT_YEAR = String(new Date().getFullYear());
@@ -314,40 +315,48 @@ const AdminLeadershipTab = () => {
       {/* Header */}
       <div style={S.header}>
         <div>
-          <h3 style={S.title}>🏛️ Leadership Management</h3>
+          <h3 style={{ ...S.title, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Landmark size={20} color="#0f2347" />
+            <span>Leadership Management</span>
+          </h3>
           <p style={{ margin: '4px 0 0', fontSize: '0.83rem', color: '#94a3b8' }}>
-            Manage Presidents, Secretaries &amp; Principals over the years
+            Manage Presidents, Secretaries &amp; Principals across college history
           </p>
         </div>
         <button
-          style={S.addBtn}
+          style={{ ...S.addBtn, display: 'inline-flex', alignItems: 'center', gap: 6 }}
           onClick={openAdd}
           onMouseOver={e => e.currentTarget.style.background = '#1a3a7c'}
           onMouseOut={e => e.currentTarget.style.background = '#0f2347'}
         >
-          <span style={{ fontSize: 16 }}>＋</span>
-          Add {typeInfo.label.split(' ')[1]}
+          <Plus size={16} />
+          Add {typeInfo.label}
         </button>
       </div>
 
       {/* Type tabs */}
       <div style={S.typeTabs}>
-        {TYPES.map(t => (
-          <button
-            key={t.value}
-            style={S.typeTab(activeType === t.value, t.color)}
-            onClick={() => setActiveType(t.value)}
-          >
-            {t.label}
-            <span style={{
-              marginLeft: 7, background: activeType === t.value ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
-              color: activeType === t.value ? '#fff' : '#94a3b8',
-              fontSize: '0.72rem', fontWeight: 800, borderRadius: 20, padding: '1px 7px',
-            }}>
-              {countsByType[t.value] || 0}
-            </span>
-          </button>
-        ))}
+        {TYPES.map(t => {
+          const TabIcon = t.icon;
+          return (
+            <button
+              key={t.value}
+              style={{ ...S.typeTab(activeType === t.value, t.color), display: 'inline-flex', alignItems: 'center', gap: 6 }}
+              onClick={() => setActiveType(t.value)}
+            >
+              <TabIcon size={14} />
+              <span>{t.label}</span>
+              <span style={{
+                marginLeft: 4, background: activeType === t.value ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
+                color: activeType === t.value ? '#fff' : '#94a3b8',
+                fontSize: '0.72rem', fontWeight: 800, borderRadius: 20, padding: '1px 7px',
+                fontVariantNumeric: 'tabular-nums',
+              }}>
+                {countsByType[t.value] || 0}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Loading */}
@@ -376,12 +385,12 @@ const AdminLeadershipTab = () => {
       {/* Empty */}
       {!loading && filtered.length === 0 && (
         <div style={S.empty}>
-          <div style={{ fontSize: 40, marginBottom: 10 }}>📋</div>
+          <ClipboardList size={38} style={{ opacity: 0.35, margin: '0 auto 10px', display: 'block' }} />
           <p style={{ fontWeight: 700, color: '#64748b', margin: '0 0 6px', fontSize: '0.95rem' }}>
-            No {typeInfo.label.split(' ')[1].toLowerCase()}s added yet
+            No {typeInfo.label.toLowerCase()}s recorded yet
           </p>
           <p style={{ margin: 0, fontSize: '0.83rem' }}>
-            Click "Add {typeInfo.label.split(' ')[1]}" to get started
+            Click "Add {typeInfo.label}" to record history
           </p>
         </div>
       )}
@@ -413,8 +422,8 @@ const AdminLeadershipTab = () => {
                 </span>
               )}
             </div>
-            <div style={S.badge()}>
-              📅 {r.from} – {r.to || 'Present'}
+            <div style={{ ...S.badge(), display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              <Calendar size={12} /> {r.from} – {r.to || 'Present'}
               {(() => {
                 const f = parseInt(r.from, 10);
                 const t = r.to?.toLowerCase() === 'present' || !r.to
@@ -428,13 +437,17 @@ const AdminLeadershipTab = () => {
           </div>
           <div style={S.actions}>
             <button
-              style={S.editBtn}
+              style={{ ...S.editBtn, display: 'inline-flex', alignItems: 'center', gap: 4 }}
               onClick={() => openEdit(r)}
-            >✏️ Edit</button>
+            >
+              <Edit2 size={11} /> Edit
+            </button>
             <button
-              style={S.delBtn}
+              style={{ ...S.delBtn, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
               onClick={() => setConfirmDel(r)}
-            >🗑️</button>
+            >
+              <Trash2 size={12} />
+            </button>
           </div>
         </div>
       ))}
@@ -447,7 +460,7 @@ const AdminLeadershipTab = () => {
             {/* Modal header */}
             <div style={S.modalHead}>
               <h3 style={S.modalTitle}>
-                {editing ? '✏️ Edit Record' : `＋ Add ${typeInfo.label.split(' ')[1]}`}
+                {editing ? 'Edit Leadership Record' : `Add ${typeInfo.label}`}
               </h3>
               <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.8rem', margin: '4px 0 0' }}>
                 Firestore collection: leadership

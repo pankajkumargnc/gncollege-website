@@ -1,62 +1,63 @@
 // src/components/admin/tabs/DriveTab.jsx
-// 🚀 ULTRA PRO MAX DRIVE MANAGER (All .env Folders Synced)
+// Central Google Drive Resource Manager & Firestore Sync Hub
 
 import { useState, useEffect } from 'react';
 import { db } from "../../../firebase";
 import { collection, getDocs, doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { Cloud, RefreshCw, Wrench, Eye, Send, XCircle, FileText, Image as ImageIcon, Folder, CheckCircle, Clock, Loader2 } from 'lucide-react';
 import { T, NAVY, GOLD } from '../AdminShared';
 
-// ── 📂 ALL .ENV FOLDERS CONFIGURATION ──
+// ALL .ENV FOLDERS CONFIGURATION
 const DRIVE_CATEGORIES = [
-  // ── 📄 PDF DOCUMENTS ──
+  // PDF DOCUMENTS
   { 
     id: 'notices', 
-    label: '📢 Notices', 
+    label: 'Notices', 
     folderId: import.meta.env.VITE_DRIVE_NOTICE_FOLDER, 
     dbCollection: 'notices',
     type: 'pdf'
   },
   { 
     id: 'regulations', 
-    label: '📜 Regulations', 
+    label: 'Regulations', 
     folderId: import.meta.env.VITE_DRIVE_REGULATIONS_FOLDER, 
     dbCollection: 'regulations',
     type: 'pdf'
   },
   { 
     id: 'event_reports', 
-    label: '🏆 Event Reports', 
+    label: 'Event Reports', 
     folderId: import.meta.env.VITE_DRIVE_EVENT_REPORTS_FOLDER, 
     dbCollection: 'eventReports',
     type: 'pdf'
   },
   { 
     id: 'college_docs', 
-    label: '📂 College Docs', 
+    label: 'College Docs', 
     folderId: import.meta.env.VITE_DRIVE_COLLEGE_DOCUMENTS_FOLDER, 
     dbCollection: 'collegeDocs',
     type: 'pdf'
   },
   { 
     id: 'main_docs', 
-    label: '🗂️ Main Docs Folder', 
+    label: 'Main Docs Folder', 
     folderId: import.meta.env.VITE_DRIVE_DOCUMENT_FOLDER, 
     dbCollection: 'generalDocs',
     type: 'pdf'
   },
   
-  // ── 🖼️ IMAGES ──
+  // IMAGES
   { 
     id: 'slider', 
-    label: '🖼️ Hero Slider', 
+    label: 'Hero Slider', 
     folderId: import.meta.env.VITE_DRIVE_HERO_SLIDER_FOLDER, 
     dbCollection: 'slider',
     type: 'image'
   },
   { 
     id: 'main_images', 
-    label: '📸 Main Images Gallery', 
+    label: 'Main Images Gallery', 
     folderId: import.meta.env.VITE_DRIVE_IMAGES_FOLDER, 
     dbCollection: 'gallery',
     type: 'image'
@@ -72,7 +73,7 @@ export default function DriveTab({ logAct }) {
 
   const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
 
-  // ── 1. FETCH DRIVE FILES & FIREBASE STATUS ──
+  // 1. FETCH DRIVE FILES & FIREBASE STATUS
   const fetchTabData = async () => {
     if (!API_KEY || !activeTab.folderId) {
       toast.error(`Folder ID for ${activeTab.label} is missing in .env!`);
@@ -81,7 +82,7 @@ export default function DriveTab({ logAct }) {
 
     setLoading(true);
     try {
-      // A. Fetch from Google Drive (Godown)
+      // Fetch from Google Drive
       const mimeQuery = activeTab.type === 'image' ? "mimeType contains 'image/'" : "mimeType='application/pdf'";
       const r = await fetch(
         `https://www.googleapis.com/drive/v3/files?q='${activeTab.folderId}'+in+parents+and+${mimeQuery}&key=${API_KEY}&fields=files(id,name,createdTime,size,thumbnailLink)`
@@ -94,7 +95,7 @@ export default function DriveTab({ logAct }) {
       files.sort((a, b) => new Date(b.createdTime) - new Date(a.createdTime));
       setDriveFiles(files);
 
-      // B. Fetch from Firebase (Live Shop)
+      // Fetch from Firebase
       const querySnapshot = await getDocs(collection(db, activeTab.dbCollection));
       const liveIds = new Set();
       querySnapshot.forEach((doc) => {
@@ -112,7 +113,7 @@ export default function DriveTab({ logAct }) {
     fetchTabData();
   }, [activeTab]);
 
-  // ── 2. PUBLISH TO LIVE WEBSITE ──
+  // 2. PUBLISH TO LIVE WEBSITE
   const handlePublish = async (file) => {
     setProcessingId(file.id);
     try {
@@ -127,8 +128,8 @@ export default function DriveTab({ logAct }) {
       const publishData = {
         title: file.name.replace(/\.[^/.]+$/, ''), 
         link: fileUrl,
-        image: fileUrl, // For Gallery and Slider
-        url: fileUrl,   // For Campus visuals
+        image: fileUrl,
+        url: fileUrl,
         src: fileUrl,
         driveThumbnail: file.thumbnailLink || '',
         cat: activeTab.id === 'slider' ? 'Slider' : 'Campus',
@@ -142,7 +143,7 @@ export default function DriveTab({ logAct }) {
       await setDoc(doc(db, activeTab.dbCollection, file.id), publishData);
       
       setPublishedIds(prev => new Set(prev).add(file.id));
-      toast.success(`${file.name} published to ${activeTab.label}!`);
+      toast.success(`${file.name} published successfully`);
       logAct?.('publish', `Published ${file.name} to ${activeTab.label}`, activeTab.dbCollection);
       
     } catch (err) {
@@ -151,7 +152,7 @@ export default function DriveTab({ logAct }) {
     setProcessingId(null);
   };
 
-  // ── 2B. AUTO-REPAIR & SYNC ALL PUBLISHED LIVE IMAGES ──
+  // 2B. AUTO-REPAIR & SYNC ALL PUBLISHED LIVE IMAGES
   const handleRepairLiveImages = async () => {
     if (!API_KEY) {
       toast.error('Google API Key missing in .env!');
@@ -184,14 +185,14 @@ export default function DriveTab({ logAct }) {
           }
         }
       }
-      toast.success(`🎉 Success! ${repaired} published images refreshed with reliable links!`, { id: tId });
+      toast.success(`${repaired} published images refreshed with reliable links!`, { id: tId });
       fetchTabData();
     } catch (err) {
       toast.error(`Sync failed: ${err.message}`, { id: tId });
     }
   };
 
-  // ── 3. UNPUBLISH FROM LIVE WEBSITE ──
+  // 3. UNPUBLISH FROM LIVE WEBSITE
   const handleUnpublish = async (file) => {
     if (!window.confirm(`Are you sure you want to remove "${file.name}" from the live website?`)) return;
     
@@ -216,51 +217,56 @@ export default function DriveTab({ logAct }) {
   return (
     <div className="fade-up" style={{ paddingBottom: '40px' }}>
       
-      {/* ── HEADER ── */}
+      {/* HEADER */}
       <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', boxShadow: '0 4px 15px rgba(0,0,0,0.03)', marginBottom: '24px' }}>
-        <h2 style={{ margin: '0 0 8px 0', color: NAVY, fontSize: '24px', fontWeight: 900 }}>☁️ Central Drive Manager</h2>
-        <p style={{ margin: 0, color: '#64748b', fontSize: '14px', fontWeight: 600 }}>
-          Manage your Google Drive files. Only published files will appear on the live website.
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+          <Cloud size={24} color={NAVY} />
+          <h2 style={{ margin: 0, color: NAVY, fontSize: '22px', fontWeight: 900 }}>Central Drive Manager</h2>
+        </div>
+        <p style={{ margin: 0, color: '#64748b', fontSize: '14px', fontWeight: 500 }}>
+          Synchronize files directly from Google Drive storage folders to public college portals.
         </p>
       </div>
 
-      {/* ── CATEGORY TABS (FLEX WRAP FOR MULTIPLE FOLDERS) ── */}
-      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '24px' }}>
+      {/* CATEGORY TABS */}
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
         {DRIVE_CATEGORIES.map(cat => (
           <button
             key={cat.id}
             onClick={() => setActiveTab(cat)}
             style={{
-  padding: '10px 18px', borderRadius: '50px', cursor: 'pointer',
-  fontWeight: 800, fontSize: '13px', transition: 'all 0.3s',
-  background: activeTab.id === cat.id ? NAVY : '#fff',
-  color: activeTab.id === cat.id ? '#fff' : '#64748b',
-  boxShadow: activeTab.id === cat.id ? '0 6px 15px rgba(15,35,71,0.2)' : '0 2px 5px rgba(0,0,0,0.05)',
-  border: activeTab.id !== cat.id ? '1px solid #e2e8f0' : 'none',
-  whiteSpace: 'nowrap'
-}}
+              padding: '9px 18px', borderRadius: '50px', cursor: 'pointer',
+              fontWeight: 700, fontSize: '13px', transition: 'all 0.25s',
+              background: activeTab.id === cat.id ? NAVY : '#fff',
+              color: activeTab.id === cat.id ? '#fff' : '#64748b',
+              boxShadow: activeTab.id === cat.id ? '0 4px 14px rgba(15,35,71,0.2)' : '0 1px 3px rgba(0,0,0,0.04)',
+              border: activeTab.id !== cat.id ? '1px solid #e2e8f0' : 'none',
+              whiteSpace: 'nowrap',
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+            }}
           >
+            {cat.type === 'image' ? <ImageIcon size={14} /> : <FileText size={14} />}
             {cat.label}
           </button>
         ))}
       </div>
 
-      {/* ── FILE LISTING AREA ── */}
+      {/* FILE LISTING AREA */}
       <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
         
         {/* Toolbar */}
         <div style={{ padding: '16px 24px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-          <div style={{ fontWeight: 800, color: NAVY, fontSize: '16px' }}>
+          <div style={{ fontWeight: 800, color: NAVY, fontSize: '15px' }}>
             {activeTab.label} Files ({driveFiles.length})
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             {activeTab.type === 'image' && (
-              <button onClick={handleRepairLiveImages} style={{ background: '#fef3c7', border: '1px solid #f59e0b', padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: '#92400e' }} title="Scan and repair broken published image links">
-                ⚡ Fix All Live Images
+              <button onClick={handleRepairLiveImages} style={{ background: '#fef3c7', border: '1px solid #f59e0b', padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 700, color: '#92400e', display: 'inline-flex', alignItems: 'center', gap: 6 }} title="Scan and repair broken published image links">
+                <Wrench size={13} /> Fix Live Images
               </button>
             )}
-            <button onClick={fetchTabData} style={{ background: '#fff', border: '1px solid #cbd5e1', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: 700, color: NAVY, boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }} title="Refresh List">
-              🔄 Refresh Drive
+            <button onClick={fetchTabData} style={{ background: '#fff', border: '1px solid #cbd5e1', padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: NAVY, boxShadow: '0 2px 4px rgba(0,0,0,0.02)', display: 'inline-flex', alignItems: 'center', gap: 6 }} title="Refresh List">
+              <RefreshCw size={13} /> Refresh Drive
             </button>
           </div>
         </div>
@@ -269,13 +275,13 @@ export default function DriveTab({ logAct }) {
         {loading ? (
           <div style={{ padding: '60px 20px', textAlign: 'center' }}>
             <div className="spinner" style={{ margin: '0 auto 16px', borderColor: `${GOLD}40`, borderTopColor: GOLD }}></div>
-            <div style={{ color: '#64748b', fontWeight: 700 }}>Scanning Google Drive...</div>
+            <div style={{ color: '#64748b', fontWeight: 600 }}>Scanning Google Drive...</div>
           </div>
         ) : driveFiles.length === 0 ? (
           <div style={{ padding: '60px 20px', textAlign: 'center', color: '#64748b' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
-            <h3 style={{ margin: '0 0 8px', color: NAVY }}>Folder is Empty</h3>
-            <p style={{ fontSize: '14px' }}>Upload files to your Google Drive folder first.</p>
+            <Folder size={44} style={{ margin: '0 auto 12px', display: 'block', opacity: 0.35 }} />
+            <h3 style={{ margin: '0 0 6px', color: NAVY, fontSize: 18, fontWeight: 800 }}>Folder is Empty</h3>
+            <p style={{ fontSize: '13px', margin: 0 }}>Upload documents or assets to your configured Google Drive folder.</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -285,11 +291,11 @@ export default function DriveTab({ logAct }) {
 
               return (
                 <div key={file.id} style={{ 
-                  display: 'flex', alignItems: 'center', padding: '16px 24px', 
+                  display: 'flex', alignItems: 'center', padding: '14px 20px', 
                   borderBottom: '1px solid #f1f5f9', gap: '16px',
                   background: isPublished ? '#f0fdf4' : '#ffffff',
-                  transition: 'background 0.3s',
-                  flexWrap: 'wrap' // Mobile support
+                  transition: 'background 0.2s',
+                  flexWrap: 'wrap'
                 }}>
                   
                   {/* File Icon / Thumbnail */}
@@ -312,8 +318,8 @@ export default function DriveTab({ logAct }) {
                             }
                           }}
                         />
-                        <div style={{ display: 'none', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', background: '#f1f5f9', fontSize: '20px' }}>
-                          🖼️
+                        <div style={{ display: 'none', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', background: '#f1f5f9' }}>
+                          <ImageIcon size={20} color="#94a3b8" />
                         </div>
                       </>
                     ) : file.thumbnailLink ? (
@@ -329,25 +335,23 @@ export default function DriveTab({ logAct }) {
                             if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
                           }}
                         />
-                        <div style={{ display: 'none', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', background: '#fee2e2', color: '#dc2626', flexDirection: 'column' }}>
-                          <span style={{ fontSize: '18px', lineHeight: 1 }}>📄</span>
-                          <span style={{ fontSize: '8px', fontWeight: 900, marginTop: 2 }}>PDF</span>
+                        <div style={{ display: 'none', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', background: '#fee2e2', color: '#dc2626' }}>
+                          <FileText size={20} />
                         </div>
                       </>
                     ) : (
-                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fee2e2', color: '#dc2626', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '18px', lineHeight: 1 }}>📄</span>
-                        <span style={{ fontSize: '8px', fontWeight: 900, marginTop: 2 }}>PDF</span>
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fee2e2', color: '#dc2626' }}>
+                        <FileText size={20} />
                       </div>
                     )}
                   </div>
 
                   {/* File Info */}
                   <div style={{ flex: 1, minWidth: '200px' }}>
-                    <div style={{ fontWeight: 800, color: NAVY, fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ fontWeight: 700, color: NAVY, fontSize: '13.5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {file.name}
                     </div>
-                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px', fontWeight: 600 }}>
+                    <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '3px', fontWeight: 500 }}>
                       {new Date(file.createdTime).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} 
                       {' '}• {(file.size / 1024).toFixed(0)} KB
                     </div>
@@ -355,30 +359,33 @@ export default function DriveTab({ logAct }) {
 
                   {/* Status Badge */}
                   <div style={{
-                    padding: '6px 12px', borderRadius: '50px', fontSize: '11px', fontWeight: 900, letterSpacing: '0.5px',
+                    padding: '5px 12px', borderRadius: '50px', fontSize: '11px', fontWeight: 800, letterSpacing: '0.4px',
                     background: isPublished ? '#dcfce7' : '#f1f5f9',
                     color: isPublished ? '#166534' : '#64748b',
-                    display: 'flex', alignItems: 'center', gap: '4px'
+                    display: 'flex', alignItems: 'center', gap: '5px'
                   }}>
-                    {isPublished ? '🟢 LIVE ON SITE' : '🟡 IN GODOWN'}
+                    {isPublished ? <CheckCircle size={12} color="#16a34a" /> : <Clock size={12} color="#94a3b8" />}
+                    <span>{isPublished ? 'LIVE ON SITE' : 'IN DRIVE'}</span>
                   </div>
 
                   {/* Action Buttons */}
                   <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                     <a href={`https://drive.google.com/file/d/${file.id}/view`} target="_blank" rel="noreferrer" 
-                       style={{ padding: '8px 16px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', color: NAVY, textDecoration: 'none', fontSize: '13px', fontWeight: 700, transition: '0.2s', display: 'flex', alignItems: 'center' }}>
-                      👁️ View
+                       style={{ padding: '7px 14px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', color: NAVY, textDecoration: 'none', fontSize: '12.5px', fontWeight: 700, transition: '0.2s', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                      <Eye size={13} /> View
                     </a>
                     
                     {isPublished ? (
                       <button onClick={() => handleUnpublish(file)} disabled={isProcessing}
-                        style={{ padding: '8px 16px', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', color: '#b91c1c', cursor: 'pointer', fontSize: '13px', fontWeight: 800, transition: '0.2s', width: '130px' }}>
-                        {isProcessing ? '⏳...' : '✖ Unpublish'}
+                        style={{ padding: '7px 14px', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', color: '#b91c1c', cursor: 'pointer', fontSize: '12.5px', fontWeight: 700, transition: '0.2s', minWidth: '110px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                        {isProcessing ? <Loader2 size={13} className="animate-spin" /> : <XCircle size={13} />}
+                        {isProcessing ? 'Working...' : 'Unpublish'}
                       </button>
                     ) : (
                       <button onClick={() => handlePublish(file)} disabled={isProcessing}
-                        style={{ padding: '8px 16px', background: NAVY, border: 'none', borderRadius: '8px', color: '#fff', cursor: 'pointer', fontSize: '13px', fontWeight: 800, transition: '0.2s', boxShadow: '0 4px 10px rgba(15,35,71,0.2)', width: '130px' }}>
-                        {isProcessing ? '⏳...' : '🚀 Publish'}
+                        style={{ padding: '7px 14px', background: NAVY, border: 'none', borderRadius: '8px', color: '#fff', cursor: 'pointer', fontSize: '12.5px', fontWeight: 700, transition: '0.2s', boxShadow: '0 4px 10px rgba(15,35,71,0.15)', minWidth: '110px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                        {isProcessing ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+                        {isProcessing ? 'Working...' : 'Publish'}
                       </button>
                     )}
                   </div>

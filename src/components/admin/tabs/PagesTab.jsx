@@ -5,6 +5,20 @@ import { collection, addDoc, updateDoc, doc, serverTimestamp, getDocs, query, wh
 import toast from 'react-hot-toast';
 import { T, NAVY, GOLD, WHITE, useLocalDraft, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
 import { clearCache } from '../../../utils/cachedFetch';
+import {
+  FileText,
+  Plus,
+  Edit2,
+  Edit3,
+  Trash2,
+  Copy,
+  ExternalLink,
+  Check,
+  Folder,
+  RefreshCw,
+  Code,
+  RotateCcw
+} from 'lucide-react';
 
 const JoditEditor = lazy(() => import('jodit-react'));
 
@@ -522,7 +536,9 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
       {/* ── HEADER ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ fontSize: 32, background: '#fff', padding: 10, borderRadius: 12, boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>📄</div>
+          <div style={{ background: '#fff', padding: 10, borderRadius: 12, boxShadow: '0 4px 15px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <FileText size={28} color={NAVY} />
+          </div>
           <div>
             <h2 style={{ margin: 0, color: NAVY, fontSize: 24, fontWeight: 900 }}>Pages & SEO Enterprise CMS</h2>
             <p style={{ margin: '4px 0 0', color: T.t3, fontSize: 13, fontWeight: 600 }}>
@@ -535,9 +551,10 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
           <button
             className="abtn abtn-outline abtn-sm"
             onClick={() => handleCleanupNavbar(false)}
-            style={{ fontSize: 12, background: '#fff' }}
+            style={{ fontSize: 12, background: '#fff', display: 'inline-flex', alignItems: 'center', gap: 6 }}
           >
-            🧹 Clean Orphan Links
+            <RefreshCw size={12} />
+            <span>Clean Orphan Links</span>
           </button>
         </div>
       </div>
@@ -547,14 +564,17 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
         <button
           className={`pt-tab-btn ${activeTab === 'manage' ? 'active' : ''}`}
           onClick={() => { setActiveTab('manage'); resetEditor(); }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
         >
-          📂 All Pages ({pages?.length || 0})
+          <Folder size={15} />
+          <span>All Pages ({pages?.length || 0})</span>
         </button>
         <button
           className={`pt-tab-btn ${activeTab === 'editor' ? 'active' : ''}`}
           onClick={() => { setActiveTab('editor'); if (!editItem) resetEditor(); }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
         >
-          {editItem ? '✏️ Edit Page Content' : '✨ Create New Page'}
+          {editItem ? <><Edit2 size={15} /> Edit Page Content</> : <><Plus size={15} /> Create New Page</>}
         </button>
       </div>
 
@@ -568,7 +588,7 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
           <div style={{ background: WHITE, padding: 24, borderRadius: 16, border: `2px solid ${editItem ? GOLD : T.b1}`, boxShadow: '0 8px 30px rgba(15,35,71,0.06)' }}>
             <div style={{ fontSize: 16, fontWeight: 800, color: NAVY, marginBottom: 16, borderBottom: `1px solid ${T.b1}`, paddingBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span>{editItem ? '✏️ Update Custom Page' : '📝 Build New Institutional Page'}</span>
+                <span>{editItem ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Edit2 size={16} /> Update Custom Page</span> : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Plus size={16} /> Build New Institutional Page</span>}</span>
                 {formData.status === 'draft' && (
                   <span style={{ fontSize: 11, background: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: 4, fontWeight: 800 }}>DRAFT</span>
                 )}
@@ -602,8 +622,8 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
                     onChange={e => setFormData({ ...formData, status: e.target.value })}
                     style={{ fontWeight: 700, color: formData.status === 'published' ? '#16a34a' : '#d97706' }}
                   >
-                    <option value="published">🟢 Published</option>
-                    <option value="draft">🟡 Draft</option>
+                    <option value="published">Published</option>
+                    <option value="draft">Draft</option>
                   </select>
                 </div>
               </div>
@@ -628,10 +648,10 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
                   <button
                     type="button"
                     onClick={() => copyPageLink(formData.slug)}
-                    style={{ background: 'transparent', border: 'none', padding: '0 12px', cursor: 'pointer', fontSize: 14 }}
+                    style={{ background: 'transparent', border: 'none', padding: '0 12px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                     title="Copy Link"
                   >
-                    📋
+                    <Copy size={14} color="#64748b" />
                   </button>
                 </div>
               </div>
@@ -1154,9 +1174,10 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
               <button
                 className="abtn abtn-navy abtn-sm"
                 onClick={() => { resetEditor(); setActiveTab('editor'); }}
-                style={{ fontSize: 12 }}
+                style={{ fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 6 }}
               >
-                ✨ + Create New Page
+                <Plus size={14} />
+                <span>Create New Page</span>
               </button>
             </div>
 
@@ -1192,10 +1213,9 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: 20,
                       flexShrink: 0
                     }}>
-                      {isPublished ? '📄' : '📝'}
+                      {isPublished ? <FileText size={22} color="#10b981" /> : <Edit3 size={22} color="#f59e0b" />}
                     </div>
 
                     <div style={{ flex: 1, minWidth: 0, padding: '0 10px' }}>
@@ -1219,7 +1239,7 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
                             userSelect: 'none'
                           }}
                         >
-                          {isPublished ? '● PUBLISHED' : '○ DRAFT'}
+                          {isPublished ? 'PUBLISHED' : 'DRAFT'}
                         </span>
 
                         {/* SEO Badge */}
@@ -1250,36 +1270,39 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
                         type="button"
                         onClick={() => copyPageLink(page.slug)}
                         className="abtn abtn-outline abtn-sm"
-                        style={{ fontSize: 11, padding: '5px 8px' }}
+                        style={{ fontSize: 11, padding: '5px 8px', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                         title="Copy Public URL"
                       >
-                        📋 Copy Link
+                        <Copy size={12} />
+                        <span>Copy Link</span>
                       </button>
                       <a
                         href={`${import.meta.env.BASE_URL}#/p/${page.slug}`}
                         target="_blank"
                         rel="noreferrer"
                         className="abtn abtn-outline abtn-sm"
-                        style={{ textDecoration: 'none', fontSize: 11, padding: '5px 8px' }}
+                        style={{ textDecoration: 'none', fontSize: 11, padding: '5px 8px', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                       >
-                        👁️ View Live
+                        <ExternalLink size={12} />
+                        <span>View Live</span>
                       </a>
                       <button
                         type="button"
                         className="abtn abtn-navy abtn-sm"
                         onClick={() => startEdit(page)}
-                        style={{ fontSize: 11, padding: '5px 10px' }}
+                        style={{ fontSize: 11, padding: '5px 10px', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                       >
-                        ✏️ Edit
+                        <Edit2 size={12} />
+                        <span>Edit</span>
                       </button>
                       <button
                         type="button"
                         className="abtn abtn-red abtn-sm"
                         onClick={() => handleDeletePage(page)}
-                        style={{ padding: '5px 8px' }}
+                        style={{ padding: '6px 8px', display: 'inline-flex', alignItems: 'center' }}
                         aria-label="Delete page"
                       >
-                        🗑️
+                        <Trash2 size={13} />
                       </button>
                     </div>
                   </div>

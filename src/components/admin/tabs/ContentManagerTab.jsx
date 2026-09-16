@@ -11,6 +11,7 @@ import { NAVY, GOLD, WHITE, BG, T, useDebounce } from '../AdminShared';
 import toast from 'react-hot-toast';
 import DEFAULT_PAGE_CONTENT from '../../../data/defaultPageContent';
 import DOMPurify from 'dompurify';
+import { Sparkles, Edit3, Columns, Eye, Download, Upload, Plus, Undo2, Save, Check, ExternalLink } from 'lucide-react';
 
 const JoditEditor = lazy(() => import('jodit-react'));
 
@@ -958,7 +959,8 @@ Format Required: Return HTML suitable for website display without markdown wrapp
       }}>
         <div>
           <h2 style={{ fontSize: 22, fontWeight: 900, margin: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span>⚡</span> Headless CMS Content Studio
+            <Sparkles size={20} color={GOLD} />
+            <span>Headless CMS Content Studio</span>
           </h2>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', margin: '4px 0 0' }}>
             Next-gen visual page builder • Live split preview • Real-time Firestore sync
@@ -972,30 +974,36 @@ Format Required: Return HTML suitable for website display without markdown wrapp
             style={{
               background: viewMode === 'editor' ? GOLD : 'transparent',
               color: viewMode === 'editor' ? NAVY : '#fff',
-              border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer'
+              border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', gap: 6
             }}
           >
-            ✏️ Editor
+            <Edit3 size={13} />
+            <span>Editor</span>
           </button>
           <button
             onClick={() => setViewMode('split')}
             style={{
               background: viewMode === 'split' ? GOLD : 'transparent',
               color: viewMode === 'split' ? NAVY : '#fff',
-              border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer'
+              border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', gap: 6
             }}
           >
-            ↔️ Split View
+            <Columns size={13} />
+            <span>Split View</span>
           </button>
           <button
             onClick={() => setViewMode('preview')}
             style={{
               background: viewMode === 'preview' ? GOLD : 'transparent',
               color: viewMode === 'preview' ? NAVY : '#fff',
-              border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer'
+              border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', gap: 6
             }}
           >
-            👁️ Preview
+            <Eye size={13} />
+            <span>Preview</span>
           </button>
         </div>
       </div>
@@ -1096,10 +1104,11 @@ Format Required: Return HTML suitable for website display without markdown wrapp
                         style={{
                           background: '#f1f5f9', border: `1px solid ${T.b1}`, color: NAVY,
                           padding: '8px 14px', borderRadius: 8, fontSize: 12, fontWeight: 800,
-                          textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4
+                          textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6
                         }}
                       >
-                        ↗ Live Page
+                        <ExternalLink size={13} />
+                        <span>Live Page</span>
                       </a>
                     )}
 
@@ -1109,10 +1118,12 @@ Format Required: Return HTML suitable for website display without markdown wrapp
                         onClick={handleUndo}
                         style={{
                           background: '#fee2e2', border: '1px solid #fca5a5', color: '#b91c1c',
-                          padding: '8px 14px', borderRadius: 8, fontSize: 12, fontWeight: 800, cursor: 'pointer'
+                          padding: '8px 14px', borderRadius: 8, fontSize: 12, fontWeight: 800, cursor: 'pointer',
+                          display: 'inline-flex', alignItems: 'center', gap: 6
                         }}
                       >
-                        ↩ Undo
+                        <Undo2 size={13} />
+                        <span>Undo</span>
                       </button>
                     )}
 
@@ -1123,10 +1134,11 @@ Format Required: Return HTML suitable for website display without markdown wrapp
                         background: isDirty ? `linear-gradient(135deg, ${NAVY}, #1a3a7c)` : '#e2e8f0',
                         color: isDirty ? WHITE : T.t3, border: 'none', borderRadius: 8, padding: '9px 20px',
                         fontWeight: 900, fontSize: 13, cursor: isDirty ? 'pointer' : 'default',
-                        boxShadow: isDirty ? '0 4px 12px rgba(15,35,71,0.2)' : 'none'
+                        boxShadow: isDirty ? '0 4px 12px rgba(15,35,71,0.2)' : 'none',
+                        display: 'inline-flex', alignItems: 'center', gap: 6
                       }}
                     >
-                      {saving ? '⏳ Saving...' : isDirty ? '💾 Save (Ctrl+S)' : '✓ Saved'}
+                      {saving ? 'Saving...' : isDirty ? <><Save size={14} /> <span>Save (Ctrl+S)</span></> : <><Check size={14} /> <span>Saved</span></>}
                     </button>
                   </div>
                 </div>
@@ -1209,14 +1221,16 @@ Format Required: Return HTML suitable for website display without markdown wrapp
                     <button
                       type="button"
                       onClick={exportJSON}
-                      style={{ background: '#f1f5f9', border: `1px solid ${T.b1}`, borderRadius: 8, padding: '5px 12px', fontSize: 11.5, fontWeight: 700, color: NAVY, cursor: 'pointer' }}
+                      style={{ background: '#f1f5f9', border: `1px solid ${T.b1}`, borderRadius: 8, padding: '6px 12px', fontSize: 11.5, fontWeight: 700, color: NAVY, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5 }}
                       title="Download JSON Backup"
                     >
-                      📥 Export
+                      <Download size={13} />
+                      <span>Export</span>
                     </button>
 
-                    <label style={{ background: '#f1f5f9', border: `1px solid ${T.b1}`, borderRadius: 8, padding: '5px 12px', fontSize: 11.5, fontWeight: 700, color: NAVY, cursor: 'pointer', margin: 0 }}>
-                      📤 Import
+                    <label style={{ background: '#f1f5f9', border: `1px solid ${T.b1}`, borderRadius: 8, padding: '6px 12px', fontSize: 11.5, fontWeight: 700, color: NAVY, cursor: 'pointer', margin: 0, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                      <Upload size={13} />
+                      <span>Import</span>
                       <input type="file" accept=".json" onChange={importJSON} style={{ display: 'none' }} />
                     </label>
 
@@ -1225,11 +1239,13 @@ Format Required: Return HTML suitable for website display without markdown wrapp
                       onClick={() => setShowTemplatePicker(true)}
                       style={{
                         background: 'linear-gradient(135deg, #f4a023, #d97706)',
-                        color: '#fff', border: 'none', borderRadius: 8, padding: '6px 14px',
-                        fontSize: 12, fontWeight: 800, cursor: 'pointer', boxShadow: '0 2px 8px rgba(244,160,35,0.3)'
+                        color: '#fff', border: 'none', borderRadius: 8, padding: '7px 14px',
+                        fontSize: 12, fontWeight: 800, cursor: 'pointer', boxShadow: '0 2px 8px rgba(244,160,35,0.3)',
+                        display: 'inline-flex', alignItems: 'center', gap: 6
                       }}
                     >
-                      + Add Section Preset
+                      <Plus size={14} />
+                      <span>Add Section Preset</span>
                     </button>
                   </div>
                 </div>

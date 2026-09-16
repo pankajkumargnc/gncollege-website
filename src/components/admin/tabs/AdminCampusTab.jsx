@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { doc, setDoc, onSnapshot, serverTimestamp, getDoc } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import toast from 'react-hot-toast';
+import { Building, Trees, Building2, Landmark, School, Laptop, Leaf, Plus, Cloud, Upload, Edit2, Copy, Trash2, Check, X, Loader2, Eye } from 'lucide-react';
 import MediaPicker from '../../MediaPicker';
 import { resolveUrl } from '../../../utils/resolver';
 
@@ -10,13 +11,13 @@ const NAVY = '#0f2347';
 const GOLD = '#f4a023';
 
 const CATEGORIES = [
-  { id: 'bank-more',      label: 'Bank More Campus',    icon: '🏛️' },
-  { id: 'bhuda',          label: 'Bhuda Campus',         icon: '🌳' },
-  { id: 'vocational',     label: 'Vocational Building',  icon: '🏢' },
-  { id: 'infrastructure', label: 'Infrastructure',        icon: '🏗️' },
-  { id: 'classrooms',     label: 'Classrooms',           icon: '🏫' },
-  { id: 'ict-rooms',      label: 'ICT Rooms',            icon: '💻' },
-  { id: 'green-campus',   label: 'Green Campus',         icon: '🌿' },
+  { id: 'bank-more',      label: 'Bank More Campus',    icon: Building },
+  { id: 'bhuda',          label: 'Bhuda Campus',         icon: Trees },
+  { id: 'vocational',     label: 'Vocational Building',  icon: Building2 },
+  { id: 'infrastructure', label: 'Infrastructure',        icon: Landmark },
+  { id: 'classrooms',     label: 'Classrooms',           icon: School },
+  { id: 'ict-rooms',      label: 'ICT Rooms',            icon: Laptop },
+  { id: 'green-campus',   label: 'Green Campus',         icon: Leaf },
 ];
 
 export default function AdminCampusTab({ imgbbKey = '' }) {
@@ -260,7 +261,7 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
                 boxShadow: isActive ? '0 4px 12px rgba(15,35,71,0.15)' : 'none',
               }}
             >
-              <span>{cat.icon}</span>
+              <cat.icon size={15} />
               <span>{cat.label}</span>
               <span style={{
                 background: isActive ? 'rgba(255,255,255,0.22)' : '#f1f5f9',
@@ -269,6 +270,7 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
                 borderRadius: 12,
                 fontSize: 11,
                 fontWeight: 800,
+                fontVariantNumeric: 'tabular-nums',
                 marginLeft: 4,
               }}>
                 {count}
@@ -282,11 +284,11 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
       <div style={{ background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: 14, padding: '20px 24px', marginBottom: 24, boxShadow: '0 4px 16px rgba(0,0,0,0.02)', width: '100%', boxSizing: 'border-box' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div style={{ fontWeight: 800, fontSize: 15, color: NAVY, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span>➕</span> Add Photo to <span style={{ color: GOLD }}>{activeLabel}</span>
+            <Plus size={16} color={GOLD} /> Add Photo to <span style={{ color: GOLD }}>{activeLabel}</span>
           </div>
           {uploading && (
             <span style={{ fontSize: 12, color: '#3b82f6', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span className="anim-spin">⏳</span> Uploading image...
+              <Loader2 size={13} className="animate-spin" /> Uploading image...
             </span>
           )}
         </div>
@@ -356,7 +358,7 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
               cursor: 'pointer',
             }}
           >
-            <span>☁️</span> {showDrivePicker ? 'Hide Drive Library' : 'Browse Google Drive & Cloud Library'}
+            <Cloud size={14} /> {showDrivePicker ? 'Hide Drive Library' : 'Browse Google Drive & Cloud Library'}
           </button>
 
           <button
@@ -376,7 +378,7 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
               cursor: uploading ? 'wait' : 'pointer',
             }}
           >
-            <span>📁</span> Upload from Computer
+            <Upload size={14} /> Upload from Computer
           </button>
         </div>
 
@@ -546,25 +548,25 @@ export default function AdminCampusTab({ imgbbKey = '' }) {
                             setEditingCaption(img.caption || '');
                           }}
                           title="Edit Caption"
-                          style={{ background: '#f1f5f9', border: 'none', padding: '5px 9px', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontWeight: 700, color: NAVY }}
+                          style={{ background: '#f1f5f9', border: 'none', padding: '5px 9px', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontWeight: 700, color: NAVY, display: 'inline-flex', alignItems: 'center', gap: 4 }}
                         >
-                          ✏️ Edit
+                          <Edit2 size={11} /> Edit
                         </button>
                         <button
                           onClick={() => copyPhotoUrl(img.url)}
                           title="Copy Image URL"
-                          style={{ background: '#f1f5f9', border: 'none', padding: '5px 9px', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontWeight: 700, color: '#475569' }}
+                          style={{ background: '#f1f5f9', border: 'none', padding: '5px 9px', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontWeight: 700, color: '#475569', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                         >
-                          🔗 Copy
+                          <Copy size={11} /> Copy
                         </button>
                       </div>
 
                       <button
                         onClick={() => deletePhoto(img.id)}
                         title="Delete photo"
-                        style={{ background: '#fee2e2', border: 'none', padding: '5px 9px', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontWeight: 700, color: '#dc2626' }}
+                        style={{ background: '#fee2e2', border: 'none', padding: '5px 9px', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontWeight: 700, color: '#dc2626', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                       >
-                        🗑️ Delete
+                        <Trash2 size={11} /> Delete
                       </button>
                     </div>
                   </div>

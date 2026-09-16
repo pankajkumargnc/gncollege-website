@@ -248,7 +248,7 @@ export function GreenCampus() {
           </Fade>
           {aboutHtml && (
             <Fade delay={0.15}>
-              <div style={{ maxWidth: 840, margin: '0 auto 32px', background: '#fff', padding: '24px 32px', borderRadius: 20, boxShadow: '0 8px 24px rgba(6,78,59,0.06)', border: '1px solid #d1fae5', textAlign: 'left', color: '#334155', fontSize: 15, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutHtml) }} />
+              <div style={{ maxWidth: 840, margin: '0 auto 32px', background: '#fff', padding: '24px 32px', borderRadius: 20, boxShadow: '0 8px 24px rgba(6,78,59,0.06)', border: '1px solid #d1fae5', textAlign: 'justify', textJustify: 'inter-word', color: '#334155', fontSize: 15, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutHtml) }} />
             </Fade>
           )}
         </div>

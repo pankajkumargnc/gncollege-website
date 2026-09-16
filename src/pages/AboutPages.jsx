@@ -7,6 +7,12 @@ import { COLORS } from '../styles/colors';
 import PDFModal from '../components/PDFModal'; // ✅ PDF Modal Import
 import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageContent'; // ✅ CMS Content Hook
 import DOMPurify from 'dompurify';
+import {
+  FileText, PhoneCall, Compass, Target, GraduationCap, Users,
+  Scale, Building2, UserCheck, FolderArchive, Calendar, Download,
+  Info, ShieldCheck, AlertCircle, Award, Sparkles, HeartHandshake,
+  Lightbulb, BookOpen, Briefcase, Landmark, Ban, Moon, FileCheck, Loader2
+} from 'lucide-react';
 import '../styles/index.css';
 
 const N = COLORS.navy || '#0f2347';
@@ -104,7 +110,9 @@ function AboutSidebar() {
     <aside className="profile-sidebar">
       <Fade delay={0.1}>
         <div className="widget">
-          <h3 className="widget-title"><span>📑</span> About Us</h3>
+          <h3 className="widget-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <FileText size={18} color={G} /> About Us
+          </h3>
           <ul className="quick-links">
             {[
               { label: 'College Profile',     path: '/about-us/college-profile' },
@@ -130,7 +138,7 @@ function AboutSidebar() {
           </ul>
         </div>
         <div className="helpdesk-widget">
-          <div style={{ fontSize: 42, marginBottom: 14, position: 'relative', zIndex: 2 }}>📞</div>
+          <PhoneCall size={38} color={G} style={{ marginBottom: 14, position: 'relative', zIndex: 2 }} />
           <h4 style={{ margin: '0 0 10px', fontSize: 18, color: G, position: 'relative', zIndex: 2 }}>Need Help?</h4>
           <p style={{ fontSize: 13, margin: '0 0 18px', color: '#e2e8f0', lineHeight: 1.6, position: 'relative', zIndex: 2 }}>
             Contact our admin office for admissions or academic queries.
@@ -172,13 +180,19 @@ function MeetingPDFList({ collectionName, accentColor, emptyText }) {
     return () => unsub();
   }, [collectionName]);
 
-  if (loading) return <div style={{ padding: 20, textAlign: 'center', color: '#94a3b8' }}>⏳ Loading…</div>;
+  if (loading) {
+    return (
+      <div style={{ padding: 24, textAlign: 'center', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <Loader2 size={18} className="spin-animate" /> Loading proceedings…
+      </div>
+    );
+  }
   if (meetings.length === 0) return (
     <div style={{ padding: 32, textAlign: 'center', color: '#94a3b8', background: '#f8fafc', borderRadius: 12 }}>
-      <div style={{ fontSize: 36, marginBottom: 8 }}>📂</div>
-      <div style={{ fontWeight: 700 }}>{emptyText || 'Koi meetings nahi mili.'}</div>
+      <FolderArchive size={36} color="#94a3b8" style={{ marginBottom: 10, margin: '0 auto 10px' }} />
+      <div style={{ fontWeight: 700 }}>{emptyText || 'No official meeting records found.'}</div>
       <div style={{ fontSize: 12, marginTop: 4 }}>
-        Admin Panel → {collectionName === 'gb_meetings' ? 'GB Meetings' : 'Staff Council'} tab se add karein
+        Official circulars and minutes will appear once published.
       </div>
     </div>
   );
@@ -212,7 +226,7 @@ function MeetingPDFList({ collectionName, accentColor, emptyText }) {
                       }
                     }}
                     style={{ display:'inline-flex', alignItems:'center', gap:7, background:accentColor||N, color:'#fff', padding:'10px 18px', borderRadius:10, fontWeight:700, fontSize:13, textDecoration:'none', minHeight:44, transition:'background .25s ease, transform .25s cubic-bezier(.22,1,.36,1)' }}>
-                    📄 View Meeting PDF
+                    <FileText size={15} /> View Meeting PDF
                   </a>
                 </div>
               </div>
@@ -246,24 +260,35 @@ export function VisionMission() {
   const visionText = getText('vision', 'To be a premier institution of higher learning that nurtures leaders of tomorrow — intellectually competent, ethically grounded, and socially responsible — drawing inspiration from the teachings of Guru Nanak Devji.');
   const missionText = getText('mission', 'To provide quality and inclusive higher education to all sections of society, with special focus on the underprivileged, empowering students through academic excellence, skill development, and value-based learning.');
   const coreValues = getList('core-values', [
-    { icon:'🕊️', label:'Peace & Harmony' },
-    { icon:'🎓', label:'Academic Excellence' },
-    { icon:'🤝', label:'Inclusivity' },
-    { icon:'💡', label:'Innovation' },
-    { icon:'🌿', label:'Service to Society' },
-    { icon:'⚖️', label:'Integrity' },
+    { label:'Peace & Harmony' },
+    { label:'Academic Excellence' },
+    { label:'Inclusivity' },
+    { label:'Innovation' },
+    { label:'Service to Society' },
+    { label:'Integrity' },
   ]);
+
+  const getCoreValueIcon = (label) => {
+    const l = String(label).toLowerCase();
+    if (l.includes('peace') || l.includes('harmony')) return <HeartHandshake size={32} color={G} />;
+    if (l.includes('academic') || l.includes('excellence')) return <GraduationCap size={32} color={N} />;
+    if (l.includes('inclusiv')) return <Users size={32} color={G} />;
+    if (l.includes('innovat')) return <Lightbulb size={32} color={N} />;
+    if (l.includes('service') || l.includes('society')) return <Sparkles size={32} color={G} />;
+    if (l.includes('integr') || l.includes('truth')) return <Scale size={32} color={N} />;
+    return <Award size={32} color={G} />;
+  };
 
   return (
     <div>
-      <PageHero title={content?.title || "Vision & Mission"} subtitle={content?.subtitle || "Our guiding principles and future aspirations"} icon="🌟" />
+      <PageHero title={content?.title || "Vision & Mission"} subtitle={content?.subtitle || "Our guiding principles and future aspirations"} icon={<Sparkles size={40} />} />
       <PageLayout>
         <Fade>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))', gap:24, marginBottom:32 }}>
             <div style={{ background:'#fff', borderRadius:20, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', overflow:'hidden' }}>
               <div style={{ height:6, background:G }} />
               <div style={{ padding:32 }}>
-                <div style={{ fontSize:42, marginBottom:14 }}>🎯</div>
+                <Target size={38} color={G} style={{ marginBottom: 14 }} />
                 <h2 style={{ color:N, fontSize:22, fontWeight:800, marginBottom:16 }}>Our Vision</h2>
                 <div style={{ color:'#475569', lineHeight:1.8, fontSize:15 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(visionText) }} />
               </div>
@@ -271,7 +296,7 @@ export function VisionMission() {
             <div style={{ background:'#fff', borderRadius:20, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', overflow:'hidden' }}>
               <div style={{ height:6, background:N }} />
               <div style={{ padding:32 }}>
-                <div style={{ fontSize:42, marginBottom:14 }}>📌</div>
+                <Compass size={38} color={N} style={{ marginBottom: 14 }} />
                 <h2 style={{ color:N, fontSize:22, fontWeight:800, marginBottom:16 }}>Our Mission</h2>
                 <div style={{ color:'#475569', lineHeight:1.8, fontSize:15 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(missionText) }} />
               </div>
@@ -288,7 +313,7 @@ export function VisionMission() {
                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(15,35,71,.1)'; e.currentTarget.style.borderColor = G; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
                 >
-                  <div style={{ fontSize:32, marginBottom:8 }}>{v.icon}</div>
+                  <div style={{ marginBottom:8, display:'flex', justifyContent:'center' }}>{getCoreValueIcon(v.label)}</div>
                   <div style={{ fontSize:13, fontWeight:700, color:N }}>{v.label}</div>
                 </div>
               ))}
@@ -322,7 +347,7 @@ export function PrincipalMessage() {
 
   return (
     <div>
-      <PageHero title={content?.title || "Principal's Message"} subtitle={content?.subtitle || "A word from our Principal to students and parents"} icon="🎓" />
+      <PageHero title={content?.title || "Principal's Message"} subtitle={content?.subtitle || "A word from our Principal to students and parents"} icon={<GraduationCap size={40} />} />
       <PageLayout>
         <Fade>
           <div style={{ background:'#fff', borderRadius:20, padding:40, boxShadow:'0 8px 30px rgba(0,0,0,0.07)' }}>
@@ -330,7 +355,7 @@ export function PrincipalMessage() {
               <div style={{ textAlign:'center', flexShrink:0 }}>
                 <DataMarker label="Principal ki photo ka path — src mein dalein" />
                 <div style={{ width:180, height:180, borderRadius:'50%', border:`6px solid ${G}`, boxShadow:'0 10px 30px rgba(15,35,71,0.2)', overflow:'hidden', margin:'0 auto', background:'#f1f5f9', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <img src={`${import.meta.env.BASE_URL}${pInfo.photo || 'images/principal.webp'}`} alt="Principal" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<span style=\"font-size:72px\">👨‍💼</span>'; }} />
+                  <img src={`${import.meta.env.BASE_URL}${pInfo.photo || 'images/principal.webp'}`} alt="Principal" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<div style=\"display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8\"><svg width=\"64\" height=\"64\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><polyline points=\"16 11 18 13 22 9\"/></svg></div>'; }} />
                 </div>
                 <div style={{ marginTop:14, fontWeight:800, fontSize:18, color:N }}>{pInfo.name}</div>
                 <div style={{ fontSize:13, color:'#64748b', marginTop:4 }}>{pInfo.designation}</div>
@@ -370,7 +395,7 @@ export function Organogram() {
 
   return (
     <div>
-      <PageHero title={content?.title || "Organogram"} subtitle={content?.subtitle || "Organizational structure and hierarchy of Guru Nanak College, Dhanbad"} icon="🏛️" />
+      <PageHero title={content?.title || "Organogram"} subtitle={content?.subtitle || "Organizational structure and hierarchy of Guru Nanak College, Dhanbad"} icon={<Landmark size={40} />} />
       <PageLayout>
         {/* Image fallback */}
         <Fade delay={0.15}>
@@ -387,7 +412,7 @@ export function Organogram() {
                    setSelectedPdf({ url: pdfUrl, title: 'Organogram' });
                 }}
                 style={{ display:'inline-flex', alignItems:'center', gap:8, background:'#0f2347', color:'#fff', padding:'10px 22px', borderRadius:10, fontWeight:700, fontSize:14, textDecoration:'none' }}>
-                📄 View Organogram PDF
+                <FileText size={16} /> View Organogram PDF
               </a>
             </div>
           </div>
@@ -419,7 +444,7 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
   // ── CMS data with prop fallbacks ──
   const purposeList = getList('purpose', purpose);
   const respList = getList('responsibilities', responsibilities);
-  const chairInfo = getObject('chairperson', { name: '✏️ [Chairperson Name]', designation: '✏️ [Designation, Department]' });
+  const chairInfo = getObject('chairperson', { name: 'Chairperson / Convener', designation: 'Faculty In-Charge' });
   const membersData = getTable('members', null);
   useScrollTop();
   const [selectedPdf, setSelectedPdf] = useState(null); // ✅ PDF Modal State
@@ -431,10 +456,9 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
           <div style={{ background:'#fff', borderRadius:20, padding:32, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:20 }}>
             <div style={{ display:'flex', gap:20, alignItems:'center', padding:20, background:`linear-gradient(135deg,${N},#1a3a7c)`, borderRadius:14, color:'#fff', flexWrap:'wrap', justifyContent: 'space-between' }}>
               <div style={{display: 'flex', gap: 20, alignItems: 'center'}}>
-                <div style={{ width:72, height:72, borderRadius:'50%', background:'rgba(255,255,255,0.15)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:34, border:`3px solid ${G}`, flexShrink:0 }}>{icon}</div>
+                <div style={{ width:72, height:72, borderRadius:'50%', background:'rgba(255,255,255,0.15)', display:'flex', alignItems:'center', justifyContent:'center', border:`3px solid ${G}`, flexShrink:0 }}>{icon}</div>
                 <div>
                   <div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase', letterSpacing:1 }}>Chairperson / Convener</div>
-                  <DataMarker label={`${name} ke Chairperson ka naam aur designation`} />
                   <div style={{ fontSize:18, fontWeight:800 }}>{chairInfo.name}</div>
                   <div style={{ fontSize:13, color:'#cbd5e1', marginTop:4 }}>{chairInfo.designation}</div>
                 </div>
@@ -447,7 +471,7 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
                     style={{ background:G, color:N, padding:'10px 20px', border: 'none', borderRadius:10, fontWeight:800, fontSize:13, cursor:'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'transform 0.25s cubic-bezier(.22,1,.36,1), box-shadow 0.25s ease', minHeight:44 }}
                     onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
                     onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
-                    📄 View Committee Report
+                    <FileText size={15} /> View Committee Report
                   </button>
               )}
             </div>
@@ -481,7 +505,6 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
           <div style={{ background:'#fff', borderRadius:20, padding:32, boxShadow:'0 8px 30px rgba(0,0,0,0.07)' }}>
             <h2 className="section-heading">Committee Members</h2>
             <div className="heading-underline" />
-            <DataMarker label={`${name} ke members — naam, designation, role`} />
             <div style={{ overflowX:'auto' }}>
               <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
                 <thead>
@@ -492,10 +515,16 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
                   </tr>
                 </thead>
                 <tbody>
-                  {(membersData?.rows || [[1,'✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Chairperson'],[2,'✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Member Secretary'],[3,'✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Member'],[4,'✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Member'],[5,'✏️ [Name]','✏️ [Designation]','✏️ [Dept]','Member']]).map((row,i)=>(
+                  {(membersData?.rows || [
+                    [1, 'Chairperson', 'Faculty In-Charge', 'Designated Department', 'Chairperson'],
+                    [2, 'Member Secretary', 'Assistant Professor', 'Designated Department', 'Member Secretary'],
+                    [3, 'Senior Faculty Member', 'Associate Professor', 'Designated Department', 'Member'],
+                    [4, 'Faculty Member', 'Assistant Professor', 'Designated Department', 'Member'],
+                    [5, 'Student / Community Nominee', 'Representative', 'College Council', 'Member']
+                  ]).map((row,i)=>(
                     <tr key={i} style={{ background:i%2===0?'#f8fafc':'#fff', borderBottom:'1px solid #e2e8f0' }}>
                       {row.map((cell, ci) => (
-                        <td key={ci} style={{ padding:'11px 16px', fontWeight: ci===1 ? 600 : 400, color: ci===0 ? '#64748b' : ci<4 ? (String(cell).includes('✏️') ? '#94a3b8' : N) : 'inherit' }}>
+                        <td key={ci} style={{ padding:'11px 16px', fontWeight: ci===1 ? 600 : 400, color: ci===0 ? '#64748b' : ci<4 ? N : 'inherit' }}>
                           {ci === row.length - 1 ? (
                             <span style={{ background: String(cell).includes('Chairperson')?'#fef3c7': String(cell).includes('Secretary')?'#dcfce7':'#f1f5f9', color: String(cell).includes('Chairperson')?'#92400e': String(cell).includes('Secretary')?'#166534':'#475569', padding:'3px 10px', borderRadius:6, fontSize:12, fontWeight:700 }}>{cell}</span>
                           ) : cell}
@@ -523,15 +552,15 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
   );
 }
 
-export function WomensCell()    { return <CommitteePage slug="womens-cell" name="Women's Cell" icon="👩‍💼" desc="Dedicated to the safety, empowerment, and welfare of female students and staff at GNC." purpose={["Ensure a safe and harassment-free environment for women on campus.","Conduct awareness programs on women's rights and legal provisions.","Provide counselling and support to female students in need."]} responsibilities={["Monitor campus safety for women","Handle complaints related to women's issues","Organize gender sensitization workshops","Coordinate with ICC for harassment cases"]}/>; }
-export function AntiRagging()   { return <CommitteePage slug="anti-ragging" name="Anti-Ragging Committee" icon="🚫" desc="Committed to maintaining a 100% ragging-free campus in compliance with UGC & Supreme Court guidelines." purpose={["Prevent and prohibit ragging in all forms on campus.","Create awareness among students about legal consequences of ragging.","Investigate complaints and take strict action against offenders."]} responsibilities={["Display anti-ragging notices","Collect anti-ragging affidavits","Investigate complaints promptly","Coordinate with police if required","Conduct orientation programs"]}/>; }
-export function ScStCell()      { return <CommitteePage slug="sc-st" name="SC/ST Cell" icon="🤝" desc="A dedicated welfare and support centre for Scheduled Caste and Scheduled Tribe students." purpose={["Ensure equal educational opportunities for SC/ST students.","Guide students about government scholarships and reservations.","Resolve academic and social issues faced by SC/ST students."]} responsibilities={["Facilitate scholarship applications","Address grievances of SC/ST students","Organize awareness camps","Maintain data of SC/ST enrollment","Liaison with government welfare departments"]}/>; }
-export function ObcCell()       { return <CommitteePage slug="obc" name="OBC Cell" icon="📚" desc="Supporting students from Other Backward Classes with their academic and welfare needs." purpose={["Facilitate awareness of OBC reservations and government schemes.","Guide OBC students for scholarship applications.","Provide academic and career counselling."]} responsibilities={["Scholarship guidance for OBC students","Address academic grievances","Facilitate income/caste certificate help","Organize career awareness programs"]}/>; }
-export function GrievanceCell() { return <CommitteePage slug="grievance" name="Grievance Redressal Cell" icon="⚖️" desc="An official platform for students and staff to raise and resolve their academic and administrative grievances." purpose={["Provide a fair and transparent mechanism for addressing grievances.","Ensure prompt redressal of student and staff complaints.","Maintain a record of grievances and their resolution."]} responsibilities={["Receive and register grievances","Investigate complaints within stipulated time","Maintain grievance register","Submit reports to Principal","Ensure confidentiality and impartiality"]}/>; }
-export function IccCell()       { return <CommitteePage slug="icc" name="Internal Complaints Committee (ICC)" icon="🛡️" desc="Constituted under Sexual Harassment of Women at Workplace Act, 2013." purpose={["Prevent, prohibit, and redress sexual harassment complaints.","Conduct sensitization programs for students and staff.","Ensure impartial inquiry and fair resolution of complaints."]} responsibilities={["Receive complaints of sexual harassment","Conduct inquiry within 90 days","Maintain confidentiality of complainant","Submit annual report to District Officer","Organize prevention workshops"]}/>; }
-export function MinorityCell()  { return <CommitteePage slug="minority" name="Minority Cell" icon="🌙" desc="A welfare cell to support and guide students from minority communities in their academic journey." purpose={["Guide minority students about government scholarships and schemes.","Create an inclusive environment for minority students.","Address specific academic and personal issues."]} responsibilities={["Pre-matric and post-matric scholarship guidance","Address minority student grievances","Organize awareness programs","Maintain enrollment data"]}/>; }
-export function PlacementCell() { return <CommitteePage slug="placement" name="Placement Cell" icon="💼" desc="Bridging students with career opportunities through training, internships, and campus placements." purpose={["Facilitate campus placements and internship opportunities.","Organize skill development and career guidance programs.","Maintain industry-academia partnerships."]} responsibilities={["Coordinate with companies for campus drives","Organize mock interviews and GD sessions","Maintain placement records","Career counselling for final year students","Organize job fairs"]}/>; }
-export function RusaCell()      { return <CommitteePage slug="rusa" name="RUSA Cell" icon="🏛️" desc="Rashtriya Uchchatar Shiksha Abhiyan — implementing central schemes for quality improvement in higher education." purpose={["Implement RUSA-funded projects and infrastructure development.","Ensure compliance with RUSA guidelines and reporting requirements."]} responsibilities={["Coordinate RUSA grant utilization","Maintain RUSA project documentation","Submit utilization certificates","Monitor RUSA-funded activities","Liaison with State Higher Education Council"]}/>; }
+export function WomensCell()    { return <CommitteePage slug="womens-cell" name="Women's Cell" icon={<UserCheck size={32} />} desc="Dedicated to the safety, empowerment, and welfare of female students and staff at GNC." purpose={["Ensure a safe and harassment-free environment for women on campus.","Conduct awareness programs on women's rights and legal provisions.","Provide counselling and support to female students in need."]} responsibilities={["Monitor campus safety for women","Handle complaints related to women's issues","Organize gender sensitization workshops","Coordinate with ICC for harassment cases"]}/>; }
+export function AntiRagging()   { return <CommitteePage slug="anti-ragging" name="Anti-Ragging Committee" icon={<Ban size={32} />} desc="Committed to maintaining a 100% ragging-free campus in compliance with UGC & Supreme Court guidelines." purpose={["Prevent and prohibit ragging in all forms on campus.","Create awareness among students about legal consequences of ragging.","Investigate complaints and take strict action against offenders."]} responsibilities={["Display anti-ragging notices","Collect anti-ragging affidavits","Investigate complaints promptly","Coordinate with police if required","Conduct orientation programs"]}/>; }
+export function ScStCell()      { return <CommitteePage slug="sc-st" name="SC/ST Cell" icon={<HeartHandshake size={32} />} desc="A dedicated welfare and support centre for Scheduled Caste and Scheduled Tribe students." purpose={["Ensure equal educational opportunities for SC/ST students.","Guide students about government scholarships and reservations.","Resolve academic and social issues faced by SC/ST students."]} responsibilities={["Facilitate scholarship applications","Address grievances of SC/ST students","Organize awareness camps","Maintain data of SC/ST enrollment","Liaison with government welfare departments"]}/>; }
+export function ObcCell()       { return <CommitteePage slug="obc" name="OBC Cell" icon={<BookOpen size={32} />} desc="Supporting students from Other Backward Classes with their academic and welfare needs." purpose={["Facilitate awareness of OBC reservations and government schemes.","Guide OBC students for scholarship applications.","Provide academic and career counselling."]} responsibilities={["Scholarship guidance for OBC students","Address academic grievances","Facilitate income/caste certificate help","Organize career awareness programs"]}/>; }
+export function GrievanceCell() { return <CommitteePage slug="grievance" name="Grievance Redressal Cell" icon={<Scale size={32} />} desc="An official platform for students and staff to raise and resolve their academic and administrative grievances." purpose={["Provide a fair and transparent mechanism for addressing grievances.","Ensure prompt redressal of student and staff complaints.","Maintain a record of grievances and their resolution."]} responsibilities={["Receive and register grievances","Investigate complaints within stipulated time","Maintain grievance register","Submit reports to Principal","Ensure confidentiality and impartiality"]}/>; }
+export function IccCell()       { return <CommitteePage slug="icc" name="Internal Complaints Committee (ICC)" icon={<ShieldCheck size={32} />} desc="Constituted under Sexual Harassment of Women at Workplace Act, 2013." purpose={["Prevent, prohibit, and redress sexual harassment complaints.","Conduct sensitization programs for students and staff.","Ensure impartial inquiry and fair resolution of complaints."]} responsibilities={["Receive complaints of sexual harassment","Conduct inquiry within 90 days","Maintain confidentiality of complainant","Submit annual report to District Officer","Organize prevention workshops"]}/>; }
+export function MinorityCell()  { return <CommitteePage slug="minority" name="Minority Cell" icon={<Moon size={32} />} desc="A welfare cell to support and guide students from minority communities in their academic journey." purpose={["Guide minority students about government scholarships and schemes.","Create an inclusive environment for minority students.","Address specific academic and personal issues."]} responsibilities={["Pre-matric and post-matric scholarship guidance","Address minority student grievances","Organize awareness programs","Maintain enrollment data"]}/>; }
+export function PlacementCell() { return <CommitteePage slug="placement" name="Placement Cell" icon={<Briefcase size={32} />} desc="Bridging students with career opportunities through training, internships, and campus placements." purpose={["Facilitate campus placements and internship opportunities.","Organize skill development and career guidance programs.","Maintain industry-academia partnerships."]} responsibilities={["Coordinate with companies for campus drives","Organize mock interviews and GD sessions","Maintain placement records","Career counselling for final year students","Organize job fairs"]}/>; }
+export function RusaCell()      { return <CommitteePage slug="rusa" name="RUSA Cell" icon={<Landmark size={32} />} desc="Rashtriya Uchchatar Shiksha Abhiyan — implementing central schemes for quality improvement in higher education." purpose={["Implement RUSA-funded projects and infrastructure development.","Ensure compliance with RUSA guidelines and reporting requirements."]} responsibilities={["Coordinate RUSA grant utilization","Maintain RUSA project documentation","Submit utilization certificates","Monitor RUSA-funded activities","Liaison with State Higher Education Council"]}/>; }
 
 
 /* ═══════════════════════════════════════════════════════════════
@@ -548,14 +577,13 @@ export function GoverningBody() {
 
   return (
     <div>
-      <PageHero title={content?.title || "Governing Body"} subtitle={content?.subtitle || "The apex decision-making body of Guru Nanak College, Dhanbad"} icon="🏛️" />
+      <PageHero title={content?.title || "Governing Body"} subtitle={content?.subtitle || "The apex decision-making body of Guru Nanak College, Dhanbad"} icon={<Landmark size={40} />} />
       <PageLayout>
         <Fade>
           <div style={{ background:'#fff', borderRadius:20, padding:36, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:24 }}>
             <h2 className="section-heading">About the Governing Body</h2>
             <div className="heading-underline" />
             <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutText) }} />
-            <DataMarker label="Current session, total members, chairperson naam — niche stats box mein dalein" />
             <div style={{ marginTop:20, padding:'16px 24px', background:`linear-gradient(135deg,${N},#1a3a7c)`, borderRadius:12, color:'#fff', display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}>
               <div><div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase' }}>Current Session</div><div style={{ fontWeight:800, fontSize:18 }}>{gbStats.session || '2024-25'}</div></div>
               <div><div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase' }}>Total Members</div><div style={{ fontWeight:800, fontSize:18 }}>{gbStats.totalMembers || '8'}</div></div>
@@ -567,7 +595,6 @@ export function GoverningBody() {
           <div style={{ background:'#fff', borderRadius:20, padding:36, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:24 }}>
             <h2 className="section-heading">Members of Governing Body</h2>
             <div className="heading-underline" />
-            <DataMarker label="Saare members ka naam, designation, category, role dalein" />
             <div style={{ overflowX:'auto' }}>
               <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
                 <thead>
@@ -631,7 +658,7 @@ export function StaffCouncil() {
 
   return (
     <div>
-      <PageHero title={content?.title || "Staff Council"} subtitle={content?.subtitle || "The collective voice of teaching and non-teaching staff at GNC"} icon="👨‍🏫" />
+      <PageHero title={content?.title || "Staff Council"} subtitle={content?.subtitle || "The collective voice of teaching and non-teaching staff at GNC"} icon={<Users size={40} />} />
       <PageLayout>
         <Fade>
           <div style={{ background:'#fff', borderRadius:20, padding:36, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:24 }}>
@@ -644,7 +671,6 @@ export function StaffCouncil() {
           <div style={{ background:'#fff', borderRadius:20, padding:36, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:24 }}>
             <h2 className="section-heading">Staff Council Members</h2>
             <div className="heading-underline" />
-            <DataMarker label="Staff Council ke members — naam, designation, department, role" />
             <div style={{ overflowX:'auto' }}>
               <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
                 <thead>
@@ -724,7 +750,7 @@ export function AuditReport() {
       <PageHero
         title="Audit Report"
         subtitle="Annual audit reports and financial statements of Guru Nanak College, Dhanbad"
-        icon="📊"
+        icon={<FileCheck size={40} />}
       />
       <PageLayout>
         <Fade>
@@ -733,10 +759,12 @@ export function AuditReport() {
             <div className="heading-underline" />
 
             {loading ? (
-              <div style={{ padding:32, textAlign:'center', color:'#94a3b8' }}>⏳ Loading…</div>
+              <div style={{ padding:32, textAlign:'center', color:'#64748b', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
+                <Loader2 size={18} className="spin-animate" /> Loading audit reports…
+              </div>
             ) : docs.length === 0 ? (
               <div style={{ padding:32, textAlign:'center', color:'#94a3b8', background:'#f8fafc', borderRadius:12, border:'1px solid #e2e8f0' }}>
-                <div style={{ fontSize:36, marginBottom:10 }}>📊</div>
+                <FileCheck size={38} color="#94a3b8" style={{ margin: '0 auto 10px' }} />
                 <div style={{ fontWeight:700, marginBottom:6 }}>No audit reports have been uploaded yet.</div>
                 <div style={{ fontSize:13 }}>Annual financial statements and audit certificates will appear here once published.</div>
               </div>
@@ -749,12 +777,14 @@ export function AuditReport() {
                     border:'1.5px solid #e2e8f0', borderLeft:`5px solid ${N}`,
                     borderRadius:12, transition:'all .2s',
                   }}>
-                    <div style={{ fontSize:32, flexShrink:0 }}>📄</div>
+                    <div style={{ flexShrink:0 }}>
+                      <FileText size={28} color={N} />
+                    </div>
                     <div style={{ flex:1 }}>
                       <div style={{ fontWeight:800, color:N, fontSize:15 }}>{doc.title}</div>
                       {doc.date && (
-                        <div style={{ fontSize:12, color:'#64748b', marginTop:4 }}>
-                          📅 {new Date(doc.date).toLocaleDateString('en-IN', { year:'numeric', month:'long', day:'numeric' })}
+                        <div style={{ fontSize:12, color:'#64748b', marginTop:4, display:'flex', alignItems:'center', gap:4 }}>
+                          <Calendar size={13} /> {new Date(doc.date).toLocaleDateString('en-IN', { year:'numeric', month:'long', day:'numeric' })}
                         </div>
                       )}
                     </div>
@@ -771,15 +801,18 @@ export function AuditReport() {
                       onMouseEnter={e => e.currentTarget.style.background = G}
                       onMouseLeave={e => e.currentTarget.style.background = N}
                     >
-                      📥 View Report
+                      <Download size={15} /> View Report
                     </button>
                   </div>
                 ))}
               </div>
             )}
 
-            <div style={{ marginTop:24, padding:'14px 18px', background:'#fffbeb', border:'1.5px dashed #f59e0b', borderRadius:10, fontSize:13, color:'#92400e' }}>
-              💡 <strong>Administrator Guidance:</strong> Publish annual audit statements via Admin Panel → Documents → Target Page: <code style={{ background:'#fef3c7', padding:'1px 6px', borderRadius:4 }}>Audit Report (/about-us/audit-report)</code>.
+            <div style={{ marginTop:24, padding:'14px 18px', background:'#fffbeb', border:'1.5px dashed #f59e0b', borderRadius:10, fontSize:13, color:'#92400e', display:'flex', alignItems:'center', gap:8 }}>
+              <Info size={18} color="#d97706" style={{ flexShrink:0 }} />
+              <div>
+                <strong>Administrator Guidance:</strong> Publish annual audit statements via Admin Panel → Documents → Target Page: <code style={{ background:'#fef3c7', padding:'1px 6px', borderRadius:4 }}>Audit Report (/about-us/audit-report)</code>.
+              </div>
             </div>
           </div>
         </Fade>

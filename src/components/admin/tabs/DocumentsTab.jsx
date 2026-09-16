@@ -10,6 +10,7 @@ import {
   collection, addDoc, updateDoc, doc, serverTimestamp,
 } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { FolderArchive, FileText, BookOpen, Download, Eye, EyeOff, Edit2, Trash2, Plus, CheckCircle2, ExternalLink, FileSpreadsheet, Star, X, Image as ImageIcon } from 'lucide-react';
 import MediaPicker from '../../MediaPicker';
 import {
   T, NAVY, GOLD, BG, useLocalDraft, SectionSearch, BulkBar, MiniLog,
@@ -28,15 +29,15 @@ export const DOCUMENT_CATEGORIES = [
 ];
 
 export const TARGET_DESTINATIONS = [
-  { id: 'magazine',       label: '📰 E-Magazine Portal (/publication/e-magazine)', defaultCat: 'E-Magazine & Publications' },
-  { id: 'documents',      label: '🗂️ Universal Document Archive (/documents)',     defaultCat: 'General College Documents' },
-  { id: 'audit-report',   label: '🏛️ Audit Reports Page (/about-us/audit-report)',  defaultCat: 'Audit Reports & Financials' },
-  { id: 'naac',           label: '📈 NAAC SSR & IQAC Repository (/naac)',          defaultCat: 'NAAC, SSR & IQAC Reports' },
-  { id: 'iqac',           label: '🎯 IQAC Quality Benchmarks (/academics/iqac)',   defaultCat: 'NAAC, SSR & IQAC Reports' },
-  { id: 'result-2024',    label: '🏆 Exam Results 2024 (/publication/results)',    defaultCat: 'Examination Results' },
-  { id: 'result-2023',    label: '🏆 Exam Results 2023 (/publication/results)',    defaultCat: 'Examination Results' },
-  { id: 'sss-2023-24',    label: '📊 SSS Report 2023-24 (/publication/sss-report)', defaultCat: 'NAAC, SSR & IQAC Reports' },
-  { id: 'syllabus',       label: '📚 Department Syllabus & Regulations',           defaultCat: 'Academic Syllabus & Regulations' },
+  { id: 'magazine',       label: 'E-Magazine Portal (/publication/e-magazine)', defaultCat: 'E-Magazine & Publications' },
+  { id: 'documents',      label: 'Universal Document Archive (/documents)',     defaultCat: 'General College Documents' },
+  { id: 'audit-report',   label: 'Audit Reports Page (/about-us/audit-report)',  defaultCat: 'Audit Reports & Financials' },
+  { id: 'naac',           label: 'NAAC SSR & IQAC Repository (/naac)',          defaultCat: 'NAAC, SSR & IQAC Reports' },
+  { id: 'iqac',           label: 'IQAC Quality Benchmarks (/academics/iqac)',   defaultCat: 'NAAC, SSR & IQAC Reports' },
+  { id: 'result-2024',    label: 'Exam Results 2024 (/publication/results)',    defaultCat: 'Examination Results' },
+  { id: 'result-2023',    label: 'Exam Results 2023 (/publication/results)',    defaultCat: 'Examination Results' },
+  { id: 'sss-2023-24',    label: 'SSS Report 2023-24 (/publication/sss-report)', defaultCat: 'NAAC, SSR & IQAC Reports' },
+  { id: 'syllabus',       label: 'Department Syllabus & Regulations',           defaultCat: 'Academic Syllabus & Regulations' },
 ];
 
 export default function DocumentsTab({
@@ -175,41 +176,45 @@ export default function DocumentsTab({
       {/* ── HEADER RIBBON ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
         <div>
-          <p className="asec" style={{ margin: 0, fontSize: 'clamp(20px, 3vw, 24px)', fontWeight: 900, color: NAVY }}>
-            📁 Universal Document & Publication Vault
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+            <FolderArchive size={26} color={GOLD} />
+            <h2 className="asec" style={{ margin: 0, fontSize: 'clamp(20px, 3vw, 24px)', fontWeight: 900, color: NAVY }}>
+              Universal Document &amp; Publication Vault
+            </h2>
+          </div>
           <p className="asub" style={{ margin: '4px 0 0', color: T.t3, fontSize: 13, fontWeight: 600 }}>
-            Upload E-Magazines, Annual Publications, Posters, Circulars, NAAC & Syllabi from one single command center.
+            Upload E-Magazines, Annual Publications, Posters, Circulars, NAAC &amp; Syllabi from one single command center
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <button
             type="button"
             onClick={exportDocumentsToCSV}
             className="abtn abtn-outline abtn-sm"
-            style={{ fontWeight: 800, borderColor: GOLD, color: NAVY }}
+            style={{ fontWeight: 800, borderColor: GOLD, color: NAVY, display: 'inline-flex', alignItems: 'center', gap: 6 }}
           >
-            📊 Export for NAAC Audit (.CSV)
+            <FileSpreadsheet size={14} color={NAVY} /> Export for NAAC Audit (.CSV)
           </button>
           <button
             type="button"
             onClick={() => setShowPreview(!showPreview)}
             className="abtn abtn-outline abtn-sm"
-            style={{ fontWeight: 800 }}
+            style={{ fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 6 }}
           >
-            {showPreview ? '👁️ Hide Live Card' : '👁️ Show Live Card'}
+            {showPreview ? <EyeOff size={14} /> : <Eye size={14} />}
+            {showPreview ? 'Hide Live Card' : 'Show Live Card'}
           </button>
         </div>
       </div>
 
-      {/* ── 📁 CLEAR DESTINATION INDICATOR ── */}
+      {/* ── CLEAR DESTINATION INDICATOR ── */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 12,
         background: 'linear-gradient(135deg, rgba(6, 95, 70, 0.05) 0%, rgba(5, 150, 105, 0.08) 100%)',
         border: '1.5px solid rgba(5, 150, 105, 0.2)',
         borderRadius: 14, padding: '12px 16px', margin: '0 0 20px',
       }}>
-        <span style={{ fontSize: 24 }}>📁</span>
+        <FolderArchive size={24} color="#065f46" />
         <div>
           <div style={{ fontWeight: 800, fontSize: 13, color: '#065f46' }}>
             Live Destination: Homepage Card 3 (E-Documents) &amp; /documents Archive
@@ -226,9 +231,13 @@ export default function DocumentsTab({
         {/* Left Form Column */}
         <div className="card-gold" style={{ margin: 0 }}>
           <div className="actitle" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>{editItem ? '✏️ Edit Document / Publication' : '➕ Upload New Document or E-Magazine'}</span>
-            <span style={{ fontSize: 11, fontWeight: 800, color: GOLD, background: `${NAVY}11`, padding: '2px 8px', borderRadius: 20 }}>
-              {isMagazine ? '📖 E-Magazine Mode' : '📄 Official Document Mode'}
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              {editItem ? <Edit2 size={16} color={GOLD} /> : <Plus size={16} color={GOLD} />}
+              {editItem ? 'Edit Document / Publication' : 'Upload New Document or E-Magazine'}
+            </span>
+            <span style={{ fontSize: 11, fontWeight: 800, color: GOLD, background: `${NAVY}11`, padding: '3px 10px', borderRadius: 20, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              {isMagazine ? <BookOpen size={12} /> : <FileText size={12} />}
+              {isMagazine ? 'E-Magazine Mode' : 'Official Document Mode'}
             </span>
           </div>
 
@@ -359,11 +368,11 @@ export default function DocumentsTab({
                 justifyContent: 'space-between'
               }}>
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>
-                    ⭐ Mark as Featured / Latest Issue on Bookshelf
+                  <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Star size={15} fill={GOLD} color={GOLD} /> Mark as Featured / Latest Issue on Bookshelf
                   </div>
                   <div style={{ fontSize: 11.5, color: T.t3, marginTop: 2 }}>
-                    Displays a prominent '⭐ LATEST ISSUE' badge on the digital bookshelf card.
+                    Displays a prominent 'LATEST ISSUE' badge on the digital bookshelf card.
                   </div>
                 </div>
                 <input
@@ -377,16 +386,18 @@ export default function DocumentsTab({
 
             {/* Action Buttons */}
             <div style={{ display: 'flex', gap: 10 }}>
-              <button type="submit" className="abtn abtn-gold" disabled={loading} style={{ flex: 1 }}>
-                {loading ? '⏳ Publishing...' : (editItem ? '🚀 Update Document' : '🚀 Publish Live to Website')}
+              <button type="submit" className="abtn abtn-gold" disabled={loading} style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <CheckCircle2 size={16} />
+                {loading ? 'Publishing…' : (editItem ? 'Update Document' : 'Publish Live to Website')}
               </button>
               {editItem && (
                 <button
                   type="button"
                   className="abtn abtn-outline"
                   onClick={() => { setEditItem(null); clearDraft(); }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
                 >
-                  Cancel
+                  <X size={15} /> Cancel
                 </button>
               )}
             </div>
@@ -648,7 +659,7 @@ export default function DocumentsTab({
                     {d.category}
                   </span>
                   <span className="abadge" style={{ background: '#e0f2fe', color: '#0369a1', fontSize: 10.5, fontWeight: 700 }}>
-                    🎯 /{d.targetPage || 'documents'}
+                    /{d.targetPage || 'documents'}
                   </span>
                   {d.year && <span className="abadge" style={{ background: BG, color: T.t3 }}>{d.year}</span>}
                   {d.volumeIssue && <span className="abadge" style={{ background: '#fef9c3', color: '#854d0e' }}>{d.volumeIssue}</span>}
@@ -663,9 +674,9 @@ export default function DocumentsTab({
                     target="_blank"
                     rel="noreferrer"
                     className="abtn abtn-outline abtn-sm"
-                    style={{ textDecoration: 'none', padding: '4px 8px', fontSize: 11 }}
+                    style={{ textDecoration: 'none', padding: '4px 8px', fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 4 }}
                   >
-                    👁️ View PDF
+                    <FileText size={12} /> View PDF
                   </a>
                 )}
                 {d.coverImage && (
@@ -674,10 +685,10 @@ export default function DocumentsTab({
                     target="_blank"
                     rel="noreferrer"
                     className="abtn abtn-outline abtn-sm"
-                    style={{ textDecoration: 'none', padding: '4px 8px', fontSize: 11 }}
+                    style={{ textDecoration: 'none', padding: '4px 8px', fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 4 }}
                     title="View Poster"
                   >
-                    🖼️ Poster
+                    <ImageIcon size={12} /> Poster
                   </a>
                 )}
                 <button
@@ -699,16 +710,18 @@ export default function DocumentsTab({
                     });
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  style={{ padding: '4px 8px' }}
+                  style={{ padding: '6px 8px', display: 'inline-flex', alignItems: 'center' }}
+                  title="Edit document"
                 >
-                  ✏️
+                  <Edit2 size={13} />
                 </button>
                 <button
                   className="abtn abtn-red abtn-sm"
                   onClick={() => { softDelete('pdfReports', d.id, d, d.title); clearCache('pdfReports'); }}
-                  style={{ padding: '4px 8px' }}
+                  style={{ padding: '6px 8px', display: 'inline-flex', alignItems: 'center' }}
+                  title="Delete document"
                 >
-                  🗑️
+                  <Trash2 size={13} />
                 </button>
               </div>
             </div>
@@ -717,7 +730,7 @@ export default function DocumentsTab({
 
         {filtered.length === 0 && (
           <div style={{ textAlign: 'center', padding: '40px 0', color: T.t4 }}>
-            <div style={{ fontSize: 32, marginBottom: 8 }}>📭</div>
+            <FolderArchive size={36} style={{ margin: '0 auto 8px', display: 'block', opacity: 0.4 }} />
             No documents found matching this filter.
           </div>
         )}

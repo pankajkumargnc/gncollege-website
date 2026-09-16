@@ -39,9 +39,21 @@ export default defineConfig({
       },
     },
     {
+      name: 'Tablet Landscape (1024px)',
+      use: { 
+        viewport: { width: 1024, height: 768 } 
+      },
+    },
+    {
       name: 'Desktop Standard (1440px)',
       use: { 
         viewport: { width: 1440, height: 900 } 
+      },
+    },
+    {
+      name: 'Desktop Full HD (1920px)',
+      use: { 
+        viewport: { width: 1920, height: 1080 } 
       },
     },
   ],

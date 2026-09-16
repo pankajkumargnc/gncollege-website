@@ -115,9 +115,28 @@ select:focus {
   text-decoration: none;
 }
 
-/* ══ Commandment 2 — Global Button Cursor ══ */
+/* ══ Commandment 2 — Global Button Cursor & Tactile Response ══ */
 button, [role="button"], .clickable {
   cursor: pointer;
+}
+button:active:not(:disabled),
+[role="button"]:active:not(:disabled),
+.clickable:active {
+  transform: scale(0.97);
+  transition: transform 0.08s ease;
+}
+
+/* ══ Editorial Typography & Reading Physics ══ */
+p, .prose p, .content-p {
+  text-wrap: pretty;
+  line-height: 1.68;
+}
+h1, h2, h3, h4, .heading-balanced {
+  text-wrap: balance;
+  letter-spacing: -0.02em;
+}
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
 :root {
@@ -325,15 +344,25 @@ th,
   font-feature-settings: "case" 1;
 }
 
-/* Rich body text — flush-left, ragged-right, pretty wrap */
-p, li, td, blockquote,
+/* Rich body text — full justified typography with hyphenation support */
+p,
 .rich-text-content,
 [class*="content-card"] p {
   font-family: 'Inter', sans-serif;
   line-height: 1.62;
   letter-spacing: normal;
-  text-align: left; /* Flush-left, ragged-right to prevent rivers of white space */
-  text-wrap: pretty; /* Eliminates orphan words on final lines */
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  text-wrap: pretty;
+}
+
+li, td, blockquote {
+  font-family: 'Inter', sans-serif;
+  line-height: 1.62;
+  letter-spacing: normal;
+  text-wrap: pretty;
 }
 
 /* Optimal reading line-length (45-75 characters per line) */
@@ -363,12 +392,17 @@ p:last-child {
   color: var(--text-secondary);
   font-size: var(--text-base);
   line-height: 1.75;
-  text-align: left;
+  text-align: justify;
+  text-justify: inter-word;
 }
 .rich-text-content p {
   margin-bottom: 1.25rem;
   line-height: 1.75;
   color: var(--text-secondary);
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
 }
 .rich-text-content h2,
 .rich-text-content h3,
@@ -684,6 +718,9 @@ p {
   max-width: 75ch;
   margin-bottom: var(--space-sm); 
   text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
 }
 p:last-child { margin-bottom: 0; }
 
@@ -767,35 +804,92 @@ p:last-child { margin-bottom: 0; }
 /* ═══════════════════════════════════════
    5. TEXT ALIGNMENT & SECTION HEADERS (Web Typography Rules)
 ═══════════════════════════════════════ */
-/* Body content — flush-left, ragged-right for natural reading and no white-space rivers */
-p, li, td, th {
+/* Body paragraphs — full justified alignment; lists and table cells retain left alignment */
+p {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  text-wrap: pretty;
+}
+
+li, td, th {
   text-align: left;
   text-wrap: pretty;
 }
 
-/* Notification cards — force left */
+/* ══════════════════════════════════════════════════════
+   GLOBAL BODY PARAGRAPH JUSTIFICATION ENGINE
+   Ensures all body paragraphs across every page & corner
+   have full justified alignment with clean inter-word spacing.
+   Hero titles, badges, and headers remain untouched.
+══════════════════════════════════════════════════════ */
+p,
+.rich-text-content p,
+.rich-text-content > div,
+.prose p,
+.reading-text,
+article p,
+.content-card p,
+.editorial-body,
+.page-body,
+.profile-main p,
+.about-text,
+.dynamic-section p,
+.vm-card p,
+.gnc-prose p,
+.sh-card p,
+.hub-card p,
+.dp-hl p,
+.lead-p,
+.body-paragraph,
+.policy-card p,
+.committee-desc,
+.overview-text {
+  text-align: justify !important;
+  text-justify: inter-word !important;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+/* Notification cards — titles left, body descriptions justified */
 .notif-card .rich-text-title,
 .notif-card .rich-text-title *,
-.notif-card .rich-text-desc,
-.notif-card .rich-text-desc *,
 .ns-root .ns-title,
 .ns-root .ns-title *,
 .ns-card h3,
-.ns-card h3 *,
-.ns-card .ns-item-content,
-.ns-card .ns-item-content * {
+.ns-card h3 * {
   text-align: left !important;
 }
 
-/* Standalone section headers — center aligned */
+.notif-card .rich-text-desc,
+.notif-card .rich-text-desc *,
+.flat-card p,
+.ns-card .ns-item-content p {
+  text-align: justify !important;
+  text-justify: inter-word !important;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+/* Standalone section headers & hero subtitles — center aligned */
 .section-title,
 .section-header h2,
 .section-header h3,
 .sec-h,
 .uni-header,
 .uni-header h2,
-.uni-header h3 {
-  text-align: center;
+.uni-header h3,
+.uni-header p,
+.premium-hero p,
+.profile-hero p,
+.hero-subtitle,
+.section-subtitle,
+.hf-sec-sub,
+.footer-bottom p,
+.stat-card p,
+.wof-stat p {
+  text-align: center !important;
 }
 
 /* Global NextGen Header System */
@@ -996,7 +1090,7 @@ p, li, td, th {
   width:clamp(36px,5vw,50px); height:3px;
   background:var(--gold); border-radius:2px;
 }
-.footer-desc { line-height:1.65; margin-bottom:1.5rem; color:#94a3b8; text-align: left; max-width: 48ch; text-wrap: pretty; }
+.footer-desc { line-height:1.65; margin-bottom:1.5rem; color:#94a3b8; text-align: justify; text-justify: inter-word; max-width: 48ch; text-wrap: pretty; }
 .footer-links { list-style:none; padding:0; }
 .footer-links li { margin-bottom:clamp(6px,.8vw,12px); }
 .footer-links a { color:#cbd5e1; text-decoration:none; transition:color .25s ease, padding-left .25s ease; display:flex; align-items:center; gap:8px; }
@@ -1080,7 +1174,8 @@ p, li, td, th {
   h2 { font-size:clamp(18px,5.5vw,28px); }
   h3 { font-size:clamp(16px,4.5vw,22px); }
   .stats-grid { grid-template-columns:1fr 1fr; }
-  p, li, td { text-align: left; }
+  p { text-align: justify; text-justify: inter-word; }
+  li, td { text-align: left; }
 }
 /* ═══════════════════════════════════════════════════
    GNC CONSOLIDATED v12

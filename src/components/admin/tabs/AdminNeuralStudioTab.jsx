@@ -4,6 +4,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { Sparkles, Wand2, Zap, RotateCcw, Download, RefreshCw, Cpu } from 'lucide-react';
 import { NAVY, GOLD, WHITE, BG, T, GCSS } from '../AdminShared';
 
 const AdminNeuralStudioTab = () => {
@@ -180,8 +181,8 @@ const AdminNeuralStudioTab = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32, position: 'relative', zIndex: 10 }}>
                     <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <div style={{ padding: 10, background: 'rgba(59,130,246,0.1)', borderRadius: 12 }}>
-                                <span style={{ fontSize: 24 }}>🧠</span>
+                            <div style={{ padding: 10, background: 'rgba(59,130,246,0.15)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Cpu size={24} color="#60a5fa" />
                             </div>
                             <div>
                                 <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, letterSpacing: -0.5 }}>OPEN NEURAL STUDIO<span style={{ color: '#3b82f6' }}> v3.5</span></h1>
@@ -203,11 +204,11 @@ const AdminNeuralStudioTab = () => {
 
                 {!preview ? (
                     <div className="dropzone-advanced fade-up" onClick={() => fileInputRef.current.click()}>
-                        <div style={{ fontSize: 64, marginBottom: 20 }}>🌌</div>
+                        <Wand2 size={48} color="#60a5fa" style={{ margin: '0 auto 16px', display: 'block' }} />
                         <h2 style={{ margin: '0 0 10px', color: '#fff', fontWeight: 900 }}>INITIALIZE IMAGE ASSET</h2>
-                        <p style={{ color: '#94a3b8', fontSize: 13, fontWeight: 600 }}>Feed the AI with a raw, high-resolution visual component</p>
+                        <p style={{ color: '#94a3b8', fontSize: 13, fontWeight: 600 }}>Feed the AI engine with a high-resolution visual asset</p>
                         <div style={{ marginTop: 24, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 20px', background: 'rgba(255,255,255,0.05)', borderRadius: 50, border: '1px solid rgba(255,255,255,0.1)', fontSize: 11, fontWeight: 800, color: '#f4a023' }}>
-                             ⚡ SUPPORTS: JPG &middot; PNG &middot; WEBP &middot; AVIF
+                             <Zap size={13} color="#f4a023" /> SUPPORTS: JPG &middot; PNG &middot; WEBP &middot; AVIF
                         </div>
                         <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={handleFile} />
                     </div>
@@ -240,8 +241,8 @@ const AdminNeuralStudioTab = () => {
                                     
                                     {isProcessing && (
                                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 20 }}>
-                                            <div style={{ fontSize: 64, animation: 'spin 0.5s linear infinite' }}>⚛️</div>
-                                            <div style={{ fontWeight: 900, color: '#f4a023', fontSize: 24, letterSpacing: 8, textShadow: '0 0 20px #f4a023' }}>RECONSTRUCTING...</div>
+                                            <RefreshCw size={48} color="#f4a023" className="animate-spin" />
+                                            <div style={{ fontWeight: 900, color: '#f4a023', fontSize: 22, letterSpacing: 6, textShadow: '0 0 20px #f4a023' }}>RECONSTRUCTING...</div>
                                         </div>
                                     )}
                                 </div>
@@ -283,16 +284,16 @@ const AdminNeuralStudioTab = () => {
                         <div className="control-panel">
                             <div className="action-hub">
                                 <button className="btn-neon" onClick={() => { setImg(null); setPreview(null); setProcessed(null); }} style={{ background: 'rgba(71, 85, 105, 0.4)', color: '#94a3b8' }}>
-                                    🗑️ Reset Studio
+                                    <RotateCcw size={14} /> Reset Studio
                                 </button>
                                 
                                 {!processed ? (
                                     <button className="btn-neon btn-neon-primary" onClick={processAI} disabled={isProcessing}>
-                                        ⚡ Run Neural Scan
+                                        <Zap size={14} /> Run Neural Scan
                                     </button>
                                 ) : (
                                     <button className="btn-neon btn-neon-premium" onClick={download}>
-                                        💎 Download High-Fid Banner
+                                        <Download size={14} /> Download Ultra-HD Banner
                                     </button>
                                 ) }
                             </div>

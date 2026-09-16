@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { doc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { db } from "../../../firebase";
+import { Laptop, BarChart3, Landmark, BookOpen, FileText, Globe2, History, Scale, TrendingUp, Brain, IndianRupee, Save, CheckCircle2, Loader2, Plus, Trash2, Building2, Target, Users, Sparkles } from 'lucide-react';
 import MediaPicker from "../../MediaPicker";
 import toast from 'react-hot-toast';
 
@@ -18,17 +19,17 @@ const GOLD = '#f59e0b';
 
 /* ─── data structures ─────────────────────────────────────────────────── */
 const DEPTS = [
-  { slug: 'bca',           label: 'BCA',           icon: '💻', color: BLUE },
-  { slug: 'bba',           label: 'BBA',           icon: '📊', color: GOLD },
-  { slug: 'commerce',      label: 'Commerce',      icon: '🏦', color: '#10b981' },
-  { slug: 'humanities',    label: 'Humanities (F)', icon: '📚', color: PURP },
-  { slug: 'hindi',         label: 'Hindi',         icon: '📖', color: PURP },
-  { slug: 'english',       label: 'English',       icon: '📝', color: PURP },
-  { slug: 'social-science',label: 'Social Science (F)',icon: '🌍', color: RED },
-  { slug: 'history',       label: 'History',       icon: '🏛️', color: RED },
-  { slug: 'political-science', label: 'Pol. Science', icon: '⚖️', color: RED },
-  { slug: 'economics',     label: 'Economics',     icon: '📈', color: RED },
-  { slug: 'psychology',    label: 'Psychology',    icon: '🧠', color: RED },
+  { slug: 'bca',           label: 'BCA',           icon: Laptop, color: BLUE },
+  { slug: 'bba',           label: 'BBA',           icon: BarChart3, color: GOLD },
+  { slug: 'commerce',      label: 'Commerce',      icon: Landmark, color: '#10b981' },
+  { slug: 'humanities',    label: 'Humanities (F)', icon: BookOpen, color: PURP },
+  { slug: 'hindi',         label: 'Hindi',         icon: BookOpen, color: PURP },
+  { slug: 'english',       label: 'English',       icon: FileText, color: PURP },
+  { slug: 'social-science',label: 'Social Science (F)',icon: Globe2, color: RED },
+  { slug: 'history',       label: 'History',       icon: History, color: RED },
+  { slug: 'political-science', label: 'Pol. Science', icon: Scale, color: RED },
+  { slug: 'economics',     label: 'Economics',     icon: TrendingUp, color: RED },
+  { slug: 'psychology',    label: 'Psychology',    icon: Brain, color: RED },
 ];
 
 const STREAMS = [
@@ -60,17 +61,26 @@ const SmartArea = ({ label, ...p }) => (
   </div>
 );
 
-const GlassCard = ({ children, title, icon }) => (
-  <div style={{ background: '#fff', border: '1.5px solid #f1f5f9', borderRadius: 24, padding: '28px', marginBottom: 24, boxShadow: '0 4px 6px rgba(15,35,71,.02)' }}>
-    {title && (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, paddingBottom: 16, borderBottom: '1.5px solid #f8fafc' }}>
-        <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg,#f8fafc,#f1f5f9)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>{icon}</div>
-        <div style={{ fontWeight: 800, fontSize: 16, color: NAVY }}>{title}</div>
-      </div>
-    )}
-    {children}
-  </div>
-);
+const GlassCard = ({ children, title, icon: Icon }) => {
+  const renderedIcon = React.isValidElement(Icon)
+    ? Icon
+    : (Icon ? <Icon size={18} /> : null);
+  return (
+    <div style={{ background: '#fff', border: '1.5px solid #f1f5f9', borderRadius: 24, padding: '28px', marginBottom: 24, boxShadow: '0 4px 6px rgba(15,35,71,.02)' }}>
+      {title && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, paddingBottom: 16, borderBottom: '1.5px solid #f8fafc' }}>
+          {renderedIcon && (
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg,#f8fafc,#f1f5f9)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: NAVY }}>
+              {renderedIcon}
+            </div>
+          )}
+          <div style={{ fontWeight: 800, fontSize: 16, color: NAVY }}>{title}</div>
+        </div>
+      )}
+      {children}
+    </div>
+  );
+};
 
 const PdfList = ({ reports = [], onUpdate, color = BLUE }) => {
   const [adding, setAdding] = useState(false);
@@ -80,7 +90,9 @@ const PdfList = ({ reports = [], onUpdate, color = BLUE }) => {
     <div>
       {reports.map((r, i) => (
         <div key={r.id || i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 14, background: '#f8fafc', borderRadius: 16, marginBottom: 10, border: '1px solid #f1f5f9' }}>
-           <div style={{ width: 40, height: 40, borderRadius: 10, background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>📄</div>
+           <div style={{ width: 40, height: 40, borderRadius: 10, background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#dc2626' }}>
+             <FileText size={18} />
+           </div>
            <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 800, fontSize: 14, color: NAVY }}>{r.title}</div>
               <div style={{ fontSize: 11, color: '#94a3b8' }}>{r.year} • <a href={r.pdfUrl} target="_blank" rel="noreferrer" style={{ color }}>View PDF</a></div>
@@ -160,7 +172,7 @@ export default function AdminDepartmentTab() {
         .glass-sel{background:#fff;border:1.5px solid #e2e8f0;padding:12px 14px;border-radius:12px;font-family:inherit;font-weight:600;width:100%;outline:none;}
       `}</style>
       
-      {/* 🏛️ LEFT SIDEBAR */}
+      {/* LEFT SIDEBAR */}
       <div style={{ width: 230, flexShrink: 0, position: 'sticky', top: 20, alignSelf: 'flex-start' }}>
         <h4 style={{ fontSize: 10, fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 20, paddingLeft: 8 }}>Department Nodes</h4>
         {STREAMS.map(s => {
@@ -174,51 +186,61 @@ export default function AdminDepartmentTab() {
             <div key={s.id} style={{ marginBottom: 24 }}>
                <div style={{ fontSize: 11, fontWeight: 800, color: '#cbd5e1', marginBottom: 10, paddingLeft: 12 }}>{s.label}</div>
                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                  {sDepts.map(d => (
-                    <button key={d.slug} onClick={() => setActiveDept(d.slug)} className={`aside-btn${activeDept === d.slug ? ' on' : ''}`}>
-                       <span style={{ fontSize: 18 }}>{d.icon}</span>
-                       <span style={{ fontSize: 13.5 }}>{d.label}</span>
-                    </button>
-                  ))}
+                  {sDepts.map(d => {
+                    const DeptIcon = d.icon;
+                    return (
+                      <button key={d.slug} onClick={() => setActiveDept(d.slug)} className={`aside-btn${activeDept === d.slug ? ' on' : ''}`}>
+                         <DeptIcon size={16} />
+                         <span style={{ fontSize: 13.5 }}>{d.label}</span>
+                      </button>
+                    );
+                  })}
                </div>
             </div>
           );
         })}
       </div>
 
-      {/* 🚀 MAIN PANEL */}
+      {/* MAIN PANEL */}
       <div style={{ flex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32, background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(10px)', padding: '16px 24px', borderRadius: 24, border: '1.5px solid #fff', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 10px 30px rgba(0,0,0,0.03)' }}>
            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{ width: 48, height: 48, borderRadius: 16, background: `${C}1a`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26 }}>{info.icon}</div>
+              {info && info.icon && (
+                <div style={{ width: 44, height: 44, borderRadius: 14, background: `${C}1a`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C }}>
+                  <info.icon size={22} />
+                </div>
+              )}
               <div>
-                 <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: NAVY }}>{info.label} Console</h2>
+                 <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: NAVY }}>{info?.label || 'Department'} Console</h2>
                  <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>Real-time synchronization active</div>
               </div>
            </div>
-           <button onClick={saveData} disabled={saving} className={`pbtn ${saved ? 'saved' : ''}`} style={{ minWidth: 180 }}>
-              {saving ? '⏳ Syncing...' : saved ? '✅ Saved Successfully' : '💾 Save Content'}
+           <button onClick={saveData} disabled={saving} className={`pbtn ${saved ? 'saved' : ''}`} style={{ minWidth: 170, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              {saving ? <><Loader2 size={16} className="animate-spin" /> Syncing...</> : saved ? <><CheckCircle2 size={16} /> Saved Successfully</> : <><Save size={16} /> Save Content</>}
            </button>
         </div>
 
         <div style={{ display: 'flex', gap: 16, marginBottom: 32, overflowX: 'auto', paddingBottom: 10 }}>
            {[
-             { id: 'general', label: 'Primary Info', icon: '📝' },
-             { id: 'academics', label: 'Curriculum', icon: '📖' },
-             { id: 'features', label: 'High-Impact Data', icon: '💎' },
-             { id: 'faculty', label: 'Leadership', icon: '👨‍🏫' },
-             { id: 'finance', label: 'Financials', icon: '💰' }
-           ].map(t => (
-             <button key={t.id} onClick={() => setActiveTab(t.id)} className={`tab-btn${activeTab === t.id ? ' on' : ''}`}>
-                <span style={{ marginRight: 6 }}>{t.icon}</span> {t.label}
-             </button>
-           ))}
+             { id: 'general', label: 'Primary Info', icon: FileText },
+             { id: 'academics', label: 'Curriculum', icon: BookOpen },
+             { id: 'features', label: 'Performance', icon: Sparkles },
+             { id: 'faculty', label: 'Leadership', icon: Users },
+             { id: 'finance', label: 'Financials', icon: IndianRupee }
+           ].map(t => {
+             const TabIcon = t.icon;
+             return (
+               <button key={t.id} onClick={() => setActiveTab(t.id)} className={`tab-btn${activeTab === t.id ? ' on' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <TabIcon size={15} /> {t.label}
+               </button>
+             );
+           })}
         </div>
 
         {loading ? <div style={{ textAlign: 'center', padding: 80, fontSize: 14, fontWeight: 800, color: '#cbd5e1' }}>Mounting Workspace...</div> : (
           <div className="fade-in">
              {activeTab === 'general' && (
-               <GlassCard title="Core Identity & Navigation" icon="🏢">
+               <GlassCard title="Core Identity & Navigation" icon={Building2}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
                      <SmartInput label="Full Academic Title" value={data.fullName || ''} onChange={e => set('fullName', e.target.value)} placeholder="e.g. Bachelor of Computer Applications" />
                      <SmartInput label="Department Code" value={data.short || ''} onChange={e => set('short', e.target.value)} placeholder="e.g. BCA" />
@@ -232,7 +254,9 @@ export default function AdminDepartmentTab() {
                   <SmartInput label="Marketing Tagline" value={data.tagline || ''} onChange={e => set('tagline', e.target.value)} placeholder="e.g. Code the Future. Innovate the World." />
                   <SmartArea label="Department Abstract (About)" value={data.about || ''} onChange={e => set('about', e.target.value)} placeholder="Enter a comprehensive overview of the department..." />
                   <div style={{ marginTop: 30, paddingTop: 30, borderTop: '1.5px solid #f1f5f9' }}>
-                     <h5 style={{ fontWeight: 800, color: NAVY, marginBottom: 15, fontSize: 13 }}>📋 ACTIVITY REPORTS & DOCUMENTS</h5>
+                     <h5 style={{ fontWeight: 800, color: NAVY, marginBottom: 15, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+                       <FileText size={15} /> ACTIVITY REPORTS & DOCUMENTS
+                     </h5>
                      <PdfList reports={data.programReports || []} onUpdate={v => set('programReports', v)} color={C} />
                   </div>
                </GlassCard>
@@ -240,11 +264,11 @@ export default function AdminDepartmentTab() {
 
              {activeTab === 'academics' && (
                <>
-                 <GlassCard title="Mission-Critical Vision" icon="🎯">
+                 <GlassCard title="Mission-Critical Vision" icon={Target}>
                     <SmartArea label="Strategic Vision" value={data.vision || ''} onChange={e => set('vision', e.target.value)} placeholder="Define the long-term vision for the department..." />
                     <SmartArea label="Academic Mission" value={data.mission || ''} onChange={e => set('mission', e.target.value)} placeholder="Outline the core mission and academic goals..." />
                  </GlassCard>
-                 <GlassCard title="Subject Grid / Curriculum" icon="📚">
+                 <GlassCard title="Subject Grid / Curriculum" icon={BookOpen}>
                     <div style={{ fontSize: 12, color: '#64748b', marginBottom: 20 }}>Manage semesters and their respective subjects. These appear in nested study plans on the website.</div>
                     {Object.entries(data.curriculum || {}).map(([sem, subjects]) => (
                       <div key={sem} style={{ background: '#f8fafc', padding: 24, borderRadius: 24, border: '1.5px solid #f1f5f9', marginBottom: 18 }}>
@@ -272,49 +296,49 @@ export default function AdminDepartmentTab() {
 
              {activeTab === 'features' && (
                <>
-                 <GlassCard title="Real-time Performance Metrics (Hero Stats)" icon="📈">
+                 <GlassCard title="Real-time Performance Metrics (Hero Stats)" icon={TrendingUp}>
                     { (data.stats || []).map((s, i) => (
                       <div key={i} style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr 1fr auto', gap: 12, marginBottom: 14, alignItems: 'end' }}>
-                         <SmartInput label="Icon" value={s.icon} onChange={e => { const n = [...data.stats]; n[i].icon = e.target.value; set('stats', n); }} placeholder="e.g. 🎓" />
+                         <SmartInput label="Icon" value={s.icon} onChange={e => { const n = [...data.stats]; n[i].icon = e.target.value; set('stats', n); }} placeholder="e.g. Stat" />
                          <SmartInput label="Value" value={s.value} onChange={e => { const n = [...data.stats]; n[i].value = e.target.value; set('stats', n); }} placeholder="e.g. 100%" />
                          <SmartInput label="Label" value={s.label} onChange={e => { const n = [...data.stats]; n[i].label = e.target.value; set('stats', n); }} placeholder="e.g. Placements" />
                          <SmartInput label="Sub" value={s.sub || ''} onChange={e => { const n = [...data.stats]; n[i].sub = e.target.value; set('stats', n); }} placeholder="Optional info" />
                          <button onClick={() => set('stats', data.stats.filter((_,j) => j !== i))} className="mini-del" style={{ marginBottom: 18 }}>✕</button>
                       </div>
                     ))}
-                    <button onClick={() => set('stats', [...(data.stats||[]), { icon: '📊', value: '', label: '' }])} className="add-dot-btn">+ Add High-Level Stat</button>
+                    <button onClick={() => set('stats', [...(data.stats||[]), { icon: 'Star', value: '', label: '' }])} className="add-dot-btn">+ Add High-Level Stat</button>
                  </GlassCard>
 
-                 <GlassCard title="Programme Highlights" icon="💎">
+                 <GlassCard title="Programme Highlights" icon={Sparkles}>
                     { (data.highlights || []).map((h, i) => (
                       <div key={i} style={{ display: 'grid', gridTemplateColumns: '80px 1fr 2fr auto', gap: 12, marginBottom: 14, alignItems: 'end' }}>
-                         <SmartInput label="Icon" value={h.icon} onChange={e => { const n = [...data.highlights]; n[i].icon = e.target.value; set('highlights', n); }} placeholder="⭐" />
+                         <SmartInput label="Icon" value={h.icon} onChange={e => { const n = [...data.highlights]; n[i].icon = e.target.value; set('highlights', n); }} placeholder="Star" />
                          <SmartInput label="Title" value={h.title} onChange={e => { const n = [...data.highlights]; n[i].title = e.target.value; set('highlights', n); }} placeholder="e.g. AICTE Approved" />
                          <SmartInput label="Detail" value={h.desc} onChange={e => { const n = [...data.highlights]; n[i].desc = e.target.value; set('highlights', n); }} placeholder="Brief description..." />
                          <button onClick={() => set('highlights', data.highlights.filter((_,j) => j !== i))} className="mini-del" style={{ marginBottom: 18 }}>✕</button>
                       </div>
                     ))}
-                    <button onClick={() => set('highlights', [...(data.highlights||[]), { icon: '⭐', title: '', desc: '' }])} className="add-dot-btn">+ Add Program Highlight</button>
+                    <button onClick={() => set('highlights', [...(data.highlights||[]), { icon: 'Star', title: '', desc: '' }])} className="add-dot-btn">+ Add Program Highlight</button>
                  </GlassCard>
 
-                 <GlassCard title="Infrastructure & Specialized Labs" icon="🏗️">
+                 <GlassCard title="Infrastructure & Specialized Labs" icon={Landmark}>
                     { (data.facilities || []).map((f, i) => (
                       <div key={i} style={{ display: 'grid', gridTemplateColumns: '80px 1fr 2fr auto', gap: 12, marginBottom: 14, alignItems: 'end' }}>
-                         <SmartInput label="Icon" value={f.icon} onChange={e => { const n = [...data.facilities]; n[i].icon = e.target.value; set('facilities', n); }} placeholder="🖥️" />
+                         <SmartInput label="Icon" value={f.icon} onChange={e => { const n = [...data.facilities]; n[i].icon = e.target.value; set('facilities', n); }} placeholder="Lab" />
                          <SmartInput label="Name" value={f.name} onChange={e => { const n = [...data.facilities]; n[i].name = e.target.value; set('facilities', n); }} placeholder="e.g. Advanced IT Lab" />
                          <SmartInput label="Description" value={f.desc} onChange={e => { const n = [...data.facilities]; n[i].desc = e.target.value; set('facilities', n); }} placeholder="Details about infrastructure..." />
                          <button onClick={() => set('facilities', data.facilities.filter((_,j) => j !== i))} className="mini-del" style={{ marginBottom: 18 }}>✕</button>
                       </div>
                     ))}
-                    <button onClick={() => set('facilities', [...(data.facilities||[]), { icon: '🔬', name: '', desc: '' }])} className="add-dot-btn">+ Add Facility / Lab</button>
+                    <button onClick={() => set('facilities', [...(data.facilities||[]), { icon: 'Lab', name: '', desc: '' }])} className="add-dot-btn">+ Add Facility / Lab</button>
                  </GlassCard>
 
-                 <GlassCard title="Notable Achievements" icon="🏆">
+                 <GlassCard title="Notable Achievements" icon={Target}>
                     { (data.achievements || []).map((a, i) => (
                       <div key={i} style={{ display: 'flex', gap: 14, marginBottom: 12, alignItems: 'center' }}>
                         <div style={{ fontWeight: 800, color: '#cbd5e1', fontSize: 13 }}>#{i+1}</div>
                         <input style={INP_BASE} value={a} placeholder="e.g. 100% University Result in 2023" onChange={e => { 
-                           const n = [...data.achievements]; n[i] = e.target.value; set('achievements', n); 
+                            const n = [...data.achievements]; n[i] = e.target.value; set('achievements', n); 
                         }} />
                         <button onClick={() => set('achievements', data.achievements.filter((_,j) => j !== i))} className="mini-del">✕</button>
                       </div>
@@ -325,7 +349,7 @@ export default function AdminDepartmentTab() {
              )}
 
              {activeTab === 'faculty' && (
-               <GlassCard title="Leadership at the Helm" icon="👨‍🔬">
+               <GlassCard title="Leadership at the Helm" icon={Users}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
                      <SmartInput label="HOD Name" value={data.hod?.name || ''} onChange={e => setHod('name', e.target.value)} placeholder="Prof. Name" />
                      <SmartInput label="HOD Title" value={data.hod?.desig || ''} onChange={e => setHod('desig', e.target.value)} placeholder="e.g. Head of Department, BCA" />
@@ -341,7 +365,7 @@ export default function AdminDepartmentTab() {
              )}
 
              {activeTab === 'finance' && (
-               <GlassCard title="Financial Investment Overview" icon="💹">
+               <GlassCard title="Financial Investment Overview" icon={IndianRupee}>
                   <div style={{ fontSize: 12, color: '#64748b', marginBottom: 20 }}>Categorize educational costs. These will be automatically summed up on the website.</div>
                   { (data.feeStructure || []).map((f, i) => (
                     <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr 2fr auto', gap: 12, marginBottom: 14, alignItems: 'end' }}>

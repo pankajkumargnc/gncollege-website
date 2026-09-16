@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { db } from "../../../firebase";
 import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { Camera, UploadCloud, FolderPlus, LayoutGrid, List, Edit2, Trash2, Plus, CheckCircle2, X, Star, Check } from 'lucide-react';
 import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, useLocalDraft, Toggle, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
 import { clearCache } from '../../../utils/cachedFetch';
@@ -44,7 +45,7 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
         toast.success('Photo updated!'); clearCache('gallery');
       } else {
         await addDoc(collection(db, 'gallery'), { ...payload, createdAt: serverTimestamp() });
-        toast.success('📸 Photo added!'); clearCache('gallery');
+        toast.success('Photo added!'); clearCache('gallery');
       }
       logAct(editItem ? 'update' : 'add', `Gallery: ${formData.title}`, 'gallery');
       setEditItem(null); clearDraft();
@@ -80,15 +81,15 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
         }
       } catch (err) { console.error('Upload error:', err); }
     }
-    toast.success(`🎉 ${count} photos uploaded successfully!`); clearCache('gallery');
+    toast.success(`${count} photos uploaded successfully!`); clearCache('gallery');
     logAct('add', `Bulk uploaded ${count} photos to ${formData.cat}`, 'gallery');
     setLoading(false); setProgress(0); setIsBulk(false);
   };
 
-  // ✅ Filter logic: Agar 'All Moments' hai toh sab dikhao, warna matching category
+  // Filter logic: If 'All Moments', show all, else filter by matching category
   const albums = ['All Moments', ...ALBUM_TYPES];
   const filtered = (gallery || []).filter(g => {
-    const itemCat = g.cat || g.album || 'Other'; // Purane photos support ke liye g.album
+    const itemCat = g.cat || g.album || 'Other';
     const matchSearch = !search || g.title?.toLowerCase().includes(search.toLowerCase());
     const matchAlbum  = albumFilter === 'All Moments' || itemCat === albumFilter;
     return matchSearch && matchAlbum;
@@ -96,13 +97,17 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
 
   return (
     <div className="fade-up">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>📸 Photo Gallery</p>
-          <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage college photos and albums.</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+            <Camera size={26} color={GOLD} />
+            <h2 style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>Photo Gallery Archive</h2>
+          </div>
+          <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage college photograph collections, student events, and institutional memories</p>
         </div>
-        <button className="abtn abtn-navy" style={{ marginBottom: 20 }} onClick={() => setIsBulk(!isBulk)}>
-          {isBulk ? '⬅️ Single Upload' : '🚀 Bulk Upload'}
+        <button className="abtn abtn-navy" style={{ marginBottom: 20, display: 'inline-flex', alignItems: 'center', gap: 8 }} onClick={() => setIsBulk(!isBulk)}>
+          {isBulk ? <Camera size={15} /> : <UploadCloud size={15} />}
+          <span>{isBulk ? 'Single Upload' : 'Bulk Image Dropzone'}</span>
         </button>
       </div>
 
@@ -112,16 +117,20 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
           onDragLeave={e => { e.preventDefault(); e.currentTarget.style.borderColor = NAVY; }}
           onDrop={e => { e.preventDefault(); handleBulkUpload(e.dataTransfer.files); }}>
           
-          <div style={{ fontSize: 50, marginBottom: 16 }}>📂</div>
+          <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'center' }}>
+            <UploadCloud size={48} color={GOLD} />
+          </div>
           <h3 style={{ color: NAVY, fontWeight: 900, margin: '0 0 10px' }}>Bulk Image Dropzone</h3>
           <p style={{ color: T.t3, fontSize: 13, marginBottom: 24 }}>
-            Drag multiple images here or click to browse.<br/>
-            Selected Category: <strong>{formData.cat}</strong>
+            Drag multiple images here or browse your system storage.<br/>
+            Target Category: <strong>{formData.cat}</strong>
           </p>
           
           <input type="file" multiple accept="image/*" id="bulk-input" hidden onChange={e => handleBulkUpload(e.target.files)} />
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-            <label htmlFor="bulk-input" className="abtn abtn-navy">📁 Choose Images</label>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <label htmlFor="bulk-input" className="abtn abtn-navy" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <FolderPlus size={15} /> Choose Images
+            </label>
             <select className="abtn abtn-outline" value={formData.cat} onChange={e => setFormData(d => ({ ...d, cat: e.target.value }))}>
               {ALBUM_TYPES.map(a => <option key={a} value={a}>{a}</option>)}
             </select>
@@ -132,18 +141,21 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
               <div style={{ height: 6, background: '#e2e8f0', borderRadius: 10, overflow: 'hidden', maxWidth: 300, margin: '0 auto 10px' }}>
                 <div style={{ width: `${progress}%`, height: '100%', background: GOLD, transition: 'width 0.3s' }} />
               </div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: NAVY }}>Uploading... {progress}%</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: NAVY, fontVariantNumeric: 'tabular-nums' }}>Uploading... {progress}%</div>
             </div>
           )}
         </div>
       ) : (
         <div className="card-gold">
-          <div className="actitle">{editItem ? '✏️ Edit Photo' : '➕ Add Photo'}</div>
+          <div className="actitle" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {editItem ? <Edit2 size={16} color={GOLD} /> : <Plus size={16} color={GOLD} />}
+            <span>{editItem ? 'Edit Photo' : 'Add New Photo'}</span>
+          </div>
           <form onSubmit={save}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
               <div>
                 <label className="alabel">Caption / Title *</label>
-                <input className="ainp" value={formData.title || ''} onChange={e => setFormData(d => ({ ...d, title: e.target.value }))} required placeholder="Annual Day 2025" />
+                <input className="ainp" value={formData.title || ''} onChange={e => setFormData(d => ({ ...d, title: e.target.value }))} required placeholder="Annual Sports Day 2025" />
               </div>
               <div>
                 <label className="alabel">Album / Category</label>
@@ -177,15 +189,22 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
             )}
 
             <div style={{ display: 'flex', gap: 10 }}>
-              <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editItem ? 'Update' : 'Upload'}</button>
-              {editItem && <button type="button" className="abtn abtn-outline" onClick={() => { setEditItem(null); clearDraft(); }}>Cancel</button>}
+              <button type="submit" className="abtn abtn-gold" disabled={loading} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <CheckCircle2 size={16} />
+                {loading ? 'Saving…' : editItem ? 'Update Photo' : 'Upload Photo'}
+              </button>
+              {editItem && (
+                <button type="button" className="abtn abtn-outline" onClick={() => { setEditItem(null); clearDraft(); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <X size={15} /> Cancel
+                </button>
+              )}
             </div>
           </form>
         </div>
       )}
 
       {/* Album filter Tabs */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16, alignItems: 'center' }}>
         {albums.map(a => (
           <button key={a} onClick={() => setAlbumFilter(a)}
             className="abtn abtn-sm"
@@ -194,16 +213,23 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
           </button>
         ))}
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
-          <button className="abtn abtn-sm abtn-outline" onClick={() => setViewMode('grid')} style={{ background: viewMode === 'grid' ? BG : 'white' }}>⊞ Grid</button>
-          <button className="abtn abtn-sm abtn-outline" onClick={() => setViewMode('list')} style={{ background: viewMode === 'list' ? BG : 'white' }}>☰ List</button>
+          <button className="abtn abtn-sm abtn-outline" onClick={() => setViewMode('grid')} style={{ background: viewMode === 'grid' ? BG : 'white', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <LayoutGrid size={13} /> Grid
+          </button>
+          <button className="abtn abtn-sm abtn-outline" onClick={() => setViewMode('list')} style={{ background: viewMode === 'list' ? BG : 'white', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <List size={13} /> List
+          </button>
         </div>
       </div>
 
-      <SectionSearch value={search} onChange={setSearch} placeholder="Search photos..." />
+      <SectionSearch value={search} onChange={setSearch} placeholder="Search photos by title..." />
       <BulkBar count={selected.length} onDelete={() => { bulkDelete('gallery', selected); setSelected([]); clearCache('gallery'); }} onClear={() => setSelected([])} />
 
       <div className="card">
-        <div className="actitle">Gallery ({filtered.length})</div>
+        <div className="actitle" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span>Gallery Media</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: T.t3, fontVariantNumeric: 'tabular-nums' }}>{filtered.length} photos</span>
+        </div>
 
         {viewMode === 'grid' ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: 12 }}>
@@ -225,13 +251,19 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
                   <div style={{ fontSize: 11, color: T.t3 }}>{g.cat || g.album} · {g.year}</div>
                 </div>
                 <div style={{ position: 'absolute', top: 6, right: 6, display: 'flex', gap: 4 }}>
-                  <button className="abtn abtn-xs" style={{ background: 'rgba(255,255,255,.9)', padding: '3px 7px' }}
-                    onClick={e => { e.stopPropagation(); setEditItem(g); setFormData({ title: g.title||'', cat: g.cat || g.album || 'Seminars', year: g.year||'', image: g.image||'', featured: !!g.featured }); window.scrollTo({top:0,behavior:'smooth'}); }}>✏️</button>
-                  <button className="abtn abtn-xs" style={{ background: 'rgba(239,68,68,.9)', color: 'white', padding: '3px 7px' }}
-                    onClick={e => { e.stopPropagation(); softDelete('gallery', g.id, g, g.title); clearCache('gallery'); }}>🗑️</button>
+                  <button className="abtn abtn-xs" style={{ background: 'rgba(255,255,255,.9)', padding: '4px 6px', display: 'inline-flex', alignItems: 'center' }}
+                    onClick={e => { e.stopPropagation(); setEditItem(g); setFormData({ title: g.title||'', cat: g.cat || g.album || 'Seminars', year: g.year||'', image: g.image||'', featured: !!g.featured }); window.scrollTo({top:0,behavior:'smooth'}); }} aria-label="Edit photo">
+                    <Edit2 size={12} color={NAVY} />
+                  </button>
+                  <button className="abtn abtn-xs" style={{ background: 'rgba(239,68,68,.9)', color: 'white', padding: '4px 6px', display: 'inline-flex', alignItems: 'center' }}
+                    onClick={e => { e.stopPropagation(); softDelete('gallery', g.id, g, g.title); clearCache('gallery'); }} aria-label="Delete photo">
+                    <Trash2 size={12} />
+                  </button>
                 </div>
                 {selected.includes(g.id) && (
-                  <div style={{ position: 'absolute', top: 6, left: 6, width: 22, height: 22, borderRadius: 6, background: NAVY, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 13, fontWeight: 900 }}>✓</div>
+                  <div style={{ position: 'absolute', top: 6, left: 6, width: 22, height: 22, borderRadius: 6, background: NAVY, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 13, fontWeight: 900 }}>
+                    <Check size={14} color="#fff" />
+                  </div>
                 )}
               </div>
             ))}
@@ -254,13 +286,21 @@ export default function GalleryTab({ gallery, logAct, getSectionLog, softDelete,
                 <div style={{ fontWeight: 700, color: NAVY, fontSize: 14 }}>{g.title}</div>
                 <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
                   <span className="abadge" style={{ background: BG, color: T.t2 }}>{g.cat || g.album}</span>
-                  {g.year && <span className="abadge" style={{ background: BG, color: T.t3 }}>{g.year}</span>}
-                  {g.featured && <span className="abadge" style={{ background: '#fef3c7', color: '#92400e' }}>⭐ Featured</span>}
+                  {g.year && <span className="abadge" style={{ background: BG, color: T.t3, fontVariantNumeric: 'tabular-nums' }}>{g.year}</span>}
+                  {g.featured && (
+                    <span className="abadge" style={{ background: '#fef3c7', color: '#92400e', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <Star size={11} fill="#92400e" /> Featured
+                    </span>
+                  )}
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button className="abtn abtn-outline abtn-sm" onClick={() => { setEditItem(g); setFormData({ title: g.title||'', cat: g.cat || g.album || 'Seminars', year: g.year||'', image: g.image||'', featured: !!g.featured }); window.scrollTo({top:0,behavior:'smooth'}); }}>✏️</button>
-                <button className="abtn abtn-red abtn-sm" onClick={() => softDelete('gallery', g.id, g, g.title)}>🗑️</button>
+                <button className="abtn abtn-outline abtn-sm" onClick={() => { setEditItem(g); setFormData({ title: g.title||'', cat: g.cat || g.album || 'Seminars', year: g.year||'', image: g.image||'', featured: !!g.featured }); window.scrollTo({top:0,behavior:'smooth'}); }} aria-label="Edit photo">
+                  <Edit2 size={13} />
+                </button>
+                <button className="abtn abtn-red abtn-sm" onClick={() => softDelete('gallery', g.id, g, g.title)} aria-label="Delete photo">
+                  <Trash2 size={13} />
+                </button>
               </div>
             </div>
           ))

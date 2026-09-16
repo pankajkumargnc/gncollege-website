@@ -2,6 +2,7 @@
 // GNC ADMIN — SHARED UTILITIES, THEME & COMPONENTS
 // ═══════════════════════════════════════════════════════════════════════════════
 import React, { useState, useEffect, useCallback } from 'react';
+import { Plus, Trash2, Edit2, X, Search, CheckCircle2 } from 'lucide-react';
 import '../../styles/admin.css';
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
@@ -105,7 +106,7 @@ export const StatCard = React.memo(({ icon, label, count, color = '#0f2347', sub
               {badge || 'Active'}
             </span>
           </div>
-          <div className="adm-stat-num">
+          <div className="adm-stat-num" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {a.toLocaleString()}
           </div>
           <div className="adm-stat-sub">
@@ -197,7 +198,9 @@ export const MiniLog = ({ logs }) => {
       <div style={{ fontSize: 11, fontWeight: 900, color: T.t3, marginBottom: 6, textTransform: 'uppercase', letterSpacing: .8 }}>Recent Actions</div>
       {logs.slice(0, 3).map((l, i) => (
         <div key={i} className="mini-log-item">
-          <span style={{ fontSize: 13 }}>{l.action === 'add' ? '➕' : l.action === 'delete' ? '🗑️' : '✏️'}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18 }}>
+            {l.action === 'add' ? <Plus size={13} color={T.green} /> : l.action === 'delete' ? <Trash2 size={13} color={T.red} /> : <Edit2 size={13} color={T.blue} />}
+          </span>
           <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.message}</span>
           <span style={{ color: T.t4, flexShrink: 0 }}>{l.time ? new Date(l.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</span>
         </div>
@@ -209,8 +212,12 @@ export const MiniLog = ({ logs }) => {
 export const BulkBar = ({ count, onDelete, onClear }) => count === 0 ? null : (
   <div className="bulk-bar fade-up">
     <span style={{ fontSize: 13, fontWeight: 700 }}>{count} item{count > 1 ? 's' : ''} selected</span>
-    <button className="abtn abtn-red abtn-sm" style={{ background: T.red, color: WHITE, border: 'none' }} onClick={onDelete}>🗑️ Delete Selected</button>
-    <button className="abtn abtn-outline abtn-sm" style={{ color: WHITE, borderColor: 'rgba(255,255,255,.3)' }} onClick={onClear}>✕ Clear</button>
+    <button className="abtn abtn-red abtn-sm" style={{ background: T.red, color: WHITE, border: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={onDelete}>
+      <Trash2 size={14} /> Delete Selected
+    </button>
+    <button className="abtn abtn-outline abtn-sm" style={{ color: WHITE, borderColor: 'rgba(255,255,255,.3)', display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={onClear}>
+      <X size={14} /> Clear
+    </button>
   </div>
 );
 

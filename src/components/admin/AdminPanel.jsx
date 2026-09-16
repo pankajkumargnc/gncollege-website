@@ -9,44 +9,73 @@ import {
   onSnapshot, query, orderBy, getDocs, writeBatch, limit
 } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { FileText, Users, Undo2, Trash2, ShieldCheck, LogOut } from 'lucide-react';
 import { setImgbbKey } from '../MediaPicker';
 import { NAVY, GOLD, WHITE, BG, T, useDebounce } from './AdminShared';
 import "../../styles/admin.css";
 
-// ── Lazy-loaded tab components (Path FIXED: Removed '/admin' as we are already in it) ──
-const DashboardTab      = lazy(() => import('./tabs/DashboardTab'));
-const QuickPublishTab   = lazy(() => import('./tabs/QuickPublishTab'));
-const AlertsTab         = lazy(() => import('./tabs/AlertsTab'));
-const PlacementsTab     = lazy(() => import('./tabs/PlacementsTab'));
-const FacultyTab        = lazy(() => import('./tabs/FacultyTab'));
-const SliderTab         = lazy(() => import('./tabs/SliderTab'));
-const MenuBuilderTab    = lazy(() => import('./tabs/MenuBuilderTab'));
-const PagesTab          = lazy(() => import('./tabs/PagesTab'));
-const GalleryTab        = lazy(() => import('./tabs/GalleryTab'));
-const NoticesTab        = lazy(() => import('./tabs/NoticesTab'));
-const AnnouncementsTab  = lazy(() => import('./tabs/AnnouncementsTab'));
-const DocumentsTab      = lazy(() => import('./tabs/DocumentsTab'));
-const EventsTab         = lazy(() => import('./tabs/EventsTab'));
-const YouTubeTab        = lazy(() => import('./tabs/YouTubeTab'));
-const DriveTab          = lazy(() => import('./tabs/DriveTab'));
-const SettingsTab       = lazy(() => import('./tabs/SettingsTab'));
-const ContactTab        = lazy(() => import('./tabs/ContactTab'));
-const ActivityTab       = lazy(() => import('./tabs/ActivityTab'));
-const BackupRestoreTab  = lazy(() => import('./tabs/BackupRestoreTab'));
-const SystemTestTab     = lazy(() => import('./tabs/SystemTestTab'));
-const MeetingPDFTab     = lazy(() => import('./tabs/MeetingPDFTab'));
-const TestimonialsTab   = lazy(() => import('./tabs/TestimonialsTab'));
-const ContentManagerTab = lazy(() => import('./tabs/ContentManagerTab'));
-const PollsTab          = lazy(() => import('./tabs/PollsTab'));
+// ── 🛡️ Safe Lazy Loader for Admin Tabs with Auto-Retry & Graceful Degradation ──
+const safeLazyTab = (importFn) => lazy(async () => {
+  try {
+    return await importFn();
+  } catch (err) {
+    console.warn('Tab dynamic import failed, retrying...', err);
+    try {
+      await new Promise(r => setTimeout(r, 250));
+      return await importFn();
+    } catch (retryErr) {
+      console.error('Critical: Tab module load failed:', retryErr);
+      return {
+        default: () => (
+          <div style={{ padding: '60px 24px', textAlign: 'center', background: '#fff', borderRadius: 16, border: '1.5px solid #fee2e2', margin: 20 }}>
+            <div style={{ color: '#ef4444', fontSize: 18, fontWeight: 900, marginBottom: 8 }}>Module Load Notice</div>
+            <div style={{ color: '#64748b', fontSize: 13, maxWidth: 500, margin: '0 auto 20px', lineHeight: 1.6 }}>
+              {retryErr.message || 'The requested administrative tab module could not be loaded.'}
+            </div>
+            <button className="abtn abtn-navy" onClick={() => window.location.reload()} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, margin: '0 auto' }}>
+              Reload Admin Core
+            </button>
+          </div>
+        )
+      };
+    }
+  }
+});
 
-// Purane Admin Tabs (Jo aapne tabs folder mein move kiye hain)
-const AdminNeuralStudioTab = lazy(() => import('./tabs/AdminNeuralStudioTab'));
-const AdminCampusTab    = lazy(() => import('./tabs/AdminCampusTab'));
-const AdminLeadershipTab= lazy(() => import('./tabs/AdminLeadershipTab'));
-const AdminDepartmentTab= lazy(() => import('./tabs/AdminDepartmentTab'));
+// ── Lazy-loaded tab components ───────────────────────────────────────────────
+const DashboardTab      = safeLazyTab(() => import('./tabs/DashboardTab'));
+const QuickPublishTab   = safeLazyTab(() => import('./tabs/QuickPublishTab'));
+const AlertsTab         = safeLazyTab(() => import('./tabs/AlertsTab'));
+const PlacementsTab     = safeLazyTab(() => import('./tabs/PlacementsTab'));
+const FacultyTab        = safeLazyTab(() => import('./tabs/FacultyTab'));
+const SliderTab         = safeLazyTab(() => import('./tabs/SliderTab'));
+const MenuBuilderTab    = safeLazyTab(() => import('./tabs/MenuBuilderTab'));
+const PagesTab          = safeLazyTab(() => import('./tabs/PagesTab'));
+const GalleryTab        = safeLazyTab(() => import('./tabs/GalleryTab'));
+const NoticesTab        = safeLazyTab(() => import('./tabs/NoticesTab'));
+const AnnouncementsTab  = safeLazyTab(() => import('./tabs/AnnouncementsTab'));
+const DocumentsTab      = safeLazyTab(() => import('./tabs/DocumentsTab'));
+const EventsTab         = safeLazyTab(() => import('./tabs/EventsTab'));
+const YouTubeTab        = safeLazyTab(() => import('./tabs/YouTubeTab'));
+const DriveTab          = safeLazyTab(() => import('./tabs/DriveTab'));
+const SettingsTab       = safeLazyTab(() => import('./tabs/SettingsTab'));
+const ContactTab        = safeLazyTab(() => import('./tabs/ContactTab'));
+const ActivityTab       = safeLazyTab(() => import('./tabs/ActivityTab'));
+const BackupRestoreTab  = safeLazyTab(() => import('./tabs/BackupRestoreTab'));
+const SystemTestTab     = safeLazyTab(() => import('./tabs/SystemTestTab'));
+const MeetingPDFTab     = safeLazyTab(() => import('./tabs/MeetingPDFTab'));
+const TestimonialsTab   = safeLazyTab(() => import('./tabs/TestimonialsTab'));
+const ContentManagerTab = safeLazyTab(() => import('./tabs/ContentManagerTab'));
+const PollsTab          = safeLazyTab(() => import('./tabs/PollsTab'));
 
-// Yeh component main 'components' folder mein hai (Ek step peechhe)
-const ImageCropper      = lazy(() => import('../ImageCropper'));
+// Additional Admin Tabs
+const AdminNeuralStudioTab = safeLazyTab(() => import('./tabs/AdminNeuralStudioTab'));
+const AdminCampusTab    = safeLazyTab(() => import('./tabs/AdminCampusTab'));
+const AdminLeadershipTab= safeLazyTab(() => import('./tabs/AdminLeadershipTab'));
+const AdminDepartmentTab= safeLazyTab(() => import('./tabs/AdminDepartmentTab'));
+
+// Main components
+const ImageCropper      = safeLazyTab(() => import('../ImageCropper'));
 
 // ── Error Boundary ────────────────────────────────────────────────────────────
 class AdminErrorBoundary extends React.Component {
@@ -128,7 +157,7 @@ const TabLoader = () => (
 export const ADMIN_ROLES = {
   SUPER_ADMIN: {
     id: 'SUPER_ADMIN',
-    name: '👑 Super Admin',
+    name: 'Super Administrator',
     badge: 'FULL CORE',
     desc: 'Unrestricted Access (Principal / IT Incharge)',
     color: '#f4a023',
@@ -136,7 +165,7 @@ export const ADMIN_ROLES = {
   },
   ACADEMIC_EXAM: {
     id: 'ACADEMIC_EXAM',
-    name: '📝 Exam & Academic Desk',
+    name: 'Exam & Academic Desk',
     badge: 'ACADEMICS',
     desc: 'Notices, News, Documents, Departments, Meetings',
     color: '#0284c7',
@@ -144,7 +173,7 @@ export const ADMIN_ROLES = {
   },
   CULTURAL_EVENTS: {
     id: 'CULTURAL_EVENTS',
-    name: '🎭 Events & Cultural Desk',
+    name: 'Events & Cultural Desk',
     badge: 'EVENTS',
     desc: 'Events, Gallery, Campus, YouTube, Testimonials, Slider',
     color: '#db2777',
@@ -152,7 +181,7 @@ export const ADMIN_ROLES = {
   },
   FACULTY_PLACEMENT: {
     id: 'FACULTY_PLACEMENT',
-    name: '👨‍🏫 Faculty & Alumni Desk',
+    name: 'Faculty & Alumni Desk',
     badge: 'FACULTY',
     desc: 'Faculty Directory, Placements & Alumni Wall',
     color: '#059669',
@@ -182,7 +211,7 @@ function AdminPanelInner({
     setActiveRole(newRole);
     sessionStorage.setItem('gnc_admin_role', newRole);
     const rInfo = ADMIN_ROLES[newRole];
-    toast.success(`Role switched to: ${rInfo?.name || newRole}`, { icon: '🛡️' });
+    toast.success(`Role switched to: ${rInfo?.name || newRole}`);
   };
 
   // Filter tabs according to RBAC Role
@@ -263,9 +292,11 @@ function AdminPanelInner({
     logAct('delete', `Deleted: ${displayName}`, colName);
     toast(t => (
       <span style={{ display:'flex', alignItems:'center', gap:10 }}>
-        <span>🗑️ "{displayName}" deleted</span>
+        <span>Deleted: "{displayName}"</span>
         <button onClick={async () => { try { await addDoc(collection(db, colName), data); toast.success('Restored!'); logAct('add', `Restored: ${displayName}`, colName); } catch {} toast.dismiss(t.id); }}
-          style={{ background:GOLD, color:NAVY, border:'none', borderRadius:6, padding:'4px 12px', fontWeight:800, cursor:'pointer', fontSize:12 }}>↩ Undo</button>
+          style={{ background:GOLD, color:NAVY, border:'none', borderRadius:6, padding:'4px 12px', fontWeight:800, cursor:'pointer', fontSize:12, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <Undo2 size={12} /> Undo
+        </button>
       </span>
     ), { duration: 5000 });
   }, [logAct]);
@@ -335,7 +366,7 @@ function AdminPanelInner({
   // ── ✅ PREMIUM LOGOUT FUNCTION WITH ANIMATION ─────────────────────────────
   const handlePremiumLogout = () => {
     setIsExiting(true);
-    toast.success('Terminating Session... 👋', {
+    toast.success('Terminating Session...', {
       duration: 2500,
       style: { background: '#0f2347', color: '#fff', border: '1.5px solid #f4a023' }
     });
@@ -357,8 +388,8 @@ function AdminPanelInner({
       case 'departments':  return <AdminDepartmentTab />;
       case 'campus':       return <AdminCampusTab />;
       case 'leadership':   return <AdminLeadershipTab />;
-      case 'gb_meetings':  return <MeetingPDFTab collectionName="gb_meetings" title="Governing Body (GB) Meetings" subtitle="GB Meeting PDFs — /about-us/governing-body" accentColor="#0f2347" icon="📋" {...sharedProps} />;
-      case 'staff_council':return <MeetingPDFTab collectionName="staff_council" title="Staff Council Meetings" subtitle="Staff Council PDFs — /about-us/staff-council" accentColor="#1a3a7c" icon="👨‍🏫" {...sharedProps} />;
+      case 'gb_meetings':  return <MeetingPDFTab collectionName="gb_meetings" title="Governing Body (GB) Meetings" subtitle="GB Meeting PDFs — /about-us/governing-body" accentColor="#0f2347" icon={<FileText size={20} />} {...sharedProps} />;
+      case 'staff_council':return <MeetingPDFTab collectionName="staff_council" title="Staff Council Meetings" subtitle="Staff Council PDFs — /about-us/staff-council" accentColor="#1a3a7c" icon={<Users size={20} />} {...sharedProps} />;
       case 'slider':       return <SliderTab sliderSlides={sliderSlides} {...sharedProps} />;
       case 'menu_builder': return <MenuBuilderTab navLinks={navLinks} {...sharedProps} />;
       case 'pages':        return <PagesTab pages={pages} {...sharedProps} />;

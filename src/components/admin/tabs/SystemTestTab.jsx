@@ -80,9 +80,41 @@ export default function SystemTestTab({ logAct }) {
     []
   );
 
+  // 🔐 Robust parser for audit history that transparently handles legacy base64 strings
+  const safeParseAuditHistory = () => {
+    try {
+      const raw = localStorage.getItem("gnc_audit_history");
+      if (!raw) return [];
+      if (raw.startsWith("W3") || raw.startsWith("ey")) {
+        try {
+          const decoded = decodeURIComponent(escape(atob(raw)));
+          const parsed = JSON.parse(decoded);
+          if (Array.isArray(parsed)) {
+            localStorage.setItem("gnc_audit_history", JSON.stringify(parsed));
+            return parsed;
+          }
+        } catch {
+          try {
+            const parsed = JSON.parse(atob(raw));
+            if (Array.isArray(parsed)) {
+              localStorage.setItem("gnc_audit_history", JSON.stringify(parsed));
+              return parsed;
+            }
+          } catch (_) {}
+        }
+      }
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (err) {
+      console.warn("[SystemTestTab] Recovered from corrupted audit history:", err);
+      try { localStorage.setItem("gnc_audit_history", "[]"); } catch (_) {}
+      return [];
+    }
+  };
+
   // ─── Mount: Init all background systems ─────────────────────────
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("gnc_audit_history") || "[]");
+    const saved = safeParseAuditHistory();
     setHistory(saved.slice(-30));
     fetchRecentLogs();
     startFpsMonitor();
@@ -190,9 +222,7 @@ export default function SystemTestTab({ logAct }) {
   const startScheduler = () => {
     schedulerRef.current = setInterval(async () => {
       if (document.visibilityState !== "visible") return;
-      const lastRun = JSON.parse(
-        localStorage.getItem("gnc_audit_history") || "[]"
-      ).slice(-1)[0];
+      const lastRun = safeParseAuditHistory().slice(-1)[0];
       if (!lastRun) return;
       const minutesSince = (Date.now() - lastRun.timestamp) / 60000;
       if (minutesSince < 30) return;
@@ -448,7 +478,7 @@ export default function SystemTestTab({ logAct }) {
       // 🔐 Auto-migrate/purge any legacy unencoded plain-text cache keys from older sessions
       for (let i = localStorage.length - 1; i >= 0; i--) {
         const k = localStorage.key(i);
-        if (k && (k.startsWith("gnc_") || k.startsWith("gnc-") || k.startsWith("vite-"))) {
+        if (k && (k.startsWith("gnc_") || k.startsWith("gnc-") || k.startsWith("vite-")) && k !== "gnc_audit_history") {
           const raw = localStorage.getItem(k);
           if (raw && (raw.startsWith("{") || raw.startsWith("["))) {
             try {
@@ -1031,7 +1061,7 @@ export default function SystemTestTab({ logAct }) {
 
     setAnalytics(finalAnalytics);
 
-    const previousRun = JSON.parse(localStorage.getItem("gnc_audit_history") || "[]").slice(-1)[0];
+    const previousRun = safeParseAuditHistory().slice(-1)[0];
     if (previousRun) {
       const prevScore = previousRun.score ?? previousRun.total ?? finalScore;
       const diff = finalScore - prevScore;
@@ -1046,7 +1076,7 @@ export default function SystemTestTab({ logAct }) {
       total: finalScore,
     };
     const updatedHistory = [
-      ...JSON.parse(localStorage.getItem("gnc_audit_history") || "[]"),
+      ...safeParseAuditHistory(),
       historyEntry,
     ].slice(-30);
     localStorage.setItem("gnc_audit_history", JSON.stringify(updatedHistory));

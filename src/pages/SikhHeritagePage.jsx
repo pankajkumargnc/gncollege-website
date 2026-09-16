@@ -4,6 +4,10 @@ import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeli
 import 'react-vertical-timeline-component/style.min.css';
 import { updateSEO } from '../utils/seoManager';
 import { COLORS } from '../styles/colors';
+import {
+  Bell, Landmark, Scale, HeartHandshake, GraduationCap,
+  Sparkles, FileText, Award, ArrowRight
+} from 'lucide-react';
 
 const NAVY = COLORS.navy || '#0f2347';
 const GOLD = COLORS.gold || '#f4a023';
@@ -39,11 +43,11 @@ function playHarmonicChime() {
 }
 
 const TABS = [
-  { id: 'philosophy', label: '☬ Eternal Principles', punjabi: 'ਸਿੱਖ ਸਿਧਾਂਤ', icon: '🙏' },
-  { id: 'history', label: '🏛️ Founder & Roots', punjabi: 'ਸਾਡਾ ਵਿਰਸਾ', icon: '📜' },
-  { id: 'minority', label: '⚖️ Minority Status & Rights', punjabi: 'ਘੱਟ ਗਿਣਤੀ ਦਰਜਾ', icon: '🏅' },
-  { id: 'spiritual', label: '🕌 Gurudwara & Sewa', punjabi: 'ਸੇਵਾ ਅਤੇ ਅਰਦਾਸ', icon: '🍲' },
-  { id: 'scholarships', label: '🎓 Scholarships & Welfare', punjabi: 'ਵਜ਼ੀਫ਼ੇ ਤੇ ਮਦਦ', icon: '💳' },
+  { id: 'philosophy', label: 'Eternal Principles', punjabi: 'ਸਿੱਖ ਸਿਧਾਂਤ' },
+  { id: 'history', label: 'Founder & Roots', punjabi: 'ਸਾਡਾ ਵਿਰਸਾ' },
+  { id: 'minority', label: 'Minority Status & Rights', punjabi: 'ਘੱਟ ਗਿਣਤੀ ਦਰਜਾ' },
+  { id: 'spiritual', label: 'Gurudwara & Sewa', punjabi: 'ਸੇਵਾ ਅਤੇ ਅਰਦਾਸ' },
+  { id: 'scholarships', label: 'Scholarships & Welfare', punjabi: 'ਵਜ਼ੀਫ਼ੇ ਤੇ ਮਦਦ' },
 ];
 
 export default function SikhHeritagePage() {
@@ -451,8 +455,10 @@ export default function SikhHeritagePage() {
             onClick={handleChimeClick} 
             className={`sh-chime-btn ${isPlayingChime ? 'active' : ''}`}
             title="Listen to peaceful meditative chime"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
           >
-            <span>{isPlayingChime ? '🔔 Playing Harmonic Chime...' : '🔔 Contemplate (Divine Chime)'}</span>
+            <Bell size={15} color="#f4a023" />
+            <span>{isPlayingChime ? 'Playing Harmonic Chime...' : 'Contemplate (Harmonic Chime)'}</span>
           </button>
         </div>
       </section>
@@ -559,7 +565,7 @@ export default function SikhHeritagePage() {
         {activeTab === 'history' && (
           <article className="sh-card">
             <header className="sh-card-header">
-              <div className="sh-card-icon">🏛️</div>
+              <div className="sh-card-icon"><Landmark size={26} color="#f4a023" /></div>
               <div>
                 <h2 className="sh-card-title">Founding Fathers & Historical Odyssey</h2>
                 <div className="sh-card-subtitle">ਸਾਡਾ ਵਿਰਸਾ — From a bold community initiative in 1970 to a premier degree institution</div>
@@ -571,13 +577,13 @@ export default function SikhHeritagePage() {
                 <h3 style={{ fontSize: 20, fontWeight: 800, color: '#0f2347', margin: '0 0 12px' }}>
                   The Vision of Sardar Pritam Singh Sahni
                 </h3>
-                <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.68, fontSize: 15, textAlign: 'left', textWrap: 'pretty' }}>
+                <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.68, fontSize: 15, textAlign: 'justify', textJustify: 'inter-word', textWrap: 'pretty' }}>
                   In the late 1960s, Dhanbad was burgeoning as the coal capital of India, yet higher education facilities for middle-class 
                   and underprivileged families were scarce. Led by visionary philanthropist <strong>Sardar Pritam Singh Sahni</strong> alongside 
                   esteemed leaders of the local Sikh Gurudwara Prabandhak Committee, the Sikh community resolved to establish an institution 
                   of national stature.
                 </p>
-                <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.68, fontSize: 15, textAlign: 'left', textWrap: 'pretty' }}>
+                <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.68, fontSize: 15, textAlign: 'justify', textJustify: 'inter-word', textWrap: 'pretty' }}>
                   Founded in 1970, Guru Nanak College began with a singular resolve: high-quality higher education accessible to everyone, 
                   preserving ethical virtues while fostering contemporary scientific and commerce disciplines.
                 </p>
@@ -606,8 +612,8 @@ export default function SikhHeritagePage() {
                   date="1970"
                   contentStyle={{ background: '#0f2347', color: '#fff', borderRadius: '14px', boxShadow: '0 8px 25px rgba(15,35,71,0.15)' }}
                   contentArrowStyle={{ borderRight: '7px solid #0f2347' }}
-                  iconStyle={{ background: '#f4a023', color: '#0f2347', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}
-                  icon={<span>🏛️</span>}
+                  iconStyle={{ background: '#f4a023', color: '#0f2347', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  icon={<Landmark size={18} color="#0f2347" />}
                 >
                   <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#f4a023', margin: '0 0 6px' }}>Establishment of Guru Nanak College</h4>
                   <p style={{ margin: 0, fontSize: '13px', color: '#cbd5e1', lineHeight: 1.6 }}>
@@ -619,8 +625,8 @@ export default function SikhHeritagePage() {
                   date="1972"
                   contentStyle={{ background: '#ffffff', color: '#0f2347', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 8px 25px rgba(0,0,0,0.05)' }}
                   contentArrowStyle={{ borderRight: '7px solid #ffffff' }}
-                  iconStyle={{ background: '#0f2347', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}
-                  icon={<span>📜</span>}
+                  iconStyle={{ background: '#0f2347', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  icon={<FileText size={18} color="#ffffff" />}
                 >
                   <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#0f2347', margin: '0 0 6px' }}>UGC 2(f) & 12(B) Status</h4>
                   <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: 1.6 }}>
@@ -632,8 +638,8 @@ export default function SikhHeritagePage() {
                   date="1992"
                   contentStyle={{ background: '#ffffff', color: '#0f2347', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 8px 25px rgba(0,0,0,0.05)' }}
                   contentArrowStyle={{ borderRight: '7px solid #ffffff' }}
-                  iconStyle={{ background: '#3b82f6', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}
-                  icon={<span>🎓</span>}
+                  iconStyle={{ background: '#3b82f6', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  icon={<GraduationCap size={18} color="#ffffff" />}
                 >
                   <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#0f2347', margin: '0 0 6px' }}>Affiliation with Vinoba Bhave University (VBU)</h4>
                   <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: 1.6 }}>
@@ -645,8 +651,8 @@ export default function SikhHeritagePage() {
                   date="2017"
                   contentStyle={{ background: '#ffffff', color: '#0f2347', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 8px 25px rgba(0,0,0,0.05)' }}
                   contentArrowStyle={{ borderRight: '7px solid #ffffff' }}
-                  iconStyle={{ background: '#10b981', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}
-                  icon={<span>🌟</span>}
+                  iconStyle={{ background: '#10b981', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  icon={<Sparkles size={18} color="#ffffff" />}
                 >
                   <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#0f2347', margin: '0 0 6px' }}>B.B.M. Koyalanchal University (BBMKU)</h4>
                   <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: 1.6 }}>
@@ -658,8 +664,8 @@ export default function SikhHeritagePage() {
                   date="Present"
                   contentStyle={{ background: 'linear-gradient(135deg, #0f2347, #1e3a8a)', color: '#fff', borderRadius: '14px', boxShadow: '0 8px 25px rgba(15,35,71,0.2)' }}
                   contentArrowStyle={{ borderRight: '7px solid #0f2347' }}
-                  iconStyle={{ background: '#f4a023', color: '#0f2347', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}
-                  icon={<span>🚀</span>}
+                  iconStyle={{ background: '#f4a023', color: '#0f2347', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  icon={<Award size={18} color="#0f2347" />}
                 >
                   <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#f4a023', margin: '0 0 6px' }}>56 Years of Unbroken Academic Legacy</h4>
                   <p style={{ margin: 0, fontSize: '13px', color: '#cbd5e1', lineHeight: 1.6 }}>
@@ -675,7 +681,7 @@ export default function SikhHeritagePage() {
         {activeTab === 'minority' && (
           <article className="sh-card">
             <header className="sh-card-header">
-              <div className="sh-card-icon">⚖️</div>
+              <div className="sh-card-icon"><Scale size={26} color="#f4a023" /></div>
               <div>
                 <h2 className="sh-card-title">Sikh Minority Status & Legal Protections</h2>
                 <div className="sh-card-subtitle">ਘੱਟ ਗਿਣਤੀ ਦਰਜਾ — Recognized by NCMEI under Constitutional Article 30(1)</div>
@@ -704,12 +710,12 @@ export default function SikhHeritagePage() {
             <h3 style={{ fontSize: 19, fontWeight: 800, color: '#0f2347', margin: '24px 0 12px' }}>
               Constitutional Basis & Autonomous Administration
             </h3>
-            <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.68, fontSize: 15, textAlign: 'left', textWrap: 'pretty' }}>
+            <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.68, fontSize: 15, textAlign: 'justify', textJustify: 'inter-word', textWrap: 'pretty' }}>
               Guru Nanak College is formally recognized as a <strong>Religious Minority Educational Institution</strong> by the 
               <strong> National Commission for Minority Educational Institutions (NCMEI)</strong>, a statutory body established by the 
               Government of India under the NCMEI Act 2004.
             </p>
-            <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.68, fontSize: 15, textAlign: 'left', textWrap: 'pretty' }}>
+            <p style={{ color: 'var(--text-mid, #475569)', lineHeight: 1.68, fontSize: 15, textAlign: 'justify', textJustify: 'inter-word', textWrap: 'pretty' }}>
               Under <strong>Article 30(1) of the Constitution of India</strong>, minority communities have the fundamental right to establish 
               and administer educational institutions of their choice. This grants the Governing Body autonomous authority in faculty appointments, 
               institutional governance, and strategic curriculum enhancement while strictly adhering to university academic schedules.
@@ -730,9 +736,9 @@ export default function SikhHeritagePage() {
               <div style={{ marginTop: 18, display: 'flex', gap: 14, flexWrap: 'wrap' }}>
                 <Link to="/about-us/regulations/minority-exemption" style={{
                   background: '#0f2347', color: '#fff', padding: '10px 18px', borderRadius: 10,
-                  fontSize: 13, fontWeight: 800, textDecoration: 'none'
+                  fontSize: 13, fontWeight: 800, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 7
                 }}>
-                  📜 View Minority Exemption Regulations
+                  <FileText size={14} /> View Minority Exemption Regulations
                 </Link>
                 <Link to="/about-us/various-committees/minority" style={{
                   background: 'rgba(244,160,35,0.15)', color: '#d97706', border: '1px solid rgba(244,160,35,0.4)',
@@ -749,7 +755,7 @@ export default function SikhHeritagePage() {
         {activeTab === 'spiritual' && (
           <article className="sh-card">
             <header className="sh-card-header">
-              <div className="sh-card-icon">🕌</div>
+              <div className="sh-card-icon"><HeartHandshake size={26} color="#f4a023" /></div>
               <div>
                 <h2 className="sh-card-title">Gurudwara Sahib & Community Sewa</h2>
                 <div className="sh-card-subtitle">ਸੇਵਾ ਅਤੇ ਅਰਦਾਸ — Nurturing compassion, brotherhood, and selfless dedication</div>
@@ -804,7 +810,7 @@ export default function SikhHeritagePage() {
         {activeTab === 'scholarships' && (
           <article className="sh-card">
             <header className="sh-card-header">
-              <div className="sh-card-icon">🎓</div>
+              <div className="sh-card-icon"><GraduationCap size={26} color="#f4a023" /></div>
               <div>
                 <h2 className="sh-card-title">Minority & Merit Scholarships</h2>
                 <div className="sh-card-subtitle">ਵਜ਼ੀਫ਼ੇ ਤੇ ਮਦਦ — Ensuring no deserving student is denied higher education</div>

@@ -1,8 +1,9 @@
 // src/components/admin/tabs/PlacementsTab.jsx
 import { useState } from 'react';
-import { db } from '../../../firebase'; // ✅ FIXED: Teen folder peechhe
+import { db } from '../../../firebase';
 import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { GraduationCap, Building2, Download, Edit2, Trash2, Plus, X, CheckCircle2, Award } from 'lucide-react';
 import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, useLocalDraft, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
 import { resolveUrl } from '../../../utils/resolver';
@@ -27,7 +28,7 @@ export default function PlacementsTab({ placements, logAct, getSectionLog, softD
         toast.success('Alumni updated!');
       } else {
         await addDoc(collection(db, 'placements'), { ...formData, createdAt: serverTimestamp() });
-        toast.success('🎓 Alumni added!');
+        toast.success('Alumni profile added!');
       }
       logAct(editItem ? 'update' : 'add', `Alumni: ${formData.name} at ${formData.company}`, 'placements');
       setEditItem(null); clearDraft();
@@ -41,19 +42,25 @@ export default function PlacementsTab({ placements, logAct, getSectionLog, softD
 
   return (
     <div className="fade-up">
-      <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>🎓 Alumni Wall</p>
-      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage placed students and alumni success stories.</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+        <GraduationCap size={26} color={GOLD} />
+        <h2 style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>Alumni & Placements Wall</h2>
+      </div>
+      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage placed students, corporate selections, and alumni success stories</p>
 
       <div className="card-gold">
-        <div className="actitle">{editItem ? '✏️ Edit Alumni' : '➕ Add Alumni'}</div>
+        <div className="actitle" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {editItem ? <Edit2 size={16} color={GOLD} /> : <Plus size={16} color={GOLD} />}
+          <span>{editItem ? 'Edit Alumni Profile' : 'Add New Placed Alumni'}</span>
+        </div>
         <form onSubmit={save}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
             <div>
               <label className="alabel">Student Name *</label>
-              <input className="ainp" value={formData.name || ''} onChange={e => setFormData(d => ({ ...d, name: e.target.value }))} required placeholder="Rahul Kumar" />
+              <input className="ainp" value={formData.name || ''} onChange={e => setFormData(d => ({ ...d, name: e.target.value }))} required placeholder="Student Name" />
             </div>
             <div>
-              <label className="alabel">Company</label>
+              <label className="alabel">Company / Organization</label>
               <input className="ainp" value={formData.company || ''} onChange={e => setFormData(d => ({ ...d, company: e.target.value }))} placeholder="TCS / Wipro / Govt. Service" />
             </div>
             <div>
@@ -78,7 +85,7 @@ export default function PlacementsTab({ placements, logAct, getSectionLog, softD
 
           <div style={{ marginBottom: 14 }}>
             <label className="alabel">Testimonial / Quote</label>
-            <textarea className="ainp" rows={2} value={formData.testimonial || ''} onChange={e => setFormData(d => ({ ...d, testimonial: e.target.value }))} placeholder="E.g. GNC changed my life..." />
+            <textarea className="ainp" rows={2} value={formData.testimonial || ''} onChange={e => setFormData(d => ({ ...d, testimonial: e.target.value }))} placeholder="Sharing their college experience and guidance..." />
           </div>
 
           <div style={{ marginBottom: 20 }}>
@@ -93,18 +100,28 @@ export default function PlacementsTab({ placements, logAct, getSectionLog, softD
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
-            <button type="submit" className="abtn abtn-gold" disabled={loading}>🚀 {editItem ? 'Update' : 'Add'}</button>
-            {editItem && <button type="button" className="abtn abtn-outline" onClick={() => { setEditItem(null); clearDraft(); }}>Cancel</button>}
+            <button type="submit" className="abtn abtn-gold" disabled={loading} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <CheckCircle2 size={16} />
+              {loading ? 'Saving…' : editItem ? 'Update Profile' : 'Add Profile'}
+            </button>
+            {editItem && (
+              <button type="button" className="abtn abtn-outline" onClick={() => { setEditItem(null); clearDraft(); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <X size={15} /> Cancel
+              </button>
+            )}
           </div>
         </form>
       </div>
 
-      <SectionSearch value={search} onChange={setSearch} placeholder="Search by name or company..." />
+      <SectionSearch value={search} onChange={setSearch} placeholder="Search alumni by name or company..." />
       <BulkBar count={selected.length} onDelete={() => { bulkDelete('placements', selected); setSelected([]); }} onClear={() => setSelected([])} />
 
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-          <div className="actitle" style={{ margin: 0 }}>Alumni ({filtered.length})</div>
+          <div className="actitle" style={{ margin: 0 }}>
+            <span>Alumni Records</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: T.t3, marginLeft: 8, fontVariantNumeric: 'tabular-nums' }}>({filtered.length})</span>
+          </div>
           <button 
             type="button" 
             className="abtn abtn-outline abtn-sm"
@@ -122,7 +139,7 @@ export default function PlacementsTab({ placements, logAct, getSectionLog, softD
               'GNC_Alumni_Placements'
             )}
           >
-            📊 Export Excel
+            <Download size={14} /> Export Excel
           </button>
         </div>
         {filtered.map(p => (
@@ -138,14 +155,16 @@ export default function PlacementsTab({ placements, logAct, getSectionLog, softD
                 />
               : null
             }
-            <div style={{ width: 44, height: 44, borderRadius: '50%', background: `${NAVY}15`, display: p.photo ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>🎓</div>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: `${NAVY}15`, display: p.photo ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <GraduationCap size={20} color={NAVY} />
+            </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 800, color: NAVY, fontSize: 14 }}>{p.name}</div>
               <div style={{ fontSize: 13, color: T.t2 }}>{p.role}{p.company ? ` @ ${p.company}` : ''}</div>
               <div style={{ display: 'flex', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
                 <span className="abadge" style={{ background: BG, color: T.t2 }}>{p.department}</span>
-                {p.batch && <span className="abadge" style={{ background: BG, color: T.t3 }}>Batch {p.batch}</span>}
-                {p.package && <span className="abadge" style={{ background: '#dcfce7', color: T.green }}>💰 {p.package}</span>}
+                {p.batch && <span className="abadge" style={{ background: BG, color: T.t3, fontVariantNumeric: 'tabular-nums' }}>Batch {p.batch}</span>}
+                {p.package && <span className="abadge" style={{ background: '#dcfce7', color: T.green, fontVariantNumeric: 'tabular-nums' }}>{p.package}</span>}
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
@@ -153,12 +172,16 @@ export default function PlacementsTab({ placements, logAct, getSectionLog, softD
                 setEditItem(p);
                 setFormData({ name: p.name||'', company: p.company||'', role: p.role||'', department: p.department||'B.A.', batch: p.batch||'', package: p.package||'', photo: p.photo||'', testimonial: p.testimonial||'' });
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}>✏️</button>
-              <button className="abtn abtn-red abtn-sm" onClick={() => softDelete('placements', p.id, p, p.name)} aria-label="Delete placement">🗑️</button>
+              }} aria-label="Edit alumni">
+                <Edit2 size={13} />
+              </button>
+              <button className="abtn abtn-red abtn-sm" onClick={() => softDelete('placements', p.id, p, p.name)} aria-label="Delete placement">
+                <Trash2 size={13} />
+              </button>
             </div>
           </div>
         ))}
-        {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '30px 0', color: T.t4 }}>No alumni found</div>}
+        {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '30px 0', color: T.t4 }}>No alumni records found</div>}
       </div>
 
       <MiniLog logs={getSectionLog('placements')} />

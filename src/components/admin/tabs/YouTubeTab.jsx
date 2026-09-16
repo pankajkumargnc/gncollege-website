@@ -1,10 +1,11 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// YouTubeTab — ▶️ YouTube API configuration + channel test
+// YouTubeTab — YouTube API configuration + channel test
 // ═══════════════════════════════════════════════════════════════════════════════
 import { useState, useEffect } from 'react';
 import { db } from "../../../firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { Video, Key, CheckCircle2, XCircle, Save, RefreshCw, PlaySquare, Info, ShieldCheck } from 'lucide-react';
 import { T, NAVY, GOLD } from '../AdminShared';
 
 export default function YouTubeTab({ logAct }) {
@@ -35,26 +36,34 @@ export default function YouTubeTab({ logAct }) {
       const r = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${ytCfg.channelId}&key=${ytCfg.apiKey}`);
       const d = await r.json();
       if (d.error) throw new Error(d.error.message);
-      if (d.items?.length) setYtTest({ ok: true, msg: `✅ Channel: "${d.items[0].snippet.title}"` });
+      if (d.items?.length) setYtTest({ ok: true, msg: `Channel Verified: "${d.items[0].snippet.title}"` });
       else throw new Error('Channel not found');
-    } catch (e) { setYtTest({ ok: false, msg: `❌ ${e.message}` }); }
+    } catch (e) { setYtTest({ ok: false, msg: e.message }); }
     setYtLoading(false);
   };
 
   return (
     <div className="fade-up">
-      <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>▶️ YouTube Manager</p>
-      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Auto-fetch latest videos for the video gallery.</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+        <Video size={24} color={GOLD} />
+        <h2 style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>YouTube Manager</h2>
+      </div>
+      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Configure API keys and automated video feeds for the institutional video gallery</p>
 
       <div className="card-navy">
-        <div className="actitle">🔑 YouTube API Configuration</div>
+        <div className="actitle" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Key size={16} color={GOLD} />
+          <span>YouTube API Configuration</span>
+        </div>
 
         {/* Setup guide */}
         <div style={{
           background: `${NAVY}0a`, border: `1.5px solid ${NAVY}25`,
           borderRadius: 12, padding: '14px 18px', marginBottom: 20
         }}>
-          <div style={{ fontWeight: 800, color: NAVY, marginBottom: 8 }}>📋 3 Steps Setup:</div>
+          <div style={{ fontWeight: 800, color: NAVY, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Info size={15} color={NAVY} /> 3-Step Integration Guide:
+          </div>
           <ol style={{ margin: 0, padding: '0 0 0 18px', fontSize: 13, color: T.t2, lineHeight: 2 }}>
             <li>Google Cloud Console → Enable <strong>YouTube Data API v3</strong></li>
             <li>Credentials → Create API Key → Copy it</li>
@@ -86,7 +95,7 @@ export default function YouTubeTab({ logAct }) {
                 placeholder={"dQw4w9WgXcQ\nabc123xyz\n...one Video ID per line"}
               />
               <p style={{ fontSize: 11, color: '#94a3b8', margin: '4px 0 0' }}>
-                💡 Copy the ID found after <code>watch?v=</code> in a YouTube URL. These videos will show on the Homepage.
+                Note: Paste video IDs extracted from YouTube URLs (e.g. watch?v=ID). These videos will display directly on the institutional homepage.
               </p>
             </div>
             <div>
@@ -99,12 +108,13 @@ export default function YouTubeTab({ logAct }) {
           </div>
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <button type="submit" className="abtn abtn-navy" disabled={loading}>
-              💾 Save Config
+            <button type="submit" className="abtn abtn-navy" disabled={loading} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <Save size={15} /> Save Config
             </button>
             <button type="button" className="abtn abtn-gold"
-              disabled={ytLoading || !ytCfg.apiKey} onClick={testYt}>
-              {ytLoading ? '⏳ Testing…' : '🧪 Test API'}
+              disabled={ytLoading || !ytCfg.apiKey} onClick={testYt} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              {ytLoading ? <RefreshCw size={15} className="spin" /> : <ShieldCheck size={15} />}
+              {ytLoading ? 'Testing API…' : 'Test API Connection'}
             </button>
           </div>
         </form>
@@ -114,29 +124,34 @@ export default function YouTubeTab({ logAct }) {
             marginTop: 14, padding: '12px 16px', borderRadius: 10,
             background: ytTest.ok ? '#dcfce7' : '#fee2e2',
             color: ytTest.ok ? T.green : T.red,
-            fontWeight: 700, fontSize: 14
+            fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8
           }}>
-            {ytTest.msg}
+            {ytTest.ok ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+            <span>{ytTest.msg}</span>
           </div>
         )}
       </div>
 
       {/* Info card */}
       <div className="card">
-        <div className="actitle">ℹ️ How Videos Show on Website</div>
+        <div className="actitle" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Info size={16} color={NAVY} /> How Videos Show on Website
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16 }}>
           {[
-            { icon: '🔑', title: 'API Key Mode', desc: 'Automatically fetches latest videos from your channel. Requires Channel ID.' },
-            { icon: '📋', title: 'Manual IDs Mode', desc: 'Paste specific video IDs. Works without API key. More control over what\'s shown.' },
-            { icon: '🔄', title: 'Auto Refresh', desc: 'Videos refresh when visitors load /video-gallery page. No manual sync needed.' },
-          ].map(item => (
-            <div key={item.icon} style={{
+            { Icon: Key, title: 'API Key Mode', desc: 'Automatically fetches latest videos from your channel. Requires Channel ID.' },
+            { Icon: PlaySquare, title: 'Manual IDs Mode', desc: 'Paste specific video IDs. Works without API key. More control over what is shown.' },
+            { Icon: RefreshCw, title: 'Auto Refresh', desc: 'Videos refresh when visitors load /video-gallery page. No manual sync needed.' },
+          ].map(({ Icon, title, desc }) => (
+            <div key={title} style={{
               background: `${NAVY}06`, border: `1px solid ${NAVY}12`,
               borderRadius: 12, padding: '14px 16px'
             }}>
-              <div style={{ fontSize: 24, marginBottom: 8 }}>{item.icon}</div>
-              <div style={{ fontWeight: 800, color: NAVY, fontSize: 13, marginBottom: 5 }}>{item.title}</div>
-              <div style={{ fontSize: 12, color: T.t3, lineHeight: 1.6 }}>{item.desc}</div>
+              <div style={{ marginBottom: 8, color: GOLD }}>
+                <Icon size={22} />
+              </div>
+              <div style={{ fontWeight: 800, color: NAVY, fontSize: 13, marginBottom: 5 }}>{title}</div>
+              <div style={{ fontSize: 12, color: T.t3, lineHeight: 1.6 }}>{desc}</div>
             </div>
           ))}
         </div>

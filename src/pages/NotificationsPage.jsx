@@ -158,7 +158,7 @@ export default function NotificationsPage() {
                <h3 style={{ color: '#0f2347', fontWeight: 800, marginBottom: 8, fontSize: 'clamp(16px,2.5vw,20px)' }}>
                 No Notices Found
                </h3>
-               <p style={{ fontSize: 'clamp(13px,1.8vw,15px)', marginBottom: 24, lineHeight: 1.7, maxWidth: 400, margin: '0 auto 24px' }}>
+               <p style={{ fontSize: 'clamp(13px,1.8vw,15px)', marginBottom: 24, lineHeight: 1.7, maxWidth: 400, margin: '0 auto 24px', textAlign: 'center' }}>
                 {search
                   ? `No results found for "${search}". Please try a different keyword.`
                   : 'No notices have been published yet.'}
@@ -192,7 +192,12 @@ export default function NotificationsPage() {
                         <span style={{ fontSize: '11px', fontWeight: 800, padding: '4px 12px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '50px', color: navy, textTransform: 'uppercase' }}>Document</span>
                         {n.isNew && <span className="badge-new" style={{ fontSize: '10px', fontWeight: 900, color: '#fff', background: '#ef4444', padding: '3px 8px', borderRadius: '50px' }}>NEW</span>}
                       </div>
-                      <div style={{ fontSize: '16px', fontWeight: 'bold', color: navy, lineHeight: '1.4' }}>{n.text}</div>
+                      <div style={{ fontSize: '16px', fontWeight: 700, color: navy, lineHeight: 1.5, textAlign: 'justify', textJustify: 'inter-word', textWrap: 'pretty' }}>{n.text}</div>
+                      {n.description && (
+                        <p style={{ fontSize: '14px', color: '#475569', lineHeight: 1.68, margin: '8px 0 0', textAlign: 'justify', textJustify: 'inter-word', textWrap: 'pretty' }}>
+                          {n.description}
+                        </p>
+                      )}
                       {n.link && (
                         <a href={n.link} target="_blank" rel="noreferrer"
                           style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '16px', fontSize: '13px', fontWeight: 800, color: navy, textDecoration: 'none', background: '#f1f5f9', padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', transition: 'all .2s' }}

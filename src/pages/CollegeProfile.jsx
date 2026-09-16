@@ -49,6 +49,9 @@ const CollegeProfile = () => {
         }
         .rich-text-content {
           text-align: justify;
+          text-justify: inter-word;
+          hyphens: auto;
+          -webkit-hyphens: auto;
         }
       `}</style>
       

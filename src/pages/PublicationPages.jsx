@@ -182,7 +182,7 @@ function PublicationDocList({ keyword }) {
                           {d.title}
                         </h3>
                         {d.description && (
-                          <p style={{ fontSize: 13, color: '#475569', margin: 0, lineHeight: 1.55, textAlign: 'left', textWrap: 'pretty' }}>
+                          <p style={{ fontSize: 13, color: '#475569', margin: 0, lineHeight: 1.55, textAlign: 'justify', textJustify: 'inter-word', textWrap: 'pretty' }}>
                             {d.description}
                           </p>
                         )}
@@ -804,7 +804,7 @@ export function PublicationPage({ type, title, subtitle, icon, keyword }) {
                   <h2 style={{ fontSize: 24, fontWeight: 900, color: NAVY, margin: '4px 0 0', letterSpacing: '-0.3px', textAlign: 'left' }}>
                     Digital Magazine Archive & Annual Editions
                   </h2>
-                  <p style={{ fontSize: 13.5, color: '#64748b', margin: '6px 0 0', textAlign: 'left' }}>
+                  <p style={{ fontSize: 13.5, color: '#64748b', margin: '6px 0 0', textAlign: 'justify', textJustify: 'inter-word' }}>
                     Explore Guru Nanak College's annual publications, souvenirs, and student editions. Read online or download high-definition PDF copies.
                   </p>
                 </div>

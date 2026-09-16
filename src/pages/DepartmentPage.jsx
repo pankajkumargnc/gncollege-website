@@ -39,8 +39,8 @@ const DEPT_META = {
     heroBg: 'linear-gradient(145deg,#faf5ff,#ede9fe 50%,#f0f9ff)',
     facultyKeys: ['Hindi', 'English'],
     subjects: [
-      { label: 'Dept. of Hindi',   slug: 'hindi',   icon: '📖', desc: 'Sanskriti aur sahitya ka sangam' },
-      { label: 'Dept. of English', slug: 'english', icon: '📝', desc: 'Global language and literature' },
+      { label: 'Dept. of Hindi',   slug: 'hindi',   desc: 'Exploration of classical traditions, poetic literature, and linguistic heritage' },
+      { label: 'Dept. of English', slug: 'english', desc: 'World literature, critical theory, and advanced communication competencies' },
     ],
   },
   'social-science': {
@@ -48,10 +48,10 @@ const DEPT_META = {
     heroBg: 'linear-gradient(145deg,#fff5f5,#fee2e2 50%,#fef9ec)',
     facultyKeys: ['History', 'Political Science', 'Economics', 'Psychology'],
     subjects: [
-      { label: 'History',            slug: 'history',            icon: '🏛️', desc: 'Past events aur civilizations ka adhyayan' },
-      { label: 'Political Science',  slug: 'political-science',  icon: '⚖️', desc: 'Governance, policies aur public life' },
-      { label: 'Economics',          slug: 'economics',          icon: '📈', desc: 'Resources, finance aur development' },
-      { label: 'Psychology',         slug: 'psychology',         icon: '🧠', desc: 'Human behavior and mental processes' },
+      { label: 'History',            slug: 'history',            desc: 'Chronicles of ancient and modern civilizations, historiography, and heritage' },
+      { label: 'Political Science',  slug: 'political-science',  desc: 'Constitutional governance, political theory, and public policy administration' },
+      { label: 'Economics',          slug: 'economics',          desc: 'Quantitative resource analysis, macro-economic policy, and developmental finance' },
+      { label: 'Psychology',         slug: 'psychology',         desc: 'Behavioral analysis, cognitive psychology, and applied human sciences' },
     ],
   },
 };

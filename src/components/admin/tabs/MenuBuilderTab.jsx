@@ -5,97 +5,112 @@ import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, order
 import toast from 'react-hot-toast';
 import { T, NAVY, GOLD, WHITE } from '../AdminShared';
 import { clearCache } from '../../../utils/cachedFetch';
+import {
+  Compass,
+  RefreshCw,
+  Plus,
+  Edit2,
+  Trash2,
+  Copy,
+  Eye,
+  EyeOff,
+  ChevronUp,
+  ChevronDown,
+  Check,
+  FolderTree,
+  ExternalLink
+} from 'lucide-react';
 
-// 🌐 Default Standard Website Routes (Comprehensive College Sitemap)
+// Standard Website Routes (Comprehensive College Sitemap)
 const STANDARD_ROUTES = [
-  { path: '/', label: '🏠 Home Page' },
+  { path: '/', label: 'Home Page' },
   // Sikh Heritage & About
-  { path: '/about-us/sikh-heritage', label: '☬ About - Sikh Heritage Hub (Divine)' },
-  { path: '/about-us/principal-message', label: '👨‍💼 About - Principal Message' },
-  { path: '/about-us/vision-mission', label: '🎯 About - Vision & Mission' },
-  { path: '/about-us/college-profile', label: '🏢 About - College Profile' },
-  { path: '/about-us/college-management/principal', label: '🏛️ Management - Principal Desk' },
-  { path: '/about-us/college-management/organogram', label: '📊 Management - Organogram' },
-  { path: '/about-us/college-management/presidents', label: '📜 Management - Presidents' },
-  { path: '/about-us/college-management/secretaries', label: '✍️ Management - Secretaries' },
-  { path: '/about-us/college-staff/teaching-staff', label: '👨‍🏫 Staff - Teaching Faculty' },
-  { path: '/about-us/college-staff/non-teaching-staff', label: '👥 Staff - Non-Teaching Staff' },
+  { path: '/about-us/sikh-heritage', label: 'About - Sikh Heritage Hub (Divine)' },
+  { path: '/about-us/principal-message', label: 'About - Principal Message' },
+  { path: '/about-us/vision-mission', label: 'About - Vision & Mission' },
+  { path: '/about-us/college-profile', label: 'About - College Profile' },
+  { path: '/about-us/college-management/principal', label: 'Management - Principal Desk' },
+  { path: '/about-us/college-management/organogram', label: 'Management - Organogram' },
+  { path: '/about-us/college-management/presidents', label: 'Management - Presidents' },
+  { path: '/about-us/college-management/secretaries', label: 'Management - Secretaries' },
+  { path: '/about-us/college-staff/teaching-staff', label: 'Staff - Teaching Faculty' },
+  { path: '/about-us/college-staff/non-teaching-staff', label: 'Staff - Non-Teaching Staff' },
   // Committees
-  { path: '/about-us/various-committees/placement', label: '💼 Committee - Placement Cell' },
-  { path: '/about-us/various-committees/womens-cell', label: '👩 Committee - Women\'s Cell' },
-  { path: '/about-us/various-committees/grievance', label: '⚖️ Committee - Grievance Redressal' },
-  { path: '/about-us/various-committees/anti-ragging', label: '🛡️ Committee - Anti-Ragging' },
-  { path: '/about-us/various-committees/sc-st', label: '🤝 Committee - SC / ST Cell' },
-  { path: '/about-us/various-committees/obc', label: '🤝 Committee - OBC Cell' },
-  { path: '/about-us/various-committees/icc', label: '⚖️ Committee - ICC' },
-  { path: '/about-us/various-committees/minority', label: '☬ Committee - Minority Cell' },
-  { path: '/about-us/various-committees/rusa', label: '🏛️ Committee - RUSA' },
+  { path: '/about-us/various-committees/placement', label: 'Committee - Placement Cell' },
+  { path: '/about-us/various-committees/womens-cell', label: "Committee - Women's Cell" },
+  { path: '/about-us/various-committees/grievance', label: 'Committee - Grievance Redressal' },
+  { path: '/about-us/various-committees/anti-ragging', label: 'Committee - Anti-Ragging' },
+  { path: '/about-us/various-committees/sc-st', label: 'Committee - SC / ST Cell' },
+  { path: '/about-us/various-committees/obc', label: 'Committee - OBC Cell' },
+  { path: '/about-us/various-committees/icc', label: 'Committee - ICC' },
+  { path: '/about-us/various-committees/minority', label: 'Committee - Minority Cell' },
+  { path: '/about-us/various-committees/rusa', label: 'Committee - RUSA' },
   // Regulations
-  { path: '/about-us/regulations/fyugp-nep', label: '📜 Regulations - BBMKU FYUGP (NEP)' },
-  { path: '/about-us/regulations/bbmku-ug', label: '📜 Regulations - BBMKU UG (CBCS)' },
-  { path: '/about-us/regulations/bbmku-circular', label: '📜 Regulations - BBMKU Circulars' },
-  { path: '/about-us/regulations/college-affiliation', label: '📜 Regulations - Affiliation Paper' },
-  { path: '/about-us/regulations/ugc-certificate', label: '📜 Regulations - UGC 2(f) & 12(B)' },
-  { path: '/about-us/regulations/vbu-bca', label: '📜 Regulations - VBU BCA' },
-  { path: '/about-us/regulations/vbu-ug', label: '📜 Regulations - VBU UG 2015' },
-  { path: '/about-us/regulations/college-byelaws', label: '📜 Regulations - College ByeLaws' },
-  { path: '/about-us/regulations/minority-exemption', label: '📜 Regulations - Minority Exemption' },
+  { path: '/about-us/regulations/fyugp-nep', label: 'Regulations - BBMKU FYUGP (NEP)' },
+  { path: '/about-us/regulations/bbmku-ug', label: 'Regulations - BBMKU UG (CBCS)' },
+  { path: '/about-us/regulations/bbmku-circular', label: 'Regulations - BBMKU Circulars' },
+  { path: '/about-us/regulations/college-affiliation', label: 'Regulations - Affiliation Paper' },
+  { path: '/about-us/regulations/ugc-certificate', label: 'Regulations - UGC 2(f) & 12(B)' },
+  { path: '/about-us/regulations/vbu-bca', label: 'Regulations - VBU BCA' },
+  { path: '/about-us/regulations/vbu-ug', label: 'Regulations - VBU UG 2015' },
+  { path: '/about-us/regulations/college-byelaws', label: 'Regulations - College ByeLaws' },
+  { path: '/about-us/regulations/minority-exemption', label: 'Regulations - Minority Exemption' },
   // Academics
-  { path: '/academics/departments/bca', label: '💻 Academics - BCA Department' },
-  { path: '/academics/departments/bba', label: '📈 Academics - BBA Department' },
-  { path: '/academics/departments/commerce', label: '📊 Academics - Commerce Dept' },
-  { path: '/academics/departments/social-science', label: '🌍 Academics - Social Science' },
-  { path: '/academics/departments/humanities', label: '📖 Academics - Humanities' },
-  { path: '/academics/course-offered', label: '📚 Academics - Courses Offered' },
-  { path: '/academics/academic-calendar', label: '📅 Academics - Academic Calendar' },
-  { path: '/syllabus', label: '📝 Academics - Syllabus' },
-  { path: '/academics/iqac', label: '🏅 Academics - IQAC Cell' },
-  { path: '/academics/placements', label: '💼 Academics - Placements' },
+  { path: '/academics/departments/bca', label: 'Academics - BCA Department' },
+  { path: '/academics/departments/bba', label: 'Academics - BBA Department' },
+  { path: '/academics/departments/commerce', label: 'Academics - Commerce Dept' },
+  { path: '/academics/departments/social-science', label: 'Academics - Social Science' },
+  { path: '/academics/departments/humanities', label: 'Academics - Humanities' },
+  { path: '/academics/course-offered', label: 'Academics - Courses Offered' },
+  { path: '/academics/academic-calendar', label: 'Academics - Academic Calendar' },
+  { path: '/syllabus', label: 'Academics - Syllabus' },
+  { path: '/academics/iqac', label: 'Academics - IQAC Cell' },
+  { path: '/academics/placements', label: 'Academics - Placements' },
   // Admission
-  { path: '/admission/notification/latest', label: '⚡ Admission - Latest Notices' },
-  { path: '/admission/notification/upcoming', label: '⚡ Admission - Upcoming News' },
-  { path: '/admission/fee-structure', label: '💳 Admission - Fee Structure' },
-  { path: '/admission/rule', label: '📋 Admission - Admission Rules' },
-  { path: '/admission/document-required', label: '📁 Admission - Documents Required' },
-  { path: '/admission/intake-capacity', label: '🔢 Admission - Intake Capacity' },
-  { path: '/scholarships', label: '🎓 Admission - Scholarships & Aid' },
+  { path: '/admission/notification/latest', label: 'Admission - Latest Notices' },
+  { path: '/admission/notification/upcoming', label: 'Admission - Upcoming News' },
+  { path: '/admission/fee-structure', label: 'Admission - Fee Structure' },
+  { path: '/admission/rule', label: 'Admission - Admission Rules' },
+  { path: '/admission/document-required', label: 'Admission - Documents Required' },
+  { path: '/admission/intake-capacity', label: 'Admission - Intake Capacity' },
+  { path: '/scholarships', label: 'Admission - Scholarships & Aid' },
   // NAAC
-  { path: '/naac/ssr-2nd-cycle/cycle-2-documents', label: '🏅 NAAC - SSR 2nd Cycle' },
-  { path: '/naac/ssr-2nd-cycle/executive-summary', label: '🏅 NAAC - Executive Summary' },
-  { path: '/naac/ssr-1st-cycle/cycle-1-documents', label: '🏅 NAAC - SSR 1st Cycle' },
-  { path: '/naac/ssr-1st-cycle/peer-team-report', label: '🏅 NAAC - Peer Team Report' },
-  { path: '/naac/aqar', label: '📜 NAAC - AQAR Reports' },
-  { path: '/naac/nirf', label: '🏆 NAAC - NIRF' },
-  { path: '/naac/perspective-plan', label: '🎯 NAAC - Perspective Plan' },
+  { path: '/naac/ssr-2nd-cycle/cycle-2-documents', label: 'NAAC - SSR 2nd Cycle' },
+  { path: '/naac/ssr-2nd-cycle/executive-summary', label: 'NAAC - Executive Summary' },
+  { path: '/naac/ssr-1st-cycle/cycle-1-documents', label: 'NAAC - SSR 1st Cycle' },
+  { path: '/naac/ssr-1st-cycle/peer-team-report', label: 'NAAC - Peer Team Report' },
+  { path: '/naac/aqar', label: 'NAAC - AQAR Reports' },
+  { path: '/naac/nirf', label: 'NAAC - NIRF' },
+  { path: '/naac/perspective-plan', label: 'NAAC - Perspective Plan' },
   // Activities
-  { path: '/activity/nss', label: '🌟 Activity - NSS Unit' },
-  { path: '/activity/ncc', label: '🎖️ Activity - NCC Wing' },
-  { path: '/activity/workshop', label: '💡 Activity - Workshops' },
-  { path: '/activity/games-sports', label: '⚽ Activity - Games & Sports' },
-  { path: '/activity/collaboration/rotaract-club', label: '🤝 Activity - Rotaract Club' },
-  { path: '/activity/collaboration/sadbhavana-diwas', label: '🕊️ Activity - Sadbhavana Diwas' },
+  { path: '/activity/nss', label: 'Activity - NSS Unit' },
+  { path: '/activity/ncc', label: 'Activity - NCC Wing' },
+  { path: '/activity/workshop', label: 'Activity - Workshops' },
+  { path: '/activity/games-sports', label: 'Activity - Games & Sports' },
+  { path: '/activity/collaboration/rotaract-club', label: 'Activity - Rotaract Club' },
+  { path: '/activity/collaboration/sadbhavana-diwas', label: 'Activity - Sadbhavana Diwas' },
   // Publications
-  { path: '/publication/examination-results/2024', label: '📊 Publication - Results 2024' },
-  { path: '/publication/examination-results/2023', label: '📊 Publication - Results 2023' },
-  { path: '/publication/college-library', label: '📚 Publication - College Library' },
-  { path: '/publication/e-magazine', label: '📰 Publication - E-Magazine' },
-  { path: '/publication/sss-report/2023-24', label: '📋 Publication - SSS 2023-24' },
-  { path: '/publication/sss-report/2022-23', label: '📋 Publication - SSS 2022-23' },
+  { path: '/publication/examination-results/2024', label: 'Publication - Results 2024' },
+  { path: '/publication/examination-results/2023', label: 'Publication - Results 2023' },
+  { path: '/publication/college-library', label: 'Publication - College Library' },
+  { path: '/publication/e-magazine', label: 'Publication - E-Magazine' },
+  { path: '/publication/sss-report/2023-24', label: 'Publication - SSS 2023-24' },
+  { path: '/publication/sss-report/2022-23', label: 'Publication - SSS 2022-23' },
   // Campus & Media
-  { path: '/campus/infrastructure', label: '🏛️ Campus - Infrastructure' },
-  { path: '/campus/classroom', label: '🖥️ Campus - Classrooms' },
-  { path: '/campus/ict-rooms', label: '📡 Campus - ICT Rooms' },
-  { path: '/campus/green-campus', label: '🌿 Campus - Green Campus' },
-  { path: '/campus/visuals/bhuda', label: '📸 Campus - Bhuda Boys Wing' },
-  { path: '/campus/visuals/bank-more', label: '📸 Campus - Bank More Girls Wing' },
-  { path: '/campus/visuals/vocational-building', label: '🏢 Campus - Vocational IT Wing' },
-  { path: '/gallery', label: '📸 Photo Gallery' },
-  { path: '/gallery/videos', label: '🎬 Video Gallery' },
-  { path: '/events', label: '🏆 Campus Events' },
-  { path: '/news', label: '📰 News & Circulars' },
-  { path: '/notifications', label: '📢 Notices' },
-  { path: '/contact', label: '📞 Contact Us' },
-  { path: '#', label: '🚫 No Link (Dropdown Menu Header Only)' }
+  { path: '/campus/infrastructure', label: 'Campus - Infrastructure' },
+  { path: '/campus/classroom', label: 'Campus - Classrooms' },
+  { path: '/campus/ict-rooms', label: 'Campus - ICT Rooms' },
+  { path: '/campus/green-campus', label: 'Campus - Green Campus' },
+  { path: '/campus/visuals/bhuda', label: 'Campus - Bhuda Boys Wing' },
+  { path: '/campus/visuals/bank-more', label: 'Campus - Bank More Girls Wing' },
+  { path: '/campus/visuals/vocational-building', label: 'Campus - Vocational IT Wing' },
+  { path: '/gallery', label: 'Photo Gallery' },
+  { path: '/gallery/videos', label: 'Video Gallery' },
+  { path: '/events', label: 'Campus Events' },
+  { path: '/news', label: 'News & Circulars' },
+  { path: '/notifications', label: 'Notices' },
+  { path: '/contact', label: 'Contact Us' },
+  { path: '#', label: 'No Link (Dropdown Menu Header Only)' }
 ];
 
 export default function MenuBuilderTab({ logAct }) {
@@ -294,7 +309,9 @@ export default function MenuBuilderTab({ logAct }) {
       {/* ── HEADER ── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ fontSize: 28, background: '#fff', padding: 8, borderRadius: 12, boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>🧭</div>
+          <div style={{ background: '#fff', padding: 10, borderRadius: 12, boxShadow: '0 4px 15px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Compass size={26} color={NAVY} />
+          </div>
           <div>
             <h2 style={{ margin: 0, color: NAVY, fontSize: 22, fontWeight: 900 }}>Menu & Mega-Navigation Builder</h2>
             <p style={{ margin: '4px 0 0', color: T.t3, fontSize: 13, fontWeight: 500 }}>
@@ -306,10 +323,11 @@ export default function MenuBuilderTab({ logAct }) {
           type="button"
           onClick={triggerSync}
           className="abtn abtn-outline abtn-sm"
-          style={{ background: '#fff', border: `1px solid ${GOLD}`, color: NAVY, fontWeight: 700 }}
+          style={{ background: '#fff', border: `1px solid ${GOLD}`, color: NAVY, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 6 }}
           title="Force-clear browser navigation cache"
         >
-          ⚡ Force Instant Sync
+          <RefreshCw size={13} />
+          <span>Force Instant Sync</span>
         </button>
       </div>
 
@@ -336,7 +354,7 @@ export default function MenuBuilderTab({ logAct }) {
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-            <span>{editId ? '✏️ Update Navigation Item' : '➕ Add Navigation Link'}</span>
+            <span>{editId ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Edit2 size={16} /> Update Navigation Item</span> : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Plus size={16} /> Add Navigation Link</span>}</span>
             {editId && (
               <span
                 style={{ fontSize: 11, color: '#dc2626', cursor: 'pointer', fontWeight: 700 }}
@@ -405,7 +423,7 @@ export default function MenuBuilderTab({ logAct }) {
                   <option key={`std-${i}`} value={route.path}>{route.label}</option>
                 ))}
                 {customPages.map(page => (
-                  <option key={page.id} value={`/p/${page.slug}`}>📄 Custom: {page.title}</option>
+                  <option key={page.id} value={`/p/${page.slug}`}>Custom: {page.title}</option>
                 ))}
               </datalist>
             </div>
@@ -449,10 +467,10 @@ export default function MenuBuilderTab({ logAct }) {
                 value={formData.parentId}
                 onChange={e => setFormData({...formData, parentId: e.target.value})}
               >
-                <option value="">🌟 Main Top-Level Bar Link</option>
+                <option value="">Main Top-Level Bar Link</option>
                 {parentOptions.map(opt => (
                   <option key={opt.id} value={opt.id} disabled={opt.id === editId}>
-                    {opt.level === 0 ? '📁 ' : (opt.level === 1 ? '  ↳ 📂 ' : '    ↳ 📄 ')}
+                    {opt.level === 0 ? '• ' : (opt.level === 1 ? '  ↳ • ' : '    ↳ - ')}
                     {opt.label}
                   </option>
                 ))}
@@ -496,7 +514,7 @@ export default function MenuBuilderTab({ logAct }) {
                 style={{ flex: 1, justifyContent: 'center', padding: '12px', fontWeight: 800 }}
                 disabled={loading}
               >
-                {loading ? 'Saving & Syncing...' : (editId ? '✅ Update & Sync Menu' : '🚀 Publish Link to Navbar')}
+                {loading ? 'Saving & Syncing...' : (editId ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Check size={16} /> Update & Sync Menu</span> : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Plus size={16} /> Publish Link to Navbar</span>)}
               </button>
               {editId && (
                 <button type="button" className="abtn abtn-outline" onClick={resetForm}>
@@ -511,11 +529,14 @@ export default function MenuBuilderTab({ logAct }) {
         <div style={{ background: WHITE, padding: 24, borderRadius: 16, border: `1px solid ${T.b1}`, boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, borderBottom: `1px solid ${T.b1}`, paddingBottom: 10 }}>
             <div>
-              <span style={{ fontSize: 16, fontWeight: 800, color: NAVY }}>🗂️ Live Menu Tree ({menus.length} Links)</span>
+              <span style={{ fontSize: 16, fontWeight: 800, color: NAVY, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <FolderTree size={18} color={NAVY} />
+                Live Menu Tree ({menus.length} Links)
+              </span>
               <p style={{ margin: '2px 0 0', fontSize: 11, color: T.t3 }}>Changes sync live across all visitors instantly</p>
             </div>
             <span style={{ fontSize: 11, color: T.t3, background: '#f1f5f9', padding: '4px 10px', borderRadius: 20 }}>
-              Use ▲ / ▼ to reorder
+              Use arrows to reorder
             </span>
           </div>
 
@@ -538,14 +559,14 @@ export default function MenuBuilderTab({ logAct }) {
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       {/* Reorder Arrows */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <button onClick={() => handleMove(topItem, 'up')} disabled={idx===0} style={{ border:'none', background:'none', cursor:idx===0?'not-allowed':'pointer', opacity:idx===0?0.25:1, fontSize:11, padding:0 }} aria-label="Move up">▲</button>
-                        <button onClick={() => handleMove(topItem, 'down')} disabled={idx===arr.length-1} style={{ border:'none', background:'none', cursor:idx===arr.length-1?'not-allowed':'pointer', opacity:idx===arr.length-1?0.25:1, fontSize:11, padding:0 }} aria-label="Move down">▼</button>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <button onClick={() => handleMove(topItem, 'up')} disabled={idx===0} style={{ border:'none', background:'none', cursor:idx===0?'not-allowed':'pointer', opacity:idx===0?0.25:1, padding:0, display:'flex' }} aria-label="Move up"><ChevronUp size={12} color={NAVY} /></button>
+                        <button onClick={() => handleMove(topItem, 'down')} disabled={idx===arr.length-1} style={{ border:'none', background:'none', cursor:idx===arr.length-1?'not-allowed':'pointer', opacity:idx===arr.length-1?0.25:1, padding:0, display:'flex' }} aria-label="Move down"><ChevronDown size={12} color={NAVY} /></button>
                       </div>
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <span style={{ fontWeight: 800, color: NAVY, fontSize: 14 }}>
-                            {topItem.icon || '📁'} {topItem.label}
+                            {topItem.icon ? `${topItem.icon} ` : ''}{topItem.label}
                           </span>
                           {topItem.badge && (
                             <span style={{
@@ -565,17 +586,17 @@ export default function MenuBuilderTab({ logAct }) {
                     </div>
 
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                      <button onClick={() => handleToggleActive(topItem)} title={topItem.isActive === false ? 'Click to show' : 'Click to hide'} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }}>
-                        {topItem.isActive === false ? '🙈' : '👁️'}
+                      <button onClick={() => handleToggleActive(topItem)} title={topItem.isActive === false ? 'Click to show' : 'Click to hide'} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4 }}>
+                        {topItem.isActive === false ? <EyeOff size={15} color="#94a3b8" /> : <Eye size={15} color="#16a34a" />}
                       </button>
-                      <button onClick={() => handleDuplicate(topItem)} title="Duplicate link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }}>
-                        📋
+                      <button onClick={() => handleDuplicate(topItem)} title="Duplicate link" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4 }}>
+                        <Copy size={14} color="#64748b" />
                       </button>
-                      <button onClick={() => handleEdit(topItem)} style={{ background: '#e2e8f0', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 5, fontSize: 12, fontWeight: 600 }}>
-                        ✏️ Edit
+                      <button onClick={() => handleEdit(topItem)} style={{ background: '#e2e8f0', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 5, fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        <Edit2 size={12} /> Edit
                       </button>
-                      <button onClick={() => handleDelete(topItem.id, topItem.label)} style={{ background: '#fee2e2', color: '#b91c1c', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 5, fontSize: 12 }} aria-label="Delete menu item">
-                        🗑️
+                      <button onClick={() => handleDelete(topItem.id, topItem.label)} style={{ background: '#fee2e2', color: '#b91c1c', border: 'none', cursor: 'pointer', padding: '5px 8px', borderRadius: 5, display: 'inline-flex', alignItems: 'center' }} aria-label="Delete menu item">
+                        <Trash2 size={12} />
                       </button>
                     </div>
                   </div>
@@ -594,14 +615,14 @@ export default function MenuBuilderTab({ logAct }) {
                         opacity: subItem.isActive === false ? 0.7 : 1
                       }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                            <button onClick={() => handleMove(subItem, 'up')} disabled={sIdx===0} style={{ border:'none', background:'none', cursor:sIdx===0?'not-allowed':'pointer', opacity:sIdx===0?0.25:1, fontSize:10, padding:0 }} aria-label="Move sub-item up">▲</button>
-                            <button onClick={() => handleMove(subItem, 'down')} disabled={sIdx===sArr.length-1} style={{ border:'none', background:'none', cursor:sIdx===sArr.length-1?'not-allowed':'pointer', opacity:sIdx===sArr.length-1?0.25:1, fontSize:10, padding:0 }} aria-label="Move sub-item down">▼</button>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <button onClick={() => handleMove(subItem, 'up')} disabled={sIdx===0} style={{ border:'none', background:'none', cursor:sIdx===0?'not-allowed':'pointer', opacity:sIdx===0?0.25:1, padding:0, display:'flex' }} aria-label="Move sub-item up"><ChevronUp size={11} color={NAVY} /></button>
+                            <button onClick={() => handleMove(subItem, 'down')} disabled={sIdx===sArr.length-1} style={{ border:'none', background:'none', cursor:sIdx===sArr.length-1?'not-allowed':'pointer', opacity:sIdx===sArr.length-1?0.25:1, padding:0, display:'flex' }} aria-label="Move sub-item down"><ChevronDown size={11} color={NAVY} /></button>
                           </div>
                           <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                               <span style={{ fontWeight: 600, color: '#334155', fontSize: 13 }}>
-                                {subItem.icon || '📂'} {subItem.label}
+                                {subItem.icon ? `${subItem.icon} ` : ''}{subItem.label}
                               </span>
                               {subItem.badge && (
                                 <span style={{
@@ -621,14 +642,14 @@ export default function MenuBuilderTab({ logAct }) {
                         </div>
 
                         <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-                          <button onClick={() => handleToggleActive(subItem)} title={subItem.isActive === false ? 'Click to show' : 'Click to hide'} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12 }}>
-                            {subItem.isActive === false ? '🙈' : '👁️'}
+                          <button onClick={() => handleToggleActive(subItem)} title={subItem.isActive === false ? 'Click to show' : 'Click to hide'} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 3 }}>
+                            {subItem.isActive === false ? <EyeOff size={13} color="#94a3b8" /> : <Eye size={13} color="#16a34a" />}
                           </button>
-                          <button onClick={() => handleDuplicate(subItem)} title="Duplicate link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12 }}>
-                            📋
+                          <button onClick={() => handleDuplicate(subItem)} title="Duplicate link" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 3 }}>
+                            <Copy size={13} color="#64748b" />
                           </button>
-                          <button onClick={() => handleEdit(subItem)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }} aria-label="Edit sub-item">✏️</button>
-                          <button onClick={() => handleDelete(subItem.id, subItem.label)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }} aria-label="Delete sub-item">🗑️</button>
+                          <button onClick={() => handleEdit(subItem)} style={{ background: '#f1f5f9', border: 'none', cursor: 'pointer', padding: '3px 6px', borderRadius: 4, display: 'flex', alignItems: 'center' }} aria-label="Edit sub-item"><Edit2 size={11} color={NAVY} /></button>
+                          <button onClick={() => handleDelete(subItem.id, subItem.label)} style={{ background: '#fee2e2', color: '#b91c1c', border: 'none', cursor: 'pointer', padding: '3px 6px', borderRadius: 4, display: 'flex', alignItems: 'center' }} aria-label="Delete sub-item"><Trash2 size={11} /></button>
                         </div>
                       </div>
 
@@ -647,11 +668,11 @@ export default function MenuBuilderTab({ logAct }) {
                           }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                                <button onClick={() => handleMove(subSubItem, 'up')} disabled={ssIdx===0} style={{ border:'none', background:'none', cursor:ssIdx===0?'not-allowed':'pointer', opacity:ssIdx===0?0.25:1, fontSize:9, padding:0 }} aria-label="Move item up">▲</button>
-                                <button onClick={() => handleMove(subSubItem, 'down')} disabled={ssIdx===ssArr.length-1} style={{ border:'none', background:'none', cursor:ssIdx===ssArr.length-1?'not-allowed':'pointer', opacity:ssIdx===ssArr.length-1?0.25:1, fontSize:9, padding:0 }} aria-label="Move item down">▼</button>
+                                <button onClick={() => handleMove(subSubItem, 'up')} disabled={ssIdx===0} style={{ border:'none', background:'none', cursor:ssIdx===0?'not-allowed':'pointer', opacity:ssIdx===0?0.25:1, padding:0, display:'flex' }} aria-label="Move item up"><ChevronUp size={10} color={NAVY} /></button>
+                                <button onClick={() => handleMove(subSubItem, 'down')} disabled={ssIdx===ssArr.length-1} style={{ border:'none', background:'none', cursor:ssIdx===ssArr.length-1?'not-allowed':'pointer', opacity:ssIdx===ssArr.length-1?0.25:1, padding:0, display:'flex' }} aria-label="Move item down"><ChevronDown size={10} color={NAVY} /></button>
                               </div>
                               <span style={{ fontWeight: 500, color: '#475569', fontSize: 12 }}>
-                                {subSubItem.icon || '📄'} {subSubItem.label}
+                                {subSubItem.icon ? `${subSubItem.icon} ` : ''}{subSubItem.label}
                               </span>
                               {subSubItem.badge && (
                                 <span style={{
@@ -666,14 +687,14 @@ export default function MenuBuilderTab({ logAct }) {
                             </div>
 
                             <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                              <button onClick={() => handleToggleActive(subSubItem)} title={subSubItem.isActive === false ? 'Click to show' : 'Click to hide'} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11 }}>
-                                {subSubItem.isActive === false ? '🙈' : '👁️'}
+                              <button onClick={() => handleToggleActive(subSubItem)} title={subSubItem.isActive === false ? 'Click to show' : 'Click to hide'} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 2 }}>
+                                {subSubItem.isActive === false ? <EyeOff size={12} color="#94a3b8" /> : <Eye size={12} color="#16a34a" />}
                               </button>
-                              <button onClick={() => handleDuplicate(subSubItem)} title="Duplicate link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11 }}>
-                                📋
+                              <button onClick={() => handleDuplicate(subSubItem)} title="Duplicate link" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 2 }}>
+                                <Copy size={12} color="#64748b" />
                               </button>
-                              <button onClick={() => handleEdit(subSubItem)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12 }} aria-label="Edit item">✏️</button>
-                              <button onClick={() => handleDelete(subSubItem.id, subSubItem.label)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12 }} aria-label="Delete item">🗑️</button>
+                              <button onClick={() => handleEdit(subSubItem)} style={{ background: '#f1f5f9', border: 'none', cursor: 'pointer', padding: '2px 5px', borderRadius: 4, display: 'flex', alignItems: 'center' }} aria-label="Edit item"><Edit2 size={10} color={NAVY} /></button>
+                              <button onClick={() => handleDelete(subSubItem.id, subSubItem.label)} style={{ background: '#fee2e2', color: '#b91c1c', border: 'none', cursor: 'pointer', padding: '2px 5px', borderRadius: 4, display: 'flex', alignItems: 'center' }} aria-label="Delete item"><Trash2 size={10} /></button>
                             </div>
                           </div>
 
@@ -685,8 +706,8 @@ export default function MenuBuilderTab({ logAct }) {
                             }}>
                               <span style={{ color: '#64748b' }}>↳ {l3Item.label}</span>
                               <div style={{ display: 'flex', gap: 4 }}>
-                                <button onClick={() => handleEdit(l3Item)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11 }}>✏️</button>
-                                <button onClick={() => handleDelete(l3Item.id, l3Item.label)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11 }}>🗑️</button>
+                                <button onClick={() => handleEdit(l3Item)} style={{ background: '#f1f5f9', border: 'none', cursor: 'pointer', padding: '2px 5px', borderRadius: 4, display: 'flex', alignItems: 'center' }}><Edit2 size={10} color={NAVY} /></button>
+                                <button onClick={() => handleDelete(l3Item.id, l3Item.label)} style={{ background: '#fee2e2', color: '#b91c1c', border: 'none', cursor: 'pointer', padding: '2px 5px', borderRadius: 4, display: 'flex', alignItems: 'center' }}><Trash2 size={10} /></button>
                               </div>
                             </div>
                           ))}

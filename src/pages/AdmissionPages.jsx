@@ -1,10 +1,14 @@
-// src/pages/AdmissionPages.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import DOMPurify from 'dompurify';
 import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageContent';
+import {
+  ClipboardList, FolderCheck, CreditCard, Bell, Inbox,
+  Calendar, FileCheck, Printer, FileText, TrendingUp,
+  Landmark, BookOpen, Laptop, Briefcase, Users, ExternalLink
+} from 'lucide-react';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -49,7 +53,7 @@ export function AdmissionRule() {
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-      <PageHeader title={content?.title || "Admission Procedure"} subtitle={content?.subtitle || "Complete step-by-step guide for UG and Vocational admission under NEP 2020."} icon="📝" />
+      <PageHeader title={content?.title || "Admission Procedure"} subtitle={content?.subtitle || "Complete step-by-step guide for UG and Vocational admission under NEP 2020."} icon={<ClipboardList size={38} />} />
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ background: '#fff', padding: 40, borderRadius: 24, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)' }}>
@@ -89,15 +93,23 @@ export function DocumentRequired() {
     { t: 'Caste Certificate', d: 'If applicable for reservation claims.', type: 'Photocopy' }
   ]);
 
+  const getDocIcon = (type) => {
+    if (type === 'Original') return <FileCheck size={28} color="#ef4444" />;
+    if (type === 'Print') return <Printer size={28} color="#0284c7" />;
+    return <FileText size={28} color="#64748b" />;
+  };
+
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-      <PageHeader title={content?.title || "Documents Required"} subtitle={content?.subtitle || "Bring these documents during physical verification at the campus."} icon="📂" />
+      <PageHeader title={content?.title || "Documents Required"} subtitle={content?.subtitle || "Bring these documents during physical verification at the campus."} icon={<FolderCheck size={38} />} />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: 16 }}>
             {docs.map((d, i) => (
               <div key={i} style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #e2e8f0', display: 'flex', gap: 16, boxShadow: '0 4px 15px rgba(15,35,71,0.03)' }}>
-                <div style={{ fontSize: 32 }}>{d.type === 'Original' ? '📜' : d.type === 'Print' ? '🖨️' : '📄'}</div>
+                <div style={{ flexShrink: 0, marginTop: 4 }}>
+                  {getDocIcon(d.type)}
+                </div>
                 <div>
                   <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 4, background: d.type === 'Original' ? '#fee2e2' : '#f1f5f9', color: d.type === 'Original' ? '#ef4444' : '#64748b', marginBottom: 6 }}>{(d.type || 'DOCUMENT').toUpperCase()}</div>
                   <div style={{ fontWeight: 800, color: NAVY, fontSize: 16, marginBottom: 4 }}>{d.t || d.title}</div>
@@ -140,7 +152,7 @@ export function FeeStructure() {
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-      <PageHeader title="Fee Structure" subtitle="Detailed semester-wise fee breakdown for 4-Year FYUGP (8 Semesters), BCA, and BBA." icon="💳" />
+      <PageHeader title="Fee Structure" subtitle="Detailed semester-wise fee breakdown for 4-Year FYUGP (8 Semesters), BCA, and BBA." icon={<CreditCard size={38} />} />
       <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 24, flexWrap: 'wrap' }}>
@@ -158,7 +170,7 @@ export function FeeStructure() {
                 <div style={{ background: '#eff6ff', borderLeft: '4px solid #3b82f6', padding: '12px 16px', borderRadius: '0 8px 8px 0', marginBottom: 20, fontSize: 13, color: '#1e3a8a', fontWeight: 600 }}>
                   Note: Under NEP 2020 (FYUGP), the undergraduate course is spread over 8 semesters. The fee pattern generally repeats for Odd (1, 3, 5, 7) and Even (2, 4, 6, 8) semesters.
                 </div>
-                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 800 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 800, fontVariantNumeric: 'tabular-nums' }}>
                   <thead>
                     <tr style={{ background: NAVY, color: '#fff', textAlign: 'left' }}>
                       <th style={{ padding: 16, borderRadius: '12px 0 0 0' }}>Fee Head</th>
@@ -180,10 +192,10 @@ export function FeeStructure() {
                     ))}
                     <tr style={{ background: `${GOLD}15`, fontWeight: 900, color: NAVY }}>
                       <td style={{ padding: 16 }}>Grand Total</td>
-                      <td style={{ padding: 16 }}>₹3146</td>
-                      <td style={{ padding: 16 }}>₹2600</td>
-                      <td style={{ padding: 16 }}>₹3026</td>
-                      <td style={{ padding: 16 }}>₹2480</td>
+                      <td style={{ padding: 16 }}>₹3,146</td>
+                      <td style={{ padding: 16 }}>₹2,600</td>
+                      <td style={{ padding: 16 }}>₹3,026</td>
+                      <td style={{ padding: 16 }}>₹2,480</td>
                     </tr>
                   </tbody>
                 </table>
@@ -191,7 +203,7 @@ export function FeeStructure() {
             )}
 
             {(activeTab === 'BCA' || activeTab === 'BBA') && (
-              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 500 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 500, fontVariantNumeric: 'tabular-nums' }}>
                 <thead>
                   <tr style={{ background: NAVY, color: '#fff', textAlign: 'left' }}>
                     <th style={{ padding: 16, borderRadius: '12px 0 0 0' }}>Particulars</th>
@@ -243,25 +255,33 @@ export function AdmissionNotification() {
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-      <PageHeader title="Admission Notifications" subtitle="Latest updates, merit lists, and announcements regarding admissions." icon="📢" />
+      <PageHeader title="Admission Notifications" subtitle="Latest updates, merit lists, and announcements regarding admissions." icon={<Bell size={38} />} />
       <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           {notices.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 60, background: '#fff', borderRadius: 20, border: '2px dashed #e2e8f0' }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>📭</div>
+              <Inbox size={42} color="#94a3b8" style={{ margin: '0 auto 12px' }} />
               <div style={{ fontWeight: 700, fontSize: 16, color: NAVY }}>No Admission Notices</div>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {notices.map((n, i) => (
-                <div key={n.id} style={{ background: '#fff', padding: 24, borderRadius: 16, borderLeft: `4px solid ${n.isNew ? '#ef4444' : NAVY}`, boxShadow: '0 4px 15px rgba(15,35,71,0.03)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 20 }}>
-                  <div>
-                    {n.isNew && <span style={{ display: 'inline-block', background: '#fee2e2', color: '#ef4444', fontSize: 10, fontWeight: 900, padding: '2px 8px', borderRadius: 4, marginBottom: 8, animation: 'pulse 2s infinite' }}>🔴 NEW UPDATE</span>}
+              {notices.map((n) => (
+                <div key={n.id} style={{ background: '#fff', padding: 24, borderRadius: 16, borderLeft: `4px solid ${n.isNew ? '#ef4444' : NAVY}`, boxShadow: '0 4px 15px rgba(15,35,71,0.03)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: 260 }}>
+                    {n.isNew && (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#fee2e2', color: '#ef4444', fontSize: 10, fontWeight: 900, padding: '2px 8px', borderRadius: 4, marginBottom: 8 }}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444' }} /> NEW UPDATE
+                      </span>
+                    )}
                     <div style={{ fontWeight: 700, fontSize: 16, color: NAVY, lineHeight: 1.5 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(n.text) }} />
-                    <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 8 }}>🗓️ {new Date(n.date).toLocaleDateString()}</div>
+                    <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Calendar size={13} /> {new Date(n.date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </div>
                   </div>
                   {n.link && (
-                    <a href={n.link} target="_blank" rel="noreferrer" style={{ background: `${NAVY}15`, color: NAVY, padding: '10px 20px', minHeight: 44, display: 'inline-flex', alignItems: 'center', borderRadius: 10, textDecoration: 'none', fontWeight: 800, fontSize: 13, whiteSpace: 'nowrap' }}>View Details ↗</a>
+                    <a href={n.link} target="_blank" rel="noreferrer" style={{ background: `${NAVY}15`, color: NAVY, padding: '10px 20px', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6, borderRadius: 10, textDecoration: 'none', fontWeight: 800, fontSize: 13, whiteSpace: 'nowrap' }}>
+                      View Details <ExternalLink size={14} />
+                    </a>
                   )}
                 </div>
               ))}
@@ -279,26 +299,38 @@ export function AdmissionNotification() {
 export function IntakeCapacity() {
   const { content, getList } = usePageContent('intake-capacity');
   const defaultData = [
-    { title: 'Commerce', seats: 550, icon: '📈', color: GOLD, sub: 'B.Com Honours' },
-    { title: 'Arts (History & Pol. Sc)', seats: 312, icon: '🏛️', color: NAVY, sub: '156 Seats Each' },
-    { title: 'Arts (Eng, Eco, Psy, Hin)', seats: 512, icon: '📚', color: '#0ea5e9', sub: '128 Seats Each' },
-    { title: 'BCA', seats: 90, icon: '💻', color: '#ef4444', sub: 'Vocational Course' },
-    { title: 'BBA', seats: 90, icon: '💼', color: '#10b981', sub: 'Vocational Course' }
+    { title: 'Commerce', seats: 550, color: GOLD, sub: 'B.Com Honours' },
+    { title: 'Arts (History & Pol. Sc)', seats: 312, color: NAVY, sub: '156 Seats Each' },
+    { title: 'Arts (Eng, Eco, Psy, Hin)', seats: 512, color: '#0ea5e9', sub: '128 Seats Each' },
+    { title: 'BCA', seats: 90, color: '#ef4444', sub: 'Vocational Course' },
+    { title: 'BBA', seats: 90, color: '#10b981', sub: 'Vocational Course' }
   ];
   const data = getList('seats', defaultData);
 
+  const getCourseIcon = (title, color) => {
+    const t = String(title).toLowerCase();
+    if (t.includes('commerce')) return <TrendingUp size={30} color={color || GOLD} />;
+    if (t.includes('history') || t.includes('pol')) return <Landmark size={30} color={color || NAVY} />;
+    if (t.includes('arts') || t.includes('eng')) return <BookOpen size={30} color={color || '#0ea5e9'} />;
+    if (t.includes('bca') || t.includes('comp')) return <Laptop size={30} color={color || '#ef4444'} />;
+    if (t.includes('bba') || t.includes('bus')) return <Briefcase size={30} color={color || '#10b981'} />;
+    return <Users size={30} color={color || GOLD} />;
+  };
+
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-      <PageHeader title={content?.title || "Intake Capacity"} subtitle={content?.subtitle || "Subject-wise maximum seat availability for the current academic session."} icon="🪑" />
+      <PageHeader title={content?.title || "Intake Capacity"} subtitle={content?.subtitle || "Subject-wise maximum seat availability for the current academic session."} icon={<Users size={38} />} />
       <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 20 }}>
             {data.map((d, i) => (
               <div key={i} style={{ background: '#fff', borderRadius: 20, padding: 30, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.04)', display: 'flex', alignItems: 'center', gap: 20 }}>
-                <div style={{ width: 64, height: 64, borderRadius: 16, background: `${d.color || GOLD}15`, color: d.color || GOLD, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32 }}>{d.icon || '🪑'}</div>
+                <div style={{ width: 64, height: 64, borderRadius: 16, background: `${d.color || GOLD}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {getCourseIcon(d.title, d.color)}
+                </div>
                 <div>
                   <div style={{ fontSize: 13, color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>{d.title}</div>
-                  <div style={{ fontSize: 36, fontWeight: 900, color: NAVY, lineHeight: 1 }}>{d.seats}</div>
+                  <div style={{ fontSize: 36, fontWeight: 900, color: NAVY, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{d.seats}</div>
                   <div style={{ fontSize: 12, color: d.color || GOLD, fontWeight: 800, marginTop: 4 }}>{d.sub}</div>
                 </div>
               </div>

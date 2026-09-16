@@ -1,6 +1,4 @@
 // src/components/admin/tabs/EventsTab.jsx
-// ✅ BUG FIX: VITE_DRIVE_EVENT_REPORTS_FOLDER → VITE_DRIVE_EVENT_REPORTS_FOLDER
-
 import { useState } from "react";
 import { db } from "../../../firebase";
 import {
@@ -11,6 +9,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import toast from "react-hot-toast";
+import { Trophy, Calendar, MapPin, Clock, Plus, Edit2, Trash2, Camera, CalendarDays, CheckCircle2, X } from 'lucide-react';
 import MediaPicker from "../../MediaPicker";
 import {
   T,
@@ -85,8 +84,8 @@ export default function EventsTab({
         });
         toast.success(
           payload.status === "upcoming"
-            ? "🔜 Upcoming Event Published!"
-            : "📸 Recent Event Published!",
+            ? "Upcoming Event Published!"
+            : "Recent Event Published!",
         );
       }
       logAct(editItem ? "update" : "add", `Event: ${formData.title}`, "events");
@@ -101,9 +100,9 @@ export default function EventsTab({
   // ── Scheduling status helper ──
   const getScheduleStatus = (ev) => {
     const now = new Date();
-    if (ev.publishDate && new Date(ev.publishDate) > now) return { label: '🟡 Scheduled', bg: '#fefce8', color: '#d97706' };
-    if (ev.expiryDate && new Date(ev.expiryDate) < now) return { label: '🔴 Expired', bg: '#fee2e2', color: '#dc2626' };
-    return { label: '🟢 Live', bg: '#dcfce7', color: '#16a34a' };
+    if (ev.publishDate && new Date(ev.publishDate) > now) return { label: 'Scheduled', bg: '#fefce8', color: '#d97706' };
+    if (ev.expiryDate && new Date(ev.expiryDate) < now) return { label: 'Expired', bg: '#fee2e2', color: '#dc2626' };
+    return { label: 'Live', bg: '#dcfce7', color: '#16a34a' };
   };
 
   const filtered = (events || []).filter(
@@ -120,17 +119,20 @@ export default function EventsTab({
 
   return (
     <div className="fade-up">
-      <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>🏆 Events Manager</p>
-      <p style={{ margin: '4px 0 14px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage campus events, competitions, and seminars.</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+        <Trophy size={24} color={GOLD} />
+        <h2 style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>Events & Activities Manager</h2>
+      </div>
+      <p style={{ margin: '4px 0 14px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage campus events, academic seminars, sports competitions, and cultural celebrations</p>
 
-      {/* ── 🏆 CLEAR DESTINATION INDICATOR ── */}
+      {/* ── Destination indicator ── */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 12,
         background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.05) 0%, rgba(124, 58, 237, 0.08) 100%)',
         border: '1.5px solid rgba(147, 51, 234, 0.2)',
         borderRadius: 14, padding: '12px 16px', margin: '0 0 20px',
       }}>
-        <span style={{ fontSize: 24 }}>🏆</span>
+        <Trophy size={22} color="#6b21a8" />
         <div>
           <div style={{ fontWeight: 800, fontSize: 13, color: '#6b21a8' }}>
             Live Destination: Homepage Card 2 (Upcoming Events) &amp; /events Page
@@ -142,8 +144,9 @@ export default function EventsTab({
       </div>
 
       <div className="card-gold">
-        <div className="actitle">
-          {editItem ? "✏️ Edit Event" : "➕ Add Event"}
+        <div className="actitle" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {editItem ? <Edit2 size={16} color={GOLD} /> : <Plus size={16} color={GOLD} />}
+          <span>{editItem ? "Edit Event" : "Create New Event"}</span>
         </div>
 
         <div
@@ -170,9 +173,13 @@ export default function EventsTab({
               transition: ".2s",
               background: formData.status === "upcoming" ? GOLD : "transparent",
               color: formData.status === "upcoming" ? "#000" : T.t2,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8
             }}
           >
-            🔜 Upcoming Event
+            <CalendarDays size={16} /> Upcoming Event
           </button>
           <button
             type="button"
@@ -187,9 +194,13 @@ export default function EventsTab({
               transition: ".2s",
               background: formData.status === "recent" ? NAVY : "transparent",
               color: formData.status === "recent" ? "#fff" : T.t2,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8
             }}
           >
-            📸 Recent Event
+            <Camera size={16} /> Recent / Completed Event
           </button>
         </div>
 
@@ -293,10 +304,10 @@ export default function EventsTab({
             />
           </div>
 
-          {/* ── 📅 Content Scheduling ── */}
+          {/* ── Content Scheduling ── */}
           <div style={{ background: '#f8fafc', borderRadius: 12, padding: 16, marginBottom: 20, border: `1px solid ${T.b1}` }}>
             <div style={{ fontSize: 13, fontWeight: 800, color: NAVY, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-              📅 Scheduling <span style={{ fontSize: 11, color: T.t4, fontWeight: 600 }}>(optional)</span>
+              <Clock size={15} color={NAVY} /> Scheduling Options <span style={{ fontSize: 11, color: T.t4, fontWeight: 600 }}>(optional)</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14 }}>
               <div>
@@ -317,8 +328,9 @@ export default function EventsTab({
           </div>
 
           <div style={{ display: "flex", gap: 10 }}>
-            <button type="submit" className="abtn abtn-gold" disabled={loading}>
-              🚀 {editItem ? "Update" : "Publish"}
+            <button type="submit" className="abtn abtn-gold" disabled={loading} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <CheckCircle2 size={16} />
+              {loading ? 'Processing…' : editItem ? "Update Event" : "Publish Event"}
             </button>
             {editItem && (
               <button
@@ -329,8 +341,9 @@ export default function EventsTab({
                   clearDraft();
                   setFormData((d) => ({ ...d, status: "recent" }));
                 }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
               >
-                Cancel
+                <X size={15} /> Cancel
               </button>
             )}
           </div>
@@ -340,7 +353,7 @@ export default function EventsTab({
       <SectionSearch
         value={search}
         onChange={setSearch}
-        placeholder="Search events..."
+        placeholder="Search events by title or category..."
       />
       <BulkBar
         count={selected.length}
@@ -361,34 +374,38 @@ export default function EventsTab({
           }}
         >
           {[
-            { id: "upcoming", label: "🔜 Upcoming Events" },
-            { id: "recent", label: "📸 Recent/Past Events" },
-          ].map((t) => (
+            { id: "upcoming", label: "Upcoming Events", icon: CalendarDays },
+            { id: "recent", label: "Recent / Past Events", icon: Camera },
+          ].map(({ id, label, icon: TabIcon }) => (
             <button
-              key={t.id}
+              key={id}
               onClick={() => {
-                setListTab(t.id);
+                setListTab(id);
                 setSelected([]);
               }}
               style={{
                 background: "none",
                 border: "none",
                 fontSize: 15,
-                fontWeight: listTab === t.id ? 900 : 600,
-                color: listTab === t.id ? NAVY : T.t3,
+                fontWeight: listTab === id ? 900 : 600,
+                color: listTab === id ? NAVY : T.t3,
                 cursor: "pointer",
-                borderBottom: listTab === t.id ? `3px solid ${NAVY}` : "none",
+                borderBottom: listTab === id ? `3px solid ${NAVY}` : "none",
                 paddingBottom: 10,
                 transition: "0.2s",
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8
               }}
             >
-              {t.label}
+              <TabIcon size={16} />
+              {label}
             </button>
           ))}
         </div>
-        <div className="actitle">
-          {listTab === "upcoming" ? "Upcoming Events" : "Recent Events"} (
-          {displayedEvents.length})
+        <div className="actitle" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span>{listTab === "upcoming" ? "Upcoming Events" : "Recent Events"}</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: T.t3, fontVariantNumeric: 'tabular-nums' }}>{displayedEvents.length} records</span>
         </div>
         {displayedEvents.map((ev) => (
           <div
@@ -440,7 +457,7 @@ export default function EventsTab({
                     fontWeight: 900,
                   }}
                 >
-                  {ev.status === "upcoming" ? "🔜 Upcoming" : "📸 Recent"}
+                  {ev.status === "upcoming" ? "Upcoming" : "Recent"}
                 </span>
                 <span
                   className="abadge"
@@ -451,22 +468,22 @@ export default function EventsTab({
                 {ev.date && (
                   <span
                     className="abadge"
-                    style={{ background: BG, color: T.t2 }}
+                    style={{ background: BG, color: T.t2, display: 'inline-flex', alignItems: 'center', gap: 4, fontVariantNumeric: 'tabular-nums' }}
                   >
-                    📅 {new Date(ev.date).toLocaleDateString("en-IN")}
+                    <Calendar size={12} /> {new Date(ev.date).toLocaleDateString("en-IN")}
                   </span>
                 )}
                 {ev.venue && (
                   <span
                     className="abadge"
-                    style={{ background: BG, color: T.t3 }}
+                    style={{ background: BG, color: T.t3, display: 'inline-flex', alignItems: 'center', gap: 4 }}
                   >
-                    📍 {ev.venue}
+                    <MapPin size={12} /> {ev.venue}
                   </span>
                 )}
                 {(() => { const s = getScheduleStatus(ev); return <span className="abadge" style={{ background: s.bg, color: s.color, fontWeight: 800 }}>{s.label}</span>; })()}
-                {ev.publishDate && <span className="abadge" style={{ background: '#f0fdf4', color: T.t3, fontSize: 10 }}>📅 {new Date(ev.publishDate).toLocaleDateString('en-IN', {day:'2-digit', month:'short'})}</span>}
-                {ev.expiryDate && <span className="abadge" style={{ background: '#fefce8', color: '#d97706', fontSize: 10 }}>⏰ {new Date(ev.expiryDate).toLocaleDateString('en-IN', {day:'2-digit', month:'short'})}</span>}
+                {ev.publishDate && <span className="abadge" style={{ background: '#f0fdf4', color: T.t3, fontSize: 10, fontVariantNumeric: 'tabular-nums' }}>{new Date(ev.publishDate).toLocaleDateString('en-IN', {day:'2-digit', month:'short'})}</span>}
+                {ev.expiryDate && <span className="abadge" style={{ background: '#fefce8', color: '#d97706', fontSize: 10, fontVariantNumeric: 'tabular-nums' }}>{new Date(ev.expiryDate).toLocaleDateString('en-IN', {day:'2-digit', month:'short'})}</span>}
               </div>
               <div style={{ fontWeight: 700, color: NAVY, fontSize: 14 }}>
                 {ev.title}
@@ -496,14 +513,16 @@ export default function EventsTab({
                   });
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
+                aria-label="Edit event"
               >
-                ✏️
+                <Edit2 size={13} />
               </button>
               <button
                 className="abtn abtn-red abtn-sm"
                 onClick={() => softDelete("events", ev.id, ev, ev.title)}
+                aria-label="Delete event"
               >
-                🗑️
+                <Trash2 size={13} />
               </button>
             </div>
           </div>

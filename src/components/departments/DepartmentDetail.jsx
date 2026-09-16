@@ -1,6 +1,7 @@
 import { Fade, Pill, SectionLabel, SectionHead, EmptyBox, NAVY } from './DepartmentUI';
 import { FacultySection } from './DepartmentFaculty';
 import { SubjectGrid } from './SubjectGrid';
+import { Target, Compass, CreditCard, FileText, Award, UserCheck, Mail, Phone, GraduationCap } from 'lucide-react';
 
 export const DepartmentDetail = ({ d, meta, activeSem, setSem, setPreviewPdf, deptSlug, subSlug }) => {
   const C = meta.color;
@@ -28,7 +29,7 @@ export const DepartmentDetail = ({ d, meta, activeSem, setSem, setPreviewPdf, de
                 <h2 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 'clamp(24px,3.5vw,36px)', fontWeight: 900, color: NAVY, margin: '0 0 16px', letterSpacing: '-1px' }}>
                   {meta.fullName || meta.short} <span style={{ color: C }}>Overview</span>
                 </h2>
-                <p style={{ color: '#64748b', lineHeight: 1.9, fontSize: 16, margin: 0 }}>
+                <p style={{ color: '#64748b', lineHeight: 1.9, fontSize: 16, margin: 0, textAlign: 'justify', textJustify: 'inter-word', textWrap: 'pretty' }}>
                   {d.about || `The ${meta.short} Faculty at GNC College is a vibrant academic community dedicated to critical inquiry, creative expression, and social understanding. We house multiple specialized departments that prepare students for leadership, research, and professional excellence.`}
                 </p>
                 <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
@@ -44,8 +45,8 @@ export const DepartmentDetail = ({ d, meta, activeSem, setSem, setPreviewPdf, de
               </Fade>
               <Fade delay={0.15}>
                  <div style={{ position: 'relative' }}>
-                    <div style={{ width: '100%', height: 300, background: `linear-gradient(135deg, ${C}22, ${C}06)`, borderRadius: 30, overflow: 'hidden' }}>
-                       <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', fontSize: 80, opacity: 0.3 }}>🎓</div>
+                    <div style={{ width: '100%', height: 300, background: `linear-gradient(135deg, ${C}22, ${C}06)`, borderRadius: 30, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                       <GraduationCap size={76} color={C} style={{ opacity: 0.3 }} />
                     </div>
                     <div style={{ position: 'absolute', bottom: -20, right: -20, background: '#fff', padding: '16px 20px', borderRadius: 20, boxShadow: '0 10px 25px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9' }}>
                        <div style={{ fontWeight: 800, color: NAVY, fontSize: 14 }}>Academic Portal</div>
@@ -69,7 +70,7 @@ export const DepartmentDetail = ({ d, meta, activeSem, setSem, setPreviewPdf, de
                     <h2 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 'clamp(20px,2.5vw,28px)', fontWeight: 800, color: NAVY, margin: '0 0 14px', letterSpacing: '-.4px' }}>
                       About <span style={{ color: C }}>{subSlug ? (subSlug.charAt(0).toUpperCase() + subSlug.slice(1)) : meta.short} Department</span>
                     </h2>
-                    <p style={{ color: '#64748b', lineHeight: 1.9, fontSize: 15, margin: 0 }}>{d.about}</p>
+                    <p style={{ color: '#64748b', lineHeight: 1.9, fontSize: 15, margin: 0, textAlign: 'justify', textJustify: 'inter-word', textWrap: 'pretty' }}>{d.about}</p>
                   </Fade>
                 )}
                 {(d.vision || d.mission) && (
@@ -78,7 +79,9 @@ export const DepartmentDetail = ({ d, meta, activeSem, setSem, setPreviewPdf, de
                       {d.vision && (
                         <div style={{ background: `${C}08`, border: `1.5px solid ${C}1e`, borderRadius: 16, padding: '20px 22px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 10 }}>
-                            <div style={{ width: 32, height: 32, borderRadius: 9, background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🎯</div>
+                            <div style={{ width: 32, height: 32, borderRadius: 9, background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,.07)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Target size={18} color={C} />
+                            </div>
                             <span style={{ fontWeight: 800, color: NAVY, fontSize: 14 }}>Vision</span>
                           </div>
                           <p style={{ color: '#64748b', lineHeight: 1.8, fontSize: 13.5, margin: 0 }}>{d.vision}</p>
@@ -87,7 +90,9 @@ export const DepartmentDetail = ({ d, meta, activeSem, setSem, setPreviewPdf, de
                       {d.mission && (
                         <div style={{ background: '#fef9ec', border: '1.5px solid #fed7aa', borderRadius: 16, padding: '20px 22px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 10 }}>
-                            <div style={{ width: 32, height: 32, borderRadius: 9, background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🚀</div>
+                            <div style={{ width: 32, height: 32, borderRadius: 9, background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,.07)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Compass size={18} color="#d97706" />
+                            </div>
                             <span style={{ fontWeight: 800, color: NAVY, fontSize: 14 }}>Mission</span>
                           </div>
                           <p style={{ color: '#64748b', lineHeight: 1.8, fontSize: 13.5, margin: 0 }}>{d.mission}</p>
@@ -175,7 +180,7 @@ export const DepartmentDetail = ({ d, meta, activeSem, setSem, setPreviewPdf, de
             <div id="fees" style={{ padding: 'clamp(48px,6vw,64px) 0 0' }}>
               <SectionHead label="Education Investment" title="Fee Structure" color={C} />
               {feeRows.length === 0 ? (
-                <Fade><EmptyBox icon="💰" msg="No fee data available" sub="Details will be updated soon." color={C} /></Fade>
+                <Fade><EmptyBox icon={<CreditCard size={28} color={C} />} msg="No fee data available" sub="Details will be updated soon." color={C} /></Fade>
               ) : (
                 <Fade delay={0.06}>
                   <div style={{ background: '#fff', border: '1.5px solid #f1f5f9', borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 20px rgba(15,35,71,.06)' }}>
@@ -187,14 +192,14 @@ export const DepartmentDetail = ({ d, meta, activeSem, setSem, setPreviewPdf, de
                     {feeRows.map((row, i) => (
                       <div key={i} className="dp-fee-row">
                         <div style={{ fontSize: 14, fontWeight: 600, color: NAVY }}>{row.category}</div>
-                        <div style={{ fontSize: 15, fontWeight: 800, color: C }}>₹ {Number(row.amount).toLocaleString('en-IN')}</div>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: C, fontVariantNumeric: 'tabular-nums' }}>₹ {Number(row.amount).toLocaleString('en-IN')}</div>
                         <div className="dp-fee-note" style={{ fontSize: 13, color: '#64748b' }}>{row.note || '—'}</div>
                       </div>
                     ))}
                     {feeRows.length > 1 && (
                       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr', padding: '14px 20px', background: `${C}0a`, borderTop: `2px solid ${C}1e` }}>
                         <div style={{ fontSize: 14, fontWeight: 800, color: NAVY }}>Total Estimate</div>
-                        <div style={{ fontSize: 15, fontWeight: 800, color: C }}>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: C, fontVariantNumeric: 'tabular-nums' }}>
                           ₹ {feeRows.reduce((s, r) => s + (Number(r.amount) || 0), 0).toLocaleString('en-IN')}
                         </div>
                         <div />
@@ -209,7 +214,7 @@ export const DepartmentDetail = ({ d, meta, activeSem, setSem, setPreviewPdf, de
             <div style={{ padding: 'clamp(48px,6vw,64px) 0 0' }}>
               <SectionHead label="Resources" title="Activity & Program Reports" color={C} />
               {reports.length === 0 ? (
-                <Fade><EmptyBox icon="📋" msg="No reports listed" sub="Departmental activity reports will appear here." color={C} /></Fade>
+                <Fade><EmptyBox icon={<FileText size={28} color={C} />} msg="No reports listed" sub="Departmental activity reports will appear here." color={C} /></Fade>
               ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 14 }}>
                   {reports.map((rep, i) => (
@@ -218,7 +223,9 @@ export const DepartmentDetail = ({ d, meta, activeSem, setSem, setPreviewPdf, de
                         const pdfLink = rep.pdfUrl || rep.link;
                         if (pdfLink) setPreviewPdf({ url: pdfLink, title: rep.title || 'Report' });
                       }}>
-                        <div style={{ width: 48, height: 48, borderRadius: 12, background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>📄</div>
+                        <div style={{ width: 48, height: 48, borderRadius: 12, background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <FileText size={22} color="#ef4444" />
+                        </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontWeight: 700, color: NAVY, fontSize: 13.5, marginBottom: 3, lineHeight: 1.3 }}>{rep.title}</div>
                           <div style={{ fontSize: 12, color: '#94a3b8' }}>{rep.year || ''}</div>
@@ -237,7 +244,7 @@ export const DepartmentDetail = ({ d, meta, activeSem, setSem, setPreviewPdf, de
             <div style={{ padding: 'clamp(48px,6vw,64px) 0 0' }}>
               <SectionHead label="Milestones" title="Our Achievements" color={C} />
               {achievements.length === 0 ? (
-                <Fade><EmptyBox icon="🏆" msg="No achievements added" sub="Student and faculty success stories." color={C} /></Fade>
+                <Fade><EmptyBox icon={<Award size={28} color={C} />} msg="No achievements added" sub="Student and faculty success stories." color={C} /></Fade>
               ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 12 }}>
                   {achievements.map((a, i) => (
@@ -258,16 +265,16 @@ export const DepartmentDetail = ({ d, meta, activeSem, setSem, setPreviewPdf, de
               <Fade delay={0.08}>
                 <div className="dp-g2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 24 }}>
                   <div style={{ background: `linear-gradient(145deg,${C}0a,${C}04)`, border: `1.5px solid ${C}1e`, borderRadius: 20, padding: '28px 26px' }}>
-                    <div style={{ width: 68, height: 68, borderRadius: 16, overflow: 'hidden', background: `${C}14`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30, marginBottom: 16, border: `2px solid ${C}28` }}>
+                    <div style={{ width: 68, height: 68, borderRadius: 16, overflow: 'hidden', background: `${C}14`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, border: `2px solid ${C}28` }}>
                       {d.hod?.imageUrl
                         ? <img src={d.hod.imageUrl} alt={d.hod?.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
-                        : '👨‍🏫'}
+                        : <UserCheck size={32} color={C} />}
                     </div>
                     <div style={{ fontWeight: 800, color: NAVY, fontSize: 17, marginBottom: 3 }}>{d.hod?.name || 'Prof. Name'}</div>
                     <div style={{ color: C, fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{d.hod?.desig || `HOD, ${meta.short}`}</div>
                     <div style={{ borderTop: `1px solid ${C}1e`, paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 9 }}>
-                      {d.hod?.email && <a href={`mailto:${d.hod.email}`} style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#475569', fontSize: 13, textDecoration: 'none' }}><span style={{ color: C }}>✉</span>{d.hod.email}</a>}
-                      {d.hod?.phone && <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#475569', fontSize: 13 }}><span style={{ color: C }}>📞</span>{d.hod.phone}</div>}
+                      {d.hod?.email && <a href={`mailto:${d.hod.email}`} style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#475569', fontSize: 13, textDecoration: 'none' }}><Mail size={14} color={C} />{d.hod.email}</a>}
+                      {d.hod?.phone && <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#475569', fontSize: 13 }}><Phone size={14} color={C} />{d.hod.phone}</div>}
                     </div>
                   </div>
                   <div style={{ background: '#fff', border: '1.5px solid #f1f5f9', borderRadius: 20, padding: '28px 26px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>

@@ -27,7 +27,8 @@ const PROSE_CSS = `
     color: #334155;
     max-width: 100%;
     word-break: break-word;
-    text-align: left;
+    text-align: justify;
+    text-justify: inter-word;
     text-wrap: pretty;
   }
 
@@ -56,6 +57,10 @@ const PROSE_CSS = `
   .gnc-prose p {
     margin: 0.9em 0 1em;
     color: #334155;
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+    -webkit-hyphens: auto;
   }
 
   /* ── Links ── */

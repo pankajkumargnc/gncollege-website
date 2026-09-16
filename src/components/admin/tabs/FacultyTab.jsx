@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { db } from "../../../firebase";
 import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { Users, User, Edit2, Trash2, Plus, Download } from 'lucide-react';
 import MediaPicker from '../../MediaPicker';
 import { T, NAVY, GOLD, BG, WHITE, useLocalDraft, Toggle, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
 import { clearCache } from '../../../utils/cachedFetch';
@@ -33,7 +34,7 @@ export default function FacultyTab({ faculties, logAct, getSectionLog, softDelet
         toast.success('Staff updated!'); clearCache('faculties');
       } else {
         await addDoc(collection(db, 'faculties'), { ...payload, createdAt: serverTimestamp() });
-        toast.success('👨‍🏫 Staff added!'); clearCache('faculties');
+        toast.success('Staff profile added!'); clearCache('faculties');
       }
       logAct(editItem ? 'update' : 'add', `Staff: ${formData.name} (${formData.department})`, 'faculties');
       setEditItem(null); clearDraft();
@@ -69,7 +70,9 @@ export default function FacultyTab({ faculties, logAct, getSectionLog, softDelet
               />
             : null
           }
-          <div style={{ width: 44, height: 44, borderRadius: '50%', background: `${NAVY}15`, display: f.photo ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>👨‍🏫</div>
+          <div style={{ width: 44, height: 44, borderRadius: '50%', background: `${NAVY}15`, display: f.photo ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <User size={22} color={NAVY} />
+          </div>
           <div style={{ flex: 1, minWidth: '150px' }}>
             <div style={{ fontWeight: 800, color: NAVY, fontSize: 'clamp(13px, 4vw, 14px)' }}>{f.name}</div>
             <div style={{ fontSize: 12, color: T.t2 }}>{f.designation}</div>
@@ -79,12 +82,12 @@ export default function FacultyTab({ faculties, logAct, getSectionLog, softDelet
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
-            <button className="abtn abtn-outline abtn-sm" onClick={() => {
+            <button className="abtn abtn-outline abtn-sm" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => {
               setEditItem(f);
               setFormData({ name: f.name||'', designation: f.designation||'Assistant Professor', department: f.department||'English', qualification: f.qualification||'', photo: f.photo||'', email: f.email||'', phone: f.phone||'', staffType: f.staffType||'Teaching', order: f.order||0 });
               window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}>✏️</button>
-            <button className="abtn abtn-red abtn-sm" onClick={() => { softDelete('faculties', f.id, f, f.name); clearCache('faculties'); }}>🗑️</button>
+            }} aria-label="Edit staff member"><Edit2 size={13} /></button>
+            <button className="abtn abtn-red abtn-sm" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => { softDelete('faculties', f.id, f, f.name); clearCache('faculties'); }} aria-label="Delete staff member"><Trash2 size={13} /></button>
           </div>
         </div>
       ))}
@@ -93,11 +96,14 @@ export default function FacultyTab({ faculties, logAct, getSectionLog, softDelet
 
   return (
     <div className="fade-up">
-      <p style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>👨‍🏫 Faculty &amp; Staff</p>
-      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage teaching and non-teaching staff.</p>
+      <h2 style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 5vw, 24px)', letterSpacing: '-0.5px' }}>Faculty &amp; Staff Directory</h2>
+      <p style={{ margin: '4px 0 20px', color: T.t3, fontSize: 13, fontWeight: 600 }}>Manage teaching and non-teaching staff profiles.</p>
 
       <div className="card-gold">
-        <div className="actitle">{editItem ? '✏️ Edit Staff' : '➕ Add Staff'}</div>
+        <div className="actitle" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {editItem ? <Edit2 size={16} /> : <Plus size={16} />}
+          <span>{editItem ? 'Edit Staff Member' : 'Add Staff Member'}</span>
+        </div>
         <form onSubmit={save}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14, marginBottom: 14 }}>
             <div>
@@ -153,7 +159,9 @@ export default function FacultyTab({ faculties, logAct, getSectionLog, softDelet
           </div>
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <button type="submit" className="abtn abtn-gold" style={{ flex: '1 1 120px', justifyContent: 'center' }} disabled={loading}>🚀 {editItem ? 'Update' : 'Add'}</button>
+            <button type="submit" className="abtn abtn-gold" style={{ flex: '1 1 120px', justifyContent: 'center' }} disabled={loading}>
+              {loading ? 'Saving…' : editItem ? 'Update Staff Member' : 'Add Staff Member'}
+            </button>
             {editItem && <button type="button" className="abtn abtn-outline" style={{ flex: '1 1 120px', justifyContent: 'center' }} onClick={() => { setEditItem(null); clearDraft(); }}>Cancel</button>}
           </div>
         </form>
@@ -199,7 +207,7 @@ export default function FacultyTab({ faculties, logAct, getSectionLog, softDelet
               'GNC_Staff_Faculty'
             )}
           >
-            📊 Export Excel
+            <Download size={14} /> Export Excel
           </button>
         </div>
         {renderList(teaching, 'Teaching Staff')}
