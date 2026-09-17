@@ -1,6 +1,6 @@
 // src/utils/cachedFetch.js — Smart Persistent Caching + Zero-Lag Real-Time Sync Engine
 import { collection, getDocs, doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../firebase";
+import { db } from "../firebase.js";
 
 const CACHE_KEY_PREFIX = "gnc_coll_";
 export const SYNC_CHANNEL_NAME = "gnc_live_sync";

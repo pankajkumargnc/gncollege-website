@@ -2,14 +2,14 @@
 // ✍️ @SEO_Agent — Route-based SEO meta tag management
 
 const SITE_NAME = 'Guru Nanak College, Dhanbad';
-const BASE_URL = 'https://gnc-college-web.web.app';
+export const BASE_URL = 'https://gnc-college-web.web.app';
 const DEFAULT_IMAGE = `${BASE_URL}/images/gncollege-social-preview.webp`;
 const DEFAULT_DESC = 'Guru Nanak College Dhanbad — NAAC accredited Sikh Minority Degree College affiliated to B.B.M.K. University, Jharkhand. Offering B.A., B.Com., BCA, BBA courses.';
 
 /**
  * Route → SEO metadata mapping
  */
-const SEO_MAP = {
+export const SEO_MAP = {
   '/': {
     title: 'Guru Nanak College Dhanbad | NAAC Accredited Degree College',
     description: DEFAULT_DESC,
@@ -428,6 +428,10 @@ const SEO_MAP = {
     title: 'Documents | Guru Nanak College Dhanbad',
     description: 'Official documents, reports, and publications from Guru Nanak College.',
   },
+  '/documents/request': {
+    title: 'Student Document Request & Tracking Hub | Guru Nanak College Dhanbad',
+    description: 'Apply online for official certificates, character certificates, fee clearance NOC, and track application status in real time.',
+  },
 
   // ── Alumni / Legal / Others ───────────────────────────────
   '/alumni': {
@@ -664,6 +668,70 @@ function setJsonLd(pathname, pageTitle = SITE_NAME, pageDesc = DEFAULT_DESC) {
     });
   }
 
+  // 6. Person Schema (for Leadership / Principal routes)
+  if (pathname.includes('/principal-message') || pathname.includes('/governing-body')) {
+    graph.push({
+      "@type": "Person",
+      "@id": `${BASE_URL}/#principal`,
+      "name": "Dr. Sanjay Prasad",
+      "jobTitle": "Principal",
+      "worksFor": {
+        "@id": `${BASE_URL}/#organization`
+      },
+      "url": `${BASE_URL}/#/about-us/principal-message`
+    });
+  }
+
+  // 7. FAQPage Schema (for Admission FAQ / Rules / Fee routes)
+  if (pathname.includes('/admission')) {
+    graph.push({
+      "@type": "FAQPage",
+      "@id": `${BASE_URL}/#${pathname}-faq`,
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What undergraduate courses are offered at Guru Nanak College Dhanbad?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Guru Nanak College offers B.A., B.Com., BCA, and BBA undergraduate degree programs affiliated to BBMK University under the NEP 2020 FYUGP 4-year framework."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How can I apply for admission at Guru Nanak College, Dhanbad?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Admissions are processed through the Jharkhand Chancellor Portal (jharkhanduniversities.nic.in) or direct college admission counter according to university guidelines."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Guru Nanak College, Dhanbad recognized and accredited?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, Guru Nanak College, Dhanbad is NAAC accredited and a premier Sikh Minority Degree College established in 1970."
+          }
+        }
+      ]
+    });
+  }
+
+  // 8. WebPage Schema with Speakable Accessibility Specification
+  graph.push({
+    "@type": "WebPage",
+    "@id": `${BASE_URL}/#${pathname}-webpage`,
+    "url": `${BASE_URL}/#${pathname}`,
+    "name": pageTitle,
+    "description": pageDesc,
+    "isPartOf": {
+      "@id": `${BASE_URL}/#organization`
+    },
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": ["h1", "h2", ".prose p", ".dept-hero h1"]
+    }
+  });
+
   const finalSchema = {
     "@context": "https://schema.org",
     "@graph": graph
@@ -680,3 +748,4 @@ function setJsonLd(pathname, pageTitle = SITE_NAME, pageDesc = DEFAULT_DESC) {
 }
 
 export default updateSEO;
+

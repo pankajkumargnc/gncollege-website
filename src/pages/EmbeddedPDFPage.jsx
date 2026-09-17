@@ -1,25 +1,46 @@
 // src/pages/EmbeddedPDFPage.jsx
 // 🚀 ULTRA PRO MAX PDF ENGINE (Height Increased for Full Page View)
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 
-export default function EmbeddedPDFPage({ title, subtitle, pdfUrl }) {
+export default function EmbeddedPDFPage({ title, subtitle, pdfUrl, docSlug }) {
   const [loading, setLoading] = useState(true);
+  const [activePdfUrl, setActivePdfUrl] = useState(pdfUrl);
   const containerRef = useRef(null);
 
+  // ── Dynamic Firestore Sync: Resolves live URL if admin updated in Admin Panel ──
+  useEffect(() => {
+    if (!db || !title) return;
+    try {
+      const q = query(collection(db, 'pdfReports'), where('title', '==', title));
+      const unsub = onSnapshot(q, (snap) => {
+        if (!snap.empty) {
+          const docData = snap.docs[0].data();
+          const liveUrl = docData.fileUrl || docData.url || docData.pdfUrl;
+          if (liveUrl) setActivePdfUrl(liveUrl);
+        }
+      }, (err) => console.warn('[EmbeddedPDFPage] Firestore sync warning:', err.message));
+      return () => unsub();
+    } catch (_) {}
+  }, [title]);
+
+  const targetUrl = activePdfUrl || pdfUrl;
+
   // ── URL Formatting Engine (ABSOLUTE PATH FIX) ──
-  const isDrive = pdfUrl.includes('drive.google.com');
-  const driveUrl = isDrive ? pdfUrl.replace(/\/view(\?.*)?$/, '/preview') : '';
+  const isDrive = targetUrl.includes('drive.google.com');
+  const driveUrl = isDrive ? targetUrl.replace(/\/view(\?.*)?$/, '/preview') : '';
   
   // ✅ FIX: "Inception Bug" rokne ke liye URL ko exact origin point par set kiya
-  const cleanUrl = pdfUrl.startsWith('/') ? pdfUrl.slice(1) : pdfUrl;
-  const finalLocalUrl = pdfUrl.startsWith('http') 
-    ? pdfUrl 
+  const cleanUrl = targetUrl.startsWith('/') ? targetUrl.slice(1) : targetUrl;
+  const finalLocalUrl = targetUrl.startsWith('http') 
+    ? targetUrl 
     : `${window.location.origin}${import.meta.env.BASE_URL}${cleanUrl}`;
 
   const displayUrl = isDrive ? driveUrl : `${finalLocalUrl}#toolbar=0&navpanes=0&scrollbar=0`;
-  const downloadUrl = isDrive ? pdfUrl : finalLocalUrl;
+  const downloadUrl = isDrive ? targetUrl : finalLocalUrl;
 
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {

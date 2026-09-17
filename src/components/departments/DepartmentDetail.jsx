@@ -1,7 +1,27 @@
 import { Fade, Pill, SectionLabel, SectionHead, EmptyBox, NAVY } from './DepartmentUI';
 import { FacultySection } from './DepartmentFaculty';
 import { SubjectGrid } from './SubjectGrid';
-import { Target, Compass, CreditCard, FileText, Award, UserCheck, Mail, Phone, GraduationCap } from 'lucide-react';
+import {
+  Target, Compass, CreditCard, FileText, Award, UserCheck, Mail, Phone, GraduationCap,
+  Briefcase, Monitor, Scale, BarChart3, Handshake, BookOpen, Landmark, Globe, CheckCircle2
+} from 'lucide-react';
+
+const renderHighlightIcon = (h, C) => {
+  const key = h.iconKey || h.icon;
+  if (!key) return <Award size={20} color={C} />;
+  if (typeof key === 'object' && key !== null) return key;
+  const k = String(key).toLowerCase();
+  if (k === 'award' || k === 'scroll' || k === '📜' || k === 'aicte') return <Award size={20} color={C} />;
+  if (k === 'briefcase' || k === '💼' || k === 'placement') return <Briefcase size={20} color={C} />;
+  if (k === 'monitor' || k === 'laptop' || k === '💻' || k === 'lab') return <Monitor size={20} color={C} />;
+  if (k === 'scale' || k === 'balance' || k === '⚖️' || k === 'ethics') return <Scale size={20} color={C} />;
+  if (k === 'bar-chart-3' || k === 'chart' || k === '📊' || k === 'case-study') return <BarChart3 size={20} color={C} />;
+  if (k === 'handshake' || k === '🤝') return <Handshake size={20} color={C} />;
+  if (k === 'book-open' || k === 'book' || k === '📚') return <BookOpen size={20} color={C} />;
+  if (k === 'landmark' || k === 'bank' || k === '🏛️' || k === '🏦') return <Landmark size={20} color={C} />;
+  if (k === 'globe' || k === '🌍') return <Globe size={20} color={C} />;
+  return <CheckCircle2 size={20} color={C} />;
+};
 
 export const DepartmentDetail = ({ d, meta, activeSem, setSem, setPreviewPdf, deptSlug, subSlug }) => {
   const C = meta.color;
@@ -112,7 +132,9 @@ export const DepartmentDetail = ({ d, meta, activeSem, setSem, setPreviewPdf, de
                   {highlights.map((h, i) => (
                     <Fade key={i} delay={i * .06} y={18}>
                       <div className="dp-hl">
-                        <div style={{ width: 42, height: 42, borderRadius: 12, background: `${C}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, marginBottom: 12 }}>{h.icon}</div>
+                        <div style={{ width: 42, height: 42, borderRadius: 12, background: `${C}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                          {renderHighlightIcon(h, C)}
+                        </div>
                         <div style={{ fontWeight: 700, color: NAVY, fontSize: 13.5, marginBottom: 6, lineHeight: 1.4 }}>{h.title}</div>
                         <div style={{ color: '#64748b', fontSize: 13, lineHeight: 1.65 }}>{h.desc}</div>
                       </div>

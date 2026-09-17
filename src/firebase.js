@@ -6,6 +6,8 @@ import { initializeApp, getApps } from "firebase/app";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore } from "firebase/firestore";
 import { getAnalytics, logEvent } from "firebase/analytics";
 
+const env = (typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env : (process.env || {});
+
 const {
   VITE_FIREBASE_API_KEY,
   VITE_FIREBASE_AUTH_DOMAIN,
@@ -14,7 +16,7 @@ const {
   VITE_FIREBASE_MESSAGING_SENDER_ID,
   VITE_FIREBASE_APP_ID,
   VITE_FIREBASE_MEASUREMENT_ID,
-} = import.meta.env;
+} = env;
 
 const firebaseConfig = {
   apiKey:            VITE_FIREBASE_API_KEY,
@@ -34,14 +36,17 @@ export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : nul
 // ✅ Safe initialization of Firestore with offline persistence
 let dbInstance;
 try {
-  // Always try initializeFirst (with config) FIRST to ensure persistence
-  dbInstance = initializeFirestore(app, {
-    localCache: persistentLocalCache({
-      tabManager: persistentMultipleTabManager(),
-    }),
-  });
+  if (typeof window !== 'undefined' && typeof indexedDB !== 'undefined') {
+    dbInstance = initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    });
+  } else {
+    dbInstance = getFirestore(app);
+  }
 } catch (e) {
-  // If already initialized during HMR, just get the instance
+  // If already initialized during HMR or in Node, just get the instance
   dbInstance = getFirestore(app);
 }
 
@@ -71,3 +76,25 @@ export const requestNotificationPermission = async () => {
 };
 
 export { logEvent };
+
+// ✅ Firebase App Check — Bot & Scraper Protection (reCAPTCHA v3)
+// Only activates in production when VITE_RECAPTCHA_SITE_KEY is provided
+const recaptchaSiteKey = env.VITE_RECAPTCHA_SITE_KEY;
+if (recaptchaSiteKey && env.PROD) {
+  import('firebase/app-check').then(({ initializeAppCheck, ReCaptchaV3Provider }) => {
+    try {
+      initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider(recaptchaSiteKey),
+        isTokenAutoRefreshEnabled: true,
+      });
+    } catch (e) {
+      // App Check already initialized (HMR) or provider error — safe to ignore
+      console.warn('[AppCheck] Init skipped:', e.message);
+    }
+  }).catch(() => {
+    // firebase/app-check module not available — skip gracefully
+  });
+} else if (!env.PROD) {
+  // In development, enable App Check debug mode if needed
+  // self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+}

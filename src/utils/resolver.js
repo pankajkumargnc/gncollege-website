@@ -112,6 +112,7 @@ export function resolveUrl(input) {
 
   // Check if URL points to a known local asset file
   const KNOWN_LOCAL_ASSETS = [
+    'college_hero_bg.webp', 'college_hero_bg.jpg',
     'green1.webp', 'green2.webp', 'green3.webp', 'green4.webp', 'green5.webp', 'green6.webp', 'green7.webp', 'greencampus.webp',
     'pf1.webp', 'pf2.webp', 'pf3.webp', 'pf4.webp', 'pf5.webp', 'pf6.webp', 'pf7.webp', 'pf8.webp', 'pf9.webp', 'pf10.webp',
     'pic1.webp', 'pic1.png', 'college_photo.webp', 'organogram.webp', 'organogram.jpg',

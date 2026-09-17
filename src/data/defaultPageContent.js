@@ -23,10 +23,10 @@ const DEFAULT_PAGE_CONTENT = {
       {
         id: 'stats', heading: 'Key Statistics', type: 'list', order: 3,
         content: JSON.stringify([
-          { label: 'Years of Legacy', value: '56+', icon: '🏛️' },
-          { label: 'Expert Faculty', value: '120+', icon: '👨‍🏫' },
-          { label: 'Students', value: '5000+', icon: '🎓' },
-          { label: 'Courses', value: '30+', icon: '📚' }
+          { label: 'Years of Legacy', value: '56+', icon: 'landmark' },
+          { label: 'Expert Faculty', value: '120+', icon: 'users' },
+          { label: 'Students', value: '5000+', icon: 'graduation-cap' },
+          { label: 'Courses', value: '30+', icon: 'book-open' }
         ])
       }
     ],
@@ -48,12 +48,12 @@ const DEFAULT_PAGE_CONTENT = {
       {
         id: 'core-values', heading: 'Core Values', type: 'list', order: 3,
         content: JSON.stringify([
-          { icon: '🕊️', label: 'Peace & Harmony' },
-          { icon: '🎓', label: 'Academic Excellence' },
-          { icon: '🤝', label: 'Inclusivity' },
-          { icon: '💡', label: 'Innovation' },
-          { icon: '🌿', label: 'Service to Society' },
-          { icon: '⚖️', label: 'Integrity' }
+          { icon: 'dove', label: 'Peace & Harmony' },
+          { icon: 'graduation-cap', label: 'Academic Excellence' },
+          { icon: 'handshake', label: 'Inclusivity' },
+          { icon: 'lightbulb', label: 'Innovation' },
+          { icon: 'leaf', label: 'Service to Society' },
+          { icon: 'scale', label: 'Integrity' }
         ])
       }
     ],
@@ -303,11 +303,11 @@ const DEFAULT_PAGE_CONTENT = {
       {
         id: 'seats', heading: 'Department-wise Capacity', type: 'list', order: 1,
         content: JSON.stringify([
-          { title: 'Commerce', seats: 550, icon: '📈', color: '#f4a023', sub: 'B.Com Honours' },
-          { title: 'Arts (History & Pol. Sc)', seats: 312, icon: '🏛️', color: '#0f2347', sub: '156 Seats Each' },
-          { title: 'Arts (Eng, Eco, Psy, Hin)', seats: 512, icon: '📚', color: '#0ea5e9', sub: '128 Seats Each' },
-          { title: 'BCA', seats: 90, icon: '💻', color: '#ef4444', sub: 'Vocational Course' },
-          { title: 'BBA', seats: 90, icon: '💼', color: '#10b981', sub: 'Vocational Course' }
+          { title: 'Commerce', seats: 550, icon: 'trending-up', color: '#f4a023', sub: 'B.Com Honours' },
+          { title: 'Arts (History & Pol. Sc)', seats: 312, icon: 'landmark', color: '#0f2347', sub: '156 Seats Each' },
+          { title: 'Arts (Eng, Eco, Psy, Hin)', seats: 512, icon: 'book-open', color: '#0ea5e9', sub: '128 Seats Each' },
+          { title: 'BCA', seats: 90, icon: 'monitor', color: '#ef4444', sub: 'Vocational Course' },
+          { title: 'BBA', seats: 90, icon: 'briefcase', color: '#10b981', sub: 'Vocational Course' }
         ])
       }
     ],
@@ -322,10 +322,10 @@ const DEFAULT_PAGE_CONTENT = {
       {
         id: 'stats', heading: 'NSS Statistics', type: 'list', order: 1,
         content: JSON.stringify([
-          { num: '500+', label: 'Active Volunteers', icon: '🙋‍♂️' },
-          { num: '50+', label: 'Blood Units Donated', icon: '🩸' },
-          { num: '20+', label: 'Adopted Villages', icon: '🏡' },
-          { num: '1000+', label: 'Trees Planted', icon: '🌳' }
+          { num: '500+', label: 'Active Volunteers', icon: 'hand' },
+          { num: '50+', label: 'Blood Units Donated', icon: 'heart-pulse' },
+          { num: '20+', label: 'Adopted Villages', icon: 'home' },
+          { num: '1000+', label: 'Trees Planted', icon: 'tree-pine' }
         ])
       },
       {
@@ -421,10 +421,10 @@ const DEFAULT_PAGE_CONTENT = {
       {
         id: 'facilities', heading: 'Key Facilities', type: 'list', order: 1,
         content: JSON.stringify([
-          { title: 'Central Library', icon: '📚', desc: 'Over 50,000 books and digital journals.' },
-          { title: 'Science Labs', icon: '🔬', desc: 'State-of-the-art equipments.' },
-          { title: 'Auditorium', icon: '🎭', desc: '500+ seating capacity.' },
-          { title: 'Sports Ground', icon: '⚽', desc: 'Vast playground for outdoor sports.' }
+          { title: 'Central Library', icon: 'book-open', desc: 'Over 50,000 books and digital journals.' },
+          { title: 'Science Labs', icon: 'microscope', desc: 'State-of-the-art equipments.' },
+          { title: 'Auditorium', icon: 'theatre', desc: '500+ seating capacity.' },
+          { title: 'Sports Ground', icon: 'circle-dot', desc: 'Vast playground for outdoor sports.' }
         ])
       }
     ],
@@ -479,9 +479,9 @@ const DEFAULT_PAGE_CONTENT = {
       {
         id: 'counters', heading: 'Counter Stats', type: 'list', order: 1,
         content: JSON.stringify([
-          { label: 'Students Enrolled', value: '4,000+', icon: '👨‍🎓', raw: 4000 },
-          { label: 'Successful Alumni', value: '45,000+', icon: '🎓', raw: 45000 },
-          { label: 'Years of Legacy', value: '55+', icon: '🏛️', raw: 55 }
+          { label: 'Students Enrolled', value: '4,000+', icon: 'graduation-cap', raw: 4000 },
+          { label: 'Successful Alumni', value: '45,000+', icon: 'graduation-cap', raw: 45000 },
+          { label: 'Years of Legacy', value: '55+', icon: 'landmark', raw: 55 }
         ])
       }
     ],
@@ -492,15 +492,15 @@ const DEFAULT_PAGE_CONTENT = {
 // ── Committee Defaults Generator ──
 function generateCommitteeDefaults() {
   const committees = [
-    { slug: 'womens-cell', name: "Women's Cell", icon: '👩‍💼', desc: 'Dedicated to the safety, empowerment, and welfare of female students and staff at GNC.', purpose: ['Ensure a safe and harassment-free environment for women on campus.', "Conduct awareness programs on women's rights and legal provisions.", 'Provide counselling and support to female students in need.'], responsibilities: ['Monitor campus safety for women', "Handle complaints related to women's issues", 'Organize gender sensitization workshops', 'Coordinate with ICC for harassment cases'], chair: 'Senior Faculty Member', chairDesig: 'Associate Professor, Department of Hindi' },
-    { slug: 'anti-ragging', name: 'Anti-Ragging Committee', icon: '🚫', desc: 'Committed to maintaining a 100% ragging-free campus in compliance with UGC & Supreme Court guidelines.', purpose: ['Prevent and prohibit ragging in all forms on campus.', 'Create awareness among students about legal consequences of ragging.', 'Investigate complaints and take strict action against offenders.'], responsibilities: ['Display anti-ragging notices', 'Collect anti-ragging affidavits', 'Investigate complaints promptly', 'Coordinate with police if required', 'Conduct orientation programs'], chair: 'Senior Faculty Member', chairDesig: 'Associate Professor, Department of Commerce' },
-    { slug: 'sc-st', name: 'SC/ST Cell', icon: '🤝', desc: 'A dedicated welfare and support centre for Scheduled Caste and Scheduled Tribe students.', purpose: ['Ensure equal educational opportunities for SC/ST students.', 'Guide students about government scholarships and reservations.', 'Resolve academic and social issues faced by SC/ST students.'], responsibilities: ['Facilitate scholarship applications', 'Address grievances of SC/ST students', 'Organize awareness camps', 'Maintain data of SC/ST enrollment', 'Liaison with government welfare departments'], chair: 'Faculty Member', chairDesig: 'Assistant Professor, Department of History' },
-    { slug: 'obc', name: 'OBC Cell', icon: '📚', desc: 'Supporting students from Other Backward Classes with their academic and welfare needs.', purpose: ['Facilitate awareness of OBC reservations and government schemes.', 'Guide OBC students for scholarship applications.', 'Provide academic and career counselling.'], responsibilities: ['Scholarship guidance for OBC students', 'Address academic grievances', 'Facilitate income/caste certificate help', 'Organize career awareness programs'], chair: 'Faculty Member', chairDesig: 'Assistant Professor, Department of Political Science' },
-    { slug: 'grievance', name: 'Grievance Redressal Cell', icon: '⚖️', desc: 'An official platform for students and staff to raise and resolve their academic and administrative grievances.', purpose: ['Provide a fair and transparent mechanism for addressing grievances.', 'Ensure prompt redressal of student and staff complaints.', 'Maintain a record of grievances and their resolution.'], responsibilities: ['Receive and register grievances', 'Investigate complaints within stipulated time', 'Maintain grievance register', 'Submit reports to Principal', 'Ensure confidentiality and impartiality'], chair: 'Senior Faculty Member', chairDesig: 'Associate Professor, Department of English' },
-    { slug: 'icc', name: 'Internal Complaints Committee (ICC)', icon: '🛡️', desc: 'Constituted under Sexual Harassment of Women at Workplace Act, 2013.', purpose: ['Prevent, prohibit, and redress sexual harassment complaints.', 'Conduct sensitization programs for students and staff.', 'Ensure impartial inquiry and fair resolution of complaints.'], responsibilities: ['Receive complaints of sexual harassment', 'Conduct inquiry within 90 days', 'Maintain confidentiality of complainant', 'Submit annual report to District Officer', 'Organize prevention workshops'], chair: 'Presiding Officer', chairDesig: 'Senior Lady Faculty Member' },
-    { slug: 'minority', name: 'Minority Cell', icon: '🌙', desc: 'A welfare cell to support and guide students from minority communities in their academic journey.', purpose: ['Guide minority students about government scholarships and schemes.', 'Create an inclusive environment for minority students.', 'Address specific academic and personal issues.'], responsibilities: ['Pre-matric and post-matric scholarship guidance', 'Address minority student grievances', 'Organize awareness programs', 'Maintain enrollment data'], chair: 'Faculty Member', chairDesig: 'Assistant Professor, Department of Economics' },
-    { slug: 'placement', name: 'Placement Cell', icon: '💼', desc: 'Bridging students with career opportunities through training, internships, and campus placements.', purpose: ['Facilitate campus placements and internship opportunities.', 'Organize skill development and career guidance programs.', 'Maintain industry-academia partnerships.'], responsibilities: ['Coordinate with companies for campus drives', 'Organize mock interviews and GD sessions', 'Maintain placement records', 'Career counselling for final year students', 'Organize job fairs'], chair: 'Placement Officer', chairDesig: 'Faculty, Department of BCA/BBA' },
-    { slug: 'rusa', name: 'RUSA Cell', icon: '🏛️', desc: 'Rashtriya Uchchatar Shiksha Abhiyan — implementing central schemes for quality improvement.', purpose: ['Implement RUSA-funded projects and infrastructure development.', 'Ensure compliance with RUSA guidelines and reporting requirements.'], responsibilities: ['Coordinate RUSA grant utilization', 'Maintain RUSA project documentation', 'Submit utilization certificates', 'Monitor RUSA-funded activities', 'Liaison with State Higher Education Council'], chair: 'RUSA Coordinator', chairDesig: 'Nominated by Principal' },
+    { slug: 'womens-cell', name: "Women's Cell", icon: 'user-check', desc: 'Dedicated to the safety, empowerment, and welfare of female students and staff at GNC.', purpose: ['Ensure a safe and harassment-free environment for women on campus.', "Conduct awareness programs on women's rights and legal provisions.", 'Provide counselling and support to female students in need.'], responsibilities: ['Monitor campus safety for women', "Handle complaints related to women's issues", 'Organize gender sensitization workshops', 'Coordinate with ICC for harassment cases'], chair: 'Senior Faculty Member', chairDesig: 'Associate Professor, Department of Hindi' },
+    { slug: 'anti-ragging', name: 'Anti-Ragging Committee', icon: 'shield-alert', desc: 'Committed to maintaining a 100% ragging-free campus in compliance with UGC & Supreme Court guidelines.', purpose: ['Prevent and prohibit ragging in all forms on campus.', 'Create awareness among students about legal consequences of ragging.', 'Investigate complaints and take strict action against offenders.'], responsibilities: ['Display anti-ragging notices', 'Collect anti-ragging affidavits', 'Investigate complaints promptly', 'Coordinate with police if required', 'Conduct orientation programs'], chair: 'Senior Faculty Member', chairDesig: 'Associate Professor, Department of Commerce' },
+    { slug: 'sc-st', name: 'SC/ST Cell', icon: 'handshake', desc: 'A dedicated welfare and support centre for Scheduled Caste and Scheduled Tribe students.', purpose: ['Ensure equal educational opportunities for SC/ST students.', 'Guide students about government scholarships and reservations.', 'Resolve academic and social issues faced by SC/ST students.'], responsibilities: ['Facilitate scholarship applications', 'Address grievances of SC/ST students', 'Organize awareness camps', 'Maintain data of SC/ST enrollment', 'Liaison with government welfare departments'], chair: 'Faculty Member', chairDesig: 'Assistant Professor, Department of History' },
+    { slug: 'obc', name: 'OBC Cell', icon: 'book-open', desc: 'Supporting students from Other Backward Classes with their academic and welfare needs.', purpose: ['Facilitate awareness of OBC reservations and government schemes.', 'Guide OBC students for scholarship applications.', 'Provide academic and career counselling.'], responsibilities: ['Scholarship guidance for OBC students', 'Address academic grievances', 'Facilitate income/caste certificate help', 'Organize career awareness programs'], chair: 'Faculty Member', chairDesig: 'Assistant Professor, Department of Political Science' },
+    { slug: 'grievance', name: 'Grievance Redressal Cell', icon: 'scale', desc: 'An official platform for students and staff to raise and resolve their academic and administrative grievances.', purpose: ['Provide a fair and transparent mechanism for addressing grievances.', 'Ensure prompt redressal of student and staff complaints.', 'Maintain a record of grievances and their resolution.'], responsibilities: ['Receive and register grievances', 'Investigate complaints within stipulated time', 'Maintain grievance register', 'Submit reports to Principal', 'Ensure confidentiality and impartiality'], chair: 'Senior Faculty Member', chairDesig: 'Associate Professor, Department of English' },
+    { slug: 'icc', name: 'Internal Complaints Committee (ICC)', icon: 'shield', desc: 'Constituted under Sexual Harassment of Women at Workplace Act, 2013.', purpose: ['Prevent, prohibit, and redress sexual harassment complaints.', 'Conduct sensitization programs for students and staff.', 'Ensure impartial inquiry and fair resolution of complaints.'], responsibilities: ['Receive complaints of sexual harassment', 'Conduct inquiry within 90 days', 'Maintain confidentiality of complainant', 'Submit annual report to District Officer', 'Organize prevention workshops'], chair: 'Presiding Officer', chairDesig: 'Senior Lady Faculty Member' },
+    { slug: 'minority', name: 'Minority Cell', icon: 'moon', desc: 'A welfare cell to support and guide students from minority communities in their academic journey.', purpose: ['Guide minority students about government scholarships and schemes.', 'Create an inclusive environment for minority students.', 'Address specific academic and personal issues.'], responsibilities: ['Pre-matric and post-matric scholarship guidance', 'Address minority student grievances', 'Organize awareness programs', 'Maintain enrollment data'], chair: 'Faculty Member', chairDesig: 'Assistant Professor, Department of Economics' },
+    { slug: 'placement', name: 'Placement Cell', icon: 'briefcase', desc: 'Bridging students with career opportunities through training, internships, and campus placements.', purpose: ['Facilitate campus placements and internship opportunities.', 'Organize skill development and career guidance programs.', 'Maintain industry-academia partnerships.'], responsibilities: ['Coordinate with companies for campus drives', 'Organize mock interviews and GD sessions', 'Maintain placement records', 'Career counselling for final year students', 'Organize job fairs'], chair: 'Placement Officer', chairDesig: 'Faculty, Department of BCA/BBA' },
+    { slug: 'rusa', name: 'RUSA Cell', icon: 'landmark', desc: 'Rashtriya Uchchatar Shiksha Abhiyan — implementing central schemes for quality improvement.', purpose: ['Implement RUSA-funded projects and infrastructure development.', 'Ensure compliance with RUSA guidelines and reporting requirements.'], responsibilities: ['Coordinate RUSA grant utilization', 'Maintain RUSA project documentation', 'Submit utilization certificates', 'Monitor RUSA-funded activities', 'Liaison with State Higher Education Council'], chair: 'RUSA Coordinator', chairDesig: 'Nominated by Principal' },
   ];
 
   const result = {};

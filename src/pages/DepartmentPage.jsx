@@ -20,22 +20,22 @@ import { DepartmentDetail } from '../components/departments/DepartmentDetail';
 /* ── Department Static Meta Configuration ────────────────────────── */
 const DEPT_META = {
   bca: {
-    short: 'BCA', icon: '💻', color: '#0ea5e9',
+    short: 'BCA', iconKey: 'monitor', color: '#0ea5e9',
     heroBg: 'linear-gradient(145deg,#f0f9ff,#dbeafe 50%,#fef9ec)',
     facultyKeys: ['BCA'],
   },
   bba: {
-    short: 'BBA', icon: '📊', color: '#f59e0b',
+    short: 'BBA', iconKey: 'bar-chart-3', color: '#f59e0b',
     heroBg: 'linear-gradient(145deg,#fffbeb,#fef3c7 50%,#f0f9ff)',
     facultyKeys: ['BBA'],
   },
   commerce: {
-    short: 'Commerce', icon: '🏦', color: '#10b981',
+    short: 'Commerce', iconKey: 'landmark', color: '#10b981',
     heroBg: 'linear-gradient(145deg,#f0fdf4,#d1fae5 50%,#fef9ec)',
     facultyKeys: ['Commerce'],
   },
   humanities: {
-    short: 'Humanities', icon: '📚', color: '#8b5cf6',
+    short: 'Humanities', iconKey: 'book-open', color: '#8b5cf6',
     heroBg: 'linear-gradient(145deg,#faf5ff,#ede9fe 50%,#f0f9ff)',
     facultyKeys: ['Hindi', 'English'],
     subjects: [
@@ -44,7 +44,7 @@ const DEPT_META = {
     ],
   },
   'social-science': {
-    short: 'Social Science', icon: '🌍', color: '#ef4444',
+    short: 'Social Science', iconKey: 'globe', color: '#ef4444',
     heroBg: 'linear-gradient(145deg,#fff5f5,#fee2e2 50%,#fef9ec)',
     facultyKeys: ['History', 'Political Science', 'Economics', 'Psychology'],
     subjects: [
@@ -71,9 +71,9 @@ const DEFAULT_CONTENT = {
       { label: 'Labs', value: 'Advanced IT' }
     ],
     highlights: [
-      { title: 'AICTE Approved', desc: 'Officially recognized technical education standards.', icon: '📜' },
-      { title: 'Placement Portal', desc: 'Dedicated support for top IT industry hiring.', icon: '💼' },
-      { title: 'Advanced IT Lab', desc: 'High-speed systems with latest software stacks.', icon: '💻' }
+      { title: 'AICTE Approved', desc: 'Officially recognized technical education standards.', iconKey: 'award' },
+      { title: 'Placement Portal', desc: 'Dedicated support for top IT industry hiring.', iconKey: 'briefcase' },
+      { title: 'Advanced IT Lab', desc: 'High-speed systems with latest software stacks.', iconKey: 'monitor' }
     ],
     curriculum: { 
       'Semester 1': ['C Programming Fundamentals', 'Discrete Mathematics', 'Computer Organization', 'Professional Communication', 'Lab: C Programming'],
@@ -94,9 +94,9 @@ const DEFAULT_CONTENT = {
       { label: 'Status', value: 'Leading Hub' }
     ],
     highlights: [
-      { title: 'Business Ethics', desc: 'Strong focus on ethical leadership and values.', icon: '⚖️' },
-      { title: 'Case Study Hub', desc: 'Interactive learning with real-world scenarios.', icon: '📊' },
-      { title: 'Placement Cell', desc: 'Connecting students with corporate giants.', icon: '🤝' }
+      { title: 'Business Ethics', desc: 'Strong focus on ethical leadership and values.', iconKey: 'scale' },
+      { title: 'Case Study Hub', desc: 'Interactive learning with real-world scenarios.', iconKey: 'bar-chart-3' },
+      { title: 'Placement Cell', desc: 'Connecting students with corporate giants.', iconKey: 'handshake' }
     ],
     curriculum: {
       'Semester 1': ['Principles of Management', 'Business Economics', 'Business Statistics', 'English Language', 'IT for Managers'],
@@ -227,7 +227,8 @@ const DEFAULT_CONTENT = {
 
 /* ── Single Department View ────────────────────────────────────────── */
 function SingleDeptPage({ slug, subSlug }) {
-  const meta = DEPT_META[slug] || { short: slug.toUpperCase(), icon: '🏛️', color: NAVY, heroBg: 'linear-gradient(145deg,#f8fafc,#f1f5f9)', facultyKeys: [slug] };
+  const baseMeta = DEPT_META[slug] || { short: slug.toUpperCase(), iconKey: 'landmark', color: NAVY, heroBg: 'linear-gradient(145deg,#f8fafc,#f1f5f9)', facultyKeys: [slug] };
+  const [meta, setMeta] = useState(baseMeta);
   const C = meta.color;
   const [data, setData] = useState(null);
   const [loading, setL] = useState(true);
@@ -243,6 +244,14 @@ function SingleDeptPage({ slug, subSlug }) {
       const fsData = snap.exists() ? snap.data() : {};
       const def = DEFAULT_CONTENT[targetDocId] || {};
       
+      // Dynamic metadata overrides from Firestore (P2.4)
+      setMeta({
+        ...baseMeta,
+        color: fsData.color || baseMeta.color,
+        heroBg: fsData.heroBg || baseMeta.heroBg,
+        iconKey: fsData.iconKey || baseMeta.iconKey,
+      });
+
       // Intelligent field-level merging: use def if fsData field is empty/missing
       const merged = {
         ...def,

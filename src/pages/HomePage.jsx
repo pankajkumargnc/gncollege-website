@@ -127,9 +127,35 @@ const QUICK_ACTIONS = [
     bg: "#fff",
     hoverBg: "#fdf4ff",
     iconBg: "linear-gradient(135deg,#f3e8ff,#e9d5ff)",
-    external: false,
   },
 ];
+
+const ICON_MAP = {
+  Landmark: <Landmark size={20} />,
+  GraduationCap: <GraduationCap size={20} />,
+  Gem: <Gem size={20} />,
+  Unlock: <Unlock size={20} />,
+  ScrollText: <ScrollText size={20} />,
+  Award: <Award size={20} />,
+  CreditCard: <CreditCard size={20} />,
+  Globe: <Globe size={20} />,
+  Microscope: <Microscope size={20} />,
+  BookOpen: <BookOpen size={20} />,
+  UserCheck: <UserCheck size={20} />,
+  BarChart3: <BarChart3 size={20} />,
+  Users: <Users size={28} />,
+  Building2: <Building2 size={28} />,
+  ShieldCheck: <ShieldCheck size={24} style={{ color: "#f4a023" }} />,
+  FlaskConical: <FlaskConical size={24} style={{ color: "#f4a023" }} />,
+  ClipboardList: <ClipboardList size={22} style={{ color: "#f4a023" }} />,
+  Bell: <Bell size={22} style={{ color: "#8b5cf6" }} />,
+};
+
+const resolveIcon = (iconVal, defaultIcon) => {
+  if (React.isValidElement(iconVal)) return iconVal;
+  if (typeof iconVal === "string" && ICON_MAP[iconVal]) return ICON_MAP[iconVal];
+  return defaultIcon;
+};
 
 function useScrollAnim(options = {}) {
   const { threshold = 0.12, rootMargin = "0px 0px -60px 0px" } = options;
@@ -406,30 +432,32 @@ const UniHeader = ({ label, title1, title2, sub }) => {
   );
 };
 
-const QuickActionBar = () => (
+const QuickActionBar = ({ items = QUICK_ACTIONS }) => (
   <div className="hp-qab">
     <div className="hp-qab-inner">
-      {QUICK_ACTIONS.map((item) => {
+      {(items || QUICK_ACTIONS).map((item) => {
         const commonProps = {
           className: "hp-qab-item",
-          style: { background: item.bg },
+          style: { background: item.bg || "#fff" },
           onMouseEnter: (e) => {
-            e.currentTarget.style.background = item.hoverBg;
-            e.currentTarget.querySelector(".hp-qab-arr").style.color =
-              item.color;
+            e.currentTarget.style.background = item.hoverBg || "#eff6ff";
+            const arr = e.currentTarget.querySelector(".hp-qab-arr");
+            if (arr) arr.style.color = item.color || "#0f2347";
           },
           onMouseLeave: (e) => {
-            e.currentTarget.style.background = item.bg;
-            e.currentTarget.querySelector(".hp-qab-arr").style.color =
-              "#cbd5e1";
+            e.currentTarget.style.background = item.bg || "#fff";
+            const arr = e.currentTarget.querySelector(".hp-qab-arr");
+            if (arr) arr.style.color = "#cbd5e1";
           },
         };
 
+        const resolvedIcon = resolveIcon(item.icon, <Bell size={22} style={{ color: item.color || "#0f2347" }} />);
+
         const inner = (
           <>
-            <style>{`.hp-qab-item[data-id="${item.title}"]::after{background:${item.color};}`}</style>
-            <div className="hp-qab-icon" style={{ background: item.iconBg }}>
-              {item.icon}
+            <style>{`.hp-qab-item[data-id="${item.title}"]::after{background:${item.color || "#0f2347"};}`}</style>
+            <div className="hp-qab-icon" style={{ background: item.iconBg || "linear-gradient(135deg,#fef3c7,#fde68a)" }}>
+              {resolvedIcon}
             </div>
             <div>
               <div className="hp-qab-title">{item.title}</div>
@@ -844,6 +872,50 @@ const HomePage = ({
     else alert("Full details coming soon!");
   }, []);
 
+  const activeCounters = useMemo(() => {
+    const raw = liveSettings?.counters || siteSettings?.counters;
+    if (Array.isArray(raw) && raw.length > 0) {
+      return raw.map((c, i) => ({
+        ...c,
+        icon: resolveIcon(c.icon, COUNTERS[i % COUNTERS.length]?.icon || <Users size={28} />)
+      }));
+    }
+    return counterData || COUNTERS;
+  }, [liveSettings?.counters, siteSettings?.counters, counterData]);
+
+  const activeLinks = useMemo(() => {
+    const raw = liveSettings?.quickLinks || siteSettings?.quickLinks;
+    if (Array.isArray(raw) && raw.length > 0) {
+      return raw.map((l, i) => ({
+        ...l,
+        icon: resolveIcon(l.icon, LINKS_DATA[i % LINKS_DATA.length]?.icon || <Globe size={20} />)
+      }));
+    }
+    return LINKS_DATA;
+  }, [liveSettings?.quickLinks, siteSettings?.quickLinks]);
+
+  const activeAboutFeats = useMemo(() => {
+    const raw = liveSettings?.aboutFeatures || siteSettings?.aboutFeatures;
+    if (Array.isArray(raw) && raw.length > 0) {
+      return raw.map((f, i) => ({
+        ...f,
+        icon: resolveIcon(f.icon, ABOUT_FEATS[i % ABOUT_FEATS.length]?.icon || <Award size={24} />)
+      }));
+    }
+    return ABOUT_FEATS;
+  }, [liveSettings?.aboutFeatures, siteSettings?.aboutFeatures]);
+
+  const activeQuickActions = useMemo(() => {
+    const raw = liveSettings?.quickActions || siteSettings?.quickActions;
+    if (Array.isArray(raw) && raw.length > 0) {
+      return raw.map((a, i) => ({
+        ...a,
+        icon: resolveIcon(a.icon, QUICK_ACTIONS[i % QUICK_ACTIONS.length]?.icon || <ClipboardList size={22} />)
+      }));
+    }
+    return QUICK_ACTIONS;
+  }, [liveSettings?.quickActions, siteSettings?.quickActions]);
+
   return (
     <div
       className="hp-root"
@@ -854,7 +926,7 @@ const HomePage = ({
       <div className="hp-watermark" />
       <HeroSlider slides={sliderSlides} />
       <PremiumTicker items={updates?.length > 0 ? updates : TICKER_ITEMS} />
-      <QuickActionBar />
+      <QuickActionBar items={activeQuickActions} />
       <NotificationSection
         notices={finalNotices}
         announcements={announcements}
@@ -906,7 +978,7 @@ const HomePage = ({
               of academic progress and individual development.
             </p>
             <div className="hp-afeat-grid">
-              {ABOUT_FEATS.map((f) => (
+              {activeAboutFeats.map((f) => (
                 <div key={f.title} className="hp-afeat">
                   <span style={{ fontSize: 19, marginTop: 2 }}>{f.icon}</span>
                   <div>
@@ -1031,7 +1103,7 @@ const HomePage = ({
       <section className="hp-cnt" data-aos="fade-up">
         <div className="hp-cnt-bg" />
         <div className="hp-cnt-grid">
-          {counterData.map((c, i) => (
+          {activeCounters.map((c, i) => (
             <SA key={c.label} variant="rise" delay={`d${i + 1}`}>
               <div 
                 className="gc r16" 
@@ -1073,7 +1145,7 @@ const HomePage = ({
             />
           </SA>
           <div className="hp-links-grid">
-            {LINKS_DATA.map((l, i) => (
+            {activeLinks.map((l, i) => (
               <SA key={l.name} variant="scale" delay={`d${(i % 4) + 1}`}>
                 <div className="gc r12">
                   <a

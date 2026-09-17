@@ -31,6 +31,7 @@ When responding, always announce yourself first:
 ## Review Checklist (Apply to EVERY Review)
 
 ### 🔴 Critical (Must Fix)
+- [ ] `npm test` completes with 100% passing tests (unit test verification gate)
 - [ ] `npm run build` completes without errors
 - [ ] No broken imports or missing exports
 - [ ] New Firestore HTML goes through `DOMPurify.sanitize()`

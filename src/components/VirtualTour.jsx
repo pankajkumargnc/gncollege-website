@@ -1,8 +1,10 @@
-// src/components/VirtualTour.jsx — Interactive 360° Virtual Campus Tour
-import React, { useEffect, useRef, useState } from 'react';
+// src/components/VirtualTour.jsx — Interactive 360° Virtual Campus Tour with Web Speech Audio Narration
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Viewer } from '@photo-sphere-viewer/core';
 import '@photo-sphere-viewer/core/index.css';
-import { Compass, Eye, Maximize2, MapPin, ChevronRight, Sparkles } from 'lucide-react';
+import { Compass, Eye, MapPin, ChevronRight, Volume2, Square, Languages, Globe } from 'lucide-react';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 
 const NAVY = COLORS?.navy || '#0f2347';
@@ -39,12 +41,48 @@ const TOUR_LOCATIONS = [
   }
 ];
 
+const NARRATIONS = {
+  'main-gate': {
+    en: 'Welcome to Guru Nanak College, Dhanbad! Established in 1970 to mark the fifth birth centenary of Sri Guru Nanak Dev Ji, our historic campus provides comprehensive higher education across science, arts, commerce, and vocational fields.',
+    hi: 'गुरु नानक कॉलेज, धनबाद में आपका हार्दिक स्वागत है! 1970 में स्थापित, यह सिख अल्पसंख्यक डिग्री कॉलेज झारखंड का एक प्रमुख उच्च शिक्षण संस्थान है।'
+  },
+  'admin-block': {
+    en: 'You are viewing the Central Administrative Block. This houses the Principal chamber, academic council hall, accounts section, and the student facilitation helpdesk.',
+    hi: 'यह कॉलेज का मुख्य प्रशासनिक भवन है जहाँ प्राचार्य कक्ष, प्रशासनिक कार्यालय, लेखा विभाग और छात्र सहायता केंद्र स्थित हैं।'
+  },
+  'library': {
+    en: 'Welcome to the Central College Library and Reading Hall. Equipped with over 45,000 academic reference volumes, national journals, and high-speed digital research terminals with INFLIBNET access.',
+    hi: 'यह केंद्रीय पुस्तकालय और वाचनालय है। यहाँ 45,000 से अधिक संदर्भ पुस्तकें, शोध पत्रिकाएं और इंटरनेट युक्त ई-लर्निंग डिजिटल स्टडी टर्मिनल उपलब्ध हैं।'
+  },
+  'auditorium': {
+    en: 'Standing inside the Guru Gobind Singh Auditorium. This grand multipurpose auditorium hosts university youth fests, national academic seminars, convocations, and cultural celebrations.',
+    hi: 'गुरु गोबिंद सिंह सभागार में आपका स्वागत है। यहाँ सभी प्रमुख राष्ट्रीय सेमिनार, सांस्कृतिक कार्यक्रम, युवा महोत्सव और दीक्षांत समारोह आयोजित होते हैं।'
+  }
+};
+
 export default function VirtualTour() {
   const containerRef = useRef(null);
   const viewerRef = useRef(null);
+  const [locations, setLocations] = useState(TOUR_LOCATIONS);
   const [activeLocation, setActiveLocation] = useState(TOUR_LOCATIONS[0]);
   const [loading, setLoading] = useState(true);
+  const [isNarrating, setIsNarrating] = useState(false);
+  const [tourLang, setTourLang] = useState('en'); // 'en' | 'hi'
 
+  // Sync locations from Firestore settings/virtual_tour with rock-solid fallback
+  useEffect(() => {
+    if (!db) return;
+    try {
+      const unsub = onSnapshot(doc(db, 'settings', 'virtual_tour'), (snap) => {
+        if (snap.exists() && Array.isArray(snap.data().locations) && snap.data().locations.length > 0) {
+          setLocations(snap.data().locations);
+        }
+      }, () => {});
+      return () => unsub();
+    } catch {}
+  }, []);
+
+  // 360 Viewer Initialization
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -85,8 +123,60 @@ export default function VirtualTour() {
     };
   }, [activeLocation]);
 
+  // Audio Tour Narration Guide
+  const speakNarration = useCallback((locationId, targetLang = tourLang) => {
+    if (!('speechSynthesis' in window)) {
+      alert('Audio narration is not supported on this device/browser.');
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const narrationObj = NARRATIONS[locationId] || {
+      en: activeLocation.description || activeLocation.title,
+      hi: activeLocation.description || activeLocation.title
+    };
+    const textToSpeak = targetLang === 'hi' ? narrationObj.hi : narrationObj.en;
+
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utterance.lang = targetLang === 'hi' ? 'hi-IN' : 'en-IN';
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+
+    try {
+      const voices = window.speechSynthesis.getVoices();
+      const preferred = voices.find(v => targetLang === 'hi' ? v.lang.includes('hi') : (v.lang.includes('en-IN') || v.lang.includes('en')));
+      if (preferred) utterance.voice = preferred;
+    } catch {}
+
+    utterance.onend = () => setIsNarrating(false);
+    utterance.onerror = () => setIsNarrating(false);
+
+    setIsNarrating(true);
+    window.speechSynthesis.speak(utterance);
+  }, [activeLocation, tourLang]);
+
+  const toggleNarration = () => {
+    if (isNarrating) {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      setIsNarrating(false);
+    } else {
+      speakNarration(activeLocation.id, tourLang);
+    }
+  };
+
+  // Stop speech when switching location or unmounting
+  useEffect(() => {
+    return () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
   const switchLocation = (loc) => {
     if (loc.id === activeLocation.id) return;
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    setIsNarrating(false);
     setLoading(true);
     setActiveLocation(loc);
   };
@@ -130,7 +220,69 @@ export default function VirtualTour() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          {/* Audio Tour Guide Controls */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            background: 'rgba(255,255,255,0.12)',
+            padding: '6px 12px',
+            borderRadius: 12,
+            border: '1px solid rgba(255,255,255,0.2)'
+          }}>
+            <button
+              onClick={toggleNarration}
+              className="gnc-audio-tour-btn"
+              style={{
+                background: isNarrating ? '#ef4444' : GOLD,
+                color: isNarrating ? '#fff' : NAVY,
+                border: 'none',
+                borderRadius: 8,
+                padding: '6px 12px',
+                fontSize: 12,
+                fontWeight: 800,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              title={isNarrating ? 'Stop Audio Guide' : 'Listen to Audio Tour Guide'}
+            >
+              {isNarrating ? <Square size={14} /> : <Volume2 size={14} />}
+              {isNarrating ? 'Stop Audio' : 'Audio Guide'}
+            </button>
+
+            <button
+              onClick={() => {
+                const next = tourLang === 'en' ? 'hi' : 'en';
+                setTourLang(next);
+                if (isNarrating) {
+                  window.speechSynthesis.cancel();
+                  speakNarration(activeLocation.id, next);
+                }
+              }}
+              style={{
+                background: 'transparent',
+                color: '#fff',
+                border: '1px solid rgba(255,255,255,0.3)',
+                borderRadius: 8,
+                padding: '5px 10px',
+                fontSize: 11,
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4
+              }}
+              title="Switch Audio Language"
+            >
+              <Languages size={13} color={GOLD} />
+              {tourLang === 'en' ? 'हिंदी' : 'EN'}
+            </button>
+          </div>
+
           <span style={{
             background: 'rgba(255,255,255,0.1)',
             padding: '8px 14px',
@@ -202,11 +354,12 @@ export default function VirtualTour() {
           flexWrap: 'wrap',
           gap: 8
         }}>
-          <div style={{ fontWeight: 800, color: NAVY, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-            📍 Select Campus Tour Hotspot
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 800, color: NAVY, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+            <MapPin size={16} color={GOLD} />
+            <span>Select Campus Tour Hotspot</span>
           </div>
           <div style={{ fontSize: 12, color: '#64748b' }}>
-            {TOUR_LOCATIONS.length} Interactive Locations Available
+            {locations.length} Interactive Locations Available
           </div>
         </div>
 
@@ -215,7 +368,7 @@ export default function VirtualTour() {
           gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           gap: 12
         }}>
-          {TOUR_LOCATIONS.map((loc) => {
+          {locations.map((loc) => {
             const isActive = loc.id === activeLocation.id;
             return (
               <button
@@ -246,10 +399,9 @@ export default function VirtualTour() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 16,
                   flexShrink: 0
                 }}>
-                  {isActive ? '🌐' : '📍'}
+                  {isActive ? <Globe size={18} color={GOLD} /> : <MapPin size={18} color="#64748b" />}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{

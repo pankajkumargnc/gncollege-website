@@ -10,7 +10,9 @@
       "Agent(backend-agent)",
       "Agent(security-agent)",
       "Agent(seo-agent)",
-      "Agent(deploy-agent)",
+      "Agent(devops-agent)",
+      "Agent(ai-agent)",
+      "Agent(fullstack-developer)",
       "Agent(review-agent)"
     ]
   }

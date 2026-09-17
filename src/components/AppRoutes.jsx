@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useParams } from 'react-router-dom';
 import ErrorBoundary from "./ErrorBoundary";
 import HomePage from "../pages/HomePage";
 import VideoLibrary from '../pages/VideoLibrary';
@@ -37,6 +37,7 @@ const LeadershipPage = safeLazy(() => import("../pages/LeadershipPage"));
 const NewsPage = safeLazy(() => import("../pages/NewsPage"));
 const NotificationsPage = safeLazy(() => import("../pages/NotificationsPage"));
 const DocumentsPage = safeLazy(() => import("../pages/DocumentsPage"));
+const DocumentRequestPage = safeLazy(() => import("../pages/DocumentRequestPage"));
 const EventsPage = safeLazy(() => import("../pages/EventsPage"));
 const AdminPanel = safeLazy(() => import("./admin/AdminPanel"));
 const EmbeddedPDFPage = safeLazy(() => import("../pages/EmbeddedPDFPage"));
@@ -136,6 +137,35 @@ const R = ({ el }) => (
         <EB>{el}</EB>
     </Suspense>
 );
+
+// ── 🌐 DYNAMIC ROUTE WRAPPERS (HEADLESS SCALING) ──────────────────────────
+const DynamicExamResults = () => {
+    const { year } = useParams();
+    const yr = year || '2024';
+    return (
+        <PublicationPage 
+            type="result" 
+            title={`Exam Results ${yr}`} 
+            subtitle={`Academic session examination results for ${yr}`} 
+            icon={<ClipboardList size={40} />} 
+            keyword={`result-${yr}`} 
+        />
+    );
+};
+
+const DynamicSssReport = () => {
+    const { session } = useParams();
+    const sess = session || '2023-24';
+    return (
+        <PublicationPage 
+            type="sss" 
+            title={`SSS Report ${sess}`} 
+            subtitle="Student Satisfaction Survey" 
+            icon={<BarChart3 size={40} />} 
+            keyword={`sss-${sess}`} 
+        />
+    );
+};
 
 export default function AppRoutes({
     updates, notices, announcements, events, gallery, 
@@ -252,8 +282,12 @@ export default function AppRoutes({
             {/* Publication */}
             <Route path="/publication/college-library" element={<R el={<LibraryPage />} />} />
             <Route path="/publication/e-magazine" element={<R el={<PublicationPage type="magazine" title="E-Magazine" subtitle="Official college digital publications and periodicals" icon={<Newspaper size={40} />} keyword="magazine" />} />} />
+            <Route path="/publication/examination-results/:year" element={<R el={<DynamicExamResults />} />} />
+            <Route path="/publication/examination-results" element={<R el={<DynamicExamResults />} />} />
             <Route path="/publication/examination-results/2024" element={<R el={<PublicationPage type="result" title="Exam Results 2024" subtitle="Academic year 2023-24 examination results" icon={<ClipboardList size={40} />} keyword="result-2024" />} />} />
             <Route path="/publication/examination-results/2023" element={<R el={<PublicationPage type="result" title="Exam Results 2023" subtitle="Academic year 2022-23 examination results" icon={<ClipboardList size={40} />} keyword="result-2023" />} />} />
+            <Route path="/publication/sss-report/:session" element={<R el={<DynamicSssReport />} />} />
+            <Route path="/publication/sss-report" element={<R el={<DynamicSssReport />} />} />
             <Route path="/publication/sss-report/2023-24" element={<R el={<PublicationPage type="sss" title="SSS Report 2023-24" subtitle="Student Satisfaction Survey" icon={<BarChart3 size={40} />} keyword="sss-2023-24" />} />} />
             <Route path="/publication/sss-report/2022-23" element={<R el={<PublicationPage type="sss" title="SSS Report 2022-23" subtitle="Student Satisfaction Survey" icon={<BarChart3 size={40} />} keyword="sss-2022-23" />} />} />
 
@@ -267,6 +301,9 @@ export default function AppRoutes({
             <Route path="/news" element={<R el={<NewsPage />} />} />
             <Route path="/notifications" element={<R el={<NotificationsPage />} />} />
             <Route path="/documents" element={<R el={<DocumentsPage />} />} />
+            <Route path="/documents/request" element={<R el={<DocumentRequestPage />} />} />
+            <Route path="/services/document-request" element={<R el={<DocumentRequestPage />} />} />
+            <Route path="/student-services/document-request" element={<R el={<DocumentRequestPage />} />} />
             <Route path="/events" element={<R el={<EventsPage />} />} />
             <Route path="/scholarships" element={<R el={<ScholarshipsPage />} />} />
             <Route path="/alumni" element={<R el={<AlumniWall />} />} />

@@ -45,6 +45,12 @@ body {
   --glass-border: rgba(255,255,255,.42);
   --glass-shadow: 0 8px 32px rgba(15,35,71,.1);
 
+  /* Dynamic Universal Hero & Kinetic Background System */
+  --hero-bg-url: url('/images/college_hero_bg.webp');
+  --hero-overlay-gradient: linear-gradient(135deg, rgba(15, 35, 71, 0.90) 0%, rgba(10, 25, 47, 0.82) 48%, rgba(15, 35, 71, 0.92) 100%);
+  --hero-bg-position: center 36%;
+  --hero-kenburns-animation: heroKenBurns 28s ease-in-out infinite alternate;
+
   /* Fluid Modular Type Scale (rem + vw) — WCAG 1.4.4 Accessible */
   --text-xs:   clamp(0.75rem, 0.71rem + 0.18vw, 0.8125rem);  /* 12px → 13px */
   --text-sm:   clamp(0.8125rem, 0.77rem + 0.22vw, 0.875rem); /* 13px → 14px */
@@ -744,26 +750,29 @@ p:last-child { margin-bottom: 0; }
 .kinetic-bg {
   position: absolute;
   inset: 0;
-  /* 4-Color Mesh Gradient */
-  background: linear-gradient(-45deg, #0f2347, #1e3a8a, #0c1c38, #1e40af);
-  background-size: 400% 400%;
-  animation: gradientMotion 10s ease infinite;
+  background-image: 
+    var(--hero-overlay-gradient, linear-gradient(135deg, rgba(15, 35, 71, 0.90) 0%, rgba(10, 25, 47, 0.82) 48%, rgba(15, 35, 71, 0.92) 100%)),
+    var(--hero-bg-url, url('/images/college_hero_bg.webp'));
+  background-size: cover;
+  background-position: var(--hero-bg-position, center 36%);
+  background-repeat: no-repeat;
   z-index: 0;
+  transform: scale(1.02);
+  animation: var(--hero-kenburns-animation, heroKenBurns 28s ease-in-out infinite alternate);
 }
 
 .kinetic-bg::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(244, 160, 35, 0.1) 0%, transparent 70%);
-  mix-blend-mode: overlay;
+  background: radial-gradient(circle at 50% 30%, rgba(244, 160, 35, 0.14) 0%, transparent 70%);
   pointer-events: none;
 }
 
-@keyframes gradientMotion {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+@keyframes heroKenBurns {
+  0% { transform: scale(1.02) translateY(0); }
+  50% { transform: scale(1.06) translateY(-4px); }
+  100% { transform: scale(1.02) translateY(0); }
 }
 
 .hero-content-wrapper {
@@ -997,8 +1006,9 @@ article p,
   position:relative;
   height: clamp(240px,40vw,480px);
   width:100%;
-  background-image: url('https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1986&auto=format&fit=crop');
-  background-size:cover; background-position:center;
+  background-image: var(--hero-bg-url, url('/images/college_hero_bg.webp'));
+  background-size:cover; 
+  background-position: var(--hero-bg-position, center 36%);
   display:flex; align-items:center; justify-content:center; text-align:center;
 }
 .hero-overlay {

@@ -48,18 +48,25 @@ const safeDraftEncode = (obj) => {
 };
 const safeDraftDecode = (str, fallback) => {
   if (!str) return fallback;
-  try { return JSON.parse(decodeURIComponent(escape(atob(str)))); }
+  let parsed = null;
+  try { parsed = JSON.parse(decodeURIComponent(escape(atob(str)))); }
   catch {
-    try { return JSON.parse(str); } catch { return fallback; }
+    try { parsed = JSON.parse(str); } catch { return fallback; }
   }
+  if (!parsed || typeof parsed !== 'object') return fallback;
+  if (fallback && typeof fallback === 'object' && !Array.isArray(fallback)) {
+    return { ...fallback, ...parsed };
+  }
+  return parsed;
 };
 
 export const useLocalDraft = (key, init, sensitiveKeys = []) => {
   const [v, set] = useState(() => {
     try {
       const s = localStorage.getItem(`gnc_draft_${key}`);
-      return safeDraftDecode(s, init);
-    } catch { return init; }
+      const decoded = safeDraftDecode(s, init);
+      return (decoded !== null && typeof decoded === 'object') ? decoded : (init || {});
+    } catch { return init || {}; }
   });
   const save = useCallback(nv => {
     set(prev => {

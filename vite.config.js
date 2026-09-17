@@ -126,6 +126,6 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ["jodit-react"],
+    include: ["react", "react-dom"],
   },
 });

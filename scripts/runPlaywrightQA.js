@@ -20,6 +20,7 @@ const ROUTES = [
   { path: '/#/admission/fee-structure', label: 'Fee Structure' },
   { path: '/#/notifications', label: 'Notifications / Notices' },
   { path: '/#/contact', label: 'Contact Us' },
+  { path: '/#/documents/request', label: 'Document Request Hub' },
 ];
 
 const BASE_URL = 'http://localhost:3000';

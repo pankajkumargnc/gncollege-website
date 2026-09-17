@@ -57,6 +57,34 @@
 .asub { font-size: 13.5px; color: #334155; margin: 0 0 24px; }
 .actitle { font-size: 14.5px; font-weight: 800; color: #0f2347; margin: 0 0 18px; padding-bottom: 12px; border-bottom: 2px solid #f0f4f8; display: flex; align-items: center; gap: 8px; }
 .alabel { display: block; font-size: 11.5px; font-weight: 800; color: #1e293b; margin-bottom: 7px; text-transform: uppercase; letter-spacing: .5px; }
+
+/* ── Settings Tab Specific Styles ── */
+.settings-group {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 4px 18px rgba(15, 35, 71, 0.04);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.settings-group-title {
+  font-size: 15px;
+  font-weight: 900;
+  color: #0f2347;
+  letter-spacing: -0.3px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.settings-row {
+  margin-bottom: 16px;
+}
+.settings-row:last-child {
+  margin-bottom: 0;
+}
 .sec-search::before {
   content: '';
   position: absolute;

@@ -52,7 +52,13 @@ service cloud.firestore {
       allow update: if request.resource.data.diff(resource.data).affectedKeys().hasAny(['count', 'value', 'updatedAt']) || isAdmin(); 
       allow create, delete: if isAdmin(); 
     }
-    match /settings/{settingId}     { allow read: if true; allow write: if isAdmin(); }
+    // Settings: public metadata (site, site_sync, chatbot) readable by all.
+    // SECURITY: sensitive keys (geminiApiKey) must NOT be stored in public-readable docs.
+    // Use environment variables for API keys instead (see firebase.js / AIChatbot.jsx).
+    match /settings/site             { allow read: if true; allow write: if isAdmin(); }
+    match /settings/site_sync        { allow read: if true; allow write: if isAdmin(); }
+    match /settings/chatbot          { allow read: if true; allow write: if isAdmin(); }
+    match /settings/{otherSettingId} { allow read: if isAdmin(); allow write: if isAdmin(); }
     match /adminLogs/{docId}        { allow read, write, create: if isAdmin(); }
     match /_sysTest/{docId}         { allow read, write, delete: if isAdmin(); }
     match /_systemTest/{docId}      { allow read, write, delete: if isAdmin(); }

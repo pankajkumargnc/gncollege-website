@@ -12,3 +12,4 @@ backups/snapshots/
 backups/
 _backups/
 .firebase/
+*.tsbuildinfo

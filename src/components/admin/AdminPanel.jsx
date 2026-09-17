@@ -206,6 +206,13 @@ function AdminPanelInner({
     }
   }, [visibleTabs, tab]);
 
+  // Always reset scroll to top when changing tabs so headers and subtabs are never hidden
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
+  }, [tab]);
+
   // ── Live data subscriptions ───────────────────────────────────────────────
   const [_pdfReports,   set_pdfReports]   = useState([]);
   const [_pages,        set_pages]        = useState([]);

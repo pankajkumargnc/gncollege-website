@@ -15,10 +15,13 @@ import {
   Settings, Sliders, Globe, Share2, Image as ImageIcon, Bot, Shield, Save, 
   Eye, EyeOff, Zap, CheckCircle2, Building2, Wrench, Loader2, Download, 
   AlertTriangle, Radio, Bell, RefreshCw, Layers, Database, Check, 
-  ExternalLink, Copy, Search, Smartphone, Monitor
+  ExternalLink, Copy, Search, Smartphone, Monitor,
+  UploadCloud, Sparkles, RotateCcw, ArrowUpRight, Info,
+  PhoneCall, Compass, GraduationCap
 } from 'lucide-react';
 import { T, NAVY, GOLD, Toggle } from '../AdminShared';
 import { clearCache, encodePayload, decodePayload } from '../../../utils/cachedFetch';
+import { processHeroImage, formatBytes } from '../../../utils/imageProcessor';
 
 export default function SettingsTab({ logAct }) {
   const [activeSubTab, setActiveSubTab] = useState('general');
@@ -67,6 +70,13 @@ export default function SettingsTab({ logAct }) {
       enableVirtualTour: true,
       enableAlumniWall: true,
       enablePlacementAnalytics: true,
+
+      // Hero & Kinetic Background Settings
+      heroBgUrl: '/images/college_hero_bg.webp',
+      heroOverlayStyle: 'royal-navy',
+      heroOverlayGradient: 'linear-gradient(135deg, rgba(15, 35, 71, 0.90) 0%, rgba(10, 25, 47, 0.82) 48%, rgba(15, 35, 71, 0.92) 100%)',
+      heroBgPosition: 'center 36%',
+      heroKenBurns: true,
     };
   });
 
@@ -74,6 +84,12 @@ export default function SettingsTab({ logAct }) {
   const [showGeminiKey, setShowGeminiKey] = useState(false);
   const [testingGemini, setTestingGemini] = useState(false);
   const [geminiTestStatus, setGeminiTestStatus] = useState(null);
+
+  // Hero Image Processing State
+  const [heroProcessing, setHeroProcessing] = useState(false);
+  const [heroStats, setHeroStats] = useState(null);
+  const [heroPreviewDevice, setHeroPreviewDevice] = useState('desktop'); // 'desktop' | 'mobile'
+  const [isHeroDragOver, setIsHeroDragOver] = useState(false);
 
   // Social Preview State
   const [socialPlatform, setSocialPlatform] = useState('whatsapp'); // 'whatsapp' | 'facebook' | 'twitter' | 'google'
@@ -301,8 +317,10 @@ export default function SettingsTab({ logAct }) {
   };
 
   const field = (key, label, type = 'text', placeholder = '') => (
-    <div key={key} className="settings-row">
-      <label className="alabel" style={{ minWidth: 160, margin: 0 }}>{label}</label>
+    <div key={key} className="settings-row" style={{ marginBottom: 14 }}>
+      <label className="alabel" style={{ marginBottom: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+        <span>{label}</span>
+      </label>
       <input 
         className="ainp" 
         value={siteCfg[key] || ''}
@@ -315,27 +333,125 @@ export default function SettingsTab({ logAct }) {
 
   const subTabs = [
     { id: 'general', label: 'General Info', icon: Building2 },
-    { id: 'social-seo', label: 'Social & SEO Preview', icon: Globe },
+    { id: 'social-seo', label: 'SEO & Social Preview', icon: Globe },
+    { id: 'homepage-stats', label: 'Homepage Stats', icon: Layers },
+    { id: 'hero-banner', label: 'Hero & Kinetic Banner', icon: ImageIcon },
     { id: 'broadcast', label: 'Emergency Broadcast', icon: Radio },
     { id: 'toggles', label: 'Feature Switches', icon: Sliders },
     { id: 'api-keys', label: 'API & Security Keys', icon: Bot },
     { id: 'backup', label: 'Database Snapshot', icon: Database },
   ];
 
+  const OVERLAY_THEMES = [
+    {
+      id: 'royal-navy',
+      name: 'Royal Navy Deep (Default)',
+      gradient: 'linear-gradient(135deg, rgba(15, 35, 71, 0.90) 0%, rgba(10, 25, 47, 0.82) 48%, rgba(15, 35, 71, 0.92) 100%)',
+      accent: '#f4a023',
+      desc: 'Institutional Navy with subtle gold glow (WCAG AAA contrast for titles & badges)'
+    },
+    {
+      id: 'charcoal',
+      name: 'Charcoal Onyx',
+      gradient: 'linear-gradient(135deg, rgba(17, 24, 39, 0.92) 0%, rgba(31, 41, 55, 0.85) 100%)',
+      accent: '#60a5fa',
+      desc: 'Modern graphite dark tone for clean, minimal contemporary aesthetic'
+    },
+    {
+      id: 'sapphire',
+      name: 'Midnight Sapphire',
+      gradient: 'linear-gradient(135deg, rgba(10, 30, 60, 0.94) 0%, rgba(15, 23, 42, 0.88) 100%)',
+      accent: '#38bdf8',
+      desc: 'Vibrant academic blue with deep night-sky undertones'
+    },
+    {
+      id: 'sunset',
+      name: 'Warm Sunset Maroon',
+      gradient: 'linear-gradient(135deg, rgba(88, 28, 28, 0.92) 0%, rgba(15, 35, 71, 0.88) 100%)',
+      accent: '#fb923c',
+      desc: 'Prestigious deep maroon blend honoring college red brick architecture'
+    }
+  ];
+
+  const HERO_PREVIEW_PAGES = [
+    { name: 'College Profile', path: '/about-us/college-profile', type: 'Profile Hero' },
+    { name: 'Vision & Mission', path: '/about-us/vision-mission', type: 'Kinetic BG' },
+    { name: 'Fee Structure', path: '/admission/fee-structure', type: 'Kinetic BG' },
+    { name: 'Academics (BCA)', path: '/academics/bca', type: 'Kinetic BG' },
+    { name: 'Campus Facilities', path: '/campus/computer-lab', type: 'Kinetic BG' },
+    { name: 'Alumni Wall', path: '/campus/alumni-wall', type: 'Kinetic BG' },
+  ];
+
+  const handleHeroFileUpload = async (file) => {
+    if (!file) return;
+    setHeroProcessing(true);
+    try {
+      const result = await processHeroImage(file, {
+        maxWidth: 1920,
+        maxHeight: 1080,
+        quality: 0.85,
+        format: 'image/webp'
+      });
+      setHeroStats(result);
+
+      let finalUrl = result.dataUrl;
+
+      // If ImgBB API key exists, upload WebP to ImgBB
+      const imgbbKey = siteCfg.imgbbKey || window.GN_IMGBB_KEY;
+      if (imgbbKey && result.blob) {
+        try {
+          const body = new FormData();
+          body.append('image', result.blob, `${file.name.replace(/\.[^.]+$/, '')}_1920.webp`);
+          const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbKey}`, { method: 'POST', body });
+          const json = await res.json();
+          if (json.success && json.data?.url) {
+            finalUrl = json.data.url;
+            toast.success('Uploaded to Cloud Storage CDN! ☁️');
+          }
+        } catch (e) {
+          console.warn('ImgBB upload error, using optimized dataUrl:', e);
+        }
+      }
+
+      setSiteCfg(prev => ({
+        ...prev,
+        heroBgUrl: finalUrl
+      }));
+
+      toast.success(`Image auto-processed! Scaled to ${result.width}×${result.height} WebP (${result.formattedCompressed}, ${result.reductionRatio}% reduction) 🚀`);
+    } catch (err) {
+      toast.error('Failed to process image: ' + err.message);
+    }
+    setHeroProcessing(false);
+  };
+
+  const resetHeroToDefault = () => {
+    setSiteCfg(prev => ({
+      ...prev,
+      heroBgUrl: '/images/college_hero_bg.webp',
+      heroOverlayStyle: 'royal-navy',
+      heroOverlayGradient: 'linear-gradient(135deg, rgba(15, 35, 71, 0.90) 0%, rgba(10, 25, 47, 0.82) 48%, rgba(15, 35, 71, 0.92) 100%)',
+      heroBgPosition: 'center 36%',
+      heroKenBurns: true
+    }));
+    setHeroStats(null);
+    toast.success('Reset to Official College Campus Dome Image! 🏛️');
+  };
+
   return (
-    <div className="fade-up" style={{ maxWidth: 1200, margin: '0 auto' }}>
+    <div className="fade-up" style={{ maxWidth: 1240, margin: '0 auto', padding: '12px 6px 40px' }}>
       
       {/* Header Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg, #0f2347, #1e3a8a)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD, boxShadow: '0 4px 14px rgba(15,35,71,0.2)' }}>
-            <Settings size={22} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16, background: '#ffffff', border: '1.5px solid #e2e8f0', borderRadius: 16, padding: '18px 24px', boxShadow: '0 2px 10px rgba(15,35,71,0.03)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ width: 46, height: 46, borderRadius: 12, background: 'linear-gradient(135deg, #0f2347, #1e3a8a)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD, boxShadow: '0 4px 14px rgba(15,35,71,0.2)', flexShrink: 0 }}>
+            <Settings size={24} />
           </div>
           <div>
-            <h1 style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 4vw, 24px)', letterSpacing: '-0.5px' }}>
+            <h1 style={{ margin: 0, fontWeight: 900, color: NAVY, fontSize: 'clamp(20px, 3.5vw, 24px)', letterSpacing: '-0.5px' }}>
               Site Settings & Central Configuration
             </h1>
-            <p style={{ margin: '2px 0 0', color: T.t3, fontSize: 13, fontWeight: 600 }}>
+            <p style={{ margin: '3px 0 0', color: T.t3, fontSize: 13, fontWeight: 600 }}>
               Institutional identity, social graph simulators, disaster recovery, and system switches.
             </p>
           </div>
@@ -346,7 +462,7 @@ export default function SettingsTab({ logAct }) {
           onClick={saveSite} 
           className="abtn abtn-gold" 
           disabled={siteLoading}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 24px', fontSize: 13.5 }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 26px', fontSize: 13.5 }}
         >
           {siteLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
           <span>Save Changes</span>
@@ -354,7 +470,7 @@ export default function SettingsTab({ logAct }) {
       </div>
 
       {/* Sub-Navigation Tabs */}
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 10, marginBottom: 20, borderBottom: '1.5px solid #e2e8f0' }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', paddingBottom: 14, marginBottom: 24, borderBottom: '1.5px solid #e2e8f0' }}>
         {subTabs.map(t => {
           const Icon = t.icon;
           const active = activeSubTab === t.id;
@@ -367,20 +483,21 @@ export default function SettingsTab({ logAct }) {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 8,
-                padding: '9px 16px',
+                padding: '8px 16px',
                 borderRadius: 10,
                 border: active ? `1.5px solid ${NAVY}` : '1.5px solid #e2e8f0',
                 background: active ? NAVY : '#ffffff',
-                color: active ? '#ffffff' : T.t2,
+                color: active ? '#ffffff' : '#334155',
                 fontWeight: active ? 800 : 600,
                 fontSize: 13,
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
                 transition: 'all 0.18s ease',
-                boxShadow: active ? '0 4px 12px rgba(15,35,71,0.15)' : 'none'
+                boxShadow: active ? '0 4px 12px rgba(15,35,71,0.15)' : 'none',
+                flexShrink: 0
               }}
             >
-              <Icon size={15} color={active ? GOLD : '#64748b'} />
+              <Icon size={14} color={active ? GOLD : '#64748b'} />
               <span>{t.label}</span>
               {t.id === 'broadcast' && siteCfg.emergencyBroadcastEnabled && (
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444' }} />
@@ -394,43 +511,74 @@ export default function SettingsTab({ logAct }) {
 
         {/* ═════════ 1. GENERAL INFO ═════════ */}
         {activeSubTab === 'general' && (
-          <div className="settings-group fade-up">
-            <div className="settings-group-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Building2 size={17} color={GOLD} />
-              <span>Institutional Identity & Contact Information</span>
-            </div>
-            {field('name', 'College Name', 'text', 'Guru Nanak College')}
-            {field('tagline', 'Tagline / Affiliation', 'text', 'Affiliated to B.B.M.K. University, Dhanbad')}
-            {field('address', 'Full Campus Address', 'text', 'Bank More, Dhanbad — 826001, Jharkhand')}
-            {field('phone', 'Public Telephone', 'text', '+91 326 2302324')}
-            {field('email', 'Official Email', 'email', 'principal@gncollege.org')}
-            {field('footerText', 'Footer Copyright Line', 'text', '© 2026 Guru Nanak College, Dhanbad')}
-
-            <div className="settings-row" style={{ marginTop: 16, background: siteCfg.maintenanceMode ? '#fef2f2' : '#f8fafc', padding: 16, borderRadius: 12, border: siteCfg.maintenanceMode ? '1.5px solid #fca5a5' : '1px solid #e2e8f0' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 800, fontSize: 14, color: siteCfg.maintenanceMode ? '#b91c1c' : NAVY }}>
-                  Maintenance Mode (Under Construction)
-                </div>
-                <div style={{ fontSize: 12, color: T.t3, marginTop: 2 }}>
-                  When enabled, visitors see a scheduled maintenance screen. Administrators remain able to login via <code>/admin</code>.
-                </div>
-                {siteCfg.maintenanceMode && (
-                  <div style={{ marginTop: 10 }}>
-                    <input 
-                      className="ainp"
-                      value={siteCfg.maintenanceMessage || ''}
-                      onChange={e => setSiteCfg(d => ({ ...d, maintenanceMessage: e.target.value }))}
-                      placeholder="Custom maintenance message displayed to visitors..."
-                    />
-                  </div>
-                )}
+          <div className="fade-up" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {/* Card 1: Institutional Core Identity */}
+            <div className="settings-group" style={{ margin: 0 }}>
+              <div className="settings-group-title">
+                <Building2 size={18} color={GOLD} />
+                <span>Institutional Core Identity</span>
+                <span style={{ fontSize: 11, background: 'rgba(15,35,71,0.08)', color: NAVY, padding: '2px 8px', borderRadius: 10, fontWeight: 700, marginLeft: 'auto' }}>
+                  Public Header &amp; Branding
+                </span>
               </div>
-              <Toggle
-                checked={siteCfg.maintenanceMode || false}
-                onChange={() => setSiteCfg(d => ({ ...d, maintenanceMode: !d.maintenanceMode }))}
-                label={siteCfg.maintenanceMode ? 'SITE DOWN' : 'SITE LIVE'}
-                color={T.red}
-              />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+                {field('name', 'College Name', 'text', 'Guru Nanak College')}
+                {field('tagline', 'Tagline / Affiliation', 'text', 'Affiliated to B.B.M.K. University, Dhanbad')}
+                <div style={{ gridColumn: '1 / -1' }}>
+                  {field('footerText', 'Footer Copyright Line', 'text', '© 2026 Guru Nanak College, Dhanbad')}
+                </div>
+              </div>
+            </div>
+
+            {/* Card 2: Official Contact & Campus Location */}
+            <div className="settings-group" style={{ margin: 0 }}>
+              <div className="settings-group-title">
+                <PhoneCall size={18} color={GOLD} />
+                <span>Official Contact &amp; Campus Location</span>
+                <span style={{ fontSize: 11, background: 'rgba(15,35,71,0.08)', color: NAVY, padding: '2px 8px', borderRadius: 10, fontWeight: 700, marginLeft: 'auto' }}>
+                  Contact Page &amp; Footer
+                </span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+                {field('phone', 'Public Telephone', 'text', '+91 326 2302324')}
+                {field('email', 'Official Email', 'email', 'principal@gncollege.org')}
+                <div style={{ gridColumn: '1 / -1' }}>
+                  {field('address', 'Full Campus Address', 'text', 'Bank More, Dhanbad — 826001, Jharkhand')}
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3: Emergency Maintenance Mode Banner */}
+            <div className="settings-group" style={{ margin: 0, border: siteCfg.maintenanceMode ? '1.5px solid #fca5a5' : '1.5px solid #e2e8f0', background: siteCfg.maintenanceMode ? '#fff5f5' : '#ffffff' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: 15, color: siteCfg.maintenanceMode ? '#b91c1c' : NAVY, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: siteCfg.maintenanceMode ? '#dc2626' : '#22c55e' }} />
+                    Maintenance Mode (Under Construction Screen)
+                  </div>
+                  <div style={{ fontSize: 12.5, color: T.t3, marginTop: 4, maxWidth: 640 }}>
+                    When enabled, public visitors see an official Under Construction / Maintenance notice. Administrators remain fully able to log in and manage the site via <code>/#/admin</code>.
+                  </div>
+                </div>
+                <Toggle
+                  checked={siteCfg.maintenanceMode || false}
+                  onChange={() => setSiteCfg(d => ({ ...d, maintenanceMode: !d.maintenanceMode }))}
+                  label={siteCfg.maintenanceMode ? 'SITE DOWN' : 'SITE LIVE'}
+                  color={T.red}
+                />
+              </div>
+
+              {siteCfg.maintenanceMode && (
+                <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid #fed7d7' }}>
+                  <label className="alabel">Custom Maintenance Notice Message</label>
+                  <input 
+                    className="ainp"
+                    value={siteCfg.maintenanceMessage || ''}
+                    onChange={e => setSiteCfg(d => ({ ...d, maintenanceMessage: e.target.value }))}
+                    placeholder="System undergoing scheduled maintenance. Services will resume shortly."
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -443,17 +591,19 @@ export default function SettingsTab({ logAct }) {
                 <Globe size={17} color={GOLD} />
                 <span>Official Social Media Channels</span>
               </div>
-              {['facebook', 'twitter', 'youtube', 'linkedin'].map(s => (
-                <div key={s} className="settings-row">
-                  <label className="alabel" style={{ minWidth: 160, margin: 0, textTransform: 'capitalize' }}>{s} Profile URL</label>
-                  <input 
-                    className="ainp" 
-                    value={siteCfg[s] || ''}
-                    onChange={e => setSiteCfg(d => ({ ...d, [s]: e.target.value }))}
-                    placeholder={`https://${s}.com/...`} 
-                  />
-                </div>
-              ))}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
+                {['facebook', 'twitter', 'youtube', 'linkedin'].map(s => (
+                  <div key={s} style={{ marginBottom: 4 }}>
+                    <label className="alabel" style={{ textTransform: 'capitalize', marginBottom: 6 }}>{s} Profile URL</label>
+                    <input 
+                      className="ainp" 
+                      value={siteCfg[s] || ''}
+                      onChange={e => setSiteCfg(d => ({ ...d, [s]: e.target.value }))}
+                      placeholder={`https://${s}.com/...`} 
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* 🚀 REAL-TIME OPEN GRAPH & SERP SIMULATOR */}
@@ -620,6 +770,580 @@ export default function SettingsTab({ logAct }) {
           </div>
         )}
 
+        {/* ═════════ 2.5. HOMEPAGE STATS & COUNTERS ═════════ */}
+        {activeSubTab === 'homepage-stats' && (
+          <div className="fade-up">
+            <div className="settings-group">
+              <div className="settings-group-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Layers size={17} color={GOLD} />
+                <span>Homepage Institutional Key Statistics (Live Counters)</span>
+              </div>
+              <p style={{ fontSize: 12.5, color: T.t3, margin: '6px 20px 14px', lineHeight: 1.6 }}>
+                Configure the dynamic counters rendered in the celebration achievements section of the homepage.
+              </p>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, padding: '0 20px 20px' }}>
+                <div style={{ background: '#f8fafc', padding: 16, borderRadius: 12, border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontWeight: 800, fontSize: 13, color: NAVY, marginBottom: 8 }}>Stat 1: Students Enrolled</div>
+                  <input
+                    className="ainp"
+                    placeholder="e.g. 4,000+"
+                    value={siteCfg.counter1Value ?? (siteCfg.counters?.[0]?.value || '4,000+')}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setSiteCfg(d => {
+                        const counters = [...(d.counters || [
+                          { label: "Students Enrolled", value: "4,000+", icon: "Users" },
+                          { label: "Successful Alumni", value: "45,000+", icon: "GraduationCap" },
+                          { label: "Expert Faculty", value: "50+", icon: "UserCheck" },
+                          { label: "Years of Legacy", value: "56", icon: "Building2" },
+                        ])];
+                        counters[0] = { ...counters[0], value: val };
+                        return { ...d, counter1Value: val, counters };
+                      });
+                    }}
+                  />
+                </div>
+
+                <div style={{ background: '#f8fafc', padding: 16, borderRadius: 12, border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontWeight: 800, fontSize: 13, color: NAVY, marginBottom: 8 }}>Stat 2: Successful Alumni</div>
+                  <input
+                    className="ainp"
+                    placeholder="e.g. 45,000+"
+                    value={siteCfg.counter2Value ?? (siteCfg.counters?.[1]?.value || '45,000+')}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setSiteCfg(d => {
+                        const counters = [...(d.counters || [
+                          { label: "Students Enrolled", value: "4,000+", icon: "Users" },
+                          { label: "Successful Alumni", value: "45,000+", icon: "GraduationCap" },
+                          { label: "Expert Faculty", value: "50+", icon: "UserCheck" },
+                          { label: "Years of Legacy", value: "56", icon: "Building2" },
+                        ])];
+                        counters[1] = { ...counters[1], value: val };
+                        return { ...d, counter2Value: val, counters };
+                      });
+                    }}
+                  />
+                </div>
+
+                <div style={{ background: '#f8fafc', padding: 16, borderRadius: 12, border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontWeight: 800, fontSize: 13, color: NAVY, marginBottom: 8 }}>Stat 3: Expert Faculty</div>
+                  <input
+                    className="ainp"
+                    placeholder="e.g. 50+"
+                    value={siteCfg.counter3Value ?? (siteCfg.counters?.[2]?.value || '50+')}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setSiteCfg(d => {
+                        const counters = [...(d.counters || [
+                          { label: "Students Enrolled", value: "4,000+", icon: "Users" },
+                          { label: "Successful Alumni", value: "45,000+", icon: "GraduationCap" },
+                          { label: "Expert Faculty", value: "50+", icon: "UserCheck" },
+                          { label: "Years of Legacy", value: "56", icon: "Building2" },
+                        ])];
+                        counters[2] = { ...counters[2], value: val };
+                        return { ...d, counter3Value: val, counters };
+                      });
+                    }}
+                  />
+                </div>
+
+                <div style={{ background: '#f8fafc', padding: 16, borderRadius: 12, border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontWeight: 800, fontSize: 13, color: NAVY, marginBottom: 8 }}>Stat 4: Years of Legacy</div>
+                  <input
+                    className="ainp"
+                    placeholder="e.g. 56"
+                    value={siteCfg.counter4Value ?? (siteCfg.counters?.[3]?.value || '56')}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setSiteCfg(d => {
+                        const counters = [...(d.counters || [
+                          { label: "Students Enrolled", value: "4,000+", icon: "Users" },
+                          { label: "Successful Alumni", value: "45,000+", icon: "GraduationCap" },
+                          { label: "Expert Faculty", value: "50+", icon: "UserCheck" },
+                          { label: "Years of Legacy", value: "56", icon: "Building2" },
+                        ])];
+                        counters[3] = { ...counters[3], value: val };
+                        return { ...d, counter4Value: val, counters };
+                      });
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═════════ 2.8. HERO & KINETIC BACKGROUND MANAGER ═════════ */}
+        {activeSubTab === 'hero-banner' && (
+          <div className="fade-up">
+            
+            {/* Section 1: Specifications & Dimension Guidance */}
+            <div className="settings-group">
+              <div className="settings-group-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <ImageIcon size={18} color={GOLD} />
+                <span>Hero & Kinetic Background Management Engine</span>
+                <span style={{ fontSize: 11, background: 'rgba(244,160,35,0.15)', color: '#d97706', padding: '2px 8px', borderRadius: 12, fontWeight: 800, marginLeft: 'auto' }}>
+                  Universal Site-Wide Sync
+                </span>
+              </div>
+
+              <div style={{ padding: '0 20px 16px' }}>
+                {/* Guidelines Callout Banner */}
+                <div style={{ background: 'linear-gradient(135deg, rgba(15,35,71,0.04), rgba(244,160,35,0.06))', border: '1.5px solid #e2e8f0', borderRadius: 14, padding: '16px 20px', marginBottom: 20 }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: NAVY, display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD, flexShrink: 0 }}>
+                      <Sparkles size={18} />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 800, color: NAVY, fontSize: 14 }}>
+                        Recommended Dimensions, Format & Auto-Optimization Rules
+                      </div>
+                      <p style={{ margin: '4px 0 10px', fontSize: 12.5, color: T.t2, lineHeight: 1.6 }}>
+                        Upload any photograph of the college campus (smartphone or DSLR). Our client-side image processing engine will automatically scale it down, convert it into modern WebP format, and compress it to guarantee fast page loading (LCP).
+                      </p>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                        <div style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: 8, padding: '4px 10px', fontSize: 11.5, fontWeight: 700, color: NAVY }}>
+                          📐 <strong>Optimal Dimensions:</strong> 1920 × 1080 px (16:9 Landscape)
+                        </div>
+                        <div style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: 8, padding: '4px 10px', fontSize: 11.5, fontWeight: 700, color: NAVY }}>
+                          ⚡ <strong>Auto-Format:</strong> WebP (85% Perceptual Quality)
+                        </div>
+                        <div style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: 8, padding: '4px 10px', fontSize: 11.5, fontWeight: 700, color: NAVY }}>
+                          📦 <strong>Target File Size:</strong> ~150 KB – 300 KB
+                        </div>
+                        <div style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: 8, padding: '4px 10px', fontSize: 11.5, fontWeight: 700, color: NAVY }}>
+                          📷 <strong>Supported Inputs:</strong> JPG, PNG, WEBP, AVIF, HEIC
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 2: Smart Drag & Drop Upload Zone */}
+                <div 
+                  style={{ 
+                    border: isHeroDragOver ? `2px dashed ${GOLD}` : '2px dashed #cbd5e1', 
+                    borderRadius: 14, 
+                    padding: '30px 20px', 
+                    textAlign: 'center', 
+                    background: isHeroDragOver ? 'rgba(244,160,35,0.05)' : '#f8fafc',
+                    transition: 'all 0.2s ease',
+                    cursor: 'pointer',
+                    marginBottom: 20
+                  }}
+                  onDragOver={e => { e.preventDefault(); setIsHeroDragOver(true); }}
+                  onDragLeave={e => { e.preventDefault(); setIsHeroDragOver(false); }}
+                  onDrop={e => {
+                    e.preventDefault();
+                    setIsHeroDragOver(false);
+                    if (e.dataTransfer?.files?.[0]) {
+                      handleHeroFileUpload(e.dataTransfer.files[0]);
+                    }
+                  }}
+                  onClick={() => document.getElementById('hero-file-picker')?.click()}
+                >
+                  <input 
+                    type="file" 
+                    id="hero-file-picker" 
+                    accept="image/*" 
+                    hidden 
+                    onChange={e => {
+                      if (e.target.files?.[0]) {
+                        handleHeroFileUpload(e.target.files[0]);
+                      }
+                    }} 
+                  />
+
+                  {heroProcessing ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: 10 }}>
+                      <Loader2 size={36} className="animate-spin" color={GOLD} />
+                      <div style={{ fontWeight: 800, color: NAVY, fontSize: 14 }}>
+                        Auto-processing image in browser...
+                      </div>
+                      <div style={{ fontSize: 12, color: T.t3 }}>
+                        Clamping to 1920×1080 • Converting to WebP • Optimizing compression
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ width: 50, height: 50, borderRadius: '50%', background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.06)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: GOLD, marginBottom: 12 }}>
+                        <UploadCloud size={26} />
+                      </div>
+                      <div style={{ fontWeight: 800, color: NAVY, fontSize: 15, marginBottom: 4 }}>
+                        Click to Upload or Drag & Drop Campus Image
+                      </div>
+                      <div style={{ fontSize: 12.5, color: T.t3, maxWidth: 500, margin: '0 auto 14px' }}>
+                        Image will be automatically scaled to 1920×1080, compressed, and converted to WebP.
+                      </div>
+                      <button 
+                        type="button" 
+                        className="abtn abtn-navy" 
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 20px', fontSize: 13 }}
+                        onClick={e => { e.stopPropagation(); document.getElementById('hero-file-picker')?.click(); }}
+                      >
+                        <ImageIcon size={15} /> Browse Image File
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Compression Analytics Badge (if processed) */}
+                {heroStats && (
+                  <div style={{ background: '#ecfdf5', border: '1.5px solid #a7f3d0', borderRadius: 12, padding: '14px 18px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <CheckCircle2 size={20} color="#059669" />
+                      <div>
+                        <div style={{ fontWeight: 800, color: '#065f46', fontSize: 13.5 }}>
+                          Image Successfully Compressed & Converted!
+                        </div>
+                        <div style={{ fontSize: 12, color: '#047857', marginTop: 2 }}>
+                          Original: <strong>{heroStats.formattedOriginal}</strong> ➔ Processed WebP: <strong>{heroStats.formattedCompressed}</strong> ({heroStats.width}×{heroStats.height}px)
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ background: '#059669', color: '#fff', fontSize: 11.5, fontWeight: 800, padding: '3px 10px', borderRadius: 20 }}>
+                        {heroStats.reductionRatio}% Size Reduction
+                      </span>
+                      {heroStats.dataUrl && (
+                        <a 
+                          href={heroStats.dataUrl} 
+                          download={`gnc_hero_${Date.now()}.webp`}
+                          className="abtn abtn-outline"
+                          style={{ padding: '6px 12px', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                          onClick={e => e.stopPropagation()}
+                        >
+                          <Download size={13} /> Save WebP
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Direct URL Input & Fast Preset Chips */}
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: 16, marginBottom: 20 }}>
+                  <label className="alabel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span>Active Hero Background Image Path / URL</span>
+                    <span style={{ fontSize: 11, color: T.t3, fontWeight: 600 }}>Supports local assets or external CDN URLs</span>
+                  </label>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    <input 
+                      className="ainp" 
+                      style={{ flex: 1, minWidth: 260 }}
+                      value={siteCfg.heroBgUrl || ''} 
+                      placeholder="/images/college_hero_bg.webp"
+                      onChange={e => setSiteCfg(d => ({ ...d, heroBgUrl: e.target.value }))}
+                    />
+                    <button 
+                      type="button" 
+                      className="abtn abtn-outline" 
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5 }}
+                      onClick={resetHeroToDefault}
+                      title="Reset to newly generated College Dome image"
+                    >
+                      <RotateCcw size={14} /> Reset to Default Dome
+                    </button>
+                  </div>
+
+                  {/* Preset Chips */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 11.5, color: T.t3, fontWeight: 700 }}>Quick Presets:</span>
+                    <button
+                      type="button"
+                      onClick={() => setSiteCfg(d => ({ ...d, heroBgUrl: '/images/college_hero_bg.webp', heroBgPosition: 'center 36%' }))}
+                      style={{ background: siteCfg.heroBgUrl === '/images/college_hero_bg.webp' ? NAVY : '#fff', color: siteCfg.heroBgUrl === '/images/college_hero_bg.webp' ? '#fff' : NAVY, border: '1px solid #cbd5e1', borderRadius: 6, padding: '3px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      🏛️ Campus Dome Composite (WebP)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSiteCfg(d => ({ ...d, heroBgUrl: '/images/college_hero_bg.jpg', heroBgPosition: 'center 36%' }))}
+                      style={{ background: siteCfg.heroBgUrl === '/images/college_hero_bg.jpg' ? NAVY : '#fff', color: siteCfg.heroBgUrl === '/images/college_hero_bg.jpg' ? '#fff' : NAVY, border: '1px solid #cbd5e1', borderRadius: 6, padding: '3px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      🏫 Campus Archival (JPG)
+                    </button>
+                  </div>
+                </div>
+
+                {/* Section 3: Live Interactive Hero Simulator (WYSIWYG) */}
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Eye size={17} color={NAVY} />
+                      <span style={{ fontWeight: 800, fontSize: 14, color: NAVY }}>
+                        Live Hero Section Simulator (WYSIWYG)
+                      </span>
+                      <span style={{ fontSize: 11, background: '#dbeafe', color: '#1d4ed8', padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>
+                        Real-Time CSS & Animation
+                      </span>
+                    </div>
+
+                    {/* Viewport switcher */}
+                    <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: 8, padding: 3, border: '1px solid #e2e8f0' }}>
+                      <button
+                        type="button"
+                        onClick={() => setHeroPreviewDevice('desktop')}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          padding: '4px 12px',
+                          borderRadius: 6,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          border: 'none',
+                          background: heroPreviewDevice === 'desktop' ? '#ffffff' : 'transparent',
+                          color: heroPreviewDevice === 'desktop' ? NAVY : '#64748b',
+                          boxShadow: heroPreviewDevice === 'desktop' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                        }}
+                      >
+                        <Monitor size={14} /> Desktop (1920px)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setHeroPreviewDevice('mobile')}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          padding: '4px 12px',
+                          borderRadius: 6,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          border: 'none',
+                          background: heroPreviewDevice === 'mobile' ? '#ffffff' : 'transparent',
+                          color: heroPreviewDevice === 'mobile' ? NAVY : '#64748b',
+                          boxShadow: heroPreviewDevice === 'mobile' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                        }}
+                      >
+                        <Smartphone size={14} /> Mobile (375px)
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Simulator Container */}
+                  <div style={{ background: '#0b132b', borderRadius: 14, padding: 14, overflow: 'hidden' }}>
+                    <div 
+                      style={{ 
+                        maxWidth: heroPreviewDevice === 'mobile' ? 380 : '100%', 
+                        margin: '0 auto', 
+                        borderRadius: 10, 
+                        overflow: 'hidden', 
+                        position: 'relative',
+                        height: heroPreviewDevice === 'mobile' ? 260 : 320,
+                        border: heroPreviewDevice === 'mobile' ? '4px solid #334155' : '1px solid rgba(255,255,255,0.15)',
+                        transition: 'max-width 0.3s ease, height 0.3s ease'
+                      }}
+                    >
+                      {/* Background Image with Dynamic Ken Burns Animation */}
+                      <div 
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          backgroundImage: `${siteCfg.heroOverlayGradient || 'linear-gradient(135deg, rgba(15, 35, 71, 0.90) 0%, rgba(10, 25, 47, 0.82) 48%, rgba(15, 35, 71, 0.92) 100%)'}, url("${siteCfg.heroBgUrl || '/images/college_hero_bg.webp'}")`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: siteCfg.heroBgPosition || 'center 36%',
+                          backgroundRepeat: 'no-repeat',
+                          animation: siteCfg.heroKenBurns !== false ? 'heroKenBurns 28s ease-in-out infinite alternate' : 'none'
+                        }}
+                      />
+
+                      {/* Ambient Gold Flare */}
+                      <div 
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          background: 'radial-gradient(circle at 50% 30%, rgba(244, 160, 35, 0.14) 0%, transparent 70%)',
+                          pointerEvents: 'none'
+                        }}
+                      />
+
+                      {/* Content Overlay */}
+                      <div style={{ position: 'relative', zIndex: 10, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 20px', color: '#fff' }}>
+                        {/* Gold Badge */}
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(244, 160, 35, 0.2)', border: '1px solid rgba(244, 160, 35, 0.45)', borderRadius: 20, padding: '3px 12px', marginBottom: 12 }}>
+                          <span style={{ fontSize: 11, color: '#f4a023', fontWeight: 800, letterSpacing: 0.5 }}>
+                            ESTABLISHED 1970 • UGC 2(F) &amp; 12(B)
+                          </span>
+                        </div>
+
+                        {/* Title */}
+                        <h2 style={{ fontSize: heroPreviewDevice === 'mobile' ? 20 : 30, fontWeight: 900, letterSpacing: '-0.5px', margin: '0 0 8px', color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+                          Guru Nanak College, Dhanbad
+                        </h2>
+
+                        {/* Subtitle / Breadcrumb */}
+                        <p style={{ margin: 0, fontSize: heroPreviewDevice === 'mobile' ? 12 : 14, color: 'rgba(255,255,255,0.88)', maxWidth: 500, lineHeight: 1.4 }}>
+                          Home / Academics / Bachelor of Computer Applications (BCA)
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 4: Overlay Themes & Styling Controls */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 24 }}>
+                  {/* Theme Presets */}
+                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: 16 }}>
+                    <div style={{ fontWeight: 800, fontSize: 13, color: NAVY, marginBottom: 4 }}>
+                      1. Overlay Darkness &amp; Color Theme
+                    </div>
+                    <div style={{ fontSize: 12, color: T.t3, marginBottom: 12 }}>
+                      Select a balanced gradient overlay that matches institutional branding and maintains WCAG text contrast.
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {OVERLAY_THEMES.map(th => {
+                        const isSelected = (siteCfg.heroOverlayStyle || 'royal-navy') === th.id;
+                        return (
+                          <div
+                            key={th.id}
+                            onClick={() => setSiteCfg(d => ({ ...d, heroOverlayStyle: th.id, heroOverlayGradient: th.gradient }))}
+                            style={{
+                              padding: '10px 14px',
+                              borderRadius: 8,
+                              border: isSelected ? `2px solid ${NAVY}` : '1px solid #e2e8f0',
+                              background: isSelected ? '#ffffff' : '#f1f5f9',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            <div>
+                              <div style={{ fontSize: 12.5, fontWeight: 800, color: NAVY }}>
+                                {th.name}
+                              </div>
+                              <div style={{ fontSize: 11, color: T.t3, marginTop: 1 }}>
+                                {th.desc}
+                              </div>
+                            </div>
+                            <div style={{ width: 20, height: 20, borderRadius: '50%', background: th.accent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              {isSelected && <Check size={12} color="#fff" />}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Focal Position & Ken Burns Toggle */}
+                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: 13, color: NAVY, marginBottom: 4 }}>
+                        2. Image Focal Alignment (Position)
+                      </div>
+                      <div style={{ fontSize: 12, color: T.t3, marginBottom: 12 }}>
+                        Set which area of the campus photo stays centered when scaling across mobile and desktop.
+                      </div>
+                      
+                      <select
+                        className="ainp"
+                        value={siteCfg.heroBgPosition || 'center 36%'}
+                        onChange={e => setSiteCfg(d => ({ ...d, heroBgPosition: e.target.value }))}
+                        style={{ marginBottom: 16 }}
+                      >
+                        <option value="center 36%">🏛️ Center 36% (Optimal for College Dome &amp; Facade)</option>
+                        <option value="center center">🎯 Center Center (True Horizontal &amp; Vertical Center)</option>
+                        <option value="center top">⛅ Center Top (Skyline &amp; Upper Architectural Dome)</option>
+                        <option value="center bottom">🌿 Center Bottom (Lawns, Trees &amp; Ground Entrance)</option>
+                      </select>
+
+                      <div style={{ fontWeight: 800, fontSize: 13, color: NAVY, marginBottom: 4 }}>
+                        3. Ambient Motion (Ken Burns Effect)
+                      </div>
+                      <div style={{ fontSize: 12, color: T.t3, marginBottom: 12 }}>
+                        Smooth 28-second organic slow-zoom animation giving the hero a cinematic atmosphere.
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8 }}>
+                        <span style={{ fontSize: 12.5, fontWeight: 700, color: NAVY }}>
+                          {siteCfg.heroKenBurns !== false ? 'Cinematic Ken Burns: ACTIVE' : 'Cinematic Ken Burns: MUTED'}
+                        </span>
+                        <Toggle
+                          checked={siteCfg.heroKenBurns !== false}
+                          onChange={() => setSiteCfg(d => ({ ...d, heroKenBurns: d.heroKenBurns === false ? true : false }))}
+                          color={GOLD}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid #e2e8f0', display: 'flex', gap: 8 }}>
+                      <button
+                        type="button"
+                        className="abtn abtn-gold"
+                        style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                        onClick={saveSite}
+                        disabled={siteLoading}
+                      >
+                        {siteLoading ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+                        Save &amp; Publish Hero Settings
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 5: Live Browser Verification & Quick Preview Matrix */}
+                <div style={{ background: '#ffffff', border: '1.5px solid #e2e8f0', borderRadius: 14, padding: 18 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <ExternalLink size={18} color={GOLD} />
+                    <span style={{ fontWeight: 900, fontSize: 14.5, color: NAVY }}>
+                      Live Browser Verification Matrix (Point 3)
+                    </span>
+                    <span style={{ fontSize: 11, background: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: 10, fontWeight: 800 }}>
+                      1-Click Test Links
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 12.5, color: T.t3, margin: '0 0 16px', lineHeight: 1.5 }}>
+                    Click any page below to open it in a new browser tab and instantly verify your updated campus hero background and kinetic animation in real time:
+                  </p>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+                    {HERO_PREVIEW_PAGES.map(page => (
+                      <a
+                        key={page.path}
+                        href={`#${page.path}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '12px 14px',
+                          background: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: 10,
+                          textDecoration: 'none',
+                          color: NAVY,
+                          transition: 'all 0.18s ease'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = GOLD; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.transform = 'none'; }}
+                      >
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 800, color: NAVY }}>
+                            {page.name}
+                          </div>
+                          <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
+                            {page.type} • {page.path}
+                          </div>
+                        </div>
+                        <ArrowUpRight size={16} color={GOLD} />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ═════════ 3. EMERGENCY BROADCAST TICKER ═════════ */}
         {activeSubTab === 'broadcast' && (
           <div className="fade-up">
@@ -718,70 +1442,115 @@ export default function SettingsTab({ logAct }) {
 
         {/* ═════════ 4. FEATURE SWITCHES ═════════ */}
         {activeSubTab === 'toggles' && (
-          <div className="settings-group fade-up">
-            <div className="settings-group-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Sliders size={17} color={GOLD} />
-              <span>Public Website Feature Modules (Instant On / Off)</span>
-            </div>
-            <p style={{ fontSize: 12.5, color: T.t3, margin: '6px 20px 14px', lineHeight: 1.6 }}>
-              Enable or disable website components in real-time. Changes are instantly synchronized across all user sessions.
-            </p>
-
-            {[
-              { key: 'enableLanguageToggle', title: 'Bilingual Language Switcher (EN / हिंदी)', sub: 'Display Hindi/English translation pill in the top header navbar' },
-              { key: 'enableCampusPoll', title: 'Live Campus Poll (Student Voice)', sub: 'Show interactive student voting & opinion widget on homepage' },
-              { key: 'enableFloatingQR', title: 'Floating QR Code Share & Print', sub: 'Enable floating action button for quick mobile share and printing' },
-              { key: 'enableVirtualTour', title: '360° Virtual Campus Tour', sub: 'Interactive panoramic 360° campus navigation module' },
-              { key: 'enableAlumniWall', title: 'Alumni Success Wall', sub: 'Public masonry wall showcasing prestigious alumni across industries' },
-              { key: 'enablePlacementAnalytics', title: 'Placement Analytics & Career Trends (Homepage)', sub: 'Toggle the interactive Year-over-Year placement intelligence chart (placement-analytics-wrap) on the homepage' },
-            ].map(f => (
-              <div key={f.key} className="settings-row">
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>{f.title}</div>
-                  <div style={{ fontSize: 12, color: T.t3 }}>{f.sub}</div>
-                </div>
-                <Toggle
-                  checked={siteCfg[f.key] !== false}
-                  onChange={() => handleFeatureToggle(f.key)}
-                  label={siteCfg[f.key] !== false ? 'Enabled' : 'Disabled'}
-                  color={T.green}
-                />
+          <div className="fade-up">
+            <div className="settings-group">
+              <div className="settings-group-title">
+                <Sliders size={18} color={GOLD} />
+                <span>Public Website Feature Modules (Instant On / Off)</span>
+                <span style={{ fontSize: 11, background: 'rgba(244,160,35,0.15)', color: '#d97706', padding: '2px 8px', borderRadius: 10, fontWeight: 800, marginLeft: 'auto' }}>
+                  Live Reactive Switches
+                </span>
               </div>
-            ))}
+              <p style={{ fontSize: 12.5, color: T.t3, margin: '0 0 20px', lineHeight: 1.6 }}>
+                Toggle public website interactive features in real-time. Changes are broadcast immediately across all visitor sessions worldwide without rebuilding or redeploying code.
+              </p>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+                {[
+                  { key: 'enableLanguageToggle', title: 'Bilingual Language Switcher (EN / हिंदी)', sub: 'Display Hindi/English translation pill in the top header navbar', icon: Globe },
+                  { key: 'enableCampusPoll', title: 'Live Campus Poll (Student Voice)', sub: 'Show interactive student voting & opinion widget on homepage', icon: Radio },
+                  { key: 'enableFloatingQR', title: 'Floating QR Code Share & Print', sub: 'Enable floating action button for quick mobile share and printing', icon: Smartphone },
+                  { key: 'enableVirtualTour', title: '360° Virtual Campus Twin & Tour', sub: 'Interactive panoramic 360° campus audio guide & navigation', icon: Compass },
+                  { key: 'enableAlumniWall', title: 'Alumni Success Wall', sub: 'Public masonry wall showcasing prestigious alumni across industries', icon: GraduationCap },
+                  { key: 'enablePlacementAnalytics', title: 'Placement Analytics & Career Trends', sub: 'Interactive Year-over-Year placement intelligence chart on homepage', icon: Layers },
+                ].map(f => {
+                  const Icon = f.icon;
+                  const isEnabled = siteCfg[f.key] !== false;
+                  return (
+                    <div 
+                      key={f.key}
+                      style={{
+                        padding: '16px 18px',
+                        borderRadius: 12,
+                        border: isEnabled ? '1.5px solid #0f2347' : '1.5px solid #e2e8f0',
+                        background: isEnabled ? '#ffffff' : '#f8fafc',
+                        boxShadow: isEnabled ? '0 4px 14px rgba(15,35,71,0.06)' : 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 14,
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          width: 38, height: 38, borderRadius: 10,
+                          background: isEnabled ? 'rgba(15,35,71,0.08)' : '#f1f5f9',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          color: isEnabled ? NAVY : '#94a3b8', flexShrink: 0, marginTop: 2
+                        }}>
+                          <Icon size={18} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY, lineHeight: 1.3, marginBottom: 4 }}>
+                            {f.title}
+                          </div>
+                          <div style={{ fontSize: 11.5, color: T.t3, lineHeight: 1.4 }}>
+                            {f.sub}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ flexShrink: 0 }}>
+                        <Toggle
+                          checked={isEnabled}
+                          onChange={() => handleFeatureToggle(f.key)}
+                          label={isEnabled ? 'ON' : 'OFF'}
+                          color={T.green}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
 
         {/* ═════════ 5. API & SECURITY KEYS ═════════ */}
         {activeSubTab === 'api-keys' && (
-          <div className="fade-up">
+          <div className="fade-up" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {/* Google Gemini AI */}
-            <div className="settings-group">
-              <div className="settings-group-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Bot size={17} color={GOLD} />
-                <span>Google Gemini AI Engine (Chatbot & Neural Studio)</span>
+            <div className="settings-group" style={{ margin: 0 }}>
+              <div className="settings-group-title">
+                <Bot size={18} color={GOLD} />
+                <span>Google Gemini AI Engine (Chatbot &amp; Neural Studio)</span>
+                <span style={{ fontSize: 11, background: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: 10, fontWeight: 800, marginLeft: 'auto' }}>
+                  Multi-Modal AI
+                </span>
               </div>
-              <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '12px 16px', margin: '12px 20px', fontSize: 12.5, color: '#166534', lineHeight: 1.6 }}>
-                <strong>Multi-Modal AI Power:</strong> Powers both the student AI Chatbot and the <strong>Neural AI Studio</strong> (photo scene analysis, copy generation, and vision OCR). Key is stored securely in your private Firestore settings.
-              </div>
+              <p style={{ fontSize: 12.5, color: T.t3, margin: '0 0 16px', lineHeight: 1.6 }}>
+                Powers both the student bilingual AI Copilot and the <strong>Neural AI Studio</strong> (campus photo scene analysis, automated notice drafting, and OCR).
+              </p>
 
-              <div className="settings-row">
-                <label className="alabel" style={{ minWidth: 140, margin: 0 }}>Gemini API Key</label>
-                <div style={{ flex: 1, display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div style={{ marginBottom: 16 }}>
+                <label className="alabel" style={{ marginBottom: 6 }}>Gemini API Key</label>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                   <input
                     className="ainp"
                     type={showGeminiKey ? 'text' : 'password'}
                     value={siteCfg.geminiApiKey || ''}
                     onChange={e => setSiteCfg(d => ({ ...d, geminiApiKey: e.target.value }))}
                     placeholder="AIzaSy..."
-                    style={{ fontFamily: 'monospace', flex: 1 }}
+                    style={{ fontFamily: 'monospace', flex: 1, minWidth: 260 }}
                   />
                   <button
                     type="button"
                     onClick={() => setShowGeminiKey(!showGeminiKey)}
                     className="abtn abtn-outline"
-                    style={{ padding: '8px 12px', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                    style={{ padding: '9px 14px', fontSize: 12.5, display: 'inline-flex', alignItems: 'center', gap: 6 }}
                   >
-                    {showGeminiKey ? <><EyeOff size={13} /> Hide</> : <><Eye size={13} /> Show</>}
+                    {showGeminiKey ? <><EyeOff size={14} /> Hide</> : <><Eye size={14} /> Show</>}
                   </button>
                   <button
                     type="button"
@@ -791,37 +1560,40 @@ export default function SettingsTab({ logAct }) {
                     style={{
                       background: '#0f2347',
                       color: '#f59e0b',
-                      border: '1px solid #f59e0b',
-                      padding: '8px 14px',
-                      fontSize: 12,
-                      fontWeight: 700,
+                      border: '1.5px solid #f59e0b',
+                      padding: '9px 16px',
+                      fontSize: 12.5,
+                      fontWeight: 800,
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: 6,
                       opacity: (!siteCfg.geminiApiKey || testingGemini) ? 0.6 : 1
                     }}
                   >
-                    {testingGemini ? <Loader2 size={13} className="animate-spin" /> : <Zap size={13} />}
+                    {testingGemini ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
                     {testingGemini ? 'Testing...' : 'Test Connection'}
                   </button>
                 </div>
               </div>
 
               {geminiTestStatus && (
-                <div style={{ margin: '6px 20px 12px', fontSize: 12, padding: '8px 14px', borderRadius: 8, fontWeight: 600, background: geminiTestStatus.success ? '#dcfce7' : '#fee2e2', color: geminiTestStatus.success ? '#15803d' : '#b91c1c', border: `1px solid ${geminiTestStatus.success ? '#86efac' : '#fca5a5'}` }}>
+                <div style={{ fontSize: 12.5, padding: '10px 16px', borderRadius: 10, fontWeight: 700, background: geminiTestStatus.success ? '#dcfce7' : '#fee2e2', color: geminiTestStatus.success ? '#15803d' : '#b91c1c', border: `1px solid ${geminiTestStatus.success ? '#86efac' : '#fca5a5'}` }}>
                   {geminiTestStatus.message}
                 </div>
               )}
             </div>
 
             {/* ImgBB */}
-            <div className="settings-group" style={{ marginTop: 20 }}>
-              <div className="settings-group-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <ImageIcon size={17} color={GOLD} />
-                <span>ImgBB Cloud Image Hosting</span>
+            <div className="settings-group" style={{ margin: 0 }}>
+              <div className="settings-group-title">
+                <ImageIcon size={18} color={GOLD} />
+                <span>ImgBB Cloud Image Hosting CDN</span>
               </div>
-              <div className="settings-row">
-                <label className="alabel" style={{ minWidth: 140, margin: 0 }}>ImgBB API Key</label>
+              <p style={{ fontSize: 12.5, color: T.t3, margin: '0 0 16px', lineHeight: 1.6 }}>
+                Enables instant cloud image uploads for photo gallery albums and rich notice attachments.
+              </p>
+              <div>
+                <label className="alabel" style={{ marginBottom: 6 }}>ImgBB API Key</label>
                 <input 
                   className="ainp" 
                   value={siteCfg.imgbbKey || ''}
@@ -833,22 +1605,28 @@ export default function SettingsTab({ logAct }) {
             </div>
 
             {/* Google reCAPTCHA */}
-            <div className="settings-group" style={{ marginTop: 20 }}>
-              <div className="settings-group-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Shield size={17} color={GOLD} />
+            <div className="settings-group" style={{ margin: 0 }}>
+              <div className="settings-group-title">
+                <Shield size={18} color={GOLD} />
                 <span>Google reCAPTCHA v2 / Bot Filtering</span>
               </div>
-              <div className="settings-row">
-                <label className="alabel" style={{ minWidth: 140, margin: 0 }}>Enable reCAPTCHA</label>
+              <p style={{ fontSize: 12.5, color: T.t3, margin: '0 0 16px', lineHeight: 1.6 }}>
+                Protects contact forms, admission inquiries, and document requests from automated spam bots.
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, marginBottom: 16 }}>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: 13.5, color: NAVY }}>reCAPTCHA Bot Filtering Status</div>
+                  <div style={{ fontSize: 11.5, color: T.t3, marginTop: 2 }}>{siteCfg.enableRecaptcha ? 'Google reCAPTCHA v2 Active' : 'Fallback Honeypot Shield Active'}</div>
+                </div>
                 <Toggle
                   checked={siteCfg.enableRecaptcha || false}
                   onChange={() => setSiteCfg(d => ({ ...d, enableRecaptcha: !d.enableRecaptcha }))}
-                  label={siteCfg.enableRecaptcha ? 'Protection Active' : 'Honeypot Active'}
+                  label={siteCfg.enableRecaptcha ? 'ACTIVE' : 'HONEYPOT'}
                   color={T.green}
                 />
               </div>
-              <div className="settings-row">
-                <label className="alabel" style={{ minWidth: 140, margin: 0 }}>reCAPTCHA Site Key</label>
+              <div>
+                <label className="alabel" style={{ marginBottom: 6 }}>reCAPTCHA Site Key</label>
                 <input 
                   className="ainp" 
                   value={siteCfg.recaptchaSiteKey || ''}

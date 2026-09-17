@@ -7,8 +7,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:github": "vite build --base=/gncollege-website/",
+    "build": "vite build && node scripts/generateSitemap.js",
+    "build:github": "vite build --base=/gncollege-website/ && node scripts/generateSitemap.js",
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "npm run build && npx firebase-tools deploy --only hosting",
@@ -16,6 +16,7 @@
     "deploy:all": "npm run deploy && npm run deploy:github",
     "backup": "node scripts/backupFirestore.js",
     "backup:scheduled": "node scripts/scheduledBackup.mjs",
+    "test": "node scripts/runUnitTests.js",
     "test:qa": "node scripts/runPlaywrightQA.js"
   },
   "dependencies": {
@@ -60,6 +61,7 @@
     "gh-pages": "^6.3.0",
     "playwright": "^1.58.2",
     "terser": "^5.46.0",
+    "typescript": "^7.0.2",
     "vite": "^7.3.1",
     "vite-plugin-imagemin": "^0.4.0",
     "vite-plugin-pwa": "^1.2.0"

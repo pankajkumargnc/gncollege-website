@@ -22,14 +22,71 @@
     "expert_faculty": "Expert Faculty",
     "years_legacy": "Years of Legacy"
   },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "back": "Back",
+    "submit": "Submit",
+    "download": "Download PDF",
+    "close": "Close",
+    "view_more": "View More",
+    "search": "Search",
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "read_more": "Read More",
+    "apply": "Apply Now",
+    "refresh": "Refresh",
+    "view_all": "View All",
+    "naac_accredited": "NAAC Accredited Degree College"
+  },
   "search": {
     "placeholder": "Search alumni, faculty, latest notices, or pages...",
     "no_results": "No matching results found"
+  },
+  "departments": {
+    "title": "Academic Departments",
+    "bca": "Bachelor of Computer Applications (BCA)",
+    "bba": "Bachelor of Business Administration (BBA)",
+    "commerce": "Department of Commerce (B.Com)",
+    "humanities": "Faculty of Humanities",
+    "social_science": "Faculty of Social Sciences",
+    "faculty": "Faculty Members",
+    "curriculum": "Syllabus & Curriculum",
+    "fee": "Fee Structure"
+  },
+  "admission": {
+    "title": "Admission 2026",
+    "procedure": "Admission Procedure",
+    "rules": "Rules & Eligibility",
+    "fee_structure": "Fee Structure",
+    "documents": "Documents Required",
+    "intake": "Intake Capacity",
+    "chancellor_portal": "Apply via Chancellor Portal",
+    "cims_portal": "Pay Fees Online via CIMS ERP"
+  },
+  "academics": {
+    "title": "Academic Programs",
+    "nep_framework": "NEP 2020 FYUGP 4-Year Degree Programs",
+    "academic_calendar": "Academic Calendar",
+    "iqac": "Internal Quality Assurance Cell (IQAC)",
+    "placements": "Training & Placement Cell"
+  },
+  "chatbot": {
+    "title": "AI Academic Assistant",
+    "tagline": "24/7 Virtual Counselor & Helpdesk",
+    "placeholder": "Ask anything about Guru Nanak College...",
+    "listening": "Listening... Speak now",
+    "clear_chat": "Clear Chat History",
+    "whatsapp_support": "Chat on WhatsApp"
   },
   "footer": {
     "about_text": "Guru Nanak College, Dhanbad is a premier Sikh minority degree institution dedicated to value-based academic excellence since 1970.",
     "quick_links": "Quick Links",
     "contact_info": "Campus Contact",
+    "bhuda_campus": "Bhuda Campus: Guru Gobind Singh Marg, Bhuda, Dhanbad - 826001",
+    "bank_more_campus": "Bank More Campus: Guru Nanak Complex, Bank More, Dhanbad - 826001",
+    "phone": "+91 79033 40991",
+    "email": "principal@gncollege.org",
     "all_rights": "All Rights Reserved."
   }
 }

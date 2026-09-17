@@ -4,13 +4,17 @@
 // Handles E-Magazines, Annual Publications, Posters, NAAC, Audit, Syllabi & Results
 // ═══════════════════════════════════════════════════════════════════════════════
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { db } from '../../../firebase';
 import {
-  collection, addDoc, updateDoc, doc, serverTimestamp,
+  collection, addDoc, updateDoc, doc, serverTimestamp, onSnapshot, query, orderBy
 } from 'firebase/firestore';
 import toast from 'react-hot-toast';
-import { FolderArchive, FileText, BookOpen, Download, Eye, EyeOff, Edit2, Trash2, Plus, CheckCircle2, ExternalLink, FileSpreadsheet, Star, X, Image as ImageIcon } from 'lucide-react';
+import { 
+  FolderArchive, FileText, BookOpen, Download, Eye, EyeOff, Edit2, Trash2, 
+  Plus, CheckCircle2, ExternalLink, FileSpreadsheet, Star, X, Image as ImageIcon,
+  ShieldCheck, Clock, Search, PhoneCall
+} from 'lucide-react';
 import MediaPicker from '../../MediaPicker';
 import {
   T, NAVY, GOLD, BG, useLocalDraft, SectionSearch, BulkBar, MiniLog,
@@ -63,6 +67,42 @@ export default function DocumentsTab({
   const [selected,  setSelected]  = useState([]);
   const [loading,   setLoading]   = useState(false);
   const [showPreview, setShowPreview] = useState(true);
+
+  // Student Document Requests State
+  const [vaultSection, setVaultSection] = useState('publications'); // 'publications' | 'requests'
+  const [docRequests, setDocRequests] = useState([]);
+  const [reqSearch, setReqSearch] = useState('');
+  const [reqFilter, setReqFilter] = useState('All');
+
+  useEffect(() => {
+    if (!db) return;
+    try {
+      const q = query(collection(db, 'document_requests'), orderBy('createdAt', 'desc'));
+      const unsub = onSnapshot(q, (snap) => {
+        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        setDocRequests(list);
+      }, () => {});
+      return () => unsub();
+    } catch {}
+  }, []);
+
+  const updateRequestStatus = async (reqId, newStatus, newStage, remark) => {
+    try {
+      if (db) {
+        await updateDoc(doc(db, 'document_requests', reqId), {
+          status: newStatus,
+          stage: newStage,
+          statusRemark: remark,
+          updatedAt: serverTimestamp(),
+        });
+      }
+      setDocRequests(prev => prev.map(r => r.id === reqId ? { ...r, status: newStatus, stage: newStage, statusRemark: remark } : r));
+      toast.success(`Request marked as ${newStatus}!`);
+      logAct?.('update', `Document request ${reqId} marked ${newStatus}`, 'documents');
+    } catch (err) {
+      toast.error('Failed to update status: ' + err.message);
+    }
+  };
 
   // Auto-sync targetPage and default Category when selected
   const handleDestinationChange = (destId) => {
@@ -207,6 +247,194 @@ export default function DocumentsTab({
         </div>
       </div>
 
+      {/* ── SECTION SWITCHER: PUBLICATIONS VAULT vs STUDENT DOCUMENT REQUESTS ── */}
+      <div style={{ display: 'flex', gap: 10, margin: '0 0 20px', flexWrap: 'wrap' }}>
+        <button
+          type="button"
+          onClick={() => setVaultSection('publications')}
+          style={{
+            background: vaultSection === 'publications' ? NAVY : '#ffffff',
+            color: vaultSection === 'publications' ? '#ffffff' : NAVY,
+            border: `2px solid ${NAVY}`,
+            fontWeight: 800,
+            padding: '9px 20px',
+            borderRadius: 12,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            cursor: 'pointer',
+            boxShadow: vaultSection === 'publications' ? '0 4px 14px rgba(15,35,71,0.2)' : 'none'
+          }}
+        >
+          <FolderArchive size={16} /> Publications Vault ({pdfReports?.length || 0})
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setVaultSection('requests')}
+          style={{
+            background: vaultSection === 'requests' ? NAVY : '#ffffff',
+            color: vaultSection === 'requests' ? '#ffffff' : NAVY,
+            border: `2px solid ${NAVY}`,
+            fontWeight: 800,
+            padding: '9px 20px',
+            borderRadius: 12,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            cursor: 'pointer',
+            boxShadow: vaultSection === 'requests' ? '0 4px 14px rgba(15,35,71,0.2)' : 'none'
+          }}
+        >
+          <FileText size={16} /> Student Document Requests ({docRequests.length})
+        </button>
+      </div>
+
+      {vaultSection === 'requests' ? (
+        <div className="card-gold fade-up" style={{ padding: 24, margin: '0 0 24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+            <div>
+              <h2 style={{ fontSize: 18, fontWeight: 900, color: NAVY, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <ShieldCheck size={20} color={GOLD} /> Student Document Verification &amp; Approval Desk
+              </h2>
+              <p style={{ margin: '4px 0 0', fontSize: 12.5, color: '#64748b' }}>
+                Manage online applications for Bonafide, Character, Fee Clearance, and Transfer NOC certificates.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <input
+                className="ainp"
+                placeholder="Search Student, Roll, or Token..."
+                value={reqSearch}
+                onChange={e => setReqSearch(e.target.value)}
+                style={{ width: 240, margin: 0 }}
+              />
+              <select
+                className="ainp"
+                value={reqFilter}
+                onChange={e => setReqFilter(e.target.value)}
+                style={{ width: 160, margin: 0 }}
+              >
+                <option value="All">All Statuses</option>
+                <option value="submitted">Submitted</option>
+                <option value="under_verification">Under Verification</option>
+                <option value="approved">Approved</option>
+                <option value="ready">Ready at Counter</option>
+              </select>
+            </div>
+          </div>
+
+          {docRequests.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#64748b' }}>
+              <FileText size={40} color="#cbd5e1" style={{ margin: '0 auto 12px' }} />
+              <div style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>No Student Document Requests Yet</div>
+              <p style={{ margin: '4px 0 0', fontSize: 13 }}>Requests submitted at /documents/request will appear here in real time.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {docRequests
+                .filter(r => {
+                  if (reqFilter !== 'All' && r.status !== reqFilter) return false;
+                  if (reqSearch) {
+                    const q = reqSearch.toLowerCase();
+                    return (
+                      r.studentName?.toLowerCase().includes(q) ||
+                      r.rollNo?.toLowerCase().includes(q) ||
+                      r.trackingToken?.toLowerCase().includes(q)
+                    );
+                  }
+                  return true;
+                })
+                .map(r => (
+                  <div
+                    key={r.id || r.trackingToken}
+                    style={{
+                      background: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 14,
+                      padding: 16,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 10
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontFamily: 'monospace', fontWeight: 900, color: NAVY, fontSize: 14, background: '#f1f5f9', padding: '4px 10px', borderRadius: 8 }}>
+                          {r.trackingToken}
+                        </span>
+                        <span style={{ fontWeight: 800, color: NAVY, fontSize: 14.5 }}>
+                          {r.studentName}
+                        </span>
+                        <span style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>
+                          ({r.rollNo} • {r.department} {r.semester})
+                        </span>
+                      </div>
+
+                      <span style={{
+                        padding: '4px 12px',
+                        borderRadius: 20,
+                        fontSize: 11.5,
+                        fontWeight: 800,
+                        background: r.stage >= 4 ? '#dcfce7' : (r.stage >= 3 ? '#e0e7ff' : '#fef3c7'),
+                        color: r.stage >= 4 ? '#15803d' : (r.stage >= 3 ? '#3730a3' : '#b45309'),
+                        border: `1px solid ${r.stage >= 4 ? '#86efac' : (r.stage >= 3 ? '#c7d2fe' : '#fde68a')}`
+                      }}>
+                        {r.status?.toUpperCase() || 'SUBMITTED'} (STAGE {r.stage || 1}/4)
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, fontSize: 12.5, color: '#475569' }}>
+                      <div>
+                        <strong>Certificate:</strong> {r.docTitle || r.docType} | <strong>Purpose:</strong> {r.purpose || 'Not specified'} | <strong>Contact:</strong> {r.phone || 'N/A'}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        {r.stage < 2 && (
+                          <button
+                            type="button"
+                            onClick={() => updateRequestStatus(r.id, 'under_verification', 2, 'Under scrutiny by college administrative staff.')}
+                            className="abtn abtn-sm abtn-outline"
+                            style={{ fontSize: 11.5, fontWeight: 700 }}
+                          >
+                            Mark Verifying
+                          </button>
+                        )}
+                        {r.stage < 3 && (
+                          <button
+                            type="button"
+                            onClick={() => updateRequestStatus(r.id, 'approved', 3, 'Approved by Principal Office. Sent for official seal.')}
+                            className="abtn abtn-sm"
+                            style={{ background: '#3b82f6', color: '#fff', border: 'none', fontSize: 11.5, fontWeight: 700 }}
+                          >
+                            Approve
+                          </button>
+                        )}
+                        {r.stage < 4 && (
+                          <button
+                            type="button"
+                            onClick={() => updateRequestStatus(r.id, 'ready', 4, 'Certificate signed and ready for collection at Counter #2.')}
+                            className="abtn abtn-sm"
+                            style={{ background: '#10b981', color: '#fff', border: 'none', fontSize: 11.5, fontWeight: 700 }}
+                          >
+                            Ready at Counter #2
+                          </button>
+                        )}
+                        {r.stage >= 4 && (
+                          <span style={{ fontSize: 12, color: '#10b981', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                            <CheckCircle2 size={14} /> Ready for Handover
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
       {/* ── CLEAR DESTINATION INDICATOR ── */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 12,
@@ -735,6 +963,8 @@ export default function DocumentsTab({
           </div>
         )}
       </div>
+        </>
+      )}
 
       <MiniLog logs={getSectionLog('pdfReports')} />
     </div>

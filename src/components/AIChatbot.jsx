@@ -1,7 +1,11 @@
-// src/components/AIChatbot.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { db } from '../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { 
+  Mic, MicOff, Volume2, VolumeX, Languages, RotateCcw, X, 
+  GraduationCap, CreditCard, Award, Compass, FileText, Square, 
+  Send 
+} from 'lucide-react';
 
 const COLLEGE_PHONE = '917903340991';
 const CHANCELLOR_PORTAL = 'https://universities.jharkhand.gov.in/';
@@ -72,16 +76,26 @@ Knowledge Base:
 ${COLLEGE_KNOWLEDGE}
 `;
 
-const QUICK_PROMPTS = [
-  { label: '🎓 Admission 2026', query: 'How do I apply for Admission 2026 at Guru Nanak College?' },
-  { label: '💳 Pay College Fees', query: 'Where and how do I pay college fees online?' },
-  { label: '📊 Check Results', query: 'How can I check my BBMKU Semester Exam results?' },
-  { label: '💻 BCA & BBA Info', query: 'Tell me about BCA and BBA courses, fees and eligibility at GNC.' },
-  { label: '📞 Contact Office', query: 'What are the contact details and office timings for Guru Nanak College?' },
+const EN_PROMPTS = [
+  { label: 'Admission 2026', query: 'How do I apply for Admission 2026 at Guru Nanak College?' },
+  { label: 'Pay College Fees', query: 'Where and how do I pay college fees online via CIMS?' },
+  { label: 'Check Results', query: 'How can I check my BBMKU Semester Exam results?' },
+  { label: 'BCA & BBA Info', query: 'Tell me about BCA and BBA courses, fees and eligibility at GNC.' },
+  { label: 'Request Certificate', query: 'How do I apply for Bonafide or Character certificate online?' },
+];
+
+const HI_PROMPTS = [
+  { label: 'एडमिशन 2026', query: 'गुरु नानक कॉलेज में 2026 एडमिशन के लिए कैसे अप्लाई करें?' },
+  { label: 'फीस पेमेंट (CIMS)', query: 'कॉलेज फीस ऑनलाइन CIMS पोर्टल पर कैसे जमा करें?' },
+  { label: 'परीक्षा परिणाम', query: 'BBMKU सेमेस्टर परीक्षा परिणाम कैसे देखें?' },
+  { label: 'BCA/BBA कोर्स', query: 'BCA और BBA कोर्स, फीस और पात्रता की जानकारी दें।' },
+  { label: 'सर्टिफिकेट रिक्वेस्ट', query: 'बोनाफाइड या कैरेक्टर सर्टिफिकेट के लिए ऑनलाइन आवेदन कैसे करें?' },
 ];
 
 export default function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false);
+  const [lang, setLang] = useState('en'); // 'en' | 'hi'
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(false);
   const [messages, setMessages] = useState([
     {
       role: 'model',
@@ -92,10 +106,16 @@ export default function AIChatbot() {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [adminApiKey, setAdminApiKey] = useState('');
+  // API key sourced exclusively from environment variables (SECURITY: never from Firestore)
+  const [quickPrompts, setQuickPrompts] = useState(EN_PROMPTS);
+  const [chatbotConfig, setChatbotConfig] = useState({
+    collegeKnowledge: '',
+    systemPromptAddendum: ''
+  });
   const [isDark, setIsDark] = useState(
     () => document.documentElement.getAttribute('data-theme') === 'dark'
   );
+  const [liveNotices, setLiveNotices] = useState([]);
   const [pos, setPos] = useState(null); // { x: number, y: number }
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ mouseX: 0, mouseY: 0, elX: 0, elY: 0 });
@@ -170,18 +190,40 @@ export default function AIChatbot() {
   // Logo URL with base support
   const logoUrl = `${import.meta.env.BASE_URL}images/logo.webp`;
 
-  // Fetch API key securely from Firestore admin settings
+  // SECURITY: API key is sourced ONLY from environment variables.
+  // Never fetch secrets from public-readable Firestore documents.
+
+  // ── Dynamic Live Notice Context Hook (RAG) ──
   useEffect(() => {
-    getDoc(doc(db, 'settings', 'site'))
-      .then(snap => {
+    if (!db) return;
+    try {
+      const q = query(collection(db, 'notices'), orderBy('date', 'desc'), limit(6));
+      const unsub = onSnapshot(q, (snap) => {
+        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        setLiveNotices(list);
+      }, () => {});
+      return () => unsub();
+    } catch (_) {}
+  }, []);
+
+  // ── Dynamic Chatbot Config from Firestore (settings/chatbot) (P2.3) ──
+  useEffect(() => {
+    if (!db) return;
+    try {
+      const unsub = onSnapshot(doc(db, 'settings', 'chatbot'), (snap) => {
         if (snap.exists()) {
           const data = snap.data();
-          if (data.geminiApiKey) {
-            setAdminApiKey(data.geminiApiKey.trim());
+          if (Array.isArray(data.quickPrompts) && data.quickPrompts.length > 0) {
+            setQuickPrompts(data.quickPrompts);
           }
+          setChatbotConfig({
+            collegeKnowledge: data.collegeKnowledge || '',
+            systemPromptAddendum: data.systemPromptAddendum || ''
+          });
         }
-      })
-      .catch(() => {});
+      }, () => {});
+      return () => unsub();
+    } catch (_) {}
   }, []);
 
   // Dark mode listener
@@ -205,14 +247,14 @@ export default function AIChatbot() {
     }
   }, [isOpen]);
 
-  // Setup Speech Recognition
+  // Setup Speech Recognition with dynamic language
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
-      recognition.lang = 'en-IN';
+      recognition.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
 
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
@@ -230,7 +272,13 @@ export default function AIChatbot() {
 
       speechRecognitionRef.current = recognition;
     }
-  }, []);
+  }, [lang]);
+
+  const toggleLanguage = () => {
+    const nextLang = lang === 'en' ? 'hi' : 'en';
+    setLang(nextLang);
+    setQuickPrompts(nextLang === 'hi' ? HI_PROMPTS : EN_PROMPTS);
+  };
 
   const toggleSpeechRecognition = () => {
     if (!speechRecognitionRef.current) {
@@ -250,20 +298,38 @@ export default function AIChatbot() {
     }
   };
 
-  const speakText = (text) => {
+  const speakText = useCallback((text, targetLang = lang) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const cleanText = text.replace(/[*_#`[\]()]/g, '').replace(/https?:\/\/\S+/g, '');
       const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = targetLang === 'hi' ? 'hi-IN' : 'en-IN';
       utterance.rate = 1.0;
       utterance.pitch = 1.0;
+
+      try {
+        const voices = window.speechSynthesis.getVoices();
+        const preferredVoice = voices.find(v => targetLang === 'hi' ? v.lang.includes('hi') : (v.lang.includes('en-IN') || v.lang.includes('en')));
+        if (preferredVoice) utterance.voice = preferredVoice;
+      } catch {}
+
       window.speechSynthesis.speak(utterance);
     }
-  };
+  }, [lang]);
 
   // ── INTELLIGENT RULE-BASED FALLBACK ENGINE ──
   const getIntelligentFallback = (query) => {
     const q = query.toLowerCase();
+
+    if (q.includes('notice') || q.includes('announcement') || q.includes('circular') || q.includes('update') || q.includes('routine') || q.includes('schedule')) {
+      const noticeList = liveNotices.length > 0 
+        ? liveNotices.slice(0, 4).map(n => `• **${n.date || 'Notice'}**: ${n.title || n.text} (${n.category || 'Official'})`).join('\n')
+        : '• Semester internal examinations & admission lists are actively updated on campus.\n• Check the official notice board for complete downloadable circulars.';
+
+      return `📢 **Latest Guru Nanak College Notices & Circulars (Live Updates)**:\n\n` +
+        `${noticeList}\n\n` +
+        `📌 View all official documents and download circulars on our [Notices & Announcements Portal](#/notifications).`;
+    }
 
     if (q.includes('admission') || q.includes('apply') || q.includes('form') || q.includes('chancellor')) {
       return `Sat Sri Akal! 🎓 **UG & Vocational Admission 2026** at Guru Nanak College is conducted through the official Jharkhand Chancellor Portal.\n\n` +
@@ -355,7 +421,7 @@ export default function AIChatbot() {
 
   // ── CALL GEMINI MULTI-TURN AI ──
   const callGeminiAPI = async (userPrompt, history) => {
-    const activeKey = adminApiKey || window.GNC_GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
+    const activeKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
 
     if (!activeKey) {
       return null;
@@ -388,18 +454,31 @@ export default function AIChatbot() {
       'gemini-pro'
     ];
 
+    const liveNoticeContext = liveNotices.length > 0
+      ? `\n# REAL-TIME CAMPUS NOTICES & CIRCULARS (LIVE FEED):\n` +
+        liveNotices.map((n, i) => `${i+1}. [${n.date || 'Recent'}] ${n.title || n.text} (${n.category || 'General'})`).join('\n')
+      : '';
+    const dynamicKnowledge = chatbotConfig.collegeKnowledge
+      ? `${COLLEGE_KNOWLEDGE}\n\n# ADMIN CUSTOM KNOWLEDGE:\n${chatbotConfig.collegeKnowledge}`
+      : COLLEGE_KNOWLEDGE;
+    const dynamicAddendum = chatbotConfig.systemPromptAddendum
+      ? `\nADDITIONAL INSTRUCTIONS:\n${chatbotConfig.systemPromptAddendum}\n`
+      : '';
+    const activeSystemPrompt = `${SYSTEM_PROMPT}\n${dynamicAddendum}\nKnowledge Base:\n${dynamicKnowledge}`;
+    const dynamicPrompt = `${activeSystemPrompt}\n${liveNoticeContext}`;
+
     for (const model of modelsToTry) {
       for (const ver of ['v1beta', 'v1']) {
         try {
           const url = `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent?key=${activeKey}`;
           const body = ver === 'v1beta'
             ? {
-                systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                systemInstruction: { parts: [{ text: dynamicPrompt }] },
                 contents: contents,
                 generationConfig: { temperature: 0.4, maxOutputTokens: 600, topP: 0.95 }
               }
             : {
-                contents: [{ role: 'user', parts: [{ text: `${SYSTEM_PROMPT}\n\nUser Question: ${userPrompt}` }] }]
+                contents: [{ role: 'user', parts: [{ text: `${dynamicPrompt}\n\nUser Question: ${userPrompt}` }] }]
               };
 
           const response = await fetch(url, {
@@ -453,14 +532,38 @@ export default function AIChatbot() {
     }
 
     setIsTyping(false);
+
+    // ── Smooth Streaming Typewriter Effect ──
+    const fullText = replyText;
+    const msgTimestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const msgId = Date.now();
+
     setMessages((prev) => [
       ...prev,
       {
+        id: msgId,
         role: 'model',
-        text: replyText,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        text: '',
+        timestamp: msgTimestamp
       }
     ]);
+
+    let charIndex = 0;
+    const step = Math.max(3, Math.floor(fullText.length / 35));
+    const streamInterval = setInterval(() => {
+      charIndex += step;
+      if (charIndex >= fullText.length) {
+        charIndex = fullText.length;
+        clearInterval(streamInterval);
+        if (isVoiceEnabled) {
+          speakText(fullText, lang);
+        }
+      }
+      const partial = fullText.slice(0, charIndex);
+      setMessages((prev) =>
+        prev.map((m) => (m.id === msgId ? { ...m, text: partial } : m))
+      );
+    }, 14);
   };
 
   const handleClearChat = () => {
@@ -796,22 +899,50 @@ export default function AIChatbot() {
 
             {/* Header Actions */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {/* Language Switch Button */}
+              <button
+                onClick={toggleLanguage}
+                className="gnc-action-btn-small"
+                title={lang === 'en' ? 'हिन्दी में बदलें' : 'Switch to English'}
+                aria-label="Toggle language"
+                style={{ gap: 4, padding: '4px 8px', fontSize: 11.5, fontWeight: 800 }}
+              >
+                <Languages size={14} color="#f59e0b" />
+                <span>{lang === 'en' ? 'हिंदी' : 'EN'}</span>
+              </button>
+
+              {/* Voice Output (Auto-TTS) Toggle */}
+              <button
+                onClick={() => {
+                  const next = !isVoiceEnabled;
+                  setIsVoiceEnabled(next);
+                  if (!next && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+                }}
+                className="gnc-action-btn-small"
+                title={isVoiceEnabled ? 'Voice output: ON (Click to Mute)' : 'Voice output: OFF (Click to Unmute)'}
+                aria-label="Toggle voice output"
+              >
+                {isVoiceEnabled ? <Volume2 size={15} color="#10b981" /> : <VolumeX size={15} color="#94a3b8" />}
+              </button>
+
+              {/* Clear Chat */}
               <button
                 onClick={handleClearChat}
                 className="gnc-action-btn-small"
                 title="Clear Chat History"
                 aria-label="Clear chat history"
               >
-                🔄
+                <RotateCcw size={14} />
               </button>
+
+              {/* Close Window */}
               <button
                 onClick={() => setIsOpen(false)}
                 className="gnc-action-btn-small"
                 title="Close Window"
                 aria-label="Close Assistant"
-                style={{ fontSize: '14px', fontWeight: 'bold' }}
               >
-                ✕
+                <X size={16} />
               </button>
             </div>
           </div>
@@ -932,6 +1063,127 @@ export default function AIChatbot() {
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Quick Action Navigation Pills */}
+          <div
+            className="hide-scroll"
+            style={{
+              padding: '6px 12px',
+              display: 'flex',
+              gap: '6px',
+              overflowX: 'auto',
+              background: isDark ? '#0b1329' : '#f1f5f9',
+              borderTop: `1px solid ${borderModal}`,
+              alignItems: 'center'
+            }}
+          >
+            <a
+              href="https://universities.jharkhand.gov.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="gnc-pill-btn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: '#3b82f6',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                borderRadius: 14,
+                padding: '4px 10px',
+                fontSize: 11,
+                fontWeight: 700,
+                textDecoration: 'none',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <GraduationCap size={13} /> {lang === 'hi' ? 'एडमिशन' : 'Admission'}
+            </a>
+            <a
+              href="https://cimsstudentnewui.mastersofterp.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="gnc-pill-btn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: '#10b981',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                borderRadius: 14,
+                padding: '4px 10px',
+                fontSize: 11,
+                fontWeight: 700,
+                textDecoration: 'none',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <CreditCard size={13} /> {lang === 'hi' ? 'फीस ERP' : 'Pay Fees'}
+            </a>
+            <a
+              href="https://bbmkuniv.in/login"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="gnc-pill-btn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: '#f59e0b',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                borderRadius: 14,
+                padding: '4px 10px',
+                fontSize: 11,
+                fontWeight: 700,
+                textDecoration: 'none',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <Award size={13} /> {lang === 'hi' ? 'रिजल्ट्स' : 'Results'}
+            </a>
+            <a
+              href="#/campus/virtual-tour"
+              className="gnc-pill-btn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: '#8b5cf6',
+                border: '1px solid rgba(139, 92, 246, 0.3)',
+                borderRadius: 14,
+                padding: '4px 10px',
+                fontSize: 11,
+                fontWeight: 700,
+                textDecoration: 'none',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <Compass size={13} /> {lang === 'hi' ? '360° टूर' : '360° Tour'}
+            </a>
+            <a
+              href="#/documents/request"
+              className="gnc-pill-btn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: '#ec4899',
+                border: '1px solid rgba(236, 72, 153, 0.3)',
+                borderRadius: 14,
+                padding: '4px 10px',
+                fontSize: 11,
+                fontWeight: 700,
+                textDecoration: 'none',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <FileText size={13} /> {lang === 'hi' ? 'सर्टिफिकेट' : 'Documents'}
+            </a>
+          </div>
+
           {/* Quick Suggestions Chips */}
           <div
             className="hide-scroll"
@@ -944,7 +1196,7 @@ export default function AIChatbot() {
               borderTop: `1px solid ${borderModal}`
             }}
           >
-            {QUICK_PROMPTS.map((item, qIdx) => (
+            {quickPrompts.map((item, qIdx) => (
               <button
                 key={qIdx}
                 type="button"
@@ -992,7 +1244,8 @@ export default function AIChatbot() {
             <button
               type="button"
               onClick={toggleSpeechRecognition}
-              title={isListening ? 'Stop Listening' : 'Speak your query'}
+              title={isListening ? 'Stop Listening' : (lang === 'hi' ? 'बोलकर प्रश्न पूछें' : 'Speak your query')}
+              aria-label={isListening ? 'Stop Listening' : 'Speak your query'}
               style={{
                 width: '40px',
                 height: '40px',
@@ -1006,16 +1259,17 @@ export default function AIChatbot() {
                 cursor: 'pointer',
                 flexShrink: 0,
                 transition: 'all 0.2s',
-                fontSize: '15px'
+                boxShadow: isListening ? '0 0 12px rgba(239, 68, 68, 0.6)' : 'none'
               }}
             >
-              {isListening ? '⏹️' : '🎙️'}
+              {isListening ? <Square size={16} /> : <Mic size={18} />}
             </button>
 
             {/* Send button */}
             <button
               type="submit"
               disabled={!input.trim()}
+              aria-label="Send message"
               style={{
                 width: '40px',
                 height: '40px',
@@ -1032,10 +1286,7 @@ export default function AIChatbot() {
                 boxShadow: input.trim() ? '0 4px 12px rgba(245, 158, 11, 0.4)' : 'none'
               }}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-              </svg>
+              <Send size={16} />
             </button>
           </form>
         </div>

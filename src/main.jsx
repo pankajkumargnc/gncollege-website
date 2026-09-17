@@ -7,6 +7,10 @@ import './styles/print.css'
 import AOS from 'aos'
 import 'aos/dist/aos.css'
 import './i18n'
+import { initErrorTracker } from './utils/errorTracker'
+import { QueryProvider } from './providers/QueryProvider'
+
+initErrorTracker();
 
 if (typeof window !== 'undefined') {
   AOS.init({
@@ -75,8 +79,10 @@ if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <RootErrorBoundary>
-    <Router>
-      <AppWrapper />
-    </Router>
+    <QueryProvider>
+      <Router>
+        <AppWrapper />
+      </Router>
+    </QueryProvider>
   </RootErrorBoundary>,
-)
+)

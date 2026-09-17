@@ -35,10 +35,10 @@ Full Name:     Guru Nanak College, Dhanbad
 Short Name:    GNC Dhanbad
 Location:      Nagnagar, Dhanbad, Jharkhand 826004
 Affiliation:   Binod Bihari Mahto Koyalanchal University (BBMKU)
-Established:   1972
+Established:   1970
 Type:          Co-Educational | Minority Institution
 Recognition:   UGC recognized under Section 2(f) & 12(B)
-NAAC:          Accredited
+NAAC:          Accredited Grade 'B'
 Founder:       Sardar Pritam Singh Sahni
 Website:       https://pankajkumargnc.github.io/gncollege-website
 ```
@@ -46,12 +46,12 @@ Website:       https://pankajkumargnc.github.io/gncollege-website
 ## SEO Meta Tags Pattern (index.html)
 ```html
 <!-- Primary SEO -->
-<title>Guru Nanak College Dhanbad | Top College in Jharkhand | Since 1972</title>
-<meta name="description" content="Guru Nanak College, Dhanbad - NAAC accredited, UGC recognized co-educational institution affiliated to BBMKU. Offering BA, BSc, BCom, BCA courses since 1972.">
-<meta name="keywords" content="Guru Nanak College, GNC Dhanbad, college in Dhanbad, BBMKU affiliated college, Jharkhand college, admission 2025">
+<title>Guru Nanak College Dhanbad | Top College in Jharkhand | Since 1970</title>
+<meta name="description" content="Guru Nanak College, Dhanbad - NAAC accredited, UGC recognized co-educational institution affiliated to BBMKU. Offering BA, BSc, BCom, BCA courses since 1970.">
+<meta name="keywords" content="Guru Nanak College, GNC Dhanbad, college in Dhanbad, BBMKU affiliated college, Jharkhand college, admission 2026">
 
 <!-- Open Graph -->
-<meta property="og:title" content="Guru Nanak College Dhanbad | Since 1972">
+<meta property="og:title" content="Guru Nanak College Dhanbad | Since 1970">
 <meta property="og:description" content="NAAC accredited co-educational institution in Dhanbad, Jharkhand">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pankajkumargnc.github.io/gncollege-website">
@@ -59,7 +59,7 @@ Website:       https://pankajkumargnc.github.io/gncollege-website
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Guru Nanak College Dhanbad">
+<meta name="twitter:title" content="Guru Nanak College Dhanbad | Since 1970">
 
 <!-- Schema.org -->
 <script type="application/ld+json">

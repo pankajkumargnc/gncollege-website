@@ -132,8 +132,8 @@ const CollegeProfile = () => {
       `}</style>
 
       {/* Hero */}
-      <header className="profile-hero" style={{ backgroundImage: `url('/images/college_photo.webp')` }}>
-        <div className="hero-overlay" style={{ background: 'linear-gradient(135deg, rgba(15, 35, 71, 0.94) 0%, rgba(10, 25, 47, 0.88) 100%)' }} />
+      <header className="profile-hero">
+        <div className="hero-overlay" style={{ background: 'var(--hero-overlay-gradient, linear-gradient(135deg, rgba(15, 35, 71, 0.94) 0%, rgba(10, 25, 47, 0.88) 100%))' }} />
         <div className="hero-content anim-fade-in">
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(244, 160, 35, 0.18)', border: '1px solid rgba(244, 160, 35, 0.4)', borderRadius: 20, padding: '4px 14px', marginBottom: 14 }}>
             <span style={{ fontSize: 13, color: '#f4a023', fontWeight: 800, letterSpacing: 0.5 }}>ESTABLISHED 1970 • UGC 2(F) &amp; 12(B)</span>

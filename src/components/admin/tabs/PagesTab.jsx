@@ -23,7 +23,26 @@ import {
 
 const JoditEditor = lazy(() => import('jodit-react'));
 
-export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bulkDelete }) {
+const DEFAULT_PAGE_FORM = {
+  title: '',
+  slug: '',
+  content: '',
+  seoTitle: '',
+  seoDesc: '',
+  keywords: '',
+  featuredImage: '',
+  status: 'published',
+  addToMenu: true,
+  template: 'none'
+};
+
+export default function PagesTab({
+  pages = [],
+  logAct = () => {},
+  getSectionLog = () => [],
+  softDelete = () => {},
+  bulkDelete = () => {}
+}) {
   const [activeTab, setActiveTab] = useState('manage'); // 'manage' | 'editor'
   const [editItem, setEditItem] = useState(null);
   
@@ -40,18 +59,8 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
   const [loading, setLoading] = useState(false);
 
   // Local draft preservation
-  const [formData, setFormData, clearDraft] = useLocalDraft('custom_page_v2', {
-    title: '',
-    slug: '',
-    content: '',
-    seoTitle: '',
-    seoDesc: '',
-    keywords: '',
-    featuredImage: '',
-    status: 'published',
-    addToMenu: true,
-    template: 'none'
-  });
+  const [rawFormData, setFormData, clearDraft] = useLocalDraft('custom_page_v2', DEFAULT_PAGE_FORM);
+  const formData = (rawFormData && typeof rawFormData === 'object') ? { ...DEFAULT_PAGE_FORM, ...rawFormData } : DEFAULT_PAGE_FORM;
 
   // 🛡️ Enterprise Rich-Text Draft Auto-Save & Crash Recovery
   const {
@@ -63,8 +72,8 @@ export default function PagesTab({ pages, logAct, getSectionLog, softDelete, bul
     clearDraft: clearRteDraft
   } = useDraftAutoSave(
     editItem ? `page_${editItem.id}` : `page_new_${formData.slug || 'untitled'}`,
-    formData.content,
-    (restoredContent) => setFormData(prev => ({ ...prev, content: restoredContent }))
+    formData.content || '',
+    (restoredContent) => setFormData(prev => ({ ...(prev || DEFAULT_PAGE_FORM), content: restoredContent }))
   );
 
   // Handle title change and auto-slug generation

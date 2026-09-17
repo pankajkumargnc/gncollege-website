@@ -76,6 +76,35 @@ export default function App() {
     }
   }, [siteSettings?.metaTitle, siteSettings?.metaDescription, isAdminRoute]);
 
+  // ── 🎨 Dynamic Universal Hero Background Synchronization ──
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
+    if (siteSettings?.heroBgUrl) {
+      root.style.setProperty('--hero-bg-url', `url("${siteSettings.heroBgUrl}")`);
+    } else {
+      root.style.removeProperty('--hero-bg-url');
+    }
+
+    if (siteSettings?.heroOverlayGradient) {
+      root.style.setProperty('--hero-overlay-gradient', siteSettings.heroOverlayGradient);
+    } else {
+      root.style.removeProperty('--hero-overlay-gradient');
+    }
+
+    if (siteSettings?.heroBgPosition) {
+      root.style.setProperty('--hero-bg-position', siteSettings.heroBgPosition);
+    } else {
+      root.style.removeProperty('--hero-bg-position');
+    }
+
+    if (siteSettings?.heroKenBurns === false) {
+      root.style.setProperty('--hero-kenburns-animation', 'none');
+    } else {
+      root.style.removeProperty('--hero-kenburns-animation');
+    }
+  }, [siteSettings?.heroBgUrl, siteSettings?.heroOverlayGradient, siteSettings?.heroBgPosition, siteSettings?.heroKenBurns]);
+
   // ✅ PWA: New Notice Push Simulator (Students only)
   useEffect(() => {
     try {
