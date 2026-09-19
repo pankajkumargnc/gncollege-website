@@ -104,8 +104,13 @@ export default function ScholarshipsPage() {
         .sch-help-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
         [data-theme="dark"] .sch-card { background: rgba(10,22,48,0.85) !important; border-color: rgba(255,255,255,0.08) !important; }
         [data-theme="dark"] .sch-card h3 { color: #f1f5f9 !important; }
+        [data-theme="dark"] .sch-section-heading { color: #f1f5f9 !important; }
         [data-theme="dark"] .sch-step { background: rgba(10,22,48,0.85) !important; border-color: rgba(255,255,255,0.08) !important; }
+        [data-theme="dark"] .sch-step div[style*="color: #0f2347"] { color: #f1f5f9 !important; }
+        [data-theme="dark"] .sch-step div[style*="color: #64748b"] { color: #94a3b8 !important; }
         [data-theme="dark"] .sch-helpdesk { background: rgba(244,160,35,0.08) !important; border-color: rgba(244,160,35,0.2) !important; }
+        [data-theme="dark"] .sch-helpdesk h3 { color: #f1f5f9 !important; }
+        [data-theme="dark"] .sch-helpdesk p { color: #94a3b8 !important; }
       `}</style>
       {/* Hero */}
       <section className="premium-hero">
@@ -125,7 +130,7 @@ export default function ScholarshipsPage() {
 
       {/* Scholarship Cards */}
       <section style={{ maxWidth: 1100, margin: '32px auto 0', padding: 'clamp(20px, 4vw, 40px) 20px' }}>
-        <h2 style={{
+        <h2 className="sch-section-heading" style={{
           fontSize: 'clamp(1.3rem, 3vw, 1.8rem)', fontWeight: 900, color: '#0f2347',
           marginBottom: 'clamp(20px, 3vw, 30px)', textAlign: 'center'
         }}>Available Scholarships</h2>
@@ -187,7 +192,7 @@ export default function ScholarshipsPage() {
         background: '#f8fafc', padding: 'clamp(30px, 5vw, 50px) 20px',
       }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
-          <h2 style={{
+          <h2 className="sch-section-heading" style={{
             fontSize: 'clamp(1.2rem, 2.5vw, 1.6rem)', fontWeight: 900,
             color: '#0f2347', textAlign: 'center', marginBottom: 'clamp(20px, 3vw, 36px)',
           }}>How to Apply — Step by Step</h2>

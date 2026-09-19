@@ -156,7 +156,7 @@ export function Infrastructure() {
               <div style={{ background: b.bg || '#fff', borderRadius: 24, padding: 32, height: '100%', border: '1.5px solid #e2e8f0' }}>
                 <div style={{ marginBottom: 16 }}>{b.icon || <Building2 size={36} style={{ color: b.color || NAVY }} />}</div>
                 <h3 style={{ fontSize: 22, fontWeight: 800, color: b.color || NAVY, margin: '0 0 10px' }}>{b.title}</h3>
-                <p style={{ color: '#64748b', fontSize: 15, margin: 0, lineHeight: 1.6 }}>{b.desc}</p>
+                <p style={{ color: '#475569', fontSize: 15, margin: 0, lineHeight: 1.6 }}>{b.desc}</p>
               </div>
             </Fade>
           ))}

@@ -290,10 +290,10 @@ export default function VideoGallery() {
           <>
             {/* Filter */}
             <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:32, alignItems:'center' }}>
-              <span style={{ fontSize:11, fontWeight:700, color:'#a0aec0', textTransform:'uppercase', letterSpacing:.8 }}>FILTER:</span>
+              <span style={{ fontSize:11, fontWeight:800, color:'#475569', textTransform:'uppercase', letterSpacing:.8 }}>FILTER:</span>
               {TYPES.map(t => (
                 <button key={t} className="yt-filter-btn" onClick={() => setFilter(t)}
-                  style={{ padding:'6px 16px', borderRadius:20, border:`2px solid ${filter===t?N:'#e2e8f0'}`, background:filter===t?N:'transparent', color:filter===t?'#fff':'#718096', fontWeight:700, fontSize:12.5, textTransform:'capitalize', display:'inline-flex', alignItems:'center', gap:6 }}>
+                  style={{ padding:'6px 16px', borderRadius:20, border:`2px solid ${filter===t?N:'#cbd5e1'}`, background:filter===t?N:'#f8fafc', color:filter===t?'#fff':'#334155', fontWeight:700, fontSize:12.5, textTransform:'capitalize', display:'inline-flex', alignItems:'center', gap:6 }}>
                   {t === 'all' ? <><Film size={13} /> All</> : t.charAt(0).toUpperCase()+t.slice(1)}
                 </button>
               ))}

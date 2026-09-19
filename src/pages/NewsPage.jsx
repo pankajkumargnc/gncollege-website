@@ -426,12 +426,12 @@ export default function NewsPage() {
 
                 {/* Category Pills */}
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 14 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.8, flexShrink: 0 }}>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: 0.8, flexShrink: 0 }}>
                     CATEGORY:
                   </span>
                   {CATEGORIES.map(c => {
                     const isSelected = (selCat === 'All' && c === 'All') || selCat.toLowerCase() === c.toLowerCase();
-                    const cfg = TYPE_CONFIG[c] || { bg: '#f1f5f9', text: '#334155', border: '#e2e8f0' };
+                    const cfg = TYPE_CONFIG[c] || { bg: '#f1f5f9', text: '#334155', border: '#cbd5e1', dot: '#64748b' };
                     return (
                       <button
                         key={c}
@@ -440,13 +440,20 @@ export default function NewsPage() {
                         style={{
                           padding: '6px 14px',
                           borderRadius: 20,
-                          border: `1.5px solid ${isSelected ? (c === 'All' ? navy : cfg.border) : '#e2e8f0'}`,
-                          background: isSelected ? (c === 'All' ? navy : cfg.bg) : '#fff',
-                          color: isSelected ? (c === 'All' ? '#fff' : cfg.text) : '#64748b',
+                          border: `1.5px solid ${isSelected ? (c === 'All' ? navy : cfg.border) : '#cbd5e1'}`,
+                          background: isSelected ? (c === 'All' ? navy : cfg.bg) : '#f8fafc',
+                          color: isSelected ? (c === 'All' ? '#fff' : cfg.text) : '#334155',
                           fontWeight: 700,
                           fontSize: 12,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          cursor: 'pointer',
                         }}
                       >
+                        {c !== 'All' && cfg.dot && (
+                          <span style={{ width: 7, height: 7, borderRadius: '50%', background: isSelected ? cfg.dot : '#94a3b8' }} />
+                        )}
                         {c === 'All' ? 'All Updates' : cfg.label || c}
                       </button>
                     );

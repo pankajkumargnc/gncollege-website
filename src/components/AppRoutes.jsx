@@ -304,6 +304,7 @@ export default function AppRoutes({
             <Route path="/notifications" element={<R el={<NotificationsPage />} />} />
             <Route path="/documents" element={<R el={<DocumentsPage />} />} />
             <Route path="/documents/request" element={<R el={<DocumentRequestPage />} />} />
+            <Route path="/document-request" element={<R el={<DocumentRequestPage />} />} />
             <Route path="/services/document-request" element={<R el={<DocumentRequestPage />} />} />
             <Route path="/student-services/document-request" element={<R el={<DocumentRequestPage />} />} />
             <Route path="/events" element={<R el={<EventsPage />} />} />

@@ -323,7 +323,7 @@ export default function NotificationsPage() {
         {/* Active Result Count */}
         {!loading && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, padding: '0 4px' }}>
-            <div style={{ fontSize: 13, color: '#64748b', fontWeight: 700 }}>
+            <div style={{ fontSize: 13, color: '#475569', fontWeight: 700 }}>
               Showing <span style={{ color: navy, fontWeight: 900 }}>{filtered.length}</span> official notifications
               {activeCategory !== 'All' && <span> under <strong>{CATEGORIES.find(c => c.id === activeCategory)?.label}</strong></span>}
             </div>

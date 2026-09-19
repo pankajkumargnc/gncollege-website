@@ -14,7 +14,7 @@ import CampusMap from '../components/CampusMap';
 // ── Default fallback — jab tak Firebase se data na aaye ────────────────────
 const DEFAULT_CONTACT = {
   bhuda:    { phone: '+91 79033 40991', email: 'info@gncollege.org',        address: 'Guru Nanak College, Bhuda\nDhanbad, Jharkhand - 826001'     },
-  bankMore: { phone: '',               email: 'vocational@gncollege.org',   address: 'Guru Nanak College, Bank More\nDhanbad, Jharkhand - 826001' },
+  bankMore: { phone: '+91 326 2304074', email: 'vocational@gncollege.org', address: 'Guru Nanak College, Bank More\nDhanbad, Jharkhand - 826001' },
 };
 
 const DEFAULT_DIRECTORY = [
@@ -427,17 +427,13 @@ export default function Contact() {
               <div className="d-icon"><MapPin size={18} style={{ color: COLORS.gold }} /></div>
               <div className="d-text"><h4>Location</h4><p>{bankMore.address}</p></div>
             </div>
-            {bankMore.phone ? (
-              <div className="detail-row">
-                <div className="d-icon"><Phone size={18} style={{ color: COLORS.navy }} /></div>
-                <div className="d-text"><h4>Helpdesk</h4><a href={`tel:${bankMore.phone}`}>{bankMore.phone}</a></div>
+            <div className="detail-row">
+              <div className="d-icon"><Phone size={18} style={{ color: COLORS.navy }} /></div>
+              <div className="d-text">
+                <h4>Helpdesk</h4>
+                <a href={`tel:${bankMore.phone || '+91 326 2304074'}`}>{bankMore.phone || '+91 326 2304074'}</a>
               </div>
-            ) : (
-              <div className="detail-row">
-                <div className="d-icon"><Phone size={18} style={{ color: COLORS.navy }} /></div>
-                <div className="d-text"><h4>Helpdesk</h4><p style={{ color:'#a0aec0', fontStyle:'italic' }}>Admin Panel se number add karein</p></div>
-              </div>
-            )}
+            </div>
             {bankMore.email && (
               <div className="detail-row">
                 <div className="d-icon"><Mail size={18} style={{ color: COLORS.navy }} /></div>
