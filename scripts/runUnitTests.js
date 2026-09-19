@@ -3,6 +3,7 @@ import { runSeoTests } from '../tests/unit/seoManager.test.js';
 import { runCacheTests } from '../tests/unit/cachedFetch.test.js';
 import { runDocumentRequestTests } from '../tests/unit/documentRequest.test.js';
 import { runImageProcessorTests } from '../tests/unit/imageProcessor.test.js';
+import { runFirestoreRulesTests } from '../tests/unit/firestoreRules.test.js';
 
 console.log('\n🧪 Running GNC College Unit Test Suite...\n');
 
@@ -29,6 +30,7 @@ reportSuite('Dynamic SEO Manager Tests', runSeoTests());
 reportSuite('Persistent Cache & Payload Tests', runCacheTests());
 reportSuite('Student Document Request Hub Tests', runDocumentRequestTests());
 reportSuite('Client-Side Image Processor & Dimension Tests', runImageProcessorTests());
+reportSuite('Firestore Security Rules Matrix Tests', runFirestoreRulesTests());
 
 console.log(`══════════════════════════════════════════`);
 console.log(`Results: ${passed}/${total} Passed (${failed} Failed)`);

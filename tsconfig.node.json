@@ -7,5 +7,7 @@
     "allowSyntheticDefaultImports": true,
     "allowJs": true
   },
-  "include": ["vite.config.js"]
+  "include": [
+    "vite.config.js"
+  ]
 }

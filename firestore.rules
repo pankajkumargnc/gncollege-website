@@ -32,9 +32,19 @@ service cloud.firestore {
     match /staff_council/{docId}    { allow read: if true; allow write: if isAdmin(); }
     match /pageContent/{docId}      { allow read: if true; allow write: if isAdmin(); }
     match /push_broadcasts/{docId}  { allow read, write: if isAdmin(); }
+    match /document_requests/{docId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create: if request.resource.data.keys().hasAll(['studentName', 'docTitle', 'trackingToken', 'createdAt']);
+      allow update, delete: if isAdmin();
+    }
     match /polls/{docId} { 
       allow read: if true; 
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasAny(['votes', 'totalVotes', 'options', 'votedIps', 'hasVoted']) || isAdmin(); 
+      allow update: if (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['options', 'totalVotes', 'votedIps', 'hasVoted']) &&
+        request.resource.data.question == resource.data.question &&
+        request.resource.data.options.size() == resource.data.options.size()
+      ) || isAdmin(); 
       allow create, delete: if isAdmin(); 
     }
     match /site_visits/{docId} { 
@@ -58,10 +68,12 @@ service cloud.firestore {
     match /settings/site             { allow read: if true; allow write: if isAdmin(); }
     match /settings/site_sync        { allow read: if true; allow write: if isAdmin(); }
     match /settings/chatbot          { allow read: if true; allow write: if isAdmin(); }
+    match /settings/contact          { allow read: if true; allow write: if isAdmin(); }
     match /settings/{otherSettingId} { allow read: if isAdmin(); allow write: if isAdmin(); }
     match /adminLogs/{docId}        { allow read, write, create: if isAdmin(); }
     match /_sysTest/{docId}         { allow read, write, delete: if isAdmin(); }
     match /_systemTest/{docId}      { allow read, write, delete: if isAdmin(); }
+    match /_securityProbe/{docId}   { allow read, write, delete: if isAdmin(); }
     match /{document=**}            { allow read, write: if false; }
   }
 }
