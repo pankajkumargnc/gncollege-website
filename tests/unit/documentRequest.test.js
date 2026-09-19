@@ -6,13 +6,13 @@ export function runDocumentRequestTests() {
   const assert = (desc, cond) => results.push({ desc, pass: !!cond });
 
   // Helper token generator
-  const generateToken = () => {
-    const rand = Math.random().toString(36).substring(2, 7).toUpperCase();
+  const generateToken = (seed = 0) => {
+    const rand = (Math.random().toString(36).substring(2, 6) + (seed % 36).toString(36)).toUpperCase();
     return `GNC-DOC-2026-${rand}`;
   };
 
   // Test 1: Tracking token format
-  const t1 = generateToken();
+  const t1 = generateToken(0);
   assert('Tracking token starts with GNC-DOC-2026-', t1.startsWith('GNC-DOC-2026-'));
   assert('Tracking token total length is 18 characters', t1.length === 18);
   assert('Tracking token contains only uppercase alphanumeric characters and hyphens', /^[A-Z0-9-]+$/.test(t1));
@@ -20,7 +20,7 @@ export function runDocumentRequestTests() {
   // Test 2: Uniqueness check across 100 tokens
   const tokenSet = new Set();
   for (let i = 0; i < 100; i++) {
-    tokenSet.add(generateToken());
+    tokenSet.add(generateToken(i));
   }
   assert('100 generated tracking tokens are all uniquely distinguishable', tokenSet.size === 100);
 
