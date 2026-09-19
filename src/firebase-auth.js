@@ -32,11 +32,10 @@ export const PRIMARY_OWNER_EMAIL = "pankajkumargnc@gmail.com";
 export const PRIMARY_OWNER_NAME = "Pankaj Kumar Prasad";
 export const PRIMARY_OWNER_ROLE = "SUPER_ADMIN";
 
-/**
- * Authorized admin email addresses (Strictly restricted to Primary Owner)
- */
 export const AUTHORIZED_ADMIN_EMAILS = [
-  PRIMARY_OWNER_EMAIL
+  PRIMARY_OWNER_EMAIL,
+  "admin@gncollege.org",
+  "principal@gncollege.org"
 ];
 
 // Master 2FA PIN (Configurable via VITE_ADMIN_2FA_PIN, defaults to secure 6-digit master code)
@@ -55,14 +54,14 @@ export async function loginAdmin(usernameOrEmail, password) {
     throw new Error("Please enter both email/username and password.");
   }
 
-  // Resolve to official owner email
+  // Resolve username alias to primary administrator email
   let targetEmail = cleanInput;
   if (!cleanInput.includes("@")) {
     targetEmail = PRIMARY_OWNER_EMAIL;
   }
 
-  if (targetEmail !== PRIMARY_OWNER_EMAIL) {
-    throw new Error("Access Denied: Unrecognized administrator. Only the primary system administrator is authorized.");
+  if (!AUTHORIZED_ADMIN_EMAILS.includes(targetEmail)) {
+    throw new Error("Access Denied: Unrecognized administrator. Only authorized college administrators may sign in.");
   }
 
   try {
@@ -170,16 +169,16 @@ export async function sendAdminPasswordReset() {
  */
 export function recoverAdminUsername(verificationKey) {
   const cleanKey = (verificationKey || "").toString().trim();
-  if (cleanKey === MASTER_2FA_PIN || cleanKey === "GNC-SUPER-ADMIN-2026") {
+  if (MASTER_2FA_PIN && cleanKey === MASTER_2FA_PIN) {
     return {
       success: true,
       username: "admin",
       email: PRIMARY_OWNER_EMAIL,
       name: PRIMARY_OWNER_NAME,
-      role: "Super Administrator (Sole Owner)"
+      role: "Super Administrator"
     };
   }
-  throw new Error("Invalid Master Verification Key. Only the authorized primary administrator can recover access credentials.");
+  throw new Error("Invalid Master Verification Key. Only authorized college administrators can recover access credentials.");
 }
 
 /**

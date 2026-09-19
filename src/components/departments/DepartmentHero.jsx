@@ -1,5 +1,6 @@
 import { NAVY, Pill } from './DepartmentUI';
 import { BookOpen, Users, CreditCard, Sparkles, Microscope, Palette, Award, GraduationCap, UserCheck, Landmark } from 'lucide-react';
+import { splitHeading } from '../../utils/splitTitle';
 
 export const DepartmentHero = ({ slug, meta, d, C, feeRows, facultyKeys, subSlug }) => {
   // A "Subject" view is either a sub-page (e.g. humanities/hindi) 
@@ -29,8 +30,8 @@ export const DepartmentHero = ({ slug, meta, d, C, feeRows, facultyKeys, subSlug
                 </>
               )}
             </div>
-            <h1 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 'clamp(28px,4.5vw,52px)', fontWeight: 800, color: NAVY, lineHeight: 1.06, letterSpacing: '-1.5px', margin: '0 0 14px' }}>
-              {subSlug ? `${subjectName} Department` : subjectName}
+            <h1 className="section-heading" style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 'clamp(28px,4.5vw,46px)', fontWeight: 800, lineHeight: 1.15, letterSpacing: '-1.5px', margin: '0 0 14px' }}>
+              {splitHeading(subSlug ? `${subjectName} Department` : subjectName)}
             </h1>
             {d.tagline ? (
               <p style={{ fontSize: 15.5, color: '#64748b', lineHeight: 1.8, maxWidth: 480, margin: '0 0 22px', fontWeight: 400 }}>

@@ -5,6 +5,7 @@ import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 const PDFModal = lazy(() => import('../components/PDFModal')); // ✅ PDF Modal Import
 import usePageContent from '../hooks/usePageContent';
+import { splitHeading } from '../utils/splitTitle';
 import {
   TrendingUp, Target, BarChart3, Wrench, FileText, GraduationCap,
   BookOpen, FolderOpen, Calendar, Sun, Rocket, Banknote, Download, ArrowUpRight
@@ -42,7 +43,7 @@ const PageHeader = ({ title, subtitle, icon }) => (
     <Fade>
       <div className="hero-content-wrapper">
         {icon && <div className="hero-icon">{icon}</div>}
-        <h1>{title}</h1>
+        <h1 className="hero-title">{splitHeading(title)}</h1>
         {subtitle && <p>{subtitle}</p>}
       </div>
     </Fade>
@@ -73,7 +74,7 @@ export function IqacPage() {
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title="Internal Quality Assurance Cell" subtitle="Ensuring and enhancing the academic and administrative performance of the institution." icon={<TrendingUp size={36} color={GOLD} />} />
       
-      <div style={{ maxWidth: 1200, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1200, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24, marginBottom: 60 }}>
           {[{ i: <Target size={30} color={GOLD} />, t:'Quality Benchmarks', d:'Developing parameters for various academic activities.' },
             { i: <BarChart3 size={30} color={GOLD} />, t:'Feedback System', d:'Collecting and analyzing feedback from all stakeholders.' },
@@ -162,7 +163,7 @@ export function CourseOffered() {
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Courses Offered (NEP 2022)"} subtitle={content?.subtitle || "Four Year Undergraduate Programme (FYUGP) with Multiple Entry & Exit Options."} icon={<GraduationCap size={36} color={GOLD} />} />
       
-      <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1100, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ background: '#fff', borderRadius: 20, padding: '30px 40px', display: 'flex', flexWrap: 'wrap', gap: 30, justifyContent: 'space-between', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', marginBottom: 40 }}>
             {nepTimeline.map((item, i) => (
@@ -229,7 +230,7 @@ export function Syllabus() {
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title="Syllabus Database" subtitle="Download official FYUGP and CBCS syllabi for all departments." icon={<BookOpen size={36} color={GOLD} />} />
       
-      <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1000, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ background: '#fff', padding: 20, borderRadius: 20, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', marginBottom: 30 }}>
             <label htmlFor="syllabus-search" className="sr-only">Search syllabus by subject or semester</label>
@@ -320,7 +321,7 @@ export function AcademicCalendar() {
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Academic Calendar"} subtitle={content?.subtitle || "Key dates, examination schedules, and holidays for the current session."} icon={<Calendar size={36} color={GOLD} />} />
       
-      <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 900, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ background: '#fff', padding: 40, borderRadius: 24, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)' }}>
             <h2 style={{ fontSize: 24, fontWeight: 900, color: NAVY, marginBottom: 30, borderBottom: `2px solid ${GOLD}`, paddingBottom: 10, display: 'inline-block' }}>Session Timeline</h2>
@@ -391,7 +392,7 @@ export function PlacementsPage() {
                 icon={<Rocket size={36} color={GOLD} />} 
             />
 
-            <div style={{ maxWidth: 1200, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+            <div style={{ maxWidth: 1200, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
                 {/* Search & Filter Bar */}
                 <Fade>
                     <div style={{ background: '#fff', padding: '24px', borderRadius: 20, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', marginBottom: 30, display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center' }}>

@@ -6,6 +6,8 @@ import { COLORS } from '../styles/colors';
 import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageContent';
 import { resolveUrl } from '../utils/resolver';
 import DOMPurify from 'dompurify';
+import { splitHeading } from '../utils/splitTitle';
+import { BookOpen, Microscope, Film, Trophy, Building2 } from 'lucide-react';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -114,11 +116,11 @@ export function CampusVisuals({ title, desc, categoryId }) {
       <header className="premium-hero">
         <div className="kinetic-bg" />
         <div className="hero-content-wrapper">
-          <Fade><h1>{title}</h1></Fade>
+          <Fade><h1 className="hero-title">{splitHeading(title)}</h1></Fade>
           <Fade delay={0.1}><p>{desc}</p></Fade>
         </div>
       </header>
-      <div style={{ maxWidth: 1200, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1200, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         {/* Yahan direct live photos aayengi */}
         <LiveGallery categoryId={categoryId} /> 
       </div>
@@ -132,10 +134,10 @@ export function CampusVisuals({ title, desc, categoryId }) {
 export function Infrastructure() {
   const { content, getList } = usePageContent('infrastructure');
   const boxes = getList('facilities', [
-    { title: 'Central Library', icon: '📚', span: 2, bg: '#fff', color: NAVY, desc: 'Over 50,000 books and digital journals.' },
-    { title: 'Science Labs', icon: '🔬', span: 1, bg: `${NAVY}0a`, color: NAVY, desc: 'State-of-the-art equipments.' },
-    { title: 'Auditorium', icon: '🎭', span: 1, bg: `${GOLD}15`, color: '#b45309', desc: '500+ seating capacity.' },
-    { title: 'Sports Ground', icon: '⚽', span: 2, bg: '#fff', color: NAVY, desc: 'Vast playground for outdoor sports.' }
+    { title: 'Central Library', icon: <BookOpen size={36} style={{ color: NAVY }} />, span: 2, bg: '#fff', color: NAVY, desc: 'Over 50,000 books and digital journals.' },
+    { title: 'Science Labs', icon: <Microscope size={36} style={{ color: NAVY }} />, span: 1, bg: `${NAVY}0a`, color: NAVY, desc: 'State-of-the-art equipments.' },
+    { title: 'Auditorium', icon: <Film size={36} style={{ color: '#b45309' }} />, span: 1, bg: `${GOLD}15`, color: '#b45309', desc: '500+ seating capacity.' },
+    { title: 'Sports Ground', icon: <Trophy size={36} style={{ color: NAVY }} />, span: 2, bg: '#fff', color: NAVY, desc: 'Vast playground for outdoor sports.' }
   ]);
 
   return (
@@ -143,16 +145,16 @@ export function Infrastructure() {
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <Fade>
           <div style={{ color: GOLD, fontWeight: 700, letterSpacing: 2, marginBottom: 8 }}>OVERVIEW</div>
-          <h1 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, color: NAVY, marginBottom: 40 }}>{content?.title || 'World-Class Infrastructure'}</h1>
+          <h1 className="section-heading" style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, marginBottom: 16 }}>{splitHeading(content?.title || 'World-Class Infrastructure')}</h1>
           {content?.subtitle && (
-            <p style={{ color: '#64748b', fontSize: 16, marginTop: -20, marginBottom: 36 }}>{content.subtitle}</p>
+            <p style={{ color: '#64748b', fontSize: 16, marginTop: 0, marginBottom: 36 }}>{content.subtitle}</p>
           )}
         </Fade>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24, marginBottom: 40 }}>
           {boxes.map((b, i) => (
             <Fade key={i} delay={i * 0.1} style={{ gridColumn: `span ${window.innerWidth > 768 ? (b.span || 1) : 1}` }}>
               <div style={{ background: b.bg || '#fff', borderRadius: 24, padding: 32, height: '100%', border: '1.5px solid #e2e8f0' }}>
-                <div style={{ fontSize: 40, marginBottom: 16 }}>{b.icon || '🏛️'}</div>
+                <div style={{ marginBottom: 16 }}>{b.icon || <Building2 size={36} style={{ color: b.color || NAVY }} />}</div>
                 <h3 style={{ fontSize: 22, fontWeight: 800, color: b.color || NAVY, margin: '0 0 10px' }}>{b.title}</h3>
                 <p style={{ color: '#64748b', fontSize: 15, margin: 0, lineHeight: 1.6 }}>{b.desc}</p>
               </div>
@@ -185,7 +187,7 @@ export function Classrooms() {
           </Fade>
           <Fade delay={0.2}>
             <div style={{ background: `${GOLD}15`, padding: '8px 16px', borderRadius: 20, color: '#b45309', fontWeight: 700, display: 'inline-block', marginBottom: 16, fontSize: 13 }}>MODERN LEARNING</div>
-            <h1 style={{ fontSize: 'clamp(28px, 4vw, 38px)', fontWeight: 800, color: NAVY, margin: '0 0 24px', lineHeight: 1.2 }}>{content?.title || 'Smart Classrooms'}</h1>
+            <h1 className="section-heading" style={{ fontSize: 'clamp(28px, 4vw, 38px)', fontWeight: 800, margin: '0 0 24px', lineHeight: 1.2 }}>{splitHeading(content?.title || 'Smart Classrooms')}</h1>
             <div className="rich-text-content" style={{ color: '#64748b', fontSize: 16, lineHeight: 1.8, marginBottom: 24 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(descText) }} />
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
               {features.map((item, i) => (
@@ -214,7 +216,7 @@ export function IctRooms() {
     <div style={{ background: NAVY, padding: 'clamp(56px,8vw,80px) clamp(16px,3vw,24px)', color: '#fff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", minHeight: '100dvh' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <Fade><h1 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, margin: '0 0 16px' }}>{content?.title || 'ICT & Computer Labs'}</h1></Fade>
+          <Fade><h1 className="hero-title" style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, margin: '0 0 16px' }}>{splitHeading(content?.title || 'ICT & Computer Labs')}</h1></Fade>
           <Fade delay={0.1}><p style={{ color: '#94a3b8', fontSize: 16, maxWidth: 600, margin: '0 auto 24px', lineHeight: 1.7 }}>{content?.subtitle || 'Empowering students with high-end workstations.'}</p></Fade>
           {aboutHtml && (
             <Fade delay={0.2}>
@@ -241,7 +243,7 @@ export function GreenCampus() {
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <Fade>
             <div style={{ fontSize: 48, marginBottom: 16 }}>🌿</div>
-            <h1 style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, color: '#064e3b', margin: '0 0 16px' }}>{content?.title || 'Our Green Initiatives'}</h1>
+            <h1 className="section-heading" style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, margin: '0 0 16px' }}>{splitHeading(content?.title || 'Our Green Initiatives')}</h1>
             {content?.subtitle && (
               <p style={{ color: '#047857', fontSize: 16, maxWidth: 600, margin: '0 auto 20px', fontWeight: 600 }}>{content.subtitle}</p>
             )}

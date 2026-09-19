@@ -9,6 +9,7 @@ import {
   Calendar, FileCheck, Printer, FileText, TrendingUp,
   Landmark, BookOpen, Laptop, Briefcase, Users, ExternalLink
 } from 'lucide-react';
+import { splitHeading } from '../utils/splitTitle';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -30,7 +31,7 @@ const PageHeader = ({ title, subtitle, icon }) => (
     <Fade>
       <div className="hero-content-wrapper">
         {icon && <div className="hero-icon">{icon}</div>}
-        <h1>{title}</h1>
+        <h1 className="hero-title">{splitHeading(title)}</h1>
         {subtitle && <p>{subtitle}</p>}
       </div>
     </Fade>
@@ -54,7 +55,7 @@ export function AdmissionRule() {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Admission Procedure"} subtitle={content?.subtitle || "Complete step-by-step guide for UG and Vocational admission under NEP 2020."} icon={<ClipboardList size={38} />} />
-      <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 900, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ background: '#fff', padding: 40, borderRadius: 24, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)' }}>
             <div style={{ background: '#fef2f2', borderLeft: `4px solid #ef4444`, padding: 16, borderRadius: '0 12px 12px 0', marginBottom: 30 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(importantRule) }} />
@@ -102,7 +103,7 @@ export function DocumentRequired() {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Documents Required"} subtitle={content?.subtitle || "Bring these documents during physical verification at the campus."} icon={<FolderCheck size={38} />} />
-      <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1000, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: 16 }}>
             {docs.map((d, i) => (
@@ -153,7 +154,7 @@ export function FeeStructure() {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title="Fee Structure" subtitle="Detailed semester-wise fee breakdown for 4-Year FYUGP (8 Semesters), BCA, and BBA." icon={<CreditCard size={38} />} />
-      <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1100, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 24, flexWrap: 'wrap' }}>
             {['UG', 'BCA', 'BBA'].map(t => (
@@ -256,7 +257,7 @@ export function AdmissionNotification() {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title="Admission Notifications" subtitle="Latest updates, merit lists, and announcements regarding admissions." icon={<Bell size={38} />} />
-      <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 900, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           {notices.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 60, background: '#fff', borderRadius: 20, border: '2px dashed #e2e8f0' }}>
@@ -320,7 +321,7 @@ export function IntakeCapacity() {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Intake Capacity"} subtitle={content?.subtitle || "Subject-wise maximum seat availability for the current academic session."} icon={<Users size={38} />} />
-      <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1000, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 20 }}>
             {data.map((d, i) => (

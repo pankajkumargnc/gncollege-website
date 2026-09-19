@@ -10,7 +10,6 @@ import { decodePayload } from "../utils/cachedFetch";
 
 import HeroSlider from "../components/HeroSlider";
 import { resolveUrl } from "../utils/resolver";
-import Ticker from "../components/Ticker";
 import HomeFeatures from "../components/HomeFeatures";
 import NotificationSection from "../components/home/NotificationSection";
 import PlacementsSection from "../components/home/PlacementsSection";

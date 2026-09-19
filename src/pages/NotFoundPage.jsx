@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Home, Camera, MapPin, GraduationCap, Phone, Library, ArrowLeft } from 'lucide-react';
 
 const NAVY = '#0f2347';
 const GOLD = '#f4a023';
@@ -67,12 +68,12 @@ function useParticles(canvasRef) {
 
 /* ── Quick nav suggestions ── */
 const SUGGESTIONS = [
-  { icon: '🏠', label: 'Home', path: '/' },
-  { icon: '📸', label: 'Gallery', path: '/gallery/photos' },
-  { icon: '📌', label: 'Admission', path: '/admission/rule' },
-  { icon: '🎓', label: 'Courses', path: '/academics/course-offered' },
-  { icon: '📞', label: 'Contact', path: '/contact' },
-  { icon: '📚', label: 'Library', path: '/publication/college-library' },
+  { icon: Home, label: 'Home', path: '/' },
+  { icon: Camera, label: 'Gallery', path: '/gallery/photos' },
+  { icon: MapPin, label: 'Admission', path: '/admission/rule' },
+  { icon: GraduationCap, label: 'Courses', path: '/academics/course-offered' },
+  { icon: Phone, label: 'Contact', path: '/contact' },
+  { icon: Library, label: 'Library', path: '/publication/college-library' },
 ];
 
 export default function NotFoundPage() {
@@ -189,7 +190,7 @@ export default function NotFoundPage() {
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px) scale(1.04)'; e.currentTarget.style.boxShadow = '0 14px 36px rgba(244,160,35,0.55)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 28px rgba(244,160,35,0.4)'; }}
             >
-              🏠 Go Home
+              <Home size={16} /> Go Home
             </Link>
             <button onClick={() => navigate(-1)} style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -202,7 +203,7 @@ export default function NotFoundPage() {
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.transform = ''; }}
             >
-              ← Go Back
+              <ArrowLeft size={16} /> Go Back
             </button>
           </div>
 
@@ -212,23 +213,26 @@ export default function NotFoundPage() {
               Or explore
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 100px), 1fr))', gap: 8 }}>
-              {SUGGESTIONS.map((s, i) => (
-                <Link key={s.path} to={s.path} style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                  padding: '14px 10px', borderRadius: 14,
-                  background: hov === i ? 'rgba(244,160,35,0.12)' : 'rgba(255,255,255,0.04)',
-                  border: hov === i ? '1px solid rgba(244,160,35,0.3)' : '1px solid rgba(255,255,255,0.06)',
-                  textDecoration: 'none',
-                  transition: 'all .2s',
-                  transform: hov === i ? 'translateY(-3px)' : 'none',
-                }}
-                  onMouseEnter={() => setHov(i)}
-                  onMouseLeave={() => setHov(null)}
-                >
-                  <span style={{ fontSize: 22 }}>{s.icon}</span>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: hov === i ? GOLD : 'rgba(255,255,255,0.5)', letterSpacing: '0.5px' }}>{s.label}</span>
-                </Link>
-              ))}
+              {SUGGESTIONS.map((s, i) => {
+                const IconComp = s.icon;
+                return (
+                  <Link key={s.path} to={s.path} style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                    padding: '14px 10px', borderRadius: 14,
+                    background: hov === i ? 'rgba(244,160,35,0.12)' : 'rgba(255,255,255,0.04)',
+                    border: hov === i ? '1px solid rgba(244,160,35,0.3)' : '1px solid rgba(255,255,255,0.06)',
+                    textDecoration: 'none',
+                    transition: 'all .2s',
+                    transform: hov === i ? 'translateY(-3px)' : 'none',
+                  }}
+                    onMouseEnter={() => setHov(i)}
+                    onMouseLeave={() => setHov(null)}
+                  >
+                    <IconComp size={22} style={{ color: hov === i ? GOLD : 'rgba(255,255,255,0.7)', transition: 'color .2s' }} />
+                    <span style={{ fontSize: 11, fontWeight: 700, color: hov === i ? GOLD : 'rgba(255,255,255,0.5)', letterSpacing: '0.5px' }}>{s.label}</span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>

@@ -2,7 +2,6 @@ import React, { Suspense, lazy } from 'react';
 import { Routes, Route, useParams } from 'react-router-dom';
 import ErrorBoundary from "./ErrorBoundary";
 import HomePage from "../pages/HomePage";
-import VideoLibrary from '../pages/VideoLibrary';
 import { Newspaper, ClipboardList, BarChart3, BookOpen } from "lucide-react";
 
 // ── 🛡️ SMART LAZY LOADER ─────────────────────────────────────────────────────
@@ -131,12 +130,15 @@ const PageLoader = () => (
 
 const PageViewer = safeLazy(() => import("./PageViewer"));
 
-const EB = ({ children }) => <ErrorBoundary>{children}</ErrorBoundary>;
-const R = ({ el }) => (
-    <Suspense fallback={<PageLoader />}>
-        <EB>{el}</EB>
-    </Suspense>
-);
+const EB = ({ children, page }) => <ErrorBoundary page={page}>{children}</ErrorBoundary>;
+const R = ({ el, page }) => {
+    const pageName = page || (el?.type?.name || el?.type?.displayName || 'Page');
+    return (
+        <Suspense fallback={<PageLoader />}>
+            <EB page={pageName}>{el}</EB>
+        </Suspense>
+    );
+};
 
 // ── 🌐 DYNAMIC ROUTE WRAPPERS (HEADLESS SCALING) ──────────────────────────
 const DynamicExamResults = () => {
@@ -255,7 +257,7 @@ export default function AppRoutes({
             <Route path="/admission/notification/latest" element={<R el={<AdmissionNotif type="latest" title="Latest Notifications" />} />} />
             <Route path="/admission/notification/upcoming" element={<R el={<AdmissionNotif type="upcoming" title="Upcoming Notifications" />} />} />
             <Route path="/admission/intake-capacity" element={<R el={<IntakeCapacity />} />} />
-            <Route path="/videos" element={<VideoLibrary />} />
+            <Route path="/videos" element={<R el={<VideoGallery />} />} />
 
             {/* Activity */}
             <Route path="/activity/nss" element={<R el={<NssPage />} />} />

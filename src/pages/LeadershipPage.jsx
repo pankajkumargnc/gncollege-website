@@ -12,6 +12,7 @@ import { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { resolveUrl } from '../utils/resolver';
+import { splitHeading } from '../utils/splitTitle';
 
 // ── Config per type ──────────────────────────────────────────────────────────
 const TYPE_CONFIG = {
@@ -362,7 +363,7 @@ const LeadershipPage = ({ type = 'president', title }) => {
         <div className="kinetic-bg" />
         <div className="hero-content-wrapper">
           <span className="hero-icon">{cfg.icon}</span>
-          <h1>{pageTitle}</h1>
+          <h1 className="hero-title">{splitHeading(pageTitle)}</h1>
           <p>{cfg.subtitle}</p>
         </div>
       </header>

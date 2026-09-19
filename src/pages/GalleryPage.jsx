@@ -15,6 +15,8 @@ import PremiumPagination from '../components/PremiumPagination';
 import { resolveUrl } from '../utils/resolver';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
+import { splitHeading } from '../utils/splitTitle';
+import { Camera } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 12;
 const FALLBACK_IMG = `${import.meta.env.BASE_URL}images/college_photo.webp`;
@@ -144,29 +146,11 @@ export default function GalleryPage({ gallery: galleryProp, headless }) {
 
       {/* ── HERO ── */}
       {!headless && (
-      <div style={{ background:`linear-gradient(135deg,${N} 0%,#1a3a7c 100%)`, padding:'70px 20px 60px', textAlign:'center', position:'relative', overflow:'hidden' }}>
-        <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(rgba(244,160,35,.07) 1px, transparent 1px)', backgroundSize:'28px 28px', pointerEvents:'none' }} />
-        <div style={{ position:'absolute', top:0, left:0, right:0, height:4, background:G }} />
-        <div style={{ position:'relative', zIndex:1 }}>
-
-          <h1 style={{ color:'#fff', fontSize:'clamp(28px,5vw,48px)', fontWeight:900, margin:'0 0 12px', letterSpacing:'-1px' }}>
-            📸 Photo Gallery
-          </h1>
-          <p style={{ color:'rgba(255,255,255,.65)', fontSize:15, maxWidth:520, margin:'0 auto 24px' }}>
-            Memorable moments of campus life, events, and achievements
-          </p>
-          {/* Stats */}
-          <div style={{ display:'flex', justifyContent:'center', gap:24, flexWrap:'wrap' }}>
-            {[
-              { n: images.length + '+', l: 'Total Photos' },
-              { n: CATS.length - 1,     l: 'Categories' },
-            ].map((s,i) => (
-              <div key={i} style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.15)', borderRadius:10, padding:'10px 22px', backdropFilter:'blur(8px)' }}>
-                <div style={{ fontSize:22, fontWeight:900, color:G, lineHeight:1 }}>{s.n}</div>
-                <div style={{ fontSize:11, color:'rgba(255,255,255,.55)', marginTop:3, fontWeight:600 }}>{s.l}</div>
-              </div>
-            ))}
-          </div>
+      <div className="premium-hero">
+        <div className="kinetic-bg" />
+        <div className="hero-content-wrapper anim-fade-in">
+          <h1 className="hero-title">{splitHeading('Photo Gallery')}</h1>
+          <p className="hero-subtitle">Memorable moments of campus life, events, and achievements • {images.length}+ Photos</p>
         </div>
       </div>
       )}
@@ -177,8 +161,8 @@ export default function GalleryPage({ gallery: galleryProp, headless }) {
         {/* Filter tabs */}
         <div style={{ display:'flex', justifyContent:'center', gap:8, flexWrap:'wrap', marginBottom:40 }}>
           {CATS.map(cat => (
-            <button key={cat} className={`gal-filter${filter===cat?' active':''}`} onClick={() => setFilter(cat)}>
-              {cat === 'All Moments' ? '📸 All' : cat}
+            <button key={cat} className={`gal-filter${filter===cat?' active':''}`} onClick={() => setFilter(cat)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              {cat === 'All Moments' ? <><Camera size={13} /> All</> : cat}
             </button>
           ))}
         </div>

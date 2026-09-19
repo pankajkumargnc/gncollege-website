@@ -149,13 +149,13 @@ export default function EventsPage({ headless }) {
       <header className="premium-hero">
         <div className="kinetic-bg" />
         <div className="hero-content-wrapper">
-          <h1 className="hero-title">🏛️ Campus Events</h1>
+          <h1 className="hero-title">🏛️ Campus <span>Events</span></h1>
           <p className="hero-subtitle">Workshops, seminars, cultural fests, and sports — all activities in one place</p>
         </div>
       </header>
       )}
 
-      <div style={{ maxWidth:'1200px', margin:headless ? '0' : '-50px auto 0', padding:headless ? '0' : '0 20px', position:'relative', zIndex:10 }}>
+      <div style={{ maxWidth:'1200px', margin:headless ? '0' : '32px auto 0', padding:headless ? '0' : '0 20px', position:'relative', zIndex:10 }}>
 
         {/* Counters */}
         <div style={{ display:'flex', gap:16, flexWrap:'wrap', justifyContent:'center', marginBottom:40 }}>
@@ -213,8 +213,8 @@ export default function EventsPage({ headless }) {
             </div>
           ) : (
             <section style={{ background:'#fff', padding:'30px 40px', borderRadius:'16px', boxShadow:'0 8px 25px rgba(0,0,0,0.07)', marginTop:'30px', marginBottom:'60px' }}>
-              <h2 style={{ fontSize:'clamp(24px,4vw,32px)', fontWeight:800, color:navy, margin:'0 0 10px', letterSpacing:'-0.5px' }}>
-                Recent Events &amp; Happenings
+              <h2 className="section-heading" style={{ fontSize:'clamp(24px,4vw,32px)', fontWeight:800, margin:'0 0 10px', letterSpacing:'-0.5px' }}>
+                Recent Events &amp; <span>Happenings</span>
               </h2>
               <div style={{ width:80, height:4, background:`linear-gradient(90deg,${gold},#fde68a)`, borderRadius:2, marginBottom:35 }} />
 

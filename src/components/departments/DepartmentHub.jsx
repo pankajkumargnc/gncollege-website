@@ -80,8 +80,8 @@ export const DepartmentHub = ({ DEPT_META }) => {
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg,#0ea5e9, #2563eb)', color: '#fff', fontSize: 12, fontWeight: 800, padding: '6px 18px', borderRadius: 100, marginBottom: 24, boxShadow: '0 8px 16px rgba(14,165,233,0.2)', textTransform: 'uppercase', letterSpacing: '1px' }}>
               <Building2 size={15} /> Academic Excellence
             </div>
-            <h1 style={{ fontSize: 'clamp(32px,6vw,58px)', fontWeight: 900, color: NAVY, lineHeight: 1, letterSpacing: '-2px', marginBottom: 20 }}>
-              Future-Ready <span style={{ background: 'linear-gradient(135deg,#0ea5e9, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Departments</span>
+            <h1 className="section-heading" style={{ fontSize: 'clamp(32px,4vw,48px)', fontWeight: 900, letterSpacing: '-1.5px', marginBottom: 20 }}>
+              Future-Ready <span>Departments</span>
             </h1>
             <p style={{ color: '#64748b', fontSize: 'clamp(16px,2vw,18px)', maxWidth: 640, margin: '0 auto', lineHeight: 1.8, textWrap: 'pretty' }}>
               Specialized academic departments at Guru Nanak College — where rigorous curriculum, distinguished faculty, and career outcomes empower your future.

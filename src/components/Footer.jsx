@@ -1,6 +1,7 @@
 import React, { useState, useEffect, memo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { doc, onSnapshot, collection, getCountFromServer } from 'firebase/firestore';
+import { Shield, Phone, AlertCircle, MapPin, Building2, Mail } from 'lucide-react';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import { SOCIAL_LINKS } from '../data/db';
@@ -75,6 +76,7 @@ const SA = ({ children, variant = 'up', delay = '', style = {}, className = '' }
 
 const Footer = memo(() => {
   const [firebaseSocials, setFirebaseSocials] = useState(null);
+  const [siteSettings, setSiteSettings] = useState(null);
   const [time, setTime] = useState(new Date());
   const [visitorCount, setVisitorCount] = useState(null);
 
@@ -82,6 +84,9 @@ const Footer = memo(() => {
     const ticker = setInterval(() => setTime(new Date()), 1000);
     const unsub = onSnapshot(doc(db, 'settings', 'socialLinks'), snap => {
       if (snap.exists() && snap.data().links) setFirebaseSocials(snap.data().links);
+    });
+    const unsubSite = onSnapshot(doc(db, 'settings', 'site'), snap => {
+      if (snap.exists()) setSiteSettings(snap.data());
     });
 
     // ── Automated Real-Time Visitor Counter ──
@@ -109,6 +114,7 @@ const Footer = memo(() => {
       clearInterval(ticker);
       clearInterval(visitorInterval);
       unsub();
+      unsubSite();
     };
   }, []);
 
@@ -329,15 +335,15 @@ const Footer = memo(() => {
             </div>
             <div className="f-em-contacts">
               <a href="tel:18001805522" className="f-em-link">
-                🛡️ Anti-Ragging Toll-Free: <b>1800-180-5522</b>
+                <Shield size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 5 }} /> Anti-Ragging Toll-Free: <b>1800-180-5522</b>
               </a>
               <span style={{ opacity: 0.3 }}>|</span>
               <a href="tel:03262304074" className="f-em-link">
-                📞 College Office: <b>0326-2304074</b>
+                <Phone size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 5 }} /> College Office: <b>0326-2304074</b>
               </a>
               <span style={{ opacity: 0.3 }}>|</span>
               <Link to="/contact" className="f-em-link">
-                🚨 Women Grievance Redressal ›
+                <AlertCircle size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 5 }} /> Women Grievance Redressal ›
               </Link>
             </div>
           </div>
@@ -346,20 +352,20 @@ const Footer = memo(() => {
         <div className="f-reach-grid">
           <SA variant="up" className="f-card-3d">
             <div className="f-card-inner">
-              <div className="f-card-front"><span className="f-card-icon">📍</span><div className="f-card-info"><b>Bhuda Campus</b><span>Rani Road, Barmasiya</span></div></div>
-              <a href="https://www.google.com/maps/search/?api=1&query=Guru+Nanak+College+Bhuda+Campus+Dhanbad" target="_blank" rel="noopener noreferrer" className="f-card-back">📌 OPEN PINPOINT MAP</a>
+              <div className="f-card-front"><span className="f-card-icon"><MapPin size={26} /></span><div className="f-card-info"><b>{siteSettings?.campusBhudaTitle || "Bhuda Campus"}</b><span>{siteSettings?.campusBhudaAddress || "Rani Road, Barmasiya"}</span></div></div>
+              <a href={siteSettings?.campusBhudaDirectionsUrl || "https://www.google.com/maps/search/?api=1&query=Guru+Nanak+College+Bhuda+Campus+Dhanbad"} target="_blank" rel="noopener noreferrer" className="f-card-back">OPEN PINPOINT MAP</a>
             </div>
           </SA>
           <SA variant="up" className="f-card-3d" delay="sa-d1">
             <div className="f-card-inner">
-              <div className="f-card-front"><span className="f-card-icon">🏢</span><div className="f-card-info"><b>Bank More Campus</b><span>Main Road, Dhanbad</span></div></div>
-              <a href="https://www.google.com/maps/search/?api=1&query=Guru+Nanak+College+Bank+More+Campus+Dhanbad" target="_blank" rel="noopener noreferrer" className="f-card-back">📌 OPEN PINPOINT MAP</a>
+              <div className="f-card-front"><span className="f-card-icon"><Building2 size={26} /></span><div className="f-card-info"><b>{siteSettings?.campusBankMoreTitle || "Bank More Campus"}</b><span>{siteSettings?.campusBankMoreAddress || "Main Road, Dhanbad"}</span></div></div>
+              <a href={siteSettings?.campusBankMoreDirectionsUrl || "https://www.google.com/maps/search/?api=1&query=Guru+Nanak+College+Bank+More+Campus+Dhanbad"} target="_blank" rel="noopener noreferrer" className="f-card-back">OPEN PINPOINT MAP</a>
             </div>
           </SA>
           <SA variant="up" className="f-card-3d" delay="sa-d2">
             <div className="f-card-inner">
-              <div className="f-card-front"><span className="f-card-icon">📧</span><div className="f-card-info"><b>Official Email</b><span>principal@gncollege.org</span></div></div>
-              <a href="https://mail.google.com/mail/?view=cm&fs=1&to=principal@gncollege.org" target="_blank" rel="noopener noreferrer" className="f-card-back">✉️ OPEN IN GMAIL</a>
+              <div className="f-card-front"><span className="f-card-icon"><Mail size={26} /></span><div className="f-card-info"><b>Official Email</b><span>principal@gncollege.org</span></div></div>
+              <a href="https://mail.google.com/mail/?view=cm&fs=1&to=principal@gncollege.org" target="_blank" rel="noopener noreferrer" className="f-card-back">OPEN IN GMAIL</a>
             </div>
           </SA>
         </div>

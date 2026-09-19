@@ -3,8 +3,9 @@ import { collection, onSnapshot, getDocsFromServer } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import FlipbookViewer from '../components/FlipbookViewer';
-import { BookOpen, Download, Share2, Sparkles, Eye, Search, ExternalLink, Calendar, CheckCircle } from 'lucide-react';
+import { BookOpen, Download, Share2, Sparkles, Eye, Search, ExternalLink, Calendar, CheckCircle, Newspaper, Laptop, Library, FileCheck, FileText } from 'lucide-react';
 import { resolveUrl } from '../utils/resolver';
+import { splitHeading } from '../utils/splitTitle';
 const PDFModal = lazy(() => import('../components/PDFModal'));
 
 const NAVY = COLORS?.navy || '#0f2347';
@@ -62,7 +63,7 @@ const PageHeader = ({ title, subtitle, icon }) => (
     <Fade>
       <div className="hero-content-wrapper">
         {icon && <div className="hero-icon">{icon}</div>}
-        <h1>{title}</h1>
+        <h1 className="hero-title">{splitHeading(title)}</h1>
         {subtitle && <p>{subtitle}</p>}
       </div>
     </Fade>
@@ -176,7 +177,7 @@ function PublicationDocList({ keyword }) {
 
                   <div style={{ padding: 18, flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 10 }}>
-                      {!d.coverImage && <span style={{ fontSize: 24 }}>📄</span>}
+                      {!d.coverImage && <FileText size={24} style={{ color: NAVY, flexShrink: 0, marginTop: 2 }} />}
                       <div style={{ flex: 1 }}>
                         <h3 style={{ fontSize: 15, fontWeight: 800, color: NAVY, margin: '0 0 4px', lineHeight: 1.4 }}>
                           {d.title}
@@ -258,21 +259,21 @@ function PublicationDocList({ keyword }) {
 
 export function LibraryPage() {
   const stats = [
-    { label: 'Books', val: '50,000+', icon: '📚' },
-    { label: 'Journals', val: '25+', icon: '📰' },
-    { label: 'Digital Access', val: 'N-LIST', icon: '💻' },
-    { label: 'Reading Hall', val: '200 Seating', icon: '🪑' }
+    { label: 'Books', val: '50,000+', icon: <BookOpen size={30} style={{ color: NAVY, margin: '0 auto 12px', display: 'block' }} /> },
+    { label: 'Journals', val: '25+', icon: <Newspaper size={30} style={{ color: NAVY, margin: '0 auto 12px', display: 'block' }} /> },
+    { label: 'Digital Access', val: 'N-LIST', icon: <Laptop size={30} style={{ color: NAVY, margin: '0 auto 12px', display: 'block' }} /> },
+    { label: 'Reading Hall', val: '200 Seating', icon: <Library size={30} style={{ color: NAVY, margin: '0 auto 12px', display: 'block' }} /> }
   ];
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
-      <PageHeader title="College Library" subtitle="A hub of knowledge equipped with vast resources for research and learning." icon="📖" />
-      <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <PageHeader title="College Library" subtitle="A hub of knowledge equipped with vast resources for research and learning." icon={<BookOpen size={36} style={{ color: GOLD }} />} />
+      <div style={{ maxWidth: 1100, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 20, marginBottom: 40 }}>
           {stats.map((s, i) => (
             <Fade key={i} delay={i * 0.1}>
               <div style={{ background: '#fff', borderRadius: 20, padding: 30, textAlign: 'center', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)' }}>
-                <div style={{ fontSize: 36, marginBottom: 12 }}>{s.icon}</div>
+                {s.icon}
                 <div style={{ fontSize: 24, fontWeight: 900, color: NAVY, marginBottom: 4 }}>{s.val}</div>
                 <div style={{ fontSize: 13, color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>{s.label}</div>
               </div>
@@ -487,7 +488,7 @@ function MagazineCardItem({ mag, idx, onShareWa }) {
                   <div style={{ fontSize: 9, color: '#94a3b8', marginTop: 2 }}>DHANBAD</div>
                 </div>
                 <div>
-                  <span style={{ fontSize: 42, display: 'block', marginBottom: 8 }}>📖</span>
+                  <BookOpen size={38} style={{ color: GOLD, margin: '0 auto 8px', display: 'block' }} />
                   <h4 style={{ fontSize: 16, fontWeight: 900, margin: 0, lineHeight: 1.3, textTransform: 'uppercase', color: '#ffffff' }}>
                     {mag.title}
                   </h4>
@@ -564,7 +565,9 @@ function MagazineCardItem({ mag, idx, onShareWa }) {
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
-            <span>📄 High-Definition Edition</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+              <FileCheck size={13} /> High-Definition Edition
+            </span>
             <span>{mag.fileSize || 'PDF Format'}</span>
           </div>
 
@@ -784,7 +787,7 @@ export function PublicationPage({ type, title, subtitle, icon, keyword }) {
         }
       `}</style>
 
-      <div style={{ maxWidth: 1200, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1200, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         {isMagazine ? (
           <div>
             {/* ── DIGITAL BOOKSHELF ARCHIVE HEADER & SEARCH ── */}
@@ -809,8 +812,8 @@ export function PublicationPage({ type, title, subtitle, icon, keyword }) {
                   </p>
                 </div>
 
-                <div style={{ fontSize: 13, color: NAVY, fontWeight: 800, background: '#f1f5f9', padding: '8px 16px', borderRadius: 20, border: '1px solid #e2e8f0' }}>
-                  📚 {magazines.length} Edition{magazines.length !== 1 ? 's' : ''} in Archive
+                <div style={{ fontSize: 13, color: NAVY, fontWeight: 800, background: '#f1f5f9', padding: '8px 16px', borderRadius: 20, border: '1px solid #e2e8f0', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <Library size={15} /> {magazines.length} Edition{magazines.length !== 1 ? 's' : ''} in Archive
                 </div>
               </div>
 
@@ -879,7 +882,9 @@ export function PublicationPage({ type, title, subtitle, icon, keyword }) {
                   textAlign: 'center',
                   border: '2px dashed #cbd5e1'
                 }}>
-                  <div style={{ fontSize: 44, marginBottom: 12 }}>📚</div>
+                  <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}>
+                    <BookOpen size={44} style={{ color: '#94a3b8' }} />
+                  </div>
                   <h3 style={{ fontSize: 18, fontWeight: 800, color: NAVY, margin: '0 0 6px' }}>
                     No magazine editions found
                   </h3>

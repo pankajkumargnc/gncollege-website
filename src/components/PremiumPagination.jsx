@@ -12,14 +12,13 @@ export default function PremiumPagination({
   scrollToTop = true,
   scrollAnchorId = ''
 }) {
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  if (totalPages <= 1) return null;
-
+  const totalPages = Math.ceil(Number(totalItems || 0) / Number(itemsPerPage || 15));
   const NAVY = COLORS?.navy || '#0f2347';
   const GOLD = COLORS?.gold || '#f4a023';
 
   // Smart page calculation with ellipsis windows
   const paginationRange = useMemo(() => {
+    if (totalPages <= 1) return [];
     if (totalPages <= 7) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
@@ -66,6 +65,8 @@ export default function PremiumPagination({
       window.scrollTo({ top: Math.max(0, window.scrollY - 380), behavior: 'smooth' });
     }
   };
+
+  if (totalPages <= 1) return null;
 
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);

@@ -6,6 +6,7 @@ import { COLORS } from '../styles/colors';
 const PDFModal = lazy(() => import('../components/PDFModal'));
 import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageContent';
 import DOMPurify from 'dompurify';
+import { splitHeading } from '../utils/splitTitle';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -26,7 +27,7 @@ const PageHeader = ({ title, subtitle, icon }) => (
     <Fade>
       <div className="hero-content-wrapper">
         {icon && <div className="hero-icon">{icon}</div>}
-        <h1>{title}</h1>
+        <h1 className="hero-title">{splitHeading(title)}</h1>
         {subtitle && <p>{subtitle}</p>}
       </div>
     </Fade>
@@ -41,7 +42,7 @@ export function NssPage() {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "National Service Scheme (NSS)"} subtitle={content?.subtitle || 'Motto: "Not Me But You". Developing student personality through community service.'} icon="🤝" />
-      <div style={{ maxWidth: 1100, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1100, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 20, marginBottom: 40 }}>
             {stats.map((s, i) => (
@@ -88,7 +89,7 @@ export function NccPage() {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "National Cadet Corps (NCC)"} subtitle={content?.subtitle || 'Motto: "Unity and Discipline". Shaping the youth into patriotic and disciplined citizens.'} icon="🎖️" theme="#1e3a8a" />
-      <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1000, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ background: '#fff', borderRadius: 24, overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))' }}>
             <img src={`${import.meta.env.BASE_URL}images/HeroSlider/slide0.webp`} alt="NCC Parade" style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: 300 }} />
@@ -123,7 +124,7 @@ export function WorkshopPage() {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Workshops & Seminars"} subtitle={content?.subtitle || "Bridging the gap between academia and industry through expert sessions."} icon="🎤" />
-      <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1000, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 350px), 1fr))', gap: 20 }}>
             {workshops.map((w, i) => (
@@ -160,7 +161,7 @@ export function SportsPage() {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Games & Sports"} subtitle={content?.subtitle || "Promoting physical fitness, teamwork, and sportsmanship among students."} icon="🏆" />
-      <div style={{ maxWidth: 1000, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1000, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24 }}>
             <div style={{ background: '#fff', borderRadius: 24, padding: 40, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)' }}>
@@ -208,7 +209,7 @@ export function RotaractClub() {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Rotaract Club"} subtitle={content?.subtitle || 'Motto: "Fellowship Through Service". A global movement of young leaders.'} icon="⚙️" theme="#d91b5c" />
-      <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 900, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ background: '#fff', borderRadius: 24, padding: 40, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(217,27,92,0.08)', textAlign: 'center' }}>
             <h2 style={{ fontSize: 28, fontWeight: 900, color: '#d91b5c', marginBottom: 20 }}>Empowering Youth</h2>
@@ -243,7 +244,7 @@ export function SadbhavanaDiwas() {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       <PageHeader title={content?.title || "Sadbhavana Diwas"} subtitle={content?.subtitle || "Promoting National Integration, Peace, and Communal Harmony."} icon="🕊️" theme="#059669" />
-      <div style={{ maxWidth: 900, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 900, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <Fade>
           <div style={{ background: '#fff', borderRadius: 24, padding: 40, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(5,150,105,0.08)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 24, flexWrap: 'wrap' }}>

@@ -4,6 +4,7 @@ import DOMPurify from 'dompurify';
 import { Link } from 'react-router-dom';
 import '../styles/index.css';
 import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageContent';
+import { Building2, GraduationCap, Users, BookOpen, MapPin, Award, Landmark, Sparkles, BookmarkCheck } from 'lucide-react';
 
 const CollegeProfile = () => {
   useEffect(() => {
@@ -25,10 +26,10 @@ const CollegeProfile = () => {
   );
 
   const stats = getList('stats', [
-    { label: "Years of Heritage", value: "56+", icon: "🏛️" },
-    { label: "Qualified Faculty", value: "65+", icon: "👨‍🏫" },
-    { label: "Enrolled Scholars", value: "5,000+", icon: "🎓" },
-    { label: "Academic Programs", value: "15+", icon: "📚" }
+    { label: "Years of Heritage", value: "56+", icon: <Building2 size={22} style={{ color: '#f4a023' }} /> },
+    { label: "Qualified Faculty", value: "65+", icon: <GraduationCap size={22} style={{ color: '#f4a023' }} /> },
+    { label: "Enrolled Scholars", value: "5,000+", icon: <Users size={22} style={{ color: '#f4a023' }} /> },
+    { label: "Academic Programs", value: "15+", icon: <BookOpen size={22} style={{ color: '#f4a023' }} /> }
   ]);
 
   const milestones = [
@@ -37,35 +38,35 @@ const CollegeProfile = () => {
       title: "Foundation & Inception",
       desc: "Established by Gurudwara Prabandhak Committee, Dhanbad on the auspicious occasion of the 500th Birth Centenary of Sri Guru Nanak Dev Ji. First affiliated with Ranchi University.",
       badge: "Inception",
-      icon: "🏛️"
+      icon: <Building2 size={18} />
     },
     {
       year: "1985",
       title: "UGC 2(f) & 12(B) Recognition",
       desc: "Conferred permanent recognition under Sections 2(f) and 12(B) of the UGC Act and granted Deficit Grant College Status by the Government of Jharkhand.",
       badge: "Recognition",
-      icon: "📜"
+      icon: <Award size={18} />
     },
     {
       year: "2000",
       title: "Bank More Women's Wing Inception",
       desc: "Dedicated women's campus inaugurated at Bank More, Dhanbad to empower female scholars across the coal belt with specialized morning degree classes.",
       badge: "Expansion",
-      icon: "👩‍🎓"
+      icon: <GraduationCap size={18} />
     },
     {
       year: "2017",
       title: "Affiliation to BBMKU Dhanbad",
       desc: "Permanently affiliated with the newly established Binod Bihari Mahto Koyalanchal University (BBMKU) as a premier Sikh Minority Degree College.",
       badge: "University Shift",
-      icon: "🎓"
+      icon: <Landmark size={18} />
     },
     {
       year: "Present",
       title: "NEP-2020 & Digital Campus",
       desc: "Complete rollout of NEP 2020 4-year FYUGP degree courses, smart audio-visual lecture theatres, digitized library resources, and active placement drives.",
       badge: "Modern Era",
-      icon: "🚀"
+      icon: <Sparkles size={18} />
     }
   ];
 
@@ -104,51 +105,169 @@ const CollegeProfile = () => {
           height: 4px;
           background: linear-gradient(90deg, #0f2347, #f4a023);
         }
-        .milestone-step {
+        /* Historic Milestones Enhanced Modern Timeline */
+        .milestones-timeline-track {
           position: relative;
           padding-left: 36px;
-          padding-bottom: 28px;
-          border-left: 2px solid #e2e8f0;
+          margin-top: 18px;
         }
-        .milestone-step:last-child {
-          border-left: 2px solid transparent;
-          padding-bottom: 0;
-        }
-        .milestone-dot {
+        .milestones-timeline-track::before {
+          content: '';
           position: absolute;
-          left: -14px;
-          top: 0;
-          width: 26px;
-          height: 26px;
+          left: 14px;
+          top: 14px;
+          bottom: 24px;
+          width: 3px;
+          background: linear-gradient(180deg, #f4a023 0%, #1e40af 50%, #0f2347 100%);
+          border-radius: 4px;
+          box-shadow: 0 0 10px rgba(244, 160, 35, 0.3);
+        }
+        .milestone-card-interactive {
+          position: relative;
+          margin-bottom: 24px;
+          animation: milestoneFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        .milestone-card-interactive:last-child {
+          margin-bottom: 0;
+        }
+        @keyframes milestoneFadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(16px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .milestone-node {
+          position: absolute;
+          left: -36px;
+          top: 14px;
+          width: 32px;
+          height: 32px;
           border-radius: 50%;
-          background: #0f2347;
+          background: linear-gradient(135deg, #0f2347, #1e3a8a);
           color: #f4a023;
           display: flex;
           align-items: center;
           justify-content: center;
+          font-size: 14px;
+          box-shadow: 0 0 0 4px #ffffff, 0 4px 12px rgba(15, 35, 71, 0.25);
+          z-index: 2;
+          transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .milestone-pulse {
+          position: absolute;
+          inset: -3px;
+          border-radius: 50%;
+          border: 2px solid rgba(244, 160, 35, 0.6);
+          animation: milestonePulse 2.4s infinite ease-out;
+        }
+        @keyframes milestonePulse {
+          0% { transform: scale(0.95); opacity: 0.8; }
+          70% { transform: scale(1.6); opacity: 0; }
+          100% { transform: scale(1.8); opacity: 0; }
+        }
+        .milestone-card-body {
+          margin-left: 14px;
+          background: #ffffff;
+          border: 1.5px solid #e2e8f0;
+          border-radius: 16px;
+          padding: 20px 24px;
+          box-shadow: 0 4px 16px rgba(15, 35, 71, 0.04);
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          position: relative;
+          overflow: hidden;
+        }
+        .milestone-card-body::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 4px;
+          background: linear-gradient(180deg, #f4a023, #0f2347);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+        .milestone-card-interactive:hover .milestone-card-body {
+          transform: translateX(8px) translateY(-3px);
+          box-shadow: 0 14px 32px rgba(15, 35, 71, 0.1), 0 0 0 1px rgba(244, 160, 35, 0.3);
+          border-color: rgba(244, 160, 35, 0.4);
+          background: linear-gradient(180deg, #ffffff 0%, #fafcff 100%);
+        }
+        .milestone-card-interactive:hover .milestone-card-body::before {
+          opacity: 1;
+        }
+        .milestone-card-interactive:hover .milestone-node {
+          transform: scale(1.2) rotate(8deg);
+          background: linear-gradient(135deg, #f4a023, #d97706);
+          color: #0f2347;
+          box-shadow: 0 0 0 6px #ffffff, 0 6px 20px rgba(244, 160, 35, 0.4);
+        }
+        .milestone-year-pill {
+          background: linear-gradient(135deg, #0f2347, #1e3a8a);
+          color: #f4a023;
+          padding: 3px 12px;
+          border-radius: 8px;
           font-size: 13px;
-          box-shadow: 0 0 0 4px #fff, 0 2px 8px rgba(15,35,71,0.2);
+          font-weight: 800;
+          letter-spacing: 0.5px;
+          box-shadow: 0 2px 6px rgba(15, 35, 71, 0.2);
+        }
+        .milestone-badge-pill {
+          font-size: 11px;
+          font-weight: 800;
+          color: #475569;
+          background: #f1f5f9;
+          padding: 3px 10px;
+          border-radius: 6px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .milestone-card-title {
+          margin: 0 0 6px;
+          font-size: 16.5px;
+          font-weight: 800;
+          color: #0f2347;
+          letter-spacing: -0.2px;
+          transition: color 0.2s ease;
+        }
+        .milestone-card-interactive:hover .milestone-card-title {
+          color: #1e3a8a;
+        }
+        .milestone-card-desc {
+          margin: 0;
+          font-size: 13.5px;
+          color: #475569;
+          line-height: 1.65;
         }
       `}</style>
 
-      {/* Hero */}
-      <header className="profile-hero">
-        <div className="hero-overlay" style={{ background: 'var(--hero-overlay-gradient, linear-gradient(135deg, rgba(15, 35, 71, 0.94) 0%, rgba(10, 25, 47, 0.88) 100%))' }} />
-        <div className="hero-content anim-fade-in">
+      {/* Unified Hero Skeleton matching all pages */}
+      <div className="premium-hero">
+        <div className="kinetic-bg" />
+        <div className="hero-content-wrapper anim-fade-in">
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(244, 160, 35, 0.18)', border: '1px solid rgba(244, 160, 35, 0.4)', borderRadius: 20, padding: '4px 14px', marginBottom: 14 }}>
             <span style={{ fontSize: 13, color: '#f4a023', fontWeight: 800, letterSpacing: 0.5 }}>ESTABLISHED 1970 • UGC 2(F) &amp; 12(B)</span>
           </div>
-          <h1 className="hero-title" style={{ fontSize: 'clamp(26px, 5vw, 42px)', fontWeight: 900, letterSpacing: '-0.5px' }}>
-            {heroTitle}
+          <h1 className="hero-title" style={{ fontSize: 'clamp(26px, 5vw, 42px)', fontWeight: 900, letterSpacing: '-0.5px', margin: '0 0 10px' }}>
+            {(() => {
+              const words = (heroTitle || "College Profile & History").trim().split(' ');
+              if (words.length <= 1) return heroTitle;
+              const last = words.pop();
+              return <>{words.join(' ')} <span>{last}</span></>;
+            })()}
           </h1>
-          <p className="hero-subtitle" style={{ maxWidth: 700, margin: '0 auto', fontSize: 15, opacity: 0.9 }}>
+          <p className="hero-subtitle" style={{ maxWidth: 720, margin: '0 auto', fontSize: 15, opacity: 0.92, color: 'rgba(255,255,255,0.9)' }}>
             {heroSubtitle}
           </p>
         </div>
-      </header>
+      </div>
 
-      {/* Overlapping Institutional Stats Strip */}
-      <div style={{ maxWidth: '1120px', margin: '-50px auto 30px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      {/* Institutional Stats Strip — Positioned cleanly below hero without overlapping */}
+      <div style={{ maxWidth: '1120px', margin: '32px auto 24px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <div style={{ background: '#fff', borderRadius: 16, padding: '20px 28px', boxShadow: '0 12px 36px rgba(15,35,71,0.09)', border: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
           {stats.map((stat, idx) => (
             <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -169,8 +288,8 @@ const CollegeProfile = () => {
           <main className="profile-main">
             {/* 1. College Profile & Institutional Identity Card */}
             <section style={{ background: '#fff', padding: '32px', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', marginBottom: '30px' }}>
-              <h2 className="section-heading" style={{ fontSize: '24px', color: '#0f2347', fontWeight: 900, margin: '0 0 8px' }}>
-                Institutional Profile
+              <h2 className="section-heading" style={{ fontSize: '24px', fontWeight: 900, margin: '0 0 8px' }}>
+                Institutional <span>Profile</span>
               </h2>
               <div className="heading-underline" style={{ width: 50, height: 4, background: '#f4a023', borderRadius: 2, marginBottom: 24 }} />
 
@@ -185,8 +304,8 @@ const CollegeProfile = () => {
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, rgba(15,35,71,0.85) 100%)' }} />
-                    <span style={{ position: 'absolute', bottom: 12, left: 14, color: '#fff', fontWeight: 800, fontSize: 13 }}>
-                      📍 Bhuda Campus, Dhanbad
+                    <span style={{ position: 'absolute', bottom: 12, left: 14, color: '#fff', fontWeight: 800, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                      <MapPin size={13} style={{ color: '#f4a023' }} /> Bhuda Campus, Dhanbad
                     </span>
                   </div>
                   <div style={{ padding: '16px 20px' }}>
@@ -228,8 +347,8 @@ const CollegeProfile = () => {
 
             {/* 2. Dual Campuses Section */}
             <section style={{ background: '#fff', padding: '32px', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', marginBottom: '30px' }}>
-              <h2 className="section-heading" style={{ fontSize: '24px', color: '#0f2347', fontWeight: 900, margin: '0 0 8px' }}>
-                Our Campuses
+              <h2 className="section-heading" style={{ fontSize: '24px', fontWeight: 900, margin: '0 0 8px' }}>
+                Our <span>Campuses</span>
               </h2>
               <div className="heading-underline" style={{ width: 50, height: 4, background: '#f4a023', borderRadius: 2, marginBottom: 20 }} />
               <p style={{ fontSize: 14.5, color: '#64748b', marginBottom: 24 }}>
@@ -267,31 +386,41 @@ const CollegeProfile = () => {
               </div>
             </section>
 
-            {/* 3. Historic Milestones (Clean Modern Steps) */}
+            {/* 3. Historic Milestones (Interactive & Animated Journey) */}
             <section style={{ background: '#fff', padding: '32px', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', marginBottom: '30px' }}>
-              <h2 className="section-heading" style={{ fontSize: '24px', color: '#0f2347', fontWeight: 900, margin: '0 0 8px' }}>
-                Historic Milestones
-              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 8 }}>
+                <h2 className="section-heading" style={{ fontSize: '24px', fontWeight: 900, margin: 0 }}>
+                  Historic Milestones &amp; <span>Heritage</span>
+                </h2>
+                <span style={{ fontSize: 12, fontWeight: 800, color: '#f4a023', background: 'rgba(244,160,35,0.12)', padding: '4px 12px', borderRadius: 20, border: '1px solid rgba(244,160,35,0.3)' }}>
+                  EST. 1970 ➔ 2026+
+                </span>
+              </div>
               <div className="heading-underline" style={{ width: 50, height: 4, background: '#f4a023', borderRadius: 2, marginBottom: 24 }} />
 
-              <div style={{ marginTop: 10 }}>
+              <div className="milestones-timeline-track">
                 {milestones.map((m, idx) => (
-                  <div key={idx} className="milestone-step">
-                    <div className="milestone-dot">{m.icon}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                      <span style={{ background: '#0f2347', color: '#f4a023', padding: '2px 10px', borderRadius: 6, fontSize: 12, fontWeight: 800 }}>
-                        {m.year}
-                      </span>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
-                        {m.badge}
-                      </span>
+                  <div key={idx} className="milestone-card-interactive" style={{ animationDelay: `${idx * 0.1}s` }}>
+                    <div className="milestone-node">
+                      <span style={{ position: 'relative', zIndex: 3 }}>{m.icon}</span>
+                      <span className="milestone-pulse" />
                     </div>
-                    <h4 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 800, color: '#0f2347' }}>
-                      {m.title}
-                    </h4>
-                    <p style={{ margin: 0, fontSize: 13.5, color: '#475569', lineHeight: 1.6 }}>
-                      {m.desc}
-                    </p>
+                    <div className="milestone-card-body">
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+                        <span className="milestone-year-pill">
+                          {m.year}
+                        </span>
+                        <span className="milestone-badge-pill">
+                          {m.badge}
+                        </span>
+                      </div>
+                      <h4 className="milestone-card-title">
+                        {m.title}
+                      </h4>
+                      <p className="milestone-card-desc">
+                        {m.desc}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -305,7 +434,7 @@ const CollegeProfile = () => {
           <aside className="profile-sidebar anim-slide-up" style={{ animationDelay: '0.4s' }}>
             {/* Quick Links Widget */}
             <div className="widget">
-              <h3 className="widget-title"><span>📑</span> Institutional Links</h3>
+              <h3 className="widget-title"><span style={{ display: 'inline-flex', alignItems: 'center', marginRight: 6 }}><BookmarkCheck size={18} style={{ color: '#f4a023' }} /></span> Institutional Links</h3>
               <ul className="quick-links">
                 {[
                   { label: "Principal's Desk", path: '/about-us/principal-message' },

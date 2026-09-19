@@ -4,7 +4,7 @@ import {
   FileText, CheckCircle2, Clock, Building2, Search, Copy, Check, 
   ArrowRight, ShieldCheck, AlertCircle, Sparkles, HelpCircle, PhoneCall
 } from 'lucide-react';
-import { collection, addDoc, doc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, setDoc, addDoc, doc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import toast from 'react-hot-toast';
@@ -86,8 +86,9 @@ export default function DocumentRequestPage() {
 
     try {
       if (db) {
-        await addDoc(collection(db, 'document_requests'), {
+        await setDoc(doc(db, 'document_requests', trackingToken), {
           ...requestPayload,
+          id: trackingToken,
           serverTimestamp: serverTimestamp()
         });
       }
@@ -130,31 +131,35 @@ export default function DocumentRequestPage() {
     setTrackedRecord(null);
 
     try {
-      // 1. Check local backup first
-      const localRequests = JSON.parse(localStorage.getItem('gnc_my_document_requests') || '[]');
-      const foundLocal = localRequests.find(r => r.trackingToken === token);
-
-      if (foundLocal) {
-        setTrackedRecord(foundLocal);
-      } else {
-        // Mock fallback preview for demo if network unavailable
-        if (token.startsWith('GNC-DOC-')) {
-          setTrackedRecord({
-            trackingToken: token,
-            studentName: 'Verified Student',
-            docTitle: 'Bonafide Certificate',
-            department: 'Computer Applications',
-            status: 'approved',
-            stage: 4,
-            createdAt: new Date().toISOString(),
-            statusRemark: 'Approved by Principal Office. Ready for collection at College Counter #2.'
-          });
-        } else {
-          setTrackingError('No document application found matching this Tracking ID. Please double check.');
+      // 1. Check live Firestore first
+      let record = null;
+      if (db) {
+        try {
+          const docSnap = await getDoc(doc(db, 'document_requests', token));
+          if (docSnap.exists()) {
+            record = { id: docSnap.id, ...docSnap.data() };
+          }
+        } catch (dbErr) {
+          console.warn('Live tracking lookup error:', dbErr);
         }
       }
+
+      // 2. Check local backup if not found online or offline
+      if (!record) {
+        const localRequests = JSON.parse(localStorage.getItem('gnc_my_document_requests') || '[]');
+        const foundLocal = localRequests.find(r => r.trackingToken === token);
+        if (foundLocal) {
+          record = foundLocal;
+        }
+      }
+
+      if (record) {
+        setTrackedRecord(record);
+      } else {
+        setTrackingError('No document application found matching this Tracking ID. Please verify your token.');
+      }
     } catch (err) {
-      setTrackingError('Unable to fetch status. Please try again.');
+      setTrackingError('Unable to fetch status. Please check your connection and try again.');
     } finally {
       setTrackingLoading(false);
     }
@@ -169,92 +174,90 @@ export default function DocumentRequestPage() {
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', sans-serif", paddingBottom: 60 }}>
-      {/* Hero Header */}
-      <section style={{
-        background: `linear-gradient(135deg, ${NAVY} 0%, #173266 100%)`,
-        color: '#ffffff',
-        padding: 'clamp(36px, 6vw, 64px) 20px',
-        textAlign: 'center',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{ maxWidth: 840, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+      {/* Unified Hero Skeleton */}
+      <section className="premium-hero">
+        <div className="kinetic-bg" />
+        <div className="hero-content-wrapper anim-fade-in">
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: 6,
             background: 'rgba(244,160,35,0.18)',
+            border: '1px solid rgba(244,160,35,0.4)',
             color: GOLD,
-            padding: '6px 16px',
+            padding: '4px 14px',
             borderRadius: 20,
             fontSize: 12,
             fontWeight: 800,
-            letterSpacing: 1.5,
+            letterSpacing: 1,
             textTransform: 'uppercase',
-            marginBottom: 14
+            marginBottom: 12
           }}>
-            <ShieldCheck size={15} /> Student Services Hub
+            <ShieldCheck size={14} /> Student Services Hub
           </div>
-          <h1 style={{ margin: '0 0 12px', fontSize: 'clamp(26px, 4.5vw, 40px)', fontWeight: 900, letterSpacing: '-1px' }}>
-            Student Document Request & Tracking Hub
+          <h1 className="hero-title" style={{ margin: '0 0 10px' }}>
+            Student Document Request &amp; <span>Tracking Hub</span>
           </h1>
-          <p style={{ margin: 0, color: 'rgba(255,255,255,0.8)', fontSize: 'clamp(14px, 1.1vw, 16px)', lineHeight: 1.6, maxWidth: 680, marginInline: 'auto' }}>
+          <p className="hero-subtitle" style={{ margin: 0, color: 'rgba(255,255,255,0.9)', maxWidth: 680 }}>
             Apply online for official institutional certificates, clearance NOCs, and track your application lifecycle in real-time.
           </p>
-
-          {/* Tab Switcher */}
-          <div style={{
-            display: 'inline-flex',
-            background: 'rgba(255,255,255,0.12)',
-            padding: 4,
-            borderRadius: 14,
-            marginTop: 28,
-            gap: 4
-          }}>
-            <button
-              onClick={() => { setActiveTab('apply'); setSubmittedToken(null); }}
-              style={{
-                padding: '10px 24px',
-                borderRadius: 10,
-                border: 'none',
-                background: activeTab === 'apply' ? GOLD : 'transparent',
-                color: activeTab === 'apply' ? NAVY : '#ffffff',
-                fontWeight: 800,
-                fontSize: 13.5,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                transition: 'all 0.2s'
-              }}
-            >
-              <FileText size={16} /> Apply for Document
-            </button>
-            <button
-              onClick={() => setActiveTab('track')}
-              style={{
-                padding: '10px 24px',
-                borderRadius: 10,
-                border: 'none',
-                background: activeTab === 'track' ? GOLD : 'transparent',
-                color: activeTab === 'track' ? NAVY : '#ffffff',
-                fontWeight: 800,
-                fontSize: 13.5,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                transition: 'all 0.2s'
-              }}
-            >
-              <Search size={16} /> Track Status
-            </button>
-          </div>
         </div>
       </section>
 
+      {/* Tab Switcher - Cleanly positioned below hero */}
+      <div style={{ display: 'flex', justifyContent: 'center', margin: '32px auto 0', padding: '0 16px', position: 'relative', zIndex: 10 }}>
+        <div style={{
+          display: 'inline-flex',
+          background: '#ffffff',
+          padding: 6,
+          borderRadius: 16,
+          boxShadow: '0 4px 20px rgba(15,35,71,0.06)',
+          border: '1px solid #e2e8f0',
+          gap: 6
+        }}>
+          <button
+            onClick={() => { setActiveTab('apply'); setSubmittedToken(null); }}
+            style={{
+              padding: '10px 24px',
+              borderRadius: 10,
+              border: 'none',
+              background: activeTab === 'apply' ? GOLD : 'transparent',
+              color: activeTab === 'apply' ? NAVY : '#64748b',
+              fontWeight: 800,
+              fontSize: 13.5,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              transition: 'all 0.2s'
+            }}
+          >
+            <FileText size={16} /> Apply for Document
+          </button>
+          <button
+            onClick={() => setActiveTab('track')}
+            style={{
+              padding: '10px 24px',
+              borderRadius: 10,
+              border: 'none',
+              background: activeTab === 'track' ? GOLD : 'transparent',
+              color: activeTab === 'track' ? NAVY : '#64748b',
+              fontWeight: 800,
+              fontSize: 13.5,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              transition: 'all 0.2s'
+            }}
+          >
+            <Search size={16} /> Track Status
+          </button>
+        </div>
+      </div>
+
       {/* Main Content Area */}
-      <div style={{ maxWidth: 1000, margin: '-30px auto 0', padding: '0 16px', position: 'relative', zIndex: 2 }}>
+      <div style={{ maxWidth: 1000, margin: '24px auto 0', padding: '0 16px', position: 'relative', zIndex: 2 }}>
         
         {/* ── TAB 1: APPLY FOR DOCUMENT ── */}
         {activeTab === 'apply' && (

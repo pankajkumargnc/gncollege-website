@@ -10,6 +10,8 @@ import { useParams } from 'react-router-dom';
 import { COLORS } from '../styles/colors';
 import LazyImg from '../components/LazyImg';
 import { resolveUrl } from '../utils/resolver';
+import { splitHeading } from '../utils/splitTitle';
+import { GraduationCap, Users, Building2, Search } from 'lucide-react';
 
 const N = COLORS.navy || '#0f2347';
 const G = COLORS.gold || '#f4a023';
@@ -93,8 +95,10 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
         <div className="premium-hero">
           <div className="kinetic-bg" />
           <div className="hero-content-wrapper">
-            <div className="hero-icon">{isTeaching ? '👨‍🏫' : '👥'}</div>
-            <h1 className="anim-fade-in">{label} Staff</h1>
+            <div className="hero-icon" style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+              {isTeaching ? <GraduationCap size={44} style={{ color: G }} /> : <Users size={44} style={{ color: G }} />}
+            </div>
+            <h1 className="hero-title anim-fade-in">{splitHeading(`${label} Staff`)}</h1>
             <p className="anim-slide-up">
               Hon'ble members of the {label.toLowerCase()} fraternity dedicated to academic excellence at Guru Nanak College, Dhanbad
             </p>
@@ -163,7 +167,11 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
                     }
                   }}
                 >
-                  {dept === 'ALL' ? '🏛️ All Departments' : dept}
+                  {dept === 'ALL' ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <Building2 size={14} /> All Departments
+                    </span>
+                  ) : dept}
                 </button>
               );
             })}
@@ -181,7 +189,9 @@ export default function StaffPage({ faculties, headless, type: forcedType }) {
         ) : filteredStaff.length === 0 ? (
           /* ── Commandment 5: Contextual Empty State ── */
           <div style={{ textAlign: 'center', padding: 'clamp(40px,6vw,64px) 20px', background: '#fff', borderRadius: 20, border: '2px dashed #e2e8f0' }}>
-            <div style={{ fontSize: 'clamp(40px,8vw,52px)', marginBottom: 16 }}>👨‍🏫</div>
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'center' }}>
+              <GraduationCap size={48} style={{ color: '#94a3b8' }} />
+            </div>
             <h3 style={{ color: N, fontWeight: 800, margin: '0 0 8px', fontSize: 'clamp(16px,2.5vw,20px)' }}>
               No data found
             </h3>

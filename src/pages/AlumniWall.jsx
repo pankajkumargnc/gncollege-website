@@ -7,6 +7,7 @@ import { resolveUrl } from '../utils/resolver';
 import { COLORS } from '../styles/colors';
 import { GraduationCap, Briefcase, Building2, Quote, Search, Sparkles, Filter, Award } from 'lucide-react';
 import PremiumPagination from '../components/PremiumPagination';
+import { splitHeading } from '../utils/splitTitle';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -215,13 +216,13 @@ export default function AlumniWall() {
           }}>
             <Sparkles size={14} /> GURU NANAK COLLEGE ALUMNI ASSOCIATION
           </div>
-          <h1>Alumni Success Wall</h1>
+          <h1 className="hero-title">{splitHeading('Alumni Success Wall')}</h1>
           <p>Celebrating over 45,000 alumni shaping industries, academia, governance, and public life globally.</p>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <div style={{ maxWidth: 1200, margin: '-40px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1200, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         {/* Search & Filter Toolbar */}
         <div style={{
           background: '#ffffff',

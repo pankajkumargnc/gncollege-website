@@ -49,16 +49,49 @@ class ErrorBoundary extends React.Component {
 
   // ── Step 2: Log karo (development mein helpful) ────────────────────
   componentDidCatch(error, info) {
-    // Development mein console mein dikhega
-    // Production mein vite.config.js ki wajah se remove ho jaayega
-
-    // Future mein yahan Firebase error logging add kar sakte ho:
-    // logError({ page: this.props.page, error: error.message, stack: info.componentStack });
+    console.error('[ErrorBoundary caught error]:', error, info);
+    this.setState({
+      errorStack: (error?.stack || '') + (info?.componentStack ? `\n\nComponent Stack:${info.componentStack}` : '')
+    });
   }
 
   // ── Step 3: Retry button ───────────────────────────────────────────
   handleReset = () => {
-    this.setState({ hasError: false, errorMsg: '', errorStack: '' });
+    this.setState({ hasError: false, errorMsg: '', errorStack: '', copied: false });
+  };
+
+  handleCopyReport = () => {
+    const url = typeof window !== 'undefined' ? window.location.href : 'Unknown URL';
+    const page = this.props.page || 'Unspecified Page';
+    const report = [
+      '=== GNC RUNTIME ERROR REPORT ===',
+      `URL: ${url}`,
+      `Page: ${page}`,
+      `Error: ${this.state.errorMsg}`,
+      '',
+      '--- Stack Trace ---',
+      this.state.errorStack || 'No stack trace captured',
+      '================================'
+    ].join('\n');
+
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(report).then(() => {
+        this.setState({ copied: true });
+        setTimeout(() => this.setState({ copied: false }), 2500);
+      }).catch(() => {});
+    }
+  };
+
+  handleClearCacheAndReload = () => {
+    try {
+      if (typeof sessionStorage !== 'undefined') sessionStorage.clear();
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem('gnc_site_settings_cache');
+        localStorage.removeItem('gnc_nav_v1');
+        localStorage.removeItem('gnc_nav_v1_ts');
+      }
+    } catch (_) {}
+    window.location.reload();
   };
 
   render() {
@@ -75,6 +108,8 @@ class ErrorBoundary extends React.Component {
     // Silent mode — kuch bhi render mat karo
     if (isMinimal) return null;
 
+    const currentUrl = typeof window !== 'undefined' ? (window.location.hash || window.location.pathname) : '';
+
     return (
       <div style={{
         minHeight:      '40vh',
@@ -89,21 +124,21 @@ class ErrorBoundary extends React.Component {
           textAlign:    'center',
           background:   '#fff',
           borderRadius: '20px',
-          padding:      '50px 40px',
-          maxWidth:     '480px',
+          padding:      '40px 32px',
+          maxWidth:     '560px',
           width:        '100%',
           boxShadow:    '0 10px 40px rgba(0,0,0,0.06)',
           border:       '1px solid #e2e8f0',
         }}>
           {/* Icon */}
-          <div style={{ fontSize: '52px', marginBottom: '16px' }}>{meta.icon}</div>
+          <div style={{ fontSize: '48px', marginBottom: '12px' }}>{meta.icon}</div>
 
           {/* Heading */}
           <h2 style={{
             color:        navy,
             fontSize:     '20px',
             fontWeight:   900,
-            margin:       '0 0 10px',
+            margin:       '0 0 8px',
             letterSpacing: '-0.3px',
           }}>
             Oops! Something went wrong
@@ -113,34 +148,90 @@ class ErrorBoundary extends React.Component {
           <p style={{
             color:        '#64748b',
             fontSize:     '14px',
-            margin:       '0 0 24px',
+            margin:       '0 0 20px',
             lineHeight:   1.6,
           }}>
             {meta.msg} Please try again or refresh the page.
           </p>
 
-          {/* Error detail — sirf development mein dikhao */}
+          {/* Error detail — visible in dev mode, open by default */}
           {import.meta.env.DEV && this.state.errorMsg && (
-            <details style={{
+            <details open style={{
               textAlign:    'left',
               background:   '#fef2f2',
               border:       '1px solid #fecaca',
-              borderRadius: '8px',
-              padding:      '12px',
+              borderRadius: '10px',
+              padding:      '14px',
               marginBottom: '20px',
-              fontSize:     '11px',
-              color:        '#dc2626',
+              fontSize:     '11.5px',
+              color:        '#b91c1c',
             }}>
-              <summary style={{ cursor: 'pointer', fontWeight: 700, marginBottom: '6px' }}>
+              <summary style={{ cursor: 'pointer', fontWeight: 800, marginBottom: '8px', color: '#991b1b', userSelect: 'none' }}>
                 🐛 Error Details (visible in dev only)
               </summary>
-              <code style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+
+              <div style={{ marginBottom: 8, padding: '6px 10px', background: '#fee2e2', borderRadius: 6, fontSize: 11 }}>
+                <div><strong>Route:</strong> <code>{currentUrl || '/'}</code></div>
+                <div><strong>Component:</strong> <code>{pageName}</code></div>
+              </div>
+
+              <code style={{ 
+                whiteSpace: 'pre-wrap', 
+                wordBreak: 'break-word', 
+                display: 'block', 
+                maxHeight: '220px', 
+                overflowY: 'auto',
+                background: '#450a0a',
+                color: '#fecaca',
+                padding: '10px 12px',
+                borderRadius: '6px',
+                lineHeight: 1.45,
+                fontFamily: 'Consolas, Monaco, monospace',
+                fontSize: '11px'
+              }}>
                 {this.state.errorMsg}
+                {this.state.errorStack && `\n\n${this.state.errorStack}`}
               </code>
+
+              <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={this.handleCopyReport}
+                  style={{
+                    background: this.state.copied ? '#16a34a' : '#dc2626',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 6,
+                    padding: '6px 12px',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'background .2s'
+                  }}
+                >
+                  {this.state.copied ? '✅ Copied to Clipboard!' : '📋 Copy Error Details'}
+                </button>
+                <button
+                  type="button"
+                  onClick={this.handleClearCacheAndReload}
+                  style={{
+                    background: '#ffffff',
+                    color: '#991b1b',
+                    border: '1px solid #fca5a5',
+                    borderRadius: 6,
+                    padding: '6px 12px',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  🧹 Clear Cache & Reload
+                </button>
+              </div>
             </details>
           )}
 
-          {/* Buttons */}
+          {/* Action Buttons */}
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
               onClick={this.handleReset}
@@ -149,7 +240,7 @@ class ErrorBoundary extends React.Component {
                 color:        '#fff',
                 border:       'none',
                 borderRadius: '10px',
-                padding:      '11px 24px',
+                padding:      '11px 22px',
                 fontSize:     '14px',
                 fontWeight:   800,
                 cursor:       'pointer',
@@ -169,7 +260,7 @@ class ErrorBoundary extends React.Component {
                 color:        '#475569',
                 border:       '1px solid #e2e8f0',
                 borderRadius: '10px',
-                padding:      '11px 24px',
+                padding:      '11px 22px',
                 fontSize:     '14px',
                 fontWeight:   700,
                 cursor:       'pointer',

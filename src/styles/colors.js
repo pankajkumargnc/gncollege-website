@@ -1,11 +1,12 @@
 export const COLORS = {
-  // Core brand
+  // Core brand — Synchronized with src/styles/index.css :root tokens
   navy:      '#0f2347',
   navyDark:  '#060e1c',
-  navyLight: '#1a3a7c',
+  navyLight: '#1a3a6b',
   gold:      '#f4a023',
   goldDark:  '#d4870e',
-  goldLight: '#fff8ed',
+  goldLight: '#fbbf24',
+  goldCream: '#fff8ed',
   red:       '#c0392b',
   white:     '#ffffff',
   lightGray: '#f8f9fa',
@@ -17,6 +18,7 @@ export const COLORS = {
   text:      '#334155',
   textMid:   '#64748b',
   textLight: '#94a3b8',
-  border:    '#e2e8f0',
-  bg:        '#f8fafc',
+  border:    '#edf2f7',
+  bg:        '#f4f7f9',
 }
+

@@ -6,6 +6,11 @@ import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import toast from 'react-hot-toast';
 import PremiumPagination from '../components/PremiumPagination';
+import { 
+  FileText, BarChart2, BookOpen, ClipboardList, Trophy, Scale, 
+  Building2, Image, Search, Filter, Calendar, FolderOpen, Download, 
+  Share2, Eye, ExternalLink 
+} from 'lucide-react';
 
 const PDFModal = lazy(() => import('../components/PDFModal'));
 
@@ -26,15 +31,15 @@ const DOC_TYPES = [
 ];
 
 const DOC_META = {
-  Document:    { icon: '📄', bg: '#EBF0FF', text: '#1a365d', border: '#BED0FF', label: 'Official Doc' },
-  Report:      { icon: '📊', bg: '#F0FFF4', text: '#1c4532', border: '#9AE6B4', label: 'Report & Audit' },
-  Syllabus:    { icon: '📚', bg: '#FFFBEB', text: '#744210', border: '#FAF089', label: 'NEP Syllabus' },
-  Circular:    { icon: '📋', bg: '#FFF5F5', text: '#742a2a', border: '#FEB2B2', label: 'Circular' },
-  Result:      { icon: '🏆', bg: '#E6FFFA', text: '#1d4044', border: '#81E6D9', label: 'Results' },
-  Regulation:  { icon: '⚖️', bg: '#F5F3FF', text: '#4C1D95', border: '#DDD6FE', label: 'Regulation & RTI' },
-  Affiliation: { icon: '🏛️', bg: '#F0F9FF', text: '#0C4A6E', border: '#BAE6FD', label: 'UGC & Affiliation' },
-  Magazine:    { icon: '📖', bg: '#FEF3C7', text: '#92400E', border: '#FCD34D', label: 'College Magazine' },
-  Poster:      { icon: '🎨', bg: '#FDF2F8', text: '#9D174D', border: '#FBCFE8', label: 'Event Poster' },
+  Document:    { icon: FileText, bg: '#EBF0FF', text: '#1a365d', border: '#BED0FF', label: 'Official Doc' },
+  Report:      { icon: BarChart2, bg: '#F0FFF4', text: '#1c4532', border: '#9AE6B4', label: 'Report & Audit' },
+  Syllabus:    { icon: BookOpen, bg: '#FFFBEB', text: '#744210', border: '#FAF089', label: 'NEP Syllabus' },
+  Circular:    { icon: ClipboardList, bg: '#FFF5F5', text: '#742a2a', border: '#FEB2B2', label: 'Circular' },
+  Result:      { icon: Trophy, bg: '#E6FFFA', text: '#1d4044', border: '#81E6D9', label: 'Results' },
+  Regulation:  { icon: Scale, bg: '#F5F3FF', text: '#4C1D95', border: '#DDD6FE', label: 'Regulation & RTI' },
+  Affiliation: { icon: Building2, bg: '#F0F9FF', text: '#0C4A6E', border: '#BAE6FD', label: 'UGC & Affiliation' },
+  Magazine:    { icon: BookOpen, bg: '#FEF3C7', text: '#92400E', border: '#FCD34D', label: 'College Magazine' },
+  Poster:      { icon: Image, bg: '#FDF2F8', text: '#9D174D', border: '#FBCFE8', label: 'Event Poster' },
 };
 
 const getTS = ts => ts?.toDate ? ts.toDate() : new Date(ts || Date.now());
@@ -174,27 +179,28 @@ export default function DocumentsPage() {
         }
       `}</style>
 
-      {/* Hero */}
-      <header className="profile-hero" style={{ backgroundImage: `url('/images/college_photo.webp')` }}>
-        <div className="hero-overlay" style={{ background: 'linear-gradient(135deg, rgba(15, 35, 71, 0.94) 0%, rgba(10, 25, 47, 0.88) 100%)' }} />
-        <div className="hero-content anim-fade-in">
+      {/* Unified Hero Skeleton */}
+      <div className="premium-hero">
+        <div className="kinetic-bg" />
+        <div className="hero-content-wrapper anim-fade-in">
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(244, 160, 35, 0.18)', border: '1px solid rgba(244, 160, 35, 0.4)', borderRadius: 20, padding: '4px 14px', marginBottom: 14 }}>
             <span style={{ fontSize: 13, color: gold, fontWeight: 800, letterSpacing: 0.5 }}>OFFICIAL REPOSITORY</span>
           </div>
-          <h1 className="hero-title" style={{ fontSize: 'clamp(26px, 5vw, 42px)', fontWeight: 900, letterSpacing: '-0.5px' }}>
-            Institutional Document Archive
+          <h1 className="hero-title" style={{ fontSize: 'clamp(26px, 5vw, 42px)', fontWeight: 900, letterSpacing: '-0.5px', margin: '0 0 10px' }}>
+            Institutional Document <span>Archive</span>
           </h1>
-          <p className="hero-subtitle" style={{ maxWidth: 720, margin: '0 auto', fontSize: 15, opacity: 0.9 }}>
+          <p className="hero-subtitle" style={{ maxWidth: 720, margin: '0 auto', fontSize: 15, opacity: 0.92, color: 'rgba(255,255,255,0.9)' }}>
             Comprehensive repository of UGC &amp; BBMKU affiliations, NEP syllabi, annual reports, audited financial disclosures, and college publications.
           </p>
         </div>
-      </header>
+      </div>
 
-      {/* Counters Section */}
-      <div style={{ maxWidth: '1120px', margin: '-50px auto 30px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      {/* Counters Section — Positioned cleanly below hero without overlapping */}
+      <div style={{ maxWidth: '1120px', margin: '32px auto 24px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <div style={{ background: '#fff', borderRadius: 16, padding: '18px 24px', boxShadow: '0 12px 36px rgba(15,35,71,0.09)', border: '1px solid #e2e8f0', display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
           {['Syllabus', 'Affiliation', 'Report', 'Circular', 'Magazine'].map(type => {
-            const m = DOC_META[type] || { icon: '📄' };
+            const m = DOC_META[type] || { icon: FileText, text: '#1a365d' };
+            const IconComp = m.icon;
             const count = typeCounts[type] || 0;
             const isSel = selType.toLowerCase() === type.toLowerCase();
             return (
@@ -215,8 +221,8 @@ export default function DocumentsPage() {
                   boxShadow: isSel ? '0 4px 12px rgba(244,160,35,0.2)' : 'none',
                 }}
               >
-                <div style={{ width: 38, height: 38, borderRadius: 10, background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
-                  {m.icon}
+                <div style={{ width: 38, height: 38, borderRadius: 10, background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <IconComp size={20} style={{ color: m.text }} />
                 </div>
                 <div style={{ textAlign: 'left' }}>
                   <div style={{ fontSize: 20, fontWeight: 900, color: navy, lineHeight: 1.1 }}>{count}</div>
@@ -323,7 +329,8 @@ export default function DocumentsPage() {
               </span>
               {DOC_TYPES.map(t => {
                 const isSelected = (selType === 'All' && t === 'All') || selType.toLowerCase() === t.toLowerCase();
-                const m = DOC_META[t] || { bg: '#f1f5f9', text: '#334155', border: '#e2e8f0', icon: '📄' };
+                const m = DOC_META[t] || { bg: '#f1f5f9', text: '#334155', border: '#e2e8f0', icon: FileText };
+                const IconComp = m.icon;
                 return (
                   <button
                     key={t}
@@ -339,10 +346,10 @@ export default function DocumentsPage() {
                       fontSize: 12,
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 4,
+                      gap: 6,
                     }}
                   >
-                    <span>{t !== 'All' ? m.icon : '📑'}</span> {t === 'All' ? 'All Archive' : m.label || t}
+                    <span>{t !== 'All' && IconComp ? <IconComp size={13} /> : <FolderOpen size={13} />}</span> {t === 'All' ? 'All Archive' : m.label || t}
                   </button>
                 );
               })}
@@ -467,8 +474,8 @@ export default function DocumentsPage() {
                               boxShadow: '0 8px 20px rgba(0,0,0,0.5)',
                             }}
                           />
-                          <span style={{ position: 'absolute', top: 12, right: 12, background: m.bg, color: m.text, border: `1px solid ${m.border}`, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 800, zIndex: 3 }}>
-                            {m.icon} {d.type || 'Document'}
+                          <span style={{ position: 'absolute', top: 12, right: 12, background: m.bg, color: m.text, border: `1px solid ${m.border}`, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 800, zIndex: 3, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                            {React.createElement(m.icon, { size: 12 })} {d.type || 'Document'}
                           </span>
                         </div>
                       ) : (
@@ -478,8 +485,8 @@ export default function DocumentsPage() {
                       <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                         {!d.coverImage && (
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                            <div style={{ width: 44, height: 44, borderRadius: 12, background: m.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, border: `1px solid ${m.border}` }}>
-                              {m.icon}
+                            <div style={{ width: 44, height: 44, borderRadius: 12, background: m.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${m.border}` }}>
+                              {React.createElement(m.icon, { size: 22, style: { color: m.text } })}
                             </div>
                             <span style={{ background: m.bg, color: m.text, border: `1px solid ${m.border}`, padding: '3px 11px', borderRadius: 20, fontSize: 11.5, fontWeight: 800 }}>
                               {d.type || 'Document'}
@@ -498,7 +505,9 @@ export default function DocumentsPage() {
                         )}
 
                         <div style={{ marginTop: 'auto', paddingTop: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f5f9', marginBottom: 14 }}>
-                          <span style={{ fontSize: 11.5, color: '#94a3b8', fontWeight: 600 }}>📅 {fmtDt(d.createdAt)}</span>
+                          <span style={{ fontSize: 11.5, color: '#94a3b8', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                            <Calendar size={12} /> {fmtDt(d.createdAt)}
+                          </span>
                           {d.fileSize && (
                             <span style={{ fontSize: 11, color: '#64748b', background: '#f8fafc', padding: '2px 8px', borderRadius: 6, border: '1px solid #e2e8f0', fontWeight: 700 }}>
                               {d.fileSize}
@@ -591,8 +600,8 @@ export default function DocumentsPage() {
                 {Object.entries(grouped).sort((a, b) => b[0] - a[0]).map(([year, items]) => (
                   <div key={year} style={{ marginBottom: 28 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-                      <span style={{ background: navy, color: gold, borderRadius: 8, padding: '5px 16px', fontWeight: 800, fontSize: 12.5 }}>
-                        📂 {year}
+                      <span style={{ background: navy, color: gold, borderRadius: 8, padding: '5px 16px', fontWeight: 800, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                        <FolderOpen size={13} /> {year}
                       </span>
                       <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
                       <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 700 }}>
@@ -619,8 +628,8 @@ export default function DocumentsPage() {
                               boxShadow: '0 2px 8px rgba(15,35,71,0.03)',
                             }}
                           >
-                            <div style={{ width: 42, height: 42, borderRadius: 10, background: m.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0, border: `1px solid ${m.border}` }}>
-                              {m.icon}
+                            <div style={{ width: 42, height: 42, borderRadius: 10, background: m.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${m.border}` }}>
+                              {React.createElement(m.icon, { size: 20, style: { color: m.text } })}
                             </div>
 
                             <div style={{ flex: 1, minWidth: 0 }}>
@@ -631,7 +640,9 @@ export default function DocumentsPage() {
                                 <span style={{ background: m.bg, color: m.text, border: `1px solid ${m.border}`, padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 700 }}>
                                   {d.type || 'Document'}
                                 </span>
-                                <span style={{ fontSize: 12, color: '#94a3b8' }}>📅 {fmtDt(d.createdAt)}</span>
+                                <span style={{ fontSize: 12, color: '#94a3b8', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                  <Calendar size={11} /> {fmtDt(d.createdAt)}
+                                </span>
                                 {d.fileSize && <span style={{ fontSize: 11, color: '#64748b' }}>• {d.fileSize}</span>}
                               </div>
                             </div>

@@ -7,6 +7,7 @@ import { COLORS } from '../styles/colors';
 import DOMPurify from 'dompurify';
 import toast from 'react-hot-toast';
 import PremiumPagination from '../components/PremiumPagination';
+import { Megaphone, Trophy, Newspaper, Building2 } from 'lucide-react';
 
 const PDFModal = lazy(() => import('../components/PDFModal'));
 
@@ -15,15 +16,15 @@ const CATEGORIES   = ['All', 'News', 'Achievement', 'Admission', 'Examination', 
 const ITEMS_PER_PAGE = 12;
 
 const TYPE_CONFIG = {
-  News:        { label: 'News 📢',        bg: '#EBF0FF', text: '#1a365d', border: '#BED0FF', dot: '#4a7fd4' },
-  Achievement: { label: 'Achievement 🏆', bg: '#F0FFF4', text: '#1c4532', border: '#9AE6B4', dot: '#38a169' },
-  Admission:   { label: 'Admission 🎓',   bg: '#FFF7ED', text: '#9A3412', border: '#FED7AA', dot: '#F97316' },
-  Examination: { label: 'Examination 📝', bg: '#FEF2F2', text: '#991B1B', border: '#FECACA', dot: '#EF4444' },
-  Result:      { label: 'Result 📊',      bg: '#FFF5F5', text: '#742a2a', border: '#FEB2B2', dot: '#e53e3e' },
-  Placement:   { label: 'Placement 💼',   bg: '#EFF6FF', text: '#1E40AF', border: '#BFDBFE', dot: '#3B82F6' },
-  Sports:      { label: 'Sports 🏅',      bg: '#ECFDF5', text: '#065F46', border: '#A7F3D0', dot: '#10B981' },
-  Scholarship: { label: 'Scholarship 💰', bg: '#FAF5FF', text: '#44337a', border: '#E9D8FD', dot: '#805ad5' },
-  Update:      { label: 'Update ⚡',      bg: '#FFFBEB', text: '#744210', border: '#FAF089', dot: '#d69e2e' },
+  News:        { label: 'News',        bg: '#EBF0FF', text: '#1a365d', border: '#BED0FF', dot: '#4a7fd4' },
+  Achievement: { label: 'Achievement', bg: '#F0FFF4', text: '#1c4532', border: '#9AE6B4', dot: '#38a169' },
+  Admission:   { label: 'Admission',   bg: '#FFF7ED', text: '#9A3412', border: '#FED7AA', dot: '#F97316' },
+  Examination: { label: 'Examination', bg: '#FEF2F2', text: '#991B1B', border: '#FECACA', dot: '#EF4444' },
+  Result:      { label: 'Result',      bg: '#FFF5F5', text: '#742a2a', border: '#FEB2B2', dot: '#e53e3e' },
+  Placement:   { label: 'Placement',   bg: '#EFF6FF', text: '#1E40AF', border: '#BFDBFE', dot: '#3B82F6' },
+  Sports:      { label: 'Sports',      bg: '#ECFDF5', text: '#065F46', border: '#A7F3D0', dot: '#10B981' },
+  Scholarship: { label: 'Scholarship', bg: '#FAF5FF', text: '#44337a', border: '#E9D8FD', dot: '#805ad5' },
+  Update:      { label: 'Update',      bg: '#FFFBEB', text: '#744210', border: '#FAF089', dot: '#d69e2e' },
 };
 
 // Press & Media Clippings data celebrating GNC's regional media presence
@@ -270,41 +271,44 @@ export default function NewsPage() {
         }
       `}</style>
 
-      {/* Hero */}
-      <header className="profile-hero" style={{ backgroundImage: `url('/images/college_photo.webp')` }}>
-        <div className="hero-overlay" style={{ background: 'linear-gradient(135deg, rgba(15, 35, 71, 0.94) 0%, rgba(10, 25, 47, 0.88) 100%)' }} />
-        <div className="hero-content anim-fade-in">
+      {/* Unified Hero Skeleton */}
+      <div className="premium-hero">
+        <div className="kinetic-bg" />
+        <div className="hero-content-wrapper anim-fade-in">
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(244, 160, 35, 0.18)', border: '1px solid rgba(244, 160, 35, 0.4)', borderRadius: 20, padding: '4px 14px', marginBottom: 14 }}>
             <span style={{ fontSize: 13, color: gold, fontWeight: 800, letterSpacing: 0.5 }}>MEDIA &amp; BULLETINS</span>
           </div>
-          <h1 className="hero-title" style={{ fontSize: 'clamp(26px, 5vw, 42px)', fontWeight: 900, letterSpacing: '-0.5px' }}>
-            News &amp; Media Coverage
+          <h1 className="hero-title" style={{ fontSize: 'clamp(26px, 5vw, 42px)', fontWeight: 900, letterSpacing: '-0.5px', margin: '0 0 10px' }}>
+            News &amp; Media <span>Coverage</span>
           </h1>
-          <p className="hero-subtitle" style={{ maxWidth: 700, margin: '0 auto', fontSize: 15, opacity: 0.9 }}>
+          <p className="hero-subtitle" style={{ maxWidth: 720, margin: '0 auto', fontSize: 15, opacity: 0.92, color: 'rgba(255,255,255,0.9)' }}>
             Live announcements, academic milestones, student achievements, and regional press media coverage of Guru Nanak College, Dhanbad.
           </p>
         </div>
-      </header>
+      </div>
 
-      {/* Top Statistical Overview Banner */}
-      <div style={{ maxWidth: '1120px', margin: '-50px auto 30px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      {/* Top Statistical Overview Banner — Positioned cleanly below hero without overlapping */}
+      <div style={{ maxWidth: '1120px', margin: '32px auto 24px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <div style={{ background: '#fff', borderRadius: 16, padding: '18px 24px', boxShadow: '0 12px 36px rgba(15,35,71,0.09)', border: '1px solid #e2e8f0', display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'space-around', alignItems: 'center' }}>
           {[
-            { val: newsList.length, label: 'Official Bulletins', icon: '📢', color: '#1E40AF' },
-            { val: newsList.filter(n => n.type === 'Achievement').length, label: 'Campus Achievements', icon: '🏆', color: '#047857' },
-            { val: PRESS_CLIPPINGS.length, label: 'Press Media Features', icon: '📰', color: '#9333EA' },
-            { val: years.length > 1 ? `${years.length - 1}+ Yrs` : 'Active', label: 'Archival Records', icon: '🏛️', color: '#D97706' },
-          ].map((stat, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 170 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: `${stat.color}14`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>
-                {stat.icon}
+            { val: newsList.length, label: 'Official Bulletins', icon: Megaphone, color: '#1E40AF' },
+            { val: newsList.filter(n => n.type === 'Achievement').length, label: 'Campus Achievements', icon: Trophy, color: '#047857' },
+            { val: PRESS_CLIPPINGS.length, label: 'Press Media Features', icon: Newspaper, color: '#9333EA' },
+            { val: years.length > 1 ? `${years.length - 1}+ Yrs` : 'Active', label: 'Archival Records', icon: Building2, color: '#D97706' },
+          ].map((stat, i) => {
+            const IconComp = stat.icon;
+            return (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 170 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: `${stat.color}14`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <IconComp size={22} style={{ color: stat.color }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: navy, lineHeight: 1.1 }}>{stat.val}</div>
+                  <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>{stat.label}</div>
+                </div>
               </div>
-              <div>
-                <div style={{ fontSize: 22, fontWeight: 900, color: navy, lineHeight: 1.1 }}>{stat.val}</div>
-                <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>{stat.label}</div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

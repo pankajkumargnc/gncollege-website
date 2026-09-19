@@ -11,6 +11,8 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import PremiumPagination from '../components/PremiumPagination';
+import { splitHeading } from '../utils/splitTitle';
+import { Video, Film, Calendar, Eye, ThumbsUp, Tv, AlertCircle, RotateCw } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 9; // 3×3 grid pe perfect fit
 
@@ -122,9 +124,14 @@ export default function VideoGallery() {
 
   if (!ready) {
     return (
-      <div style={{ background: '#f8fafc', minHeight: '100dvh', padding: '70px 20px', textAlign: 'center' }}>
-        <h1 style={{ color: N, fontSize: 'clamp(28px,5vw,48px)', fontWeight: 900, margin: '0 0 12px' }}>🎬 Video Gallery</h1>
-        <p style={{ color: '#94a3b8' }}>Loading video gallery...</p>
+      <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', sans-serif" }}>
+        <div className="premium-hero">
+          <div className="kinetic-bg" />
+          <div className="hero-content-wrapper anim-fade-in">
+            <h1 className="hero-title">{splitHeading('Video Gallery')}</h1>
+            <p className="hero-subtitle">Loading campus videos...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -146,23 +153,15 @@ export default function VideoGallery() {
         `}</style>
 
         {/* Hero */}
-        <div style={{ background:`linear-gradient(135deg,${N} 0%,#1a3a7c 100%)`, padding:'70px 20px 60px', textAlign:'center', position:'relative', overflow:'hidden' }}>
-          <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(rgba(244,160,35,.07) 1px,transparent 1px)', backgroundSize:'28px 28px', pointerEvents:'none' }} />
-          <div style={{ position:'absolute', top:0, left:0, right:0, height:4, background:G }} />
-          <div style={{ position:'relative', zIndex:1 }}>
-
-            <h1 style={{ color:'#fff', fontSize:'clamp(28px,5vw,48px)', fontWeight:900, margin:'0 0 12px', letterSpacing:'-1px' }}>🎬 Video Gallery</h1>
-            <p style={{ color:'rgba(255,255,255,.65)', fontSize:15, maxWidth:520, margin:'0 auto 24px' }}>
-              Latest campus videos from the official {channel} channel
-            </p>
-            <div style={{ display:'inline-block', background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.15)', borderRadius:10, padding:'10px 22px' }}>
-              <div style={{ fontSize:22, fontWeight:900, color:G, lineHeight:1 }}>{videoIds.length}</div>
-              <div style={{ fontSize:11, color:'rgba(255,255,255,.55)', marginTop:3 }}>Videos</div>
-            </div>
+        <div className="premium-hero">
+          <div className="kinetic-bg" />
+          <div className="hero-content-wrapper anim-fade-in">
+            <h1 className="hero-title">{splitHeading('Video Gallery')}</h1>
+            <p className="hero-subtitle">Latest campus videos from the official {channel} channel • {videoIds.length} Videos</p>
           </div>
         </div>
 
-        <div style={{ maxWidth:1280, margin:'0 auto', padding:'48px 20px' }}>
+        <div style={{ maxWidth:1280, margin:'0 auto', padding:'32px 20px' }}>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(min(100%, 320px),1fr))', gap:24 }}>
             {paginatedIds.map((vid, i) => {
               const globalIdx = (currentPage - 1) * ITEMS_PER_PAGE + i;
@@ -217,14 +216,16 @@ export default function VideoGallery() {
     return (
       <div style={{ background:'#f8fafc', minHeight:'100dvh', fontFamily:"'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
         {/* Hero */}
-        <div style={{ background:`linear-gradient(135deg,${N} 0%,#1a3a7c 100%)`, padding:'70px 20px 60px', textAlign:'center', position:'relative', overflow:'hidden' }}>
-          <div style={{ position:'absolute', top:0, left:0, right:0, height:4, background:G }} />
-
-          <h1 style={{ color:'#fff', fontSize:'clamp(28px,5vw,48px)', fontWeight:900, margin:'0 0 12px' }}>🎬 Video Gallery</h1>
+        <div className="premium-hero">
+          <div className="kinetic-bg" />
+          <div className="hero-content-wrapper anim-fade-in">
+            <h1 className="hero-title">{splitHeading('Video Gallery')}</h1>
+            <p className="hero-subtitle">Official video repository of Guru Nanak College, Dhanbad</p>
+          </div>
         </div>
-        <div style={{ maxWidth:600, margin:'60px auto', padding:'0 20px', textAlign:'center' }}>
+        <div style={{ maxWidth:600, margin:'40px auto', padding:'0 20px', textAlign:'center' }}>
           <div style={{ background:'#fff', borderRadius:20, padding:'48px 32px', boxShadow:'0 8px 30px rgba(15,35,71,.07)', border:'1px solid #e2e8f0' }}>
-            <div style={{ fontSize:60, marginBottom:16 }}>📺</div>
+            <Tv size={56} style={{ color: N, margin: '0 auto 16px', display: 'block' }} />
             <h2 style={{ color:N, fontWeight:900, margin:'0 0 8px' }}>Videos Coming Soon</h2>
             <p style={{ color: '#64748b', fontSize: 14, marginBottom: 24 }}>Add videos via the YouTube Manager tab in the Admin Panel</p>
             <Link to="/" style={{ display:'inline-block', background:N, color:'#fff', padding:'11px 28px', borderRadius:8, fontWeight:700, textDecoration:'none', fontSize:14 }}>
@@ -257,26 +258,11 @@ export default function VideoGallery() {
       `}</style>
 
       {/* Hero */}
-      <div style={{ background:`linear-gradient(135deg,${N} 0%,#1a3a7c 100%)`, padding:'70px 20px 60px', textAlign:'center', position:'relative', overflow:'hidden' }}>
-        <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(rgba(244,160,35,.07) 1px,transparent 1px)', backgroundSize:'28px 28px', pointerEvents:'none' }} />
-        <div style={{ position:'absolute', top:0, left:0, right:0, height:4, background:G }} />
-        <div style={{ position:'relative', zIndex:1 }}>
-
-          <h1 style={{ color:'#fff', fontSize:'clamp(28px,5vw,48px)', fontWeight:900, margin:'0 0 12px' }}>🎬 Video Gallery</h1>
-          <p style={{ color:'rgba(255,255,255,.65)', fontSize:15, maxWidth:520, margin:'0 auto 24px' }}>
-            Follow latest college events, seminars, and cultural programs
-          </p>
-          <div style={{ display:'flex', gap:14, flexWrap:'wrap', justifyContent:'center' }}>
-            {[
-              { val:videos.length, label:'Videos' },
-              { val:fmtCount(videos.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0)), label:'Total Views' },
-            ].map((s,i) => (
-              <div key={i} style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.18)', borderRadius:10, padding:'10px 22px', backdropFilter:'blur(8px)' }}>
-                <div style={{ fontSize:22, fontWeight:900, color:G, lineHeight:1 }}>{s.val}</div>
-                <div style={{ fontSize:11, color:'rgba(255,255,255,.55)', marginTop:3 }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
+      <div className="premium-hero">
+        <div className="kinetic-bg" />
+        <div className="hero-content-wrapper anim-fade-in">
+          <h1 className="hero-title">{splitHeading('Video Gallery')}</h1>
+          <p className="hero-subtitle">Follow latest college events, seminars, and cultural programs • {videos.length} Videos</p>
         </div>
       </div>
 
@@ -291,11 +277,11 @@ export default function VideoGallery() {
 
         {error && (
           <div style={{ textAlign:'center', padding:'60px 20px', background:'#fff5f5', borderRadius:16, border:'1px solid #fed7d7' }}>
-            <div style={{ fontSize:44, marginBottom:12 }}>⚠️</div>
+            <AlertCircle size={44} style={{ color:'#c53030', margin:'0 auto 12px', display:'block' }} />
             <h3 style={{ color:'#c53030', margin:'0 0 8px' }}>API Error</h3>
             <p style={{ color:'#718096' }}>{error}</p>
-            <button onClick={fetchVideos} style={{ marginTop:16, padding:'10px 24px', background:N, color:'#fff', border:'none', borderRadius:10, fontWeight:700, cursor:'pointer', fontSize:14, fontFamily:'inherit' }}>
-              🔄 Retry
+            <button onClick={fetchVideos} style={{ marginTop:16, padding:'10px 24px', background:N, color:'#fff', border:'none', borderRadius:10, fontWeight:700, cursor:'pointer', fontSize:14, fontFamily:'inherit', display:'inline-flex', alignItems:'center', gap:6 }}>
+              <RotateCw size={15} /> Retry
             </button>
           </div>
         )}
@@ -307,8 +293,8 @@ export default function VideoGallery() {
               <span style={{ fontSize:11, fontWeight:700, color:'#a0aec0', textTransform:'uppercase', letterSpacing:.8 }}>FILTER:</span>
               {TYPES.map(t => (
                 <button key={t} className="yt-filter-btn" onClick={() => setFilter(t)}
-                  style={{ padding:'6px 16px', borderRadius:20, border:`2px solid ${filter===t?N:'#e2e8f0'}`, background:filter===t?N:'transparent', color:filter===t?'#fff':'#718096', fontWeight:700, fontSize:12.5, textTransform:'capitalize' }}>
-                  {t === 'all' ? '🎬 All' : t.charAt(0).toUpperCase()+t.slice(1)}
+                  style={{ padding:'6px 16px', borderRadius:20, border:`2px solid ${filter===t?N:'#e2e8f0'}`, background:filter===t?N:'transparent', color:filter===t?'#fff':'#718096', fontWeight:700, fontSize:12.5, textTransform:'capitalize', display:'inline-flex', alignItems:'center', gap:6 }}>
+                  {t === 'all' ? <><Film size={13} /> All</> : t.charAt(0).toUpperCase()+t.slice(1)}
                 </button>
               ))}
               <span style={{ marginLeft:'auto', background:'#f0f4ff', color:N, borderRadius:20, padding:'5px 14px', fontSize:12.5, fontWeight:800 }}>
@@ -356,10 +342,12 @@ export default function VideoGallery() {
                         <h3 style={{ margin:'0 0 8px', fontSize:15, fontWeight:800, color:N, lineHeight:1.4, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
                           {sn.title}
                         </h3>
-                        <p style={{ margin:'0 0 12px', fontSize:12, color:'#a0aec0', fontWeight:600 }}>📅 {fmtDate(sn.publishedAt)}</p>
-                        <div style={{ display:'flex', gap:14, fontSize:12, color:'#718096', fontWeight:700 }}>
-                          <span>👁 {fmtCount(st.viewCount)} views</span>
-                          <span>👍 {fmtCount(st.likeCount)}</span>
+                        <p style={{ margin:'0 0 12px', fontSize:12, color:'#a0aec0', fontWeight:600, display:'inline-flex', alignItems:'center', gap:5 }}>
+                          <Calendar size={13} /> {fmtDate(sn.publishedAt)}
+                        </p>
+                        <div style={{ display:'flex', gap:14, fontSize:12, color:'#718096', fontWeight:700, alignItems:'center' }}>
+                          <span style={{ display:'inline-flex', alignItems:'center', gap:4 }}><Eye size={13} /> {fmtCount(st.viewCount)} views</span>
+                          <span style={{ display:'inline-flex', alignItems:'center', gap:4 }}><ThumbsUp size={13} /> {fmtCount(st.likeCount)}</span>
                           <span style={{ marginLeft:'auto' }}>
                             <a href={`https://youtube.com/watch?v=${vid}`} target="_blank" rel="noreferrer"
                               style={{ color:'#ff0000', fontWeight:800, textDecoration:'none', fontSize:12 }}>
@@ -376,7 +364,7 @@ export default function VideoGallery() {
 
             {filtered.length === 0 && (
               <div style={{ textAlign:'center', padding:'50px', color:'#a0aec0' }}>
-                <div style={{ fontSize:44, marginBottom:10 }}>🎬</div>
+                <Film size={44} style={{ color: '#94a3b8', margin: '0 auto 12px', display: 'block' }} />
                 <p style={{ fontWeight:600 }}>No videos found in this category</p>
               </div>
             )}

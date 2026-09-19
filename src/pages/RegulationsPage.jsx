@@ -5,6 +5,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useDriveDocs } from '../hooks/useDriveDocs';
 import PDFModal from '../components/PDFModal';
 import { COLORS } from '../styles/colors';
+import { FolderOpen, FileText, Calendar, HardDrive, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function RegulationsPage() {
   const [selectedPdf, setSelectedPdf] = useState(null);
@@ -20,35 +21,31 @@ export default function RegulationsPage() {
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
 
       {/* Hero */}
-      <header style={{
-        position:'relative', padding:'80px 20px',
-        background:`url('https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=2070&auto=format&fit=crop') center/cover`,
-        borderBottom:'1px solid #e2e8f0',
-      }}>
-        <div style={{ position:'absolute', inset:0, background:`linear-gradient(to right, ${COLORS.navy}f2, ${COLORS.navy}cc)` }} />
-        <div style={{ position:'relative', zIndex:1, maxWidth:'1000px', margin:'0 auto', textAlign:'center' }}>
-          <h1 style={{ color:'#fff', fontSize:'42px', fontWeight:900, margin:'0 0 15px', letterSpacing:'-1px' }}>
-            📜 College Regulations &amp; Byelaws
+      <header className="premium-hero">
+        <div className="kinetic-bg" />
+        <div className="hero-content-wrapper anim-fade-in">
+          <h1 className="hero-title" style={{ margin: '0 0 10px' }}>
+            College Regulations &amp; <span>Byelaws</span>
           </h1>
-          <p style={{ color:'#cbd5e1', fontSize:'18px', maxWidth:'650px', margin:'0 auto', lineHeight:1.6 }}>
+          <p className="hero-subtitle" style={{ maxWidth: 650, margin: '0 auto' }}>
             Official guidelines, academic rules, and administrative byelaws of Guru Nanak College and Universities (BBMKU/VBU).
           </p>
         </div>
       </header>
 
       {/* Main */}
-      <div style={{ maxWidth:'1000px', margin:'-30px auto 80px', padding:'0 20px', position:'relative', zIndex:10 }}>
+      <div style={{ maxWidth:'1000px', margin:'32px auto 80px', padding:'0 20px', position:'relative', zIndex:10 }}>
         <div style={{ background:'#fff', borderRadius:'16px', padding:'30px', boxShadow:'0 10px 40px rgba(0,0,0,0.05)', border:'1px solid #e2e8f0' }}>
 
           <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'25px', borderBottom:'2px solid #f1f5f9', paddingBottom:'15px' }}>
-            <span style={{ fontSize:'24px' }}>📂</span>
+            <FolderOpen size={22} style={{ color: COLORS.navy }} />
             <h2 style={{ fontSize:'20px', fontWeight:800, color:COLORS.navy, margin:0 }}>Official Documents</h2>
           </div>
 
           {/* Loading */}
           {loading && (
-            <div style={{ textAlign:'center', padding:'40px', color:COLORS.navy, fontWeight:800 }}>
-              <span style={{ display:'inline-block', animation:'spin 1s linear infinite', marginRight:10 }}>⏳</span>
+            <div style={{ textAlign:'center', padding:'40px', color:COLORS.navy, fontWeight:800, display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
+              <Loader2 size={20} style={{ animation:'spin 1s linear infinite' }} />
               Syncing with Google Drive...
             </div>
           )}
@@ -56,7 +53,8 @@ export default function RegulationsPage() {
           {/* Error */}
           {error && !loading && (
             <div style={{ textAlign:'center', padding:'30px', background:'#fef2f2', color:'#ef4444', borderRadius:'12px', fontWeight:'bold' }}>
-              ⚠️ Failed to fetch regulations: {error}
+              <AlertCircle size={20} style={{ display:'inline-block', verticalAlign:'middle', marginRight:6 }} />
+              Failed to fetch regulations: {error}
               <br />
               <span style={{ fontSize:12, fontWeight:500 }}>
                 Check VITE_DRIVE_REGULATIONS_FOLDER in your .env file and ensure folder is shared publicly.
@@ -82,8 +80,12 @@ export default function RegulationsPage() {
                 <div>
                   <h3 style={{ margin:'0 0 8px 0', color:COLORS.navy, fontSize:'17px', fontWeight:800 }}>{doc.name}</h3>
                   <div style={{ display:'flex', gap:'12px', fontSize:'12px', color:'#64748b', fontWeight:700 }}>
-                    <span style={{ background:'#f1f5f9', padding:'4px 10px', borderRadius:'6px' }}>📅 {doc.date}</span>
-                    <span style={{ background:'#f1f5f9', padding:'4px 10px', borderRadius:'6px' }}>💾 {doc.size}</span>
+                    <span style={{ background:'#f1f5f9', padding:'4px 10px', borderRadius:'6px', display:'inline-flex', alignItems:'center', gap:5 }}>
+                      <Calendar size={12} /> {doc.date}
+                    </span>
+                    <span style={{ background:'#f1f5f9', padding:'4px 10px', borderRadius:'6px', display:'inline-flex', alignItems:'center', gap:5 }}>
+                      <HardDrive size={12} /> {doc.size}
+                    </span>
                   </div>
                 </div>
                 <button
@@ -92,7 +94,7 @@ export default function RegulationsPage() {
                   onMouseEnter={e => e.currentTarget.style.background=COLORS.gold}
                   onMouseLeave={e => e.currentTarget.style.background=COLORS.navy}
                 >
-                  📄 Read PDF ›
+                  <FileText size={14} /> Read PDF ›
                 </button>
               </div>
             ))}

@@ -81,13 +81,20 @@ export default function SikhHeritagePage() {
         }
 
         .sh-hero {
-          background: linear-gradient(135deg, #060e1c 0%, #0f2347 45%, #1a3a6b 85%, #d97706 130%);
-          padding: clamp(60px, 8vw, 110px) 20px clamp(40px, 6vw, 70px);
+          background: linear-gradient(135deg, #0a1730 0%, #0f2347 50%, #0a1730 100%);
+          background-size: 250% 250%;
+          animation: deepNavyFlow 10s ease-in-out infinite alternate;
+          min-height: clamp(260px, 26vw, 340px);
+          padding: clamp(48px, 5.5vw, 68px) clamp(20px, 4vw, 32px);
           color: #fff;
           text-align: center;
           position: relative;
           overflow: hidden;
-          border-bottom: 3px solid #f4a023;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
         }
         .sh-hero-pattern {
           position: absolute; inset: 0; opacity: 0.05;
@@ -113,13 +120,19 @@ export default function SikhHeritagePage() {
         }
         .sh-title {
           font-family: 'Plus Jakarta Sans', sans-serif;
-          font-size: clamp(28px, 4.5vw, 50px);
+          font-size: clamp(24px, 3.6vw, 44px);
           font-weight: 900;
           letter-spacing: -0.02em;
           margin: 0 0 16px;
           line-height: 1.15;
           color: #ffffff;
           text-shadow: 0 2px 14px rgba(0,0,0,0.6);
+          white-space: nowrap;
+        }
+        @media (max-width: 768px) {
+          .sh-title {
+            white-space: normal;
+          }
         }
         .sh-title-white {
           color: #ffffff !important;
@@ -169,7 +182,7 @@ export default function SikhHeritagePage() {
         /* ── Tabs Navigation ── */
         .sh-nav-wrap {
           max-width: 1200px;
-          margin: -28px auto 40px;
+          margin: 32px auto 40px;
           padding: 0 20px;
           position: relative;
           z-index: 10;
@@ -447,34 +460,34 @@ export default function SikhHeritagePage() {
       `}</style>
 
       {/* HERO SECTION */}
-      <section className="sh-hero">
-        <div className="sh-hero-pattern" />
-        <div style={{ position: 'relative', zIndex: 2, maxWidth: 960, margin: '0 auto' }}>
-          <div className="sh-khanda-emblem">☬</div>
-          <div className="sh-gurmukhi-lead">ੴ ਸਤਿਗੁਰ ਪ੍ਰਸਾਦਿ • ਸਿੱਖ ਵਿਰਾਸਤ</div>
-          <h1 className="sh-title" style={{ color: '#ffffff' }}>
-            <span className="sh-title-white" style={{ color: '#ffffff' }}>Sikh Heritage</span> & <span className="sh-title-gold" style={{ color: '#f4a023' }}>Minority Excellence</span>
+      <section className="premium-hero">
+        <div className="kinetic-bg" />
+        <div className="hero-content-wrapper anim-fade-in">
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(244, 160, 35, 0.18)', border: '1px solid rgba(244, 160, 35, 0.4)', borderRadius: 20, padding: '4px 14px', marginBottom: 12 }}>
+            <span style={{ fontSize: 13, color: '#f4a023', fontWeight: 800, letterSpacing: 0.5 }}>☬ ੴ ਸਤਿਗੁਰ ਪ੍ਰਸਾਦਿ • SIKH MINORITY INSTITUTION</span>
+          </div>
+          <h1 className="hero-title" style={{ margin: '0 0 10px' }}>
+            Sikh Heritage &amp; <span>Minority Excellence</span>
           </h1>
-          <p className="sh-subtitle">
-            Founded in 1970 under the eternal light of Guru Nanak Dev Ji, Guru Nanak College, Dhanbad stands as 
-            Jharkhand's premier Sikh Minority Institution — championing inclusive higher education, academic rigor, 
-            and selfless community service (ਸੇਵਾ).
+          <p className="hero-subtitle" style={{ maxWidth: 740, margin: '0 auto' }}>
+            Founded in 1970 under the eternal light of Guru Nanak Dev Ji, Guru Nanak College, Dhanbad stands as Jharkhand's premier Sikh Minority Institution.
           </p>
+        </div>
+      </section>
 
+      {/* TABS NAVIGATION & CONTEMPLATION CHIME */}
+      <div className="sh-nav-wrap">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
           <button 
             onClick={handleChimeClick} 
             className={`sh-chime-btn ${isPlayingChime ? 'active' : ''}`}
             title="Listen to peaceful meditative chime"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', color: '#0f2347', border: '1.5px solid #f4a023', boxShadow: '0 4px 14px rgba(15,35,71,0.06)' }}
           >
             <Bell size={15} color="#f4a023" />
             <span>{isPlayingChime ? 'Playing Harmonic Chime...' : 'Contemplate (Harmonic Chime)'}</span>
           </button>
         </div>
-      </section>
-
-      {/* TABS NAVIGATION */}
-      <div className="sh-nav-wrap">
         <div className="sh-tabs-row">
           {TABS.map(tab => (
             <button

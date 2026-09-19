@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import '../styles/index.css';
 import { resolveUrl } from '../utils/resolver';
+import { splitHeading } from '../utils/splitTitle';
 
 const N = COLORS.navy || '#0f2347';
 const G = COLORS.gold || '#f4a023';
@@ -99,7 +100,7 @@ function PageHero({ title, subtitle, icon }) {
       <div className="kinetic-bg" />
       <div className="hero-content-wrapper">
         {icon && <div className="hero-icon">{icon}</div>}
-        <h1>{title}</h1>
+        <h1 className="hero-title">{splitHeading(title)}</h1>
         {subtitle && <p>{subtitle}</p>}
       </div>
     </div>

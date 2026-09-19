@@ -9,7 +9,8 @@ import { useDriveDocs } from '../hooks/useDriveDocs';
 import useAppData from '../hooks/useAppData';
 import { 
   Bell, Volume2, VolumeX, Share2, Search, Calendar, FileText, 
-  Sparkles, ExternalLink, Check, Filter, AlertCircle, BookmarkCheck
+  Sparkles, ExternalLink, Check, Filter, AlertCircle, BookmarkCheck,
+  Megaphone, FileEdit, GraduationCap, Palmtree, BookOpen
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -17,12 +18,12 @@ const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct
 const ITEMS_PER_PAGE = 15;
 
 const CATEGORIES = [
-  { id: 'All', label: 'All Notices', icon: '📢' },
-  { id: 'exam', label: 'Examinations', icon: '📝' },
-  { id: 'admission', label: 'Admissions', icon: '🎓' },
-  { id: 'holiday', label: 'Holidays & Recess', icon: '🏖️' },
-  { id: 'academic', label: 'Academic & NEP', icon: '📚' },
-  { id: 'general', label: 'General Circulars', icon: '📄' }
+  { id: 'All', label: 'All Notices', icon: Megaphone },
+  { id: 'exam', label: 'Examinations', icon: FileEdit },
+  { id: 'admission', label: 'Admissions', icon: GraduationCap },
+  { id: 'holiday', label: 'Holidays & Recess', icon: Palmtree },
+  { id: 'academic', label: 'Academic & NEP', icon: BookOpen },
+  { id: 'general', label: 'General Circulars', icon: FileText }
 ];
 
 const getTS = ts => {
@@ -190,40 +191,28 @@ export default function NotificationsPage() {
   return (
     <div style={{ minHeight: '100dvh', background: '#f8fafc', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
       {/* 1. HERO BANNER */}
-      <header className="premium-hero" style={{
-        background: 'linear-gradient(135deg, #0a192f 0%, #0f2347 60%, #1e3a8a 100%)',
-        color: '#fff',
-        padding: 'clamp(50px, 8vw, 80px) 20px 40px',
-        textAlign: 'center',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: 'radial-gradient(rgba(244,160,35,0.08) 1px, transparent 1px)',
-          backgroundSize: '24px 24px',
-          pointerEvents: 'none'
-        }} />
-        <div style={{ position: 'relative', zIndex: 2, maxWidth: 900, margin: '0 auto' }}>
+      <header className="premium-hero">
+        <div className="kinetic-bg" />
+        <div className="hero-content-wrapper anim-fade-in">
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
-            background: 'rgba(244,160,35,0.15)', border: '1px solid rgba(244,160,35,0.3)',
+            background: 'rgba(244,160,35,0.18)', border: '1px solid rgba(244,160,35,0.4)',
             padding: '4px 14px', borderRadius: 50, fontSize: 12, fontWeight: 800,
-            color: '#f59e0b', marginBottom: 14
+            color: '#f59e0b', marginBottom: 12
           }}>
-            <Bell size={13} className="animate-pulse" /> OFFICIAL ADMINISTRATIVE & ACADEMIC REPOSITORY
+            <Bell size={13} className="animate-pulse" /> OFFICIAL ADMINISTRATIVE &amp; ACADEMIC REPOSITORY
           </div>
-          <h1 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 900, margin: '0 0 12px', letterSpacing: '-0.02em', color: '#fff' }}>
-            Notifications & <span style={{ color: '#f4a023' }}>Circulars</span>
+          <h1 className="hero-title" style={{ margin: '0 0 10px' }}>
+            Notifications &amp; <span>Circulars</span>
           </h1>
-          <p style={{ fontSize: 'clamp(14px, 1.2vw, 16px)', color: '#cbd5e1', maxWidth: 640, margin: '0 auto', lineHeight: 1.6 }}>
+          <p className="hero-subtitle" style={{ maxWidth: 640, margin: '0 auto' }}>
             Live authoritative circulars, university exam routines, admission merit lists, and academic schedules of Guru Nanak College, Dhanbad.
           </p>
         </div>
       </header>
 
       {/* 2. MAIN CONTENT WRAPPER */}
-      <main style={{ maxWidth: 1160, margin: '-28px auto 60px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <main style={{ maxWidth: 1160, margin: '32px auto 60px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         {/* FILTER CONTROLS HUD */}
         <div style={{
           background: '#ffffff',
@@ -294,6 +283,7 @@ export default function NotificationsPage() {
             </span>
             {CATEGORIES.map(cat => {
               const isActive = activeCategory === cat.id;
+              const IconComp = cat.icon;
               return (
                 <button
                   key={cat.id}
@@ -315,7 +305,7 @@ export default function NotificationsPage() {
                     boxShadow: isActive ? '0 4px 12px rgba(15,35,71,0.2)' : 'none'
                   }}
                 >
-                  <span>{cat.icon}</span>
+                  <IconComp size={14} />
                   <span>{cat.label}</span>
                 </button>
               );
@@ -325,8 +315,8 @@ export default function NotificationsPage() {
 
         {/* Sync Status Banner */}
         {error && (
-          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '12px 16px', borderRadius: 12, marginBottom: 20, fontSize: 13, fontWeight: 700 }}>
-            ⚠️ Google Drive sync notice: Serving latest verified records from college database.
+          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '12px 16px', borderRadius: 12, marginBottom: 20, fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <AlertCircle size={16} /> Google Drive sync notice: Serving latest verified records from college database.
           </div>
         )}
 
@@ -390,9 +380,12 @@ export default function NotificationsPage() {
                     padding: '4px 14px',
                     borderRadius: 20,
                     border: '1.5px solid #e2e8f0',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6
                   }}>
-                    📅 {monthYear}
+                    <Calendar size={12} /> {monthYear}
                   </span>
                   <span style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
                 </div>

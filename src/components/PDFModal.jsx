@@ -88,8 +88,6 @@ export default function PDFModal({ url, title = "Document", onClose }) {
   const [pageWidth, setPageWidth] = useState(760);
   const bodyRef = useRef(null);
 
-  if (!url) return null;
-
   const { engine, src, type } = resolveEngine(url);
   const badge = TYPE_BADGE[type] || { label: "PDF", color: "#607D8B" };
 
@@ -167,6 +165,8 @@ export default function PDFModal({ url, title = "Document", onClose }) {
   const showZoom = engine === "react-pdf" && loadState === "success";
   const showFooter =
     engine === "react-pdf" && loadState === "success" && numPages > 0;
+
+  if (!url) return null;
 
   return (
     <div

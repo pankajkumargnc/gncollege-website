@@ -7,7 +7,7 @@ const G = COLORS.gold || '#f4a023';
 
 const SectionTitle = ({ title, subtitle, label, darkBg = false }) => {
   // Title ko split karke last word nikal rahe hain taaki usko Gold color de sakein
-  const words = title.split(' ');
+  const words = (title || '').split(' ');
   const lastWord = words.length > 1 ? words.pop() : '';
   const firstPart = words.join(' ');
 

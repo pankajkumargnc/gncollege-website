@@ -5,6 +5,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
+import { splitHeading } from '../utils/splitTitle';
 
 export default function EmbeddedPDFPage({ title, subtitle, pdfUrl, docSlug }) {
   const [loading, setLoading] = useState(true);
@@ -108,7 +109,7 @@ export default function EmbeddedPDFPage({ title, subtitle, pdfUrl, docSlug }) {
 
         .epdf-container {
           max-width: 1100px;
-          margin: -30px auto 0;
+          margin: 32px auto 0;
           padding: 0 20px;
           position: relative;
           z-index: 10;
@@ -234,10 +235,13 @@ export default function EmbeddedPDFPage({ title, subtitle, pdfUrl, docSlug }) {
       <div className="epdf-aura aura-1"></div>
       <div className="epdf-aura aura-2"></div>
 
-      <div className="epdf-header">
-        <h1 className="epdf-title">{title}</h1>
-        <div className="epdf-subtitle">{subtitle || 'Official Document'}</div>
-      </div>
+      <header className="premium-hero">
+        <div className="kinetic-bg" />
+        <div className="hero-content-wrapper anim-fade-in">
+          <h1 className="hero-title" style={{ margin: '0 0 10px' }}>{splitHeading(title)}</h1>
+          <div className="hero-subtitle">{subtitle || 'Official Document'}</div>
+        </div>
+      </header>
 
       <div className="epdf-container">
         <div className="epdf-glass-box">

@@ -36,8 +36,8 @@ let xml = `<?xml version="1.0" encoding="UTF-8"?>
 `;
 
 for (const route of routes) {
-  // Support both hash route and standard URL canonical representation
-  const loc = route === '/' ? `${BASE_URL}/` : `${BASE_URL}/#${route}`;
+  // Emit canonical standard URL without hash fragment (RFC 3986 / Google Search standard)
+  const loc = route === '/' ? `${BASE_URL}/` : `${BASE_URL}${route}`;
   const priority = getPriority(route);
   const changefreq = getChangefreq(route);
 

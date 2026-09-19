@@ -76,14 +76,22 @@ export default function App() {
     }
   }, [siteSettings?.metaTitle, siteSettings?.metaDescription, isAdminRoute]);
 
-  // ── 🎨 Dynamic Universal Hero Background Synchronization ──
+  // ── 🎨 Dynamic Universal Theme, Typography & Background Synchronization ──
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    if (siteSettings?.heroBgUrl) {
-      root.style.setProperty('--hero-bg-url', `url("${siteSettings.heroBgUrl}")`);
-    } else {
+
+    // 1. Hero Mode & Image
+    const isMesh = siteSettings?.heroBgMode === 'mesh' || siteSettings?.heroBgUrl === 'none' || siteSettings?.heroBgUrl === '';
+    if (isMesh) {
+      root.setAttribute('data-hero-mode', 'mesh');
+      root.style.setProperty('--hero-mode', 'mesh');
       root.style.removeProperty('--hero-bg-url');
+    } else {
+      root.removeAttribute('data-hero-mode');
+      root.style.setProperty('--hero-mode', 'image');
+      const bgUrl = siteSettings?.heroBgUrl || '/images/college_hero_bg.webp';
+      root.style.setProperty('--hero-bg-url', `url("${bgUrl}")`);
     }
 
     if (siteSettings?.heroOverlayGradient) {
@@ -103,7 +111,144 @@ export default function App() {
     } else {
       root.style.removeProperty('--hero-kenburns-animation');
     }
-  }, [siteSettings?.heroBgUrl, siteSettings?.heroOverlayGradient, siteSettings?.heroBgPosition, siteSettings?.heroKenBurns]);
+
+    // 2. Global Typography (Body & Headings)
+    if (siteSettings?.fontFamily) {
+      root.style.setProperty('--font-sans', siteSettings.fontFamily);
+    } else {
+      root.style.removeProperty('--font-sans');
+    }
+
+    if (siteSettings?.headingFont) {
+      root.style.setProperty('--font-heading', siteSettings.headingFont);
+    } else {
+      root.style.removeProperty('--font-heading');
+    }
+
+    // 3. Color Combinations & Master Theme
+    if (siteSettings?.themePrimary) {
+      root.style.setProperty('--navy', siteSettings.themePrimary);
+    } else {
+      root.style.removeProperty('--navy');
+    }
+
+    if (siteSettings?.themeAccent) {
+      root.style.setProperty('--gold', siteSettings.themeAccent);
+    } else {
+      root.style.removeProperty('--gold');
+    }
+
+    if (siteSettings?.themeBg) {
+      root.style.setProperty('--bg', siteSettings.themeBg);
+    } else {
+      root.style.removeProperty('--bg');
+    }
+
+    if (siteSettings?.themeSurface) {
+      root.style.setProperty('--surface', siteSettings.themeSurface);
+    } else {
+      root.style.removeProperty('--surface');
+    }
+
+    // 4. Two-Tone Heading Engine (Image Style: Primary Solid Color + Accent Solid Word)
+    const headingMode = siteSettings?.headingMode || 'two-tone';
+    root.setAttribute('data-heading-mode', headingMode);
+    root.style.setProperty('--hero-heading-primary', siteSettings?.heroHeadingStart || '#ffffff');
+    root.style.setProperty('--hero-heading-accent', siteSettings?.heroHeadingEnd || '#f4a023');
+    root.style.setProperty('--heading-primary', siteSettings?.headingPrimaryColor || siteSettings?.themePrimary || '#0f2347');
+    root.style.setProperty('--heading-accent', siteSettings?.headingAccentColor || siteSettings?.themeAccent || '#f4a023');
+    
+    const hGrad = siteSettings?.heroHeadingGradient || 
+      `linear-gradient(${siteSettings?.heroHeadingAngle || '135deg'}, ${siteSettings?.heroHeadingStart || '#ffffff'} 35%, ${siteSettings?.heroHeadingEnd || '#f4a023'} 100%)`;
+    root.style.setProperty('--hero-heading-gradient', hGrad);
+    root.style.setProperty('--hero-heading-shadow', siteSettings?.heroHeadingShadow || '0 4px 18px rgba(0,0,0,0.45)');
+
+    // 5. Hero Background Visual Effects & Blur
+    if (siteSettings?.heroVisualEffect && siteSettings.heroVisualEffect !== 'none') {
+      root.setAttribute('data-hero-effect', siteSettings.heroVisualEffect);
+    } else {
+      root.removeAttribute('data-hero-effect');
+    }
+
+    // 6. Deep Global Styling Engine (Body metrics, headings, bullets, alignment)
+    if (siteSettings?.bodyLineHeight) {
+      root.style.setProperty('--body-line-height', siteSettings.bodyLineHeight);
+    } else {
+      root.style.removeProperty('--body-line-height');
+    }
+
+    if (siteSettings?.bodyLetterSpacing) {
+      root.style.setProperty('--body-letter-spacing', siteSettings.bodyLetterSpacing);
+    } else {
+      root.style.removeProperty('--body-letter-spacing');
+    }
+
+    if (siteSettings?.bodyFontWeight) {
+      root.style.setProperty('--body-weight', siteSettings.bodyFontWeight);
+    } else {
+      root.style.removeProperty('--body-weight');
+    }
+
+    if (siteSettings?.headingTransform) {
+      root.style.setProperty('--heading-transform', siteSettings.headingTransform);
+    } else {
+      root.style.removeProperty('--heading-transform');
+    }
+
+    if (siteSettings?.textAlignDefault) {
+      root.style.setProperty('--text-align-default', siteSettings.textAlignDefault);
+    } else {
+      root.style.removeProperty('--text-align-default');
+    }
+
+    if (siteSettings?.bulletStyle && siteSettings.bulletStyle !== 'default') {
+      root.setAttribute('data-bullets', siteSettings.bulletStyle);
+    } else {
+      root.removeAttribute('data-bullets');
+    }
+
+    if (siteSettings?.textColorPrimary) {
+      root.style.setProperty('--text-primary', siteSettings.textColorPrimary);
+    } else {
+      root.style.removeProperty('--text-primary');
+    }
+
+    if (siteSettings?.themeSecondary) {
+      root.style.setProperty('--theme-secondary', siteSettings.themeSecondary);
+    } else {
+      root.style.removeProperty('--theme-secondary');
+    }
+
+    // 7. Animated Theme Gradients
+    if (siteSettings?.enableAnimatedGradients) {
+      root.setAttribute('data-animated-theme', 'true');
+    } else {
+      root.removeAttribute('data-animated-theme');
+    }
+
+    // 8. Global Motion & Animation Speed
+    if (siteSettings?.motionSpeed === 'off') {
+      root.setAttribute('data-motion', 'off');
+      root.style.setProperty('--motion-factor', '0');
+    } else if (siteSettings?.motionSpeed === 'smooth') {
+      root.removeAttribute('data-motion');
+      root.style.setProperty('--motion-factor', '1.5');
+    } else {
+      root.removeAttribute('data-motion');
+      root.style.setProperty('--motion-factor', '1');
+    }
+  }, [
+    siteSettings?.heroBgMode, siteSettings?.heroBgUrl, siteSettings?.heroOverlayGradient,
+    siteSettings?.heroBgPosition, siteSettings?.heroKenBurns, siteSettings?.heroVisualEffect,
+    siteSettings?.fontFamily, siteSettings?.headingFont, siteSettings?.themePrimary,
+    siteSettings?.themeAccent, siteSettings?.themeSecondary, siteSettings?.themeBg,
+    siteSettings?.themeSurface, siteSettings?.enableAnimatedGradients, siteSettings?.motionSpeed,
+    siteSettings?.enableDualHeading, siteSettings?.heroHeadingGradient, siteSettings?.heroHeadingStart,
+    siteSettings?.heroHeadingEnd, siteSettings?.heroHeadingAngle, siteSettings?.heroHeadingShadow,
+    siteSettings?.bodyLineHeight, siteSettings?.bodyLetterSpacing, siteSettings?.bodyFontWeight,
+    siteSettings?.headingTransform, siteSettings?.textAlignDefault, siteSettings?.bulletStyle,
+    siteSettings?.textColorPrimary
+  ]);
 
   // ✅ PWA: New Notice Push Simulator (Students only)
   useEffect(() => {

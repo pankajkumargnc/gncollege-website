@@ -13,6 +13,7 @@ const PDFModal = lazy(() => import('./PDFModal'));
 const GalleryPage = lazy(() => import('../pages/GalleryPage'));
 const EventsPage = lazy(() => import('../pages/EventsPage'));
 const StaffPage = lazy(() => import('../pages/StaffPage'));
+import { splitHeading } from '../utils/splitTitle';
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -460,13 +461,8 @@ const PageHero = ({ title, featuredImage }) => (
       background: 'rgba(255,255,255,0.04)', pointerEvents: 'none',
     }} />
     <div style={{ position: 'relative', zIndex: 2 }}>
-      <h1 style={{
-        color: '#fff', fontSize: 'clamp(1.6rem, 5vw, 2.5rem)',
-        fontWeight: 900, letterSpacing: '-0.03em', margin: 0, lineHeight: 1.2,
-        fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
-        textShadow: '0 4px 12px rgba(0,0,0,0.2)'
-      }}>
-        {title || 'Page'}
+      <h1 className="hero-title" style={{ margin: 0 }}>
+        {splitHeading(title || 'Page')}
       </h1>
       <div style={{
         width: 60, height: 4, background: '#f4a023',
@@ -693,7 +689,7 @@ export const PageViewerStandalone = () => {
     // Fetch site data for shortcodes
     const unsubG = onSnapshot(collection(db, 'gallery'), s => setSiteData(prev => ({ ...prev, gallery: s.docs.map(d => ({ id: d.id, ...d.data() })) })));
     const unsubE = onSnapshot(collection(db, 'events'), s => setSiteData(prev => ({ ...prev, events: s.docs.map(d => ({ id: d.id, ...d.data() })) })));
-    const unsubF = onSnapshot(collection(db, 'faculty'), s => setSiteData(prev => ({ ...prev, faculties: s.docs.map(d => ({ id: d.id, ...d.data() })) })));
+    const unsubF = onSnapshot(collection(db, 'faculties'), s => setSiteData(prev => ({ ...prev, faculties: s.docs.map(d => ({ id: d.id, ...d.data() })) })));
 
     const hash = window.location.hash?.replace('#', '') || '';
     const currentPath = hash.startsWith('/') ? hash : '/' + hash;

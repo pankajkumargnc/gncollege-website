@@ -1,7 +1,5 @@
 /* src/styles/admin.css — GNC Admin Portal Master Stylesheet */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
-
 .adm * { box-sizing: border-box; }
 .adm { font-family: 'Plus Jakarta Sans', sans-serif; }
 .adm ::-webkit-scrollbar { width: 5px; height: 5px; }

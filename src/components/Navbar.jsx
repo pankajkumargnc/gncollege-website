@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, memo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { Menu, X } from 'lucide-react'
 import { COLORS } from '../styles/colors'
 
 const SPOTLIGHT_CARDS = {
@@ -559,7 +560,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
               onMouseEnter={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,35,71,0.05)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
-              {menuOpen ? '✕' : '☰'}
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           )}
 

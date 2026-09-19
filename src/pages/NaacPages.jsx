@@ -5,6 +5,7 @@ import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import toast from 'react-hot-toast';
+import { Building2, Trophy, Scale, BarChart2, BookOpen, GraduationCap, Microscope, Award } from 'lucide-react';
 
 const PDFModal = lazy(() => import('../components/PDFModal'));
 
@@ -23,19 +24,24 @@ function Fade({ children, delay = 0, y = 20 }) {
 }
 
 const PageHeader = ({ title, subtitle, icon, badge = "NAAC & IQAC ACCREDITATION" }) => (
-  <header className="profile-hero" style={{ backgroundImage: `url('/images/college_photo.webp')` }}>
-    <div className="hero-overlay" style={{ background: 'linear-gradient(135deg, rgba(15, 35, 71, 0.95) 0%, rgba(10, 25, 47, 0.9) 100%)' }} />
-    <div className="hero-content anim-fade-in" style={{ padding: '60px 20px 70px' }}>
+  <div className="premium-hero">
+    <div className="kinetic-bg" />
+    <div className="hero-content-wrapper anim-fade-in">
       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(244, 160, 35, 0.18)', border: '1px solid rgba(244, 160, 35, 0.4)', borderRadius: 20, padding: '4px 14px', marginBottom: 14 }}>
         <span style={{ fontSize: 12, color: GOLD, fontWeight: 800, letterSpacing: 0.5 }}>{badge}</span>
       </div>
-      <h1 className="hero-title" style={{ fontSize: 'clamp(26px, 5vw, 40px)', fontWeight: 900, letterSpacing: '-0.5px' }}>
+      <h1 className="hero-title" style={{ fontSize: 'clamp(26px, 5vw, 40px)', fontWeight: 900, letterSpacing: '-0.5px', margin: '0 0 10px' }}>
         {icon && <span style={{ marginRight: 10 }}>{icon}</span>}
-        {title}
+        {(() => {
+          const words = (title || "").trim().split(' ');
+          if (words.length <= 1) return title;
+          const last = words.pop();
+          return <>{words.join(' ')} <span>{last}</span></>;
+        })()}
       </h1>
-      {subtitle && <p className="hero-subtitle" style={{ maxWidth: 760, margin: '0 auto', fontSize: 15, opacity: 0.9 }}>{subtitle}</p>}
+      {subtitle && <p className="hero-subtitle" style={{ maxWidth: 760, margin: '0 auto', fontSize: 15, opacity: 0.92, color: 'rgba(255,255,255,0.9)' }}>{subtitle}</p>}
     </div>
-  </header>
+  </div>
 );
 
 /* ─── Document List Component with Real-time Firestore & Instant In-Modal PDF ─── */
@@ -172,10 +178,9 @@ export function NaacPortalPage() {
       <PageHeader
         title="NAAC Accreditation Portal"
         subtitle="National Assessment and Accreditation Council (NAAC) Institutional Repository & Quality Assurance Framework of Guru Nanak College, Dhanbad."
-        icon="🏛️"
       />
 
-      <div style={{ maxWidth: 1200, margin: '-50px auto 70px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1200, margin: '32px auto 50px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         {/* Overview Banner Card */}
         <div style={{ background: '#fff', borderRadius: 20, padding: '28px 32px', boxShadow: '0 12px 36px rgba(15,35,71,0.08)', border: '1px solid #e2e8f0', marginBottom: 32 }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, alignItems: 'center' }}>
@@ -192,17 +197,20 @@ export function NaacPortalPage() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
               {[
-                { label: 'Accreditation Status', val: 'Cycle 1 & 2 Completed', color: '#1e40af', icon: '🏆' },
-                { label: 'Quality Cell', val: 'Active IQAC Cell', color: '#047857', icon: '⚖️' },
-                { label: 'Evaluation Metrics', val: '7 Criteria Aligned', color: '#9333ea', icon: '📊' },
-                { label: 'Affiliated Univ.', val: 'BBMKU Dhanbad', color: '#d97706', icon: '🏛️' },
-              ].map((s, idx) => (
-                <div key={idx} style={{ background: '#f8fafc', padding: '14px 18px', borderRadius: 12, border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: 20, marginBottom: 4 }}>{s.icon}</div>
-                  <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY }}>{s.val}</div>
-                  <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600, marginTop: 2 }}>{s.label}</div>
-                </div>
-              ))}
+                { label: 'Accreditation Status', val: 'Cycle 1 & 2 Completed', color: '#1e40af', icon: Trophy },
+                { label: 'Quality Cell', val: 'Active IQAC Cell', color: '#047857', icon: Scale },
+                { label: 'Evaluation Metrics', val: '7 Criteria Aligned', color: '#9333ea', icon: BarChart2 },
+                { label: 'Affiliated Univ.', val: 'BBMKU Dhanbad', color: '#d97706', icon: Building2 },
+              ].map((s, idx) => {
+                const IconComp = s.icon;
+                return (
+                  <div key={idx} style={{ background: '#f8fafc', padding: '14px 18px', borderRadius: 12, border: '1px solid #e2e8f0' }}>
+                    <div style={{ marginBottom: 6 }}><IconComp size={20} style={{ color: s.color }} /></div>
+                    <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY }}>{s.val}</div>
+                    <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600, marginTop: 2 }}>{s.label}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -335,7 +343,7 @@ export function NaacIqacPage() {
         icon="⚖️"
       />
 
-      <div style={{ maxWidth: 1140, margin: '-50px auto 70px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1140, margin: '32px auto 50px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         {/* Quality Mandate */}
         <div style={{ background: '#fff', borderRadius: 20, padding: '28px 32px', boxShadow: '0 8px 24px rgba(15,35,71,0.06)', border: '1px solid #e2e8f0', marginBottom: 28 }}>
           <h3 style={{ fontSize: 20, fontWeight: 900, color: NAVY, margin: '0 0 10px' }}>
@@ -500,7 +508,7 @@ export function NaacCriteriaPage() {
         icon="📊"
       />
 
-      <div style={{ maxWidth: 1200, margin: '-50px auto 70px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1200, margin: '32px auto 50px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         {/* Criteria Tabs */}
         <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 12, marginBottom: 24 }}>
           {criteriaData.map(c => (
@@ -586,7 +594,7 @@ export function NaacBestPracticesPage() {
         icon="🌟"
       />
 
-      <div style={{ maxWidth: 1140, margin: '-50px auto 70px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1140, margin: '32px auto 50px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         {/* Best Practice 1 */}
         <div style={{ background: '#fff', borderRadius: 20, padding: '32px', boxShadow: '0 8px 24px rgba(15,35,71,0.06)', border: '1px solid #e2e8f0', marginBottom: 28 }}>
           <div style={{ display: 'inline-block', background: '#eff6ff', color: '#1e40af', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 800, marginBottom: 12 }}>
@@ -648,7 +656,7 @@ export function SsrCyclePage({ cycle = 1 }) {
         subtitle={`Complete Self Study Report, Peer Team Visit documentation, and NAAC Institutional Accreditation archives for Cycle ${cycle}.`}
         icon={cycle === 1 ? "🥇" : "🥈"}
       />
-      <div style={{ maxWidth: 1140, margin: '-50px auto 70px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1140, margin: '32px auto 50px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <div style={{ background: '#fff', borderRadius: 20, padding: '28px 32px', boxShadow: '0 8px 24px rgba(15,35,71,0.06)', border: '1px solid #e2e8f0' }}>
           <h3 style={{ fontSize: 20, fontWeight: 900, color: NAVY, margin: '0 0 8px' }}>
             📜 Accreditation Cycle {cycle} Records
@@ -674,7 +682,7 @@ export function AqarPage() {
         subtitle="Annual quality benchmarks submitted by Guru Nanak College IQAC cell to the National Assessment and Accreditation Council."
         icon="📊"
       />
-      <div style={{ maxWidth: 1140, margin: '-50px auto 70px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1140, margin: '32px auto 50px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <div style={{ background: '#fff', borderRadius: 20, padding: '28px 32px', boxShadow: '0 8px 24px rgba(15,35,71,0.06)', border: '1px solid #e2e8f0' }}>
           <h3 style={{ fontSize: 20, fontWeight: 900, color: NAVY, margin: '0 0 8px' }}>
             📁 AQAR Repository (2018–19 to 2024–25)
@@ -698,12 +706,11 @@ export function NirfPage() {
       <PageHeader
         title="NIRF Institutional Data"
         subtitle="National Institutional Ranking Framework (Ministry of Education, Govt. of India) submission archives of Guru Nanak College."
-        icon="🏛️"
       />
-      <div style={{ maxWidth: 1140, margin: '-50px auto 70px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1140, margin: '32px auto 50px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <div style={{ background: '#fff', borderRadius: 20, padding: '28px 32px', boxShadow: '0 8px 24px rgba(15,35,71,0.06)', border: '1px solid #e2e8f0' }}>
-          <h3 style={{ fontSize: 20, fontWeight: 900, color: NAVY, margin: '0 0 8px' }}>
-            🏛️ NIRF Data Submissions
+          <h3 style={{ fontSize: 20, fontWeight: 900, color: NAVY, margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Building2 size={22} style={{ color: NAVY }} /> NIRF Data Submissions
           </h3>
           <p style={{ fontSize: 13.5, color: '#64748b', margin: '0 0 20px' }}>
             Standard data submitted under Teaching, Learning and Resources (TLR), Research and Professional Practice (RPC), and Graduation Outcomes (GO).
@@ -726,7 +733,7 @@ export function PerspectivePlan() {
         subtitle="The strategic roadmap and future vision of Guru Nanak College for academic, infrastructural, and research growth."
         icon="🗺️"
       />
-      <div style={{ maxWidth: 1140, margin: '-50px auto 70px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1140, margin: '32px auto 50px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         <div style={{ background: '#fff', borderRadius: 20, padding: '32px', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', marginBottom: 28 }}>
           <h2 style={{ fontSize: 22, fontWeight: 900, color: NAVY, marginBottom: 14 }}>
             Strategic 10-Year Quality Roadmap
