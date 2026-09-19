@@ -9,7 +9,7 @@ export function runFirestoreRulesTests() {
   const rulesContent = fs.readFileSync(rulesPath, 'utf8');
 
   // Helper parser/evaluator for firestore.rules
-  function evaluateRuleAccess(docPath, operation, auth = null) {
+  function evaluateRuleAccess(docPath, operation, auth = null, data = null) {
     const isAuth = auth !== null;
     const adminEmails = ["pankajkumargnc@gmail.com", "admin@gncollege.org", "principal@gncollege.org"];
     const isAdmin = isAuth && (
@@ -43,6 +43,16 @@ export function runFirestoreRulesTests() {
       if (!hasColRule) return false;
       if (operation === 'read') return true;
       if (operation === 'write') return isAdmin;
+    }
+    if (docPath.startsWith('inquiries/')) {
+      const hasInquiriesRule = /match\s+\/inquiries\/\{docId\}\s*\{\s*allow\s+read,\s*update,\s*delete:\s*if\s+isAdmin\(\);\s*allow\s+create:\s*if\s+request\.resource\.data\.keys\(\)\.hasAll\(\['name',\s*'email',\s*'message',\s*'createdAt'\]\);\s*\}/.test(rulesContent);
+      if (!hasInquiriesRule) return false;
+      if (operation === 'read' || operation === 'update' || operation === 'delete') return isAdmin;
+      if (operation === 'create') {
+        if (!data) return true;
+        const required = ['name', 'email', 'message', 'createdAt'];
+        return required.every(k => k in data);
+      }
     }
     if (docPath.startsWith('settings/')) {
       // match /settings/{otherSettingId}
@@ -129,6 +139,49 @@ export function runFirestoreRulesTests() {
   results.push({
     desc: 'DriveTab.jsx consolidates hero slider to sliderSlides collection',
     pass: hasConsolidatedSlider
+  });
+
+  // 10. Inquiries Collection Security Rules & Integration (Item 5)
+  const pubInquiryCreateAllowed = evaluateRuleAccess('inquiries/doc1', 'create', null, {
+    name: 'Rahul Kumar', email: 'rahul@example.com', message: 'Admission query', createdAt: '2026-09-19'
+  });
+  const pubInquiryCreateMissingFieldDenied = evaluateRuleAccess('inquiries/doc1', 'create', null, {
+    name: 'Rahul Kumar', email: 'rahul@example.com'
+  });
+  const pubInquiryReadDenied = evaluateRuleAccess('inquiries/doc1', 'read', null);
+  const nonAdminInquiryReadDenied = evaluateRuleAccess('inquiries/doc1', 'read', { email: 'student@example.com' });
+  const adminInquiryReadAllowed = evaluateRuleAccess('inquiries/doc1', 'read', { email: 'pankajkumargnc@gmail.com' });
+
+  results.push({
+    desc: 'Public visitor is ALLOWED to submit inquiry with all required fields',
+    pass: pubInquiryCreateAllowed === true
+  });
+  results.push({
+    desc: 'Public visitor is DENIED from creating inquiry missing required fields',
+    pass: pubInquiryCreateMissingFieldDenied === false
+  });
+  results.push({
+    desc: 'Public and non-admin visitors are DENIED from reading submitted inquiries',
+    pass: pubInquiryReadDenied === false && nonAdminInquiryReadDenied === false
+  });
+  results.push({
+    desc: 'Authorized admin is ALLOWED to read/manage student inquiries',
+    pass: adminInquiryReadAllowed === true
+  });
+
+  // 11. Static checks for Contact.jsx and functions/index.js
+  const contactPagePath = path.resolve(process.cwd(), 'src/pages/Contact.jsx');
+  const contactPageCode = fs.readFileSync(contactPagePath, 'utf8');
+  results.push({
+    desc: 'Contact.jsx persists submissions directly to Firestore inquiries collection',
+    pass: contactPageCode.includes("collection(db, 'inquiries')")
+  });
+
+  const functionsPath = path.resolve(process.cwd(), 'functions/index.js');
+  const functionsCode = fs.readFileSync(functionsPath, 'utf8');
+  results.push({
+    desc: 'functions/index.js onContactFormSubmitted triggers on inquiries/{docId}',
+    pass: functionsCode.includes("document: 'inquiries/{docId}'")
   });
 
   return results;

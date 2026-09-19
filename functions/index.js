@@ -92,21 +92,23 @@ export const geminiProxy = onCall(
  */
 export const onContactFormSubmitted = onDocumentCreated(
   {
-    document: 'contactDirectory/{docId}',
+    document: 'inquiries/{docId}',
     region: 'asia-south1'
   },
   async (event) => {
     const snap = event.data;
     if (!snap) return;
     const data = snap.data();
-    console.log(`[Contact] New submission received from: ${data.name || 'Anonymous'} (${data.email || data.phone || 'No contact'})`);
+    console.log(`[Contact] New inquiry received from: ${data.name || 'Anonymous'} (${data.email || 'No email'}) - Subject: ${data.subject || 'General Inquiry'}`);
     
     // Log audit entry
     await db.collection('adminLogs').add({
-      action: 'NEW_CONTACT_SUBMISSION',
+      action: 'NEW_CONTACT_INQUIRY',
       timestamp: new Date().toISOString(),
-      contactId: event.params.docId,
-      name: data.name || 'Anonymous'
+      inquiryId: event.params.docId,
+      name: data.name || 'Anonymous',
+      email: data.email || '',
+      subject: data.subject || 'General Inquiry'
     });
   }
 );

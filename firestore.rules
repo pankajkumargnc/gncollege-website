@@ -43,6 +43,10 @@ service cloud.firestore {
       allow create: if request.resource.data.keys().hasAll(['studentName', 'docTitle', 'trackingToken', 'createdAt']);
       allow update, delete: if isAdmin();
     }
+    match /inquiries/{docId} {
+      allow read, update, delete: if isAdmin();
+      allow create: if request.resource.data.keys().hasAll(['name', 'email', 'message', 'createdAt']);
+    }
     match /polls/{docId} { 
       allow read: if true; 
       allow update: if (

@@ -3,11 +3,11 @@
 // ✅ UUPM Compliant: Labels, inline validation, toast feedback, free form submission
 
 import React, { useEffect, useState, useRef } from 'react';
-import { doc, collection, query, orderBy, onSnapshot, getDoc } from 'firebase/firestore';
+import { doc, collection, query, orderBy, onSnapshot, getDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import toast from 'react-hot-toast';
-import { Send, MapPin, Phone, Mail, User, AtSign, FileText, MessageSquare, ShieldCheck } from 'lucide-react';
+import { Send, MapPin, Phone, Mail, User, AtSign, FileText, MessageSquare, ShieldCheck, Building2 } from 'lucide-react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import CampusMap from '../components/CampusMap';
 
@@ -111,32 +111,51 @@ function ContactForm() {
     setSending(true);
 
     try {
-      // Free submission via FormSubmit.co — no API key, no signup, free forever
-      const res = await fetch('https://formsubmit.co/ajax/info@gncollege.org', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({
-          name: data.get('name'),
-          email: data.get('email'),
-          subject: data.get('subject'),
-          message: data.get('message'),
-          _recaptcha: recaptchaToken || undefined,
-          _subject: `📬 GNC Website: ${data.get('subject')}`,
-        }),
-      });
+      const name = String(data.get('name') || '').trim();
+      const email = String(data.get('email') || '').trim();
+      const subject = String(data.get('subject') || '').trim() || 'General Inquiry';
+      const message = String(data.get('message') || '').trim();
 
-      if (res.ok) {
-        toast.success('Message sent successfully! We will get back to you soon.', { duration: 5000 });
-        form.reset();
-        setErrors({});
-        setTouched({});
-        setRecaptchaToken(null);
-        recaptchaRef.current?.reset();
-      } else {
-        toast.error('Something went wrong. Please try again.', { duration: 4000 });
+      // 1. Persist directly to Firestore inquiries collection (triggers Cloud Function onContactFormSubmitted)
+      if (db) {
+        await addDoc(collection(db, 'inquiries'), {
+          name,
+          email,
+          subject,
+          message,
+          createdAt: serverTimestamp(),
+          source: 'website_contact_form',
+          status: 'new'
+        });
       }
-    } catch {
-      toast.error('Network error. Please check your connection and try again.', { duration: 4000 });
+
+      // 2. Dispatch email notification via FormSubmit.co gateway (non-blocking for resilience)
+      try {
+        await fetch('https://formsubmit.co/ajax/info@gncollege.org', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            name,
+            email,
+            subject,
+            message,
+            _recaptcha: recaptchaToken || undefined,
+            _subject: `📬 GNC Website Inquiry: ${subject}`,
+          }),
+        });
+      } catch (emailErr) {
+        console.warn('[Contact] Email dispatch warning (submission safely saved in Firestore):', emailErr);
+      }
+
+      toast.success('Message sent successfully! We will get back to you soon.', { duration: 5000 });
+      form.reset();
+      setErrors({});
+      setTouched({});
+      setRecaptchaToken(null);
+      recaptchaRef.current?.reset();
+    } catch (err) {
+      console.error('[Contact] Submission error:', err);
+      toast.error('Submission failed. Please check your connection and try again.', { duration: 4000 });
     } finally {
       setSending(false);
     }
@@ -227,13 +246,32 @@ export default function Contact() {
     const unsubContact = onSnapshot(doc(db, 'settings', 'contact'), snap => {
       if (snap.exists()) {
         const d = snap.data();
-        setContactInfo({
-          bhuda:    { ...DEFAULT_CONTACT.bhuda,    ...(d.bhuda    || {}) },
-          bankMore: { ...DEFAULT_CONTACT.bankMore, ...(d.bankMore || {}) },
-        });
+        setContactInfo(prev => ({
+          bhuda:    { ...prev.bhuda,    ...(d.bhuda    || {}) },
+          bankMore: { ...prev.bankMore, ...(d.bankMore || {}) },
+        }));
       }
       setLoading(false);
     }, () => setLoading(false));
+
+    // ── 1.1 Dual Campus Settings from Master Site Settings ───────────────────
+    const unsubSite = onSnapshot(doc(db, 'settings', 'site'), snap => {
+      if (snap.exists()) {
+        const s = snap.data();
+        setContactInfo(prev => ({
+          bhuda: {
+            ...prev.bhuda,
+            mapEmbed: s.campusBhudaMapUrl || prev.bhuda?.mapEmbed || DEFAULT_CONTACT.bhuda.mapEmbed,
+            address: s.campusBhudaAddress || prev.bhuda?.address || DEFAULT_CONTACT.bhuda.address
+          },
+          bankMore: {
+            ...prev.bankMore,
+            mapEmbed: s.campusBankMoreMapUrl || prev.bankMore?.mapEmbed || DEFAULT_CONTACT.bankMore.mapEmbed,
+            address: s.campusBankMoreAddress || prev.bankMore?.address || DEFAULT_CONTACT.bankMore.address
+          }
+        }));
+      }
+    }, () => {});
 
     // ── 2. Directory cards ─────────────────────────────────────────────────
     const unsubDir = onSnapshot(
@@ -246,7 +284,7 @@ export default function Contact() {
       () => {} // silent fail — defaults stay
     );
 
-    return () => { unsubContact(); unsubDir(); };
+    return () => { unsubContact(); unsubSite(); unsubDir(); };
   }, []);
 
   const { bhuda, bankMore } = contactInfo;
@@ -260,13 +298,13 @@ export default function Contact() {
         }
         .contact-header {
           background: linear-gradient(135deg, ${COLORS.navy} 0%, #0a1832 100%);
-          color: white; padding: 80px 20px 140px; text-align: center; position: relative;
+          color: white; padding: 54px 20px 40px; text-align: center; position: relative;
         }
         .header-title { font-size:clamp(28px, 5vw, 46px); font-weight:900; margin:0; letter-spacing:-1px; animation:fadeInUp .6s ease-out forwards; color: #ffffff; }
         .header-title span { color:${COLORS.gold}; }
-        .header-sub { font-size:clamp(14px, 1.8vw, 16px); color:#cbd5e1; margin:15px auto 0; max-width:600px; animation:fadeInUp .6s ease-out .2s forwards; opacity:0; line-height:1.6; text-align: center; }
+        .header-sub { font-size:clamp(14px, 1.8vw, 16px); color:#cbd5e1; margin:12px auto 0; max-width:600px; animation:fadeInUp .6s ease-out .2s forwards; opacity:0; line-height:1.6; text-align: center; }
 
-        .campus-container { max-width:1200px; margin:-120px auto 40px; padding:0 20px; display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%, 400px),1fr)); gap:40px; position:relative; z-index:10; }
+        .campus-container { max-width:1200px; margin:32px auto 40px; padding:0 20px; display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%, 400px),1fr)); gap:40px; position:relative; z-index:10; }
         .campus-card { background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 15px 40px rgba(0,0,0,0.07); border:1px solid #e2e8f0; transition:all .4s ease; opacity:0; animation:fadeInUp .8s ease-out forwards; display:flex; flex-direction:column; }
         .campus-card:hover { transform:translateY(-10px); box-shadow:0 25px 50px rgba(15,35,71,.12); border-color:${COLORS.gold}; }
         .card-1 { animation-delay:.3s; } .card-2 { animation-delay:.5s; }
@@ -299,7 +337,7 @@ export default function Contact() {
         .dir-contact:hover { color:${COLORS.gold}; }
 
         @media(max-width:900px) { .campus-container { grid-template-columns:1fr; } }
-        @media(max-width:768px) { .contact-header { padding:60px 20px 80px; } .header-title { font-size:36px; } .campus-container { margin-top:-60px; } }
+        @media(max-width:768px) { .header-title { font-size:32px; } .campus-container { margin-top: 24px; } }
 
         /* ── Dark Mode Overrides ── */
         [data-theme="dark"] .campus-card {
@@ -330,9 +368,12 @@ export default function Contact() {
       `}</style>
 
       {/* Hero */}
-      <header className="contact-header">
-        <h1 className="header-title">Get In <span>Touch</span></h1>
-        <p className="header-sub">We are here to assist you. Reach out to our respective campuses or directly contact our administration team for any queries.</p>
+      <header className="premium-hero">
+        <div className="kinetic-bg" />
+        <div className="hero-content-wrapper anim-fade-in">
+          <h1 className="hero-title">Get In <span>Touch</span></h1>
+          <p className="hero-subtitle">We are here to assist you. Reach out to our respective campuses or directly contact our administration team for any queries.</p>
+        </div>
       </header>
 
       {/* Campus Cards */}
@@ -341,7 +382,7 @@ export default function Contact() {
         {/* Bhuda Campus */}
         <div className="campus-card card-1">
           <div className="card-header">
-            <div className="campus-icon">🏛️</div>
+            <div className="campus-icon"><Building2 size={28} style={{ color: COLORS.navy }} /></div>
             <div>
               <h2 className="campus-title">Bhuda Campus</h2>
               <span className="campus-badge" style={{ background:COLORS.navy, color:'#fff' }}>Main Campus • Boys Wing</span>
@@ -349,25 +390,25 @@ export default function Contact() {
           </div>
           <div className="card-details">
             <div className="detail-row">
-              <div className="d-icon">📍</div>
+              <div className="d-icon"><MapPin size={18} style={{ color: COLORS.gold }} /></div>
               <div className="d-text"><h4>Location</h4><p>{bhuda.address}</p></div>
             </div>
             {bhuda.phone && (
               <div className="detail-row">
-                <div className="d-icon">📞</div>
+                <div className="d-icon"><Phone size={18} style={{ color: COLORS.navy }} /></div>
                 <div className="d-text"><h4>Helpdesk</h4><a href={`tel:${bhuda.phone}`}>{bhuda.phone}</a></div>
               </div>
             )}
             {bhuda.email && (
               <div className="detail-row">
-                <div className="d-icon">✉️</div>
+                <div className="d-icon"><Mail size={18} style={{ color: COLORS.navy }} /></div>
                 <div className="d-text"><h4>Email ID</h4><a href={`mailto:${bhuda.email}`}>{bhuda.email}</a></div>
               </div>
             )}
           </div>
           <div className="map-container">
             <iframe title="Bhuda Campus Map"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.089853381653!2d86.43232147533682!3d23.797658878638367!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f69707963d7e8b%3A0x86733221469e7f7b!2sGuru%20Nanak%20College%20Dhanbad!5e0!3m2!1sen!2sin!4v1708688000000!5m2!1sen!2sin"
+              src={bhuda.mapEmbed || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.089853381653!2d86.43232147533682!3d23.797658878638367!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f69707963d7e8b%3A0x86733221469e7f7b!2sGuru%20Nanak%20College%20Dhanbad!5e0!3m2!1sen!2sin!4v1708688000000!5m2!1sen!2sin"}
               allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
           </div>
         </div>
@@ -375,7 +416,7 @@ export default function Contact() {
         {/* Bank More Campus */}
         <div className="campus-card card-2">
           <div className="card-header">
-            <div className="campus-icon">🏢</div>
+            <div className="campus-icon"><Building2 size={28} style={{ color: COLORS.gold }} /></div>
             <div>
               <h2 className="campus-title">Bank More Campus</h2>
               <span className="campus-badge" style={{ background:COLORS.gold, color:COLORS.navyDark || COLORS.navy }}>Girls Wing • Vocational Studies</span>
@@ -383,30 +424,30 @@ export default function Contact() {
           </div>
           <div className="card-details">
             <div className="detail-row">
-              <div className="d-icon">📍</div>
+              <div className="d-icon"><MapPin size={18} style={{ color: COLORS.gold }} /></div>
               <div className="d-text"><h4>Location</h4><p>{bankMore.address}</p></div>
             </div>
             {bankMore.phone ? (
               <div className="detail-row">
-                <div className="d-icon">📞</div>
+                <div className="d-icon"><Phone size={18} style={{ color: COLORS.navy }} /></div>
                 <div className="d-text"><h4>Helpdesk</h4><a href={`tel:${bankMore.phone}`}>{bankMore.phone}</a></div>
               </div>
             ) : (
               <div className="detail-row">
-                <div className="d-icon">📞</div>
+                <div className="d-icon"><Phone size={18} style={{ color: COLORS.navy }} /></div>
                 <div className="d-text"><h4>Helpdesk</h4><p style={{ color:'#a0aec0', fontStyle:'italic' }}>Admin Panel se number add karein</p></div>
               </div>
             )}
             {bankMore.email && (
               <div className="detail-row">
-                <div className="d-icon">✉️</div>
+                <div className="d-icon"><Mail size={18} style={{ color: COLORS.navy }} /></div>
                 <div className="d-text"><h4>Email ID</h4><a href={`mailto:${bankMore.email}`}>{bankMore.email}</a></div>
               </div>
             )}
           </div>
           <div className="map-container">
             <iframe title="Bank More Campus Map"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.630325992144!2d86.4175863149822!3d23.77601898456687!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f6a3048817a859%3A0x8d365f7d34c52968!2sGuru%20Nanak%20College%20Womens%20Wing!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin"
+              src={bankMore.mapEmbed || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.630325992144!2d86.4175863149822!3d23.77601898456687!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f6a3048817a859%3A0x8d365f7d34c52968!2sGuru%20Nanak%20College%20Womens%20Wing!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin"}
               allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
           </div>
         </div>
