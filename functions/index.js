@@ -10,6 +10,9 @@ import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { initializeApp, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import firestorePkg from '@google-cloud/firestore';
+
+const { v1 } = firestorePkg;
 
 if (!getApps().length) {
   initializeApp();
@@ -116,19 +119,49 @@ export const onContactFormSubmitted = onDocumentCreated(
 /**
  * 3. scheduledFirestoreBackup — Weekly automated backup
  * Runs every Sunday at 02:00 AM IST
+ * Exports all Firestore collections to default Firebase Storage bucket under /backups/
  */
 export const scheduledFirestoreBackup = onSchedule(
   {
     schedule: '0 2 * * 0',
     timeZone: 'Asia/Kolkata',
-    region: 'asia-south1'
+    region: 'asia-south1',
+    timeoutSeconds: 300,
+    memory: '512MiB'
   },
   async () => {
-    console.log('[Backup] Running weekly scheduled backup audit...');
-    await db.collection('adminLogs').add({
-      action: 'SCHEDULED_WEEKLY_BACKUP_HEARTBEAT',
-      timestamp: new Date().toISOString(),
-      status: 'OK'
-    });
+    console.log('[Backup] Initiating weekly scheduled Firestore database export...');
+    try {
+      const client = new v1.FirestoreAdminClient();
+      const projectId = process.env.GCP_PROJECT || process.env.GCLOUD_PROJECT || 'gnc-college-web';
+      const databaseName = client.databasePath(projectId, '(default)');
+      const bucket = process.env.BACKUP_STORAGE_BUCKET || `${projectId}.appspot.com` || `${projectId}.firebasestorage.app`;
+      const timestampStr = new Date().toISOString().replace(/[:.]/g, '-');
+      const outputUriPrefix = `gs://${bucket}/backups/${timestampStr}`;
+
+      console.log(`[Backup] Exporting ${databaseName} to ${outputUriPrefix}...`);
+      const [operation] = await client.exportDocuments({
+        name: databaseName,
+        outputUriPrefix,
+        collectionIds: [] // Exports all collections
+      });
+
+      console.log(`[Backup] Export operation successfully initiated: ${operation?.name || 'QUEUED'}`);
+      await db.collection('adminLogs').add({
+        action: 'SCHEDULED_WEEKLY_BACKUP_INITIATED',
+        timestamp: new Date().toISOString(),
+        operationName: operation?.name || '',
+        outputUriPrefix,
+        status: 'SUCCESS'
+      });
+    } catch (err) {
+      console.error('[Backup] Scheduled backup export failed:', err);
+      await db.collection('adminLogs').add({
+        action: 'SCHEDULED_WEEKLY_BACKUP_FAILED',
+        timestamp: new Date().toISOString(),
+        error: err.message,
+        status: 'ERROR'
+      });
+    }
   }
 );
