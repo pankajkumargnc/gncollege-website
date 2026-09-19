@@ -618,10 +618,33 @@ const NotificationSection = ({ notices = [], announcements = [], pdfReports = []
           overflow: hidden;
         }
 
+        .ns-header::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; width: 45%; height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+          animation: headerShimmer 4.5s ease-in-out infinite;
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        @keyframes headerFlow {
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        @keyframes headerShimmer {
+          0%   { transform: translateX(-150%) skewX(-20deg); }
+          100% { transform: translateX(250%) skewX(-20deg); }
+        }
+
         .ns-header-left {
           display: flex;
           align-items: center;
           gap: 10px;
+          position: relative;
+          z-index: 2;
         }
 
         .ns-header-title {
@@ -641,11 +664,28 @@ const NotificationSection = ({ notices = [], announcements = [], pdfReports = []
           padding: 2px 8px;
           border-radius: 99px;
           letter-spacing: 0.5px;
+          position: relative;
+          z-index: 2;
         }
 
-        .nh-notice { background: linear-gradient(135deg, #0f2347 0%, #1e3a8a 100%); }
-        .nh-news   { background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%); }
-        .nh-docs   { background: linear-gradient(135deg, #065f46 0%, #059669 100%); }
+        .nh-notice {
+          background: linear-gradient(135deg, #0a1730 0%, #0f2347 30%, #1e40af 60%, #0f2347 100%);
+          background-size: 250% 250%;
+          animation: headerFlow 7s ease-in-out infinite alternate;
+          will-change: background-position;
+        }
+        .nh-news {
+          background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 30%, #dc2626 60%, #b91c1c 100%);
+          background-size: 250% 250%;
+          animation: headerFlow 7s ease-in-out infinite alternate;
+          will-change: background-position;
+        }
+        .nh-docs {
+          background: linear-gradient(135deg, #064e3b 0%, #065f46 30%, #059669 60%, #047857 100%);
+          background-size: 250% 250%;
+          animation: headerFlow 7s ease-in-out infinite alternate;
+          will-change: background-position;
+        }
 
         /* ── CARD BODY (SCROLL CONTAINER) ── */
         .ns-body {
