@@ -6,16 +6,34 @@ import toast from 'react-hot-toast';
 import DOMPurify from 'dompurify';
 import { Bell, Pin, Calendar, Clock, Sparkles, Edit2, Trash2, Plus, Info } from 'lucide-react';
 import MediaPicker from '../../MediaPicker';
-import { T, NAVY, GOLD, BG, useLocalDraft, Toggle, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
+import { T, NAVY, GOLD, BG, Toggle, SectionSearch, BulkBar, MiniLog } from '../AdminShared';
 import { extractNoticeMetadata } from '../../../utils/aiExtractor';
+import useDraftAutoSave from '../../../hooks/useDraftAutoSave';
+
+const DEFAULT_NOTICE_DATA = { text: '', link: '', type: 'General', isNew: true, pinned: false, publishDate: '', expiryDate: '' };
 
 export default function NoticesTab({ notices, logAct, getSectionLog, softDelete, bulkDelete }) {
   const [editNotice, setEditNotice] = useState(null);
-  const [noticeData, setNoticeData, clearNoticeDraft] = useLocalDraft('notice', { text: '', link: '', type: 'General', isNew: true, pinned: false, publishDate: '', expiryDate: '' });
+  const [noticeData, setNoticeData] = useState(DEFAULT_NOTICE_DATA);
   const [noticeSearch, setNoticeSearch] = useState('');
   const [noticeSel, setNoticeSel] = useState([]);
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+
+  // 🛡️ Enterprise Draft Auto-Save Hook (Phase 2 audit finding #8)
+  const draftKey = editNotice ? `notice_${editNotice.id}` : 'notice_new';
+  const {
+    hasDraft,
+    draftTimestamp,
+    saveStatus,
+    restoreDraft,
+    discardDraft,
+    clearDraft: clearNoticeAutoDraft
+  } = useDraftAutoSave(
+    draftKey,
+    noticeData.text || '',
+    (restoredText) => setNoticeData(d => ({ ...d, text: restoredText }))
+  );
 
   const handleAIExtract = async () => {
     const rawInput = noticeData.text || noticeData.link;
@@ -67,7 +85,9 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
 
       toast.success('Notice published!');
       logAct(editNotice ? 'update' : 'add', `Notice: ${noticeData.text?.substring(0, 30)}`, 'notices');
-      setEditNotice(null); clearNoticeDraft();
+      setEditNotice(null);
+      clearNoticeAutoDraft();
+      setNoticeData(DEFAULT_NOTICE_DATA);
     } catch (err) {
       console.error('[NoticesTab] Failed to save notice:', err);
       toast.error('Failed to save notice: ' + (err.message || 'Unknown error'));
@@ -115,10 +135,69 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
           {editNotice ? <Edit2 size={16} /> : <Plus size={16} />}
           <span>{editNotice ? 'Edit Notice' : 'Publish Notice'}</span>
         </div>
+
+        {/* 💾 Draft Auto-Save Recovery Banner */}
+        {hasDraft && (
+          <div style={{
+            background: '#fffbeb',
+            border: '1.5px solid #f59e0b',
+            borderRadius: 10,
+            padding: '12px 16px',
+            marginBottom: 16,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 12
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 18 }}>💾</span>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#92400e' }}>
+                  Unsaved Notice Draft Recovered
+                </div>
+                <div style={{ fontSize: 11.5, color: '#b45309' }}>
+                  Auto-saved from your previous editing session ({draftTimestamp ? draftTimestamp.toLocaleTimeString() : 'recently'}).
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                type="button"
+                onClick={restoreDraft}
+                className="abtn abtn-sm"
+                style={{ background: '#d97706', color: '#fff', border: 'none', fontWeight: 800, padding: '6px 14px' }}
+              >
+                Restore Draft
+              </button>
+              <button
+                type="button"
+                onClick={discardDraft}
+                className="abtn abtn-sm"
+                style={{ background: 'transparent', color: '#b45309', border: '1px solid #d97706', fontWeight: 700, padding: '6px 12px' }}
+              >
+                Discard
+              </button>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={saveNotice}>
           <div style={{ marginBottom: 14 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <label className="alabel" style={{ margin: 0 }}>Notice Text *</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <label className="alabel" style={{ margin: 0 }}>Notice Text *</label>
+                {saveStatus === 'saving' && (
+                  <span style={{ fontSize: 11, color: '#b45309', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    <span className="live-pulse" style={{ width: 6, height: 6, background: '#f59e0b', borderRadius: '50%' }} /> Saving draft...
+                  </span>
+                )}
+                {saveStatus === 'saved' && (
+                  <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    ✓ Draft saved
+                  </span>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={handleAIExtract}
@@ -222,7 +301,7 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
             <button type="submit" className="abtn abtn-gold" disabled={loading}>
               {loading ? 'Saving…' : editNotice ? 'Update Notice' : 'Publish Notice'}
             </button>
-            {editNotice && <button type="button" className="abtn abtn-outline" onClick={()=>{setEditNotice(null);clearNoticeDraft();}}>Cancel</button>}
+            {editNotice && <button type="button" className="abtn abtn-outline" onClick={()=>{setEditNotice(null);clearNoticeAutoDraft();setNoticeData(DEFAULT_NOTICE_DATA);}}>Cancel</button>}
           </div>
         </form>
       </div>

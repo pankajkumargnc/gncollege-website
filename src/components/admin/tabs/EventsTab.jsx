@@ -16,12 +16,12 @@ import {
   NAVY,
   GOLD,
   BG,
-  useLocalDraft,
   SectionSearch,
   BulkBar,
   MiniLog,
 } from "../AdminShared";
 import { resolveUrl } from "../../../utils/resolver";
+import useDraftAutoSave from "../../../hooks/useDraftAutoSave";
 
 const TYPES = [
   "Cultural",
@@ -34,6 +34,19 @@ const TYPES = [
   "Other",
 ];
 
+const DEFAULT_EVENT_FORM = {
+  title: "",
+  date: "",
+  venue: "",
+  type: "Cultural",
+  description: "",
+  image: "",
+  reportLink: "",
+  status: "recent",
+  publishDate: "",
+  expiryDate: "",
+};
+
 export default function EventsTab({
   events,
   logAct,
@@ -42,22 +55,26 @@ export default function EventsTab({
   bulkDelete,
 }) {
   const [editItem, setEditItem] = useState(null);
-  const [formData, setFormData, clearDraft] = useLocalDraft("event", {
-    title: "",
-    date: "",
-    venue: "",
-    type: "Cultural",
-    description: "",
-    image: "",
-    reportLink: "",
-    status: "recent",
-    publishDate: "",
-    expiryDate: "",
-  });
+  const [formData, setFormData] = useState(DEFAULT_EVENT_FORM);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
   const [listTab, setListTab] = useState("upcoming");
+
+  // 🛡️ Enterprise Draft Auto-Save Hook (Phase 2 audit finding #8)
+  const draftKey = editItem ? `event_${editItem.id}` : 'event_new';
+  const {
+    hasDraft,
+    draftTimestamp,
+    saveStatus,
+    restoreDraft,
+    discardDraft,
+    clearDraft: clearEventAutoDraft
+  } = useDraftAutoSave(
+    draftKey,
+    formData.description || '',
+    (restoredDesc) => setFormData(d => ({ ...d, description: restoredDesc }))
+  );
 
   const save = async (e) => {
     e.preventDefault();
@@ -90,7 +107,8 @@ export default function EventsTab({
       }
       logAct(editItem ? "update" : "add", `Event: ${formData.title}`, "events");
       setEditItem(null);
-      clearDraft();
+      clearEventAutoDraft();
+      setFormData(DEFAULT_EVENT_FORM);
     } catch (err) {
       toast.error(err.message);
     }
@@ -148,6 +166,55 @@ export default function EventsTab({
           {editItem ? <Edit2 size={16} color={GOLD} /> : <Plus size={16} color={GOLD} />}
           <span>{editItem ? "Edit Event" : "Create New Event"}</span>
         </div>
+
+        {/* 💾 Draft Auto-Save Recovery Banner */}
+        {hasDraft && (
+          <div style={{
+            background: '#fffbeb',
+            border: '1.5px solid #f59e0b',
+            borderRadius: 10,
+            padding: '12px 16px',
+            marginBottom: 16,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 12
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 18 }}>💾</span>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#92400e' }}>
+                  Unsaved Event Description Recovered
+                </div>
+                <div style={{ fontSize: 11.5, color: '#b45309' }}>
+                  Auto-saved from your previous editing session ({draftTimestamp ? draftTimestamp.toLocaleTimeString() : 'recently'}).
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData(d => ({ ...d, status: 'recent' }));
+                  restoreDraft();
+                }}
+                className="abtn abtn-sm"
+                style={{ background: '#d97706', color: '#fff', border: 'none', fontWeight: 800, padding: '6px 14px' }}
+              >
+                Restore Draft
+              </button>
+              <button
+                type="button"
+                onClick={discardDraft}
+                className="abtn abtn-sm"
+                style={{ background: 'transparent', color: '#b45309', border: '1px solid #d97706', fontWeight: 700, padding: '6px 12px' }}
+              >
+                Discard
+              </button>
+            </div>
+          </div>
+        )}
 
         <div
           style={{
@@ -266,7 +333,19 @@ export default function EventsTab({
           {formData.status === "recent" && (
             <>
               <div style={{ marginBottom: 14 }}>
-                <label className="alabel">Description</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <label className="alabel" style={{ margin: 0 }}>Description</label>
+                  {saveStatus === 'saving' && (
+                    <span style={{ fontSize: 11, color: '#b45309', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <span className="live-pulse" style={{ width: 6, height: 6, background: '#f59e0b', borderRadius: '50%' }} /> Saving draft...
+                    </span>
+                  )}
+                  {saveStatus === 'saved' && (
+                    <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      ✓ Draft saved
+                    </span>
+                  )}
+                </div>
                 <textarea
                   className="ainp"
                   rows={3}
@@ -338,8 +417,8 @@ export default function EventsTab({
                 className="abtn abtn-outline"
                 onClick={() => {
                   setEditItem(null);
-                  clearDraft();
-                  setFormData((d) => ({ ...d, status: "recent" }));
+                  clearEventAutoDraft();
+                  setFormData(DEFAULT_EVENT_FORM);
                 }}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
               >

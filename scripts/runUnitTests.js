@@ -7,6 +7,7 @@ import { runFirestoreRulesTests } from '../tests/unit/firestoreRules.test.js';
 import { runDriveSecurityTests } from '../tests/unit/driveSecurity.test.js';
 import { runBackupFunctionTests } from '../tests/unit/backupFunction.test.js';
 import { runChatbotIntegrationTests } from '../tests/unit/chatbotIntegration.test.js';
+import { runDraftAutoSaveTests } from '../tests/unit/draftAutoSave.test.js';
 
 console.log('\n🧪 Running GNC College Unit Test Suite...\n');
 
@@ -37,6 +38,7 @@ reportSuite('Firestore Security Rules Matrix Tests', runFirestoreRulesTests());
 reportSuite('Google Drive & Asset Security Tests', runDriveSecurityTests());
 reportSuite('Automated Cloud Backup Function Tests', runBackupFunctionTests());
 reportSuite('AI Chatbot & Server Proxy Integration Tests', runChatbotIntegrationTests());
+reportSuite('Draft Auto-Save & Recovery Tests', runDraftAutoSaveTests());
 
 console.log(`══════════════════════════════════════════`);
 console.log(`Results: ${passed}/${total} Passed (${failed} Failed)`);
