@@ -65,6 +65,27 @@ export function setCache(collectionName, data) {
   }
 }
 
+// 🕒 Check local cache timestamp for a given collection
+export function getCacheTimestamp(collectionName) {
+  try {
+    if (!collectionName || collectionName === 'navigation' || collectionName === 'pages') {
+      return Number(localStorage.getItem('gnc_nav_v1_ts') || 0);
+    }
+    const cacheKey = `${CACHE_KEY_PREFIX}${collectionName}`;
+    const tsKey = `${cacheKey}_ts`;
+    return Number(localStorage.getItem(tsKey) || 0);
+  } catch (_) {
+    return 0;
+  }
+}
+
+// 🛡️ Evaluates if a cached collection is older than a remote sync epoch
+export function isCacheOlderThan(collectionName, remoteEpoch) {
+  if (!remoteEpoch || typeof remoteEpoch !== 'number') return false;
+  const localTs = getCacheTimestamp(collectionName);
+  return localTs > 0 && localTs < remoteEpoch;
+}
+
 // ⚡ Comprehensive Cache-Busting & Global Live Synchronization
 export function clearCache(collectionName, broadcastToRemote = true) {
   const cacheKey = `${CACHE_KEY_PREFIX}${collectionName}`;

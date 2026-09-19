@@ -4,7 +4,7 @@ import {
   collection, query, onSnapshot, orderBy, limit, getDocs, doc 
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { getCached, setCache, clearCache, SYNC_CHANNEL_NAME, encodePayload, decodePayload } from '../utils/cachedFetch';
+import { getCached, setCache, clearCache, SYNC_CHANNEL_NAME, encodePayload, decodePayload, isCacheOlderThan } from '../utils/cachedFetch';
 import DOMPurify from 'dompurify';
 
 export default function useAppData() {
@@ -201,16 +201,32 @@ export default function useAppData() {
     const unsubSync = onSnapshot(doc(db, 'settings', 'site_sync'), snap => {
       if (!snap.exists()) return;
       
-      // Skip the very first snapshot on load to prevent duplicate requests
+      const syncData = snap.data();
+      const updatedCol = syncData?.updatedCollection;
+      const remoteEpoch = syncData?.epoch || (typeof syncData?.lastUpdated?.toMillis === 'function' ? syncData.lastUpdated.toMillis() : 0);
+
+      // On initial boot, compare remote epoch with local cache timestamps so returning visitors never serve stale data
       if (!initialSyncHandled.current) {
         initialSyncHandled.current = true;
+
+        if (remoteEpoch > 0) {
+          const checkNav = !updatedCol || updatedCol === 'all' || updatedCol === 'navigation' || updatedCol === 'pages';
+          if (checkNav && isCacheOlderThan('navigation', remoteEpoch)) {
+            fetchNavigation(true);
+          }
+
+          const staticCols = ['faculties', 'pdfReports', 'gallery', 'testimonials'];
+          staticCols.forEach(col => {
+            const matchesCol = !updatedCol || updatedCol === 'all' || updatedCol === col;
+            if (matchesCol && isCacheOlderThan(col, remoteEpoch)) {
+              fetchStaticCollections(true);
+            }
+          });
+        }
         return;
       }
 
-      const syncData = snap.data();
-      const updatedCol = syncData?.updatedCollection;
-
-      // Invalidate specific or all cached items
+      // Subsequent real-time snapshots (admin pushed a change while visitor is actively browsing)
       if (!updatedCol || updatedCol === 'all' || updatedCol === 'navigation' || updatedCol === 'pages') {
         fetchNavigation(true);
       }
