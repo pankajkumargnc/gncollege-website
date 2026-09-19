@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { db } from '../firebase';
+import { db, functions } from '../firebase';
+import { httpsCallable } from 'firebase/functions';
 import { doc, collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { 
   Mic, MicOff, Volume2, VolumeX, Languages, RotateCcw, X, 
@@ -419,41 +420,8 @@ export default function AIChatbot() {
       `Or speak directly with our College Office at **+91 79033 40991** (Mon-Sat, 9:30 AM to 4:30 PM).`;
   };
 
-  // ── CALL GEMINI MULTI-TURN AI ──
+  // ── CALL GEMINI (TIER 1: SERVER PROXY -> TIER 2: CLIENT API FALLBACK) ──
   const callGeminiAPI = async (userPrompt, history) => {
-    const activeKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
-
-    if (!activeKey) {
-      return null;
-    }
-
-    // Build multi-turn format
-    const contents = [];
-
-    // Add recent turns (up to 8 turns for token efficiency)
-    const recentHistory = history.slice(-8);
-    for (const msg of recentHistory) {
-      contents.push({
-        role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.text }]
-      });
-    }
-
-    // Add current question
-    contents.push({
-      role: 'user',
-      parts: [{ text: userPrompt }]
-    });
-
-    const modelsToTry = [
-      'gemini-2.0-flash',
-      'gemini-1.5-flash-latest',
-      'gemini-1.5-flash',
-      'gemini-1.5-flash-8b',
-      'gemini-1.5-pro',
-      'gemini-pro'
-    ];
-
     const liveNoticeContext = liveNotices.length > 0
       ? `\n# REAL-TIME CAMPUS NOTICES & CIRCULARS (LIVE FEED):\n` +
         liveNotices.map((n, i) => `${i+1}. [${n.date || 'Recent'}] ${n.title || n.text} (${n.category || 'General'})`).join('\n')
@@ -464,44 +432,84 @@ export default function AIChatbot() {
     const dynamicAddendum = chatbotConfig.systemPromptAddendum
       ? `\nADDITIONAL INSTRUCTIONS:\n${chatbotConfig.systemPromptAddendum}\n`
       : '';
-    const activeSystemPrompt = `${SYSTEM_PROMPT}\n${dynamicAddendum}\nKnowledge Base:\n${dynamicKnowledge}`;
-    const dynamicPrompt = `${activeSystemPrompt}\n${liveNoticeContext}`;
+    const activeSystemPrompt = `${SYSTEM_PROMPT}\n${dynamicAddendum}\nKnowledge Base:\n${dynamicKnowledge}\n${liveNoticeContext}`;
 
-    for (const model of modelsToTry) {
-      for (const ver of ['v1beta', 'v1']) {
-        try {
-          const url = `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent?key=${activeKey}`;
-          const body = ver === 'v1beta'
-            ? {
-                systemInstruction: { parts: [{ text: dynamicPrompt }] },
-                contents: contents,
-                generationConfig: { temperature: 0.4, maxOutputTokens: 600, topP: 0.95 }
-              }
-            : {
-                contents: [{ role: 'user', parts: [{ text: `${dynamicPrompt}\n\nUser Question: ${userPrompt}` }] }]
-              };
+    const recentHistory = (history || []).slice(-8).map(m => ({
+      role: m.role === 'user' ? 'user' : 'model',
+      text: m.text
+    }));
 
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-          });
+    // ── Tier 1: Secure Cloud Function Server Proxy (zero client API key) ──
+    try {
+      if (functions) {
+        const proxyCall = httpsCallable(functions, 'geminiProxy');
+        const res = await proxyCall({
+          prompt: userPrompt,
+          systemInstruction: activeSystemPrompt,
+          history: recentHistory
+        });
+        if (res?.data?.reply) {
+          return res.data.reply.trim();
+        }
+      }
+    } catch (proxyErr) {
+      console.warn('[AIChatbot] Server geminiProxy unavailable, falling back to direct client/local engine:', proxyErr.message);
+    }
 
-          if (!response.ok) {
-            continue;
-          }
+    // ── Tier 2: Direct Client Fallback (if env key is present in client) ──
+    const activeKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
+    if (activeKey) {
+      const contents = [];
+      for (const msg of recentHistory) {
+        contents.push({
+          role: msg.role === 'user' ? 'user' : 'model',
+          parts: [{ text: msg.text }]
+        });
+      }
+      contents.push({ role: 'user', parts: [{ text: userPrompt }] });
 
-          const data = await response.json();
-          const candidateText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (candidateText && candidateText.trim()) {
-            return candidateText.trim();
-          }
-        } catch (err) {
-          // try next model / endpoint
+      const modelsToTry = [
+        'gemini-2.0-flash',
+        'gemini-1.5-flash-latest',
+        'gemini-1.5-flash',
+        'gemini-1.5-flash-8b',
+        'gemini-1.5-pro',
+        'gemini-pro'
+      ];
+
+      for (const model of modelsToTry) {
+        for (const ver of ['v1beta', 'v1']) {
+          try {
+            const url = `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent?key=${activeKey}`;
+            const body = ver === 'v1beta'
+              ? {
+                  systemInstruction: { parts: [{ text: activeSystemPrompt }] },
+                  contents: contents,
+                  generationConfig: { temperature: 0.4, maxOutputTokens: 600, topP: 0.95 }
+                }
+              : {
+                  contents: [{ role: 'user', parts: [{ text: `${activeSystemPrompt}\n\nUser Question: ${userPrompt}` }] }]
+                };
+
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(body)
+            });
+
+            if (!response.ok) continue;
+
+            const data = await response.json();
+            const candidateText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (candidateText && candidateText.trim()) {
+              return candidateText.trim();
+            }
+          } catch (_) {}
         }
       }
     }
 
+    // Tier 3: Returns null, which handleSend routes to getIntelligentFallback(query)
     return null;
   };
 

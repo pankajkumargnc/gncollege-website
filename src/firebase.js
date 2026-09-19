@@ -5,6 +5,7 @@
 import { initializeApp, getApps } from "firebase/app";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, getFirestore } from "firebase/firestore";
 import { getAnalytics, logEvent } from "firebase/analytics";
+import { getFunctions } from "firebase/functions";
 
 const env = (typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env : (process.env || {});
 
@@ -51,6 +52,7 @@ try {
 }
 
 export const db = dbInstance;
+export const functions = (typeof window !== 'undefined' && app) ? getFunctions(app, 'asia-south1') : null;
 
 // ✅ Web Push Notifications (Firebase Cloud Messaging)
 export const requestNotificationPermission = async () => {

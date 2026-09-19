@@ -6,6 +6,7 @@ import { runImageProcessorTests } from '../tests/unit/imageProcessor.test.js';
 import { runFirestoreRulesTests } from '../tests/unit/firestoreRules.test.js';
 import { runDriveSecurityTests } from '../tests/unit/driveSecurity.test.js';
 import { runBackupFunctionTests } from '../tests/unit/backupFunction.test.js';
+import { runChatbotIntegrationTests } from '../tests/unit/chatbotIntegration.test.js';
 
 console.log('\n🧪 Running GNC College Unit Test Suite...\n');
 
@@ -35,6 +36,7 @@ reportSuite('Client-Side Image Processor & Dimension Tests', runImageProcessorTe
 reportSuite('Firestore Security Rules Matrix Tests', runFirestoreRulesTests());
 reportSuite('Google Drive & Asset Security Tests', runDriveSecurityTests());
 reportSuite('Automated Cloud Backup Function Tests', runBackupFunctionTests());
+reportSuite('AI Chatbot & Server Proxy Integration Tests', runChatbotIntegrationTests());
 
 console.log(`══════════════════════════════════════════`);
 console.log(`Results: ${passed}/${total} Passed (${failed} Failed)`);
