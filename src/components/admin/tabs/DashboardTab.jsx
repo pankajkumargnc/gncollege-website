@@ -119,10 +119,63 @@ export default function DashboardTab({ notices, events, faculties, placements, p
 
   return (
     <div className="fade-up">
-      <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+      <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
         <div style={{ flex: '1 1 300px' }}>
           <h2 style={{ margin: 0, color: NAVY, fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 900, letterSpacing: '-1px' }}>Global Institutional Dashboard</h2>
           <p style={{ margin: '4px 0 0', color: T.t3, fontSize: 14, fontWeight: 600 }}>Real-time website analytics and campus activity summary.</p>
+        </div>
+      </div>
+
+      {/* ⚡ Real-Time Architecture Info Banner (Phase 2 audit finding #9) */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: 14,
+        background: 'linear-gradient(135deg, rgba(15, 35, 71, 0.04) 0%, rgba(244, 160, 35, 0.08) 100%)',
+        border: '1.5px solid rgba(244, 160, 35, 0.35)',
+        borderRadius: 14,
+        padding: '14px 20px',
+        marginBottom: 28,
+        boxShadow: '0 2px 12px rgba(15, 35, 71, 0.03)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{
+            width: 40,
+            height: 40,
+            borderRadius: 10,
+            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)'
+          }}>
+            <Zap size={22} color="#fff" />
+          </div>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 14, color: NAVY, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <span>Changes Go Live Instantly — No Deploy Needed</span>
+              <span style={{
+                background: '#dcfce7',
+                color: '#15803d',
+                fontSize: 11,
+                padding: '2px 8px',
+                borderRadius: 20,
+                fontWeight: 800,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4
+              }}>
+                <span className="glow" style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e' }} />
+                Real-Time Cloud Sync
+              </span>
+            </div>
+            <div style={{ fontSize: 12.5, color: '#475569', marginTop: 3, lineHeight: 1.5 }}>
+              All edits saved across notices, events, faculty, documents, and custom pages sync automatically to Cloud Firestore. Visitors and students worldwide see updates immediately with zero downtime or build steps required.
+            </div>
+          </div>
         </div>
       </div>
 

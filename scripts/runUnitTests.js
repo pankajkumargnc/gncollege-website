@@ -8,6 +8,7 @@ import { runDriveSecurityTests } from '../tests/unit/driveSecurity.test.js';
 import { runBackupFunctionTests } from '../tests/unit/backupFunction.test.js';
 import { runChatbotIntegrationTests } from '../tests/unit/chatbotIntegration.test.js';
 import { runDraftAutoSaveTests } from '../tests/unit/draftAutoSave.test.js';
+import { runDashboardBannerTests } from '../tests/unit/dashboardBanner.test.js';
 
 console.log('\n🧪 Running GNC College Unit Test Suite...\n');
 
@@ -39,6 +40,7 @@ reportSuite('Google Drive & Asset Security Tests', runDriveSecurityTests());
 reportSuite('Automated Cloud Backup Function Tests', runBackupFunctionTests());
 reportSuite('AI Chatbot & Server Proxy Integration Tests', runChatbotIntegrationTests());
 reportSuite('Draft Auto-Save & Recovery Tests', runDraftAutoSaveTests());
+reportSuite('Dashboard Real-Time Architecture Banner Tests', runDashboardBannerTests());
 
 console.log(`══════════════════════════════════════════`);
 console.log(`Results: ${passed}/${total} Passed (${failed} Failed)`);
