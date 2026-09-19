@@ -16,7 +16,7 @@ export const COLORS = {
 
   // UI / text colors (used in ErrorBoundary, pages, components)
   text:      '#334155',
-  textMid:   '#64748b',
+  textMid:   '#475569',
   textLight: '#94a3b8',
   border:    '#edf2f7',
   bg:        '#f4f7f9',

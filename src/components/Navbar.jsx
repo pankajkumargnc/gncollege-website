@@ -678,7 +678,7 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
                         zIndex: 300,
                         padding: '22px 26px',
                         width: megaWidth,
-                        maxHeight: 'calc(100vh - 120px)',
+                        maxHeight: 'calc(100dvh - 120px)',
                         overflowY: 'auto',
                         animation: 'dropdownMegaPop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                         display: 'flex',

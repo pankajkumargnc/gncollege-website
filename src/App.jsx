@@ -464,7 +464,7 @@ export default function App() {
   if (siteSettings?.maintenanceMode && !isAdminRoute) {
     return (
       <div style={{
-        minHeight: '100vh',
+        minHeight: '100dvh',
         background: 'linear-gradient(135deg, #070d1e, #0f2347, #020617)',
         display: 'flex',
         flexDirection: 'column',
