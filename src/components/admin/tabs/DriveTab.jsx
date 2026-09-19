@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { db } from "../../../firebase";
 import { collection, getDocs, doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { clearCache } from '../../../utils/cachedFetch';
+import { driveToDirectUrl, driveToThumbnailUrl } from '../../../utils/resolver';
 import toast from 'react-hot-toast';
 import { Cloud, RefreshCw, Wrench, Eye, Send, XCircle, FileText, Image as ImageIcon, Folder, CheckCircle, Clock, Loader2 } from 'lucide-react';
 import { T, NAVY, GOLD } from '../AdminShared';
@@ -119,12 +120,9 @@ export default function DriveTab({ logAct }) {
     setProcessingId(file.id);
     try {
       const isImg = activeTab.type === 'image';
-      const apiKey = API_KEY;
-      const directApiUrl = isImg && apiKey 
-        ? `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${apiKey}`
-        : `https://lh3.googleusercontent.com/d/${file.id}=w1200`;
-      
-      const fileUrl = isImg ? directApiUrl : `https://drive.google.com/file/d/${file.id}/preview`;
+      const fileUrl = isImg 
+        ? driveToDirectUrl(file.id) 
+        : `https://drive.google.com/file/d/${file.id}/preview`;
 
       const publishData = {
         title: file.name.replace(/\.[^/.]+$/, ''), 
@@ -174,15 +172,19 @@ export default function DriveTab({ logAct }) {
           const d = docItem.data();
           const fileId = d.driveId || (docItem.id && /^[a-zA-Z0-9_-]{25,}$/.test(docItem.id) ? docItem.id : null);
           if (fileId) {
-            const directUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
-            const needsFix = !d.image || !d.src || d.image.includes('lh3.googleusercontent.com') || d.link?.includes('drive-storage');
+            const secureDirectUrl = driveToDirectUrl(fileId);
+            const needsFix = !d.image || !d.src || 
+              d.image.includes('googleapis.com/drive') || 
+              d.image.includes('key=') || 
+              d.link?.includes('drive-storage') ||
+              (typeof d.src === 'string' && d.src.includes('key='));
             if (needsFix) {
               await setDoc(doc(db, colName, docItem.id), {
                 ...d,
-                image: directUrl,
-                src: directUrl,
-                url: directUrl,
-                link: directUrl,
+                image: secureDirectUrl,
+                src: secureDirectUrl,
+                url: secureDirectUrl,
+                link: secureDirectUrl,
                 driveId: fileId,
                 repairedAt: serverTimestamp()
               }, { merge: true });
@@ -309,7 +311,7 @@ export default function DriveTab({ logAct }) {
                     {activeTab.type === 'image' ? (
                       <>
                         <img 
-                          src={API_KEY ? `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${API_KEY}` : (file.thumbnailLink || `https://lh3.googleusercontent.com/d/${file.id}=w200`)} 
+                          src={file.thumbnailLink || driveToThumbnailUrl(file.id, 200)} 
                           alt={file.name} 
                           referrerPolicy="no-referrer"
                           loading="lazy"
@@ -317,7 +319,7 @@ export default function DriveTab({ logAct }) {
                           onError={(e) => {
                             if (!e.target.dataset.triedFallback) {
                               e.target.dataset.triedFallback = 'true';
-                              e.target.src = file.thumbnailLink || `https://lh3.googleusercontent.com/d/${file.id}=w200`;
+                              e.target.src = driveToThumbnailUrl(file.id, 200);
                             } else {
                               e.target.style.display = 'none';
                               if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
