@@ -31,10 +31,16 @@ export function runFirestoreRulesTests() {
       if (operation === 'read') return true;
       if (operation === 'write') return isAdmin;
     }
-    if (docPath === 'settings/contact') {
-      // Must verify rule is present in file
+    if (['settings/contact'].includes(docPath)) {
       const hasContactRule = /match\s+\/settings\/contact\s*\{\s*allow\s+read:\s*if\s+true;\s*allow\s+write:\s*if\s+isAdmin\(\);\s*\}/.test(rulesContent);
       if (!hasContactRule) return false;
+      if (operation === 'read') return true;
+      if (operation === 'write') return isAdmin;
+    }
+    if (['pdfReports', 'sliderSlides', 'regulations', 'eventReports', 'collegeDocs', 'generalDocs', 'slider'].some(col => docPath.startsWith(`${col}/`))) {
+      const colName = docPath.split('/')[0];
+      const hasColRule = new RegExp(`match\\s+/${colName}/\\{docId\\}\\s*\\{\\s*allow\\s+read:\\s*if\\s+true;\\s*allow\\s+write:\\s*if\\s+isAdmin\\(\\);\\s*\\}`).test(rulesContent);
+      if (!hasColRule) return false;
       if (operation === 'read') return true;
       if (operation === 'write') return isAdmin;
     }
@@ -97,6 +103,32 @@ export function runFirestoreRulesTests() {
   results.push({
     desc: 'Generic sensitive settings (e.g. settings/secrets) remain STRICTLY DENIED for public read',
     pass: otherSettingPublicReadDenied === false && otherSettingNonAdminReadDenied === false
+  });
+
+  // 8. Defensive rules for legacy and consolidated collections (Item 2)
+  const defensiveCols = ['regulations', 'eventReports', 'collegeDocs', 'generalDocs', 'slider', 'pdfReports', 'sliderSlides'];
+  for (const col of defensiveCols) {
+    const pubRead = evaluateRuleAccess(`${col}/testDoc`, 'read', null);
+    const pubWrite = evaluateRuleAccess(`${col}/testDoc`, 'write', null);
+    const adminWrite = evaluateRuleAccess(`${col}/testDoc`, 'write', { email: 'pankajkumargnc@gmail.com' });
+    results.push({
+      desc: `Collection ${col} allows public read and restricts write to admin`,
+      pass: pubRead === true && pubWrite === false && adminWrite === true
+    });
+  }
+
+  // 9. DriveTab consolidation check: Verify DriveTab categories map to live collections
+  const driveTabPath = path.resolve(process.cwd(), 'src/components/admin/tabs/DriveTab.jsx');
+  const driveTabContent = fs.readFileSync(driveTabPath, 'utf8');
+  const hasConsolidatedPdfReports = (driveTabContent.match(/dbCollection:\s*'pdfReports'/g) || []).length >= 4;
+  const hasConsolidatedSlider = driveTabContent.includes("dbCollection: 'sliderSlides'");
+  results.push({
+    desc: 'DriveTab.jsx consolidates PDF categories to pdfReports collection',
+    pass: hasConsolidatedPdfReports
+  });
+  results.push({
+    desc: 'DriveTab.jsx consolidates hero slider to sliderSlides collection',
+    pass: hasConsolidatedSlider
   });
 
   return results;

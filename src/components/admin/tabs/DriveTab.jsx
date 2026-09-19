@@ -4,11 +4,12 @@
 import { useState, useEffect } from 'react';
 import { db } from "../../../firebase";
 import { collection, getDocs, doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { clearCache } from '../../../utils/cachedFetch';
 import toast from 'react-hot-toast';
 import { Cloud, RefreshCw, Wrench, Eye, Send, XCircle, FileText, Image as ImageIcon, Folder, CheckCircle, Clock, Loader2 } from 'lucide-react';
 import { T, NAVY, GOLD } from '../AdminShared';
 
-// ALL .ENV FOLDERS CONFIGURATION
+// ALL .ENV FOLDERS CONFIGURATION (Consolidated to standard live collections)
 const DRIVE_CATEGORIES = [
   // PDF DOCUMENTS
   { 
@@ -22,28 +23,28 @@ const DRIVE_CATEGORIES = [
     id: 'regulations', 
     label: 'Regulations', 
     folderId: import.meta.env.VITE_DRIVE_REGULATIONS_FOLDER, 
-    dbCollection: 'regulations',
+    dbCollection: 'pdfReports',
     type: 'pdf'
   },
   { 
     id: 'event_reports', 
     label: 'Event Reports', 
     folderId: import.meta.env.VITE_DRIVE_EVENT_REPORTS_FOLDER, 
-    dbCollection: 'eventReports',
+    dbCollection: 'pdfReports',
     type: 'pdf'
   },
   { 
     id: 'college_docs', 
     label: 'College Docs', 
     folderId: import.meta.env.VITE_DRIVE_COLLEGE_DOCUMENTS_FOLDER, 
-    dbCollection: 'collegeDocs',
+    dbCollection: 'pdfReports',
     type: 'pdf'
   },
   { 
     id: 'main_docs', 
     label: 'Main Docs Folder', 
     folderId: import.meta.env.VITE_DRIVE_DOCUMENT_FOLDER, 
-    dbCollection: 'generalDocs',
+    dbCollection: 'pdfReports',
     type: 'pdf'
   },
   
@@ -52,7 +53,7 @@ const DRIVE_CATEGORIES = [
     id: 'slider', 
     label: 'Hero Slider', 
     folderId: import.meta.env.VITE_DRIVE_HERO_SLIDER_FOLDER, 
-    dbCollection: 'slider',
+    dbCollection: 'sliderSlides',
     type: 'image'
   },
   { 
@@ -131,8 +132,12 @@ export default function DriveTab({ logAct }) {
         image: fileUrl,
         url: fileUrl,
         src: fileUrl,
+        fileUrl: fileUrl,
+        pdfUrl: fileUrl,
         driveThumbnail: file.thumbnailLink || '',
-        cat: activeTab.id === 'slider' ? 'Slider' : 'Campus',
+        cat: activeTab.id === 'slider' ? 'Slider' : (activeTab.label || 'Campus'),
+        type: activeTab.label || 'General',
+        category: activeTab.label || 'General',
         date: new Date(file.createdTime).toISOString(),
         publishedAt: serverTimestamp(),
         createdAt: serverTimestamp(),
@@ -141,6 +146,7 @@ export default function DriveTab({ logAct }) {
       };
 
       await setDoc(doc(db, activeTab.dbCollection, file.id), publishData);
+      clearCache(activeTab.dbCollection);
       
       setPublishedIds(prev => new Set(prev).add(file.id));
       toast.success(`${file.name} published successfully`);

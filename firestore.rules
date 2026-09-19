@@ -22,6 +22,11 @@ service cloud.firestore {
     match /placements/{docId}       { allow read: if true; allow write: if isAdmin(); }
     match /pdfReports/{docId}       { allow read: if true; allow write: if isAdmin(); }
     match /reports/{docId}          { allow read: if true; allow write: if isAdmin(); }
+    match /regulations/{docId}      { allow read: if true; allow write: if isAdmin(); }
+    match /eventReports/{docId}      { allow read: if true; allow write: if isAdmin(); }
+    match /collegeDocs/{docId}       { allow read: if true; allow write: if isAdmin(); }
+    match /generalDocs/{docId}       { allow read: if true; allow write: if isAdmin(); }
+    match /slider/{docId}            { allow read: if true; allow write: if isAdmin(); }
     match /testimonials/{docId}     { allow read: if true; allow write: if isAdmin(); }
     match /contactDirectory/{docId} { allow read: if true; allow write: if isAdmin(); }
     match /navigation/{docId}       { allow read: if true; allow write: if isAdmin(); }
