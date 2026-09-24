@@ -8,14 +8,15 @@
 ![Vite](https://img.shields.io/badge/Vite-7.3.1-646CFF?style=for-the-badge&logo=vite)
 ![Headless CMS](https://img.shields.io/badge/Headless_CMS-Firestore-FF3E00?style=for-the-badge)
 ![PWA Ready](https://img.shields.io/badge/PWA-Installable%20Offline-5A0FC8?style=for-the-badge)
-![Playwright QA](https://img.shields.io/badge/Playwright_QA-42%2F42%20Passed%20(100%25)-22c55e?style=for-the-badge)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-109%2F109%20Passed-22c55e?style=for-the-badge)
+![Playwright QA](https://img.shields.io/badge/Playwright_QA-48%2F48%20Passed%20(100%25)-22c55e?style=for-the-badge)
 ![Diagnostic Core](https://img.shields.io/badge/Diagnostic_Engine-v400.0%20(36--Phase)-eab308?style=for-the-badge)
 
 **🎓 NAAC Accredited Grade 'B' Sikh Minority Degree College | Affiliated to Binod Bihari Mahto Koyalanchal University (BBMKU)**  
 **🏛️ Recognized by UGC under Sections 2(f) and 12(B) of UGC Act, 1956**  
 **📍 Dual Campuses: Bhuda Campus (Main / Boys Wing) & Bank More Campus (Girls Wing / Vocational Studies) | Dhanbad, Jharkhand — 826001**
 
-[🌐 Live Official Website](https://pankajkumargnc.github.io/gncollege-website) · [📄 Printable Official Documentation (PDF)](./GNC_College_Official_Documentation_v2.1.0.pdf) · [📋 Architecture Blueprint (HTML)](./public/docs/GNC_College_Official_Documentation_v2.1.0.html) · [🛡️ Admin Reference Guide](./public/docs/CLAUDE_GNC_Reference.pdf)
+[🌐 Live Official Website](https://pankajkumargnc.github.io/gncollege-website) · [📑 Master Audit Report (v2.1.0)](./GNC_WEBSITE_MASTER_AUDIT_REPORT.md) · [📄 Printable Official Documentation (PDF)](./GNC_College_Official_Documentation_v2.1.0.pdf) · [📋 Architecture Blueprint (HTML)](./public/docs/GNC_College_Official_Documentation_v2.1.0.html) · [🛡️ Admin Reference Guide](./public/docs/CLAUDE_GNC_Reference.pdf)
 
 ---
 
