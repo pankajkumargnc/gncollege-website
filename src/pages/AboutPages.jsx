@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { collection, query, orderBy, onSnapshot, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
-import PDFModal from '../components/PDFModal'; // ✅ PDF Modal Import
+const PDFModal = lazy(() => import('../components/PDFModal'));
 import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageContent'; // ✅ CMS Content Hook
 import DOMPurify from 'dompurify';
 import {

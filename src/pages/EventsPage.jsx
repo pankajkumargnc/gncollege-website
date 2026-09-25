@@ -6,7 +6,7 @@ import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
-import PDFModal from '../components/PDFModal';
+const PDFModal = lazy(() => import('../components/PDFModal'));
 import PremiumPagination from '../components/PremiumPagination';
 import AcademicCalendarWidget from '../components/AcademicCalendarWidget';
 import { Hammer, Mic, Theater, Trophy, Handshake, Medal, BookOpen, Calendar } from 'lucide-react';

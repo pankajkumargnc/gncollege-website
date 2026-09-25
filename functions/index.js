@@ -165,3 +165,65 @@ export const scheduledFirestoreBackup = onSchedule(
     }
   }
 );
+
+/**
+ * 4. processScheduledPublishing — Scheduled Publishing & Lifecycle Cron (Section 25)
+ * Runs every 30 minutes.
+ * - Publishes scheduled notices when publishDate <= now
+ * - Automatically archives expired notices when expiryDate < now
+ */
+export const processScheduledPublishing = onSchedule(
+  {
+    schedule: '*/30 * * * *',
+    timeZone: 'Asia/Kolkata',
+    region: 'asia-south1',
+    timeoutSeconds: 120,
+    memory: '256MiB'
+  },
+  async () => {
+    const now = new Date();
+    const nowIso = now.toISOString();
+    console.log(`[Lifecycle] Checking scheduled publishing & expiration at ${nowIso}...`);
+
+    try {
+      const noticesSnap = await db.collection('notices').get();
+      const batch = db.batch();
+      let updatedCount = 0;
+
+      noticesSnap.forEach((docSnap) => {
+        const data = docSnap.data();
+        // Check for scheduled publishing
+        if (data.status === 'scheduled' && data.publishDate && new Date(data.publishDate) <= now) {
+          batch.update(docSnap.ref, {
+            status: 'published',
+            publishedAt: nowIso,
+            updatedAt: nowIso
+          });
+          updatedCount++;
+        }
+        // Check for expiration
+        else if (data.status === 'published' && data.expiryDate && new Date(data.expiryDate) < now) {
+          batch.update(docSnap.ref, {
+            status: 'expired',
+            expiredAt: nowIso,
+            updatedAt: nowIso
+          });
+          updatedCount++;
+        }
+      });
+
+      if (updatedCount > 0) {
+        await batch.commit();
+        console.log(`[Lifecycle] Successfully updated ${updatedCount} notice lifecycles.`);
+        await db.collection('adminLogs').add({
+          action: 'SCHEDULED_PUBLISHING_PROCESSED',
+          timestamp: nowIso,
+          itemsProcessed: updatedCount
+        });
+      }
+    } catch (err) {
+      console.error('[Lifecycle] Error processing scheduled items:', err);
+    }
+  }
+);
+

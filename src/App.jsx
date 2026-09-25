@@ -13,10 +13,10 @@ import AppRoutes from "./components/AppRoutes";
 import Ticker from "./components/Ticker";
 import WhatsAppButton from "./components/WhatsAppButton";
 import BackToTop from "./components/BackToTop";
-import UniversalSearch from "./components/UniversalSearch";
 import AlertBanner from "./components/AlertBanner";
 import FloatingQRButton from "./components/FloatingQRButton";
 
+const UniversalSearch = lazy(() => import("./components/UniversalSearch"));
 const AIChatbot = lazy(() => import("./components/AIChatbot"));
 
 // ── Data & Styles ──
@@ -531,15 +531,17 @@ export default function App() {
   return (
     <>
       <Toaster position="bottom-right" containerStyle={{ zIndex: 9999999 }} />
-      <Suspense fallback={null}>
-        <UniversalSearch 
-          isOpen={searchOpen} 
-          onClose={() => setSearchOpen(false)} 
-          notices={notices}
-          faculties={faculties}
-          gallery={gallery}
-        />
-      </Suspense>
+      {searchOpen && (
+        <Suspense fallback={null}>
+          <UniversalSearch 
+            isOpen={searchOpen} 
+            onClose={() => setSearchOpen(false)} 
+            notices={notices}
+            faculties={faculties}
+            gallery={gallery}
+          />
+        </Suspense>
+      )}
       
       {!isAdminRoute && (
         <div style={{ position: 'relative', zIndex: 1000 }}>

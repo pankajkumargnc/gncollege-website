@@ -24,12 +24,27 @@ export default function UniversalSearch({
   // ── Combine & Filter All Searchable Data ──
   const flatResults = useMemo(() => {
     const items = [
-      // 1. Static Core Pages
+      // 1. Static Core Pages & Student Hub
       { title: 'Home', path: '/', icon: <Home size={22} strokeWidth={1.5}/>, cat: 'Navigation' },
-      { title: 'About GNC', path: '/about-us/college-profile', icon: <School size={22} strokeWidth={1.5}/>, cat: 'Navigation' },
-      { title: 'Admissions', path: '/admission/rule', icon: <GraduationCap size={22} strokeWidth={1.5}/>, cat: 'Navigation' },
-      { title: 'Departments', path: '/academics/departments', icon: <Building2 size={22} strokeWidth={1.5}/>, cat: 'Navigation' },
-      { title: 'Photo Gallery', path: '/gallery/photos', icon: <Camera size={22} strokeWidth={1.5}/>, cat: 'Navigation' },
+      { title: 'Student Corner', sub: 'Hub for exams, results, document requests, & calendar', path: '/student-corner', icon: <GraduationCap size={22} strokeWidth={1.5}/>, cat: 'Student Corner' },
+      { title: 'Document Request System', sub: 'Apply for TC, Bonafide, Character certificate online', path: '/documents/request', icon: <FileText size={22} strokeWidth={1.5}/>, cat: 'Student Corner' },
+      { title: 'Examination Results', sub: 'BBMKU semester examination results & marksheets', path: '/publication/examination-results/2024', icon: <GraduationCap size={22} strokeWidth={1.5}/>, cat: 'Student Corner' },
+      { title: 'Syllabus & NEP FYUGP', sub: 'Semester-wise syllabus & evaluation structure', path: '/syllabus', icon: <School size={22} strokeWidth={1.5}/>, cat: 'Academics' },
+      { title: 'Academic Calendar', sub: 'Schedule of terms, mid-terms, holidays, & events', path: '/academics/academic-calendar', icon: <Calendar size={22} strokeWidth={1.5}/>, cat: 'Academics' },
+      { title: 'Scholarships & E-Kalyan', sub: 'State & national financial aid schemes', path: '/scholarships', icon: <GraduationCap size={22} strokeWidth={1.5}/>, cat: 'Student Corner' },
+      { title: 'About GNC', sub: 'College profile, UGC 2(f) & 12(B) status, 1970 roots', path: '/about-us/college-profile', icon: <School size={22} strokeWidth={1.5}/>, cat: 'About GNC' },
+      { title: 'Sikh Heritage Hub', sub: 'Sikh minority heritage, founder values, history', path: '/about-us/sikh-heritage', icon: <School size={22} strokeWidth={1.5}/>, cat: 'About GNC' },
+      { title: 'Admissions & Rules', sub: 'Chancellor portal registration & eligibility', path: '/admission/rule', icon: <GraduationCap size={22} strokeWidth={1.5}/>, cat: 'Admissions' },
+      { title: 'Fee Structure', sub: 'Course-wise fees, concessions & minority support', path: '/admission/fee-structure', icon: <FileText size={22} strokeWidth={1.5}/>, cat: 'Admissions' },
+      { title: 'NAAC Portal & SSR', sub: 'Cycle 1 & 2 SSR, AQAR, NIRF, & IQAC reports', path: '/naac/portal', icon: <FileText size={22} strokeWidth={1.5}/>, cat: 'Institutional' },
+      { title: 'Campus & Infrastructure', sub: 'Bhuda Main Wing & Bank More Girls Wing', path: '/campus/infrastructure', icon: <Building2 size={22} strokeWidth={1.5}/>, cat: 'Campus' },
+      { title: 'Photo Gallery', path: '/gallery/photos', icon: <Camera size={22} strokeWidth={1.5}/>, cat: 'Media Gallery' },
+      
+      // 2. Academic Courses & Departments
+      { title: 'BCA (Bachelor of Computer Applications)', sub: '3-Year professional IT degree program', path: '/academics/departments/bca', icon: <Building2 size={22} strokeWidth={1.5}/>, cat: 'Courses' },
+      { title: 'BBA (Bachelor of Business Administration)', sub: 'Management & market leadership program', path: '/academics/departments/bba', icon: <Building2 size={22} strokeWidth={1.5}/>, cat: 'Courses' },
+      { title: 'B.Com (Bachelor of Commerce)', sub: 'Accounting, finance & business honors', path: '/academics/departments/commerce', icon: <Building2 size={22} strokeWidth={1.5}/>, cat: 'Courses' },
+      { title: 'B.A. (Humanities & Social Sciences)', sub: 'History, political science, Hindi, English honors', path: '/academics/departments/humanities', icon: <Building2 size={22} strokeWidth={1.5}/>, cat: 'Courses' },
       
       // 2. Dynamic Faculties
       ...(faculties || []).map(f => ({

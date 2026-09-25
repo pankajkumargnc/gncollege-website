@@ -5,7 +5,7 @@ export const GALLERY_CATEGORIES = ['All Events', 'Campus', 'Recent Programs', 'C
 // ✅ FIX: Added 'Campus' — was missing; caused 3 gallery items to vanish when any filter was applied
 
 export const PDF_CATEGORIES = ['NAAC', 'Annual Report', 'IQAC', 'Regulations', 'Examination', 'General']
-export const MENU_SECTIONS = ['About Us', 'Campus', 'Academics', 'Admission', 'Activity', 'NAAC', 'Publication', 'Gallery']
+export const MENU_SECTIONS = ['About Us', 'Campus', 'Academics', 'Admission', 'Student Corner', 'Activity', 'NAAC', 'Publication', 'Gallery']
 
 export const SOCIAL_LINKS = [
   { id: 'facebook', label: 'f', href: 'https://facebook.com/gnc.dhanbad' }, // ✅ Update with real URLs
@@ -179,6 +179,22 @@ export const navLinks = [
       { label: 'Document Required', href: '/admission/document-required' },
       { label: 'Intake Capacity', href: '/admission/intake-capacity' },
       { label: 'Scholarships & Financial Aid', href: '/scholarships' },
+    ]
+  },
+  {
+    label: 'Student Corner',
+    href: '/student-corner',
+    sub: [
+      { label: 'Student Corner Hub', href: '/student-corner' },
+      { label: 'Document Request & Tracking', href: '/documents/request' },
+      { label: 'Notices & Circulars', href: '/notifications' },
+      { label: 'Examination Results', href: '/publication/examination-results/2024' },
+      { label: 'Syllabus & NEP FYUGP', href: '/syllabus' },
+      { label: 'Academic Calendar', href: '/academics/academic-calendar' },
+      { label: 'Scholarships & E-Kalyan', href: '/scholarships' },
+      { label: 'College Documents & Vault', href: '/documents' },
+      { label: 'Grievance Redressal Cell', href: '/about-us/various-committees/grievance' },
+      { label: 'Anti-Ragging Committee', href: '/about-us/various-committees/anti-ragging' },
     ]
   },
   {

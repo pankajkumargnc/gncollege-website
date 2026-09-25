@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useDriveDocs } from '../hooks/useDriveDocs';
-import PDFModal from '../components/PDFModal';
+const PDFModal = lazy(() => import('../components/PDFModal'));
 import { COLORS } from '../styles/colors';
 import { FolderOpen, FileText, Calendar, HardDrive, AlertCircle, Loader2 } from 'lucide-react';
 

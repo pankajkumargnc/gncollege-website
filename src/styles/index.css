@@ -36,17 +36,24 @@ h1, h2, h3, h4, h5, h6, .hero-title, .section-heading, .campus-title {
 :root {
   --container-max: 1280px;
   --container-padding: 2rem;
-  --navy:      #0f2347;
-  --gold:      #f4a023;
-  --navy-dark: #060e1c;
-  --bg:        #f4f7f9;
-  --navy-light: #1a3a6b;
-  --gold-light: #fbbf24;
-  --text-primary: #1e293b;
+
+  /* 🎨 Section 4 Master Design Tokens */
+  --primary:        #0B1F3A;
+  --secondary:      #D4A72C;
+  --accent:         #F4B942;
+  --bg:             #F7F9FC;
+  --surface:        #FFFFFF;
+  --text-primary:   #172033;
+  --text-muted:     #64748B;
+
+  /* Institutional brand mappings & legacy aliases */
+  --navy:           var(--primary);
+  --gold:           var(--secondary);
+  --navy-dark:      #060e1c;
+  --navy-light:     #1a3a6b;
+  --gold-light:     var(--accent);
   --text-secondary: #334155;
-  --text-muted: #475569;
-  --border-light: #edf2f7;
-  --surface: #ffffff;
+  --border-light:   #e2e8f0;
   --surface-raised: #f8fafc;
 
   /* Master Typography & Global Theme System */

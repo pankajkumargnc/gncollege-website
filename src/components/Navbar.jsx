@@ -44,6 +44,14 @@ const SPOTLIGHT_CARDS = {
     btnText: 'Campus Tour →',
     icon: '✦'
   },
+  'Student Corner': {
+    badge: 'STUDENT SERVICES HUB',
+    title: 'Exams, Requests & Support',
+    desc: 'Track certificate requests online, check semester results, download syllabi, and access statutory student welfare cells.',
+    link: '/student-corner',
+    btnText: 'Open Student Corner →',
+    icon: '🎓'
+  },
   'NAAC': {
     badge: 'QUALITY BENCHMARK',
     title: 'NAAC Cycles & SSR',

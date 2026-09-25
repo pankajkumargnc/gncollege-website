@@ -10,7 +10,7 @@ import { T, NAVY, GOLD, BG, Toggle, SectionSearch, BulkBar, MiniLog } from '../A
 import { extractNoticeMetadata } from '../../../utils/aiExtractor';
 import useDraftAutoSave from '../../../hooks/useDraftAutoSave';
 
-const DEFAULT_NOTICE_DATA = { text: '', link: '', type: 'General', isNew: true, pinned: false, publishDate: '', expiryDate: '' };
+const DEFAULT_NOTICE_DATA = { text: '', link: '', type: 'General', status: 'published', isNew: true, pinned: false, publishDate: '', expiryDate: '' };
 
 export default function NoticesTab({ notices, logAct, getSectionLog, softDelete, bulkDelete }) {
   const [editNotice, setEditNotice] = useState(null);
@@ -95,11 +95,17 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
     setLoading(false);
   };
 
-  // ── Scheduling status helper ──
+  // ── Scheduling status helper (Section 11) ──
   const getScheduleStatus = (n) => {
+    if (n.status === 'draft') return { label: '📝 Draft', bg: '#f1f5f9', color: '#475569' };
+    if (n.status === 'archived') return { label: '📦 Archived', bg: '#f8fafc', color: '#94a3b8' };
     const now = new Date();
-    if (n.publishDate && new Date(n.publishDate) > now) return { label: '🟡 Scheduled', bg: '#fefce8', color: '#d97706' };
-    if (n.expiryDate && new Date(n.expiryDate) < now) return { label: '🔴 Expired', bg: '#fee2e2', color: '#dc2626' };
+    if (n.status === 'scheduled' || (n.publishDate && new Date(n.publishDate) > now)) {
+      return { label: '🟡 Scheduled', bg: '#fefce8', color: '#d97706' };
+    }
+    if (n.expiryDate && new Date(n.expiryDate) < now) {
+      return { label: '🔴 Expired', bg: '#fee2e2', color: '#dc2626' };
+    }
     return { label: '🟢 Live', bg: '#dcfce7', color: '#16a34a' };
   };
 
@@ -234,9 +240,18 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 14, marginBottom: 14 }}>
             <div>
-              <label className="alabel">Type</label>
+              <label className="alabel">Category / Type</label>
               <select className="ainp" value={noticeData.type || 'General'} onChange={(e) => setNoticeData(d=>({...d,type:e.target.value}))}>
                 {['General','Examination','Admission','Result','Holiday','Scholarship','Sports'].map(t=><option key={t}>{t}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="alabel">Workflow Status</label>
+              <select className="ainp" value={noticeData.status || 'published'} onChange={(e) => setNoticeData(d=>({...d,status:e.target.value}))}>
+                <option value="published">🟢 Published (Live)</option>
+                <option value="draft">📝 Draft</option>
+                <option value="scheduled">🟡 Scheduled</option>
+                <option value="archived">📦 Archived</option>
               </select>
             </div>
             <div style={{ gridColumn: '1/-1' }}>
@@ -326,7 +341,7 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
               <div style={{ fontWeight: 700, color: NAVY, fontSize: 14 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize((n.text||'').substring(0,100)) }} />
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="abtn abtn-outline abtn-sm" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} onClick={()=>{setEditNotice(n);setNoticeData({text:n.text||'',link:n.link||'',type:n.type||'General',isNew:!!n.isNew,pinned:!!n.pinned,publishDate:n.publishDate||'',expiryDate:n.expiryDate||''});window.scrollTo({top:0,behavior:'smooth'});}} aria-label="Edit notice"><Edit2 size={13} /></button>
+              <button className="abtn abtn-outline abtn-sm" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} onClick={()=>{setEditNotice(n);setNoticeData({text:n.text||'',link:n.link||'',type:n.type||'General',status:n.status||'published',isNew:!!n.isNew,pinned:!!n.pinned,publishDate:n.publishDate||'',expiryDate:n.expiryDate||''});window.scrollTo({top:0,behavior:'smooth'});}} aria-label="Edit notice"><Edit2 size={13} /></button>
               <button className="abtn abtn-red abtn-sm" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} onClick={()=>softDelete('notices',n.id,n,(n.text||'').substring(0,30))} aria-label="Delete notice"><Trash2 size={13} /></button>
             </div>
           </div>

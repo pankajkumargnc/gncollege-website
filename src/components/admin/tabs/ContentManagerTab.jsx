@@ -5,7 +5,7 @@
 // Templates, SEO SERP Audit, JSON Export/Import, & Revision History
 // ═══════════════════════════════════════════════════════════════════
 import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense, useRef } from 'react';
-import { collection, doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, onSnapshot, setDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { NAVY, GOLD, WHITE, BG, T, useDebounce } from '../AdminShared';
 import toast from 'react-hot-toast';
@@ -989,15 +989,27 @@ export default function ContentManagerTab({ logAct }) {
         return s;
       });
 
+      const currentVersion = (allPages[selectedSlug]?._version || 0) + 1;
       const payload = {
         ...editData,
         sections: processedSections,
         updatedAt: serverTimestamp(),
-        _version: (allPages[selectedSlug]?._version || 0) + 1,
+        _version: currentVersion,
       };
       delete payload.id;
 
       await setDoc(doc(db, 'pageContent', selectedSlug), payload, { merge: true });
+
+      // 🛡️ Section 23: Snapshot version history
+      try {
+        await addDoc(collection(db, 'pageContent', selectedSlug, 'revisions'), {
+          ...payload,
+          _version: currentVersion,
+          snapshotAt: serverTimestamp()
+        });
+      } catch (revErr) {
+        console.warn('[ContentManager] Revision snapshot note:', revErr.message);
+      }
       if (logAct) logAct('update', `Content updated: ${editData.title}`, 'pageContent');
       toast.success(`✅ "${editData.title}" saved successfully!`);
       setHistorySnapshot(JSON.parse(JSON.stringify(payload)));

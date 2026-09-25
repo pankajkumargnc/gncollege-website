@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { COLORS } from '../styles/colors';
-import PDFModal from '../components/PDFModal';
+const PDFModal = lazy(() => import('../components/PDFModal'));
 import PremiumPagination from '../components/PremiumPagination';
 import { useDriveDocs } from '../hooks/useDriveDocs';
 import useAppData from '../hooks/useAppData';

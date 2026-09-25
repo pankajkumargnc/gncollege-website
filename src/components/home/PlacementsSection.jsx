@@ -178,6 +178,7 @@ const WofCard = memo(({ p }) => {
 export default function PlacementsSection({ siteSettings }) {
   const [placements, set] = useState([]);
   const [loading, setL]   = useState(true);
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   useEffect(() => {
     const q = query(collection(db, 'placements'));
@@ -241,11 +242,48 @@ export default function PlacementsSection({ siteSettings }) {
           </div>
         )}
 
-        {/* Academic Placement Analytics Chart (Toggleable via Site Settings) */}
+        {/* Academic Placement Analytics Chart (On-Demand Loading to Keep Homepage Bundle Light per Section 33) */}
         {siteSettings?.enablePlacementAnalytics !== false && (
-          <React.Suspense fallback={<div style={{ minHeight: 120 }} />}>
-            <PlacementAnalytics siteSettings={siteSettings} />
-          </React.Suspense>
+          <div style={{ marginTop: 40, textAlign: 'center' }}>
+            {!showAnalytics ? (
+              <button
+                type="button"
+                onClick={() => setShowAnalytics(true)}
+                style={{
+                  background: 'rgba(11, 31, 58, 0.04)',
+                  border: '1.5px dashed rgba(11, 31, 58, 0.2)',
+                  borderRadius: 16,
+                  padding: '16px 28px',
+                  color: N,
+                  fontSize: 13.5,
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = G;
+                  e.currentTarget.style.background = 'rgba(212, 167, 44, 0.08)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(11, 31, 58, 0.2)';
+                  e.currentTarget.style.background = 'rgba(11, 31, 58, 0.04)';
+                }}
+              >
+                <span>📊</span>
+                <span>Explore Placement Trends &amp; Package Analytics</span>
+                <span style={{ fontSize: 11, background: '#D4A72C', color: '#fff', padding: '2px 8px', borderRadius: 20 }}>
+                  Interactive
+                </span>
+              </button>
+            ) : (
+              <React.Suspense fallback={<div style={{ minHeight: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>Loading analytics engine...</div>}>
+                <PlacementAnalytics siteSettings={siteSettings} />
+              </React.Suspense>
+            )}
+          </div>
         )}
 
         <div className="wof-foot">

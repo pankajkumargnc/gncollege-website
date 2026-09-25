@@ -178,6 +178,26 @@
     </div>
 
     <!-- ══ React App Root ══ -->
+    <!-- ══ SPA Deep Link Fallback Resolver (Host-Agnostic per Section 39 & 93) ══ -->
+    <script>
+      (function() {
+        try {
+          var redirect = sessionStorage.getItem('gnc_spa_redirect');
+          if (redirect) {
+            sessionStorage.removeItem('gnc_spa_redirect');
+            if (redirect !== window.location.pathname) {
+              window.history.replaceState(null, null, redirect);
+            }
+          } else {
+            var params = new URLSearchParams(window.location.search);
+            var p = params.get('p');
+            if (p) {
+              window.history.replaceState(null, null, decodeURIComponent(p));
+            }
+          }
+        } catch (_) {}
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
 

@@ -1,17 +1,17 @@
 // src/components/home/AdmissionTimeline.jsx
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import confetti from 'canvas-confetti';
 import { COLORS } from '../../styles/colors';
 
 /**
  * 🎆 Grand Admission Celebration Effect (Birthday party style flayers & crackers)
  * Launches multi-angle colorful flayers, crackers, and golden stars to celebrate GNC admission!
  */
-function launchAdmissionCelebration(cardElement) {
+async function launchAdmissionCelebration(cardElement) {
   try {
     if (typeof window === 'undefined') return;
     const isReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (isReduced) return;
+    const { default: confetti } = await import('canvas-confetti');
 
     // Party colors: GNC Gold, Amber, Emerald, Royal Navy, Ruby Red, Violet, Cyan, Hot Pink, Pure White
     const flayerColors = ['#f4a023', '#fbbf24', '#0f2347', '#10b981', '#ef4444', '#8b5cf6', '#3b82f6', '#ec4899', '#06b6d4', '#ffffff'];

@@ -44,6 +44,7 @@ const NotFoundPage = safeLazy(() => import("../pages/NotFoundPage"));
 const RegulationsPage = safeLazy(() => import("../pages/RegulationsPage"));
 const SikhHeritagePage = safeLazy(() => import("../pages/SikhHeritagePage"));
 const ScholarshipsPage = safeLazy(() => import("../pages/ScholarshipsPage"));
+const StudentCornerPage = safeLazy(() => import("../pages/StudentCornerPage"));
 const AlumniWall = safeLazy(() => import("../pages/AlumniWall"));
 const PrivacyPolicy = safeLazy(() => import("../pages/LegalPages").then((m) => ({ default: m.PrivacyPolicy })));
 const TermsOfService = safeLazy(() => import("../pages/LegalPages").then((m) => ({ default: m.TermsOfService })));
@@ -309,6 +310,8 @@ export default function AppRoutes({
             <Route path="/student-services/document-request" element={<R el={<DocumentRequestPage />} />} />
             <Route path="/events" element={<R el={<EventsPage />} />} />
             <Route path="/scholarships" element={<R el={<ScholarshipsPage />} />} />
+            <Route path="/student-corner" element={<R el={<StudentCornerPage />} />} />
+            <Route path="/student-services" element={<R el={<StudentCornerPage />} />} />
             <Route path="/alumni" element={<R el={<AlumniWall />} />} />
             <Route path="/alumni-wall" element={<R el={<AlumniWall />} />} />
             <Route path="/privacy-policy" element={<R el={<PrivacyPolicy />} />} />
