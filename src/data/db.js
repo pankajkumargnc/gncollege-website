@@ -4,7 +4,6 @@
 export const GALLERY_CATEGORIES = ['All Events', 'Campus', 'Recent Programs', 'Cultural Activity', 'NSS Programs', 'Departments']
 // ✅ FIX: Added 'Campus' — was missing; caused 3 gallery items to vanish when any filter was applied
 
-export const PDF_CATEGORIES = ['NAAC', 'Annual Report', 'IQAC', 'Regulations', 'Examination', 'General']
 export const MENU_SECTIONS = ['About Us', 'Campus', 'Academics', 'Admission', 'Student Corner', 'Activity', 'NAAC', 'Publication', 'Gallery']
 
 export const SOCIAL_LINKS = [
@@ -14,47 +13,6 @@ export const SOCIAL_LINKS = [
   { id: 'linkedin', label: 'in', href: 'https://linkedin.com/' },
 ]
 
-/* 
-export const initialNotices = [
-  { id: 1, text: 'Notice regarding Admission B.A/B.Com./BCA/BBA Session 2024-2028', date: '2024-11-01', isNew: true },
-  { id: 2, text: 'FIRST MERIT LIST ALL SUBJECTS PHASE-V 2024', date: '2024-10-28', isNew: true },
-  { id: 3, text: 'BBA: Merit List (PHASE-4) 2024', date: '2024-10-20', isNew: true },
-  { id: 4, text: 'ALL SUBJECT ASSIGNMENT GE (I-IV) 2020-23 & 2021-2024', date: '2024-10-15', isNew: false },
-  { id: 5, text: 'SEM II (2023-27) Internal Exam Schedule Released', date: '2024-10-10', isNew: false },
-]
-
-export const initialAnnouncements = [
-  { id: 1, text: 'Online fee payment 2024-25 is now open. Visit the payment portal.', date: '2024-11-01', isNew: true },
-  { id: 2, text: 'AICTE Approved BCA & BBA Courses - Admission Open', date: '2024-10-25', isNew: true },
-  { id: 3, text: 'Vocational (BCA & BBA) 2024-28 Admissions Started', date: '2024-10-18', isNew: false },
-  { id: 4, text: 'NAAC Accreditation Document Submission Completed', date: '2024-10-05', isNew: false },
-]
-
-export const initialEvents = [
-  { id: 1, month: 'OCT', day: '2', title: 'Gandhi Ji Jayanti Celebration', desc: 'On 2nd October 2024, Guru Nanak College and NSS unit celebrated the 155th birth anniversary of Mahatma Gandhi.', color: '#e74c3c', img: '🎉' },
-  { id: 2, month: 'OCT', day: '1', title: 'Swachh Raho, Swasth Raho', desc: 'On 01.10.2024, NSS unit organized a cleanliness awareness rally across the campus.', color: '#27ae60', img: '🌿' },
-  { id: 3, month: 'JUL', day: '11', title: 'Induction Programme for New Students', desc: 'On 11 July 2024, induction programme was held for newly enrolled students of Commerce department.', color: '#3498db', img: '🎓' },
-  { id: 4, month: 'AUG', day: '29', title: 'National Sports Day Programme', desc: 'On 29 August 2024, National Sports Day was celebrated in memory of Major Dhyan Chand.', color: '#9b59b6', img: '🏅' },
-]
-
-export const initialGallery = [
-  { id: 1, title: 'College Building', category: 'Campus', emoji: '🏫' },
-  { id: 2, title: 'Annual Function', category: 'Cultural Activity', emoji: '🎭' },
-  { id: 3, title: 'NSS Camp', category: 'NSS Programs', emoji: '🌿' },
-  { id: 4, title: 'Sports Day', category: 'Recent Programs', emoji: '⚽' },
-  { id: 5, title: 'Library', category: 'Campus', emoji: '📚' },
-  { id: 6, title: 'Computer Lab', category: 'Departments', emoji: '💻' },
-  { id: 7, title: 'Seminar Hall', category: 'Campus', emoji: '🎤' },
-  { id: 8, title: 'Cultural Program', category: 'Cultural Activity', emoji: '🎵' },
-]
-
-export const initialPDFReports = [
-  { id: 1, title: 'NAAC Self Study Report 2023', date: '2023-12-01', category: 'NAAC' },
-  { id: 2, title: 'Annual Report 2022-23', date: '2023-09-15', category: 'Annual Report' },
-  { id: 3, title: 'IQAC Report 2022-23', date: '2023-08-20', category: 'IQAC' },
-  { id: 4, title: 'UG Regulation (FYUGP)', date: '2023-07-01', category: 'Regulations' },
-]
-*/
 
 // ✅ Single source of truth for departments (used in HomeFeatures + elsewhere)
 export const departments = [

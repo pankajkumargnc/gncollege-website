@@ -1338,7 +1338,7 @@ article p,
 .section-heading {
   font-size: clamp(18px,2.5vw,35px);
   color:var(--navy); font-weight:700;
-  margin-bottom:.5rem; text-align:left !important;
+  margin-bottom:.5rem; text-align:left;
 }
 .heading-underline { width:clamp(50px,8vw,80px); height:5px; background:var(--gold); margin-bottom:1.5rem; border-radius:10px; }
 

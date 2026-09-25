@@ -13,3 +13,4 @@ backups/
 _backups/
 .firebase/
 *.tsbuildinfo
+_archive_unused_items/

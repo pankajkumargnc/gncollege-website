@@ -67,7 +67,7 @@ export const DepartmentHub = ({ DEPT_META }) => {
         .hub-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:12px;font-size:13px;fontWeight:800;transition:all .3s;margin-top:auto;}
         .hub-card:hover .hub-btn{padding-left:24px;padding-right:16px;}
         .hub-card::after{content:'';position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);transition:all .6s;transform:skewX(-25deg);pointer-events:none;}
-        .hub-card:hover::after{left:150%;}
+        .department-hub .section-heading { text-align: center !important; }
       `}</style>
 
       {/* 🚀 Hero Section */}
@@ -80,7 +80,7 @@ export const DepartmentHub = ({ DEPT_META }) => {
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg,#0ea5e9, #2563eb)', color: '#fff', fontSize: 12, fontWeight: 800, padding: '6px 18px', borderRadius: 100, marginBottom: 24, boxShadow: '0 8px 16px rgba(14,165,233,0.2)', textTransform: 'uppercase', letterSpacing: '1px' }}>
               <Building2 size={15} /> Academic Excellence
             </div>
-            <h1 className="section-heading" style={{ fontSize: 'clamp(32px,4vw,48px)', fontWeight: 900, letterSpacing: '-1.5px', marginBottom: 20 }}>
+            <h1 className="section-heading" style={{ fontSize: 'clamp(32px,4vw,48px)', fontWeight: 900, letterSpacing: '-1.5px', marginBottom: 20, textAlign: 'center' }}>
               Future-Ready <span>Departments</span>
             </h1>
             <p style={{ color: '#64748b', fontSize: 'clamp(16px,2vw,18px)', maxWidth: 640, margin: '0 auto', lineHeight: 1.8, textWrap: 'pretty' }}>

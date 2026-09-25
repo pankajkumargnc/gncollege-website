@@ -30,7 +30,6 @@
     "dompurify": "^3.3.3",
     "firebase": "^12.10.0",
     "fuse.js": "^7.5.0",
-    "html-react-parser": "^5.2.17",
     "i18next": "^26.4.2",
     "jodit": "^4.11.3",
     "jodit-react": "^5.3.21",

@@ -20,6 +20,25 @@ export function runDeadCodeAuditTests() {
     pass: !errorLoggerExists
   });
 
+  const quarantinedFiles = [
+    'src/components/home/SectionTitle.jsx',
+    'src/components/QuickAccessSidebar.jsx',
+    'src/components/SectionHeader.jsx',
+    'src/constants.js',
+    'src/hooks/useHashFragment.js',
+    'src/pages/VideoLibrary.jsx',
+    'src/components/MiniYouTubePlayer.jsx',
+    'src/utils/backup.js'
+  ];
+
+  quarantinedFiles.forEach(f => {
+    const exists = fs.existsSync(path.resolve(process.cwd(), f));
+    results.push({
+      desc: `Quarantined dead file ${f} is absent from src/`,
+      pass: !exists
+    });
+  });
+
   // Verify no active source file in src/ imports either deleted module
   function scanDir(dir, pattern, matches = []) {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
