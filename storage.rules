@@ -13,19 +13,9 @@ service firebase.storage {
       );
     }
 
-    // Public read access for published college media & documents
-    match /{allPaths=**} {
-      allow read: if true;
-    }
-
-    // ── SECURE DOCUMENTS VAULT ──
-    // Enforces:
-    // 1. Admin authenticated token
-    // 2. Size limit: Max 15MB (15 * 1024 * 1024 bytes)
-    // 3. Strict MIME type whitelist (PDF, Word, Excel). Executables and scripts are blocked.
-    match /documents/{docFile} {
-      allow write: if isAdmin()
-        && request.resource.size <= 15 * 1024 * 1024
+    // Helper functions for content validation
+    function isValidDocument() {
+      return request.resource.size <= 15 * 1024 * 1024
         && (
           request.resource.contentType == 'application/pdf' ||
           request.resource.contentType == 'application/msword' ||
@@ -35,15 +25,43 @@ service firebase.storage {
         );
     }
 
-    // ── SECURE IMAGES VAULT ──
-    // Enforces:
-    // 1. Admin authenticated token
-    // 2. Size limit: Max 5MB (5 * 1024 * 1024 bytes)
-    // 3. Image MIME type only
-    match /images/{imgFile} {
-      allow write: if isAdmin()
-        && request.resource.size <= 5 * 1024 * 1024
+    function isValidImage() {
+      return request.resource.size <= 8 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
+    }
+
+    // ── PUBLIC MEDIA & DOCUMENTS (Section 78: Predictable Storage Structure) ──
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() && (isValidImage() || isValidDocument());
+    }
+
+    // Legacy and direct documents vault (supports subfolders)
+    match /documents/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidDocument();
+    }
+
+    // Legacy and direct images vault (supports subfolders)
+    match /images/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidImage();
+    }
+
+    // ── PRIVATE VAULT (Section 80: Document Security) ──
+    // Strictly requires authenticated admin access; public access is explicitly blocked
+    match /private/{allPaths=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Automated and manual database backup exports
+    match /backups/{allPaths=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Default deny for all unspecified paths
+    match /{allPaths=**} {
+      allow read, write: if false;
     }
   }
 }

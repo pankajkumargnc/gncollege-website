@@ -8,7 +8,7 @@ import {
   sendPasswordResetEmail,
   signOut, 
   setPersistence, 
-  browserLocalPersistence,
+  browserSessionPersistence,
   onAuthStateChanged 
 } from "firebase/auth";
 import { getApps } from "firebase/app";
@@ -17,9 +17,10 @@ import { getApps } from "firebase/app";
 const app = getApps()[0];
 export const auth = getAuth(app);
 
-// Enable permanent local browser session persistence
+// Enforce tab-scoped session persistence per Section 81:
+// Closing the tab terminates the admin session and prevents silent resumption
 try {
-  setPersistence(auth, browserLocalPersistence).catch((err) => {
+  setPersistence(auth, browserSessionPersistence).catch((err) => {
     console.warn("[FirebaseAuth] Persistence setting warning:", err.message);
   });
 } catch (_) {}

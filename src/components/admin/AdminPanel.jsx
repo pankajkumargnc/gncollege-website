@@ -14,6 +14,7 @@ import { FileText, Users, Undo2, Trash2, ShieldCheck, LogOut, Download, UploadCl
 import { setImgbbKey } from '../MediaPicker';
 import { NAVY, GOLD, WHITE, BG, T, useDebounce } from './AdminShared';
 import BulkImportModal from './BulkImportModal';
+import useAdminIdleTimeout from '../../hooks/useAdminIdleTimeout';
 import "../../styles/admin.css";
 
 // ── 🛡️ Safe Lazy Loader for Admin Tabs with Auto-Retry & Graceful Degradation ──
@@ -155,15 +156,55 @@ const TabLoader = () => (
   </div>
 );
 
-// ── Single-Owner Root Administrator Role ───────────────────────────────────────
+// ── Institutional Role-Based Access Control (RBAC) per Section 21 ─────────────
 export const ADMIN_ROLES = {
   SUPER_ADMIN: {
     id: 'SUPER_ADMIN',
     name: 'Super Administrator',
     badge: 'ROOT CORE',
     desc: 'Sole System Owner & Lead Architect: Pankaj Kumar Prasad',
-    color: '#f4a023',
+    color: '#D4A72C',
     tabs: null // All tabs authorized
+  },
+  PRINCIPAL: {
+    id: 'PRINCIPAL',
+    name: 'Principal',
+    badge: 'EXECUTIVE',
+    desc: 'Institutional approval, official notices, leadership, and major publishing',
+    color: '#3b82f6',
+    tabs: ['dashboard', 'quick', 'alerts', 'notices', 'announcements', 'leadership', 'departments', 'documents', 'faculty', 'activity', 'settings']
+  },
+  OFFICE_ADMIN: {
+    id: 'OFFICE_ADMIN',
+    name: 'Office Administration',
+    badge: 'OFFICE',
+    desc: 'Administrative records, student document requests, contact directory',
+    color: '#10b981',
+    tabs: ['dashboard', 'documents', 'notices', 'announcements', 'contact', 'placements', 'events']
+  },
+  DEPARTMENT_ADMIN: {
+    id: 'DEPARTMENT_ADMIN',
+    name: 'Department Administrator',
+    badge: 'ACADEMIC',
+    desc: 'Department-specific notices, syllabus, and faculty profiles',
+    color: '#8b5cf6',
+    tabs: ['dashboard', 'departments', 'faculty', 'notices', 'events']
+  },
+  EDITOR: {
+    id: 'EDITOR',
+    name: 'Content Editor',
+    badge: 'EDITORIAL',
+    desc: 'Drafting and managing galleries, articles, news, and media',
+    color: '#ec4899',
+    tabs: ['dashboard', 'gallery', 'campus', 'youtube', 'drive', 'events', 'testimonials']
+  },
+  VIEWER: {
+    id: 'VIEWER',
+    name: 'Auditor / Viewer',
+    badge: 'READ ONLY',
+    desc: 'Read-only view of portal records and diagnostics',
+    color: '#64748b',
+    tabs: ['dashboard', 'activity', 'system_test']
   }
 };
 
@@ -175,7 +216,7 @@ function AdminPanelInner({
   navLinks, faculties: facultiesProp, placements: placementsProp, alerts: alertsProp
 }) {
   const [tab, setTab] = useState('dashboard');
-  const [activeRole] = useState('SUPER_ADMIN');
+  const [activeRole, setActiveRole] = useState(() => sessionStorage.getItem('gnc_admin_role') || 'SUPER_ADMIN');
   const [showBulkImport, setShowBulkImport] = useState(false);
   const [sideOpen, setSideOpen] = useState(false);
   const [sideCollapsed, setSideCollapsed] = useState(false);
@@ -183,6 +224,14 @@ function AdminPanelInner({
   const [globalSearch, setGlobalSearch] = useState('');
   const [showKeyHelp, setShowKeyHelp] = useState(false);
   const contentRef = useRef(null);
+
+  // 🛡️ Idle auto-logout guard per Section 81 (15m idle, 60s countdown warning)
+  const { showWarning: showIdleWarning, remainingWarningSecs, staySignedIn } = useAdminIdleTimeout({
+    isActive: true,
+    timeoutMinutes: 15,
+    warningSeconds: 60,
+    onLogout: onClose
+  });
 
   const handleRoleChange = (newRole) => {
     setActiveRole(newRole);
@@ -791,6 +840,113 @@ function AdminPanelInner({
               </div>
             ))}
             <button className="abtn abtn-navy" style={{ marginTop:20, width:'100%', justifyContent:'center' }} onClick={()=>setShowKeyHelp(false)}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Section 81: Inactivity Idle Auto-Logout Warning Dialog ── */}
+      {showIdleWarning && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(11, 31, 58, 0.85)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          zIndex: 9999999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 20
+        }} role="alertdialog" aria-modal="true" aria-labelledby="idle-warning-title">
+          <div style={{
+            background: '#ffffff',
+            borderRadius: 24,
+            padding: '36px 32px',
+            maxWidth: 440,
+            width: '100%',
+            textAlign: 'center',
+            boxShadow: '0 25px 60px rgba(0,0,0,0.35)',
+            border: '2px solid #D4A72C'
+          }}>
+            <div style={{
+              width: 64,
+              height: 64,
+              borderRadius: '50%',
+              background: '#fef3c7',
+              color: '#d97706',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px',
+              fontSize: 28,
+              fontWeight: 900
+            }}>
+              ⏳
+            </div>
+            <div style={{
+              display: 'inline-block',
+              background: '#fee2e2',
+              color: '#b91c1c',
+              fontSize: 11,
+              fontWeight: 800,
+              padding: '4px 12px',
+              borderRadius: 20,
+              marginBottom: 12,
+              letterSpacing: '0.5px',
+              textTransform: 'uppercase'
+            }}>
+              Security Alert: Session Timeout
+            </div>
+            <h3 id="idle-warning-title" style={{ fontSize: 20, fontWeight: 900, color: '#0B1F3A', margin: '0 0 8px' }}>
+              Are you still working?
+            </h3>
+            <p style={{ fontSize: 13.5, color: '#64748B', lineHeight: 1.6, margin: '0 0 16px' }}>
+              Your administrator session has been inactive. For data security, your session will automatically terminate in:
+            </p>
+            <div style={{
+              fontSize: 44,
+              fontWeight: 900,
+              color: remainingWarningSecs <= 15 ? '#dc2626' : '#D4A72C',
+              fontVariantNumeric: 'tabular-nums',
+              marginBottom: 24
+            }}>
+              {remainingWarningSecs}s
+            </div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <button
+                type="button"
+                onClick={staySignedIn}
+                style={{
+                  background: 'linear-gradient(135deg, #0B1F3A, #1a3a6b)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: 12,
+                  padding: '12px 24px',
+                  fontWeight: 800,
+                  fontSize: 13.5,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 14px rgba(11,31,58,0.3)'
+                }}
+              >
+                ✓ Stay Signed In
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                style={{
+                  background: '#f1f5f9',
+                  color: '#475569',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: 12,
+                  padding: '12px 18px',
+                  fontWeight: 700,
+                  fontSize: 13.5,
+                  cursor: 'pointer'
+                }}
+              >
+                Log Out
+              </button>
+            </div>
           </div>
         </div>
       )}
