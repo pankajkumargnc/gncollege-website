@@ -7,7 +7,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { db } from '../../../firebase';
 import {
-  collection, addDoc, updateDoc, doc, serverTimestamp, onSnapshot, query, orderBy
+  collection, addDoc, updateDoc, setDoc, doc, serverTimestamp, onSnapshot, query, orderBy
 } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { 
@@ -17,9 +17,9 @@ import {
 } from 'lucide-react';
 import MediaPicker from '../../MediaPicker';
 import {
-  T, NAVY, GOLD, BG, useLocalDraft, SectionSearch, BulkBar, MiniLog,
+  T, NAVY, GOLD, BG, useLocalDraft, SectionSearch, BulkBar, MiniLog, Toggle
 } from '../AdminShared';
-import { clearCache } from '../../../utils/cachedFetch';
+import { clearCache, encodePayload, decodePayload } from '../../../utils/cachedFetch';
 import { resolveUrl } from '../../../utils/resolver';
 
 export const DOCUMENT_CATEGORIES = [
@@ -73,6 +73,16 @@ export default function DocumentsTab({
   const [docRequests, setDocRequests] = useState([]);
   const [reqSearch, setReqSearch] = useState('');
   const [reqFilter, setReqFilter] = useState('All');
+  const [docReqEnabled, setDocReqEnabled] = useState(() => {
+    try {
+      const cached = localStorage.getItem('gnc_site_settings_cache');
+      if (cached) {
+        const parsed = decodePayload(cached);
+        return Boolean(parsed?.enableDocumentRequests);
+      }
+    } catch {}
+    return false;
+  });
 
   useEffect(() => {
     if (!db) return;
@@ -82,9 +92,47 @@ export default function DocumentsTab({
         const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         setDocRequests(list);
       }, () => {});
-      return () => unsub();
+
+      const unsubSettings = onSnapshot(doc(db, 'settings', 'site'), (snap) => {
+        if (snap.exists()) {
+          const d = snap.data();
+          setDocReqEnabled(Boolean(d?.enableDocumentRequests));
+        }
+      }, () => {});
+
+      return () => {
+        unsub();
+        unsubSettings();
+      };
     } catch {}
   }, []);
+
+  const handleToggleDocReqFeature = async () => {
+    const newVal = !docReqEnabled;
+    setDocReqEnabled(newVal);
+    try {
+      if (db) {
+        await setDoc(doc(db, 'settings', 'site'), {
+          enableDocumentRequests: newVal,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+      try {
+        const cached = localStorage.getItem('gnc_site_settings_cache');
+        const parsed = (cached ? decodePayload(cached) : null) || {};
+        parsed.enableDocumentRequests = newVal;
+        localStorage.setItem('gnc_site_settings_cache', encodePayload(parsed));
+      } catch {}
+
+      window.dispatchEvent(new CustomEvent('gnc_settings_updated', { detail: { enableDocumentRequests: newVal } }));
+      clearCache('site_settings');
+      toast.success(newVal ? '🟢 Online Document Requests Enabled!' : '⚪ Online Document Requests Disabled (Offline / Counter Mode Active)');
+      logAct?.('update', `Toggled enableDocumentRequests to ${newVal}`, 'documents');
+    } catch (err) {
+      setDocReqEnabled(!newVal);
+      toast.error('Failed to update feature switch: ' + err.message);
+    }
+  };
 
   const updateRequestStatus = async (reqId, newStatus, newStage, remark) => {
     try {
@@ -287,18 +335,82 @@ export default function DocumentsTab({
           }}
         >
           <FileText size={16} /> Student Document Requests ({docRequests.length})
+          {!docReqEnabled && (
+            <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 8, background: vaultSection === 'requests' ? 'rgba(239,68,68,0.3)' : '#fee2e2', color: vaultSection === 'requests' ? '#fca5a5' : '#b91c1c', fontWeight: 800 }}>
+              OFFLINE / MANUAL
+            </span>
+          )}
         </button>
       </div>
 
       {vaultSection === 'requests' ? (
         <div className="card-gold fade-up" style={{ padding: 24, margin: '0 0 24px' }}>
+          {/* ⚡ Live Online/Offline Toggle Notice Banner */}
+          <div style={{
+            background: docReqEnabled ? '#f0fdf4' : '#fffbeb',
+            border: `1.5px solid ${docReqEnabled ? '#86efac' : '#fde68a'}`,
+            borderRadius: 14,
+            padding: '14px 18px',
+            marginBottom: 20,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 16,
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 260 }}>
+              <div style={{
+                width: 38,
+                height: 38,
+                borderRadius: 10,
+                background: docReqEnabled ? '#dcfce7' : '#fef3c7',
+                color: docReqEnabled ? '#15803d' : '#b45309',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <FileText size={20} />
+              </div>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: 14, color: NAVY, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span>Online Student Document Requests:</span>
+                  <span style={{
+                    padding: '2px 8px',
+                    borderRadius: 8,
+                    fontSize: 11.5,
+                    fontWeight: 800,
+                    background: docReqEnabled ? '#dcfce7' : '#fee2e2',
+                    color: docReqEnabled ? '#15803d' : '#b91c1c'
+                  }}>
+                    {docReqEnabled ? 'ENABLED (LIVE)' : 'DISABLED (OFFLINE / MANUAL)'}
+                  </span>
+                </div>
+                <div style={{ fontSize: 12, color: '#64748b', marginTop: 3 }}>
+                  {docReqEnabled 
+                    ? 'Students can apply and track CLC, Bonafide, and Character certificates online via Student Corner.'
+                    : 'Currently disabled: Students are instructed that CLC, Bonafide, and Character certificates are issued manually at the College Administrative Counter.'}
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: NAVY }}>Feature Switch:</span>
+              <Toggle
+                checked={docReqEnabled}
+                onChange={handleToggleDocReqFeature}
+                label={docReqEnabled ? 'ON' : 'OFF'}
+                color={T.green}
+              />
+            </div>
+          </div>
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
             <div>
               <h2 style={{ fontSize: 18, fontWeight: 900, color: NAVY, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <ShieldCheck size={20} color={GOLD} /> Student Document Verification &amp; Approval Desk
               </h2>
               <p style={{ margin: '4px 0 0', fontSize: 12.5, color: '#64748b' }}>
-                Manage online applications for Bonafide, Character, Fee Clearance, and Transfer NOC certificates.
+                Manage applications for Bonafide, Character, Fee Clearance, and Transfer NOC certificates.
               </p>
             </div>
 

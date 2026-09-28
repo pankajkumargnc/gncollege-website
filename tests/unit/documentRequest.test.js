@@ -1,4 +1,6 @@
 // tests/unit/documentRequest.test.js — Unit tests for Student Document Request Hub
+import fs from 'fs';
+import path from 'path';
 import { SEO_MAP } from '../../src/utils/seoManager.js';
 
 export function runDocumentRequestTests() {
@@ -36,6 +38,20 @@ export function runDocumentRequestTests() {
     { stage: 4, status: 'ready' }
   ];
   assert('Stages progression is strictly monotonic (1 to 4)', stages.every((s, idx) => s.stage === idx + 1));
+
+  // Test 5: Feature toggle default state & configuration
+  const settingsTabCode = fs.readFileSync(path.resolve(process.cwd(), 'src/components/admin/tabs/SettingsTab.jsx'), 'utf8');
+  assert('SettingsTab.jsx includes enableDocumentRequests in siteCfg', settingsTabCode.includes('enableDocumentRequests: false'));
+  assert('SettingsTab.jsx registers enableDocumentRequests in Feature Switches', settingsTabCode.includes("key: 'enableDocumentRequests'"));
+
+  const documentsTabCode = fs.readFileSync(path.resolve(process.cwd(), 'src/components/admin/tabs/DocumentsTab.jsx'), 'utf8');
+  assert('DocumentsTab.jsx provides direct enableDocumentRequests toggle switch', documentsTabCode.includes('handleToggleDocReqFeature') && documentsTabCode.includes('Online Student Document Requests:'));
+
+  const studentCornerCode = fs.readFileSync(path.resolve(process.cwd(), 'src/pages/StudentCornerPage.jsx'), 'utf8');
+  assert('StudentCornerPage.jsx contains docReqEnabled filter for services', studentCornerCode.includes("visibleServices") && studentCornerCode.includes("s.link !== '/documents/request'"));
+
+  const docRequestPageCode = fs.readFileSync(path.resolve(process.cwd(), 'src/pages/DocumentRequestPage.jsx'), 'utf8');
+  assert('DocumentRequestPage.jsx renders offline manual counter desk when disabled', docRequestPageCode.includes('!docReqEnabled') && docRequestPageCode.includes('Official Administrative Counter Service'));
 
   return results;
 }

@@ -711,7 +711,7 @@ function setJsonLd(pathname, pageTitle = SITE_NAME, pageDesc = DEFAULT_DESC) {
           "name": "How can I apply for admission at Guru Nanak College, Dhanbad?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Admissions are processed through the Jharkhand Chancellor Portal (jharkhanduniversities.nic.in) or direct college admission counter according to university guidelines."
+            "text": "Admissions are processed through the Jharkhand Chancellor Portal (universities.jharkhand.gov.in/home) or direct college admission counter according to university guidelines."
           }
         },
         {

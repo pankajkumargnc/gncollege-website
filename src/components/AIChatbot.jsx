@@ -7,9 +7,10 @@ import {
   GraduationCap, CreditCard, Award, Compass, FileText, Square, 
   Send 
 } from 'lucide-react';
+import { decodePayload } from '../utils/cachedFetch';
 
 const COLLEGE_PHONE = '917903340991';
-const CHANCELLOR_PORTAL = 'https://universities.jharkhand.gov.in/';
+const CHANCELLOR_PORTAL = 'https://universities.jharkhand.gov.in/home';
 const CIMS_FEE_PORTAL = 'https://cimsstudentnewui.mastersofterp.in/';
 const BBMKU_RESULT_PORTAL = 'https://bbmkuniv.in/login';
 const SIKH_HERITAGE_PATH = '/#/about-us/sikh-heritage';
@@ -26,7 +27,7 @@ const COLLEGE_KNOWLEDGE = `
 - Office Hours: Monday to Saturday, 9:30 AM to 4:30 PM (Office closed on Sundays and Gazetted Holidays)
 
 # OFFICIAL DIRECT PORTALS & LINKS
-- Online Admission 2026: Chancellor Portal -> https://universities.jharkhand.gov.in/
+- Online Admission 2026: Chancellor Portal -> https://universities.jharkhand.gov.in/home
 - Online Fee Payment: CIMS Student ERP -> https://cimsstudentnewui.mastersofterp.in/
 - Semester & Annual Results: BBMKU University Result Portal -> https://bbmkuniv.in/login
 - Official College Website: https://gncollege.org
@@ -43,7 +44,7 @@ const COLLEGE_KNOWLEDGE = `
    - M.Com (Master of Commerce)
 
 # ADMISSION PROCEDURE 2026
-1. Visit the Jharkhand Universities Chancellor Portal: https://universities.jharkhand.gov.in/
+1. Visit the Jharkhand Universities Chancellor Portal: https://universities.jharkhand.gov.in/home
 2. Register as a new student with active mobile number and email ID.
 3. Select "Binod Bihari Mahto Koyalanchal University (BBMKU)" and choose "Guru Nanak College, Dhanbad".
 4. Fill academic details (Class 10th & 12th marks) and upload documents (Photo, Signature, Marks Sheet, Caste/Minority certificate if applicable).
@@ -73,10 +74,10 @@ WHAT YOU KNOW AND HOW YOU KNOW IT
 - Never invent a deadline, fee amount, phone number, or admission cutoff. A wrong number here has real consequences for a real student.
 
 OFFICIAL PORTALS
-- Admission 2026: Chancellor Portal (https://universities.jharkhand.gov.in/)
+- Admission 2026: Chancellor Portal (https://universities.jharkhand.gov.in/home)
 - Online Fees: CIMS ERP Portal (https://cimsstudentnewui.mastersofterp.in/)
 - University Results: BBMKU Portal (https://bbmkuniv.in/login)
-- Document Requests (CLC/TC/Bonafide): /documents/request
+- Certificates & Document Requests (CLC/TC/Bonafide/Character): Issued manually at the College Administrative Counter (Mon-Sat, 10:30 AM to 3:30 PM). Inform students to visit the administrative office counter in person with their college ID card and fee receipt.
 - Administrative Office: +91 79033 40991 / principal@gncollege.org
 
 ESCALATION
@@ -132,6 +133,16 @@ export default function AIChatbot() {
     () => document.documentElement.getAttribute('data-theme') === 'dark'
   );
   const [liveNotices, setLiveNotices] = useState([]);
+  const [docReqEnabled, setDocReqEnabled] = useState(() => {
+    try {
+      const cached = localStorage.getItem('gnc_site_settings_cache');
+      if (cached) {
+        const parsed = decodePayload(cached);
+        return Boolean(parsed?.enableDocumentRequests);
+      }
+    } catch {}
+    return false;
+  });
   const [pos, setPos] = useState(null); // { x: number, y: number }
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ mouseX: 0, mouseY: 0, elX: 0, elY: 0 });
@@ -240,6 +251,17 @@ export default function AIChatbot() {
       }, () => {});
       return () => unsub();
     } catch (_) {}
+  }, []);
+
+  // Settings update listener
+  useEffect(() => {
+    const handleSettingsUpdate = (e) => {
+      if (e.detail && 'enableDocumentRequests' in e.detail) {
+        setDocReqEnabled(Boolean(e.detail.enableDocumentRequests));
+      }
+    };
+    window.addEventListener('gnc_settings_updated', handleSettingsUpdate);
+    return () => window.removeEventListener('gnc_settings_updated', handleSettingsUpdate);
   }, []);
 
   // Dark mode listener
@@ -1100,7 +1122,7 @@ export default function AIChatbot() {
             }}
           >
             <a
-              href="https://universities.jharkhand.gov.in/"
+              href="https://universities.jharkhand.gov.in/home"
               target="_blank"
               rel="noopener noreferrer"
               className="gnc-pill-btn"
@@ -1185,26 +1207,28 @@ export default function AIChatbot() {
             >
               <Compass size={13} /> {lang === 'hi' ? '360° टूर' : '360° Tour'}
             </a>
-            <a
-              href="#/documents/request"
-              className="gnc-pill-btn"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 5,
-                background: isDark ? '#1e293b' : '#ffffff',
-                color: '#ec4899',
-                border: '1px solid rgba(236, 72, 153, 0.3)',
-                borderRadius: 14,
-                padding: '4px 10px',
-                fontSize: 11,
-                fontWeight: 700,
-                textDecoration: 'none',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              <FileText size={13} /> {lang === 'hi' ? 'सर्टिफिकेट' : 'Documents'}
-            </a>
+            {docReqEnabled && (
+              <a
+                href="#/documents/request"
+                className="gnc-pill-btn"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  background: isDark ? '#1e293b' : '#ffffff',
+                  color: '#ec4899',
+                  border: '1px solid rgba(236, 72, 153, 0.3)',
+                  borderRadius: 14,
+                  padding: '4px 10px',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <FileText size={13} /> {lang === 'hi' ? 'सर्टिफिकेट' : 'Documents'}
+              </a>
+            )}
           </div>
 
           {/* Quick Suggestions Chips */}

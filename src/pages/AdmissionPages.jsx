@@ -45,7 +45,7 @@ export function AdmissionRule() {
   const { content, getList, getText } = usePageContent('admission-rule');
   const importantRule = getText('important-rule', '<strong>Important Rule:</strong> Students attending less than 75% classes will not be eligible to fill up university examination forms. Violation of discipline may lead to removal.');
   const steps = getList('steps', [
-    { title: 'Apply via Chancellor Portal', desc: 'Desirous students must apply through the Chancellor Portal (https://jharkhanduniversities.nic.in/) under NEP-2020.', fee: 'Application Fee: Rs. 100/-' },
+    { title: 'Apply via Chancellor Portal', desc: 'Desirous students must apply through the Chancellor Portal (https://universities.jharkhand.gov.in/home) under NEP-2020.', fee: 'Application Fee: Rs. 100/-' },
     { title: 'Merit List & Verification', desc: 'Selected students must visit respective campuses (Main/Bhuda/Bank More) with original documents for physical verification.', fee: 'Check Document Required Page' },
     { title: 'University Registration', desc: 'After verification, pay the BBMKU Registration Fee on Chancellor Portal again.', fee: 'JAC Board: Rs. 308/- | Others: Rs. 758/-' },
     { title: 'College Online Admission Form', desc: 'Register on www.gncollege.org or enrollonline.co.in. Upload Chancellor Portal fee receipt and marksheet.', fee: 'Wait for approval message' },

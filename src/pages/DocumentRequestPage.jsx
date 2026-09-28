@@ -1,11 +1,13 @@
-// src/pages/DocumentRequestPage.jsx — Student Self-Service Document Request Hub
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   FileText, CheckCircle2, Clock, Building2, Search, Copy, Check, 
-  ArrowRight, ShieldCheck, AlertCircle, Sparkles, HelpCircle, PhoneCall
+  ArrowRight, ShieldCheck, AlertCircle, Sparkles, HelpCircle, PhoneCall,
+  MapPin, ArrowLeft
 } from 'lucide-react';
-import { collection, setDoc, addDoc, doc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, setDoc, addDoc, doc, getDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
+import { decodePayload } from '../utils/cachedFetch';
 import { COLORS } from '../styles/colors';
 import toast from 'react-hot-toast';
 
@@ -50,6 +52,42 @@ export default function DocumentRequestPage() {
   const [trackingLoading, setTrackingLoading] = useState(false);
   const [trackedRecord, setTrackedRecord] = useState(null);
   const [trackingError, setTrackingError] = useState(null);
+
+  // Online / Offline Feature Toggle State
+  const [docReqEnabled, setDocReqEnabled] = useState(() => {
+    try {
+      const cached = localStorage.getItem('gnc_site_settings_cache');
+      if (cached) {
+        const parsed = decodePayload(cached);
+        return Boolean(parsed?.enableDocumentRequests);
+      }
+    } catch {}
+    return false;
+  });
+
+  useEffect(() => {
+    const handleSettingsUpdate = (e) => {
+      if (e.detail && 'enableDocumentRequests' in e.detail) {
+        setDocReqEnabled(Boolean(e.detail.enableDocumentRequests));
+      }
+    };
+    window.addEventListener('gnc_settings_updated', handleSettingsUpdate);
+
+    let unsub = () => {};
+    if (db) {
+      unsub = onSnapshot(doc(db, 'settings', 'site'), (snap) => {
+        if (snap.exists()) {
+          const d = snap.data();
+          setDocReqEnabled(Boolean(d?.enableDocumentRequests));
+        }
+      }, () => {});
+    }
+
+    return () => {
+      window.removeEventListener('gnc_settings_updated', handleSettingsUpdate);
+      unsub();
+    };
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -171,6 +209,296 @@ export default function DocumentRequestPage() {
     toast.success('Tracking ID copied to clipboard!');
     setTimeout(() => setCopied(false), 2500);
   };
+
+  // 🏛️ Counter / Manual Issuance Desk UI (When Online Portal is Disabled)
+  if (!docReqEnabled) {
+    return (
+      <div style={{ minHeight: '100dvh', background: '#F8FAFC', fontFamily: "'Inter', sans-serif" }}>
+        {/* Header Hero */}
+        <header style={{
+          background: 'linear-gradient(135deg, #0B1F3A 0%, #1a3a6b 100%)',
+          color: '#ffffff',
+          padding: 'clamp(44px, 7vw, 76px) 20px 48px',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+            <Link
+              to="/student-corner"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                color: '#cbd5e1',
+                textDecoration: 'none',
+                fontSize: 13,
+                fontWeight: 700,
+                marginBottom: 20
+              }}
+            >
+              <ArrowLeft size={16} /> Back to Student Corner Hub
+            </Link>
+
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              background: 'rgba(212, 167, 44, 0.15)',
+              border: '1px solid rgba(212, 167, 44, 0.3)',
+              borderRadius: 30,
+              padding: '6px 16px',
+              fontSize: 12,
+              fontWeight: 800,
+              color: '#F4B942',
+              marginBottom: 16,
+              letterSpacing: '0.8px',
+              textTransform: 'uppercase'
+            }}>
+              <ShieldCheck size={14} /> Official Administrative Counter Service
+            </div>
+
+            <h1 style={{
+              fontSize: 'clamp(28px, 4.5vw, 44px)',
+              fontWeight: 900,
+              margin: '0 0 16px',
+              lineHeight: 1.18,
+              color: '#ffffff'
+            }}>
+              Student Certificate &amp; <span style={{ color: '#F4B942' }}>Document Desk</span>
+            </h1>
+
+            <p style={{
+              fontSize: 'clamp(14px, 1.8vw, 16.5px)',
+              color: '#cbd5e1',
+              maxWidth: 720,
+              lineHeight: 1.6,
+              margin: 0
+            }}>
+              Notice regarding manual issuance of Transfer Certificates (CLC), Character Certificates, Bonafide Certificates, and Examination Credentials.
+            </p>
+          </div>
+        </header>
+
+        {/* Content Container */}
+        <div style={{ maxWidth: 1100, margin: '-24px auto 60px', padding: '0 20px', position: 'relative', zIndex: 2 }}>
+          {/* Important Status Advisory */}
+          <div style={{
+            background: '#ffffff',
+            borderRadius: 20,
+            padding: '28px 32px',
+            border: '1.5px solid #fde68a',
+            boxShadow: '0 10px 30px rgba(11,31,58,0.06)',
+            marginBottom: 28,
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 18
+          }}>
+            <div style={{
+              width: 48,
+              height: 48,
+              borderRadius: 14,
+              background: '#fef3c7',
+              color: '#b45309',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <AlertCircle size={26} />
+            </div>
+            <div>
+              <h2 style={{ fontSize: 18, fontWeight: 900, color: NAVY, margin: '0 0 8px' }}>
+                Online Document Request System is Currently Paused
+              </h2>
+              <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.65, margin: 0 }}>
+                As per Guru Nanak College administrative guidelines, certificate issuance and student credential verification are executed <strong>manually at the college administrative counter</strong>. Online application submission is not active at this time. All students requiring official certificates must apply in person at the college office.
+              </p>
+            </div>
+          </div>
+
+          {/* Certificates Covered */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, marginBottom: 32 }}>
+            {[
+              {
+                title: 'College Leaving Certificate (CLC / TC)',
+                desc: 'Issued upon course completion or university transfer. Requires accounts and library clearance.',
+                turnaround: '2–3 Working Days',
+                counter: 'Counter #1 (Main Administrative Block)'
+              },
+              {
+                title: 'Bonafide Certificate',
+                desc: 'Required for E-Kalyan, NSP scholarship, passport verification, and education loan applications.',
+                turnaround: '1–2 Working Days',
+                counter: 'Counter #1 or #2'
+              },
+              {
+                title: 'Character Certificate',
+                desc: 'Official attestation of student conduct, discipline, and academic standing signed by the Principal.',
+                turnaround: '2 Working Days',
+                counter: 'Counter #2'
+              },
+              {
+                title: 'Fee Clearance & Examination NOC',
+                desc: 'Verification of no-dues from accounts wing for university admit cards and registration.',
+                turnaround: 'Same Day',
+                counter: 'Accounts Section'
+              }
+            ].map((c, i) => (
+              <div
+                key={i}
+                style={{
+                  background: '#ffffff',
+                  borderRadius: 16,
+                  padding: 22,
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 4px 14px rgba(0,0,0,0.03)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                    <FileText size={18} color={GOLD} />
+                    <h3 style={{ fontSize: 15.5, fontWeight: 800, color: NAVY, margin: 0 }}>{c.title}</h3>
+                  </div>
+                  <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.5, margin: '0 0 14px' }}>{c.desc}</p>
+                </div>
+                <div style={{
+                  paddingTop: 12,
+                  borderTop: '1px solid #f1f5f9',
+                  fontSize: 12,
+                  color: '#475569',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 4
+                }}>
+                  <div><strong>Processing Time:</strong> {c.turnaround}</div>
+                  <div><strong>Counter:</strong> {c.counter}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Step-by-Step Offline Procedure */}
+          <div style={{
+            background: '#ffffff',
+            borderRadius: 20,
+            padding: 32,
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.03)',
+            marginBottom: 32
+          }}>
+            <h2 style={{ fontSize: 18, fontWeight: 900, color: NAVY, margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Clock size={20} color={GOLD} /> Manual Application &amp; Issuance Procedure
+            </h2>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 18 }}>
+              {[
+                {
+                  step: '01',
+                  title: 'Draft Application',
+                  desc: 'Write an application addressed to The Principal specifying your Name, Roll Number, Department, Semester, and purpose of certificate.'
+                },
+                {
+                  step: '02',
+                  title: 'Enclose Documents',
+                  desc: 'Attach photocopies of your College Identity Card, Current Fee Receipt, and latest Semester Marksheet / Admit Card.'
+                },
+                {
+                  step: '03',
+                  title: 'Internal Clearance',
+                  desc: 'Get no-dues verification from the Accounts Office and Central Library (for book returns).'
+                },
+                {
+                  step: '04',
+                  title: 'Counter Collection',
+                  desc: 'Submit at Administrative Counter #1 or #2. Collect the authorized, signed certificate within the turnaround time.'
+                }
+              ].map(st => (
+                <div
+                  key={st.step}
+                  style={{
+                    background: '#f8fafc',
+                    borderRadius: 14,
+                    padding: 18,
+                    border: '1px solid #e2e8f0'
+                  }}
+                >
+                  <div style={{ fontSize: 22, fontWeight: 900, color: GOLD, marginBottom: 6 }}>{st.step}</div>
+                  <div style={{ fontSize: 14.5, fontWeight: 800, color: NAVY, marginBottom: 6 }}>{st.title}</div>
+                  <div style={{ fontSize: 12.5, color: '#64748b', lineHeight: 1.5 }}>{st.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Office Timings & Campus Helpdesk */}
+          <div style={{
+            background: 'linear-gradient(135deg, #0f2347, #1e3a8a)',
+            color: '#ffffff',
+            borderRadius: 20,
+            padding: 32,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 24
+          }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 800, color: '#F4B942', textTransform: 'uppercase', marginBottom: 6 }}>
+                <Building2 size={16} /> College Administrative Office &amp; Counter Hours
+              </div>
+              <h3 style={{ fontSize: 20, fontWeight: 900, margin: '0 0 8px', color: '#ffffff' }}>
+                Have questions regarding certificates or offline forms?
+              </h3>
+              <p style={{ margin: 0, fontSize: 13.5, color: '#cbd5e1', lineHeight: 1.5, maxWidth: 640 }}>
+                Administrative Counter operates Monday to Saturday from <strong>10:30 AM to 3:30 PM</strong> (closed on Sundays &amp; public holidays). For enquiries, contact the college office.
+              </p>
+              <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginTop: 16, fontSize: 13, color: '#e2e8f0' }}>
+                <span>📞 Phone: +91 326 2302324 / +91 79033 40991</span>
+                <span>✉️ Email: principal@gncollege.org</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <Link
+                to="/student-corner"
+                style={{
+                  background: '#F4B942',
+                  color: '#0B1F3A',
+                  padding: '12px 22px',
+                  borderRadius: 12,
+                  fontWeight: 800,
+                  fontSize: 13.5,
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                ← Student Corner Hub
+              </Link>
+              <Link
+                to="/about-us/college-profile"
+                style={{
+                  background: 'rgba(255,255,255,0.12)',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  padding: '12px 22px',
+                  borderRadius: 12,
+                  fontWeight: 700,
+                  fontSize: 13.5,
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                Contact &amp; Campus Map
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', sans-serif", paddingBottom: 60 }}>

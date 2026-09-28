@@ -58,7 +58,7 @@ const GALLERY_TABS = [
 ];
 const LINKS_DATA = [
   { name: "BBMK UNIV.", url: "https://bbmku.ac.in", icon: <Landmark size={20} /> },
-  { name: "CHANCELLOR PORTAL", url: "https://jharkhanduniversities.nic.in", icon: <GraduationCap size={20} /> },
+  { name: "CHANCELLOR PORTAL", url: "https://universities.jharkhand.gov.in/home", icon: <GraduationCap size={20} /> },
   { name: "E-KALYAN", url: "https://ekalyan.cgg.gov.in", icon: <Gem size={20} /> },
   { name: "DIGILOCKER", url: "https://www.digilocker.gov.in", icon: <Unlock size={20} /> },
   { name: "UGC INDIA", url: "https://ugc.ac.in", icon: <ScrollText size={20} /> },
@@ -110,7 +110,7 @@ const QUICK_ACTIONS = [
     icon: <GraduationCap size={22} style={{ color: "#3b82f6" }} />,
     title: "Apply for Admission",
     sub: "Chancellor portal",
-    href: "https://universities.jharkhand.gov.in/",
+    href: "https://universities.jharkhand.gov.in/home",
     color: "#3b82f6",
     bg: "#fff",
     hoverBg: "#eff6ff",

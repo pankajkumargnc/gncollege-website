@@ -697,7 +697,7 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
             <a href="https://cimsstudentnewui.mastersofterp.in/" target="_blank" rel="noopener noreferrer" className="tb-hud-item">
               💳 Fee Pay
             </a>
-            <a href="https://universities.jharkhand.gov.in/" target="_blank" rel="noopener noreferrer" className="tb-hud-item featured">
+            <a href="https://universities.jharkhand.gov.in/home" target="_blank" rel="noopener noreferrer" className="tb-hud-item featured">
               🎓 Admission
             </a>
           </div>

@@ -1396,7 +1396,7 @@ export default function AdmissionTimeline() {
         {/* CTA Button */}
         <div className={`atl-cta-wrap${cardsVis ? ' vis' : ''}`}>
           <a
-            href="https://universities.jharkhand.gov.in/"
+            href="https://universities.jharkhand.gov.in/home"
             target="_blank"
             rel="noopener noreferrer"
             className="atl-cta"

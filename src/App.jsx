@@ -439,7 +439,27 @@ export default function App() {
       combinedLinks[aboutIdx].sub = aboutSub;
     }
 
-    // 3. Keep Gallery Fallback
+    // 3. 🛡️ Dynamic Feature Toggles (Document Requests, etc.)
+    const isDocRequestsEnabled = siteSettings?.enableDocumentRequests === true;
+    if (!isDocRequestsEnabled) {
+      combinedLinks = combinedLinks.map((link) => {
+        if (!link.sub) return link;
+        return {
+          ...link,
+          sub: link.sub
+            .filter((s) => s.href !== '/documents/request' && s.href !== '/document-request' && !s.label?.toLowerCase().includes('document request'))
+            .map((s) => {
+              if (!s.sub) return s;
+              return {
+                ...s,
+                sub: s.sub.filter((ss) => ss.href !== '/documents/request' && ss.href !== '/document-request' && !ss.label?.toLowerCase().includes('document request'))
+              };
+            })
+        };
+      });
+    }
+
+    // 4. Keep Gallery Fallback
     return combinedLinks.map((link) =>
       link.label === "Gallery" && (!link.sub || link.sub.length === 0)
         ? {
@@ -448,7 +468,7 @@ export default function App() {
           }
         : link,
     );
-  }, [navLinks]);
+  }, [navLinks, siteSettings?.enableDocumentRequests]);
 
   if (isInitializing) {
     return (
@@ -539,6 +559,7 @@ export default function App() {
             notices={notices}
             faculties={faculties}
             gallery={gallery}
+            siteSettings={siteSettings}
           />
         </Suspense>
       )}

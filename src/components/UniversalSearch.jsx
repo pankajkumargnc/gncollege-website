@@ -13,7 +13,8 @@ export default function UniversalSearch({
   notices = [], 
   faculties = [], 
   pages = [],
-  gallery = []
+  gallery = [],
+  siteSettings
 }) {
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
@@ -21,13 +22,23 @@ export default function UniversalSearch({
   const listRef = useRef(null);
   const navigate = useNavigate();
 
+  const isDocReqEnabled = siteSettings?.enableDocumentRequests === true;
+
   // ── Combine & Filter All Searchable Data ──
   const flatResults = useMemo(() => {
     const items = [
       // 1. Static Core Pages & Student Hub
       { title: 'Home', path: '/', icon: <Home size={22} strokeWidth={1.5}/>, cat: 'Navigation' },
-      { title: 'Student Corner', sub: 'Hub for exams, results, document requests, & calendar', path: '/student-corner', icon: <GraduationCap size={22} strokeWidth={1.5}/>, cat: 'Student Corner' },
-      { title: 'Document Request System', sub: 'Apply for TC, Bonafide, Character certificate online', path: '/documents/request', icon: <FileText size={22} strokeWidth={1.5}/>, cat: 'Student Corner' },
+      { 
+        title: 'Student Corner', 
+        sub: isDocReqEnabled ? 'Hub for exams, results, document requests, & calendar' : 'Hub for exams, results, syllabus, & calendar', 
+        path: '/student-corner', 
+        icon: <GraduationCap size={22} strokeWidth={1.5}/>, 
+        cat: 'Student Corner' 
+      },
+      ...(isDocReqEnabled ? [
+        { title: 'Document Request System', sub: 'Apply for TC, Bonafide, Character certificate online', path: '/documents/request', icon: <FileText size={22} strokeWidth={1.5}/>, cat: 'Student Corner' }
+      ] : []),
       { title: 'Examination Results', sub: 'BBMKU semester examination results & marksheets', path: '/publication/examination-results/2024', icon: <GraduationCap size={22} strokeWidth={1.5}/>, cat: 'Student Corner' },
       { title: 'Syllabus & NEP FYUGP', sub: 'Semester-wise syllabus & evaluation structure', path: '/syllabus', icon: <School size={22} strokeWidth={1.5}/>, cat: 'Academics' },
       { title: 'Academic Calendar', sub: 'Schedule of terms, mid-terms, holidays, & events', path: '/academics/academic-calendar', icon: <Calendar size={22} strokeWidth={1.5}/>, cat: 'Academics' },

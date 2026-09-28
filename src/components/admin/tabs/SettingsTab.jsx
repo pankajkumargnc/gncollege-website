@@ -17,7 +17,8 @@ import {
   AlertTriangle, Radio, Bell, RefreshCw, Layers, Database, Check, 
   ExternalLink, Copy, Search, Smartphone, Monitor,
   UploadCloud, Sparkles, RotateCcw, ArrowUpRight, Info,
-  PhoneCall, Compass, GraduationCap, MapPin, Palette, Type, Navigation, Tablet
+  PhoneCall, Compass, GraduationCap, MapPin, Palette, Type, Navigation, Tablet,
+  FileText
 } from 'lucide-react';
 import { T, NAVY, GOLD, Toggle } from '../AdminShared';
 import { clearCache, encodePayload, decodePayload } from '../../../utils/cachedFetch';
@@ -70,6 +71,7 @@ export default function SettingsTab({ logAct }) {
       enableVirtualTour: true,
       enableAlumniWall: true,
       enablePlacementAnalytics: true,
+      enableDocumentRequests: false,
 
       // Hero & Kinetic Background Settings
       heroBgMode: 'image', // 'image' | 'mesh'
@@ -181,8 +183,8 @@ export default function SettingsTab({ logAct }) {
     return () => unsub();
   }, []);
 
-  const handleFeatureToggle = async (key) => {
-    const currentVal = siteCfg[key] !== false;
+  const handleFeatureToggle = async (key, defaultOff = false) => {
+    const currentVal = defaultOff ? Boolean(siteCfg[key]) : siteCfg[key] !== false;
     const newVal = !currentVal;
 
     setSiteCfg(prev => ({ ...prev, [key]: newVal }));
@@ -3306,6 +3308,7 @@ export default function SettingsTab({ logAct }) {
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
                 {[
+                  { key: 'enableDocumentRequests', title: 'Online Document Request & Tracking (CLC / Bonafide / Character)', sub: 'Allow online student certificate requests. When disabled (default), certificates are issued manually at the college office counter.', icon: FileText, defaultOff: true },
                   { key: 'enableLanguageToggle', title: 'Bilingual Language Switcher (EN / हिंदी)', sub: 'Display Hindi/English translation pill in the top header navbar', icon: Globe },
                   { key: 'enableCampusPoll', title: 'Live Campus Poll (Student Voice)', sub: 'Show interactive student voting & opinion widget on homepage', icon: Radio },
                   { key: 'enableFloatingQR', title: 'Floating QR Code Share & Print', sub: 'Enable floating action button for quick mobile share and printing', icon: Smartphone },
@@ -3314,7 +3317,7 @@ export default function SettingsTab({ logAct }) {
                   { key: 'enablePlacementAnalytics', title: 'Placement Analytics & Career Trends', sub: 'Interactive Year-over-Year placement intelligence chart on homepage', icon: Layers },
                 ].map(f => {
                   const Icon = f.icon;
-                  const isEnabled = siteCfg[f.key] !== false;
+                  const isEnabled = f.defaultOff ? Boolean(siteCfg[f.key]) : siteCfg[f.key] !== false;
                   return (
                     <div 
                       key={f.key}
@@ -3353,7 +3356,7 @@ export default function SettingsTab({ logAct }) {
                       <div style={{ flexShrink: 0 }}>
                         <Toggle
                           checked={isEnabled}
-                          onChange={() => handleFeatureToggle(f.key)}
+                          onChange={() => handleFeatureToggle(f.key, f.defaultOff)}
                           label={isEnabled ? 'ON' : 'OFF'}
                           color={T.green}
                         />
