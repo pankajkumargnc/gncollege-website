@@ -83,11 +83,11 @@
 
     <!-- ══ Favicon Pack ══ -->
     <!-- ══ Favicon Pack ══ -->
-    <link rel="icon"              type="image/png" href="/gncollege-website/assets/logo-Cg8_Xnzv.webp" />
-    <link rel="apple-touch-icon"                   href="/gncollege-website/assets/logo-Cg8_Xnzv.webp" />
-    <link rel="apple-touch-icon" sizes="180x180"   href="/gncollege-website/assets/logo-Cg8_Xnzv.webp" />
-    <link rel="mask-icon"                          href="/gncollege-website/assets/logo-Cg8_Xnzv.webp" color="#0f2347" />
-    <meta name="msapplication-TileImage"           content="/gncollege-website/assets/logo-Cg8_Xnzv.webp" />
+    <link rel="icon"              type="image/png" href="images/logo.webp" />
+    <link rel="apple-touch-icon"                   href="images/logo.webp" />
+    <link rel="apple-touch-icon" sizes="180x180"   href="images/logo.webp" />
+    <link rel="mask-icon"                          href="images/logo.webp" color="#0f2347" />
+    <meta name="msapplication-TileImage"           content="images/logo.webp" />
 
     <!-- ══ Performance — Preconnect ══ -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -100,7 +100,7 @@
     <link rel="dns-prefetch" href="https://www.youtube.com" />
     <link rel="dns-prefetch" href="https://api.web3forms.com" />
 
-    <link rel="preload" as="image" href="/gncollege-website/assets/logo-Cg8_Xnzv.webp" type="image/webp" />
+    <link rel="preload" as="image" href="images/logo.webp" type="image/webp" />
 
     <!-- ══ Fonts — Non-blocking (print trick) ══ -->
     <link rel="stylesheet"
@@ -112,8 +112,8 @@
     </noscript>
 
     <!-- ══ Prefetch Next-Load Assets ══ -->
-    <link rel="prefetch" href="/gncollege-website/assets/college_photo-CT-krXQ-.webp" />
-    <link rel="prefetch" href="/gncollege-website/assets/slide1-D83UA8NQ.webp" />
+    <link rel="prefetch" href="images/college_photo.webp" />
+    <link rel="prefetch" href="images/HeroSlider/slide1.webp" />
 
     <!-- ══ Critical Inline CSS — Prevents FOUC & CLS ══ -->
     <style>
@@ -144,14 +144,14 @@
     <link rel="dns-prefetch" href="https://securetoken.googleapis.com">
     <link rel="preconnect" href="https://firebase.googleapis.com">
     <link rel="dns-prefetch" href="https://firebase.googleapis.com">
-    <script type="module" crossorigin src="/gncollege-website/assets/index-DGSnWUoK.js"></script>
-    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-react-ChmM1TjL.js">
-    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-firebase-BZ-IDLbh.js">
-    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-pdf-Bz697U1v.js">
-    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-charts-CGsaCNai.js">
+    <script type="module" crossorigin src="/gncollege-website/assets/index-BBTXvqKV.js"></script>
+    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-react-EdM_Q19q.js">
+    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-firebase-CgRkFc51.js">
+    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-pdf-B5qm5c1O.js">
+    <link rel="modulepreload" crossorigin href="/gncollege-website/assets/vendor-charts-DTomjw_H.js">
     <link rel="stylesheet" crossorigin href="/gncollege-website/assets/vendor-pdf-CBXYWCWZ.css">
-    <link rel="stylesheet" crossorigin href="/gncollege-website/assets/index-DJCFOwR1.css">
-    <link rel="modulepreload" href="/assets/vendor-react-ChmM1TjL.js" crossorigin>
+    <link rel="stylesheet" crossorigin href="/gncollege-website/assets/index-Em-XmigW.css">
+    <link rel="modulepreload" href="/gncollege-website/assets/vendor-react-EdM_Q19q.js" crossorigin>
 <link rel="manifest" href="/gncollege-website/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/gncollege-website/registerSW.js"></script></head>
   <body>
 
@@ -178,7 +178,7 @@
     <!-- ══ Splash Screen ══ -->
     <div class="splash-screen" id="splash" role="status" aria-live="polite" aria-label="Website is loading, please wait">
       <img class="splash-logo"
-           src="/gncollege-website/assets/logo-Cg8_Xnzv.webp"
+           src="images/logo.webp"
            alt="Guru Nanak College, Dhanbad"
            width="120" height="120"
            onerror="this.style.display='none'" />
@@ -186,6 +186,26 @@
     </div>
 
     <!-- ══ React App Root ══ -->
+    <!-- ══ SPA Deep Link Fallback Resolver (Host-Agnostic per Section 39 & 93) ══ -->
+    <script>
+      (function() {
+        try {
+          var redirect = sessionStorage.getItem('gnc_spa_redirect');
+          if (redirect) {
+            sessionStorage.removeItem('gnc_spa_redirect');
+            if (redirect !== window.location.pathname) {
+              window.history.replaceState(null, null, redirect);
+            }
+          } else {
+            var params = new URLSearchParams(window.location.search);
+            var p = params.get('p');
+            if (p) {
+              window.history.replaceState(null, null, decodeURIComponent(p));
+            }
+          }
+        } catch (_) {}
+      })();
+    </script>
     <div id="root"></div>
 
     <!-- ══ Splash Auto-Dismiss ══ -->
