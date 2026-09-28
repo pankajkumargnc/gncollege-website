@@ -968,7 +968,7 @@ export default function DocumentRequestPage() {
           </h3>
           <ul style={{ margin: 0, paddingLeft: 20, color: '#475569', fontSize: 13.5, lineHeight: 1.8 }}>
             <li>Students must bring their <strong>Original College Identity Card</strong> or Fee Receipt when collecting certificates from Counter #2.</li>
-            <li>Office counter timings: <strong>Monday to Saturday, 10:00 AM to 3:00 PM</strong> (closed on Sundays and BBMKU University holidays).</li>
+            <li>Office counter timings: <strong>Monday to Saturday, 10:00 AM to 3:00 PM</strong> (closed on Sundays and official university holidays).</li>
             <li>For urgent queries or document dispatch status, call the administrative helpdesk at <strong>+91 79033 40991</strong>.</li>
           </ul>
         </div>

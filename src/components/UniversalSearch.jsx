@@ -39,7 +39,7 @@ export default function UniversalSearch({
       ...(isDocReqEnabled ? [
         { title: 'Document Request System', sub: 'Apply for TC, Bonafide, Character certificate online', path: '/documents/request', icon: <FileText size={22} strokeWidth={1.5}/>, cat: 'Student Corner' }
       ] : []),
-      { title: 'Examination Results', sub: 'BBMKU semester examination results & marksheets', path: '/publication/examination-results/2024', icon: <GraduationCap size={22} strokeWidth={1.5}/>, cat: 'Student Corner' },
+      { title: 'Examination Results', sub: 'Semester examination results & marksheets', path: '/publication/examination-results/2024', icon: <GraduationCap size={22} strokeWidth={1.5}/>, cat: 'Student Corner' },
       { title: 'Syllabus & NEP FYUGP', sub: 'Semester-wise syllabus & evaluation structure', path: '/syllabus', icon: <School size={22} strokeWidth={1.5}/>, cat: 'Academics' },
       { title: 'Academic Calendar', sub: 'Schedule of terms, mid-terms, holidays, & events', path: '/academics/academic-calendar', icon: <Calendar size={22} strokeWidth={1.5}/>, cat: 'Academics' },
       { title: 'Scholarships & E-Kalyan', sub: 'State & national financial aid schemes', path: '/scholarships', icon: <GraduationCap size={22} strokeWidth={1.5}/>, cat: 'Student Corner' },

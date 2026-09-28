@@ -309,9 +309,9 @@ const CollegeProfile = () => {
                     </span>
                   </div>
                   <div style={{ padding: '16px 20px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <span style={{ fontSize: 11, fontWeight: 800, color: '#0f2347', textTransform: 'uppercase' }}>Affiliated University</span>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: '#1e40af' }}>BBMKU, Dhanbad</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, gap: 10 }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: '#0f2347', textTransform: 'uppercase', flexShrink: 0 }}>Affiliated University</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#1e40af', textAlign: 'right' }}>Binod Bihari Mahto Koyalanchal University (BBMKU), Dhanbad</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                       <span style={{ fontSize: 11, fontWeight: 800, color: '#0f2347', textTransform: 'uppercase' }}>UGC Status</span>

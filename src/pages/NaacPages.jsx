@@ -622,7 +622,7 @@ export function NaacBestPracticesPage() {
           <div style={{ fontSize: 14.5, color: '#334155', lineHeight: 1.75 }}>
             <p><strong>1. Context:</strong> Academic degrees without social conscience are incomplete. Guru Nanak College blends academic curriculum with active community service rooted in the Sikh ideal of selfless service (Seva).</p>
             <p style={{ marginTop: 10 }}><strong>2. The Practice:</strong> 3 units of the National Service Scheme (NSS) and a dedicated wing of the 36 Jharkhand Battalion NCC conduct year-round community interventions: emergency blood donation drives, anti-plastic environmental rallies, adult literacy campaigns in adopted villages around Bhuda, and disaster relief.</p>
-            <p style={{ marginTop: 10 }}><strong>3. Evidence of Success:</strong> College NSS volunteers have been honored by BBMKU and district authorities as leading blood donation contributors, and NCC cadets consistently participate in Republic Day and Independence Day parades.</p>
+            <p style={{ marginTop: 10 }}><strong>3. Evidence of Success:</strong> College NSS volunteers have been honored by university and district authorities as leading blood donation contributors, and NCC cadets consistently participate in Republic Day and Independence Day parades.</p>
           </div>
         </div>
 

@@ -131,7 +131,7 @@ const DEFAULT_CONTENT = {
       { label: 'Language', value: 'National' },
       { label: 'Focus', value: 'Sahitya' },
       { label: 'Seminars', value: 'Monthly' },
-      { label: 'BBMKU', value: 'Top Dept' }
+      { label: 'University', value: 'Top Dept' }
     ],
     curriculum: {
       'Semester 1': ['Hindi Sahitya ka Itihas', 'Kavya Shastra', 'Prayojanmulak Hindi', 'Vyakaran aur Bhasha Shastra'],
@@ -199,7 +199,7 @@ const DEFAULT_CONTENT = {
       { label: 'Financial', value: 'Analytics' },
       { label: 'Resource', value: 'Expertise' },
       { label: 'Budget', value: 'Projects' },
-      { label: 'BBMKU', value: 'Academic Star' }
+      { label: 'University', value: 'Academic Star' }
     ],
     curriculum: {
       'Semester 1': ['Micro Economic Theory', 'Statistical Methods for Economics', 'Mathematical Economics', 'General Accounting'],

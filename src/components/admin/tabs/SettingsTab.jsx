@@ -570,7 +570,7 @@ export default function SettingsTab({ logAct }) {
       themeAccent: '#f4a023',
       themeSurface: '#ffffff',
       themeBg: '#f4f7f9',
-      tag: 'Academic / BBMKU'
+      tag: 'Official University'
     },
     {
       name: 'Cyber Indigo & Violet',

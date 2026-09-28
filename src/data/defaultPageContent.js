@@ -117,7 +117,7 @@ const DEFAULT_PAGE_CONTENT = {
             ['3', 'Principal, GNC', 'Principal, Guru Nanak College', 'Ex-officio', 'Member Secretary'],
             ['4', 'Management Nominee', 'Nominated by Managing Committee', 'Management Nominee', 'Member'],
             ['5', 'UGC Nominee', 'Nominated by University Grants Commission', 'UGC Nominee', 'Member'],
-            ['6', 'University Nominee', 'Nominated by BBMKU, Dhanbad', 'University Nominee', 'Member'],
+            ['6', 'University Nominee', 'Nominated by Affiliating University', 'University Nominee', 'Member'],
             ['7', 'Teaching Staff Rep.', 'Elected by Teaching Staff', 'Teaching Staff Rep.', 'Member'],
             ['8', 'Non-Teaching Rep.', 'Elected by Non-Teaching Staff', 'Non-Teaching Rep.', 'Member']
           ]
@@ -228,7 +228,7 @@ const DEFAULT_PAGE_CONTENT = {
         content: JSON.stringify([
           { title: 'Apply via Chancellor Portal', desc: 'Desirous students must apply through the Chancellor Portal (https://universities.jharkhand.gov.in/home) under NEP-2020.', fee: 'Application Fee: Rs. 100/-' },
           { title: 'Merit List & Verification', desc: 'Selected students must visit respective campuses with original documents for physical verification.', fee: 'Check Document Required Page' },
-          { title: 'University Registration', desc: 'After verification, pay the BBMKU Registration Fee on Chancellor Portal again.', fee: 'JAC Board: Rs. 308/- | Others: Rs. 758/-' },
+          { title: 'University Registration', desc: 'After verification, pay the University Registration Fee on Chancellor Portal again.', fee: 'JAC Board: Rs. 308/- | Others: Rs. 758/-' },
           { title: 'College Online Admission Form', desc: 'Register on www.gncollege.org or enrollonline.co.in. Upload Chancellor Portal fee receipt and marksheet.', fee: 'Wait for approval message' },
           { title: 'Final Fee Payment', desc: 'After approval, pay the college fee via Student Diary Cloud App or CIMS portal using Card/UPI/NetBanking.', fee: 'Online Payment Only' }
         ])

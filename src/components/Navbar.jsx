@@ -13,7 +13,7 @@ const SPOTLIGHT_CARDS = {
     icon: '☬'
   },
   'Academics': {
-    badge: 'NEP-2020 & BBMKU',
+    badge: 'NEP-2020 Curricula',
     title: 'Curriculum & Degrees',
     desc: 'BA, B.Sc, B.Com honors degrees, premier BCA vocational IT wing, and updated university CBCS syllabi.',
     link: '/academics/departments',
@@ -1005,23 +1005,29 @@ const Navbar = memo(function Navbar({ onAdminClick, navLinks }) {
 
                         {/* ── Spotlight Card Column ── */}
                         {spotlight && (
-                          <div style={{
-                            width: 235,
-                            flexShrink: 0,
-                            background: isDark
-                              ? 'linear-gradient(145deg, #111d38 0%, #080f1e 100%)'
-                              : 'linear-gradient(145deg, #0b1f4e 0%, #060e1c 100%)',
-                            borderRadius: '12px',
-                            padding: '18px',
-                            color: '#fff',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            position: 'relative',
-                            overflow: 'hidden',
-                            boxShadow: '0 8px 24px rgba(11,31,78,0.28)',
-                            border: '1px solid rgba(244,160,35,0.3)'
-                          }}>
+                          <div 
+                            className="gnc-hover-card"
+                            style={{
+                              width: 235,
+                              flexShrink: 0,
+                              background: isDark
+                                ? 'linear-gradient(145deg, #111d38 0%, #080f1e 100%)'
+                                : 'linear-gradient(145deg, #0b1f4e 0%, #060e1c 100%)',
+                              borderRadius: '14px',
+                              padding: '18px',
+                              color: '#fff',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'space-between',
+                              position: 'relative',
+                              overflow: 'hidden',
+                              boxShadow: '0 8px 24px rgba(11,31,78,0.28)',
+                              border: '1px solid rgba(244,160,35,0.3)',
+                              '--card-accent': COLORS.gold,
+                              '--card-glow': 'rgba(244,160,35,0.35)'
+                            }}
+                          >
+                            <div className="card-top-bar" />
                             <div style={{
                               position: 'absolute', right: '-10px', bottom: '-15px',
                               fontSize: '85px', opacity: 0.12, pointerEvents: 'none', userSelect: 'none'

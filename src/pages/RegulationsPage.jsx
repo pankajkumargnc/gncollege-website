@@ -28,7 +28,7 @@ export default function RegulationsPage() {
             College Regulations &amp; <span>Byelaws</span>
           </h1>
           <p className="hero-subtitle" style={{ maxWidth: 650, margin: '0 auto' }}>
-            Official guidelines, academic rules, and administrative byelaws of Guru Nanak College and Universities (BBMKU/VBU).
+            Official guidelines, academic rules, and administrative byelaws of Guru Nanak College and affiliating universities.
           </p>
         </div>
       </header>

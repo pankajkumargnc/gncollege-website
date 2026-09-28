@@ -2010,3 +2010,102 @@ img {
   pointer-events: auto;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   ✨ GNC Universal Glowing 3D Hover Card System (Student Corner Signature)
+   ═══════════════════════════════════════════════════════════════ */
+.gnc-hover-card,
+.gnc-service-card,
+.gnc-portal-card,
+.gnc-syllabus-card,
+.gnc-course-card,
+.gnc-calendar-card,
+.gnc-academic-card {
+  position: relative;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1.5px solid #e2e8f0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 3px 12px rgba(11, 31, 58, 0.04);
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.gnc-hover-card .card-top-bar,
+.gnc-service-card .srv-top-bar,
+.gnc-portal-card .portal-top-bar,
+.gnc-syllabus-card .syllabus-top-bar,
+.gnc-course-card .course-top-bar,
+.gnc-calendar-card .cal-top-bar,
+.gnc-academic-card .academic-top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--card-accent, #0284c7);
+  opacity: 0.25;
+  transform: scaleX(0.2);
+  transform-origin: center;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gnc-hover-card:hover,
+.gnc-service-card:hover,
+.gnc-portal-card:hover,
+.gnc-syllabus-card:hover,
+.gnc-course-card:hover,
+.gnc-calendar-card:hover,
+.gnc-academic-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--card-accent, #0284c7);
+  box-shadow: 0 12px 24px -6px var(--card-glow, rgba(2, 132, 199, 0.22)), 0 0 0 1px var(--card-accent, #0284c7);
+  background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.98) 100%);
+}
+
+.gnc-hover-card:hover .card-top-bar,
+.gnc-service-card:hover .srv-top-bar,
+.gnc-portal-card:hover .portal-top-bar,
+.gnc-syllabus-card:hover .syllabus-top-bar,
+.gnc-course-card:hover .course-top-bar,
+.gnc-calendar-card:hover .cal-top-bar,
+.gnc-academic-card:hover .academic-top-bar {
+  opacity: 1;
+  transform: scaleX(1);
+  box-shadow: 0 0 12px var(--card-accent, #0284c7);
+}
+
+.gnc-hover-card .card-icon-box,
+.gnc-service-card .srv-icon-box,
+.gnc-portal-card .portal-icon-box,
+.gnc-syllabus-card .syllabus-icon-box,
+.gnc-course-card .course-icon-box,
+.gnc-calendar-card .cal-icon-box,
+.gnc-academic-card .academic-icon-box {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gnc-hover-card:hover .card-icon-box,
+.gnc-service-card:hover .srv-icon-box,
+.gnc-portal-card:hover .portal-icon-box,
+.gnc-syllabus-card:hover .syllabus-icon-box,
+.gnc-course-card:hover .course-icon-box,
+.gnc-calendar-card:hover .cal-icon-box,
+.gnc-academic-card:hover .academic-icon-box {
+  transform: scale(1.08);
+  box-shadow: 0 0 18px var(--card-glow, rgba(2, 132, 199, 0.25));
+}
+
+.gnc-hover-card .card-arrow,
+.gnc-service-card .srv-arrow,
+.gnc-portal-card .portal-arrow,
+.gnc-syllabus-card .syllabus-arrow {
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.gnc-hover-card:hover .card-arrow,
+.gnc-service-card:hover .srv-arrow,
+.gnc-portal-card:hover .portal-arrow,
+.gnc-syllabus-card:hover .syllabus-arrow {
+  transform: translateX(5px);
+}
+

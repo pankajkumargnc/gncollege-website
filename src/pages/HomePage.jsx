@@ -87,7 +87,7 @@ const QUICK_ACTIONS = [
   {
     icon: <ClipboardList size={22} style={{ color: "#f4a023" }} />,
     title: "Exam Results",
-    sub: "BBMKU result portal",
+    sub: "University result portal",
     href: "https://bbmkuniv.in/login",
     color: "#f4a023",
     bg: "#fffbeb",

@@ -190,7 +190,7 @@ export default function DocumentsPage() {
             Institutional Document <span>Archive</span>
           </h1>
           <p className="hero-subtitle" style={{ maxWidth: 720, margin: '0 auto', fontSize: 15, opacity: 0.92, color: 'rgba(255,255,255,0.9)' }}>
-            Comprehensive repository of UGC &amp; BBMKU affiliations, NEP syllabi, annual reports, audited financial disclosures, and college publications.
+            Comprehensive repository of UGC &amp; university affiliations, NEP syllabi, annual reports, audited financial disclosures, and college publications.
           </p>
         </div>
       </div>

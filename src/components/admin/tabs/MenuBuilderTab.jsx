@@ -46,9 +46,9 @@ const STANDARD_ROUTES = [
   { path: '/about-us/various-committees/minority', label: 'Committee - Minority Cell' },
   { path: '/about-us/various-committees/rusa', label: 'Committee - RUSA' },
   // Regulations
-  { path: '/about-us/regulations/fyugp-nep', label: 'Regulations - BBMKU FYUGP (NEP)' },
-  { path: '/about-us/regulations/bbmku-ug', label: 'Regulations - BBMKU UG (CBCS)' },
-  { path: '/about-us/regulations/bbmku-circular', label: 'Regulations - BBMKU Circulars' },
+  { path: '/about-us/regulations/fyugp-nep', label: 'Regulations - FYUGP (NEP)' },
+  { path: '/about-us/regulations/bbmku-ug', label: 'Regulations - University UG (CBCS)' },
+  { path: '/about-us/regulations/bbmku-circular', label: 'Regulations - University Circulars' },
   { path: '/about-us/regulations/college-affiliation', label: 'Regulations - Affiliation Paper' },
   { path: '/about-us/regulations/ugc-certificate', label: 'Regulations - UGC 2(f) & 12(B)' },
   { path: '/about-us/regulations/vbu-bca', label: 'Regulations - VBU BCA' },

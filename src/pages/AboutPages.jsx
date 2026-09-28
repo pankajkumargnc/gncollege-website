@@ -618,7 +618,7 @@ export function GoverningBody() {
                     ['3','Principal, GNC','Principal, Guru Nanak College','Ex-officio','Member Secretary'],
                     ['4','Management Nominee','Nominated by Managing Committee','Management Nominee','Member'],
                     ['5','UGC Nominee','Nominated by University Grants Commission','UGC Nominee','Member'],
-                    ['6','University Nominee','Nominated by BBMKU, Dhanbad','University Nominee','Member'],
+                    ['6','University Nominee','Nominated by Affiliating University','University Nominee','Member'],
                     ['7','Teaching Staff Rep.','Elected by Teaching Staff','Teaching Staff Rep.','Member'],
                     ['8','Non-Teaching Rep.','Elected by Non-Teaching Staff','Non-Teaching Rep.','Member'],
                   ]).map((row,i)=>(

@@ -220,8 +220,8 @@ export default function AppRoutes({
             
             {/* Regulations */}
             <Route path="/about-us/regulations" element={<R el={<RegulationsPage />} />} />
-            <Route path="/about-us/regulations/bbmku-ug" element={<R el={<EmbeddedPDFPage title="BBMKU UG Regulation (CBCS)" subtitle="Academic Session 2020-23" pdfUrl="https://drive.google.com/file/d/118SXsMuxjsmGirmcrdE8mcJOMBWIs5Rm/view?usp=sharing" />} />} />
-            <Route path="/about-us/regulations/bbmku-circular" element={<R el={<EmbeddedPDFPage title="BBMKU UG Circular" subtitle="Eligibility Criteria 2020-23" pdfUrl="https://drive.google.com/file/d/1Xavf4XBsfDF2imKwqaUavQwYOiC8kD7O/view?usp=sharing" />} />} />
+            <Route path="/about-us/regulations/bbmku-ug" element={<R el={<EmbeddedPDFPage title="University UG Regulation (CBCS)" subtitle="Academic Session 2020-23" pdfUrl="https://drive.google.com/file/d/118SXsMuxjsmGirmcrdE8mcJOMBWIs5Rm/view?usp=sharing" />} />} />
+            <Route path="/about-us/regulations/bbmku-circular" element={<R el={<EmbeddedPDFPage title="University UG Circular" subtitle="Eligibility Criteria 2020-23" pdfUrl="https://drive.google.com/file/d/1Xavf4XBsfDF2imKwqaUavQwYOiC8kD7O/view?usp=sharing" />} />} />
             <Route path="/about-us/regulations/fyugp-nep" element={<R el={<EmbeddedPDFPage title="FYUGP NEP-2020" subtitle="State Universities of Jharkhand" pdfUrl="https://drive.google.com/file/d/17vs8HAt4sVtoi93fwyHSOyUH_ODytcJf/view?usp=sharing" />} />} />
             <Route path="/about-us/regulations/vbu-ug" element={<R el={<EmbeddedPDFPage title="VBU UG Regulation 2015" subtitle="Vinoba Bhave University" pdfUrl="https://drive.google.com/file/d/1sosYIf-txXl2_E6AftVIsc7WJIMJWoBU/view?usp=sharing" />} />} />
             <Route path="/about-us/regulations/vbu-bca" element={<R el={<EmbeddedPDFPage title="VBU BCA Regulation" subtitle="Vinoba Bhave University" pdfUrl="https://drive.google.com/file/d/1dibEXgbXjG9OpXn1-Nidvs6rxog75tHb/view?usp=sharing" />} />} />

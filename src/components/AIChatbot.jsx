@@ -96,7 +96,7 @@ FORMAT
 const EN_PROMPTS = [
   { label: 'Admission 2026', query: 'How do I apply for Admission 2026 at Guru Nanak College?' },
   { label: 'Pay College Fees', query: 'Where and how do I pay college fees online via CIMS?' },
-  { label: 'Check Results', query: 'How can I check my BBMKU Semester Exam results?' },
+  { label: 'Check Results', query: 'How can I check my Semester Exam results?' },
   { label: 'BCA & BBA Info', query: 'Tell me about BCA and BBA courses, fees and eligibility at GNC.' },
   { label: 'Request Certificate', query: 'How do I apply for Bonafide or Character certificate online?' },
 ];
@@ -104,7 +104,7 @@ const EN_PROMPTS = [
 const HI_PROMPTS = [
   { label: 'एडमिशन 2026', query: 'गुरु नानक कॉलेज में 2026 एडमिशन के लिए कैसे अप्लाई करें?' },
   { label: 'फीस पेमेंट (CIMS)', query: 'कॉलेज फीस ऑनलाइन CIMS पोर्टल पर कैसे जमा करें?' },
-  { label: 'परीक्षा परिणाम', query: 'BBMKU सेमेस्टर परीक्षा परिणाम कैसे देखें?' },
+  { label: 'परीक्षा परिणाम', query: 'सेमेस्टर परीक्षा परिणाम कैसे देखें?' },
   { label: 'BCA/BBA कोर्स', query: 'BCA और BBA कोर्स, फीस और पात्रता की जानकारी दें।' },
   { label: 'सर्टिफिकेट रिक्वेस्ट', query: 'बोनाफाइड या कैरेक्टर सर्टिफिकेट के लिए ऑनलाइन आवेदन कैसे करें?' },
 ];
@@ -387,7 +387,7 @@ export default function AIChatbot() {
     if (q.includes('result') || q.includes('mark') || q.includes('exam') || q.includes('bbmku') || q.includes('semester')) {
       return `📊 **Exam Results & University Portal**:\n\n` +
         `Guru Nanak College is affiliated with **BBMKU (Binod Bihari Mahto Koyalanchal University)**. Semester and annual results are released directly on the university portal:\n` +
-        `• **Results Portal**: [Check BBMKU Results](${BBMKU_RESULT_PORTAL})\n` +
+        `• **Results Portal**: [Check University Results](${BBMKU_RESULT_PORTAL})\n` +
         `• Enter your University Roll Number and Stream to download your marksheet / result sheet.`;
     }
 
@@ -446,14 +446,14 @@ export default function AIChatbot() {
     if (q.includes('hello') || q.includes('hi') || q.includes('namaste') || q.includes('sat sri akal') || q.includes('hey')) {
       return `Sat Sri Akal & Namaste! 🙏 Welcome to Guru Nanak College, Dhanbad.\n\n` +
         `I am your 24/7 Virtual Guide. What would you like to know today?\n` +
-        `• **Admission 2026**\n• **Online Fee Payment**\n• **BCA / BBA Programs**\n• **BBMKU Exam Results**\n• **Office Contact & Helpdesk**`;
+        `• **Admission 2026**\n• **Online Fee Payment**\n• **BCA / BBA Programs**\n• **University Exam Results**\n• **Office Contact & Helpdesk**`;
     }
 
     return `Sat Sri Akal! 🙏 Thank you for reaching out to Guru Nanak College, Dhanbad.\n\n` +
       `For specific inquiries, you can use our direct portals:\n` +
       `• [Admission 2026 Portal](${CHANCELLOR_PORTAL})\n` +
       `• [Online Fee Payment](${CIMS_FEE_PORTAL})\n` +
-      `• [BBMKU University Results](${BBMKU_RESULT_PORTAL})\n\n` +
+      `• [University Exam Results](${BBMKU_RESULT_PORTAL})\n\n` +
       `Or speak directly with our College Office at **+91 79033 40991** (Mon-Sat, 9:30 AM to 4:30 PM).`;
   };
 

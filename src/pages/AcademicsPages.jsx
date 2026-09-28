@@ -1,18 +1,32 @@
 // src/pages/AcademicsPages.jsx
-import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
+// 🎓 Comprehensive Academic Systems for Guru Nanak College, Dhanbad
+// Affiliated to Binod Bihari Mahto Koyalanchal University (BBMKU) & AICTE Recognized
+
+import React, { useState, useEffect, useRef, lazy, Suspense, useMemo } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
-const PDFModal = lazy(() => import('../components/PDFModal')); // ✅ PDF Modal Import
 import usePageContent from '../hooks/usePageContent';
 import { splitHeading } from '../utils/splitTitle';
 import {
   TrendingUp, Target, BarChart3, Wrench, FileText, GraduationCap,
-  BookOpen, FolderOpen, Calendar, Sun, Rocket, Banknote, Download, ArrowUpRight
+  BookOpen, FolderOpen, Calendar, Sun, Rocket, Banknote, Download, 
+  ArrowUpRight, Laptop, Briefcase, Award, Shield, CheckCircle2, Search, 
+  X, Sparkles, ExternalLink, Eye, ChevronRight, ArrowRight, Layers, 
+  Users, Clock, Building, School, Check, Bookmark, Share2
 } from 'lucide-react';
+import { 
+  BBMKU_SYLLABI, 
+  ACADEMIC_CALENDAR_EVENTS, 
+  OFFICIAL_HOLIDAYS_2026 
+} from '../data/syllabusData';
+import toast from 'react-hot-toast';
 
-const NAVY = COLORS?.navy || '#0f2347';
-const GOLD = COLORS?.gold || '#f4a023';
+const PDFModal = lazy(() => import('../components/PDFModal'));
+
+const NAVY = COLORS?.navy || '#0B1F3A';
+const GOLD = COLORS?.gold || '#F4B942';
 
 /* ─── Shared Scroll Animation (Fade In) ─── */
 function Fade({ children, delay = 0, y = 20 }) {
@@ -21,7 +35,7 @@ function Fade({ children, delay = 0, y = 20 }) {
   useEffect(() => {
     const obs = new IntersectionObserver(
       ([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect(); } },
-      { threshold: 0.1 }
+      { threshold: 0.08 }
     );
     if (ref.current) obs.observe(ref.current);
     return () => obs.disconnect();
@@ -37,14 +51,61 @@ function Fade({ children, delay = 0, y = 20 }) {
 }
 
 /* ─── Shared Hero Header ─── */
-const PageHeader = ({ title, subtitle, icon }) => (
-  <header className="premium-hero">
-    <div className="kinetic-bg" />
+const PageHeader = ({ title, subtitle, icon, badge = "Academic Excellence" }) => (
+  <header className="premium-hero" style={{
+    background: 'linear-gradient(135deg, #0B1F3A 0%, #172554 100%)',
+    color: '#ffffff',
+    padding: 'clamp(50px, 8vw, 84px) 20px 48px',
+    textAlign: 'center',
+    position: 'relative',
+    overflow: 'hidden'
+  }}>
+    <div style={{
+      position: 'absolute',
+      inset: 0,
+      background: 'radial-gradient(circle at 80% 20%, rgba(244, 185, 66, 0.15) 0%, transparent 60%)',
+      pointerEvents: 'none'
+    }} />
     <Fade>
-      <div className="hero-content-wrapper">
-        {icon && <div className="hero-icon">{icon}</div>}
-        <h1 className="hero-title">{splitHeading(title)}</h1>
-        {subtitle && <p>{subtitle}</p>}
+      <div style={{ maxWidth: 900, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 8,
+          background: 'rgba(244, 185, 66, 0.15)',
+          border: '1px solid rgba(244, 185, 66, 0.35)',
+          borderRadius: 30,
+          padding: '6px 18px',
+          fontSize: 12,
+          fontWeight: 800,
+          color: '#F4B942',
+          marginBottom: 16,
+          letterSpacing: '0.8px',
+          textTransform: 'uppercase'
+        }}>
+          <Sparkles size={14} /> {badge}
+        </div>
+        <h1 style={{
+          fontSize: 'clamp(32px, 5.5vw, 48px)',
+          fontWeight: 900,
+          lineHeight: 1.15,
+          letterSpacing: '-1.5px',
+          margin: '0 auto 16px',
+          color: '#ffffff'
+        }}>
+          {splitHeading(title)}
+        </h1>
+        {subtitle && (
+          <p style={{
+            fontSize: 'clamp(14.5px, 2vw, 17px)',
+            color: '#cbd5e1',
+            maxWidth: 720,
+            lineHeight: 1.6,
+            margin: '0 auto'
+          }}>
+            {subtitle}
+          </p>
+        )}
       </div>
     </Fade>
   </header>
@@ -55,62 +116,138 @@ const PageHeader = ({ title, subtitle, icon }) => (
 ════════════════════════════════════════════════════════════ */
 export function IqacPage() {
   const [docs, setDocs] = useState([]);
-  const [selectedPdf, setSelectedPdf] = useState(null); // ✅ PDF Modal State
+  const [selectedPdf, setSelectedPdf] = useState(null);
   
   useEffect(() => {
-    const q = query(collection(db, 'pdfReports'), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, snap => {
-      const allDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      setDocs(allDocs.filter(d => 
-        (d.title || '').toLowerCase().includes('aqar') || 
-        (d.targetPage || '').toLowerCase().includes('iqac') ||
-        (d.title || '').toLowerCase().includes('naac')
-      ));
-    });
-    return () => unsub();
+    if (!db) return;
+    try {
+      const q = query(collection(db, 'pdfReports'), orderBy('createdAt', 'desc'));
+      const unsub = onSnapshot(q, snap => {
+        const allDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        setDocs(allDocs.filter(d => 
+          (d.title || '').toLowerCase().includes('aqar') || 
+          (d.targetPage || '').toLowerCase().includes('iqac') ||
+          (d.title || '').toLowerCase().includes('naac')
+        ));
+      }, () => {});
+      return () => unsub();
+    } catch {}
   }, []);
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-      <PageHeader title="Internal Quality Assurance Cell" subtitle="Ensuring and enhancing the academic and administrative performance of the institution." icon={<TrendingUp size={36} color={GOLD} />} />
+    <div style={{ background: '#F8FAFC', minHeight: '100dvh', fontFamily: "'Inter', sans-serif" }}>
+      <PageHeader 
+        title="Internal Quality Assurance Cell (IQAC)" 
+        subtitle="Sustaining institutional quality culture, academic audits, and NAAC accreditation benchmarks." 
+        badge="Quality Assurance"
+        icon={<TrendingUp size={36} color={GOLD} />} 
+      />
       
-      <div style={{ maxWidth: 1200, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24, marginBottom: 60 }}>
-          {[{ i: <Target size={30} color={GOLD} />, t:'Quality Benchmarks', d:'Developing parameters for various academic activities.' },
-            { i: <BarChart3 size={30} color={GOLD} />, t:'Feedback System', d:'Collecting and analyzing feedback from all stakeholders.' },
-            { i: <Wrench size={30} color={GOLD} />, t:'Workshops & FDPs', d:'Organizing quality-related seminars and training programs.' }].map((b, i) => (
+      <div style={{ maxWidth: 1200, margin: '36px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24, marginBottom: 50 }}>
+          {[
+            { i: <Target size={28} color="#0284c7" />, t: 'Quality Benchmarks', d: 'Formulating academic parameters and continuous learner assessment systems.', color: '#0284c7' },
+            { i: <BarChart3 size={28} color="#059669" />, t: 'Stakeholder Feedback', d: 'Systematic feedback analysis from students, teachers, parents, and recruiters.', color: '#059669' },
+            { i: <Wrench size={28} color="#7c3aed" />, t: 'Workshops & FDPs', d: 'Capacity-building faculty development programs and modern pedagogy bootcamps.', color: '#7c3aed' }
+          ].map((b, i) => (
             <Fade key={i} delay={i * 0.1}>
-              <div style={{ background: '#fff', borderRadius: 20, padding: 32, height: '100%', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.04)', transition: 'transform 0.3s' }} onMouseEnter={e=>e.currentTarget.style.transform='translateY(-5px)'} onMouseLeave={e=>e.currentTarget.style.transform='none'}>
-                <div style={{ marginBottom: 16, background: '#f1f5f9', width: 64, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 16 }}>{b.i}</div>
-                <h3 style={{ fontSize: 20, fontWeight: 800, color: NAVY, margin: '0 0 10px' }}>{b.t}</h3>
-                <p style={{ color: '#64748b', fontSize: 15, margin: 0, lineHeight: 1.6 }}>{b.d}</p>
+              <div 
+                className="gnc-hover-card"
+                style={{ 
+                  padding: 32, 
+                  height: '100%',
+                  '--card-accent': b.color,
+                  '--card-glow': `${b.color}35`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <div className="card-top-bar" />
+                <div>
+                  <div className="card-icon-box" style={{ 
+                    marginBottom: 20, 
+                    background: `${b.color}15`, 
+                    width: 58, 
+                    height: 58, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    borderRadius: 16 
+                  }}>
+                    {b.i}
+                  </div>
+                  <h3 style={{ fontSize: 20, fontWeight: 900, color: NAVY, margin: '0 0 10px' }}>{b.t}</h3>
+                  <p style={{ color: '#64748B', fontSize: 14.5, margin: 0, lineHeight: 1.6 }}>{b.d}</p>
+                </div>
               </div>
             </Fade>
           ))}
         </div>
 
         <Fade delay={0.2}>
-          <div style={{ background: '#fff', borderRadius: 24, padding: 40, border: '1px solid #e2e8f0' }}>
-            <h2 style={{ fontSize: 28, fontWeight: 900, color: NAVY, margin: '0 0 24px' }}>AQAR & Quality Reports</h2>
+          <div style={{ background: '#ffffff', borderRadius: 24, padding: '36px 32px', border: '1.5px solid #e2e8f0', boxShadow: '0 8px 30px rgba(11,31,58,0.04)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14, marginBottom: 24 }}>
+              <div>
+                <h2 style={{ fontSize: 24, fontWeight: 900, color: NAVY, margin: '0 0 4px' }}>AQAR &amp; Institutional Quality Reports</h2>
+                <p style={{ fontSize: 13.5, color: '#64748B', margin: 0 }}>Statutory NAAC &amp; IQAC documentation published for institutional compliance.</p>
+              </div>
+            </div>
+
             {docs.length === 0 ? (
-              <p style={{ color: '#94a3b8' }}>No reports uploaded yet. (Upload from Admin Panel → Documents)</p>
+              <div style={{ textAlign: 'center', padding: '40px 20px', background: '#F8FAFC', borderRadius: 16, border: '1.5px dashed #cbd5e1' }}>
+                <FolderOpen size={36} color="#94a3b8" style={{ marginBottom: 10 }} />
+                <div style={{ fontSize: 15, fontWeight: 800, color: NAVY, marginBottom: 4 }}>No reports uploaded yet</div>
+                <div style={{ fontSize: 13, color: '#64748B' }}>Reports published via Admin Panel → Documents will appear here automatically.</div>
+              </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 18 }}>
                 {docs.map(d => (
-                  <a key={d.id} href={d.link} target="_blank" rel="noreferrer" 
-                    onClick={(e) => { 
-                      if (d.link && (d.link.includes('drive.google') || d.link.toLowerCase().endsWith('.pdf') || d.link.includes('firebase'))) {
-                        e.preventDefault(); 
-                        setSelectedPdf({ url: d.link, title: d.title || 'IQAC Report' }); 
-                      }
-                    }} 
-                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 16, border: '1.5px solid #e2e8f0', borderRadius: 14, textDecoration: 'none', color: NAVY, transition: 'all 0.2s', background: '#f8fafc' }} 
-                    onMouseEnter={e=>{e.currentTarget.style.borderColor=GOLD;e.currentTarget.style.background='#fff'}} 
-                    onMouseLeave={e=>{e.currentTarget.style.borderColor='#e2e8f0';e.currentTarget.style.background='#f8fafc'}}>
-                    <FileText size={24} color={NAVY} />
-                    <div style={{ flex: 1, fontWeight: 700, fontSize: 14 }}>{d.title}</div>
-                    <ArrowUpRight size={18} color={GOLD} />
-                  </a>
+                  <div 
+                    key={d.id} 
+                    className="gnc-hover-card"
+                    style={{
+                      padding: 20,
+                      '--card-accent': '#0284c7',
+                      '--card-glow': 'rgba(2, 132, 199, 0.3)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <div className="card-top-bar" />
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                        <FileText size={18} color="#0284c7" />
+                        <span style={{ fontSize: 11, fontWeight: 800, color: '#0284c7', background: '#e0f2fe', padding: '2px 8px', borderRadius: 6 }}>
+                          Official Report
+                        </span>
+                      </div>
+                      <h4 style={{ fontSize: 15, fontWeight: 800, color: NAVY, margin: '0 0 8px', lineHeight: 1.35 }}>
+                        {d.title}
+                      </h4>
+                    </div>
+                    <button
+                      onClick={() => setSelectedPdf({ url: d.link, title: d.title })}
+                      style={{
+                        background: 'linear-gradient(135deg, #0B1F3A, #1a3a6b)',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: 10,
+                        padding: '8px 14px',
+                        fontSize: 12.5,
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        marginTop: 14
+                      }}
+                    >
+                      <Eye size={14} /> View Report
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
@@ -118,14 +255,9 @@ export function IqacPage() {
         </Fade>
       </div>
 
-      {/* ✅ Modal Render */}
       {selectedPdf && (
         <Suspense fallback={null}>
-          <PDFModal 
-            url={selectedPdf.url} 
-            title={selectedPdf.title} 
-            onClose={() => setSelectedPdf(null)} 
-          />
+          <PDFModal url={selectedPdf.url} title={selectedPdf.title} onClose={() => setSelectedPdf(null)} />
         </Suspense>
       )}
     </div>
@@ -133,62 +265,389 @@ export function IqacPage() {
 }
 
 /* ════════════════════════════════════════════════════════════
-   2. COURSE OFFERED (NEP 2022 / FYUGP)
+   2. COURSE OFFERED (NEP-2020 / FYUGP Framework)
 ════════════════════════════════════════════════════════════ */
 export function CourseOffered() {
-  const [activeTab, setActiveTab] = useState('BCA');
-  const { content, getList, getText } = usePageContent('course-offered');
-  
-  const nepTimeline = getList('nep-timeline', [
-    { t: '1 Year', d: 'UG Certificate' }, { t: '2 Years', d: 'UG Diploma' }, 
-    { t: '3 Years', d: 'Bachelor Degree' }, { t: '4 Years', d: 'Bachelor with Honours / Research' }
-  ]);
-  
-  let courses = {
-    'BCA': ['BCA (Computer Application)'],
-    'BBA': ['BBA (Business Administration)'],
-    'Commerce': ['Accounting & Finance', 'Marketing', 'Human Resource'],
-    'Humanities': ['Hindi', 'English'],
-    'Social Science': ['History', 'Political Science', 'Psychology', 'Economics']
-  };
-  
-  try {
-    const coursesStr = getText('courses', '');
-    if (coursesStr && coursesStr.startsWith('{')) {
-      courses = JSON.parse(coursesStr);
+  const [activeFaculty, setActiveFaculty] = useState('all');
+
+  const nepPathways = [
+    { year: '1st Year', exit: 'UG Certificate', credits: '40 Credits', color: '#0284c7', desc: 'Entry with 10+2. Exit option with Undergraduate Certificate in Major discipline.' },
+    { year: '2nd Year', exit: 'UG Diploma', credits: '80 Credits', color: '#059669', desc: '2-Year core modules & practicals. Exit option with Undergraduate Diploma.' },
+    { year: '3rd Year', exit: "Bachelor's Degree", credits: '120 Credits', color: '#7c3aed', desc: 'Complete 3-year curriculum. Awarded full Bachelor of Arts / Commerce / IT Degree.' },
+    { year: '4th Year', exit: 'Honours with Research', credits: '160 Credits', color: '#d97706', desc: 'Specialized 8th semester dissertation / capstone research. Direct eligibility for Ph.D.' }
+  ];
+
+  const coursesList = [
+    // AICTE Wings
+    {
+      id: 'bca',
+      faculty: 'aicte',
+      title: 'Bachelor of Computer Applications (BCA)',
+      badge: '★ AICTE Approved',
+      accent: '#0284c7',
+      duration: '3-Year Professional Degree (6 Semesters)',
+      intake: '90 Seats',
+      eligibility: '10+2 / Intermediate in any stream with Mathematics / Computer Science / Statistics (Min 45% aggregate).',
+      curriculum: 'C/C++, Java, Python, Web Dev, RDBMS, AI & Machine Learning, Cloud Computing, Cyber Security, Capstone Project.',
+      careers: 'Software Developer, Full Stack Engineer, Cloud Architect, Systems Analyst, Database Administrator.',
+      syllabusHref: '/syllabus?filter=BCA'
+    },
+    {
+      id: 'bba',
+      faculty: 'aicte',
+      title: 'Bachelor of Business Administration (BBA)',
+      badge: '★ AICTE Approved',
+      accent: '#2563eb',
+      duration: '3-Year Professional Degree (6 Semesters)',
+      intake: '90 Seats',
+      eligibility: '10+2 / Intermediate in Arts, Science, or Commerce with minimum 45% marks.',
+      curriculum: 'Principles of Management, Marketing, HRM, Corporate Finance, Business Law, Entrepreneurship, Digital Marketing.',
+      careers: 'Marketing Executive, HR Business Partner, Financial Analyst, Retail Manager, Startup Founder.',
+      syllabusHref: '/syllabus?filter=BBA'
+    },
+
+    // Commerce Faculty
+    {
+      id: 'bcom',
+      faculty: 'commerce',
+      title: 'Bachelor of Commerce (B.Com Honours)',
+      badge: 'FYUGP NEP-2020',
+      accent: '#059669',
+      duration: '4-Year NEP FYUGP (8 Semesters)',
+      intake: '360 Seats',
+      eligibility: '10+2 / Intermediate in Commerce or Science with minimum qualifying marks.',
+      curriculum: 'Advanced Financial Accounting, Corporate Law, Cost & Management Accounting, Auditing & GST, Tally Prime.',
+      careers: 'Chartered Accountant (CA Foundation), Tax Consultant, Auditor, Financial Controller, Banking Officer.',
+      syllabusHref: '/syllabus?filter=Commerce'
+    },
+
+    // Humanities
+    {
+      id: 'ba-eng',
+      faculty: 'humanities',
+      title: 'B.A. (Major in English Literature & Linguistics)',
+      badge: 'FYUGP NEP-2020',
+      accent: '#7c3aed',
+      duration: '4-Year NEP FYUGP (8 Semesters)',
+      intake: '150 Seats',
+      eligibility: '10+2 / Intermediate in any stream with English as a compulsory subject.',
+      curriculum: 'British Literature, Indian Writing in English, Literary Criticism, Applied Phonetics, Creative & Media Writing.',
+      careers: 'Content Strategist, Corporate Communications, Civil Services, Journalism & Mass Media, Educator.',
+      syllabusHref: '/syllabus?filter=English'
+    },
+    {
+      id: 'ba-hin',
+      faculty: 'humanities',
+      title: 'B.A. (Major in Hindi Literature - हिन्दी साहित्य)',
+      badge: 'FYUGP NEP-2020',
+      accent: '#9333ea',
+      duration: '4-Year NEP FYUGP (8 Semesters)',
+      intake: '150 Seats',
+      eligibility: '10+2 / Intermediate in any stream with Hindi.',
+      curriculum: 'हिन्दी साहित्य का इतिहास, मध्यकालीन काव्य, आधुनिक गद्य, भाषा विज्ञान, अनुवाद सिद्धान्त एवं जनसंचार।',
+      careers: 'राजभाषा अधिकारी (Official Language Officer), पत्रकारिता, अध्यापन, सिविल सेवा, सम्पादन कार्य।',
+      syllabusHref: '/syllabus?filter=Hindi'
+    },
+
+    // Social Sciences
+    {
+      id: 'ba-his',
+      faculty: 'social-science',
+      title: 'B.A. (Major in History & Archaeological Studies)',
+      badge: 'FYUGP NEP-2020',
+      accent: '#d97706',
+      duration: '4-Year NEP FYUGP (8 Semesters)',
+      intake: '180 Seats',
+      eligibility: '10+2 / Intermediate in Arts, Science, or Commerce.',
+      curriculum: 'Ancient, Medieval & Modern Indian History, History of Jharkhand & Tribal Resistance, Modern World History.',
+      careers: 'Civil Services (UPSC / JPSC), Heritage Management, Archival Officer, Museum Curator, Teacher.',
+      syllabusHref: '/syllabus?filter=History'
+    },
+    {
+      id: 'ba-pol',
+      faculty: 'social-science',
+      title: 'B.A. (Major in Political Science & Public Governance)',
+      badge: 'FYUGP NEP-2020',
+      accent: '#b45309',
+      duration: '4-Year NEP FYUGP (8 Semesters)',
+      intake: '180 Seats',
+      eligibility: '10+2 / Intermediate in any stream.',
+      curriculum: 'Indian Constitution & Polity, Political Theory, Comparative Politics, International Relations, Public Administration.',
+      careers: 'Public Policy Analyst, Legal Studies, Civil Services, Political Consulting, Non-Profit Governance.',
+      syllabusHref: '/syllabus?filter=Political'
+    },
+    {
+      id: 'ba-eco',
+      faculty: 'social-science',
+      title: 'B.A. (Major in Economics & Public Policy)',
+      badge: 'FYUGP NEP-2020',
+      accent: '#ea580c',
+      duration: '4-Year NEP FYUGP (8 Semesters)',
+      intake: '120 Seats',
+      eligibility: '10+2 / Intermediate with Mathematics or Economics preferred.',
+      curriculum: 'Micro & Macroeconomics, Statistical Analytics, Public Finance, Indian Economy & Banking, Econometrics Basics.',
+      careers: 'Economic Research Analyst, Banking Specialist, Data Analyst, Market Researcher, Civil Services.',
+      syllabusHref: '/syllabus?filter=Economics'
+    },
+    {
+      id: 'ba-psy',
+      faculty: 'social-science',
+      title: 'B.A. (Major in Psychology & Behavioral Science)',
+      badge: 'FYUGP NEP-2020',
+      accent: '#c2410c',
+      duration: '4-Year NEP FYUGP (8 Semesters)',
+      intake: '60 Seats',
+      eligibility: '10+2 / Intermediate in any stream.',
+      curriculum: 'General Psychology, Biopsychology, Social Psychology, Cognitive Testing Laboratory, Abnormal Psychology.',
+      careers: 'Counseling Psychologist, Child Guidance Specialist, HR Talent Assessor, Clinical Research Assistant.',
+      syllabusHref: '/syllabus?filter=Psychology'
     }
-  } catch (e) { console.error('Error parsing courses JSON', e); }
+  ];
+
+  const filteredCourses = activeFaculty === 'all' 
+    ? coursesList 
+    : coursesList.filter(c => c.faculty === activeFaculty);
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-      <PageHeader title={content?.title || "Courses Offered (NEP 2022)"} subtitle={content?.subtitle || "Four Year Undergraduate Programme (FYUGP) with Multiple Entry & Exit Options."} icon={<GraduationCap size={36} color={GOLD} />} />
+    <div style={{ background: '#F8FAFC', minHeight: '100dvh', fontFamily: "'Inter', sans-serif" }}>
+      <PageHeader 
+        title="Courses & Programs Offered" 
+        subtitle="Four Year Undergraduate Programme (FYUGP) under NEP-2020 alongside 3-Year AICTE approved BCA & BBA professional degrees (90 seats each)."
+        badge="NEP-2020 Curricular Framework"
+        icon={<GraduationCap size={36} color={GOLD} />} 
+      />
       
-      <div style={{ maxWidth: 1100, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1240, margin: '30px auto 70px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+        
+        {/* NEP 4-Stage Progressive Pathway Timeline */}
         <Fade>
-          <div style={{ background: '#fff', borderRadius: 20, padding: '30px 40px', display: 'flex', flexWrap: 'wrap', gap: 30, justifyContent: 'space-between', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', marginBottom: 40 }}>
-            {nepTimeline.map((item, i) => (
-              <div key={i} style={{ textAlign: 'center', flex: '1 1 150px' }}>
-                <div style={{ fontSize: 24, fontWeight: 900, color: GOLD, marginBottom: 4 }}>{item.t || item.duration}</div>
-                <div style={{ fontSize: 14, color: NAVY, fontWeight: 700 }}>{item.d || item.award}</div>
-              </div>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: 18,
+            padding: '20px 24px',
+            border: '1.5px solid #e2e8f0',
+            boxShadow: '0 6px 20px rgba(11,31,58,0.03)',
+            marginBottom: 28
+          }}>
+            <div style={{ textAlign: 'center', marginBottom: 16 }}>
+              <span style={{
+                fontSize: 10.5,
+                fontWeight: 800,
+                color: '#0284c7',
+                background: '#e0f2fe',
+                padding: '3px 10px',
+                borderRadius: 16,
+                textTransform: 'uppercase',
+                letterSpacing: '0.6px'
+              }}>
+                Multiple Entry &amp; Exit System
+              </span>
+              <h2 style={{ fontSize: 18, fontWeight: 900, color: NAVY, margin: '6px 0 2px' }}>
+                4-Year FYUGP Degree Architecture (NEP 2020)
+              </h2>
+              <p style={{ fontSize: 12.5, color: '#64748B', margin: 0 }}>
+                Flexibility to enter, exit with recognized credentials, or continue toward a research degree.
+              </p>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+              gap: 12
+            }}>
+              {nepPathways.map((item, i) => (
+                <div 
+                  key={i} 
+                  className="gnc-hover-card"
+                  style={{
+                    padding: '14px 16px',
+                    '--card-accent': item.color,
+                    '--card-glow': `${item.color}30`,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <div className="card-top-bar" />
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                      <span style={{ fontSize: 11, fontWeight: 900, color: item.color, background: `${item.color}15`, padding: '2px 6px', borderRadius: 6 }}>
+                        {item.year}
+                      </span>
+                      <span style={{ fontSize: 10.5, fontWeight: 800, color: '#64748B' }}>
+                        {item.credits}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 900, color: NAVY, marginBottom: 4 }}>
+                      {item.exit}
+                    </div>
+                    <div style={{ fontSize: 11.5, color: '#64748B', lineHeight: 1.45 }}>
+                      {item.desc}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Fade>
+
+        {/* Faculty Category Filter Tabs */}
+        <Fade delay={0.1}>
+          <div style={{
+            display: 'flex',
+            gap: 8,
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            marginBottom: 24
+          }}>
+            {[
+              { id: 'all', label: `All Programs (${coursesList.length})` },
+              { id: 'aicte', label: '🚀 AICTE Vocational (BCA & BBA)' },
+              { id: 'commerce', label: '💼 Commerce (B.Com)' },
+              { id: 'humanities', label: '📖 Humanities (English, Hindi, etc.)' },
+              { id: 'social-science', label: '🏛️ Social Sciences (History, Pol Sci, Eco)' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveFaculty(tab.id)}
+                style={{
+                  padding: '7px 14px',
+                  borderRadius: 24,
+                  border: activeFaculty === tab.id ? '1px solid #0B1F3A' : '1px solid #e2e8f0',
+                  background: activeFaculty === tab.id ? '#0B1F3A' : '#ffffff',
+                  color: activeFaculty === tab.id ? '#ffffff' : '#475569',
+                  fontSize: 12,
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: activeFaculty === tab.id ? '0 4px 10px rgba(11,31,58,0.18)' : 'none'
+                }}
+              >
+                {tab.label}
+              </button>
             ))}
           </div>
         </Fade>
 
+        {/* Course Cards Grid */}
         <Fade delay={0.2}>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24, justifyContent: 'center' }}>
-            {Object.keys(courses).map(tab => (
-              <button key={tab} onClick={() => setActiveTab(tab)} style={{ padding: '12px 24px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: 'none', borderRadius: 99, fontWeight: 800, fontSize: 14, cursor: 'pointer', transition: 'all 0.3s', background: activeTab === tab ? NAVY : '#fff', color: activeTab === tab ? '#fff' : '#64748b', boxShadow: activeTab === tab ? `0 8px 20px ${NAVY}40` : '0 2px 10px rgba(0,0,0,0.05)' }}>
-                {tab}
-              </button>
-            ))}
-          </div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))',
+            gap: 16
+          }}>
+            {filteredCourses.map(course => (
+              <div
+                key={course.id}
+                className="gnc-course-card"
+                style={{
+                  padding: '16px 18px',
+                  '--card-accent': course.accent,
+                  '--card-glow': `${course.accent}30`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <div className="course-top-bar" />
+                
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{
+                      fontSize: 10.5,
+                      fontWeight: 800,
+                      color: course.accent,
+                      background: `${course.accent}15`,
+                      border: `1px solid ${course.accent}30`,
+                      padding: '2px 8px',
+                      borderRadius: 6
+                    }}>
+                      {course.badge}
+                    </span>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#64748B' }}>
+                      {course.intake}
+                    </span>
+                  </div>
 
-          <div style={{ background: '#fff', borderRadius: 24, padding: 40, border: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 20 }}>
-            {courses[activeTab] && courses[activeTab].map((subject, i) => (
-              <div key={i} style={{ background: '#f8fafc', padding: 20, borderRadius: 16, border: '1.5px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{ background: `${GOLD}20`, color: '#b45309', width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>{i+1}</div>
-                <div style={{ fontWeight: 800, color: NAVY, fontSize: 16 }}>{subject}</div>
+                  <h3 style={{ fontSize: 15.5, fontWeight: 900, color: NAVY, margin: '0 0 4px', lineHeight: 1.3 }}>
+                    {course.title}
+                  </h3>
+
+                  <div style={{ fontSize: 11, color: course.accent, fontWeight: 700, marginBottom: 10 }}>
+                    {course.duration}
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 11.5, color: '#475569' }}>
+                    <div>
+                      <strong style={{ color: NAVY }}>Eligibility: </strong>
+                      {course.eligibility}
+                    </div>
+                    <div>
+                      <strong style={{ color: NAVY }}>Curriculum: </strong>
+                      {course.curriculum}
+                    </div>
+                    <div>
+                      <strong style={{ color: NAVY }}>Careers: </strong>
+                      {course.careers}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{
+                  marginTop: 14,
+                  paddingTop: 12,
+                  borderTop: '1px solid #f1f5f9',
+                  display: 'flex',
+                  gap: 8,
+                  alignItems: 'center'
+                }}>
+                  <Link
+                    to={course.syllabusHref}
+                    style={{
+                      flex: 1,
+                      background: '#f8fafc',
+                      border: '1px solid #cbd5e1',
+                      color: NAVY,
+                      borderRadius: 8,
+                      padding: '7px 10px',
+                      fontSize: 11.5,
+                      fontWeight: 800,
+                      textDecoration: 'none',
+                      textAlign: 'center',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 5,
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <BookOpen size={13} /> View Syllabus
+                  </Link>
+
+                  <a
+                    href="https://universities.jharkhand.gov.in/home"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      flex: 1,
+                      background: `linear-gradient(135deg, ${NAVY}, #1e3a8a)`,
+                      color: '#ffffff',
+                      borderRadius: 8,
+                      padding: '7px 10px',
+                      fontSize: 11.5,
+                      fontWeight: 800,
+                      textDecoration: 'none',
+                      textAlign: 'center',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 5
+                    }}
+                  >
+                    <span>Apply Online</span>
+                    <ExternalLink size={12} />
+                  </a>
+                </div>
               </div>
             ))}
           </div>
@@ -199,98 +658,429 @@ export function CourseOffered() {
 }
 
 /* ════════════════════════════════════════════════════════════
-   3. SYLLABUS (Live from Firebase)
+   3. SYLLABUS DATABASE (Official University & GNC Comprehensive Archive)
 ════════════════════════════════════════════════════════════ */
 export function Syllabus() {
-  const [syllabusList, setSyllabusList] = useState([]);
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('All');
-  const [selectedPdf, setSelectedPdf] = useState(null); // ✅ PDF Modal State
+  const [searchParams] = useSearchParams();
+  const initialFilter = searchParams.get('filter') || 'all';
 
+  const [search, setSearch] = useState('');
+  const [activeDept, setActiveDept] = useState(initialFilter);
+  const [selectedPdf, setSelectedPdf] = useState(null);
+  const [uploadedSyllabi, setUploadedSyllabi] = useState([]);
+
+  // Live Fetch from Firebase pdfReports (type: 'syllabus')
   useEffect(() => {
-    const q = query(collection(db, 'pdfReports'), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, snap => {
-      const allDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      setSyllabusList(allDocs.filter(d => (d.type || '').toLowerCase() === 'syllabus'));
-    });
-    return () => unsub();
+    if (!db) return;
+    try {
+      const q = query(collection(db, 'pdfReports'), orderBy('createdAt', 'desc'));
+      const unsub = onSnapshot(q, snap => {
+        const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const list = docs.filter(d => (d.type || '').toLowerCase() === 'syllabus');
+        setUploadedSyllabi(list);
+      }, () => {});
+      return () => unsub();
+    } catch {}
   }, []);
 
-  const filtered = syllabusList.filter(s => 
-    (filter === 'All' || (s.title || '').toLowerCase().includes(filter.toLowerCase())) &&
-    (s.title || '').toLowerCase().includes(search.toLowerCase())
-  );
+  // Merge static syllabi with any dynamic uploaded ones
+  const allSyllabi = useMemo(() => {
+    const formattedDynamic = uploadedSyllabi.map(doc => ({
+      id: `dyn_${doc.id}`,
+      title: doc.title || 'Official Department Syllabus',
+      subtitle: doc.desc || 'Uploaded via GNC Document Vault',
+      code: 'GNC-DOC-VAULT',
+      dept: 'uploaded',
+      faculty: 'GNC Academic Vault',
+      duration: '4-Year FYUGP / CBCS',
+      credits: 'University Approved',
+      badge: 'College Vault',
+      badgeColor: '#0284c7',
+      badgeBg: '#e0f2fe',
+      accent: '#0284c7',
+      glow: 'rgba(2, 132, 199, 0.3)',
+      icon: 'BookOpen',
+      description: doc.desc || 'Official academic curriculum uploaded by Guru Nanak College administrative desk.',
+      highlights: ['University Approved Syllabus', 'Direct PDF Download available'],
+      semesters: 'Semester Wise',
+      viewUrl: doc.link,
+      downloadUrl: doc.link,
+      fileSize: 'PDF Document'
+    }));
 
-  const filterOptions = [
-    'All', 'BCA', 'BBA', 'Commerce', 'Hindi', 'English', 
-    'History', 'Political Science', 'Psychology', 'Economics'
-  ];
+    return [...BBMKU_SYLLABI, ...formattedDynamic];
+  }, [uploadedSyllabi]);
+
+  // Filtered Syllabi
+  const filtered = useMemo(() => {
+    return allSyllabi.filter(item => {
+      // Dept Tab filter
+      if (activeDept !== 'all') {
+        const matchesFilter = 
+          item.dept === activeDept || 
+          item.title.toLowerCase().includes(activeDept.toLowerCase()) ||
+          item.faculty.toLowerCase().includes(activeDept.toLowerCase());
+        if (!matchesFilter) return false;
+      }
+
+      // Search Query
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        return (
+          item.title.toLowerCase().includes(q) ||
+          item.code.toLowerCase().includes(q) ||
+          item.description.toLowerCase().includes(q) ||
+          item.faculty.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    });
+  }, [allSyllabi, activeDept, search]);
+
+  const handleOpenPdf = (item) => {
+    if (item.viewUrl) {
+      setSelectedPdf({ url: item.viewUrl, title: item.title });
+    } else {
+      toast.error('PDF link unavailable for this syllabus.');
+    }
+  };
+
+  const handleDownloadPdf = (item, e) => {
+    e.stopPropagation();
+    if (item.downloadUrl) {
+      window.open(item.downloadUrl, '_blank', 'noopener,noreferrer');
+      toast.success(`Opening ${item.title} syllabus...`);
+    } else {
+      toast.error('Download link not found.');
+    }
+  };
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-      <PageHeader title="Syllabus Database" subtitle="Download official FYUGP and CBCS syllabi for all departments." icon={<BookOpen size={36} color={GOLD} />} />
+    <div style={{ background: '#F8FAFC', minHeight: '100dvh', fontFamily: "'Inter', sans-serif" }}>
+      <PageHeader 
+        title="Official Syllabus Database" 
+        subtitle="Official university curricula for Arts, Commerce, and 3-Year AICTE Professional BCA & BBA Degrees (90 Seats each)."
+        badge="University &amp; NEP Curricula"
+        icon={<BookOpen size={36} color={GOLD} />} 
+      />
       
-      <div style={{ maxWidth: 1000, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1240, margin: '30px auto 70px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+        
+        {/* Quick Stats Strip */}
         <Fade>
-          <div style={{ background: '#fff', padding: 20, borderRadius: 20, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', marginBottom: 30 }}>
-            <label htmlFor="syllabus-search" className="sr-only">Search syllabus by subject or semester</label>
-            <input id="syllabus-search" type="text" placeholder="Search subject or semester... (e.g., BCA Sem 1)" value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%', padding: '16px 20px', borderRadius: 12, border: '1.5px solid #e2e8f0', fontSize: 16, outline: 'none', background: '#f8fafc', color: NAVY, fontWeight: 600, boxSizing: 'border-box' }} />
-            
-            <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
-              {filterOptions.map(f => (
-                <button 
-                  key={f} 
-                  onClick={() => setFilter(f)} 
-                  style={{ 
-                    padding: '8px 16px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, border: 'none', 
-                    background: filter === f ? `${NAVY}15` : 'transparent', 
-                    color: filter === f ? NAVY : '#64748b', 
-                    fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' 
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: 12,
+            marginBottom: 24
+          }}>
+            {[
+              { num: '14+', label: 'Undergraduate Syllabi', icon: Layers, color: '#0284c7' },
+              { num: '90 Seats', label: 'BCA & BBA (3-Yr AICTE)', icon: Laptop, color: '#2563eb' },
+              { num: 'Sem I–VI/VIII', label: 'Complete Semester Coverage', icon: Clock, color: '#059669' },
+              { num: '1-Click', label: 'Instant PDF Viewer & Download', icon: Download, color: '#d97706' }
+            ].map((st, idx) => {
+              const StIcon = st.icon;
+              return (
+                <div
+                  key={idx}
+                  className="gnc-hover-card"
+                  style={{
+                    padding: '12px 14px',
+                    '--card-accent': st.color,
+                    '--card-glow': `${st.color}30`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10
                   }}
                 >
-                  {f}
+                  <div className="card-top-bar" />
+                  <div className="card-icon-box" style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    background: `${st.color}15`,
+                    color: st.color,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <StIcon size={18} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 900, color: NAVY, lineHeight: 1.1 }}>
+                      {st.num}
+                    </div>
+                    <div style={{ fontSize: 11, color: '#64748B', fontWeight: 600, marginTop: 2 }}>
+                      {st.label}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Fade>
+
+        {/* Search Bar & Department Filter Tabs */}
+        <Fade delay={0.1}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: 18,
+            padding: '16px 20px',
+            border: '1.5px solid #e2e8f0',
+            boxShadow: '0 6px 20px rgba(11, 31, 58, 0.03)',
+            marginBottom: 24
+          }}>
+            {/* Search Input */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              background: '#F8FAFC',
+              border: '1px solid #cbd5e1',
+              borderRadius: 10,
+              padding: '8px 14px',
+              marginBottom: 12
+            }}>
+              <Search size={18} color="#94a3b8" />
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search by subject, code, or keyword (e.g. BCA, Java, Accounts, History, VAC)..."
+                aria-label="Search Syllabus Database"
+                style={{
+                  border: 'none',
+                  outline: 'none',
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                  color: NAVY,
+                  background: 'transparent',
+                  width: '100%'
+                }}
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch('')}
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 2, display: 'flex', color: '#94a3b8' }}
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+
+            {/* Department Filter Tabs */}
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {[
+                { id: 'all', label: 'All Subjects' },
+                { id: 'bca', label: '🚀 BCA (AICTE)' },
+                { id: 'bba', label: '📊 BBA (AICTE)' },
+                { id: 'commerce', label: '💼 Commerce' },
+                { id: 'humanities', label: '📖 Humanities' },
+                { id: 'social-science', label: '🏛️ Social Sciences' },
+                { id: 'nep-common', label: '🧩 NEP Common (VAC/SEC/AEC/MDC)' }
+              ].map(f => (
+                <button
+                  key={f.id}
+                  onClick={() => setActiveDept(f.id)}
+                  style={{
+                    padding: '6px 13px',
+                    borderRadius: 24,
+                    border: activeDept === f.id ? '1px solid #0B1F3A' : '1px solid #e2e8f0',
+                    background: activeDept === f.id ? '#0B1F3A' : '#ffffff',
+                    color: activeDept === f.id ? '#ffffff' : '#475569',
+                    fontSize: 11.5,
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: activeDept === f.id ? '0 3px 8px rgba(11,31,58,0.18)' : 'none'
+                  }}
+                >
+                  {f.label}
                 </button>
               ))}
             </div>
           </div>
         </Fade>
 
-        <Fade delay={0.1}>
-          {filtered.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 60, color: '#94a3b8', background: '#fff', borderRadius: 20, border: '2px dashed #e2e8f0' }}>
-              <FolderOpen size={40} color="#94a3b8" style={{ margin: '0 auto 12px' }} />
-              <div style={{ fontWeight: 700, fontSize: 16, color: NAVY }}>No Syllabus Found</div>
-              <div style={{ fontSize: 14 }}>Try adjusting your search or upload from Admin Panel.</div>
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: 16 }}>
-              {filtered.map(s => (
-                <div key={s.id} style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 16, transition: 'transform 0.2s' }} onMouseEnter={e=>e.currentTarget.style.transform='translateY(-3px)'} onMouseLeave={e=>e.currentTarget.style.transform='none'}>
-                  <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                    <BookOpen size={28} color={NAVY} />
-                    <div>
-                      <div style={{ fontWeight: 800, color: NAVY, fontSize: 16, lineHeight: 1.3 }}>{s.title}</div>
-                      <div style={{ fontSize: 12, color: '#64748b', marginTop: 4, fontWeight: 600 }}>NEP 2022 Format</div>
+        {/* Syllabi Cards Grid */}
+        <Fade delay={0.2}>
+          {filtered.length > 0 ? (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))',
+              gap: 16
+            }}>
+              {filtered.map(item => (
+                <div
+                  key={item.id}
+                  className="gnc-syllabus-card"
+                  style={{
+                    padding: '16px 18px',
+                    '--card-accent': item.accent,
+                    '--card-glow': `${item.accent}30`,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <div className="syllabus-top-bar" />
+
+                  <div>
+                    {/* Header with Badges */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
+                      <span style={{
+                        fontSize: 10.5,
+                        fontWeight: 800,
+                        color: item.badgeColor,
+                        background: item.badgeBg,
+                        border: `1px solid ${item.badgeColor}30`,
+                        padding: '2px 8px',
+                        borderRadius: 6
+                      }}>
+                        {item.badge}
+                      </span>
+                      <span style={{ fontSize: 10.5, fontWeight: 700, color: '#94a3b8' }}>
+                        {item.credits}
+                      </span>
+                    </div>
+
+                    <h3 style={{ fontSize: 15.5, fontWeight: 900, color: NAVY, margin: '0 0 2px', lineHeight: 1.3 }}>
+                      {item.title}
+                    </h3>
+                    <div style={{ fontSize: 11, color: item.accent, fontWeight: 700, marginBottom: 8 }}>
+                      {item.subtitle}
+                    </div>
+
+                    <p style={{
+                      fontSize: 12,
+                      color: '#64748B',
+                      lineHeight: 1.45,
+                      margin: '0 0 10px',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden'
+                    }}>
+                      {item.description}
+                    </p>
+
+                    {/* Paper Highlights */}
+                    <div style={{
+                      background: '#F8FAFC',
+                      borderRadius: 10,
+                      padding: '8px 10px',
+                      marginBottom: 10,
+                      border: '1px solid #f1f5f9'
+                    }}>
+                      <div style={{ fontSize: 10, fontWeight: 800, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>
+                        Key Curricular Modules:
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        {item.highlights.slice(0, 3).map((hl, i) => (
+                          <div key={i} style={{ fontSize: 11, color: '#475569', display: 'flex', alignItems: 'center', gap: 5 }}>
+                            <Check size={11} color={item.accent} style={{ flexShrink: 0 }} />
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hl}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  <a href={s.link} target="_blank" rel="noreferrer" 
-                    onClick={(e) => { 
-                      if (s.link && (s.link.includes('drive.google') || s.link.toLowerCase().endsWith('.pdf') || s.link.includes('firebase'))) {
-                        e.preventDefault(); 
-                        setSelectedPdf({ url: s.link, title: s.title || 'Syllabus' }); 
-                      }
-                    }} 
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 44, textAlign: 'center', background: `linear-gradient(135deg, ${NAVY}, #1a3a7c)`, color: '#fff', padding: '10px', borderRadius: 10, textDecoration: 'none', fontWeight: 800, fontSize: 14 }}>
-                    <Download size={16} /> Download PDF
-                  </a>
+
+                  {/* Dual Action Buttons: View & Download */}
+                  <div style={{
+                    marginTop: 10,
+                    paddingTop: 10,
+                    borderTop: '1px solid #f1f5f9',
+                    display: 'flex',
+                    gap: 8,
+                    alignItems: 'center'
+                  }}>
+                    <button
+                      onClick={() => handleOpenPdf(item)}
+                      style={{
+                        flex: 1,
+                        background: `linear-gradient(135deg, ${item.accent}, #0B1F3A)`,
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: 8,
+                        padding: '7px 10px',
+                        fontSize: 12,
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 5,
+                        boxShadow: `0 3px 8px ${item.accent}30`
+                      }}
+                    >
+                      <Eye size={13} /> View Syllabus
+                    </button>
+
+                    <button
+                      onClick={(e) => handleDownloadPdf(item, e)}
+                      title="Download PDF"
+                      aria-label="Download PDF"
+                      style={{
+                        background: '#f8fafc',
+                        border: '1px solid #cbd5e1',
+                        color: NAVY,
+                        borderRadius: 8,
+                        padding: '7px 10px',
+                        fontSize: 12,
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 5
+                      }}
+                    >
+                      <Download size={13} />
+                      <span>PDF</span>
+                    </button>
+                  </div>
                 </div>
               ))}
+            </div>
+          ) : (
+            <div style={{
+              textAlign: 'center',
+              padding: '60px 20px',
+              background: '#ffffff',
+              borderRadius: 20,
+              border: '2px dashed #cbd5e1'
+            }}>
+              <FolderOpen size={40} color="#94a3b8" style={{ marginBottom: 12 }} />
+              <div style={{ fontSize: 18, fontWeight: 900, color: NAVY, marginBottom: 4 }}>
+                No syllabus found matching "{search}"
+              </div>
+              <div style={{ fontSize: 13.5, color: '#64748B', marginBottom: 16 }}>
+                Try adjusting your search terms or clearing the department filters.
+              </div>
+              <button
+                onClick={() => { setSearch(''); setActiveDept('all'); }}
+                style={{
+                  background: '#0B1F3A',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '8px 18px',
+                  borderRadius: 10,
+                  fontSize: 13,
+                  fontWeight: 800,
+                  cursor: 'pointer'
+                }}
+              >
+                Clear Search
+              </button>
             </div>
           )}
         </Fade>
       </div>
 
-      {/* ✅ Modal Render */}
+      {/* In-App PDF Modal Viewer */}
       {selectedPdf && (
         <Suspense fallback={null}>
           <PDFModal 
@@ -305,183 +1095,466 @@ export function Syllabus() {
 }
 
 /* ════════════════════════════════════════════════════════════
-   4. ACADEMIC CALENDAR (Timeline)
+   4. ACADEMIC CALENDAR (Timeline & Official Holidays)
 ════════════════════════════════════════════════════════════ */
 export function AcademicCalendar() {
-  const { content, getList } = usePageContent('academic-calendar');
-  const events = getList('timeline', [
-    { month: 'July - August', title: 'Admissions & Orientation', desc: 'Commencement of new academic session and induction for Semester 1.' },
-    { month: 'September - October', title: 'Internal Mid-Semester Exams', desc: 'First assessment for all UG programs.' },
-    { month: 'November', title: 'Youth Fest & Sports Meet', desc: 'Annual cultural and sports week.' },
-    { month: 'December - January', title: 'University End-Semester Exams', desc: 'Final theory and practical examinations.' },
-    { month: 'February - March', title: 'Even Semester Commences', desc: 'Classes resume for Semester 2, 4, and 6.' }
-  ]);
+  const [viewMode, setViewMode] = useState('timeline'); // 'timeline' | 'holidays'
+  const [holidaySearch, setHolidaySearch] = useState('');
+  const [selectedPdf, setSelectedPdf] = useState(null);
+
+  const filteredHolidays = OFFICIAL_HOLIDAYS_2026.filter(h => 
+    !holidaySearch || 
+    h.name.toLowerCase().includes(holidaySearch.toLowerCase()) || 
+    h.type.toLowerCase().includes(holidaySearch.toLowerCase())
+  );
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-      <PageHeader title={content?.title || "Academic Calendar"} subtitle={content?.subtitle || "Key dates, examination schedules, and holidays for the current session."} icon={<Calendar size={36} color={GOLD} />} />
+    <div style={{ background: '#F8FAFC', minHeight: '100dvh', fontFamily: "'Inter', sans-serif" }}>
+      <PageHeader 
+        title="Official Academic Calendar" 
+        subtitle="Comprehensive session schedule, examination windows, form fill-up dates, and official holiday notifications for Session 2026–27."
+        badge="Session 2026–2027 Schedule"
+        icon={<Calendar size={36} color={GOLD} />} 
+      />
       
-      <div style={{ maxWidth: 900, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1080, margin: '30px auto 70px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+        
+        {/* Calendar Action & Download Banner */}
         <Fade>
-          <div style={{ background: '#fff', padding: 40, borderRadius: 24, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)' }}>
-            <h2 style={{ fontSize: 24, fontWeight: 900, color: NAVY, marginBottom: 30, borderBottom: `2px solid ${GOLD}`, paddingBottom: 10, display: 'inline-block' }}>Session Timeline</h2>
-            
-            <div style={{ position: 'relative', paddingLeft: 30 }}>
-              <div style={{ position: 'absolute', top: 10, bottom: 20, left: 9, width: 3, background: '#e2e8f0', borderRadius: 3 }} />
-              
-              {events.map((ev, i) => (
-                <div key={i} style={{ position: 'relative', marginBottom: 30 }}>
-                  <div style={{ position: 'absolute', left: -26, top: 4, width: 12, height: 12, borderRadius: '50%', background: GOLD, border: '3px solid #fff', boxShadow: '0 0 0 2px #f4a023' }} />
-                  <div style={{ fontSize: 13, fontWeight: 900, color: GOLD, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>{ev.month}</div>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: NAVY, marginBottom: 6 }}>{ev.title}</div>
-                  <div style={{ fontSize: 15, color: '#64748b', lineHeight: 1.6 }}>{ev.desc}</div>
+          <div style={{
+            background: 'linear-gradient(135deg, #0B1F3A 0%, #172554 100%)',
+            borderRadius: 18,
+            padding: '18px 24px',
+            color: '#ffffff',
+            boxShadow: '0 8px 24px rgba(11, 31, 58, 0.12)',
+            border: '1px solid rgba(244, 185, 66, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 16,
+            marginBottom: 24
+          }}>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(244, 185, 66, 0.2)', color: '#F4B942', padding: '2px 10px', borderRadius: 16, fontSize: 10.5, fontWeight: 800, textTransform: 'uppercase', marginBottom: 6 }}>
+                <Sparkles size={11} /> Official University Notification
+              </div>
+              <h2 style={{ fontSize: 17, fontWeight: 900, color: '#ffffff', margin: '0 0 4px' }}>
+                Download Session 2026-27 Official Calendar
+              </h2>
+              <p style={{ fontSize: 12, color: '#cbd5e1', margin: 0, maxWidth: 640 }}>
+                Complete university gazette including odd &amp; even semester schedules, internal assessments, and breaks.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                onClick={() => setSelectedPdf({ url: 'https://bbmku.ac.in', title: 'Official Academic Calendar 2026-27' })}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  color: '#ffffff',
+                  borderRadius: 8,
+                  padding: '7px 14px',
+                  fontWeight: 800,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 5
+                }}
+              >
+                <Eye size={13} /> View PDF
+              </button>
+              <a
+                href="https://bbmku.ac.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  background: 'linear-gradient(135deg, #F4B942 0%, #E5A729 100%)',
+                  color: '#0B1F3A',
+                  borderRadius: 8,
+                  padding: '7px 14px',
+                  fontWeight: 900,
+                  fontSize: 12,
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  boxShadow: '0 3px 10px rgba(244, 185, 66, 0.25)'
+                }}
+              >
+                <Download size={13} /> Download Gazette
+              </a>
+            </div>
+          </div>
+        </Fade>
+
+        {/* View Mode Tabs */}
+        <Fade delay={0.1}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 10,
+            marginBottom: 24
+          }}>
+            <button
+              onClick={() => setViewMode('timeline')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: 24,
+                border: viewMode === 'timeline' ? '1px solid #0B1F3A' : '1px solid #e2e8f0',
+                background: viewMode === 'timeline' ? '#0B1F3A' : '#ffffff',
+                color: viewMode === 'timeline' ? '#ffffff' : '#475569',
+                fontSize: 12.5,
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                transition: 'all 0.2s ease',
+                boxShadow: viewMode === 'timeline' ? '0 3px 10px rgba(11,31,58,0.18)' : 'none'
+              }}
+            >
+              <Calendar size={14} /> Session Milestones &amp; Exams ({ACADEMIC_CALENDAR_EVENTS.length})
+            </button>
+            <button
+              onClick={() => setViewMode('holidays')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: 24,
+                border: viewMode === 'holidays' ? '1px solid #0B1F3A' : '1px solid #e2e8f0',
+                background: viewMode === 'holidays' ? '#0B1F3A' : '#ffffff',
+                color: viewMode === 'holidays' ? '#ffffff' : '#475569',
+                fontSize: 12.5,
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                transition: 'all 0.2s ease',
+                boxShadow: viewMode === 'holidays' ? '0 3px 10px rgba(11,31,58,0.18)' : 'none'
+              }}
+            >
+              <Sun size={14} /> Official Holidays ({OFFICIAL_HOLIDAYS_2026.length})
+            </button>
+          </div>
+        </Fade>
+
+        {/* View Mode 1: Timeline */}
+        {viewMode === 'timeline' && (
+          <Fade delay={0.2}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {ACADEMIC_CALENDAR_EVENTS.map((ev, i) => (
+                <div
+                  key={i}
+                  className="gnc-calendar-card"
+                  style={{
+                    padding: '14px 18px',
+                    '--card-accent': ev.color,
+                    '--card-glow': `${ev.color}30`,
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 14,
+                    flexWrap: 'wrap'
+                  }}
+                >
+                  <div className="cal-top-bar" />
+
+                  {/* Month Pill */}
+                  <div style={{
+                    minWidth: 110,
+                    padding: '6px 10px',
+                    borderRadius: 8,
+                    background: `${ev.color}15`,
+                    border: `1px solid ${ev.color}35`,
+                    color: ev.color,
+                    fontWeight: 900,
+                    fontSize: 12,
+                    textAlign: 'center'
+                  }}>
+                    {ev.month}
+                  </div>
+
+                  {/* Details */}
+                  <div style={{ flex: 1, minWidth: 240 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                      <span style={{ fontSize: 10, fontWeight: 800, color: ev.color, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {ev.phase}
+                      </span>
+                      <span style={{ fontSize: 9.5, fontWeight: 700, background: '#f1f5f9', color: '#64748B', padding: '1px 6px', borderRadius: 4 }}>
+                        {ev.badge}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 15, fontWeight: 900, color: NAVY, marginBottom: 4 }}>
+                      {ev.title}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#64748B', lineHeight: 1.45 }}>
+                      {ev.desc}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
-            
-            <div style={{ marginTop: 40, padding: 20, background: '#fffbeb', borderRadius: 16, border: '1px solid #fde68a', display: 'flex', gap: 16, alignItems: 'center' }}>
-              <Sun size={32} color="#b45309" />
-              <div>
-                <div style={{ fontWeight: 800, color: '#92400e', fontSize: 16 }}>List of Holidays</div>
-                <div style={{ fontSize: 14, color: '#b45309', marginTop: 4 }}>College strictly follows the holiday calendar issued by BBMKU University. Download the official PDF for exact dates.</div>
+          </Fade>
+        )}
+
+        {/* View Mode 2: Official Holidays */}
+        {viewMode === 'holidays' && (
+          <Fade delay={0.2}>
+            <div style={{
+              background: '#ffffff',
+              borderRadius: 24,
+              padding: '28px 32px',
+              border: '1.5px solid #e2e8f0',
+              boxShadow: '0 8px 30px rgba(11,31,58,0.04)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+                <h3 style={{ fontSize: 18, fontWeight: 900, color: NAVY, margin: 0 }}>
+                  Gazetted &amp; Institutional Holidays (2026)
+                </h3>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  background: '#F8FAFC',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: 10,
+                  padding: '6px 12px',
+                  width: 240
+                }}>
+                  <Search size={14} color="#94a3b8" />
+                  <input
+                    type="text"
+                    value={holidaySearch}
+                    onChange={e => setHolidaySearch(e.target.value)}
+                    placeholder="Search holiday..."
+                    style={{ border: 'none', outline: 'none', fontSize: 12.5, width: '100%', background: 'transparent' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+                {filteredHolidays.map((h, idx) => (
+                  <div
+                    key={idx}
+                    className="gnc-hover-card"
+                    style={{
+                      padding: '14px 18px',
+                      '--card-accent': h.type === 'Institutional' ? GOLD : '#0284c7',
+                      '--card-glow': 'rgba(2, 132, 199, 0.25)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <div className="card-top-bar" />
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: NAVY, marginBottom: 2 }}>
+                        {h.name}
+                      </div>
+                      <div style={{ fontSize: 12, color: '#64748B' }}>
+                        {h.date} ({h.day})
+                      </div>
+                    </div>
+                    <span style={{
+                      fontSize: 10.5,
+                      fontWeight: 800,
+                      color: h.type === 'Institutional' ? '#b45309' : '#0284c7',
+                      background: h.type === 'Institutional' ? '#fef3c7' : '#e0f2fe',
+                      padding: '2px 8px',
+                      borderRadius: 6
+                    }}>
+                      {h.type}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
-
-          </div>
-        </Fade>
+          </Fade>
+        )}
       </div>
+
+      {selectedPdf && (
+        <Suspense fallback={null}>
+          <PDFModal url={selectedPdf.url} title={selectedPdf.title} onClose={() => setSelectedPdf(null)} />
+        </Suspense>
+      )}
     </div>
   );
 }
 
 /* ════════════════════════════════════════════════════════════
-   5. PLACEMENTS PAGE (Detailed Records)
+   5. PLACEMENTS PAGE (Wall of Fame & Career Records)
 ════════════════════════════════════════════════════════════ */
 export function PlacementsPage() {
-    const [placements, setPlacements] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState('');
-    const [deptFilter, setDeptFilter] = useState('All');
+  const [placements, setPlacements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [deptFilter, setDeptFilter] = useState('All');
 
-    useEffect(() => {
-        const q = query(collection(db, 'placements'), orderBy('createdAt', 'desc'));
-        const unsub = onSnapshot(q, snap => {
-            setPlacements(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-            setLoading(false);
-        }, () => setLoading(false));
-        return () => unsub();
-    }, []);
+  useEffect(() => {
+    if (!db) return;
+    try {
+      const q = query(collection(db, 'placements'), orderBy('createdAt', 'desc'));
+      const unsub = onSnapshot(q, snap => {
+        setPlacements(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        setLoading(false);
+      }, () => setLoading(false));
+      return () => unsub();
+    } catch {
+      setLoading(false);
+    }
+  }, []);
 
-    const filtered = placements.filter(p => {
-        const matchesSearch = (p.name || '').toLowerCase().includes(search.toLowerCase()) || 
-                              (p.company || '').toLowerCase().includes(search.toLowerCase());
-        const matchesDept = deptFilter === 'All' || p.department === deptFilter;
-        return matchesSearch && matchesDept;
-    });
+  const filtered = placements.filter(p => {
+    const matchesSearch = (p.name || '').toLowerCase().includes(search.toLowerCase()) || 
+                          (p.company || '').toLowerCase().includes(search.toLowerCase());
+    const matchesDept = deptFilter === 'All' || p.department === deptFilter;
+    return matchesSearch && matchesDept;
+  });
 
-    const depts = ['All', ...new Set(placements.map(p => p.department).filter(Boolean))];
+  const depts = ['All', ...new Set(placements.map(p => p.department).filter(Boolean))];
 
-    const NAVY = COLORS?.navy || '#0f2347';
-    const GOLD = COLORS?.gold || '#f4a023';
+  return (
+    <div style={{ background: '#F8FAFC', minHeight: '100dvh', fontFamily: "'Inter', sans-serif" }}>
+      <PageHeader 
+        title="Placements &amp; Wall of Fame" 
+        subtitle="Celebrating our meritorious graduates placed in leading IT corporations, banks, and conglomerates."
+        badge="Career &amp; Industry Placement Wing"
+        icon={<Rocket size={36} color={GOLD} />} 
+      />
 
-    return (
-        <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-            <PageHeader 
-                title="Placements & Wall of Fame" 
-                subtitle="Celebrating the success of our students who have been placed in leading industries and organizations." 
-                icon={<Rocket size={36} color={GOLD} />} 
-            />
-
-            <div style={{ maxWidth: 1200, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
-                {/* Search & Filter Bar */}
-                <Fade>
-                    <div style={{ background: '#fff', padding: '24px', borderRadius: 20, border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)', marginBottom: 30, display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center' }}>
-                        <div style={{ flex: 1, minWidth: 280 }}>
-                            <label htmlFor="placement-search" className="sr-only">Search by student name or company</label>
-                            <input 
-                                id="placement-search"
-                                type="text" 
-                                placeholder="Search by student name or company..." 
-                                value={search} 
-                                onChange={e => setSearch(e.target.value)} 
-                                style={{ width: '100%', padding: '14px 18px', borderRadius: 12, border: '1.5px solid #e2e8f0', fontSize: 15, outline: 'none', background: '#f8fafc', color: NAVY, fontWeight: 600, boxSizing: 'border-box' }} 
-                            />
-                        </div>
-                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                            {depts.map(d => (
-                                <button 
-                                    key={d} 
-                                    onClick={() => setDeptFilter(d)}
-                                    style={{ 
-                                        padding: '10px 18px', borderRadius: 10, border: 'none', 
-                                        background: deptFilter === d ? NAVY : '#fff', 
-                                        color: deptFilter === d ? '#fff' : '#64748b',
-                                        fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s',
-                                        boxShadow: deptFilter === d ? `0 4px 12px ${NAVY}40` : '0 2px 4px rgba(0,0,0,0.05)',
-                                        minHeight: 40
-                                    }}>
-                                    {d}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </Fade>
-
-                {loading ? (
-                    <div style={{ textAlign: 'center', padding: '100px 0' }}>
-                        <div className="premium-loader" />
-                        <p style={{ marginTop: 20, color: '#64748b', fontWeight: 600 }}>Loading placement records...</p>
-                    </div>
-                ) : filtered.length === 0 ? (
-                    <Fade>
-                        <div style={{ textAlign: 'center', padding: '100px 20px', background: '#fff', borderRadius: 24, border: '2px dashed #e2e8f0' }}>
-                            <GraduationCap size={48} color={GOLD} style={{ margin: '0 auto 16px' }} />
-                            <h3 style={{ fontSize: 24, fontWeight: 800, color: NAVY }}>No Records Found</h3>
-                            <p style={{ color: '#64748b', maxWidth: 400, margin: '10px auto' }}>No student records found matching your search criteria.</p>
-                        </div>
-                    </Fade>
-                ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 24 }}>
-                        {filtered.map((p, i) => (
-                            <Fade key={p.id} delay={i * 0.05}>
-                                <div style={{ background: '#fff', borderRadius: 24, padding: 28, border: '1px solid #e2e8f0', height: '100%', position: 'relative', transition: 'all 0.3s cubic-bezier(.22,1,.36,1)', textAlign: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.boxShadow = '0 20px 40px rgba(15,35,71,0.08)'; e.currentTarget.style.borderColor = GOLD + '40'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#e2e8f0'; }}>
-                                    
-                                    {p.package && (
-                                        <div style={{ position: 'absolute', top: 20, left: 20, background: '#fffbeb', color: GOLD, fontSize: 11, fontWeight: 900, padding: '4px 12px', borderRadius: 50, border: `1.5px solid ${GOLD}20`, boxShadow: '0 4px 10px rgba(244,160,35,0.1)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                            <Banknote size={13} /> {p.package} LPA
-                                        </div>
-                                    )}
-
-                                    <div style={{ width: 100, height: 100, borderRadius: '50%', margin: '10px auto 20px', border: `4px solid ${GOLD}15`, padding: 4, background: '#fff' }}>
-                                        {p.photo ? (
-                                            <img src={p.photo} alt={p.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                                        ) : (
-                                            <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><GraduationCap size={40} color="#94a3b8" /></div>
-                                        )}
-                                    </div>
-
-                                    <h3 style={{ fontSize: 18, fontWeight: 800, color: NAVY, margin: '0 0 4px' }}>{p.name}</h3>
-                                    <div style={{ fontSize: 13, color: GOLD, fontWeight: 800, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>{p.company}</div>
-                                    
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
-                                        <div style={{ fontSize: 13, color: '#64748b', fontWeight: 600 }}>{p.role}</div>
-                                        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                                            <span style={{ fontSize: 11, background: '#f1f5f9', color: '#475569', padding: '4px 10px', borderRadius: 6, fontWeight: 700 }}>{p.department}</span>
-                                            {p.batch && <span style={{ fontSize: 11, background: '#f1f5f9', color: '#475569', padding: '4px 10px', borderRadius: 6, fontWeight: 700 }}>Batch {p.batch}</span>}
-                                        </div>
-                                    </div>
-
-                                    {p.testimonial && (
-                                        <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid #f1f5f9', fontStyle: 'italic', color: '#64748b', fontSize: 13, lineHeight: 1.6 }}>
-                                            "{p.testimonial.length > 100 ? p.testimonial.substring(0, 100) + '...' : p.testimonial}"
-                                        </div>
-                                    )}
-                                </div>
-                            </Fade>
-                        ))}
-                    </div>
-                )}
+      <div style={{ maxWidth: 1200, margin: '36px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+        {/* Search & Filter Bar */}
+        <Fade>
+          <div style={{
+            background: '#ffffff',
+            padding: '24px 28px',
+            borderRadius: 20,
+            border: '1.5px solid #e2e8f0',
+            boxShadow: '0 8px 30px rgba(11, 31, 58, 0.04)',
+            marginBottom: 36,
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 16,
+            alignItems: 'center'
+          }}>
+            <div style={{ flex: 1, minWidth: 260 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#F8FAFC', border: '1px solid #cbd5e1', borderRadius: 12, padding: '10px 14px' }}>
+                <Search size={18} color="#94a3b8" />
+                <input 
+                  type="text" 
+                  placeholder="Search by student name or company (e.g. TCS, Wipro, ICICI)..." 
+                  value={search} 
+                  onChange={e => setSearch(e.target.value)} 
+                  style={{ width: '100%', border: 'none', outline: 'none', background: 'transparent', fontSize: 14, fontWeight: 600, color: NAVY }} 
+                />
+              </div>
             </div>
-        </div>
-    );
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {depts.map(d => (
+                <button 
+                  key={d} 
+                  onClick={() => setDeptFilter(d)}
+                  style={{ 
+                    padding: '8px 16px', borderRadius: 20, border: deptFilter === d ? '1px solid #0B1F3A' : '1px solid #e2e8f0', 
+                    background: deptFilter === d ? '#0B1F3A' : '#ffffff', 
+                    color: deptFilter === d ? '#ffffff' : '#64748B',
+                    fontSize: 12.5, fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s',
+                    boxShadow: deptFilter === d ? '0 4px 12px rgba(11,31,58,0.2)' : 'none'
+                  }}>
+                  {d}
+                </button>
+              ))}
+            </div>
+          </div>
+        </Fade>
+
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '80px 0' }}>
+            <div className="premium-loader" />
+            <p style={{ marginTop: 16, color: '#64748B', fontWeight: 700 }}>Loading placement records...</p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <Fade>
+            <div style={{ textAlign: 'center', padding: '80px 20px', background: '#ffffff', borderRadius: 24, border: '2px dashed #cbd5e1' }}>
+              <GraduationCap size={44} color={GOLD} style={{ margin: '0 auto 12px' }} />
+              <h3 style={{ fontSize: 20, fontWeight: 900, color: NAVY }}>No Placement Records Found</h3>
+              <p style={{ color: '#64748B', maxWidth: 400, margin: '8px auto', fontSize: 13.5 }}>Try adjusting your search criteria or explore other departments.</p>
+            </div>
+          </Fade>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 24 }}>
+            {filtered.map((p, i) => (
+              <Fade key={p.id} delay={i * 0.04}>
+                <div 
+                  className="gnc-academic-card"
+                  style={{
+                    padding: 24,
+                    '--card-accent': '#0284c7',
+                    '--card-glow': 'rgba(2, 132, 199, 0.3)',
+                    textAlign: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <div className="academic-top-bar" />
+                  
+                  <div>
+                    {p.package && (
+                      <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        background: '#fef3c7',
+                        color: '#b45309',
+                        fontSize: 11,
+                        fontWeight: 900,
+                        padding: '3px 10px',
+                        borderRadius: 20,
+                        marginBottom: 14,
+                        border: '1px solid #fde68a'
+                      }}>
+                        <Banknote size={12} /> {p.package} LPA
+                      </div>
+                    )}
+
+                    <div style={{ width: 84, height: 84, borderRadius: '50%', margin: '0 auto 14px', border: `3px solid ${GOLD}40`, padding: 3, background: '#ffffff' }}>
+                      {p.photo ? (
+                        <img src={p.photo} alt={p.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <GraduationCap size={32} color="#94a3b8" />
+                        </div>
+                      )}
+                    </div>
+
+                    <h3 style={{ fontSize: 16.5, fontWeight: 900, color: NAVY, margin: '0 0 3px' }}>{p.name}</h3>
+                    <div style={{ fontSize: 12.5, color: '#0284c7', fontWeight: 800, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                      {p.company}
+                    </div>
+                    
+                    <div style={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>{p.role}</div>
+                  </div>
+
+                  <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 10.5, background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: 6, fontWeight: 700 }}>
+                      {p.department}
+                    </span>
+                    {p.batch && (
+                      <span style={{ fontSize: 10.5, background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: 6, fontWeight: 700 }}>
+                        Batch {p.batch}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </Fade>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

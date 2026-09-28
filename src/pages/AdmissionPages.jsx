@@ -47,7 +47,7 @@ export function AdmissionRule() {
   const steps = getList('steps', [
     { title: 'Apply via Chancellor Portal', desc: 'Desirous students must apply through the Chancellor Portal (https://universities.jharkhand.gov.in/home) under NEP-2020.', fee: 'Application Fee: Rs. 100/-' },
     { title: 'Merit List & Verification', desc: 'Selected students must visit respective campuses (Main/Bhuda/Bank More) with original documents for physical verification.', fee: 'Check Document Required Page' },
-    { title: 'University Registration', desc: 'After verification, pay the BBMKU Registration Fee on Chancellor Portal again.', fee: 'JAC Board: Rs. 308/- | Others: Rs. 758/-' },
+    { title: 'University Registration', desc: 'After verification, pay the University Registration Fee on Chancellor Portal again.', fee: 'JAC Board: Rs. 308/- | Others: Rs. 758/-' },
     { title: 'College Online Admission Form', desc: 'Register on www.gncollege.org or enrollonline.co.in. Upload Chancellor Portal fee receipt and marksheet.', fee: 'Wait for approval message' },
     { title: 'Final Fee Payment', desc: 'After approval, pay the college fee via Student Diary Cloud App or CIMS portal using Card/UPI/NetBanking.', fee: 'Online Payment Only' }
   ]);

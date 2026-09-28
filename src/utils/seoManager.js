@@ -131,12 +131,12 @@ export const SEO_MAP = {
     description: 'Official regulations, university guidelines, and college byelaws of Guru Nanak College, Dhanbad.',
   },
   '/about-us/regulations/bbmku-ug': {
-    title: 'BBMKU UG Regulation (CBCS) | Guru Nanak College Dhanbad',
-    description: 'Binod Bihari Mahto Koyalanchal University UG regulations under CBCS for affiliated colleges.',
+    title: 'University UG Regulation (CBCS) | Guru Nanak College Dhanbad',
+    description: 'Affiliating University UG regulations under CBCS for affiliated colleges.',
   },
   '/about-us/regulations/bbmku-circular': {
-    title: 'BBMKU Circulars | Guru Nanak College Dhanbad',
-    description: 'Official circulars issued by BBMKU for affiliated colleges including Guru Nanak College.',
+    title: 'University Circulars | Guru Nanak College Dhanbad',
+    description: 'Official circulars issued by affiliating university for affiliated colleges including Guru Nanak College.',
   },
   '/about-us/regulations/fyugp-nep': {
     title: 'FYUGP NEP-2020 | Guru Nanak College Dhanbad',
@@ -253,10 +253,6 @@ export const SEO_MAP = {
   '/academics/departments/punjabi': {
     title: 'Punjabi Department | Guru Nanak College Dhanbad',
     description: 'Department of Punjabi language and literature at Guru Nanak College.',
-  },
-  '/academics/departments/urdu': {
-    title: 'Urdu Department | Guru Nanak College Dhanbad',
-    description: 'Department of Urdu language and literature at Guru Nanak College.',
   },
   '/academics/departments/philosophy': {
     title: 'Philosophy Department | Guru Nanak College Dhanbad',
@@ -497,13 +493,13 @@ export function updateSEO(pathname, custom = {}) {
   const description = custom.description || route.description || DEFAULT_DESC;
   const image = custom.image || DEFAULT_IMAGE;
   const url = `${BASE_URL}/#${pathname}`;
-  
+
   // Title
   document.title = title;
-  
+
   // Meta description
   setMeta('description', description);
-  
+
   // Open Graph
   setMeta('og:title', title, 'property');
   setMeta('og:description', description, 'property');
@@ -518,7 +514,7 @@ export function updateSEO(pathname, custom = {}) {
     document.head.appendChild(canonical);
   }
   canonical.setAttribute('href', url);
-  
+
   // Twitter Card
   setMeta('twitter:title', title);
   setMeta('twitter:description', description);

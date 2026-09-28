@@ -7,7 +7,7 @@ const COLLEGE_NAME = 'Guru Nanak College, Dhanbad';
 const QUICK_TOPICS = [
   { id: 'admission', label: '🎓 Admission 2026', text: 'Namaste! Main 2026 Session mein Admission ke baare mein jaankari chahta hoon. (UG/Vocational courses)' },
   { id: 'fee', label: '💳 Fee Payment / Receipt', text: 'Namaste! Mujhe Fee Payment / CIMS ERP Receipt ke regarding help chahiye.' },
-  { id: 'exam', label: '📋 Exam / Admit Card', text: 'Namaste! Examination form / Admit card / BBMKU Result ke regarding query hai.' },
+  { id: 'exam', label: '📋 Exam / Admit Card', text: 'Namaste! Examination form / Admit card / Semester Result ke regarding query hai.' },
   { id: 'certificate', label: '📜 TC / Migration / CLC', text: 'Namaste! College Leaving Certificate (CLC) / TC / Migration certificate lene ka process jaanna hai.' },
   { id: 'general', label: '🏫 General Enquiry', text: 'Namaste! Main Guru Nanak College ke regarding inquiry karna chahta hoon.' },
 ];

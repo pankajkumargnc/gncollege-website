@@ -1,7 +1,8 @@
 // src/components/admin/tabs/NoticesTab.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { db } from '../../../firebase'; // ✅ FIXED: Teen folder peechhe
-import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc, serverTimestamp, setDoc, onSnapshot } from 'firebase/firestore';
+import { decodePayload, encodePayload, clearCache } from '../../../utils/cachedFetch';
 import toast from 'react-hot-toast';
 import DOMPurify from 'dompurify';
 import { Bell, Pin, Calendar, Clock, Sparkles, Edit2, Trash2, Plus, Info } from 'lucide-react';
@@ -19,6 +20,67 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
   const [noticeSel, setNoticeSel] = useState([]);
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+
+  // 🎓 Student Corner Notice Style State (Options: 'feed' | 'columns' | 'ticker_modal')
+  const [noticeStyle, setNoticeStyle] = useState(() => {
+    try {
+      const cached = localStorage.getItem('gnc_site_settings_cache');
+      if (cached) {
+        const parsed = decodePayload(cached);
+        return parsed?.studentCornerNoticeStyle || 'feed';
+      }
+    } catch {}
+    return 'feed';
+  });
+
+  useEffect(() => {
+    if (!db) return;
+    try {
+      const unsub = onSnapshot(doc(db, 'settings', 'site'), (snap) => {
+        if (snap.exists()) {
+          const d = snap.data();
+          if (d?.studentCornerNoticeStyle) {
+            setNoticeStyle(d.studentCornerNoticeStyle);
+          }
+        }
+      }, () => {});
+      return () => unsub();
+    } catch {}
+  }, []);
+
+  const handleUpdateNoticeStyle = async (newStyle) => {
+    setNoticeStyle(newStyle);
+    try {
+      if (db) {
+        await setDoc(doc(db, 'settings', 'site'), {
+          studentCornerNoticeStyle: newStyle,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+
+      try {
+        const cached = localStorage.getItem('gnc_site_settings_cache');
+        const parsed = (cached ? decodePayload(cached) : null) || {};
+        parsed.studentCornerNoticeStyle = newStyle;
+        localStorage.setItem('gnc_site_settings_cache', encodePayload(parsed));
+      } catch {}
+
+      window.dispatchEvent(new CustomEvent('gnc_settings_updated', {
+        detail: { studentCornerNoticeStyle: newStyle }
+      }));
+      clearCache('site_settings');
+
+      const styleNames = {
+        feed: 'Option 1: Live Interactive Stream Feed (Tabs & Search)',
+        columns: 'Option 2: 3-Column Dedicated Boards',
+        ticker_modal: 'Option 3: Live Breaking Ticker & Quick Hub Modal'
+      };
+      toast.success(`🎓 Student Corner Notice Style: ${styleNames[newStyle] || newStyle}`);
+      logAct?.('update', `Changed Student Corner Notice Style to ${newStyle}`, 'notices');
+    } catch (err) {
+      toast.error('Failed to update style: ' + err.message);
+    }
+  };
 
   // 🛡️ Enterprise Draft Auto-Save Hook (Phase 2 audit finding #8)
   const draftKey = editNotice ? `notice_${editNotice.id}` : 'notice_new';
@@ -121,18 +183,168 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
         display: 'flex', alignItems: 'center', gap: 12,
         background: 'linear-gradient(135deg, rgba(15, 35, 71, 0.05) 0%, rgba(30, 58, 138, 0.08) 100%)',
         border: '1.5px solid rgba(15, 35, 71, 0.15)',
-        borderRadius: 14, padding: '12px 16px', margin: '0 0 20px',
+        borderRadius: 14, padding: '12px 16px', margin: '0 0 16px',
       }}>
         <div style={{ width: 36, height: 36, borderRadius: 10, background: `${NAVY}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <Pin size={20} color={NAVY} />
         </div>
         <div>
           <div style={{ fontWeight: 800, fontSize: 13, color: NAVY }}>
-            Live Destination: Homepage Card 1 (Campus Notices) &amp; /notifications Page
+            Live Destinations: Homepage Notices, /notifications Page &amp; Student Corner Hub
           </div>
           <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
-            Notices published here appear with 3D Date Tiles, Smart Badges (Exams, Results, Admission), and optional in-app PDF previews.
+            All notices published here automatically sync to the Student Corner page (/student-corner) in your selected presentation style below.
           </div>
+        </div>
+      </div>
+
+      {/* ── Student Corner Notice Style Selector Card ── */}
+      <div style={{
+        background: '#ffffff',
+        border: '1.5px solid rgba(15, 35, 71, 0.15)',
+        borderRadius: 16,
+        padding: '20px 24px',
+        marginBottom: 24,
+        boxShadow: '0 4px 18px rgba(15, 35, 71, 0.04)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 14 }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <span style={{ fontSize: 18 }}>🎓</span>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 900, color: NAVY }}>
+                Student Corner Hub — Notice Board Display Style
+              </h3>
+              <span style={{
+                fontSize: 11,
+                fontWeight: 800,
+                color: '#15803d',
+                background: '#dcfce7',
+                padding: '2px 8px',
+                borderRadius: 12,
+                border: '1px solid #86efac'
+              }}>
+                Live Synced
+              </span>
+            </div>
+            <p style={{ margin: 0, fontSize: 12.5, color: '#64748B' }}>
+              Select which style students will see on the <b>/student-corner</b> page:
+            </p>
+          </div>
+          <a
+            href="/student-corner"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: 12,
+              fontWeight: 800,
+              color: NAVY,
+              textDecoration: 'none',
+              padding: '6px 14px',
+              borderRadius: 8,
+              background: '#f1f5f9',
+              border: '1px solid #cbd5e1'
+            }}
+          >
+            Preview Student Corner ↗
+          </a>
+        </div>
+
+        {/* 3 Selectable Option Cards */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: 14
+        }}>
+          {[
+            {
+              id: 'feed',
+              tag: 'OPTION 1',
+              title: 'Live Stream Feed',
+              desc: 'Interactive stream with Category Tabs (Exams, Admissions, Events), Instant Search, 3D Date Tiles, and 1-Click PDF Modal.',
+              badge: 'Recommended'
+            },
+            {
+              id: 'columns',
+              tag: 'OPTION 2',
+              title: '3-Column Boards',
+              desc: 'Three dedicated side-by-side vertical boards for Examination & Results, Admissions & Fees, and Campus Events.',
+              badge: 'Dashboard'
+            },
+            {
+              id: 'ticker_modal',
+              tag: 'OPTION 3',
+              title: 'Live Ticker + Modal Hub',
+              desc: 'Compact high-visibility animated marquee bar with pulsing alert, opening a full-screen Notice Hub popup with filters.',
+              badge: 'Compact'
+            }
+          ].map(opt => {
+            const isSelected = noticeStyle === opt.id;
+            return (
+              <div
+                key={opt.id}
+                onClick={() => handleUpdateNoticeStyle(opt.id)}
+                style={{
+                  border: isSelected ? '2px solid #0284c7' : '1.5px solid #e2e8f0',
+                  background: isSelected ? '#f0f9ff' : '#ffffff',
+                  borderRadius: 14,
+                  padding: '16px 18px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: isSelected ? '0 6px 20px rgba(2, 132, 199, 0.15)' : 'none'
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span style={{
+                      fontSize: 10.5,
+                      fontWeight: 800,
+                      color: isSelected ? '#0284c7' : '#64748B',
+                      background: isSelected ? '#e0f2fe' : '#f1f5f9',
+                      padding: '2px 8px',
+                      borderRadius: 6
+                    }}>
+                      {opt.tag} • {opt.badge}
+                    </span>
+                    <div style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: '50%',
+                      border: isSelected ? '6px solid #0284c7' : '2px solid #cbd5e1',
+                      background: '#ffffff',
+                      transition: 'all 0.2s ease'
+                    }} />
+                  </div>
+                  <div style={{ fontSize: 15, fontWeight: 900, color: NAVY, marginBottom: 4 }}>
+                    {opt.title}
+                  </div>
+                  <div style={{ fontSize: 12, color: '#64748B', lineHeight: 1.45 }}>
+                    {opt.desc}
+                  </div>
+                </div>
+
+                <div style={{
+                  marginTop: 14,
+                  paddingTop: 10,
+                  borderTop: '1px solid ' + (isSelected ? '#bae6fd' : '#f1f5f9'),
+                  fontSize: 11.5,
+                  fontWeight: 800,
+                  color: isSelected ? '#0284c7' : '#94a3b8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4
+                }}>
+                  {isSelected ? '✓ Active on Live Site' : 'Click to Activate'}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

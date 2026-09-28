@@ -12,6 +12,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { decodePayload } from '../utils/cachedFetch';
 import { COLORS } from '../styles/colors';
+import StudentCornerNoticeSection from '../components/student-corner/StudentCornerNoticeSection';
 
 const N = COLORS.navy;
 const G = COLORS.gold;
@@ -69,7 +70,7 @@ const QUICK_SERVICES = [
     desc: 'Access university examination tabulations, marksheets, and previous semester archives.',
     icon: Award,
     link: '/publication/examination-results/2024',
-    badge: 'BBMKU Results',
+    badge: 'Exam Results',
     color: '#16a34a',
     category: 'academic'
   },
@@ -190,7 +191,7 @@ const EXTERNAL_PORTALS = [
     icon: GraduationCap
   },
   {
-    name: 'BBMKU Examination & Admit Card Portal',
+    name: 'University Examination & Admit Card Portal',
     desc: 'Direct student login for exam form fill-up, regular/ex-student hall ticket, and admit card download.',
     url: 'https://bbmkuniv.in/login',
     tag: 'University Portal',
@@ -248,12 +249,26 @@ export default function StudentCornerPage() {
     return false;
   });
 
+  const [noticeStyle, setNoticeStyle] = useState(() => {
+    try {
+      const cached = localStorage.getItem('gnc_site_settings_cache');
+      if (cached) {
+        const parsed = decodePayload(cached);
+        return parsed?.studentCornerNoticeStyle || 'feed';
+      }
+    } catch {}
+    return 'feed';
+  });
+
   useEffect(() => {
     window.scrollTo(0, 0);
 
     const handleSettingsUpdate = (e) => {
       if (e.detail && 'enableDocumentRequests' in e.detail) {
         setDocReqEnabled(Boolean(e.detail.enableDocumentRequests));
+      }
+      if (e.detail && 'studentCornerNoticeStyle' in e.detail) {
+        setNoticeStyle(e.detail.studentCornerNoticeStyle || 'feed');
       }
     };
     window.addEventListener('gnc_settings_updated', handleSettingsUpdate);
@@ -264,6 +279,9 @@ export default function StudentCornerPage() {
         if (snap.exists()) {
           const d = snap.data();
           setDocReqEnabled(Boolean(d?.enableDocumentRequests));
+          if (d?.studentCornerNoticeStyle) {
+            setNoticeStyle(d.studentCornerNoticeStyle);
+          }
         }
       }, () => {});
     }
@@ -661,7 +679,7 @@ export default function StudentCornerPage() {
             color: '#cbd5e1',
             maxWidth: 720,
             lineHeight: 1.65,
-            margin: '0 auto 36px',
+            margin: docReqEnabled ? '0 auto 32px' : '0 auto',
             textAlign: 'center'
           }}>
             {docReqEnabled 
@@ -669,8 +687,8 @@ export default function StudentCornerPage() {
               : 'Centralized digital gateway for Guru Nanak College students. Access exam schedules, official circulars, syllabi, academic calendars, and connect with student support cells.'}
           </p>
 
-          {/* Quick Document Status Tracker Bar OR Counter Notice Banner */}
-          {docReqEnabled ? (
+          {/* Quick Document Status Tracker Bar (when enabled) */}
+          {docReqEnabled && (
             <div style={{
               background: '#ffffff',
               borderRadius: 18,
@@ -722,47 +740,6 @@ export default function StudentCornerPage() {
                 </button>
               </form>
             </div>
-          ) : (
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.08)',
-              backdropFilter: 'blur(14px)',
-              border: '1px solid rgba(212, 167, 44, 0.3)',
-              borderRadius: 20,
-              padding: '20px 28px',
-              maxWidth: 720,
-              width: '100%',
-              margin: '0 auto',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center',
-              gap: 10,
-              boxShadow: '0 16px 36px rgba(0,0,0,0.22)'
-            }}>
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                background: 'rgba(212, 167, 44, 0.2)',
-                border: '1px solid rgba(212, 167, 44, 0.35)',
-                color: '#F4B942',
-                padding: '5px 14px',
-                borderRadius: 20,
-                fontSize: 12,
-                fontWeight: 800,
-                letterSpacing: '0.6px',
-                textTransform: 'uppercase'
-              }}>
-                <FileText size={15} /> Offline Certificate Issuance Counter
-              </div>
-              <div style={{ fontWeight: 800, fontSize: 'clamp(15px, 2.2vw, 17px)', color: '#ffffff', letterSpacing: '-0.3px' }}>
-                Transfer Certificate (CLC), Bonafide &amp; Character Certificates
-              </div>
-              <div style={{ fontSize: 'clamp(12.5px, 1.8vw, 13.5px)', color: '#cbd5e1', lineHeight: 1.55, maxWidth: 620 }}>
-                Certificates are issued manually at the Administrative Counter (Mon–Sat, 10:30 AM – 3:30 PM). Please visit the college administrative office in person with your College ID and fee receipt.
-              </div>
-            </div>
           )}
         </div>
       </header>
@@ -770,6 +747,9 @@ export default function StudentCornerPage() {
       {/* ── Main Services Content ── */}
       <main style={{ maxWidth: 1280, margin: '0 auto', padding: 'clamp(40px, 6vw, 64px) 20px' }}>
         
+        {/* ── Dynamic Student Notices & Circulars Hub (Options: 'feed' | 'columns' | 'ticker_modal') ── */}
+        <StudentCornerNoticeSection noticeStyle={noticeStyle} />
+
         {/* ── Section Header with Search & Tabs ── */}
         <div style={{
           display: 'flex',

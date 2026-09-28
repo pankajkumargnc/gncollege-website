@@ -10,6 +10,7 @@ import { runChatbotIntegrationTests } from '../tests/unit/chatbotIntegration.tes
 import { runDraftAutoSaveTests } from '../tests/unit/draftAutoSave.test.js';
 import { runDashboardBannerTests } from '../tests/unit/dashboardBanner.test.js';
 import { runDeadCodeAuditTests } from '../tests/unit/deadCodeAudit.test.js';
+import { runStudentCornerNoticeTests } from '../tests/unit/studentCornerNotices.test.js';
 
 console.log('\n🧪 Running GNC College Unit Test Suite...\n');
 
@@ -43,6 +44,7 @@ reportSuite('AI Chatbot & Server Proxy Integration Tests', runChatbotIntegration
 reportSuite('Draft Auto-Save & Recovery Tests', runDraftAutoSaveTests());
 reportSuite('Dashboard Real-Time Architecture Banner Tests', runDashboardBannerTests());
 reportSuite('Dead Code Elimination & Audit Tests', runDeadCodeAuditTests());
+reportSuite('Student Corner Notice Hub & Style Switcher Tests', runStudentCornerNoticeTests());
 
 console.log(`══════════════════════════════════════════`);
 console.log(`Results: ${passed}/${total} Passed (${failed} Failed)`);
