@@ -6,9 +6,9 @@
   <script>
     // Single Page Apps for GitHub Pages & Static Hosts
     // Redirects deep links to index.html with route preserved in session/query
-    var pathSegmentsToKeep = 0;
     var l = window.location;
-    var base = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '');
+    var isGitHubPages = l.pathname.indexOf('/gncollege-website') === 0;
+    var pathSegmentsToKeep = isGitHubPages ? 1 : 0;
     var path = l.pathname.slice(1);
     
     // Check if hosted under a subfolder or root
@@ -20,11 +20,11 @@
       sessionStorage.setItem('gnc_spa_redirect', targetPath);
     } catch (e) {}
 
-    // Redirect to root with query fallback
+    // Redirect to base path with query fallback
+    var basePath = isGitHubPages ? '/gncollege-website' : '';
     l.replace(
       l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-      l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?p=' +
-      encodeURIComponent(targetPath)
+      basePath + '/?p=' + encodeURIComponent(targetPath)
     );
   </script>
 </head>

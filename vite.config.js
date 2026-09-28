@@ -1,15 +1,20 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+let currentBase = "/";
 const modulePreloadPlugin = {
   name: "inject-modulepreload",
+  configResolved(config) {
+    currentBase = config.base || "/";
+  },
   transformIndexHtml(html, ctx) {
     if (!ctx?.bundle) return html;
     const reactVendorChunk = Object.keys(ctx.bundle).find(
       (k) => k.includes("vendor-react") && k.endsWith(".js")
     );
     if (!reactVendorChunk) return html;
-    const preloadTag = `  <link rel="modulepreload" href="/${reactVendorChunk}" crossorigin>\n`;
+    const base = currentBase.endsWith("/") ? currentBase : `${currentBase}/`;
+    const preloadTag = `  <link rel="modulepreload" href="${base}${reactVendorChunk}" crossorigin>\n`;
     return html.replace("</head>", preloadTag + "</head>");
   },
 };
