@@ -39,7 +39,7 @@ export default function QuickPublishTab({ logAct }) {
   const [aiResult, setAiResult] = useState(null);
 
   // Form States
-  const [notData, setNotData] = useState({ id: null, text: '', img: '' });
+  const [notData, setNotData] = useState({ id: null, text: '', img: '', type: 'General' });
   const [newsData, setNewsData] = useState({ id: null, text: '', img: '' });
   const [evtData, setEvtData] = useState({ id: null, title: '', day: '', month: '', type: 'WORKSHOP', img: '' });
   const [updData, setUpdData] = useState({ id: null, text: '', link: '' });
@@ -73,6 +73,7 @@ export default function QuickPublishTab({ logAct }) {
         await addDoc(collection(db, 'notices'), {
           text: fullText,
           type: mcCategory,
+          category: mcCategory,
           isNew: true,
           link: '',
           date: new Date().toISOString(),
@@ -174,15 +175,28 @@ export default function QuickPublishTab({ logAct }) {
   const saveNotice = async e => {
     e.preventDefault(); setLoading(true);
     try {
-      const payload = { text: notData.text, img: notData.img || '', updatedAt: serverTimestamp() };
+      const noticeType = notData.type || 'General';
+      const payload = { 
+        text: notData.text, 
+        img: notData.img || '', 
+        type: noticeType,
+        category: noticeType,
+        updatedAt: serverTimestamp() 
+      };
       if (notData.id) {
         await updateDoc(doc(db, 'notices', notData.id), payload);
         toast.success('Notice Updated!');
       } else {
-        await addDoc(collection(db, 'notices'), { ...payload, type: 'General', isNew: true, link: '', date: new Date().toISOString(), createdAt: serverTimestamp() });
+        await addDoc(collection(db, 'notices'), { 
+          ...payload, 
+          isNew: true, 
+          link: '', 
+          date: new Date().toISOString(), 
+          createdAt: serverTimestamp() 
+        });
         toast.success('Notice Published!');
       }
-      setNotData({ id: null, text: '', img: '' });
+      setNotData({ id: null, text: '', img: '', type: 'General' });
     } catch(err) { toast.error(err.message); }
     setLoading(false);
   };
@@ -593,6 +607,25 @@ export default function QuickPublishTab({ logAct }) {
             <span style={{ fontSize: 10, background: 'rgba(15,35,71,0.08)', color: NAVY, padding: '3px 8px', borderRadius: 6, fontWeight: 800 }}>Homepage Card 1</span>
           </div>
           <form onSubmit={saveNotice} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: NAVY, marginBottom: 4, textTransform: 'uppercase' }}>
+                Category / Type
+              </label>
+              <select 
+                className="ainp" 
+                value={notData.type || 'General'} 
+                onChange={e => setNotData({ ...notData, type: e.target.value })}
+                style={{ width: '100%', borderRadius: 10, padding: '8px 12px', border: '1.5px solid #e2e8f0', fontSize: 13, fontWeight: 700, boxSizing: 'border-box' }}
+              >
+                <option value="General">General Notice</option>
+                <option value="Examination">Examination</option>
+                <option value="Admission">Admission</option>
+                <option value="Result">Result</option>
+                <option value="Holiday">Holiday</option>
+                <option value="Scholarship">Scholarship</option>
+                <option value="Sports">Sports & Events</option>
+              </select>
+            </div>
             <textarea className="ainp" rows={3} style={{ borderRadius:16, border: '1.5px solid #f1f5f9', background: '#f8fafc' }} value={notData.text} onChange={e => setNotData({ ...notData, text: e.target.value })} placeholder="Write notice content..." required />
             {notData.img && (
               <div style={{ position:'relative', borderRadius:12, overflow:'hidden', border:'2px solid #3b82f6' }}>
@@ -604,10 +637,10 @@ export default function QuickPublishTab({ logAct }) {
               <button type="submit" className="qp-btn-pub" style={{ flex: 1 }} disabled={loading}>
                 {loading ? 'Saving…' : notData.id ? 'Update Notice' : 'Publish Notice'}
               </button>
-              {notData.id && <button type="button" className="qp-btn-cancel" onClick={() => setNotData({id:null, text:'', img:''})}>✕</button>}
+              {notData.id && <button type="button" className="qp-btn-cancel" onClick={() => setNotData({id:null, text:'', img:'', type:'General'})}>✕</button>}
             </div>
           </form>
-          <RecentList items={recentData.notices} col="notices" accent="#3b82f6" onDel={handleDelete} onEdit={item => setNotData({ id: item.id, text: item.text, img: item.img||'' })} />
+          <RecentList items={recentData.notices} col="notices" accent="#3b82f6" onDel={handleDelete} onEdit={item => setNotData({ id: item.id, text: item.text, img: item.img||'', type: item.type || item.category || 'General' })} />
         </div>
 
         {/* 2. NEWS */}

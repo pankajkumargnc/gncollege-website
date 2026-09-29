@@ -34,19 +34,43 @@ const getTS = ts => {
   return isNaN(d.getTime()) ? new Date() : d;
 };
 
-// Heuristic categorization based on notice text & title
-const detectCategory = (text = '', type = '') => {
-  const combined = `${text} ${type}`.toLowerCase();
-  if (combined.includes('exam') || combined.includes('practical') || combined.includes('admit') || combined.includes('routine') || combined.includes('viva') || combined.includes('semester')) {
+// Heuristic categorization based on notice text & title with explicit admin category priority
+const detectCategory = (text = '', type = '', category = '') => {
+  const cleanType = String(type || category || '').trim().toLowerCase();
+  const rawText = String(text || '').toLowerCase();
+  const combined = `${rawText} ${cleanType}`;
+
+  // 1. Explicit Category/Type Match First (Direct Admin Intent)
+  if (cleanType === 'examination' || cleanType === 'exam' || cleanType === 'result') {
     return { id: 'exam', label: 'Examination', badgeBg: '#eff6ff', badgeColor: '#1d4ed8', border: '#bfdbfe' };
   }
-  if (combined.includes('admission') || combined.includes('merit') || combined.includes('fyugp') || combined.includes('chancellor') || combined.includes('registration') || combined.includes('fee')) {
+  if (cleanType === 'admission' || cleanType === 'admissions') {
     return { id: 'admission', label: 'Admission', badgeBg: '#f0fdf4', badgeColor: '#15803d', border: '#bbf7d0' };
   }
-  if (combined.includes('holiday') || combined.includes('closed') || combined.includes('vacation') || combined.includes('recess') || combined.includes('baisakhi') || combined.includes('puja')) {
+  if (cleanType === 'holiday' || cleanType === 'campus holiday' || cleanType === 'recess') {
     return { id: 'holiday', label: 'Campus Holiday', badgeBg: '#fffbeb', badgeColor: '#b45309', border: '#fde68a' };
   }
-  if (combined.includes('syllabus') || combined.includes('class') || combined.includes('lecture') || combined.includes('seminar') || combined.includes('workshop')) {
+  if (cleanType === 'academic' || cleanType === 'academic notice' || cleanType === 'syllabus' || cleanType === 'nep') {
+    return { id: 'academic', label: 'Academic Notice', badgeBg: '#faf5ff', badgeColor: '#7e22ce', border: '#e9d5ff' };
+  }
+  if (cleanType === 'scholarship' || cleanType === 'scholarships') {
+    return { id: 'academic', label: 'Scholarship & Aid', badgeBg: '#faf5ff', badgeColor: '#7e22ce', border: '#e9d5ff' };
+  }
+  if (cleanType === 'sports' || cleanType === 'cultural') {
+    return { id: 'general', label: 'Sports & Cultural', badgeBg: '#f8fafc', badgeColor: '#334155', border: '#cbd5e1' };
+  }
+
+  // 2. Intelligent Content Heuristics (When type is 'General', 'Drive Notice', or unspecified)
+  if (combined.includes('exam') || combined.includes('practical') || combined.includes('admit') || combined.includes('routine') || combined.includes('viva') || combined.includes('semester') || combined.includes('cia') || combined.includes('mid-term') || combined.includes('midterm') || combined.includes('assessment') || combined.includes('backlog') || combined.includes('marksheet') || combined.includes('result') || combined.includes('form fillup') || combined.includes('exam form')) {
+    return { id: 'exam', label: 'Examination', badgeBg: '#eff6ff', badgeColor: '#1d4ed8', border: '#bfdbfe' };
+  }
+  if (combined.includes('admission') || combined.includes('merit') || combined.includes('fyugp') || combined.includes('chancellor') || combined.includes('registration') || combined.includes('counselling') || (combined.includes('fee') && !combined.includes('exam'))) {
+    return { id: 'admission', label: 'Admission', badgeBg: '#f0fdf4', badgeColor: '#15803d', border: '#bbf7d0' };
+  }
+  if (combined.includes('holiday') || combined.includes('closed') || combined.includes('vacation') || combined.includes('recess') || combined.includes('baisakhi') || combined.includes('puja') || combined.includes('diwali') || combined.includes('jayanti') || combined.includes('eid') || combined.includes('observance')) {
+    return { id: 'holiday', label: 'Campus Holiday', badgeBg: '#fffbeb', badgeColor: '#b45309', border: '#fde68a' };
+  }
+  if (combined.includes('syllabus') || combined.includes('class') || combined.includes('lecture') || combined.includes('seminar') || combined.includes('workshop') || combined.includes('scholarship') || combined.includes('ekalyan') || combined.includes('e-kalyan') || combined.includes('nep')) {
     return { id: 'academic', label: 'Academic Notice', badgeBg: '#faf5ff', badgeColor: '#7e22ce', border: '#e9d5ff' };
   }
   return { id: 'general', label: 'Official Circular', badgeBg: '#f8fafc', badgeColor: '#334155', border: '#cbd5e1' };
@@ -206,7 +230,7 @@ const CURATED_NOTICES = [
 
       // Category filter
       if (activeCategory !== 'All') {
-        const cat = detectCategory(n.text, n.type);
+        const cat = detectCategory(n.text, n.type, n.category);
         if (cat.id !== activeCategory && !cat.label.toLowerCase().includes(activeCategory.toLowerCase())) {
           return false;
         }
@@ -505,7 +529,7 @@ const CURATED_NOTICES = [
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                       {items.map(n => {
                         const d = getTS(n.createdAt);
-                        const catInfo = detectCategory(n.text, n.type);
+                        const catInfo = detectCategory(n.text, n.type, n.category);
                         const isSpeaking = speakingId === n.id;
 
                         return (
@@ -731,7 +755,7 @@ const CURATED_NOTICES = [
                     <tbody>
                       {paginated.map((n, idx) => {
                         const d = getTS(n.createdAt);
-                        const catInfo = detectCategory(n.text, n.type);
+                        const catInfo = detectCategory(n.text, n.type, n.category);
                         const authority = getIssuingAuthority(n, catInfo);
                         const refNo = getRefNo(n, d);
                         const isSpeaking = speakingId === n.id;

@@ -269,17 +269,43 @@ function AdminPanelInner({
   const [_alerts,       set_alerts]       = useState([]);
   const [_sliderSlides, set_sliderSlides] = useState([]);
   const [_testimonials, set_testimonials] = useState([]);
+  const [_notices,      set_notices]      = useState([]);
+  const [_announcements,set_announcements]= useState([]);
+  const [_events,       set_events]       = useState([]);
+  const [_gallery,      set_gallery]      = useState([]);
+  const [_faculties,    set_faculties]    = useState([]);
 
   useEffect(() => {
+    const getDocTime = (d) => {
+      if (d.createdAt?.toMillis) return d.createdAt.toMillis();
+      if (d.createdAt?.toDate) return d.createdAt.toDate().getTime();
+      if (d.createdAt instanceof Date) return d.createdAt.getTime();
+      if (typeof d.createdAt === 'string') {
+        const t = new Date(d.createdAt).getTime();
+        if (!isNaN(t)) return t;
+      }
+      if (d.date) {
+        const t = new Date(d.date).getTime();
+        if (!isNaN(t)) return t;
+      }
+      if (d.publishDate) {
+        const t = new Date(d.publishDate).getTime();
+        if (!isNaN(t)) return t;
+      }
+      return Date.now();
+    };
+
     const subs = [
       ['pdfReports', set_pdfReports], ['pages', set_pages],
       ['placements', set_placements], ['alerts', set_alerts], 
       ['sliderSlides', set_sliderSlides], ['testimonials', set_testimonials],
+      ['notices', set_notices], ['announcements', set_announcements],
+      ['events', set_events], ['gallery', set_gallery], ['faculties', set_faculties]
     ].map(([col, setter]) => {
       try {
         return onSnapshot(query(collection(db, col)), snap => {
           const docs = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-          docs.sort((a, b) => (b.createdAt?.toMillis()||0) - (a.createdAt?.toMillis()||0));
+          docs.sort((a, b) => getDocTime(b) - getDocTime(a));
           setter(docs);
         }, () => {});
       } catch { return () => {}; }
@@ -293,11 +319,11 @@ function AdminPanelInner({
   const alerts       = alertsProp        || _alerts;
   const sliderSlides = sliderSlidesProp  || _sliderSlides;
   const testimonials = _testimonials;
-  const notices      = noticesProp       || [];
-  const announcements= announcementsProp || [];
-  const events       = eventsProp        || [];
-  const gallery      = galleryProp       || [];
-  const faculties    = facultiesProp     || [];
+  const notices      = (_notices && _notices.length > 0) ? _notices : (noticesProp || []);
+  const announcements= (_announcements && _announcements.length > 0) ? _announcements : (announcementsProp || []);
+  const events       = (_events && _events.length > 0) ? _events : (eventsProp || []);
+  const gallery      = (_gallery && _gallery.length > 0) ? _gallery : (galleryProp || []);
+  const faculties    = (_faculties && _faculties.length > 0) ? _faculties : (facultiesProp || []);
 
   // ── Activity log ──────────────────────────────────────────────────────────
   const [actLog, setActLog] = useState([]);

@@ -134,12 +134,31 @@ export default function useAppData() {
 
     // High-priority live collections that truly require instant real-time pushes
     const liveCols = [
-      ['notices',       setNotices,       30, 'createdAt', 'desc'],
-      ['announcements', setAnnouncements, 15, 'createdAt', 'desc'],
-      ['events',        setEvents,        25, 'createdAt', 'desc'],
-      ['updates',       setUpdates,       15, 'createdAt', 'desc'],
-      ['sliderSlides',  setSliderSlides,  10, 'order',     'asc'],
+      ['notices',       setNotices,       100, 'createdAt', 'desc'],
+      ['announcements', setAnnouncements, 30,  'createdAt', 'desc'],
+      ['events',        setEvents,        30,  'createdAt', 'desc'],
+      ['updates',       setUpdates,       20,  'createdAt', 'desc'],
+      ['sliderSlides',  setSliderSlides,  10,  'order',     'asc'],
     ];
+
+    const getDocTime = (d) => {
+      if (d.createdAt?.toMillis) return d.createdAt.toMillis();
+      if (d.createdAt?.toDate) return d.createdAt.toDate().getTime();
+      if (d.createdAt instanceof Date) return d.createdAt.getTime();
+      if (typeof d.createdAt === 'string') {
+        const t = new Date(d.createdAt).getTime();
+        if (!isNaN(t)) return t;
+      }
+      if (d.date) {
+        const t = new Date(d.date).getTime();
+        if (!isNaN(t)) return t;
+      }
+      if (d.publishDate) {
+        const t = new Date(d.publishDate).getTime();
+        if (!isNaN(t)) return t;
+      }
+      return Date.now();
+    };
 
     const unsubs = liveCols.map(([col, setter, max, sortField, sortDir]) => {
       try {
@@ -158,6 +177,9 @@ export default function useAppData() {
             if (data.content) data.content = DOMPurify.sanitize(data.content);
             return { id: d.id, ...data };
           });
+          if (sortField !== 'order') {
+            docs.sort((a, b) => getDocTime(b) - getDocTime(a));
+          }
           setter(docs);
         }, err => {
           // If orderBy index is building or missing, fallback to unordered limit query
@@ -165,6 +187,9 @@ export default function useAppData() {
           try {
             return onSnapshot(query(collection(db, col), limit(max)), fallbackSnap => {
               const docs = fallbackSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+              if (sortField !== 'order') {
+                docs.sort((a, b) => getDocTime(b) - getDocTime(a));
+              }
               setter(docs);
             });
           } catch (_) {

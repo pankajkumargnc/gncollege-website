@@ -44,7 +44,7 @@ function ruleBasedExtractor(input) {
     type = 'Admission';
   } else if (lower.includes('result') || lower.includes('marksheet') || lower.includes('pass percentage')) {
     type = 'Result';
-  } else if (lower.includes('exam') || lower.includes('routine') || lower.includes('admit card') || lower.includes('backlog') || (lower.includes('semester') && lower.includes('form'))) {
+  } else if (lower.includes('exam') || lower.includes('routine') || lower.includes('admit') || lower.includes('practical') || lower.includes('viva') || lower.includes('assessment') || lower.includes('cia') || lower.includes('mid-term') || lower.includes('midterm') || lower.includes('backlog') || lower.includes('test') || lower.includes('form fillup') || (lower.includes('semester') && !lower.includes('class') && !lower.includes('syllabus'))) {
     type = 'Examination';
   } else if (lower.includes('holiday') || lower.includes('closed') || lower.includes('puja') || lower.includes('diwali') || lower.includes('vacation') || lower.includes('jayanti')) {
     type = 'Holiday';
@@ -52,7 +52,7 @@ function ruleBasedExtractor(input) {
     type = 'Scholarship';
   } else if (lower.includes('sport') || lower.includes('cricket') || lower.includes('football') || lower.includes('tournament') || lower.includes('badminton') || lower.includes('athletics')) {
     type = 'Sports';
-  } else if (lower.includes('semester') || lower.includes('class') || lower.includes('syllabus')) {
+  } else if (lower.includes('syllabus') || lower.includes('class') || lower.includes('lecture')) {
     type = 'General';
   }
 

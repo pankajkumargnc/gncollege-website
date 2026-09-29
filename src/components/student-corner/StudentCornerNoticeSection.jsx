@@ -48,9 +48,22 @@ const cleanDocumentTitle = (rawName = '') => {
 };
 
 // ── Smart Category Detector ──
-const detectNoticeCategory = (title = '', rawType = '') => {
-  const combined = `${title} ${rawType}`.toLowerCase();
+const detectNoticeCategory = (title = '', rawType = '', rawCategory = '') => {
+  const cleanType = String(rawType || rawCategory || '').trim().toLowerCase();
+  const lowerTitle = String(title || '').toLowerCase();
+  const combined = `${lowerTitle} ${cleanType}`;
   
+  if (cleanType === 'examination' || cleanType === 'exam') {
+    return {
+      key: 'exam',
+      label: 'EXAMINATION',
+      badgeBg: '#eff6ff',
+      badgeColor: '#1d4ed8',
+      border: '#bfdbfe',
+      icon: GraduationCap
+    };
+  }
+
   if (combined.includes('urgent') || combined.includes('alert') || combined.includes('deadline') || combined.includes('postpone') || combined.includes('important')) {
     return {
       key: 'urgent',
@@ -61,7 +74,7 @@ const detectNoticeCategory = (title = '', rawType = '') => {
       icon: AlertCircle
     };
   }
-  if (combined.includes('exam') || combined.includes('semester') || combined.includes('admit') || combined.includes('routine') || combined.includes('practical') || combined.includes('viva') || combined.includes('mid-term') || combined.includes('examination')) {
+  if (combined.includes('exam') || combined.includes('semester') || combined.includes('admit') || combined.includes('routine') || combined.includes('practical') || combined.includes('viva') || combined.includes('mid-term') || combined.includes('midterm') || combined.includes('assessment') || combined.includes('cia') || combined.includes('examination')) {
     return {
       key: 'exam',
       label: 'EXAMINATION',
@@ -136,7 +149,7 @@ export default function StudentCornerNoticeSection({ noticeStyle = 'feed' }) {
       if (n.expiryDate && new Date(n.expiryDate).getTime() < now) return;
 
       const dateMeta = parseDateObj(n.createdAt || n.publishDate);
-      const cat = detectNoticeCategory(n.text, n.type);
+      const cat = detectNoticeCategory(n.text, n.type, n.category);
       const isFresh = Boolean(n.isNew) || (now - dateMeta.ts < SEVEN_DAYS_MS);
 
       list.push({

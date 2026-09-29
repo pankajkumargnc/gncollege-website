@@ -13,6 +13,25 @@ import useDraftAutoSave from '../../../hooks/useDraftAutoSave';
 
 const DEFAULT_NOTICE_DATA = { text: '', link: '', type: 'General', status: 'published', isNew: true, pinned: false, publishDate: '', expiryDate: '' };
 
+const getDocTime = (d) => {
+  if (d.createdAt?.toMillis) return d.createdAt.toMillis();
+  if (d.createdAt?.toDate) return d.createdAt.toDate().getTime();
+  if (d.createdAt instanceof Date) return d.createdAt.getTime();
+  if (typeof d.createdAt === 'string') {
+    const t = new Date(d.createdAt).getTime();
+    if (!isNaN(t)) return t;
+  }
+  if (d.date) {
+    const t = new Date(d.date).getTime();
+    if (!isNaN(t)) return t;
+  }
+  if (d.publishDate) {
+    const t = new Date(d.publishDate).getTime();
+    if (!isNaN(t)) return t;
+  }
+  return Date.now();
+};
+
 export default function NoticesTab({ notices, logAct, getSectionLog, softDelete, bulkDelete }) {
   const [editNotice, setEditNotice] = useState(null);
   const [noticeData, setNoticeData] = useState(DEFAULT_NOTICE_DATA);
@@ -20,6 +39,26 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
   const [noticeSel, setNoticeSel] = useState([]);
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [liveNotices, setLiveNotices] = useState(null);
+
+  // ⚡ Live Firestore Subscription for All Notices (No 30-item limit, Real-Time Sync)
+  useEffect(() => {
+    if (!db) return;
+    try {
+      const unsub = onSnapshot(collection(db, 'notices'), snap => {
+        const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        docs.sort((a, b) => getDocTime(b) - getDocTime(a));
+        setLiveNotices(docs);
+      }, err => {
+        console.warn('[NoticesTab] Realtime notices subscription fallback:', err.message);
+      });
+      return () => unsub();
+    } catch (err) {
+      console.warn('[NoticesTab] Realtime notices setup error:', err);
+    }
+  }, []);
+
+  const allNoticesList = (liveNotices !== null && liveNotices.length > 0) ? liveNotices : (notices || []);
 
   // 🎓 Student Corner Notice Style State (Options: 'feed' | 'columns' | 'ticker_modal')
   const [noticeStyle, setNoticeStyle] = useState(() => {
@@ -125,19 +164,31 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
   const saveNotice = async e => {
     e.preventDefault(); setLoading(true);
     try {
-      const payload = { ...noticeData };
+      const noticeType = noticeData.type || 'General';
+      const payload = { 
+        ...noticeData,
+        type: noticeType,
+        category: noticeType
+      };
       // Convert date strings to Firestore-friendly format
       if (payload.publishDate) payload.publishDate = payload.publishDate;
       else delete payload.publishDate;
       if (payload.expiryDate) payload.expiryDate = payload.expiryDate;
       else delete payload.expiryDate;
 
-      if (editNotice) await updateDoc(doc(db, 'notices', editNotice.id), { ...payload, updatedAt: serverTimestamp() });
-      else await addDoc(collection(db, 'notices'), { ...payload, date: new Date().toISOString(), createdAt: serverTimestamp() });
+      if (editNotice) {
+        await updateDoc(doc(db, 'notices', editNotice.id), { ...payload, updatedAt: serverTimestamp() });
+        setLiveNotices(prev => (prev || []).map(item => item.id === editNotice.id ? { ...item, ...payload, updatedAt: new Date() } : item));
+      } else {
+        const nowIso = new Date().toISOString();
+        const docRef = await addDoc(collection(db, 'notices'), { ...payload, date: nowIso, createdAt: serverTimestamp() });
+        const newNoticeItem = { id: docRef.id, ...payload, date: nowIso, createdAt: new Date() };
+        setLiveNotices(prev => [newNoticeItem, ...(prev || [])]);
+      }
 
       if (noticeData.sendPush) {
         await addDoc(collection(db, 'push_broadcasts'), {
-          title: `📢 GNC Notice: ${noticeData.type || 'General'}`,
+          title: `📢 GNC Notice: ${noticeType}`,
           body: noticeData.text?.substring(0, 120),
           url: noticeData.link || '/notifications',
           createdAt: serverTimestamp()
@@ -171,7 +222,7 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
     return { label: '🟢 Live', bg: '#dcfce7', color: '#16a34a' };
   };
 
-  const filtered = (notices || []).filter(n => !noticeSearch || n.text?.toLowerCase().includes(noticeSearch.toLowerCase()));
+  const filtered = allNoticesList.filter(n => !noticeSearch || n.text?.toLowerCase().includes(noticeSearch.toLowerCase()));
 
   return (
     <div className="fade-up">
@@ -481,7 +532,7 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
             ...d,
             link: url,
             text: autoData.text,
-            type: autoData.type,
+            type: (d.type && d.type !== 'General') ? d.type : (autoData.type || 'General'),
             isNew: autoData.isNew,
             pinned: autoData.pinned
           }));
@@ -534,7 +585,11 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
       </div>
 
       <SectionSearch value={noticeSearch} onChange={setNoticeSearch} placeholder="Search notices..." />
-      <BulkBar count={noticeSel.length} onDelete={() => { bulkDelete('notices', noticeSel); setNoticeSel([]); }} onClear={() => setNoticeSel([])} />
+      <BulkBar count={noticeSel.length} onDelete={() => { 
+        setLiveNotices(prev => (prev || []).filter(x => !noticeSel.includes(x.id)));
+        bulkDelete('notices', noticeSel); 
+        setNoticeSel([]); 
+      }} onClear={() => setNoticeSel([])} />
 
       <div className="card">
         <div className="actitle">All Notices ({filtered.length})</div>
@@ -554,7 +609,10 @@ export default function NoticesTab({ notices, logAct, getSectionLog, softDelete,
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <button className="abtn abtn-outline abtn-sm" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} onClick={()=>{setEditNotice(n);setNoticeData({text:n.text||'',link:n.link||'',type:n.type||'General',status:n.status||'published',isNew:!!n.isNew,pinned:!!n.pinned,publishDate:n.publishDate||'',expiryDate:n.expiryDate||''});window.scrollTo({top:0,behavior:'smooth'});}} aria-label="Edit notice"><Edit2 size={13} /></button>
-              <button className="abtn abtn-red abtn-sm" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} onClick={()=>softDelete('notices',n.id,n,(n.text||'').substring(0,30))} aria-label="Delete notice"><Trash2 size={13} /></button>
+              <button className="abtn abtn-red abtn-sm" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} onClick={()=>{
+                setLiveNotices(prev => (prev || []).filter(x => x.id !== n.id));
+                softDelete('notices',n.id,n,(n.text||'').substring(0,30));
+              }} aria-label="Delete notice"><Trash2 size={13} /></button>
             </div>
           </div>
         ))}
