@@ -7,7 +7,7 @@ import { doc, collection, query, orderBy, onSnapshot, getDoc, addDoc, serverTime
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import toast from 'react-hot-toast';
-import { Send, MapPin, Phone, Mail, User, AtSign, FileText, MessageSquare, ShieldCheck, Building2 } from 'lucide-react';
+import { Send, MapPin, Phone, Mail, User, AtSign, FileText, MessageSquare, ShieldCheck, Building2, Sparkles } from 'lucide-react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import CampusMap from '../components/CampusMap';
 
@@ -367,12 +367,77 @@ export default function Contact() {
         [data-theme="dark"] .dir-contact:hover { color: #f4a023 !important; }
       `}</style>
 
-      {/* Hero */}
-      <header className="premium-hero">
-        <div className="kinetic-bg" />
-        <div className="hero-content-wrapper anim-fade-in">
-          <h1 className="hero-title">Get In <span>Touch</span></h1>
-          <p className="hero-subtitle">We are here to assist you. Reach out to our respective campuses or directly contact our administration team for any queries.</p>
+      {/* Unified Signature Hero Banner */}
+      <header style={{
+        background: 'linear-gradient(135deg, #0B1F3A 0%, #1a3a6b 100%)',
+        color: '#ffffff',
+        padding: 'clamp(44px, 7vw, 76px) 20px clamp(40px, 6vw, 60px)',
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'radial-gradient(circle at 80% 20%, rgba(244, 160, 35, 0.16) 0%, transparent 60%)',
+          pointerEvents: 'none'
+        }} />
+        <div style={{ maxWidth: 960, margin: '0 auto', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 7,
+            background: 'rgba(244, 160, 35, 0.15)',
+            border: '1px solid rgba(244, 160, 35, 0.35)',
+            borderRadius: 30,
+            padding: '5px 16px',
+            fontSize: 11.5,
+            fontWeight: 800,
+            color: '#F4B942',
+            marginBottom: 16,
+            letterSpacing: '0.8px',
+            textTransform: 'uppercase'
+          }}>
+            <Sparkles size={13} /> CAMPUS CONTACT &amp; HELPDESK • DHANBAD
+          </div>
+
+          <div style={{
+            width: 58,
+            height: 58,
+            borderRadius: 16,
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: '1.5px solid rgba(244, 160, 35, 0.4)',
+            color: '#F4B942',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 14,
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)'
+          }}>
+            <Building2 size={30} />
+          </div>
+
+          <h1 style={{
+            fontSize: 'clamp(26px, 4.8vw, 44px)',
+            fontWeight: 900,
+            lineHeight: 1.18,
+            letterSpacing: '-0.8px',
+            margin: '0 auto 12px',
+            color: '#ffffff',
+            textAlign: 'center'
+          }}>
+            Get In <span style={{ color: COLORS.gold }}>Touch</span>
+          </h1>
+
+          <p style={{
+            fontSize: 'clamp(14px, 1.8vw, 16.5px)',
+            color: '#cbd5e1',
+            maxWidth: 720,
+            lineHeight: 1.6,
+            margin: '0 auto'
+          }}>
+            We are here to assist you. Reach out to our respective campuses or directly contact our administration team for any queries.
+          </p>
         </div>
       </header>
 

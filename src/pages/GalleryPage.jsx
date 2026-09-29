@@ -16,7 +16,7 @@ import { resolveUrl } from '../utils/resolver';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import { splitHeading } from '../utils/splitTitle';
-import { Camera } from 'lucide-react';
+import { Camera, Sparkles } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 12;
 const FALLBACK_IMG = `${import.meta.env.BASE_URL}images/college_photo.webp`;
@@ -146,13 +146,77 @@ export default function GalleryPage({ gallery: galleryProp, headless }) {
 
       {/* ── HERO ── */}
       {!headless && (
-      <div className="premium-hero">
-        <div className="kinetic-bg" />
-        <div className="hero-content-wrapper anim-fade-in">
-          <h1 className="hero-title">{splitHeading('Photo Gallery')}</h1>
-          <p className="hero-subtitle">Memorable moments of campus life, events, and achievements • {images.length}+ Photos</p>
-        </div>
-      </div>
+        <header style={{
+          background: 'linear-gradient(135deg, #0B1F3A 0%, #1a3a6b 100%)',
+          color: '#ffffff',
+          padding: 'clamp(44px, 7vw, 76px) 20px clamp(40px, 6vw, 60px)',
+          textAlign: 'center',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'radial-gradient(circle at 80% 20%, rgba(244, 160, 35, 0.16) 0%, transparent 60%)',
+            pointerEvents: 'none'
+          }} />
+          <div style={{ maxWidth: 960, margin: '0 auto', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 7,
+              background: 'rgba(244, 160, 35, 0.15)',
+              border: '1px solid rgba(244, 160, 35, 0.35)',
+              borderRadius: 30,
+              padding: '5px 16px',
+              fontSize: 11.5,
+              fontWeight: 800,
+              color: '#F4B942',
+              marginBottom: 16,
+              letterSpacing: '0.8px',
+              textTransform: 'uppercase'
+            }}>
+              <Sparkles size={13} /> Campus Life &amp; Visual Archives
+            </div>
+
+            <div style={{
+              width: 58,
+              height: 58,
+              borderRadius: 16,
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1.5px solid rgba(244, 160, 35, 0.4)',
+              color: '#F4B942',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 14,
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)'
+            }}>
+              <Camera size={28} />
+            </div>
+
+            <h1 style={{
+              fontSize: 'clamp(26px, 4.8vw, 44px)',
+              fontWeight: 900,
+              lineHeight: 1.18,
+              letterSpacing: '-0.8px',
+              margin: '0 auto 12px',
+              color: '#ffffff',
+              textAlign: 'center'
+            }}>
+              {splitHeading('Photo Gallery')}
+            </h1>
+            <p style={{
+              fontSize: 'clamp(14px, 1.8vw, 16.5px)',
+              color: '#cbd5e1',
+              maxWidth: 720,
+              lineHeight: 1.6,
+              margin: '0 auto'
+            }}>
+              Memorable moments of campus life, academic seminars, sports, cultural fests, and milestones • {images.length}+ Photos
+            </p>
+          </div>
+        </header>
       )}
 
       {/* ── CONTENT ── */}

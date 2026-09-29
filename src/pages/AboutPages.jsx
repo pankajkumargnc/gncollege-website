@@ -1,6 +1,6 @@
 // src/pages/AboutPages.jsx
 import React, { useEffect, useRef, useState, lazy, Suspense } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { collection, query, orderBy, onSnapshot, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
@@ -11,7 +11,8 @@ import {
   FileText, PhoneCall, Compass, Target, GraduationCap, Users,
   Scale, Building2, UserCheck, FolderArchive, Calendar, Download,
   Info, ShieldCheck, AlertCircle, Award, Sparkles, HeartHandshake,
-  Lightbulb, BookOpen, Briefcase, Landmark, Ban, Moon, FileCheck, Loader2
+  Lightbulb, BookOpen, Briefcase, Landmark, Ban, Moon, FileCheck, Loader2,
+  CheckCircle2, Shield, ArrowRight, ExternalLink
 } from 'lucide-react';
 import '../styles/index.css';
 import { resolveUrl } from '../utils/resolver';
@@ -19,6 +20,19 @@ import { splitHeading } from '../utils/splitTitle';
 
 const N = COLORS.navy || '#0f2347';
 const G = COLORS.gold || '#f4a023';
+
+// ─── Committees Navigation Registry ──────────────────────────────
+export const COMMITTEES_NAV = [
+  { id: 'placement', label: 'Placement Cell', path: '/about-us/various-committees/placement', icon: Briefcase, color: '#0d9488' },
+  { id: 'womens-cell', label: "Women's Cell", path: '/about-us/various-committees/womens-cell', icon: UserCheck, color: '#db2777' },
+  { id: 'grievance', label: 'Grievance Redressal', path: '/about-us/various-committees/grievance', icon: Scale, color: '#d97706' },
+  { id: 'anti-ragging', label: 'Anti-Ragging', path: '/about-us/various-committees/anti-ragging', icon: Ban, color: '#dc2626' },
+  { id: 'sc-st', label: 'SC/ST Cell', path: '/about-us/various-committees/sc-st', icon: HeartHandshake, color: '#2563eb' },
+  { id: 'obc', label: 'OBC Cell', path: '/about-us/various-committees/obc', icon: BookOpen, color: '#7c3aed' },
+  { id: 'icc', label: 'ICC (Internal Complaints)', path: '/about-us/various-committees/icc', icon: ShieldCheck, color: '#059669' },
+  { id: 'minority', label: 'Minority Cell', path: '/about-us/various-committees/minority', icon: Moon, color: '#0284c7' },
+  { id: 'rusa', label: 'RUSA Cell', path: '/about-us/various-committees/rusa', icon: Landmark, color: '#4f46e5' },
+];
 
 // ─── Organogram Helpers ───────────────────────────────────────────
 const ORG_VARIANTS = {
@@ -94,58 +108,412 @@ function Fade({ children, delay = 0, y = 20 }) {
   );
 }
 
-function PageHero({ title, subtitle, icon }) {
+// ─── Unified Signature Hero (Student Corner Standard) ─────────────
+export function PageHero({ title, subtitle, icon, badge = "SIKH MINORITY INSTITUTION • ESTD. 1970" }) {
   return (
-    <div className="premium-hero">
-      <div className="kinetic-bg" />
-      <div className="hero-content-wrapper">
-        {icon && <div className="hero-icon">{icon}</div>}
-        <h1 className="hero-title">{splitHeading(title)}</h1>
-        {subtitle && <p>{subtitle}</p>}
+    <header style={{
+      background: 'linear-gradient(135deg, #0B1F3A 0%, #1a3a6b 100%)',
+      color: '#ffffff',
+      padding: 'clamp(44px, 7vw, 76px) 20px clamp(40px, 6vw, 60px)',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Radial Gold Lighting Accent */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        background: 'radial-gradient(circle at 80% 20%, rgba(244, 160, 35, 0.16) 0%, transparent 60%)',
+        pointerEvents: 'none'
+      }} />
+
+      <div style={{
+        maxWidth: 960,
+        margin: '0 auto',
+        position: 'relative',
+        zIndex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        textAlign: 'center'
+      }}>
+        {/* Golden Pill Badge */}
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 7,
+          background: 'rgba(244, 160, 35, 0.15)',
+          border: '1px solid rgba(244, 160, 35, 0.35)',
+          borderRadius: 30,
+          padding: '5px 16px',
+          fontSize: 11.5,
+          fontWeight: 800,
+          color: '#F4B942',
+          marginBottom: 16,
+          letterSpacing: '0.8px',
+          textTransform: 'uppercase'
+        }}>
+          <Sparkles size={13} /> {badge}
+        </div>
+
+        {icon && (
+          <div style={{
+            width: 58,
+            height: 58,
+            borderRadius: 16,
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: '1.5px solid rgba(244, 160, 35, 0.4)',
+            color: '#F4B942',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 14,
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)'
+          }}>
+            {icon}
+          </div>
+        )}
+
+        <h1 style={{
+          fontSize: 'clamp(26px, 4.8vw, 44px)',
+          fontWeight: 900,
+          lineHeight: 1.18,
+          letterSpacing: '-0.8px',
+          margin: '0 auto 12px',
+          color: '#ffffff',
+          textAlign: 'center'
+        }}>
+          {splitHeading(title)}
+        </h1>
+
+        {subtitle && (
+          <p style={{
+            fontSize: 'clamp(14px, 1.8vw, 16.5px)',
+            color: '#cbd5e1',
+            maxWidth: 720,
+            lineHeight: 1.6,
+            margin: '0 auto'
+          }}>
+            {subtitle}
+          </p>
+        )}
+      </div>
+    </header>
+  );
+}
+
+// ─── Spotlight Card: ☬ SIKH MINORITY INSTITUTION – Heritage & 1970 Roots ───
+export function SikhMinoritySpotlightCard({ variant = 'sidebar', className = '' }) {
+  return (
+    <div
+      className={`gnc-spotlight-card ${className}`}
+      style={{
+        '--card-accent': '#f4a023',
+        '--card-glow': 'rgba(244, 160, 35, 0.35)',
+        background: 'linear-gradient(145deg, #0B1F3A 0%, #172554 50%, #0f172a 100%)',
+        color: '#ffffff',
+        borderRadius: 18,
+        padding: variant === 'compact' ? '18px 20px' : '22px 24px',
+        border: '1.5px solid rgba(244, 185, 66, 0.4)',
+        boxShadow: '0 8px 30px rgba(11, 31, 58, 0.2)',
+        position: 'relative',
+        overflow: 'hidden',
+        marginBottom: 22,
+        transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
+      }}
+    >
+      <div className="card-top-bar" style={{ background: 'linear-gradient(90deg, #f4a023, #fbbf24)' }} />
+
+      {/* Khanda Watermark Accent */}
+      <div style={{
+        position: 'absolute',
+        right: -10,
+        bottom: -25,
+        fontSize: 105,
+        color: 'rgba(244, 160, 35, 0.08)',
+        pointerEvents: 'none',
+        userSelect: 'none',
+        lineHeight: 1,
+        fontFamily: 'serif'
+      }}>
+        ☬
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+          background: 'rgba(244, 185, 66, 0.18)',
+          border: '1px solid rgba(244, 185, 66, 0.45)',
+          borderRadius: 20,
+          padding: '4px 12px',
+          fontSize: 11,
+          fontWeight: 800,
+          color: '#F4B942',
+          letterSpacing: '0.6px',
+          textTransform: 'uppercase'
+        }}>
+          <span style={{ fontSize: 13, lineHeight: 1 }}>☬</span> SIKH MINORITY
+        </div>
+        <span style={{
+          fontSize: 11,
+          fontWeight: 800,
+          color: '#e2e8f0',
+          background: 'rgba(255, 255, 255, 0.12)',
+          padding: '3px 9px',
+          borderRadius: 10,
+          border: '1px solid rgba(255,255,255,0.15)'
+        }}>
+          ESTD. 1970
+        </span>
+      </div>
+
+      <h4 style={{
+        margin: '0 0 6px',
+        fontSize: 'clamp(15px, 1.3vw, 17px)',
+        fontWeight: 800,
+        color: '#ffffff',
+        letterSpacing: '-0.3px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6
+      }}>
+        Heritage &amp; 1970 Roots
+      </h4>
+
+      <p style={{
+        margin: '0 0 14px',
+        fontSize: 12.5,
+        color: '#cbd5e1',
+        lineHeight: 1.6
+      }}>
+        Established in 1970 commemorating the 500th Birth Centenary of Sri Guru Nanak Dev Ji under the noble patronage of Gurudwara Prabandhak Committee, Dhanbad.
+      </p>
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: 8,
+        paddingTop: 12,
+        borderTop: '1px solid rgba(255,255,255,0.12)'
+      }}>
+        <div style={{
+          background: 'rgba(255,255,255,0.06)',
+          borderRadius: 8,
+          padding: '6px 8px',
+          border: '1px solid rgba(255,255,255,0.08)'
+        }}>
+          <div style={{ fontSize: 9.5, textTransform: 'uppercase', color: '#94a3b8', fontWeight: 700 }}>Status</div>
+          <div style={{ fontSize: 11.5, color: '#F4B942', fontWeight: 800 }}>Deficit Grant</div>
+        </div>
+        <div style={{
+          background: 'rgba(255,255,255,0.06)',
+          borderRadius: 8,
+          padding: '6px 8px',
+          border: '1px solid rgba(255,255,255,0.08)'
+        }}>
+          <div style={{ fontSize: 9.5, textTransform: 'uppercase', color: '#94a3b8', fontWeight: 700 }}>UGC Act</div>
+          <div style={{ fontSize: 11.5, color: '#38bdf8', fontWeight: 800 }}>2(f) &amp; 12(B)</div>
+        </div>
       </div>
     </div>
   );
 }
 
-function AboutSidebar() {
+// ─── Intelligent Context-Aware About Us Sidebar ─────────────────────
+export function AboutSidebar() {
+  const location = useLocation();
+  const hashPath = typeof window !== 'undefined' ? window.location.hash.replace(/^#/, '') : '';
+  const currentPath = hashPath || location.pathname;
+
+  const isCommitteePage = currentPath.includes('/various-committees');
+  const isGovernancePage = currentPath.includes('/governing-body') ||
+                           currentPath.includes('/college-management') ||
+                           currentPath.includes('/college-staff') ||
+                           currentPath.includes('/staff-council') ||
+                           currentPath.includes('/audit-report');
+
+  // 1. Adaptive Navigation Configuration based on Page Context
+  const navConfig = isGovernancePage
+    ? {
+        title: 'Governance & Leadership',
+        badge: 'Governance',
+        icon: Users,
+        links: [
+          { label: 'Governing Body',      path: '/about-us/governing-body', icon: Users },
+          { label: 'Organogram',          path: '/about-us/college-management/organogram', icon: Landmark },
+          { label: "Principal's Message", path: '/about-us/principal-message', icon: GraduationCap },
+          { label: 'Staff Council',       path: '/about-us/staff-council', icon: Award },
+          { label: 'Teaching Faculty',    path: '/about-us/college-staff/teaching-staff', icon: Award },
+          { label: 'College Profile',     path: '/about-us/college-profile', icon: Building2 },
+        ]
+      }
+    : isCommitteePage
+    ? {
+        title: 'College Overview',
+        badge: 'Quick Links',
+        icon: Building2,
+        links: [
+          { label: 'College Profile',     path: '/about-us/college-profile', icon: Building2 },
+          { label: 'Vision & Mission',    path: '/about-us/vision-mission', icon: Target },
+          { label: "Principal's Message", path: '/about-us/principal-message', icon: GraduationCap },
+          { label: 'Governing Body',      path: '/about-us/governing-body', icon: Users },
+        ]
+      }
+    : {
+        title: 'About Us Navigation',
+        badge: 'Key Links',
+        icon: FileText,
+        links: [
+          { label: 'College Profile',     path: '/about-us/college-profile', icon: Building2 },
+          { label: 'Vision & Mission',    path: '/about-us/vision-mission', icon: Target },
+          { label: "Principal's Message", path: '/about-us/principal-message', icon: GraduationCap },
+          { label: 'Governing Body',      path: '/about-us/governing-body', icon: Users },
+          { label: 'Organogram',          path: '/about-us/college-management/organogram', icon: Landmark },
+        ]
+      };
+
+  // 2. Adaptive Committees Configuration
+  // On Committee pages: render all 9 cells with active highlight
+  // On Overview & Governance pages: render 4 primary statutory cells + View All link
+  const displayedCommittees = isCommitteePage
+    ? COMMITTEES_NAV
+    : [
+        COMMITTEES_NAV.find(c => c.id === 'placement'),
+        COMMITTEES_NAV.find(c => c.id === 'anti-ragging'),
+        COMMITTEES_NAV.find(c => c.id === 'womens-cell'),
+        COMMITTEES_NAV.find(c => c.id === 'grievance'),
+      ].filter(Boolean);
+
   return (
     <aside className="profile-sidebar">
-      <Fade delay={0.1}>
-        <div className="widget">
-          <h3 className="widget-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <FileText size={18} color={G} /> About Us
-          </h3>
-          <ul className="quick-links">
-            {[
-              { label: 'College Profile',     path: '/about-us/college-profile' },
-              { label: 'Vision & Mission',    path: '/about-us/vision-mission' },
-              { label: "Principal's Message", path: '/about-us/principal-message' },
-              { label: 'Organogram',          path: '/about-us/college-management/organogram' },
-              { label: 'Presidents',          path: '/about-us/college-management/presidents' },
-              { label: 'Secretaries',         path: '/about-us/college-management/secretaries' },
-              { label: 'Principals',          path: '/about-us/college-management/principal' },
-              { label: 'Governing Body',      path: '/about-us/governing-body' },
-              { label: 'Staff Council',       path: '/about-us/staff-council' },
-              { label: 'Teaching Staff',      path: '/about-us/college-staff/teaching-staff' },
-              { label: 'Non-Teaching Staff',  path: '/about-us/college-staff/non-teaching-staff' },
-              { label: 'Audit Report',        path: '/about-us/audit-report' },
-            ].map((l, i) => (
-              <li key={i} className="quick-link-item">
-                <Link to={l.path} className="quick-link"
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                  <span className="link-arrow">›</span> {l.label}
-                </Link>
-              </li>
-            ))}
+      <Fade delay={0.08}>
+        {/* Spotlight Card: ☬ SIKH MINORITY INSTITUTION – Heritage & 1970 Roots */}
+        <SikhMinoritySpotlightCard variant="sidebar" />
+
+        {/* Context-Aware Navigation Widget */}
+        <div className="widget" style={{ borderRadius: 16, border: '1.5px solid #e2e8f0', boxShadow: '0 4px 18px rgba(11,31,58,0.04)', marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid #f4f7fa', paddingBottom: 12, marginBottom: 14 }}>
+            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: N, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <navConfig.icon size={18} color={G} /> {navConfig.title}
+            </h3>
+            <span style={{ fontSize: 11, fontWeight: 800, background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: 12 }}>
+              {navConfig.badge}
+            </span>
+          </div>
+          <ul className="quick-links" style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {navConfig.links.map((l, i) => {
+              const Icon = l.icon;
+              const isActive = currentPath === l.path;
+              return (
+                <li key={i} className="quick-link-item" style={{ borderBottom: 'none' }}>
+                  <Link
+                    to={l.path}
+                    className={`quick-link ${isActive ? 'active' : ''}`}
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  >
+                    <Icon size={15} style={{ opacity: isActive ? 1 : 0.7, flexShrink: 0 }} />
+                    <span style={{ flex: 1, fontSize: 13 }}>{l.label}</span>
+                    <span className="link-arrow">›</span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
-        <div className="helpdesk-widget">
-          <PhoneCall size={38} color={G} style={{ marginBottom: 14, position: 'relative', zIndex: 2 }} />
-          <h4 style={{ margin: '0 0 10px', fontSize: 18, color: G, position: 'relative', zIndex: 2 }}>Need Help?</h4>
-          <p style={{ fontSize: 13, margin: '0 0 18px', color: '#e2e8f0', lineHeight: 1.6, position: 'relative', zIndex: 2 }}>
-            Contact our admin office for admissions or academic queries.
-          </p>
-          <a href="tel:+917903340991" className="helpdesk-btn">Call: 79033 40991</a>
+
+        {/* Statutory Committees & Cells Submenu Widget */}
+        <div className="widget" style={{ borderRadius: 16, border: '1.5px solid #e2e8f0', boxShadow: '0 4px 18px rgba(11,31,58,0.04)', marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid #f4f7fa', paddingBottom: 12, marginBottom: 14 }}>
+            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: N, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <ShieldCheck size={18} color={G} /> {isCommitteePage ? 'Various Committees' : 'Key Statutory Cells'}
+            </h3>
+            <span style={{ fontSize: 11, fontWeight: 800, background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: 12 }}>
+              {isCommitteePage ? `${COMMITTEES_NAV.length} Cells` : 'Priority'}
+            </span>
+          </div>
+          <ul className="quick-links" style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {displayedCommittees.map((c) => {
+              const Icon = c.icon;
+              const isActive = currentPath === c.path;
+              return (
+                <li key={c.id} className="quick-link-item" style={{ borderBottom: 'none' }}>
+                  <Link
+                    to={c.path}
+                    className={`quick-link ${isActive ? 'active' : ''}`}
+                    style={{
+                      borderLeft: isActive ? `3px solid ${c.color}` : 'none',
+                    }}
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  >
+                    <span style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: c.color,
+                      flexShrink: 0,
+                      boxShadow: isActive ? `0 0 6px ${c.color}` : 'none'
+                    }} />
+                    <Icon size={14} style={{ opacity: isActive ? 1 : 0.75, flexShrink: 0 }} />
+                    <span style={{ flex: 1, fontSize: 13 }}>{c.label}</span>
+                    <span className="link-arrow" style={{ color: isActive ? c.color : undefined }}>›</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+
+          {!isCommitteePage && (
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px dashed #e2e8f0' }}>
+              <Link
+                to="/about-us/various-committees/placement"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '8px 12px',
+                  borderRadius: 10,
+                  background: 'rgba(15, 35, 71, 0.04)',
+                  color: N,
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  transition: 'background 0.2s ease, color 0.2s ease'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(244, 160, 35, 0.15)'; e.currentTarget.style.color = '#b45309'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(15, 35, 71, 0.04)'; e.currentTarget.style.color = N; }}
+              >
+                <span>View All 9 Committees &amp; Cells</span>
+                <ArrowRight size={14} />
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Compact Administrative Desk Widget */}
+        <div className="helpdesk-widget" style={{ borderRadius: 16, padding: '16px 18px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10, position: 'relative', zIndex: 2 }}>
+            <div style={{
+              width: 38,
+              height: 38,
+              borderRadius: 10,
+              background: 'rgba(244, 160, 35, 0.18)',
+              border: '1px solid rgba(244, 160, 35, 0.35)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <PhoneCall size={18} color={G} />
+            </div>
+            <div>
+              <h4 style={{ margin: 0, fontSize: 14.5, color: G, fontWeight: 800 }}>Administrative Desk</h4>
+              <p style={{ margin: '2px 0 0', fontSize: 11.5, color: '#cbd5e1' }}>Direct Office Helpline</p>
+            </div>
+          </div>
+          <a href="tel:+917903340991" className="helpdesk-btn" style={{ minHeight: 36, padding: '7px 12px', fontSize: 12.5, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '100%', borderRadius: 8 }}>
+            Call: +91-79033 40991
+          </a>
         </div>
       </Fade>
     </aside>
@@ -159,7 +527,7 @@ function DataMarker({ label }) {
 
 function PageLayout({ children }) {
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: 'clamp(36px,5vw,56px) clamp(16px,3vw,24px) clamp(56px,7vw,88px)' }}>
+    <div style={{ maxWidth: 1200, width: '100%', margin: '0 auto', boxSizing: 'border-box', padding: 'clamp(28px,4vw,56px) clamp(14px,2.5vw,24px) clamp(48px,6vw,88px)' }}>
       <div className="profile-layout">
         <main className="profile-main">{children}</main>
         <AboutSidebar />
@@ -262,63 +630,267 @@ export function VisionMission() {
   const visionText = getText('vision', 'To be a premier institution of higher learning that nurtures leaders of tomorrow — intellectually competent, ethically grounded, and socially responsible — drawing inspiration from the teachings of Guru Nanak Devji.');
   const missionText = getText('mission', 'To provide quality and inclusive higher education to all sections of society, with special focus on the underprivileged, empowering students through academic excellence, skill development, and value-based learning.');
   const coreValues = getList('core-values', [
-    { label:'Peace & Harmony' },
-    { label:'Academic Excellence' },
-    { label:'Inclusivity' },
-    { label:'Innovation' },
-    { label:'Service to Society' },
-    { label:'Integrity' },
+    { label:'Peace & Harmony', desc: 'Promoting mutual respect, communal harmony, and peaceful coexistence among diverse communities.' },
+    { label:'Academic Excellence', desc: 'Fostering deep intellectual curiosity, high quality teaching, and career readiness.' },
+    { label:'Inclusivity', desc: 'Welcoming learners from all socio-economic backgrounds and empowering the underprivileged.' },
+    { label:'Innovation', desc: 'Embracing modern pedagogical practices, digital learning tools, and technical problem-solving.' },
+    { label:'Service to Society (Seva)', desc: 'Instilling an enduring spirit of selfless community service, empathy, and social good.' },
+    { label:'Integrity & Truth', desc: 'Upholding honesty, ethical transparency, and moral courage in all spheres of life.' },
   ]);
 
   const getCoreValueIcon = (label) => {
     const l = String(label).toLowerCase();
-    if (l.includes('peace') || l.includes('harmony')) return <HeartHandshake size={32} color={G} />;
-    if (l.includes('academic') || l.includes('excellence')) return <GraduationCap size={32} color={N} />;
-    if (l.includes('inclusiv')) return <Users size={32} color={G} />;
-    if (l.includes('innovat')) return <Lightbulb size={32} color={N} />;
-    if (l.includes('service') || l.includes('society')) return <Sparkles size={32} color={G} />;
-    if (l.includes('integr') || l.includes('truth')) return <Scale size={32} color={N} />;
-    return <Award size={32} color={G} />;
+    if (l.includes('peace') || l.includes('harmony')) return { icon: HeartHandshake, color: '#ec4899' };
+    if (l.includes('academic') || l.includes('excellence')) return { icon: GraduationCap, color: '#0284c7' };
+    if (l.includes('inclusiv')) return { icon: Users, color: '#10b981' };
+    if (l.includes('innovat')) return { icon: Lightbulb, color: '#f59e0b' };
+    if (l.includes('service') || l.includes('society') || l.includes('seva')) return { icon: Sparkles, color: '#8b5cf6' };
+    if (l.includes('integr') || l.includes('truth')) return { icon: Scale, color: '#0ea5e9' };
+    return { icon: Award, color: '#f4a023' };
   };
 
   return (
     <div>
-      <PageHero title={content?.title || "Vision & Mission"} subtitle={content?.subtitle || "Our guiding principles and future aspirations"} icon={<Sparkles size={40} />} />
+      <PageHero
+        title={content?.title || "Vision & Mission"}
+        subtitle={content?.subtitle || "Our guiding principles, founding philosophy, and institutional commitments since 1970"}
+        icon={<Target size={30} />}
+        badge="☬ SIKH MINORITY INSTITUTION • 1970 ROOTS"
+      />
       <PageLayout>
+        {/* 1. Vision & Mission 3D Split Cards */}
         <Fade>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))', gap:24, marginBottom:32 }}>
-            <div style={{ background:'#fff', borderRadius:20, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', overflow:'hidden' }}>
-              <div style={{ height:6, background:G }} />
-              <div style={{ padding:32 }}>
-                <Target size={38} color={G} style={{ marginBottom: 14 }} />
-                <h2 style={{ color:N, fontSize:22, fontWeight:800, marginBottom:16 }}>Our Vision</h2>
-                <div style={{ color:'#475569', lineHeight:1.8, fontSize:15 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(visionText) }} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24, marginBottom: 30 }}>
+            {/* Vision Card */}
+            <div
+              className="gnc-hover-card gnc-about-card"
+              style={{
+                '--card-accent': '#f4a023',
+                '--card-glow': 'rgba(244, 160, 35, 0.28)',
+                padding: '32px 28px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
+              }}
+            >
+              <div className="card-top-bar" />
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                  <div className="card-icon-box" style={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: 14,
+                    background: 'rgba(244, 160, 35, 0.12)',
+                    color: '#f4a023',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1.5px solid rgba(244, 160, 35, 0.25)'
+                  }}>
+                    <Target size={28} />
+                  </div>
+                  <span style={{
+                    fontSize: 11,
+                    fontWeight: 800,
+                    background: 'rgba(244, 160, 35, 0.12)',
+                    color: '#b45309',
+                    padding: '4px 12px',
+                    borderRadius: 20,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.6px',
+                    border: '1px solid rgba(244, 160, 35, 0.25)'
+                  }}>
+                    Guiding Horizon
+                  </span>
+                </div>
+                <h2 style={{ color: N, fontSize: 'clamp(20px, 2.2vw, 24px)', fontWeight: 800, margin: '0 0 14px' }}>
+                  Our Vision
+                </h2>
+                <div
+                  style={{ color: '#475569', lineHeight: 1.8, fontSize: 15 }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(visionText) }}
+                />
               </div>
             </div>
-            <div style={{ background:'#fff', borderRadius:20, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', overflow:'hidden' }}>
-              <div style={{ height:6, background:N }} />
-              <div style={{ padding:32 }}>
-                <Compass size={38} color={N} style={{ marginBottom: 14 }} />
-                <h2 style={{ color:N, fontSize:22, fontWeight:800, marginBottom:16 }}>Our Mission</h2>
-                <div style={{ color:'#475569', lineHeight:1.8, fontSize:15 }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(missionText) }} />
+
+            {/* Mission Card */}
+            <div
+              className="gnc-hover-card gnc-about-card"
+              style={{
+                '--card-accent': '#0284c7',
+                '--card-glow': 'rgba(2, 132, 199, 0.25)',
+                padding: '32px 28px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
+              }}
+            >
+              <div className="card-top-bar" />
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                  <div className="card-icon-box" style={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: 14,
+                    background: 'rgba(2, 132, 199, 0.12)',
+                    color: '#0284c7',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1.5px solid rgba(2, 132, 199, 0.25)'
+                  }}>
+                    <Compass size={28} />
+                  </div>
+                  <span style={{
+                    fontSize: 11,
+                    fontWeight: 800,
+                    background: 'rgba(2, 132, 199, 0.12)',
+                    color: '#0369a1',
+                    padding: '4px 12px',
+                    borderRadius: 20,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.6px',
+                    border: '1px solid rgba(2, 132, 199, 0.25)'
+                  }}>
+                    Institutional Mandate
+                  </span>
+                </div>
+                <h2 style={{ color: N, fontSize: 'clamp(20px, 2.2vw, 24px)', fontWeight: 800, margin: '0 0 14px' }}>
+                  Our Mission
+                </h2>
+                <div
+                  style={{ color: '#475569', lineHeight: 1.8, fontSize: 15 }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(missionText) }}
+                />
               </div>
             </div>
           </div>
         </Fade>
+
+        {/* 2. Institutional Philosophy Banner (Teachings of Guru Nanak Dev Ji) */}
+        <Fade delay={0.1}>
+          <div style={{
+            background: 'linear-gradient(135deg, #0B1F3A 0%, #172554 100%)',
+            borderRadius: 20,
+            padding: '28px 32px',
+            color: '#ffffff',
+            marginBottom: 30,
+            border: '1px solid rgba(244, 185, 66, 0.35)',
+            boxShadow: '0 12px 30px rgba(11, 31, 58, 0.15)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              position: 'absolute',
+              right: -10,
+              top: -20,
+              fontSize: 120,
+              color: 'rgba(244, 185, 66, 0.05)',
+              pointerEvents: 'none',
+              lineHeight: 1
+            }}>
+              ☬
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                background: 'rgba(244, 185, 66, 0.18)',
+                border: '1px solid rgba(244, 185, 66, 0.4)',
+                color: '#F4B942',
+                padding: '4px 12px',
+                borderRadius: 20,
+                fontSize: 11.5,
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '0.6px'
+              }}>
+                ☬ Founding Moral Philosophy
+              </span>
+              <span style={{ fontSize: 12, color: '#94a3b8' }}>
+                500th Birth Centenary Heritage (1970)
+              </span>
+            </div>
+            <h3 style={{ fontSize: 'clamp(18px, 2.2vw, 22px)', fontWeight: 800, color: '#ffffff', margin: '0 0 10px' }}>
+              Three Cardinal Pillars of Sri Guru Nanak Dev Ji
+            </h3>
+            <p style={{ fontSize: 14, color: '#cbd5e1', lineHeight: 1.65, margin: '0 0 18px', maxWidth: 860 }}>
+              Guru Nanak College was established to manifest these timeless ideals in higher degree education, empowering youth through holistic moral rectitude:
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
+              <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 12, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: 14, fontWeight: 800, color: '#F4B942', marginBottom: 4 }}>1. Naam Japo</div>
+                <div style={{ fontSize: 12.5, color: '#e2e8f0', lineHeight: 1.5 }}>Remembrance of the Divine, inner contemplation, and adherence to highest moral rectitude.</div>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 12, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: 14, fontWeight: 800, color: '#F4B942', marginBottom: 4 }}>2. Kirat Karo</div>
+                <div style={{ fontSize: 12.5, color: '#e2e8f0', lineHeight: 1.5 }}>Earning through honest, dedicated, and socially constructive labour and academic diligence.</div>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 12, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: 14, fontWeight: 800, color: '#F4B942', marginBottom: 4 }}>3. Wand Chhako</div>
+                <div style={{ fontSize: 12.5, color: '#e2e8f0', lineHeight: 1.5 }}>Selfless sharing of resources, knowledge, and empathy with society and the underprivileged (Seva).</div>
+              </div>
+            </div>
+          </div>
+        </Fade>
+
+        {/* 3. Core Values 3D Grid */}
         <Fade delay={0.15}>
-          <div style={{ background:'#fff', borderRadius:20, padding:36, boxShadow:'0 8px 30px rgba(0,0,0,0.07)' }}>
-            <h2 className="section-heading">Core Values</h2>
-            <div className="heading-underline" />
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))', gap:16, marginTop:24 }}>
-              {coreValues.map((v, i) => (
-                <div key={i} style={{ textAlign:'center', padding:'20px 12px', background:'#f8fafc', borderRadius:14, border:'1.5px solid #e2e8f0', transition:'transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease', cursor:'default' }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(15,35,71,.1)'; e.currentTarget.style.borderColor = G; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
-                >
-                  <div style={{ marginBottom:8, display:'flex', justifyContent:'center' }}>{getCoreValueIcon(v.label)}</div>
-                  <div style={{ fontSize:13, fontWeight:700, color:N }}>{v.label}</div>
-                </div>
-              ))}
+          <div style={{ background: '#fff', borderRadius: 20, padding: '36px 32px', boxShadow: '0 8px 30px rgba(0,0,0,0.06)', border: '1.5px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 8 }}>
+              <h2 className="section-heading" style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>
+                Core Institutional <span>Values</span>
+              </h2>
+              <span style={{ fontSize: 12, fontWeight: 800, color: '#0f2347', background: '#f1f5f9', padding: '4px 12px', borderRadius: 20 }}>
+                Values We Live By
+              </span>
+            </div>
+            <div className="heading-underline" style={{ width: 48, height: 4, background: G, borderRadius: 2, marginBottom: 24 }} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+              {coreValues.map((v, i) => {
+                const { icon: ValIcon, color } = getCoreValueIcon(v.label);
+                return (
+                  <div
+                    key={i}
+                    className="gnc-hover-card gnc-about-card"
+                    style={{
+                      '--card-accent': color,
+                      '--card-glow': `${color}35`,
+                      padding: '20px',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 14
+                    }}
+                  >
+                    <div className="card-top-bar" />
+                    <div className="card-icon-box" style={{
+                      width: 46,
+                      height: 46,
+                      borderRadius: 12,
+                      background: `${color}15`,
+                      color: color,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      border: `1px solid ${color}30`
+                    }}>
+                      <ValIcon size={24} />
+                    </div>
+                    <div>
+                      <h4 style={{ margin: '0 0 6px', fontSize: 15.5, fontWeight: 800, color: N }}>
+                        {v.label}
+                      </h4>
+                      {v.desc && (
+                        <p style={{ margin: 0, fontSize: 12.5, color: '#64748b', lineHeight: 1.55 }}>
+                          {v.desc}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </Fade>
@@ -346,39 +918,207 @@ export function PrincipalMessage() {
     quote: 'Education is not merely the acquisition of knowledge, but the transformation of character and the cultivation of a purposeful life.'
   });
 
-  const messageHtml = getText('message', '<p>Dear Students and Parents, it gives me immense pleasure to welcome you to Guru Nanak College, Dhanbad — an institution that has been nurturing young minds for over five decades.</p><p>Our college stands as a beacon of quality education in Jharkhand, offering a rich blend of academic rigour, co-curricular activities, and personal development.</p><p>I invite you to be part of our vibrant community and assure you of our complete support at every step of your academic journey.</p>');
+  const messageHtml = getText('message', '<p>Dear Students, Parents, and Well-Wishers,</p><p>It gives me immense joy and pride to welcome you to Guru Nanak College, Dhanbad — a premier Sikh Minority Degree College established in 1970 to mark the auspicious 500th Birth Centenary of Sri Guru Nanak Dev Ji.</p><p>For over five decades, our institution has stood as an unwavering pillar of higher education in Jharkhand. Guided by the noble vision of the Gurudwara Prabandhak Committee, Dhanbad, we are deeply committed to nurturing young minds who are not only academically accomplished but also morally grounded and socially responsible.</p><p>As we embrace the National Education Policy (NEP 2020) and modern vocational frontiers including BCA and BBA, we ensure state-of-the-art laboratories, enriched digital library resources, active placement assistance, and vibrant student wings like NSS and NCC.</p><p>I welcome you to embark on this transformative journey with us, and assure you that our faculty and administration will support you at every milestone of your academic aspirations.</p>');
 
   const photoSrc = resolveUrl(pInfo.photo || 'images/principal.webp');
 
   return (
     <div>
-      <PageHero title={content?.title || "Principal's Message"} subtitle={content?.subtitle || "A word from our Principal to students and parents"} icon={<GraduationCap size={40} />} />
+      <PageHero
+        title={content?.title || "Principal's Message"}
+        subtitle={content?.subtitle || "Leadership vision and welcoming words from the Principal's Desk"}
+        icon={<GraduationCap size={30} />}
+        badge="EXECUTIVE LEADERSHIP • GURU NANAK COLLEGE"
+      />
       <PageLayout>
         <Fade>
-          <div style={{ background:'#fff', borderRadius:20, padding:40, boxShadow:'0 8px 30px rgba(0,0,0,0.07)' }}>
-            <div style={{ display:'flex', gap:36, alignItems:'flex-start', flexWrap:'wrap', marginBottom:36 }}>
-              <div style={{ textAlign:'center', flexShrink:0 }}>
-                <div style={{ width:180, height:180, borderRadius:'50%', border:`6px solid ${G}`, boxShadow:'0 10px 30px rgba(15,35,71,0.2)', overflow:'hidden', margin:'0 auto', background:'#f1f5f9', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <img src={photoSrc} alt={pInfo.name || "Principal"} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<div style=\"display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8\"><svg width=\"64\" height=\"64\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><polyline points=\"16 11 18 13 22 9\"/></svg></div>'; }} />
+          {/* Executive Leadership Spotlight Presentation */}
+          <div
+            className="gnc-hover-card gnc-about-card"
+            style={{
+              '--card-accent': '#f4a023',
+              '--card-glow': 'rgba(244, 160, 35, 0.25)',
+              padding: 'clamp(24px, 4vw, 36px)',
+              marginBottom: 30
+            }}
+          >
+            <div className="card-top-bar" />
+
+            {/* Profile Grid: Portrait + Official Bio & Key Quote */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: 32,
+              alignItems: 'center',
+              marginBottom: 28
+            }}>
+              {/* Leader Photo & Credentials Box */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                padding: '20px',
+                background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)',
+                borderRadius: 20,
+                border: '1.5px solid #e2e8f0'
+              }}>
+                <div style={{
+                  position: 'relative',
+                  width: 170,
+                  height: 170,
+                  borderRadius: '50%',
+                  padding: 5,
+                  background: 'linear-gradient(135deg, #f4a023, #0f2347)',
+                  boxShadow: '0 10px 28px rgba(15, 35, 71, 0.18)',
+                  marginBottom: 16
+                }}>
+                  <div style={{
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    background: '#e2e8f0'
+                  }}>
+                    <img
+                      src={photoSrc}
+                      alt={pInfo.name || "Principal"}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg></div>';
+                      }}
+                    />
+                  </div>
+                  <span style={{
+                    position: 'absolute',
+                    bottom: 2,
+                    right: 12,
+                    background: '#16a34a',
+                    color: '#fff',
+                    border: '2px solid #fff',
+                    borderRadius: '50%',
+                    width: 18,
+                    height: 18
+                  }} title="Active Leadership" />
                 </div>
-                <div style={{ marginTop:14, fontWeight:800, fontSize:18, color:N }}>{pInfo.name}</div>
-                <div style={{ fontSize:13, color:G, fontWeight:800, marginTop:3 }}>{pInfo.designation || 'Principal'}</div>
+
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  background: 'rgba(244, 160, 35, 0.12)',
+                  color: '#b45309',
+                  padding: '3px 12px',
+                  borderRadius: 14,
+                  fontSize: 11.5,
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  marginBottom: 8,
+                  border: '1px solid rgba(244, 160, 35, 0.25)'
+                }}>
+                  Principal's Desk
+                </div>
+
+                <h3 style={{ margin: '0 0 4px', fontSize: 20, fontWeight: 900, color: N }}>
+                  {pInfo.name}
+                </h3>
+                <div style={{ fontSize: 13.5, color: '#f4a023', fontWeight: 800 }}>
+                  {pInfo.designation || 'Principal'}
+                </div>
                 {pInfo.qualification && (
-                  <div style={{ fontSize:12, color:'#64748b', fontWeight:600, marginTop:2 }}>{pInfo.qualification}</div>
+                  <div style={{ fontSize: 12.5, color: '#64748b', fontWeight: 600, marginTop: 3 }}>
+                    {pInfo.qualification}
+                  </div>
                 )}
-                <div style={{ fontSize:12.5, color:'#475569', marginTop:2, fontWeight:600 }}>{pInfo.institution || 'Guru Nanak College, Dhanbad'}</div>
+                <div style={{ fontSize: 12, color: '#475569', marginTop: 4, fontWeight: 500 }}>
+                  {pInfo.institution || 'Guru Nanak College, Dhanbad'}
+                </div>
               </div>
-              <div style={{ flex:1, minWidth:260 }}>
-                <div style={{ borderLeft:`5px solid ${G}`, paddingLeft:24, marginBottom:24 }}>
-                  <p style={{ fontSize:20, fontStyle:'italic', color:N, fontWeight:700, lineHeight:1.6 }}>
-                    "{pInfo.quote}"
+
+              {/* Leadership Quote & Institutional Roots */}
+              <div>
+                <div style={{
+                  position: 'relative',
+                  padding: '24px 28px',
+                  background: 'linear-gradient(135deg, rgba(15, 35, 71, 0.03), rgba(244, 160, 35, 0.05))',
+                  borderRadius: 16,
+                  borderLeft: `5px solid ${G}`,
+                  border: '1px solid #e2e8f0',
+                  borderLeftWidth: 5,
+                  marginBottom: 20
+                }}>
+                  <div style={{ fontSize: 44, color: G, lineHeight: 0.8, fontFamily: 'serif', marginBottom: 4 }}>“</div>
+                  <p style={{
+                    fontSize: 'clamp(15px, 1.8vw, 18px)',
+                    fontStyle: 'italic',
+                    color: N,
+                    fontWeight: 700,
+                    lineHeight: 1.65,
+                    margin: '0 0 10px'
+                  }}>
+                    {pInfo.quote}
                   </p>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: '#64748b' }}>
+                    — Executive Message to Scholars &amp; Parents
+                  </div>
+                </div>
+
+                {/* Quick Pillar Strip */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 }}>
+                  <div style={{ background: '#f8fafc', padding: '10px 14px', borderRadius: 10, border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: 10, textTransform: 'uppercase', color: '#64748b', fontWeight: 700 }}>Legacy</div>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: N }}>56+ Years</div>
+                  </div>
+                  <div style={{ background: '#f8fafc', padding: '10px 14px', borderRadius: 10, border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: 10, textTransform: 'uppercase', color: '#64748b', fontWeight: 700 }}>Status</div>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: '#16a34a' }}>UGC 2(f) &amp; 12(B)</div>
+                  </div>
+                  <div style={{ background: '#f8fafc', padding: '10px 14px', borderRadius: 10, border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: 10, textTransform: 'uppercase', color: '#64748b', fontWeight: 700 }}>Sponsorship</div>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: G }}>GPC Dhanbad</div>
+                  </div>
                 </div>
               </div>
             </div>
-            <h2 className="section-heading">Message to Students & Parents</h2>
-            <div className="heading-underline" />
-            <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(messageHtml) }} />
+
+            {/* Narrative Message Body */}
+            <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: 26 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: 6 }}>
+                <h2 className="section-heading" style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>
+                  Message to Students, Parents &amp; <span>Well-Wishers</span>
+                </h2>
+              </div>
+              <div className="heading-underline" style={{ width: 44, height: 4, background: G, borderRadius: 2, marginBottom: 20 }} />
+
+              <div
+                className="rich-text-content"
+                style={{ fontSize: 15, color: '#334155', lineHeight: 1.8 }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(messageHtml) }}
+              />
+
+              {/* Sign-off seal */}
+              <div style={{ marginTop: 28, paddingTop: 18, borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
+                <div>
+                  <div style={{ fontWeight: 800, color: N, fontSize: 15 }}>Dr. Sanjay Prasad</div>
+                  <div style={{ fontSize: 12.5, color: '#64748b' }}>Principal, Guru Nanak College, Dhanbad</div>
+                </div>
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '6px 14px',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 20,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: N
+                }}>
+                  ☬ In the Service of Higher Education Since 1970
+                </div>
+              </div>
+            </div>
           </div>
         </Fade>
         <DynamicSectionsContainer sections={content?.sections} excludeIds={['principal-info', 'message']} />
@@ -441,7 +1181,7 @@ export function Organogram() {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   4. COMMITTEE PAGE
+   4. COMMITTEE PAGE (Powers all 9 statutory cells & committees)
 ═══════════════════════════════════════════════════════════════ */
 export function CommitteePage({ name, desc, icon, purpose = [], responsibilities = [], pdfReportLink, slug }) {
   // ── CMS Content Hook — slug is derived from name if not provided ──
@@ -455,69 +1195,281 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
   const membersData = getTable('members', null);
   useScrollTop();
   const [selectedPdf, setSelectedPdf] = useState(null); // ✅ PDF Modal State
+
+  // Committee theme colors mapping
+  const committeeColors = {
+    'placement': '#0d9488',
+    'womens-cell': '#db2777',
+    'grievance': '#d97706',
+    'anti-ragging': '#dc2626',
+    'sc-st': '#2563eb',
+    'obc': '#7c3aed',
+    'icc': '#059669',
+    'minority': '#0284c7',
+    'rusa': '#4f46e5',
+  };
+  const themeColor = committeeColors[committeeSlug] || '#f4a023';
+
   return (
     <div>
-      <PageHero title={content?.title || name} subtitle={content?.subtitle || desc} icon={icon} />
+      <PageHero
+        title={content?.title || name}
+        subtitle={content?.subtitle || desc}
+        icon={icon}
+        badge="STATUTORY CELL &amp; STUDENT WELFARE COMMITTEE"
+      />
       <PageLayout>
+        {/* Quick Committee Switcher Navigation Bar */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
+            <span style={{ fontSize: 11.5, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+              Statutory Committees &amp; Cells (Submenu)
+            </span>
+            <span style={{ fontSize: 11, color: '#94a3b8' }}>Tap to switch committees</span>
+          </div>
+          <div className="gnc-committee-tabs">
+            {COMMITTEES_NAV.map((c) => {
+              const PillIcon = c.icon;
+              const isCurrent = committeeSlug === c.id;
+              return (
+                <Link
+                  key={c.id}
+                  to={c.path}
+                  className={`committee-nav-pill ${isCurrent ? 'active' : ''}`}
+                  style={{ '--pill-color': c.color }}
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                >
+                  <span className="pill-dot" style={{ width: 7, height: 7, borderRadius: '50%', background: c.color }} />
+                  <PillIcon size={14} />
+                  <span>{c.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 1. Chairperson / Convener Spotlight Card */}
         <Fade>
-          <div style={{ background:'#fff', borderRadius:20, padding:32, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:20 }}>
-            <div style={{ display:'flex', gap:20, alignItems:'center', padding:20, background:`linear-gradient(135deg,${N},#1a3a7c)`, borderRadius:14, color:'#fff', flexWrap:'wrap', justifyContent: 'space-between' }}>
-              <div style={{display: 'flex', gap: 20, alignItems: 'center'}}>
-                <div style={{ width:72, height:72, borderRadius:'50%', background:'rgba(255,255,255,0.15)', display:'flex', alignItems:'center', justifyContent:'center', border:`3px solid ${G}`, flexShrink:0 }}>{icon}</div>
+          <div
+            className="gnc-hover-card gnc-committee-card"
+            style={{
+              '--card-accent': themeColor,
+              '--card-glow': `${themeColor}30`,
+              marginBottom: 24
+            }}
+          >
+            <div className="card-top-bar" />
+            <div style={{
+              padding: 'clamp(16px, 3.5vw, 24px)',
+              background: `linear-gradient(135deg, #0B1F3A 0%, #172554 100%)`,
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 16,
+              position: 'relative',
+              overflow: 'hidden',
+              boxSizing: 'border-box',
+              width: '100%',
+              maxWidth: '100%'
+            }}>
+              <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div className="card-icon-box" style={{
+                  width: 58,
+                  height: 58,
+                  borderRadius: 16,
+                  background: 'rgba(255,255,255,0.12)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: `2px solid ${G}`,
+                  flexShrink: 0,
+                  color: '#F4B942',
+                  boxShadow: '0 6px 20px rgba(0,0,0,0.2)'
+                }}>
+                  {icon}
+                </div>
                 <div>
-                  <div style={{ fontSize:11, color:G, fontWeight:700, textTransform:'uppercase', letterSpacing:1 }}>Chairperson / Convener</div>
-                  <div style={{ fontSize:18, fontWeight:800 }}>{chairInfo.name}</div>
-                  <div style={{ fontSize:13, color:'#cbd5e1', marginTop:4 }}>{chairInfo.designation}</div>
+                  <div style={{ fontSize: 11, color: G, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 2 }}>
+                    Chairperson / Convener
+                  </div>
+                  <div style={{ fontSize: 'clamp(16px, 2vw, 20px)', fontWeight: 900 }}>
+                    {chairInfo.name}
+                  </div>
+                  <div style={{ fontSize: 13, color: '#cbd5e1', marginTop: 3 }}>
+                    {chairInfo.designation}
+                  </div>
                 </div>
               </div>
-              
-              {/* ✅ Naya Committee PDF Button */}
+
               {pdfReportLink && (
-                  <button 
-                    onClick={() => setSelectedPdf({url: pdfReportLink, title: `${name} Report`})}
-                    style={{ background:G, color:N, padding:'10px 20px', border: 'none', borderRadius:10, fontWeight:800, fontSize:13, cursor:'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'transform 0.25s cubic-bezier(.22,1,.36,1), box-shadow 0.25s ease', minHeight:44 }}
-                    onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                    onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
-                    <FileText size={15} /> View Committee Report
-                  </button>
+                <button
+                  onClick={() => setSelectedPdf({ url: pdfReportLink, title: `${name} Report` })}
+                  style={{
+                    background: G,
+                    color: N,
+                    padding: '10px 20px',
+                    border: 'none',
+                    borderRadius: 12,
+                    fontWeight: 800,
+                    fontSize: 13,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    transition: 'all 0.25s cubic-bezier(.22,1,.36,1)',
+                    minHeight: 44,
+                    boxShadow: '0 4px 14px rgba(244, 160, 35, 0.3)'
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 22px rgba(244,160,35,0.45)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(244,160,35,0.3)'; }}
+                >
+                  <FileText size={16} /> View Committee Report
+                </button>
               )}
             </div>
           </div>
         </Fade>
+
+        {/* 2. Purpose & Mandate */}
         {purposeList.length > 0 && (
           <Fade delay={0.1}>
-            <div style={{ background:'#fff', borderRadius:20, padding:32, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:20 }}>
-              <h2 className="section-heading">Purpose</h2>
-              <div className="heading-underline" />
-              <ul style={{ marginTop:12, paddingLeft:20 }}>
-                {purposeList.map((p, i) => <li key={i} style={{ marginBottom:8, color:'#475569', lineHeight:1.7 }}>{typeof p === 'object' ? (p.title || p.text || JSON.stringify(p)) : p}</li>)}
-              </ul>
-            </div>
-          </Fade>
-        )}
-        {respList.length > 0 && (
-          <Fade delay={0.15}>
-            <div style={{ background:'#fff', borderRadius:20, padding:32, boxShadow:'0 8px 30px rgba(0,0,0,0.07)', marginBottom:20 }}>
-              <h2 className="section-heading">Key Responsibilities</h2>
-              <div className="heading-underline" />
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(250px,1fr))', gap:12, marginTop:16 }}>
-                {respList.map((r, i) => (
-                  <div key={i} style={{ padding:'12px 16px', background:'#f8fafc', borderRadius:10, borderLeft:`4px solid ${G}`, fontSize:14, color:'#334155' }}>{typeof r === 'object' ? (r.title || r.text || JSON.stringify(r)) : r}</div>
+            <div
+              className="gnc-hover-card gnc-committee-card"
+              style={{
+                '--card-accent': themeColor,
+                '--card-glow': `${themeColor}25`,
+                padding: 'clamp(16px, 3.5vw, 28px)',
+                marginBottom: 24,
+                boxSizing: 'border-box'
+              }}
+            >
+              <div className="card-top-bar" />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: 10 }}>
+                <h2 className="section-heading" style={{ margin: 0, fontSize: 21, fontWeight: 800 }}>
+                  Aims &amp; <span>Purpose</span>
+                </h2>
+                <span style={{ fontSize: 11.5, fontWeight: 800, color: themeColor, background: `${themeColor}12`, padding: '4px 12px', borderRadius: 20 }}>
+                  Statutory Mandate
+                </span>
+              </div>
+              <div className="heading-underline" style={{ width: 44, height: 4, background: themeColor, borderRadius: 2, marginBottom: 18 }} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {purposeList.map((p, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                    <div style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: '50%',
+                      background: `${themeColor}15`,
+                      color: themeColor,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      marginTop: 2
+                    }}>
+                      <CheckCircle2 size={14} />
+                    </div>
+                    <div style={{ color: '#334155', lineHeight: 1.65, fontSize: 14.5 }}>
+                      {typeof p === 'object' ? (p.title || p.text || JSON.stringify(p)) : p}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
           </Fade>
         )}
+
+        {/* 3. Key Responsibilities in 3D Glowing Card Grid */}
+        {respList.length > 0 && (
+          <Fade delay={0.15}>
+            <div
+              className="gnc-hover-card gnc-committee-card"
+              style={{
+                '--card-accent': G,
+                '--card-glow': 'rgba(244, 160, 35, 0.25)',
+                padding: 'clamp(16px, 3.5vw, 28px)',
+                marginBottom: 24,
+                boxSizing: 'border-box'
+              }}
+            >
+              <div className="card-top-bar" />
+              <h2 className="section-heading" style={{ margin: '0 0 6px', fontSize: 21, fontWeight: 800 }}>
+                Key <span>Responsibilities</span>
+              </h2>
+              <div className="heading-underline" style={{ width: 44, height: 4, background: G, borderRadius: 2, marginBottom: 20 }} />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
+                {respList.map((r, i) => (
+                  <div
+                    key={i}
+                    className="gnc-hover-card"
+                    style={{
+                      '--card-accent': themeColor,
+                      '--card-glow': `${themeColor}20`,
+                      padding: '16px 18px',
+                      background: '#f8fafc',
+                      borderRadius: 14,
+                      border: '1.5px solid #e2e8f0',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 12
+                    }}
+                  >
+                    <div className="card-top-bar" />
+                    <span style={{
+                      fontSize: 11,
+                      fontWeight: 800,
+                      background: themeColor,
+                      color: '#ffffff',
+                      padding: '2px 8px',
+                      borderRadius: 8,
+                      flexShrink: 0
+                    }}>
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span style={{ fontSize: 13.5, color: '#334155', fontWeight: 600, lineHeight: 1.55 }}>
+                      {typeof r === 'object' ? (r.title || r.text || JSON.stringify(r)) : r}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Fade>
+        )}
+
+        {/* 4. Committee Members: Desktop Table + Mobile Responsive Cards */}
         <Fade delay={0.2}>
-          <div style={{ background:'#fff', borderRadius:20, padding:32, boxShadow:'0 8px 30px rgba(0,0,0,0.07)' }}>
-            <h2 className="section-heading">Committee Members</h2>
-            <div className="heading-underline" />
-            <div style={{ overflowX:'auto' }}>
-              <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
+          <div
+            className="gnc-hover-card gnc-committee-card"
+            style={{
+              '--card-accent': '#0f2347',
+              '--card-glow': 'rgba(15, 35, 71, 0.18)',
+              padding: 'clamp(16px, 3.5vw, 28px)',
+              boxSizing: 'border-box'
+            }}
+          >
+            <div className="card-top-bar" />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: 10 }}>
+              <h2 className="section-heading" style={{ margin: 0, fontSize: 21, fontWeight: 800 }}>
+                Committee <span>Members</span>
+              </h2>
+              <span style={{ fontSize: 11.5, fontWeight: 800, color: '#475569', background: '#f1f5f9', padding: '4px 12px', borderRadius: 20 }}>
+                Officially Constituted
+              </span>
+            </div>
+            <div className="heading-underline" style={{ width: 44, height: 4, background: G, borderRadius: 2, marginBottom: 20 }} />
+
+            {/* Desktop / Tablet Table View */}
+            <div className="gnc-table-wrapper" style={{ overflowX: 'auto', width: '100%', maxWidth: '100%', WebkitOverflowScrolling: 'touch', borderRadius: 12, border: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
+              <table style={{ width: '100%', minWidth: 520, borderCollapse: 'collapse', fontSize: 14 }}>
                 <thead>
-                  <tr style={{ background:N, color:'#fff' }}>
-                    {(membersData?.headers || ['S.No.','Name','Designation','Department','Role']).map(h=>(
-                      <th key={h} style={{ padding:'12px 16px', textAlign:'left', fontWeight:700 }}>{h}</th>
+                  <tr style={{ background: N, color: '#fff' }}>
+                    {(membersData?.headers || ['S.No.', 'Name', 'Designation', 'Department', 'Role']).map((h) => (
+                      <th key={h} style={{ padding: '13px 16px', textAlign: 'left', fontWeight: 800, fontSize: 13, letterSpacing: '0.4px' }}>
+                        {h}
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -528,13 +1480,43 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
                     [3, 'Senior Faculty Member', 'Associate Professor', 'Designated Department', 'Member'],
                     [4, 'Faculty Member', 'Assistant Professor', 'Designated Department', 'Member'],
                     [5, 'Student / Community Nominee', 'Representative', 'College Council', 'Member']
-                  ]).map((row,i)=>(
-                    <tr key={i} style={{ background:i%2===0?'#f8fafc':'#fff', borderBottom:'1px solid #e2e8f0' }}>
+                  ]).map((row, i) => (
+                    <tr
+                      key={i}
+                      style={{
+                        background: i % 2 === 0 ? '#f8fafc' : '#ffffff',
+                        borderBottom: '1px solid #e2e8f0',
+                        transition: 'background 0.2s ease'
+                      }}
+                    >
                       {row.map((cell, ci) => (
-                        <td key={ci} style={{ padding:'11px 16px', fontWeight: ci===1 ? 600 : 400, color: ci===0 ? '#64748b' : ci<4 ? N : 'inherit' }}>
+                        <td
+                          key={ci}
+                          style={{
+                            padding: '12px 16px',
+                            fontWeight: ci === 1 ? 700 : 500,
+                            color: ci === 0 ? '#64748b' : ci === 1 ? N : ci < 4 ? '#334155' : 'inherit'
+                          }}
+                        >
                           {ci === row.length - 1 ? (
-                            <span style={{ background: String(cell).includes('Chairperson')?'#fef3c7': String(cell).includes('Secretary')?'#dcfce7':'#f1f5f9', color: String(cell).includes('Chairperson')?'#92400e': String(cell).includes('Secretary')?'#166534':'#475569', padding:'3px 10px', borderRadius:6, fontSize:12, fontWeight:700 }}>{cell}</span>
-                          ) : cell}
+                            <span style={{
+                              background: String(cell).includes('Chairperson') ? '#fef3c7'
+                                : String(cell).includes('Secretary') ? '#dcfce7'
+                                : '#f1f5f9',
+                              color: String(cell).includes('Chairperson') ? '#92400e'
+                                : String(cell).includes('Secretary') ? '#166534'
+                                : '#475569',
+                              padding: '4px 10px',
+                              borderRadius: 8,
+                              fontSize: 12,
+                              fontWeight: 800,
+                              display: 'inline-block'
+                            }}>
+                              {cell}
+                            </span>
+                          ) : (
+                            cell
+                          )}
                         </td>
                       ))}
                     </tr>
@@ -542,16 +1524,35 @@ export function CommitteePage({ name, desc, icon, purpose = [], responsibilities
                 </tbody>
               </table>
             </div>
+
+            {/* Statutory Disclaimer Bar */}
+            <div style={{
+              marginTop: 20,
+              padding: '12px 18px',
+              background: '#f8fafc',
+              borderRadius: 10,
+              border: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              fontSize: 12.5,
+              color: '#64748b'
+            }}>
+              <Shield size={16} color={themeColor} style={{ flexShrink: 0 }} />
+              <div>
+                Constituted under UGC and statutory norms of Guru Nanak College, Dhanbad. For grievance filings or submissions, contact the Administrative Office.
+              </div>
+            </div>
           </div>
         </Fade>
         <DynamicSectionsContainer sections={content?.sections} excludeIds={['chairperson', 'purpose', 'responsibilities', 'members']} />
       </PageLayout>
       {selectedPdf && (
         <Suspense fallback={null}>
-          <PDFModal 
-            url={selectedPdf.url} 
-            title={selectedPdf.title} 
-            onClose={() => setSelectedPdf(null)} 
+          <PDFModal
+            url={selectedPdf.url}
+            title={selectedPdf.title}
+            onClose={() => setSelectedPdf(null)}
           />
         </Suspense>
       )}

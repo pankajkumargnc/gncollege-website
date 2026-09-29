@@ -7,6 +7,8 @@ const PDFModal = lazy(() => import('../components/PDFModal'));
 import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageContent';
 import DOMPurify from 'dompurify';
 import { splitHeading } from '../utils/splitTitle';
+import { Sparkles } from 'lucide-react';
+import '../styles/index.css';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -21,14 +23,82 @@ function Fade({ children, delay = 0, y = 20 }) {
   return <div ref={ref} style={{ opacity: vis ? 1 : 0, transform: vis ? 'none' : `translateY(${y}px)`, transition: `all 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${delay}s` }}>{children}</div>;
 }
 
-const PageHeader = ({ title, subtitle, icon }) => (
-  <header className="premium-hero">
-    <div className="kinetic-bg" />
+const PageHeader = ({ title, subtitle, icon, badge = "CHARACTER & SERVICE • CO-CURRICULAR" }) => (
+  <header style={{
+    background: 'linear-gradient(135deg, #0B1F3A 0%, #1a3a6b 100%)',
+    color: '#ffffff',
+    padding: 'clamp(44px, 7vw, 76px) 20px clamp(40px, 6vw, 60px)',
+    textAlign: 'center',
+    position: 'relative',
+    overflow: 'hidden'
+  }}>
+    <div style={{
+      position: 'absolute',
+      inset: 0,
+      background: 'radial-gradient(circle at 80% 20%, rgba(244, 160, 35, 0.16) 0%, transparent 60%)',
+      pointerEvents: 'none'
+    }} />
     <Fade>
-      <div className="hero-content-wrapper">
-        {icon && <div className="hero-icon">{icon}</div>}
-        <h1 className="hero-title">{splitHeading(title)}</h1>
-        {subtitle && <p>{subtitle}</p>}
+      <div style={{ maxWidth: 960, margin: '0 auto', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 7,
+          background: 'rgba(244, 160, 35, 0.15)',
+          border: '1px solid rgba(244, 160, 35, 0.35)',
+          borderRadius: 30,
+          padding: '5px 16px',
+          fontSize: 11.5,
+          fontWeight: 800,
+          color: '#F4B942',
+          marginBottom: 16,
+          letterSpacing: '0.8px',
+          textTransform: 'uppercase'
+        }}>
+          <Sparkles size={13} /> {badge}
+        </div>
+
+        {icon && (
+          <div style={{
+            width: 58,
+            height: 58,
+            borderRadius: 16,
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: '1.5px solid rgba(244, 160, 35, 0.4)',
+            color: '#F4B942',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 14,
+            fontSize: 28,
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)'
+          }}>
+            {icon}
+          </div>
+        )}
+
+        <h1 style={{
+          fontSize: 'clamp(26px, 4.8vw, 44px)',
+          fontWeight: 900,
+          lineHeight: 1.18,
+          letterSpacing: '-0.8px',
+          margin: '0 auto 12px',
+          color: '#ffffff',
+          textAlign: 'center'
+        }}>
+          {splitHeading(title)}
+        </h1>
+        {subtitle && (
+          <p style={{
+            fontSize: 'clamp(14px, 1.8vw, 16.5px)',
+            color: '#cbd5e1',
+            maxWidth: 720,
+            lineHeight: 1.6,
+            margin: '0 auto'
+          }}>
+            {subtitle}
+          </p>
+        )}
       </div>
     </Fade>
   </header>
@@ -46,10 +116,25 @@ export function NssPage() {
         <Fade>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 20, marginBottom: 40 }}>
             {stats.map((s, i) => (
-              <div key={i} style={{ background: '#fff', borderRadius: 20, padding: 30, textAlign: 'center', border: '1px solid #e2e8f0', boxShadow: '0 10px 30px rgba(15,35,71,0.05)' }}>
-                <div style={{ fontSize: 40, marginBottom: 16 }}>{s.icon || '🌟'}</div>
+              <div
+                key={i}
+                className="gnc-hover-card"
+                style={{
+                  '--card-accent': '#059669',
+                  '--card-glow': 'rgba(5, 150, 105, 0.25)',
+                  background: '#fff',
+                  borderRadius: 20,
+                  padding: 28,
+                  textAlign: 'center',
+                  border: '1.5px solid #e2e8f0',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
+                <div className="card-top-bar" style={{ background: '#059669' }} />
+                <div style={{ fontSize: 38, marginBottom: 14 }}>{s.icon || '🌟'}</div>
                 <div style={{ fontSize: 32, fontWeight: 900, color: NAVY, marginBottom: 4 }}>{s.num || s.number || '0'}</div>
-                <div style={{ fontSize: 14, color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>{s.label || s.title}</div>
+                <div style={{ fontSize: 13.5, color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5 }}>{s.label || s.title}</div>
               </div>
             ))}
           </div>

@@ -7,7 +7,7 @@ import usePageContent, { DynamicSectionsContainer } from '../hooks/usePageConten
 import { resolveUrl } from '../utils/resolver';
 import DOMPurify from 'dompurify';
 import { splitHeading } from '../utils/splitTitle';
-import { BookOpen, Microscope, Film, Trophy, Building2 } from 'lucide-react';
+import { BookOpen, Microscope, Film, Trophy, Building2, Sparkles } from 'lucide-react';
 
 const NAVY = COLORS?.navy || '#0f2347';
 const GOLD = COLORS?.gold || '#f4a023';
@@ -113,12 +113,80 @@ function LiveGallery({ categoryId }) {
 export function CampusVisuals({ title, desc, categoryId }) {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-      <header className="premium-hero">
-        <div className="kinetic-bg" />
-        <div className="hero-content-wrapper">
-          <Fade><h1 className="hero-title">{splitHeading(title)}</h1></Fade>
-          <Fade delay={0.1}><p>{desc}</p></Fade>
-        </div>
+      <header style={{
+        background: 'linear-gradient(135deg, #0B1F3A 0%, #1a3a6b 100%)',
+        color: '#ffffff',
+        padding: 'clamp(44px, 7vw, 76px) 20px clamp(40px, 6vw, 60px)',
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'radial-gradient(circle at 80% 20%, rgba(244, 160, 35, 0.16) 0%, transparent 60%)',
+          pointerEvents: 'none'
+        }} />
+        <Fade>
+          <div style={{ maxWidth: 960, margin: '0 auto', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 7,
+              background: 'rgba(244, 160, 35, 0.15)',
+              border: '1px solid rgba(244, 160, 35, 0.35)',
+              borderRadius: 30,
+              padding: '5px 16px',
+              fontSize: 11.5,
+              fontWeight: 800,
+              color: '#F4B942',
+              marginBottom: 16,
+              letterSpacing: '0.8px',
+              textTransform: 'uppercase'
+            }}>
+              <Sparkles size={13} /> Campus Infrastructure &amp; Facilities
+            </div>
+
+            <div style={{
+              width: 58,
+              height: 58,
+              borderRadius: 16,
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1.5px solid rgba(244, 160, 35, 0.4)',
+              color: '#F4B942',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 14,
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)'
+            }}>
+              <Building2 size={28} />
+            </div>
+
+            <h1 style={{
+              fontSize: 'clamp(26px, 4.8vw, 44px)',
+              fontWeight: 900,
+              lineHeight: 1.18,
+              letterSpacing: '-0.8px',
+              margin: '0 auto 12px',
+              color: '#ffffff',
+              textAlign: 'center'
+            }}>
+              {splitHeading(title)}
+            </h1>
+            {desc && (
+              <p style={{
+                fontSize: 'clamp(14px, 1.8vw, 16.5px)',
+                color: '#cbd5e1',
+                maxWidth: 720,
+                lineHeight: 1.6,
+                margin: '0 auto'
+              }}>
+                {desc}
+              </p>
+            )}
+          </div>
+        </Fade>
       </header>
       <div style={{ maxWidth: 1200, margin: '32px auto 80px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         {/* Yahan direct live photos aayengi */}
@@ -153,7 +221,7 @@ export function Infrastructure() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24, marginBottom: 40 }}>
           {boxes.map((b, i) => (
             <Fade key={i} delay={i * 0.1} style={{ gridColumn: `span ${window.innerWidth > 768 ? (b.span || 1) : 1}` }}>
-              <div style={{ background: b.bg || '#fff', borderRadius: 24, padding: 32, height: '100%', border: '1.5px solid #e2e8f0' }}>
+              <div className="gnc-hover-card" style={{ background: b.bg || '#fff', borderRadius: 24, padding: 32, height: '100%', border: '1.5px solid #e2e8f0' }}>
                 <div style={{ marginBottom: 16 }}>{b.icon || <Building2 size={36} style={{ color: b.color || NAVY }} />}</div>
                 <h3 style={{ fontSize: 22, fontWeight: 800, color: b.color || NAVY, margin: '0 0 10px' }}>{b.title}</h3>
                 <p style={{ color: '#475569', fontSize: 15, margin: 0, lineHeight: 1.6 }}>{b.desc}</p>

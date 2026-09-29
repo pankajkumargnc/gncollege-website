@@ -5,7 +5,9 @@ import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import toast from 'react-hot-toast';
-import { Building2, Trophy, Scale, BarChart2, BookOpen, GraduationCap, Microscope, Award } from 'lucide-react';
+import { Building2, Trophy, Scale, BarChart2, BookOpen, GraduationCap, Microscope, Award, Sparkles } from 'lucide-react';
+import { splitHeading } from '../utils/splitTitle';
+import '../styles/index.css';
 
 const PDFModal = lazy(() => import('../components/PDFModal'));
 
@@ -24,24 +26,83 @@ function Fade({ children, delay = 0, y = 20 }) {
 }
 
 const PageHeader = ({ title, subtitle, icon, badge = "NAAC & IQAC ACCREDITATION" }) => (
-  <div className="premium-hero">
-    <div className="kinetic-bg" />
-    <div className="hero-content-wrapper anim-fade-in">
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(244, 160, 35, 0.18)', border: '1px solid rgba(244, 160, 35, 0.4)', borderRadius: 20, padding: '4px 14px', marginBottom: 14 }}>
-        <span style={{ fontSize: 12, color: GOLD, fontWeight: 800, letterSpacing: 0.5 }}>{badge}</span>
+  <header style={{
+    background: 'linear-gradient(135deg, #0B1F3A 0%, #1a3a6b 100%)',
+    color: '#ffffff',
+    padding: 'clamp(44px, 7vw, 76px) 20px clamp(40px, 6vw, 60px)',
+    textAlign: 'center',
+    position: 'relative',
+    overflow: 'hidden'
+  }}>
+    <div style={{
+      position: 'absolute',
+      inset: 0,
+      background: 'radial-gradient(circle at 80% 20%, rgba(244, 160, 35, 0.16) 0%, transparent 60%)',
+      pointerEvents: 'none'
+    }} />
+    <Fade>
+      <div style={{ maxWidth: 960, margin: '0 auto', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 7,
+          background: 'rgba(244, 160, 35, 0.15)',
+          border: '1px solid rgba(244, 160, 35, 0.35)',
+          borderRadius: 30,
+          padding: '5px 16px',
+          fontSize: 11.5,
+          fontWeight: 800,
+          color: '#F4B942',
+          marginBottom: 16,
+          letterSpacing: '0.8px',
+          textTransform: 'uppercase'
+        }}>
+          <Sparkles size={13} /> {badge}
+        </div>
+
+        {icon && (
+          <div style={{
+            width: 58,
+            height: 58,
+            borderRadius: 16,
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: '1.5px solid rgba(244, 160, 35, 0.4)',
+            color: '#F4B942',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 14,
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)'
+          }}>
+            {icon}
+          </div>
+        )}
+
+        <h1 style={{
+          fontSize: 'clamp(26px, 4.8vw, 44px)',
+          fontWeight: 900,
+          lineHeight: 1.18,
+          letterSpacing: '-0.8px',
+          margin: '0 auto 12px',
+          color: '#ffffff',
+          textAlign: 'center'
+        }}>
+          {splitHeading(title)}
+        </h1>
+        {subtitle && (
+          <p style={{
+            fontSize: 'clamp(14px, 1.8vw, 16.5px)',
+            color: '#cbd5e1',
+            maxWidth: 720,
+            lineHeight: 1.6,
+            margin: '0 auto'
+          }}>
+            {subtitle}
+          </p>
+        )}
       </div>
-      <h1 className="hero-title" style={{ fontSize: 'clamp(26px, 5vw, 40px)', fontWeight: 900, letterSpacing: '-0.5px', margin: '0 0 10px' }}>
-        {icon && <span style={{ marginRight: 10 }}>{icon}</span>}
-        {(() => {
-          const words = (title || "").trim().split(' ');
-          if (words.length <= 1) return title;
-          const last = words.pop();
-          return <>{words.join(' ')} <span>{last}</span></>;
-        })()}
-      </h1>
-      {subtitle && <p className="hero-subtitle" style={{ maxWidth: 760, margin: '0 auto', fontSize: 15, opacity: 0.92, color: 'rgba(255,255,255,0.9)' }}>{subtitle}</p>}
-    </div>
-  </div>
+    </Fade>
+  </header>
 );
 
 /* ─── Document List Component with Real-time Firestore & Instant In-Modal PDF ─── */
@@ -268,34 +329,37 @@ export function NaacPortalPage() {
             <Link
               key={i}
               to={card.link}
+              className="gnc-hover-card"
               style={{
+                '--card-accent': '#0284c7',
+                '--card-glow': 'rgba(2, 132, 199, 0.25)',
                 background: '#fff',
-                borderRadius: 16,
-                padding: '24px',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 4px 16px rgba(15,35,71,0.05)',
+                borderRadius: 18,
+                padding: '26px 24px',
+                border: '1.5px solid #e2e8f0',
                 textDecoration: 'none',
                 display: 'flex',
                 flexDirection: 'column',
-                transition: 'all 0.22s ease',
+                position: 'relative',
+                overflow: 'hidden'
               }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = GOLD; e.currentTarget.style.boxShadow = '0 12px 28px rgba(15,35,71,0.1)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(15,35,71,0.05)'; }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <div className="card-top-bar" style={{ background: 'linear-gradient(90deg, #0284c7, #38bdf8)' }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                 <span style={{ fontSize: 32 }}>{card.icon}</span>
-                <span style={{ background: '#f1f5f9', color: NAVY, fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 20 }}>
+                <span style={{ background: 'rgba(2, 132, 199, 0.1)', color: '#0284c7', fontSize: 11, fontWeight: 800, padding: '4px 12px', borderRadius: 20, border: '1px solid rgba(2, 132, 199, 0.2)' }}>
                   {card.badge}
                 </span>
               </div>
-              <h4 style={{ fontSize: 16.5, fontWeight: 800, color: NAVY, margin: '0 0 8px' }}>
+              <h4 style={{ fontSize: 17.5, fontWeight: 900, color: NAVY, margin: '0 0 10px' }}>
                 {card.title}
               </h4>
               <p style={{ fontSize: 13.5, color: '#64748b', lineHeight: 1.6, margin: '0 0 16px', flex: 1 }}>
                 {card.desc}
               </p>
-              <div style={{ fontSize: 13, fontWeight: 800, color: GOLD, display: 'flex', alignItems: 'center', gap: 4 }}>
-                Explore Portal Section →
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#0284c7', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span>Explore Portal Section</span>
+                <span style={{ fontSize: 16 }}>→</span>
               </div>
             </Link>
           ))}

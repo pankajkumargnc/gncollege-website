@@ -12,7 +12,83 @@ import { db } from '../firebase';
 import { COLORS } from '../styles/colors';
 import PremiumPagination from '../components/PremiumPagination';
 import { splitHeading } from '../utils/splitTitle';
-import { Video, Film, Calendar, Eye, ThumbsUp, Tv, AlertCircle, RotateCw } from 'lucide-react';
+import { Video, Film, Calendar, Eye, ThumbsUp, Tv, AlertCircle, RotateCw, Sparkles } from 'lucide-react';
+
+const VideoHeader = ({ subtitle }) => (
+  <header style={{
+    background: 'linear-gradient(135deg, #0B1F3A 0%, #1a3a6b 100%)',
+    color: '#ffffff',
+    padding: 'clamp(44px, 7vw, 76px) 20px clamp(40px, 6vw, 60px)',
+    textAlign: 'center',
+    position: 'relative',
+    overflow: 'hidden'
+  }}>
+    <div style={{
+      position: 'absolute',
+      inset: 0,
+      background: 'radial-gradient(circle at 80% 20%, rgba(244, 160, 35, 0.16) 0%, transparent 60%)',
+      pointerEvents: 'none'
+    }} />
+    <div style={{ maxWidth: 960, margin: '0 auto', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 7,
+        background: 'rgba(244, 160, 35, 0.15)',
+        border: '1px solid rgba(244, 160, 35, 0.35)',
+        borderRadius: 30,
+        padding: '5px 16px',
+        fontSize: 11.5,
+        fontWeight: 800,
+        color: '#F4B942',
+        marginBottom: 16,
+        letterSpacing: '0.8px',
+        textTransform: 'uppercase'
+      }}>
+        <Sparkles size={13} /> Official Media Stream
+      </div>
+
+      <div style={{
+        width: 58,
+        height: 58,
+        borderRadius: 16,
+        background: 'rgba(255, 255, 255, 0.1)',
+        border: '1.5px solid rgba(244, 160, 35, 0.4)',
+        color: '#F4B942',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 14,
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)'
+      }}>
+        <Video size={28} />
+      </div>
+
+      <h1 style={{
+        fontSize: 'clamp(26px, 4.8vw, 44px)',
+        fontWeight: 900,
+        lineHeight: 1.18,
+        letterSpacing: '-0.8px',
+        margin: '0 auto 12px',
+        color: '#ffffff',
+        textAlign: 'center'
+      }}>
+        {splitHeading('Video Gallery')}
+      </h1>
+      {subtitle && (
+        <p style={{
+          fontSize: 'clamp(14px, 1.8vw, 16.5px)',
+          color: '#cbd5e1',
+          maxWidth: 720,
+          lineHeight: 1.6,
+          margin: '0 auto'
+        }}>
+          {subtitle}
+        </p>
+      )}
+    </div>
+  </header>
+);
 
 const ITEMS_PER_PAGE = 9; // 3×3 grid pe perfect fit
 
@@ -125,13 +201,7 @@ export default function VideoGallery() {
   if (!ready) {
     return (
       <div style={{ background: '#f8fafc', minHeight: '100dvh', fontFamily: "'Inter', sans-serif" }}>
-        <div className="premium-hero">
-          <div className="kinetic-bg" />
-          <div className="hero-content-wrapper anim-fade-in">
-            <h1 className="hero-title">{splitHeading('Video Gallery')}</h1>
-            <p className="hero-subtitle">Loading campus videos...</p>
-          </div>
-        </div>
+        <VideoHeader subtitle="Loading campus videos..." />
       </div>
     );
   }
@@ -153,13 +223,7 @@ export default function VideoGallery() {
         `}</style>
 
         {/* Hero */}
-        <div className="premium-hero">
-          <div className="kinetic-bg" />
-          <div className="hero-content-wrapper anim-fade-in">
-            <h1 className="hero-title">{splitHeading('Video Gallery')}</h1>
-            <p className="hero-subtitle">Latest campus videos from the official {channel} channel • {videoIds.length} Videos</p>
-          </div>
-        </div>
+        <VideoHeader subtitle={`Latest campus videos from the official ${channel} channel • ${videoIds.length} Videos`} />
 
         <div style={{ maxWidth:1280, margin:'0 auto', padding:'32px 20px' }}>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(min(100%, 320px),1fr))', gap:24 }}>
@@ -216,13 +280,7 @@ export default function VideoGallery() {
     return (
       <div style={{ background:'#f8fafc', minHeight:'100dvh', fontFamily:"'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
         {/* Hero */}
-        <div className="premium-hero">
-          <div className="kinetic-bg" />
-          <div className="hero-content-wrapper anim-fade-in">
-            <h1 className="hero-title">{splitHeading('Video Gallery')}</h1>
-            <p className="hero-subtitle">Official video repository of Guru Nanak College, Dhanbad</p>
-          </div>
-        </div>
+        <VideoHeader subtitle="Official video repository of Guru Nanak College, Dhanbad" />
         <div style={{ maxWidth:600, margin:'40px auto', padding:'0 20px', textAlign:'center' }}>
           <div style={{ background:'#fff', borderRadius:20, padding:'48px 32px', boxShadow:'0 8px 30px rgba(15,35,71,.07)', border:'1px solid #e2e8f0' }}>
             <Tv size={56} style={{ color: N, margin: '0 auto 16px', display: 'block' }} />
@@ -258,13 +316,7 @@ export default function VideoGallery() {
       `}</style>
 
       {/* Hero */}
-      <div className="premium-hero">
-        <div className="kinetic-bg" />
-        <div className="hero-content-wrapper anim-fade-in">
-          <h1 className="hero-title">{splitHeading('Video Gallery')}</h1>
-          <p className="hero-subtitle">Follow latest college events, seminars, and cultural programs • {videos.length} Videos</p>
-        </div>
-      </div>
+      <VideoHeader subtitle={`Follow latest college events, seminars, and cultural programs • ${videos.length} Videos`} />
 
       <div style={{ maxWidth:1280, margin:'0 auto', padding:'40px 20px' }}>
 

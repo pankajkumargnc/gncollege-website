@@ -14,7 +14,8 @@ import {
   BookOpen, FolderOpen, Calendar, Sun, Rocket, Banknote, Download, 
   ArrowUpRight, Laptop, Briefcase, Award, Shield, CheckCircle2, Search, 
   X, Sparkles, ExternalLink, Eye, ChevronRight, ArrowRight, Layers, 
-  Users, Clock, Building, School, Check, Bookmark, Share2
+  Users, Clock, Building, School, Check, Bookmark, Share2,
+  LayoutGrid, Table as TableIcon
 } from 'lucide-react';
 import { 
   BBMKU_SYLLABI, 
@@ -51,11 +52,12 @@ function Fade({ children, delay = 0, y = 20 }) {
 }
 
 /* ─── Shared Hero Header ─── */
-const PageHeader = ({ title, subtitle, icon, badge = "Academic Excellence" }) => (
-  <header className="premium-hero" style={{
-    background: 'linear-gradient(135deg, #0B1F3A 0%, #172554 100%)',
+/* ─── Shared Hero Header (Unified Student Corner Signature Standard) ─── */
+const PageHeader = ({ title, subtitle, icon, badge = "Academic Excellence • NEP 2020" }) => (
+  <header style={{
+    background: 'linear-gradient(135deg, #0B1F3A 0%, #1a3a6b 100%)',
     color: '#ffffff',
-    padding: 'clamp(50px, 8vw, 84px) 20px 48px',
+    padding: 'clamp(44px, 7vw, 76px) 20px clamp(40px, 6vw, 60px)',
     textAlign: 'center',
     position: 'relative',
     overflow: 'hidden'
@@ -63,41 +65,61 @@ const PageHeader = ({ title, subtitle, icon, badge = "Academic Excellence" }) =>
     <div style={{
       position: 'absolute',
       inset: 0,
-      background: 'radial-gradient(circle at 80% 20%, rgba(244, 185, 66, 0.15) 0%, transparent 60%)',
+      background: 'radial-gradient(circle at 80% 20%, rgba(244, 160, 35, 0.16) 0%, transparent 60%)',
       pointerEvents: 'none'
     }} />
     <Fade>
-      <div style={{ maxWidth: 900, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+      <div style={{ maxWidth: 960, margin: '0 auto', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: 8,
-          background: 'rgba(244, 185, 66, 0.15)',
-          border: '1px solid rgba(244, 185, 66, 0.35)',
+          gap: 7,
+          background: 'rgba(244, 160, 35, 0.15)',
+          border: '1px solid rgba(244, 160, 35, 0.35)',
           borderRadius: 30,
-          padding: '6px 18px',
-          fontSize: 12,
+          padding: '5px 16px',
+          fontSize: 11.5,
           fontWeight: 800,
           color: '#F4B942',
           marginBottom: 16,
           letterSpacing: '0.8px',
           textTransform: 'uppercase'
         }}>
-          <Sparkles size={14} /> {badge}
+          <Sparkles size={13} /> {badge}
         </div>
+
+        {icon && (
+          <div style={{
+            width: 58,
+            height: 58,
+            borderRadius: 16,
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: '1.5px solid rgba(244, 160, 35, 0.4)',
+            color: '#F4B942',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 14,
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)'
+          }}>
+            {icon}
+          </div>
+        )}
+
         <h1 style={{
-          fontSize: 'clamp(32px, 5.5vw, 48px)',
+          fontSize: 'clamp(26px, 4.8vw, 44px)',
           fontWeight: 900,
-          lineHeight: 1.15,
-          letterSpacing: '-1.5px',
-          margin: '0 auto 16px',
-          color: '#ffffff'
+          lineHeight: 1.18,
+          letterSpacing: '-0.8px',
+          margin: '0 auto 12px',
+          color: '#ffffff',
+          textAlign: 'center'
         }}>
           {splitHeading(title)}
         </h1>
         {subtitle && (
           <p style={{
-            fontSize: 'clamp(14.5px, 2vw, 17px)',
+            fontSize: 'clamp(14px, 1.8vw, 16.5px)',
             color: '#cbd5e1',
             maxWidth: 720,
             lineHeight: 1.6,
@@ -269,6 +291,7 @@ export function IqacPage() {
 ════════════════════════════════════════════════════════════ */
 export function CourseOffered() {
   const [activeFaculty, setActiveFaculty] = useState('all');
+  const [viewMode, setViewMode] = useState('card'); // 'card' | 'table'
 
   const nepPathways = [
     { year: '1st Year', exit: 'UG Certificate', credits: '40 Credits', color: '#0284c7', desc: 'Entry with 10+2. Exit option with Undergraduate Certificate in Major discipline.' },
@@ -417,7 +440,7 @@ export function CourseOffered() {
         icon={<GraduationCap size={36} color={GOLD} />} 
       />
       
-      <div style={{ maxWidth: 1240, margin: '30px auto 70px', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: viewMode === 'table' ? 1440 : 1240, margin: '30px auto 70px', padding: '0 20px', position: 'relative', zIndex: 10, transition: 'max-width 0.25s ease' }}>
         
         {/* NEP 4-Stage Progressive Pathway Timeline */}
         <Fade>
@@ -491,167 +514,327 @@ export function CourseOffered() {
           </div>
         </Fade>
 
-        {/* Faculty Category Filter Tabs */}
+        {/* Faculty Category Filter Tabs & View Mode Switcher */}
         <Fade delay={0.1}>
           <div style={{
             display: 'flex',
-            gap: 8,
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 12,
             flexWrap: 'wrap',
-            justifyContent: 'center',
-            marginBottom: 24
+            marginBottom: 20
           }}>
-            {[
-              { id: 'all', label: `All Programs (${coursesList.length})` },
-              { id: 'aicte', label: '🚀 AICTE Vocational (BCA & BBA)' },
-              { id: 'commerce', label: '💼 Commerce (B.Com)' },
-              { id: 'humanities', label: '📖 Humanities (English, Hindi, etc.)' },
-              { id: 'social-science', label: '🏛️ Social Sciences (History, Pol Sci, Eco)' }
-            ].map(tab => (
+            {/* Filter Pills */}
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+              {[
+                { id: 'all', label: `All Programs (${coursesList.length})` },
+                { id: 'aicte', label: '🚀 AICTE Vocational (BCA & BBA)' },
+                { id: 'commerce', label: '💼 Commerce (B.Com)' },
+                { id: 'humanities', label: '📖 Humanities (English, Hindi, etc.)' },
+                { id: 'social-science', label: '🏛️ Social Sciences (History, Pol Sci, Eco)' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveFaculty(tab.id)}
+                  style={{
+                    padding: '7px 14px',
+                    borderRadius: 24,
+                    border: activeFaculty === tab.id ? '1px solid #0B1F3A' : '1px solid #e2e8f0',
+                    background: activeFaculty === tab.id ? '#0B1F3A' : '#ffffff',
+                    color: activeFaculty === tab.id ? '#ffffff' : '#475569',
+                    fontSize: 12,
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: activeFaculty === tab.id ? '0 4px 10px rgba(11,31,58,0.18)' : 'none'
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* View Mode Toggle: Card vs Table */}
+            <div className="gnc-view-toggle">
               <button
-                key={tab.id}
-                onClick={() => setActiveFaculty(tab.id)}
-                style={{
-                  padding: '7px 14px',
-                  borderRadius: 24,
-                  border: activeFaculty === tab.id ? '1px solid #0B1F3A' : '1px solid #e2e8f0',
-                  background: activeFaculty === tab.id ? '#0B1F3A' : '#ffffff',
-                  color: activeFaculty === tab.id ? '#ffffff' : '#475569',
-                  fontSize: 12,
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: activeFaculty === tab.id ? '0 4px 10px rgba(11,31,58,0.18)' : 'none'
-                }}
+                type="button"
+                className={`gnc-view-btn ${viewMode === 'card' ? 'active' : ''}`}
+                onClick={() => setViewMode('card')}
+                title="Grid Card View"
+                aria-label="Grid Card View"
               >
-                {tab.label}
+                <LayoutGrid size={14} /> Card View
               </button>
-            ))}
-          </div>
-        </Fade>
-
-        {/* Course Cards Grid */}
-        <Fade delay={0.2}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))',
-            gap: 16
-          }}>
-            {filteredCourses.map(course => (
-              <div
-                key={course.id}
-                className="gnc-course-card"
-                style={{
-                  padding: '16px 18px',
-                  '--card-accent': course.accent,
-                  '--card-glow': `${course.accent}30`,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between'
-                }}
+              <button
+                type="button"
+                className={`gnc-view-btn ${viewMode === 'table' ? 'active' : ''}`}
+                onClick={() => setViewMode('table')}
+                title="Tabular Data View"
+                aria-label="Tabular Data View"
               >
-                <div className="course-top-bar" />
-                
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <span style={{
-                      fontSize: 10.5,
-                      fontWeight: 800,
-                      color: course.accent,
-                      background: `${course.accent}15`,
-                      border: `1px solid ${course.accent}30`,
-                      padding: '2px 8px',
-                      borderRadius: 6
-                    }}>
-                      {course.badge}
-                    </span>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#64748B' }}>
-                      {course.intake}
-                    </span>
-                  </div>
-
-                  <h3 style={{ fontSize: 15.5, fontWeight: 900, color: NAVY, margin: '0 0 4px', lineHeight: 1.3 }}>
-                    {course.title}
-                  </h3>
-
-                  <div style={{ fontSize: 11, color: course.accent, fontWeight: 700, marginBottom: 10 }}>
-                    {course.duration}
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 11.5, color: '#475569' }}>
-                    <div>
-                      <strong style={{ color: NAVY }}>Eligibility: </strong>
-                      {course.eligibility}
-                    </div>
-                    <div>
-                      <strong style={{ color: NAVY }}>Curriculum: </strong>
-                      {course.curriculum}
-                    </div>
-                    <div>
-                      <strong style={{ color: NAVY }}>Careers: </strong>
-                      {course.careers}
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{
-                  marginTop: 14,
-                  paddingTop: 12,
-                  borderTop: '1px solid #f1f5f9',
-                  display: 'flex',
-                  gap: 8,
-                  alignItems: 'center'
-                }}>
-                  <Link
-                    to={course.syllabusHref}
-                    style={{
-                      flex: 1,
-                      background: '#f8fafc',
-                      border: '1px solid #cbd5e1',
-                      color: NAVY,
-                      borderRadius: 8,
-                      padding: '7px 10px',
-                      fontSize: 11.5,
-                      fontWeight: 800,
-                      textDecoration: 'none',
-                      textAlign: 'center',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 5,
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    <BookOpen size={13} /> View Syllabus
-                  </Link>
-
-                  <a
-                    href="https://universities.jharkhand.gov.in/home"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      flex: 1,
-                      background: `linear-gradient(135deg, ${NAVY}, #1e3a8a)`,
-                      color: '#ffffff',
-                      borderRadius: 8,
-                      padding: '7px 10px',
-                      fontSize: 11.5,
-                      fontWeight: 800,
-                      textDecoration: 'none',
-                      textAlign: 'center',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 5
-                    }}
-                  >
-                    <span>Apply Online</span>
-                    <ExternalLink size={12} />
-                  </a>
-                </div>
-              </div>
-            ))}
+                <TableIcon size={14} /> Table View
+              </button>
+            </div>
           </div>
         </Fade>
+
+        {/* View Mode 1: Course Cards Grid */}
+        {viewMode === 'card' && (
+          <div className="anim-fade-in">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))',
+              gap: 16
+            }}>
+              {filteredCourses.map(course => (
+                <div
+                  key={course.id}
+                  className="gnc-course-card"
+                  style={{
+                    padding: '16px 18px',
+                    '--card-accent': course.accent,
+                    '--card-glow': `${course.accent}30`,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <div className="course-top-bar" />
+                  
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <span style={{
+                        fontSize: 10.5,
+                        fontWeight: 800,
+                        color: course.accent,
+                        background: `${course.accent}15`,
+                        border: `1px solid ${course.accent}30`,
+                        padding: '2px 8px',
+                        borderRadius: 6
+                      }}>
+                        {course.badge}
+                      </span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#64748B' }}>
+                        {course.intake}
+                      </span>
+                    </div>
+
+                    <h3 style={{ fontSize: 15.5, fontWeight: 900, color: NAVY, margin: '0 0 4px', lineHeight: 1.3 }}>
+                      {course.title}
+                    </h3>
+
+                    <div style={{ fontSize: 11, color: course.accent, fontWeight: 700, marginBottom: 10 }}>
+                      {course.duration}
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 11.5, color: '#475569' }}>
+                      <div>
+                        <strong style={{ color: NAVY }}>Eligibility: </strong>
+                        {course.eligibility}
+                      </div>
+                      <div>
+                        <strong style={{ color: NAVY }}>Curriculum: </strong>
+                        {course.curriculum}
+                      </div>
+                      <div>
+                        <strong style={{ color: NAVY }}>Careers: </strong>
+                        {course.careers}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{
+                    marginTop: 14,
+                    paddingTop: 12,
+                    borderTop: '1px solid #f1f5f9',
+                    display: 'flex',
+                    gap: 8,
+                    alignItems: 'center'
+                  }}>
+                    <Link
+                      to={course.syllabusHref}
+                      style={{
+                        flex: 1,
+                        background: '#f8fafc',
+                        border: '1px solid #cbd5e1',
+                        color: NAVY,
+                        borderRadius: 8,
+                        padding: '7px 10px',
+                        fontSize: 11.5,
+                        fontWeight: 800,
+                        textDecoration: 'none',
+                        textAlign: 'center',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 5,
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <BookOpen size={13} /> View Syllabus
+                    </Link>
+
+                    <a
+                      href="https://universities.jharkhand.gov.in/home"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        flex: 1,
+                        background: `linear-gradient(135deg, ${NAVY}, #1e3a8a)`,
+                        color: '#ffffff',
+                        borderRadius: 8,
+                        padding: '7px 10px',
+                        fontSize: 11.5,
+                        fontWeight: 800,
+                        textDecoration: 'none',
+                        textAlign: 'center',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 5
+                      }}
+                    >
+                      <span>Apply Online</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* View Mode 2: Course Table View */}
+        {viewMode === 'table' && (
+          <div className="anim-fade-in">
+            <div className="gnc-table-wrapper" style={{ width: '100%' }}>
+              <table className="gnc-data-table" style={{ width: '100%', tableLayout: 'auto' }}>
+                <thead>
+                  <tr>
+                    <th style={{ width: 44, textAlign: 'center' }}>#</th>
+                    <th style={{ minWidth: 200 }}>Program &amp; Degree</th>
+                    <th style={{ width: 135, whiteSpace: 'nowrap' }}>Model / Framework</th>
+                    <th style={{ width: 140, whiteSpace: 'nowrap' }}>Duration</th>
+                    <th style={{ width: 95, textAlign: 'center', whiteSpace: 'nowrap' }}>Intake</th>
+                    <th>Eligibility Criteria</th>
+                    <th>Curriculum Highlights</th>
+                    <th style={{ width: 170, textAlign: 'center', whiteSpace: 'nowrap' }}>Official Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredCourses.map((c, i) => (
+                    <tr key={c.id}>
+                      <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8' }}>
+                        {i + 1}
+                      </td>
+                      <td>
+                        <div style={{ fontWeight: 800, color: NAVY, fontSize: 13.5, marginBottom: 4 }}>
+                          {c.title}
+                        </div>
+                        <span style={{
+                          display: 'inline-block',
+                          fontSize: 10,
+                          fontWeight: 800,
+                          color: c.accent,
+                          background: `${c.accent}15`,
+                          padding: '2px 8px',
+                          borderRadius: 6,
+                          border: `1px solid ${c.accent}30`
+                        }}>
+                          {c.id.toUpperCase()}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{
+                          display: 'inline-block',
+                          fontSize: 11,
+                          fontWeight: 800,
+                          color: c.accent,
+                          background: `${c.accent}12`,
+                          padding: '3px 9px',
+                          borderRadius: 12,
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {c.badge}
+                        </span>
+                      </td>
+                      <td style={{ fontWeight: 700, color: NAVY, fontSize: 12.5, whiteSpace: 'nowrap' }}>
+                        {c.duration}
+                      </td>
+                      <td style={{ whiteSpace: 'nowrap', textAlign: 'center' }}>
+                        <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          fontWeight: 900,
+                          color: NAVY,
+                          background: '#f1f5f9',
+                          padding: '4px 10px',
+                          borderRadius: 8,
+                          fontSize: 12
+                        }}>
+                          <Users size={12} color="#64748b" /> {c.intake}
+                        </span>
+                      </td>
+                      <td style={{ fontSize: 12, color: '#475569', lineHeight: 1.45 }}>
+                        {c.eligibility}
+                      </td>
+                      <td style={{ fontSize: 12, color: '#64748b', lineHeight: 1.4 }}>
+                        {c.curriculum}
+                      </td>
+                      <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+                        <div style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                          <Link
+                            to={c.syllabusHref}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 5,
+                              background: '#0B1F3A',
+                              color: '#ffffff',
+                              padding: '6px 12px',
+                              borderRadius: 8,
+                              fontSize: 11.5,
+                              fontWeight: 800,
+                              textDecoration: 'none',
+                              transition: 'all 0.2s ease',
+                              boxShadow: '0 2px 6px rgba(11,31,58,0.2)'
+                            }}
+                          >
+                            <BookOpen size={12} /> Syllabus ›
+                          </Link>
+                          <a
+                            href="https://universities.jharkhand.gov.in/home"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 4,
+                              background: '#f1f5f9',
+                              color: NAVY,
+                              border: '1px solid #cbd5e1',
+                              padding: '6px 10px',
+                              borderRadius: 8,
+                              fontSize: 11.5,
+                              fontWeight: 800,
+                              textDecoration: 'none',
+                              transition: 'all 0.2s ease'
+                            }}
+                            title="Chancellor Portal Apply"
+                          >
+                            <span>Apply</span>
+                            <ExternalLink size={11} />
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -668,6 +851,7 @@ export function Syllabus() {
   const [activeDept, setActiveDept] = useState(initialFilter);
   const [selectedPdf, setSelectedPdf] = useState(null);
   const [uploadedSyllabi, setUploadedSyllabi] = useState([]);
+  const [viewMode, setViewMode] = useState('card'); // 'card' | 'table'
 
   // Live Fetch from Firebase pdfReports (type: 'syllabus')
   useEffect(() => {
@@ -870,181 +1054,359 @@ export function Syllabus() {
               )}
             </div>
 
-            {/* Department Filter Tabs */}
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {[
-                { id: 'all', label: 'All Subjects' },
-                { id: 'bca', label: '🚀 BCA (AICTE)' },
-                { id: 'bba', label: '📊 BBA (AICTE)' },
-                { id: 'commerce', label: '💼 Commerce' },
-                { id: 'humanities', label: '📖 Humanities' },
-                { id: 'social-science', label: '🏛️ Social Sciences' },
-                { id: 'nep-common', label: '🧩 NEP Common (VAC/SEC/AEC/MDC)' }
-              ].map(f => (
+            {/* Department Filter Tabs & View Mode Switcher */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 12
+            }}>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {[
+                  { id: 'all', label: 'All Subjects' },
+                  { id: 'bca', label: '🚀 BCA (AICTE)' },
+                  { id: 'bba', label: '📊 BBA (AICTE)' },
+                  { id: 'commerce', label: '💼 Commerce' },
+                  { id: 'humanities', label: '📖 Humanities' },
+                  { id: 'social-science', label: '🏛️ Social Sciences' },
+                  { id: 'nep-common', label: '🧩 NEP Common (VAC/SEC/AEC/MDC)' }
+                ].map(f => (
+                  <button
+                    key={f.id}
+                    onClick={() => setActiveDept(f.id)}
+                    style={{
+                      padding: '6px 13px',
+                      borderRadius: 24,
+                      border: activeDept === f.id ? '1px solid #0B1F3A' : '1px solid #e2e8f0',
+                      background: activeDept === f.id ? '#0B1F3A' : '#ffffff',
+                      color: activeDept === f.id ? '#ffffff' : '#475569',
+                      fontSize: 11.5,
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: activeDept === f.id ? '0 3px 8px rgba(11,31,58,0.18)' : 'none'
+                    }}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* View Mode Toggle: Card vs Table */}
+              <div className="gnc-view-toggle">
                 <button
-                  key={f.id}
-                  onClick={() => setActiveDept(f.id)}
-                  style={{
-                    padding: '6px 13px',
-                    borderRadius: 24,
-                    border: activeDept === f.id ? '1px solid #0B1F3A' : '1px solid #e2e8f0',
-                    background: activeDept === f.id ? '#0B1F3A' : '#ffffff',
-                    color: activeDept === f.id ? '#ffffff' : '#475569',
-                    fontSize: 11.5,
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    boxShadow: activeDept === f.id ? '0 3px 8px rgba(11,31,58,0.18)' : 'none'
-                  }}
+                  type="button"
+                  className={`gnc-view-btn ${viewMode === 'card' ? 'active' : ''}`}
+                  onClick={() => setViewMode('card')}
+                  title="Grid Card View"
+                  aria-label="Grid Card View"
                 >
-                  {f.label}
+                  <LayoutGrid size={14} /> Card View
                 </button>
-              ))}
+                <button
+                  type="button"
+                  className={`gnc-view-btn ${viewMode === 'table' ? 'active' : ''}`}
+                  onClick={() => setViewMode('table')}
+                  title="Tabular Data View"
+                  aria-label="Tabular Data View"
+                >
+                  <TableIcon size={14} /> Table View
+                </button>
+              </div>
             </div>
           </div>
         </Fade>
 
-        {/* Syllabi Cards Grid */}
+        {/* Syllabi Display (Cards vs Table) */}
         <Fade delay={0.2}>
           {filtered.length > 0 ? (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))',
-              gap: 16
-            }}>
-              {filtered.map(item => (
-                <div
-                  key={item.id}
-                  className="gnc-syllabus-card"
-                  style={{
-                    padding: '16px 18px',
-                    '--card-accent': item.accent,
-                    '--card-glow': `${item.accent}30`,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between'
-                  }}
-                >
-                  <div className="syllabus-top-bar" />
+            viewMode === 'card' ? (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))',
+                gap: 16
+              }}>
+                {filtered.map(item => (
+                  <div
+                    key={item.id}
+                    className="gnc-syllabus-card"
+                    style={{
+                      padding: '16px 18px',
+                      '--card-accent': item.accent,
+                      '--card-glow': `${item.accent}30`,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <div className="syllabus-top-bar" />
 
-                  <div>
-                    {/* Header with Badges */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
-                      <span style={{
-                        fontSize: 10.5,
-                        fontWeight: 800,
-                        color: item.badgeColor,
-                        background: item.badgeBg,
-                        border: `1px solid ${item.badgeColor}30`,
-                        padding: '2px 8px',
-                        borderRadius: 6
+                    <div>
+                      {/* Header with Badges */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
+                        <span style={{
+                          fontSize: 10.5,
+                          fontWeight: 800,
+                          color: item.badgeColor,
+                          background: item.badgeBg,
+                          border: `1px solid ${item.badgeColor}30`,
+                          padding: '2px 8px',
+                          borderRadius: 6
+                        }}>
+                          {item.badge}
+                        </span>
+                        <span style={{ fontSize: 10.5, fontWeight: 700, color: '#94a3b8' }}>
+                          {item.credits}
+                        </span>
+                      </div>
+
+                      <h3 style={{ fontSize: 15.5, fontWeight: 900, color: NAVY, margin: '0 0 2px', lineHeight: 1.3 }}>
+                        {item.title}
+                      </h3>
+                      <div style={{ fontSize: 11, color: item.accent, fontWeight: 700, marginBottom: 8 }}>
+                        {item.subtitle}
+                      </div>
+
+                      <p style={{
+                        fontSize: 12,
+                        color: '#64748B',
+                        lineHeight: 1.45,
+                        margin: '0 0 10px',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden'
                       }}>
-                        {item.badge}
-                      </span>
-                      <span style={{ fontSize: 10.5, fontWeight: 700, color: '#94a3b8' }}>
-                        {item.credits}
-                      </span>
+                        {item.description}
+                      </p>
+
+                      {/* Paper Highlights */}
+                      <div style={{
+                        background: '#F8FAFC',
+                        borderRadius: 10,
+                        padding: '8px 10px',
+                        marginBottom: 10,
+                        border: '1px solid #f1f5f9'
+                      }}>
+                        <div style={{ fontSize: 10, fontWeight: 800, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>
+                          Key Curricular Modules:
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                          {item.highlights.slice(0, 3).map((hl, i) => (
+                            <div key={i} style={{ fontSize: 11, color: '#475569', display: 'flex', alignItems: 'center', gap: 5 }}>
+                              <Check size={11} color={item.accent} style={{ flexShrink: 0 }} />
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hl}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
 
-                    <h3 style={{ fontSize: 15.5, fontWeight: 900, color: NAVY, margin: '0 0 2px', lineHeight: 1.3 }}>
-                      {item.title}
-                    </h3>
-                    <div style={{ fontSize: 11, color: item.accent, fontWeight: 700, marginBottom: 8 }}>
-                      {item.subtitle}
-                    </div>
-
-                    <p style={{
-                      fontSize: 12,
-                      color: '#64748B',
-                      lineHeight: 1.45,
-                      margin: '0 0 10px',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
-                    }}>
-                      {item.description}
-                    </p>
-
-                    {/* Paper Highlights */}
+                    {/* Dual Action Buttons: View & Download */}
                     <div style={{
-                      background: '#F8FAFC',
-                      borderRadius: 10,
-                      padding: '8px 10px',
-                      marginBottom: 10,
-                      border: '1px solid #f1f5f9'
+                      marginTop: 10,
+                      paddingTop: 10,
+                      borderTop: '1px solid #f1f5f9',
+                      display: 'flex',
+                      gap: 8,
+                      alignItems: 'center'
                     }}>
-                      <div style={{ fontSize: 10, fontWeight: 800, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>
-                        Key Curricular Modules:
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                        {item.highlights.slice(0, 3).map((hl, i) => (
-                          <div key={i} style={{ fontSize: 11, color: '#475569', display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <Check size={11} color={item.accent} style={{ flexShrink: 0 }} />
-                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hl}</span>
-                          </div>
-                        ))}
-                      </div>
+                      <button
+                        onClick={() => handleOpenPdf(item)}
+                        style={{
+                          flex: 1,
+                          background: `linear-gradient(135deg, ${item.accent}, #0B1F3A)`,
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: 8,
+                          padding: '7px 10px',
+                          fontSize: 12,
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 5,
+                          boxShadow: `0 3px 8px ${item.accent}30`
+                        }}
+                      >
+                        <Eye size={13} /> View Syllabus
+                      </button>
+
+                      <button
+                        onClick={(e) => handleDownloadPdf(item, e)}
+                        title="Download PDF"
+                        aria-label="Download PDF"
+                        style={{
+                          background: '#f8fafc',
+                          border: '1px solid #cbd5e1',
+                          color: NAVY,
+                          borderRadius: 8,
+                          padding: '7px 10px',
+                          fontSize: 12,
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 5
+                        }}
+                      >
+                        <Download size={13} />
+                        <span>PDF</span>
+                      </button>
                     </div>
                   </div>
-
-                  {/* Dual Action Buttons: View & Download */}
-                  <div style={{
-                    marginTop: 10,
-                    paddingTop: 10,
-                    borderTop: '1px solid #f1f5f9',
-                    display: 'flex',
-                    gap: 8,
-                    alignItems: 'center'
-                  }}>
-                    <button
-                      onClick={() => handleOpenPdf(item)}
-                      style={{
-                        flex: 1,
-                        background: `linear-gradient(135deg, ${item.accent}, #0B1F3A)`,
-                        color: '#ffffff',
-                        border: 'none',
-                        borderRadius: 8,
-                        padding: '7px 10px',
-                        fontSize: 12,
-                        fontWeight: 800,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 5,
-                        boxShadow: `0 3px 8px ${item.accent}30`
-                      }}
-                    >
-                      <Eye size={13} /> View Syllabus
-                    </button>
-
-                    <button
-                      onClick={(e) => handleDownloadPdf(item, e)}
-                      title="Download PDF"
-                      aria-label="Download PDF"
-                      style={{
-                        background: '#f8fafc',
-                        border: '1px solid #cbd5e1',
-                        color: NAVY,
-                        borderRadius: 8,
-                        padding: '7px 10px',
-                        fontSize: 12,
-                        fontWeight: 800,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 5
-                      }}
-                    >
-                      <Download size={13} />
-                      <span>PDF</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="gnc-table-wrapper">
+                <table className="gnc-data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: 45, textAlign: 'center' }}>#</th>
+                      <th>Curriculum &amp; Program</th>
+                      <th>Code &amp; Scheme</th>
+                      <th>Faculty / Stream</th>
+                      <th>Structure &amp; Credits</th>
+                      <th>Semesters Covered</th>
+                      <th>Format</th>
+                      <th style={{ textAlign: 'center' }}>Read / Download</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((item, i) => (
+                      <tr key={item.id}>
+                        <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8' }}>
+                          {i + 1}
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: 800, color: NAVY, fontSize: 13.5, marginBottom: 3 }}>
+                            {item.title}
+                          </div>
+                          <div style={{ fontSize: 11, color: item.accent, fontWeight: 700 }}>
+                            {item.subtitle}
+                          </div>
+                        </td>
+                        <td>
+                          <span style={{
+                            display: 'inline-block',
+                            fontSize: 10.5,
+                            fontWeight: 800,
+                            color: '#334155',
+                            background: '#f1f5f9',
+                            padding: '3px 8px',
+                            borderRadius: 6,
+                            fontFamily: 'monospace',
+                            border: '1px solid #e2e8f0',
+                            marginBottom: 4
+                          }}>
+                            {item.code}
+                          </span>
+                          <div>
+                            <span style={{
+                              display: 'inline-block',
+                              fontSize: 10,
+                              fontWeight: 800,
+                              color: item.badgeColor,
+                              background: item.badgeBg,
+                              padding: '1px 7px',
+                              borderRadius: 6,
+                              border: `1px solid ${item.badgeColor}30`
+                            }}>
+                              {item.badge}
+                            </span>
+                          </div>
+                        </td>
+                        <td style={{ fontSize: 12.5, fontWeight: 700, color: '#475569' }}>
+                          {item.faculty}
+                        </td>
+                        <td>
+                          <div style={{ fontSize: 12.5, fontWeight: 800, color: NAVY }}>
+                            {item.duration}
+                          </div>
+                          <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700 }}>
+                            {item.credits}
+                          </div>
+                        </td>
+                        <td style={{ fontSize: 12, color: '#475569', fontWeight: 700 }}>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            background: '#f8fafc',
+                            padding: '3px 8px',
+                            borderRadius: 6,
+                            border: '1px solid #e2e8f0'
+                          }}>
+                            <Clock size={11} color="#64748b" /> {item.semesters}
+                          </span>
+                        </td>
+                        <td>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            fontSize: 11.5,
+                            fontWeight: 700,
+                            color: '#0284c7',
+                            background: '#e0f2fe',
+                            padding: '3px 8px',
+                            borderRadius: 6
+                          }}>
+                            <FileText size={12} /> {item.fileSize || 'PDF Document'}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+                          <div style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                            <button
+                              onClick={() => handleOpenPdf(item)}
+                              style={{
+                                background: '#0B1F3A',
+                                color: '#ffffff',
+                                border: 'none',
+                                padding: '6px 12px',
+                                borderRadius: 8,
+                                fontSize: 11.5,
+                                fontWeight: 800,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 4,
+                                transition: 'all 0.2s ease',
+                                boxShadow: '0 2px 6px rgba(11,31,58,0.2)'
+                              }}
+                            >
+                              <Eye size={12} /> Read PDF
+                            </button>
+                            <button
+                              onClick={(e) => handleDownloadPdf(item, e)}
+                              style={{
+                                background: '#f1f5f9',
+                                color: NAVY,
+                                border: '1px solid #cbd5e1',
+                                padding: '6px 9px',
+                                borderRadius: 8,
+                                fontSize: 11.5,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s ease'
+                              }}
+                              title="Download PDF"
+                            >
+                              <Download size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )
           ) : (
             <div style={{
               textAlign: 'center',

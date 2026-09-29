@@ -101,7 +101,7 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
 
         .premium-topbar {
           width: 100%;
-          max-width: 100vw;
+          max-width: 100%;
           overflow-x: clip;
           position: relative;
           z-index: 1000;
@@ -136,8 +136,9 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
           min-height: 29px;
           border-bottom: 1.5px solid #2b3a67;
           gap: 8px;
-          max-width: 100vw;
+          max-width: 100%;
           box-sizing: border-box;
+          overflow: hidden;
         }
 
         .premium-topbar.is-dark .tb-main-row {
@@ -406,7 +407,7 @@ const TopBar = ({ isDark, onToggleDark, onSearchOpen, siteSettings }) => {
           gap: 8px;
           min-height: 26px;
           box-sizing: border-box;
-          max-width: 100vw;
+          max-width: 100%;
           overflow: hidden;
         }
 
